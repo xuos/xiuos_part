@@ -1,3 +1,61 @@
 menuconfig SUPPORT_CONNECTION_FRAMEWORK
         bool "support connection framework"
         default n
+
+if SUPPORT_CONNECTION_FRAMEWORK
+        menuconfig ADAPTER_LORA
+                bool "Using lora adapter device"
+                default n
+        if ADAPTER_LORA
+        source "$APP_DIR/Framework/connection/lora/Kconfig"
+        endif
+
+        menuconfig ADAPTER_4G
+                bool "Using 4G adapter device"
+                default n
+        if ADAPTER_4G
+        source "$APP_DIR/Framework/connection/4G/Kconfig"
+        endif
+
+        menuconfig ADAPTER_NB
+                bool "Using nbiot adapter device"
+                default n
+        if ADAPTER_NB
+        source "$APP_DIR/Framework/connection/nbiot/Kconfig"
+        endif
+
+        menuconfig ADAPTER_WIFI
+                bool "Using wifi adapter device"
+                default n
+        if ADAPTER_WIFI
+        source "$APP_DIR/Framework/connection/wifi/Kconfig"
+        endif
+
+        menuconfig ADAPTER_ETHERNET
+                bool "Using ethernet adapter device"
+                default n
+        if ADAPTER_ETHERNET
+        source "$APP_DIR/Framework/connection/ethernet/Kconfig"
+        endif
+
+        menuconfig ADAPTER_BLUETOOTH
+                bool "Using bluetooth adapter device"
+                default n
+        if ADAPTER_BLUETOOTH
+        source "$APP_DIR/Framework/connection/bluetooth/Kconfig"
+        endif
+
+        menuconfig ADAPTER_ZIGBEE
+                bool "Using zigbee adapter device"
+                default n
+        if ADAPTER_ZIGBEE
+        source "$APP_DIR/Framework/connection/zigbee/Kconfig"
+        endif
+
+        menuconfig ADAPTER_5G
+                bool "Using 5G adapter device"
+                default n
+        if ADAPTER_5G
+        source "$APP_DIR/Framework/connection/5G/Kconfig"
+        endif
+endif

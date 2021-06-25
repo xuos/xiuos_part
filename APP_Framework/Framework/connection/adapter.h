@@ -12,8 +12,8 @@
 
 /**
  * @file adapter.h
- * @brief Structure and function declarations of the communication adapter framework
- * @version 1.0
+ * @brief Structure and function declarations of the connection adapter framework
+ * @version 1.1
  * @author AIIT XUOS Lab
  * @date 2021.05.10
  */
@@ -30,6 +30,10 @@
 
 #define ADAPTER_BUFFSIZE 64
 
+#define ADAPTER_AT_OPERATION    1
+#define ADAPTER_LWIP_OPERATION    2
+#define ADAPTER_RAWIP_OPERATION    3
+
 #define ADAPTER_LORA_FUNC       ((uint32_t)(1 << ATAPTER_LORA))
 #define ADAPTER_4G_FUNC         ((uint32_t)(1 << ADAPTER_4G))
 #define ADAPTER_NBIOT_FUNC      ((uint32_t)(1 << ADAPTER_NBIOT))
@@ -40,6 +44,7 @@
 #define ADAPTER_5G_FUNC         ((uint32_t)(1 << ADAPTER_5G))
 
 struct Adapter;
+typedef struct Adapter *AdapterType;
 
 struct Socket
 {
@@ -73,6 +78,20 @@ enum NetRoleType
     ROLE_NONE,
 };
 
+enum AdapterStatus
+{
+    REGISTERED = 1,
+    UNREGISTERED,
+    INSTALL,
+    UNINSTALL,
+};
+
+enum IpType
+{
+    IPV4 = 1,
+    IPV6,
+};
+
 struct AdapterProductInfo
 {
     uint32_t functions;
@@ -85,7 +104,7 @@ struct IpProtocolDone
     int (*open)(struct Adapter *adapter);
     int (*close)(struct Adapter *adapter);
     int (*ioctl)(struct Adapter *adapter, int cmd, void *args);
-    int (*connect)(struct Adapter *adapter, const char *ip, const char *port, uint8_t ip_type);
+    int (*connect)(struct Adapter *adapter, const char *ip, const char *port, enum IpType ip_type);
     int (*send)(struct Socket *socket, const void *buf, size_t len);
     int (*recv)(struct Socket *socket, void *buf, size_t len);
     int (*disconnect)(struct Socket *socket);
@@ -112,6 +131,7 @@ struct Adapter
 
     enum NetProtocolType net_protocol;
     enum NetRoleType net_role;
+    enum AdapterStatus adapter_status;
 
     char buffer[ADAPTER_BUFFSIZE];
     
@@ -119,5 +139,41 @@ struct Adapter
 
     struct DoublelistNode link;
 };
+
+/*Init adapter framework*/
+int AdapterFrameworkInit(void);
+
+/*Find adapter device by name*/
+AdapterType AdapterDeviceFindByName(const char *name);
+
+/*Register the adapter to the linked list*/
+int AdapterDeviceRegister(struct Adapter *adapter);
+
+/*Unregister the adapter from the linked list*/
+int AdapterDeviceUnregister(struct Adapter *adapter);
+
+/*Open adapter device*/
+int AdapterDeviceOpen(struct Adapter *adapter);
+
+/*Close adapter device*/
+int AdapterDeviceClose(struct Adapter *adapter);
+
+/*Receice data from adapter*/
+ssize_t AdapterDeviceRecv(struct Adapter *adapter, void *dst, size_t len);
+
+/*Send data to adapter*/
+ssize_t AdapterDeviceSend(struct Adapter *adapter, const void *src, size_t len);
+
+/*Configure adapter device*/
+int AdapterDeviceControl(struct Adapter *adapter, int cmd, void *args);
+
+/*Connect to a certain ip net, only support IP_PROTOCOL*/
+int AdapterDeviceConnect(struct Adapter *adapter, const char *ip, const char *port, enum IpType ip_type);
+
+/*Join to a certain private net, only support PRIVATE_PROTOCOL*/
+int AdapterDeviceJoin(struct Adapter *adapter, const char *priv_net_group);
+
+/*Adapter disconnect from ip net or private net group*/
+int AdapterDeviceDisconnect(struct Adapter *adapter);
 
 #endif
