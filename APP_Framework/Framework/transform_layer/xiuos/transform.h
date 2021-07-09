@@ -37,6 +37,19 @@ extern "C" {
 
 #define NAME_NUM_MAX            32
 
+/*********************GPIO define*********************/
+#define GPIO_LOW    0x00
+#define GPIO_HIGH   0x01
+
+#define GPIO_CFG_OUTPUT                          0x00
+#define GPIO_CFG_INPUT                               0x01
+#define GPIO_CFG_INPUT_PULLUP            0x02
+#define GPIO_CFG_INPUT_PULLDOWN     0x03
+#define GPIO_CFG_OUTPUT_OD                  0x04
+
+#define GPIO_CONFIG_MODE                 0xffffffff
+
+/********************SERIAL define*******************/
 #define BAUD_RATE_2400          2400
 #define BAUD_RATE_4800          4800
 #define BAUD_RATE_9600          9600
@@ -75,6 +88,28 @@ extern "C" {
 #define SERIAL_RB_BUFSZ         128
 #endif
 
+struct PinDevIrq
+{
+    int irq_mode;//< RISING/FALLING/HIGH/LOW
+    void (*hdr) (void *args);//< callback function
+    void *args;//< the params of callback function
+};
+
+struct PinParam
+{
+    int cmd;//< cmd:GPIO_CONFIG_MODE/GPIO_IRQ_REGISTER/GPIO_IRQ_FREE/GPIO_IRQ_DISABLE/GPIO_IRQ_ENABLE
+    long  pin;//< pin number
+    int mode;//< pin mode: input/output
+    struct PinDevIrq irq_set;//< pin irq set
+    uint64 arg;
+};
+
+struct PinStat
+{
+    long pin;//< pin number
+    uint16_t val;//< pin level
+};
+
 enum ExtSerialPortConfigure
 {
     PORT_CFG_INIT = 0,
@@ -102,6 +137,7 @@ enum IoctlDriverType
     SERIAL_TYPE = 0,
     SPI_TYPE,
     I2C_TYPE,
+    PIN_TYPE,
     DEFAULT_TYPE,
 };
 
@@ -135,11 +171,16 @@ int PrivTaskStartup(pthread_t *thread);
 int PrivTaskDelete(pthread_t thread, int sig);
 void PrivTaskQuit(void *value_ptr);
 int PrivTaskDelay(int32_t ms);
-int PrivOpen(const char *path, int flags, ...);
+
+/*********************driver*************************/
+
+int PrivOpen(const char *path, int flags);
 int PrivRead(int fd, void *buf, size_t len);
 int PrivWrite(int fd, const void *buf, size_t len);
 int PrivClose(int fd);
 int PrivIoctl(int fd, int cmd, void *args);
+
+/*********************memory***********************/
 
 void *PrivMalloc(size_t size);
 void *PrivRealloc(void *pointer, size_t size);

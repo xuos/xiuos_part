@@ -112,11 +112,13 @@ int AdapterDeviceUnregister(struct Adapter *adapter)
 
 /**
  * @description: Open adapter device
- * @param adapter - adapter device pointer
+ * @param name - adapter device name
  * @return success: 0 , failure: other
  */
-int AdapterDeviceOpen(struct Adapter *adapter)
+int AdapterDeviceOpen(const char *name)
 {
+    struct Adapter *adapter = AdapterDeviceFindByName(name);
+    
     if (!adapter)
         return -1;
 
@@ -258,7 +260,7 @@ ssize_t AdapterDeviceRecv(struct Adapter *adapter, void *dst, size_t len)
         if (NULL == ip_done->recv)
             return -1;
     
-        return ip_done->recv(adapter->socket, dst, len);
+        return ip_done->recv(adapter, dst, len);
     } else {
         printf("AdapterDeviceRecv net_protocol %d not support\n", adapter->net_protocol);
         return -1;
@@ -290,7 +292,7 @@ ssize_t AdapterDeviceSend(struct Adapter *adapter, const void *src, size_t len)
         if (NULL == ip_done->send)
             return -1;
     
-        return ip_done->send(adapter->socket, src, len);
+        return ip_done->send(adapter, src, len);
     } else {
         printf("AdapterDeviceSend net_protocol %d not support\n", adapter->net_protocol);
         return -1;
@@ -398,17 +400,17 @@ int AdapterDeviceDisconnect(struct Adapter *adapter)
     if (PRIVATE_PROTOCOL == adapter->net_protocol) {
         struct PrivProtocolDone *priv_done = (struct PrivProtocolDone *)adapter->done; 
         
-        if (NULL == priv_done->disconnect)
+        if (NULL == priv_done->quit)
             return -1;
     
-        return priv_done->disconnect(adapter);
+        return priv_done->quit(adapter);
     } else if (IP_PROTOCOL == adapter->net_protocol) {
         struct IpProtocolDone *ip_done = (struct IpProtocolDone *)adapter->done;
     
         if (NULL == ip_done->disconnect)
             return -1;
     
-        return ip_done->disconnect(adapter->socket);
+        return ip_done->disconnect(adapter);
     } else {
         printf("AdapterDeviceDisconnect net_protocol %d not support\n", adapter->net_protocol);
         return -1;
