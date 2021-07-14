@@ -3,6 +3,5 @@ menuconfig SUPPORT_KNOWING_FRAMEWORK
         default y
 
 if SUPPORT_KNOWING_FRAMEWORK
-        source "$APP_DIR/Framework/know/tflite_sin/Kconfig"
-        source "$APP_DIR/Framework/know/tflite_mnist/Kconfig"
+        
 endif

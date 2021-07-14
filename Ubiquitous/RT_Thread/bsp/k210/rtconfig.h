@@ -263,10 +263,37 @@
 /* More Drivers */
 
 
+/* APP_Framework */
+
 /* Applications */
+
+/* config stack size and priority of main task */
+
+#define MAIN_KTASK_STACK_SIZE 1024
+
+/* test app */
+
+
+/* connection app */
+
+/* control app */
+
+
+/* knowing app */
+
+
+/* sensor app */
+
 
 /* Framework */
 
+#define TRANSFORM_LAYER_ATTRIUBUTE
+#define ADD_XIUOS_FETURES
+#define SUPPORT_KNOWING_FRAMEWORK
+
+/* app lib */
+
+#define APP_SELECT_NEWLIB
 #define __STACKSIZE__ 4096
 
 #endif

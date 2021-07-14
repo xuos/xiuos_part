@@ -24,12 +24,15 @@ config BOARD_K210_EVB
     select RT_USING_USER_MAIN
     default y
 
+config APP_DIR
+    string
+    default "../../../../APP_Framework"
+	
 source "$RTT_DIR/Kconfig"
 source "base-drivers/Kconfig"
 source "kendryte-sdk/Kconfig"
 source "$RT_Thread_DIR/drivers/Kconfig"
-source "$ROOT_DIR/APP_Framework/Applications/Kconfig"
-source "$ROOT_DIR/APP_Framework/Framework/Kconfig"
+source "$ROOT_DIR/APP_Framework/Kconfig"
 
 config __STACKSIZE__
     int "stack size for interrupt"
