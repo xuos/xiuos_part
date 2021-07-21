@@ -3,5 +3,6 @@ menuconfig SUPPORT_KNOWING_FRAMEWORK
         default y
 
 if SUPPORT_KNOWING_FRAMEWORK
-        source "$APP_DIR/Framework/knowing/tensorflow-lite/Kconfig"        
+        source "$APP_DIR/Framework/knowing/tensorflow-lite/Kconfig"
+        source "$APP_DIR/Framework/knowing/kpu-postprocessing/Kconfig"
 endif
