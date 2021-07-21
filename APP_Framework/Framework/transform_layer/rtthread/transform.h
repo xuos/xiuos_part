@@ -30,6 +30,9 @@
 #ifdef RT_USING_POSIX_TERMIOS
 #include <posix_termios.h>
 #endif
+#ifdef DRV_USING_OV2640
+#include <drv_ov2640.h>
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
