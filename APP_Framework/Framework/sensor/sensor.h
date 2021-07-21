@@ -26,6 +26,10 @@
 #include <string.h>
 #include <transform.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SENSOR_QUANTITY_VALUE_ERROR ((uint32_t)0xffffffff)
 
 /* Sensor quantity report mode */
@@ -123,5 +127,9 @@ int SensorQuantityControl(struct SensorQuantity *quant, int cmd);
 
 uint32_t Crc16(uint8_t * data, uint8_t length);
 uint8_t GetCheckSum(uint8_t *data, uint8_t head, uint8_t length);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

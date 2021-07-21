@@ -11,11 +11,11 @@
 */
 
 /**
-* @file:    xs_klist.h
+* @file:    list.h
 * @brief:   function declaration and structure defintion of list
 * @version: 1.0
 * @author:  AIIT XUOS Lab
-* @date:    2020/3/2
+* @date:    2021/6/23
 *
 */
 

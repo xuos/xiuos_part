@@ -12,8 +12,8 @@
 
 /**
  * @file adapter.c
- * @brief Implement the communication adapter framework management and API
- * @version 1.0
+ * @brief Implement the connection adapter framework management and API
+ * @version 1.1
  * @author AIIT XUOS Lab
  * @date 2021.05.10
  */
@@ -46,7 +46,7 @@ int AdapterFrameworkInit(void)
  * @param name - name string
  * @return adapter device pointer
  */
-struct Adapter *AdapterDeviceFindByName(const char *name)
+AdapterType AdapterDeviceFindByName(const char *name)
 {
     struct Adapter *ret = NULL;
     struct DoublelistNode *node;
@@ -87,6 +87,8 @@ int AdapterDeviceRegister(struct Adapter *adapter)
     AppDoubleListInsertNodeAfter(&adapter_list, &adapter->link);
     PrivMutexAbandon(&adapter_list_lock);
 
+    adapter->adapter_status = REGISTERED;
+
     return 0;
 }
 
@@ -103,18 +105,27 @@ int AdapterDeviceUnregister(struct Adapter *adapter)
     AppDoubleListRmNode(&adapter->link);
     PrivMutexAbandon(&adapter_list_lock);
 
+    adapter->adapter_status = UNREGISTERED;
+
     return 0;
 }
 
 /**
  * @description: Open adapter device
- * @param adapter - adapter device pointer
+ * @param name - adapter device name
  * @return success: 0 , failure: other
  */
-int AdapterDeviceOpen(struct Adapter *adapter)
+int AdapterDeviceOpen(const char *name)
 {
+    struct Adapter *adapter = AdapterDeviceFindByName(name);
+    
     if (!adapter)
         return -1;
+
+    if (INSTALL == adapter->adapter_status) {
+        printf("Device %s has already been opened. Just return\n", adapter->name);
+        return 0;
+    }
 
     int result = 0;
 
@@ -131,7 +142,8 @@ int AdapterDeviceOpen(struct Adapter *adapter)
         result = priv_done->open(adapter);
         if (0 == result) {
             printf("Device %s open success.\n", adapter->name);
-        }else{
+            adapter->adapter_status = INSTALL;
+        } else {
             if (adapter->fd) {
                 PrivClose(adapter->fd);
                 adapter->fd = 0;
@@ -148,7 +160,8 @@ int AdapterDeviceOpen(struct Adapter *adapter)
         result = ip_done->open(adapter);
         if (0 == result) {
             printf("Device %s open success.\n", adapter->name);
-        }else{
+            adapter->adapter_status = INSTALL;
+        } else {
             if (adapter->fd) {
                 PrivClose(adapter->fd);
                 adapter->fd = 0;
@@ -174,6 +187,11 @@ int AdapterDeviceClose(struct Adapter *adapter)
     if (!adapter)
         return -1;
 
+    if (UNINSTALL == adapter->adapter_status) {
+        printf("Device %s has already been closed. Just return\n", adapter->name);
+        return 0;
+    }
+
     int result = 0;
 
     struct IpProtocolDone *ip_done = NULL;
@@ -187,10 +205,12 @@ int AdapterDeviceClose(struct Adapter *adapter)
             return 0;
         
         result = priv_done->close(adapter);
-        if (0 == result)
+        if (0 == result) {
             printf("%s successfully closed.\n", adapter->name);
-        else
+            adapter->adapter_status = UNINSTALL;
+        } else {
             printf("Closed %s failure.\n", adapter->name);
+        }
 
         break;
     
@@ -200,10 +220,12 @@ int AdapterDeviceClose(struct Adapter *adapter)
             return 0;
         
         result = ip_done->close(adapter);
-        if (0 == result)
+        if (0 == result) {
             printf("%s successfully closed.\n", adapter->name);
-        else
+            adapter->adapter_status = UNINSTALL;
+        } else {
             printf("Closed %s failure.\n", adapter->name);
+        }
         break;
 
     default:
@@ -214,13 +236,13 @@ int AdapterDeviceClose(struct Adapter *adapter)
 }
 
 /**
- * @description: Read data from adapter
+ * @description: Receice data from adapter
  * @param adapter - adapter device pointer
  * @param dst - buffer to save data
  * @param len - buffer length
  * @return gotten data length
  */
-ssize_t AdapterDeviceRead(struct Adapter *adapter, void *dst, size_t len)
+ssize_t AdapterDeviceRecv(struct Adapter *adapter, void *dst, size_t len)
 {
     if (!adapter)
         return -1;
@@ -238,21 +260,21 @@ ssize_t AdapterDeviceRead(struct Adapter *adapter, void *dst, size_t len)
         if (NULL == ip_done->recv)
             return -1;
     
-        return ip_done->recv(adapter->socket, dst, len);
+        return ip_done->recv(adapter, dst, len);
     } else {
-        printf("AdapterDeviceRead net_protocol %d not support\n", adapter->net_protocol);
+        printf("AdapterDeviceRecv net_protocol %d not support\n", adapter->net_protocol);
         return -1;
     }
 }
 
 /**
- * @description: Write data to adapter
+ * @description: Send data to adapter
  * @param adapter - adapter device pointer
  * @param src - data buffer
  * @param len - data length
  * @return length of data written
  */
-ssize_t AdapterDeviceWrite(struct Adapter *adapter, const void *src, size_t len)
+ssize_t AdapterDeviceSend(struct Adapter *adapter, const void *src, size_t len)
 {
     if (!adapter)
         return -1;
@@ -270,15 +292,15 @@ ssize_t AdapterDeviceWrite(struct Adapter *adapter, const void *src, size_t len)
         if (NULL == ip_done->send)
             return -1;
     
-        return ip_done->send(adapter->socket, src, len);
+        return ip_done->send(adapter, src, len);
     } else {
-        printf("AdapterDeviceWrite net_protocol %d not support\n", adapter->net_protocol);
+        printf("AdapterDeviceSend net_protocol %d not support\n", adapter->net_protocol);
         return -1;
     }
 }
 
 /**
- * @description: Configure adapter
+ * @description: Configure adapter device
  * @param adapter - adapter device pointer
  * @param cmd - command
  * @param args - command parameter
@@ -305,6 +327,92 @@ int AdapterDeviceControl(struct Adapter *adapter, int cmd, void *args)
         return ip_done->ioctl(adapter, cmd, args);
     } else {
         printf("AdapterDeviceControl net_protocol %d not support\n", adapter->net_protocol);
+        return -1;
+    }
+}
+
+/**
+ * @description: Connect to a certain ip net, only support IP_PROTOCOL
+ * @param adapter - adapter device pointer
+ * @param ip - connect ip
+ * @param port - connect port
+ * @param ip_type - ip type, IPV4 or IPV6
+ * @return success: 0 , failure: other
+ */
+int AdapterDeviceConnect(struct Adapter *adapter, const char *ip, const char *port, enum IpType ip_type)
+{
+    if (!adapter)
+        return -1;
+        
+    if (PRIVATE_PROTOCOL == adapter->net_protocol) {
+        printf("AdapterDeviceConnect not suuport private_protocol, please use join\n");
+        return -1;
+    } else if (IP_PROTOCOL == adapter->net_protocol) {
+        struct IpProtocolDone *ip_done = (struct IpProtocolDone *)adapter->done;
+    
+        if (NULL == ip_done->connect)
+            return -1;
+    
+        return ip_done->connect(adapter, ip, port, ip_type);
+    } else {
+        printf("AdapterDeviceConnect net_protocol %d not support\n", adapter->net_protocol);
+        return -1;
+    }
+}
+
+/**
+ * @description: Join to a certain private net, only support PRIVATE_PROTOCOL
+ * @param adapter - adapter device pointer
+ * @param priv_net_group - private net group
+ * @return success: 0 , failure: other
+ */
+int AdapterDeviceJoin(struct Adapter *adapter, const char *priv_net_group)
+{
+    if (!adapter)
+        return -1;
+        
+    if (PRIVATE_PROTOCOL == adapter->net_protocol) {
+        struct PrivProtocolDone *priv_done = (struct PrivProtocolDone *)adapter->done; 
+        
+        if (NULL == priv_done->join)
+            return -1;
+    
+        return priv_done->join(adapter, priv_net_group);
+    } else if (IP_PROTOCOL == adapter->net_protocol) {
+        printf("AdapterDeviceJoin not suuport ip_protocol, please use connect\n");
+        return -1;
+    } else {
+        printf("AdapterDeviceJoin net_protocol %d not support\n", adapter->net_protocol);
+        return -1;
+    }
+}
+
+/**
+ * @description: Adapter disconnect from ip net or private net group 
+ * @param adapter - adapter device pointer
+ * @return success: 0 , failure: other
+ */
+int AdapterDeviceDisconnect(struct Adapter *adapter)
+{
+    if (!adapter)
+        return -1;
+        
+    if (PRIVATE_PROTOCOL == adapter->net_protocol) {
+        struct PrivProtocolDone *priv_done = (struct PrivProtocolDone *)adapter->done; 
+        
+        if (NULL == priv_done->quit)
+            return -1;
+    
+        return priv_done->quit(adapter);
+    } else if (IP_PROTOCOL == adapter->net_protocol) {
+        struct IpProtocolDone *ip_done = (struct IpProtocolDone *)adapter->done;
+    
+        if (NULL == ip_done->disconnect)
+            return -1;
+    
+        return ip_done->disconnect(adapter);
+    } else {
+        printf("AdapterDeviceDisconnect net_protocol %d not support\n", adapter->net_protocol);
         return -1;
     }
 }

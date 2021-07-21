@@ -21,12 +21,6 @@
 #include <transform.h>
 
 /**************************mutex***************************/
-
-//for test
-#define XIUOS_OS
-
-#ifdef XIUOS_OS
-
 /* private mutex API */
 int PrivMutexCreate(pthread_mutex_t *p_mutex, const pthread_mutexattr_t *attr)
 {
@@ -49,11 +43,11 @@ int PrivMutexAbandon(pthread_mutex_t *p_mutex)
 }
 
 /**********************semaphore****************************/
-
 int PrivSemaphoreCreate(sem_t *sem, int pshared, unsigned int value)
 {
     return sem_init(sem, pshared, value);
 }
+
 int PrivSemaphoreDelete(sem_t *sem)
 {
     return sem_destroy(sem);
@@ -68,13 +62,13 @@ int PrivSemaphoreObtainNoWait(sem_t *sem)
 {
     return sem_trywait(sem);
 }
+
 int PrivSemaphoreAbandon(sem_t *sem)
 {
     return sem_post(sem);
 }
 
 /**************************task*************************/
-
 int PrivTaskCreate(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*start_routine)(void *), void *arg)
 {
@@ -104,7 +98,7 @@ int PrivTaskDelay(int32_t ms)
 /*********************fs**************************/
 
 /************************Driver Posix Transform***********************/
-int PrivOpen(const char *path, int flags, ...)
+int PrivOpen(const char *path, int flags)
 {
     return open(path, flags);
 }
@@ -131,18 +125,31 @@ static int PrivSerialIoctl(int fd, int cmd, void *args)
     return ioctl(fd, cmd, &serial_cfg);
 }
 
+static int PrivPinIoctl(int fd, int cmd, void *args)
+{
+    struct PinParam *pin_cfg = (struct PinParam *)args;
+
+    return ioctl(fd, cmd, &pin_cfg);
+}
+
 int PrivIoctl(int fd, int cmd, void *args)
 {
+    int ret;
     struct PrivIoctlCfg *ioctl_cfg = (struct PrivIoctlCfg *)args;
     
     switch (ioctl_cfg->ioctl_driver_type)
     {
     case SERIAL_TYPE:
-        PrivSerialIoctl(fd, cmd, ioctl_cfg->args);
+        ret = PrivSerialIoctl(fd, cmd, ioctl_cfg->args);
+        break;
+    case PIN_TYPE:
+        ret = PrivSerialIoctl(fd, cmd, ioctl_cfg->args);
         break;
     default:
         break;
     }
+
+    return ret;
 }
 
 /********************memory api************/
@@ -150,6 +157,7 @@ void *PrivMalloc(size_t size)
 {
     return UserMalloc(size);
 }
+
 void *PrivRealloc(void *pointer, size_t size)
 {
     return UserRealloc(pointer, size);
@@ -159,9 +167,9 @@ void *PrivCalloc(size_t  count, size_t size)
 {
     return UserCalloc(count, size);
 }
+
 void PrivFree(void *pointer)
 {
     UserFree(pointer);
 }
 
-#endif
