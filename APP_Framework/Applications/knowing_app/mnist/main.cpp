@@ -1,4 +1,4 @@
-#include <rtthread.h>
+#include <transform.h>
 #include <stdio.h>
 
 #include "tensorflow/lite/micro/all_ops_resolver.h"
@@ -34,7 +34,7 @@ extern "C" void mnist_app() {
     return;
   }
 
-  tensor_arena = (uint8_t *)rt_malloc(kTensorArenaSize);
+  tensor_arena = (uint8_t *)malloc(kTensorArenaSize);
   if (tensor_arena == nullptr) {
     TF_LITE_REPORT_ERROR(error_reporter, "malloc for tensor_arena failed");
     return;
@@ -90,5 +90,7 @@ extern "C" void mnist_app() {
 }
 
 extern "C" {
+#ifdef __RT_THREAD_H__
 MSH_CMD_EXPORT(mnist_app, run mnist app);
+#endif
 }
