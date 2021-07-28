@@ -14,12 +14,10 @@
 #include <user_api.h>
 
 extern int SensorFrameworkInit(void);
-extern int RegisterAdapterEthernet(void);
-extern int RegisterAdapterWifi(void);
-extern int RegisterAdapterZigbee(void);
-extern int RegisterAdapterNBIoT(void);
-extern int RegisterAdapterBluetooth(void);
-extern int LoraSx12xxSpiDeviceInit();
+extern int AdapterFrameworkInit(void);
+
+extern int Adapter4GInit(void);
+extern int AdapterWifiInit(void);
 
 extern int D124VoiceInit(void);
 extern int Hs300xTemperatureInit(void);
@@ -52,6 +50,10 @@ static struct InitDesc framework[] =
 {
 #ifdef SUPPORT_SENSOR_FRAMEWORK
 	{ "perception_framework", SensorFrameworkInit },
+#endif
+
+#ifdef SUPPORT_CONNECTION_FRAMEWORK
+	{ "connection_framework", AdapterFrameworkInit },
 #endif
 
 	{ "NULL", NULL },
@@ -87,27 +89,11 @@ static struct InitDesc perception_desc[] =
 
 static struct InitDesc connection_desc[] = 
 {
-#ifdef CONNECTION_COMMUNICATION_ETHERNET
-	{ "ethernet adpter", RegisterAdapterEthernet },
+#ifdef ADAPTER_4G
+	{ "4G adpter", Adapter4GInit},
 #endif
-
-#ifdef CONNECTION_COMMUNICATION_WIFI
-	{ "wifi adpter", RegisterAdapterWifi },
-#endif
-
-#ifdef CONNECTION_COMMUNICATION_LORA
-	{ "lora adpter", LoraSx12xxSpiDeviceInit},
-#endif
-
-#ifdef CONNECTION_COMMUNICATION_ZIGBEE
-	{ "zigbee adpter", RegisterAdapterZigbee},
-#endif
-
-#ifdef CONNECTION_COMMUNICATION_NB_IOT
-	{ "NB-IoT adpter", RegisterAdapterNBIoT},
-#endif
-#ifdef CONNECTION_COMMUNICATION_BLUETOOTH
-	{ "bluetooth adpter", RegisterAdapterBluetooth},
+#ifdef ADAPTER_WIFI
+	{ "Wifi adpter", AdapterWifiInit},
 #endif
 	{ "NULL", NULL },
 };
@@ -132,6 +118,8 @@ static int PerceptionFrameworkInit(struct InitDesc sub_desc[])
 		printf("initialize perception_framework success.\n");
 		AppInitDesc(perception_desc);
 	}
+
+	return ret;
 }
 
 /**
@@ -141,7 +129,21 @@ static int PerceptionFrameworkInit(struct InitDesc sub_desc[])
  */
 static int ConnectionFrameworkInit(struct InitDesc sub_desc[])
 {
-	return AppInitDesc(connection_desc);
+	int i = 0;
+	int ret = 0;
+	for ( i = 0; sub_desc[i].fn != NULL; i++ ) {
+		if (0 == strncmp(sub_desc[i].fn_name, "connection_framework", strlen("connection_framework"))) {
+			ret = sub_desc[i].fn();
+			break;
+		}
+	}
+	
+	if (0 == ret) {
+		printf("initialize connection_framework success.\n");
+		AppInitDesc(connection_desc);
+	}
+
+	return ret;
 }
 
 /**
@@ -154,7 +156,7 @@ int FrameworkInit()
 	PerceptionFrameworkInit(framework);
 #endif
 
-#ifdef CONNECTION_ADAPTER
+#ifdef SUPPORT_CONNECTION_FRAMEWORK
 	ConnectionFrameworkInit(framework);
 #endif
 

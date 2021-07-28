@@ -18,136 +18,179 @@
  * @date 2021.04.22
  */
 
-#include <string.h>
-#include <user_api.h>
-#include <xs_adapter_manager.h>
-#include <xs_adapter_at_wifi.h>
+#include <at_agent.h>
+#include <adapter.h>
 
 void SendWiftMsg(int argc, char *argv[])
 {
     char wifi_msg[128];
+    int len;
     if (argc >= 1) {
         memset(wifi_msg, 0, 128);
-        strncpy(wifi_msg, argv[1], strlen(argv[1]));
+        strncpy(wifi_msg, argv[1], (len = strlen(argv[1])));
         printf("SendWiftMsg(%s).\n", wifi_msg);
     }
 
-    struct AdapterAT *at_adapter = ATAdapterFind(WIFI_ADAPTER_ID);
-    if (!at_adapter) {
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    if (!adapter) {
         printf("ATAdapterFind failed .\n");
     }
-    at_adapter->parent.done.NetAiitOpen(&at_adapter->parent);
+    AdapterDeviceOpen(adapter);
 
-    at_adapter->parent.done.NetAiitSend(&at_adapter->parent, wifi_msg, strlen(wifi_msg), true, 1000, 0, NULL, NULL, NULL);
+    AdapterDeviceSend(adapter, wifi_msg, len);
 }
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(0), SendWiftMsg, SendWiftMsg, SendWiftMsg);
 
 void RecvWifiMsg()
 {
     char wifi_recv_msg[128];
     memset(wifi_recv_msg, 0, sizeof(wifi_recv_msg));
-    struct AdapterAT *at_adapter = ATAdapterFind(WIFI_ADAPTER_ID);
-    if (!at_adapter) {
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    if (!adapter) {
         printf("ATAdapterFind failed .\n");
     }
 
-    at_adapter->parent.done.NetAiitOpen(&at_adapter->parent);
+    AdapterDeviceOpen(adapter);
 
     while (1) {
         memset(wifi_recv_msg, 0, sizeof(wifi_recv_msg));
-        if (EOK == at_adapter->parent.done.NetAiitReceive(&at_adapter->parent, wifi_recv_msg, 128, 40000, true, NULL)) {
+        if (EOK == AdapterDeviceRecv(adapter, wifi_recv_msg, 128)) {
             printf("wifi_recv_msg (%s)\n", wifi_recv_msg);
         } else {
             printf("wifi_recv_msg failed .\n");
         }
     }
 }
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0), RecvWifiMsg, RecvWifiMsg, RecvWifiMsg);
+
+void SetUpWifi()
+{
+    char wifi_recv_msg[128];
+    int baud_rate = BAUD_RATE_57600;
+    memset(wifi_recv_msg, 0, sizeof(wifi_recv_msg));
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    if (!adapter) {
+        printf("ATAdapterFind failed .\n");
+    }
+
+    printf("Waiting for msg...\n");
+    AdapterDeviceOpen(adapter);
+    AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+    if (EOK == AdapterDeviceSetUp(adapter)) {
+        printf("SetUpWifi success \n");
+    } else {
+        printf("SetUpWifi failed \n");
+    }
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0), SetUpWifi, SetUpWifi, SetUpWifi);
+
+void SetDownWifi()
+{
+    char wifi_recv_msg[128];
+    memset(wifi_recv_msg, 0, sizeof(wifi_recv_msg));
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    if (!adapter) {
+        printf("ATAdapterFind failed .\n");
+    }
+
+    printf("Waiting for msg...\n");
+
+    AdapterDeviceOpen(adapter);
+
+    if (EOK == AdapterDeviceSetDown(adapter)) {
+        printf("SetDownWifi success \n");
+    } else {
+        printf("SetDownWifi failed \n");
+    }
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0), SetDownWifi, SetDownWifi, SetDownWifi);
 
 void SetAddrWifi()
 {
-    struct AdapterAT* at_adapter =  ATAdapterFind(WIFI_ADAPTER_ID);
-    if (!at_adapter) {
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    if (!adapter) {
         printf("ATAdapterFind failed .\n");
     }
 
     printf("Waiting for msg...\n");
 
-    at_adapter->parent.done.NetAiitOpen(&at_adapter->parent);
+    AdapterDeviceOpen(adapter);
 
-    if(EOK != at_adapter->atdone.ATOperateAddr(at_adapter, IpTint("10.10.100.222"), IpTint("255.255.255.0"), IpTint("255.255.255.0")))
-        printf("WifiSetAddr failed \n");
-}
-
-void DhcpWifi()
-{
-    struct AdapterAT* at_adapter =  ATAdapterFind(WIFI_ADAPTER_ID);
-    if (!at_adapter) {
-        printf("ATAdapterFind failed .\n");
+    if(EOK == AdapterDeviceSetAddr(adapter, "192.168.66.253", "255.255.255.0", "192.168.66.1")){
+        printf("SetAddrWifi success \n");
+    } else {
+        printf("SetAddrWifi failed \n");
     }
-
-    printf("Waiting for msg...\n");
-
-    at_adapter->parent.done.NetAiitOpen(&at_adapter->parent);
-
-    if(EOK != at_adapter->atdone.ATOperateDHCP(at_adapter,1))
-        printf("WifiDHCP failed \n");
 }
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0), SetAddrWifi, SetAddrWifi, SetAddrWifi);
 
 void PingWifi()
 {
     char wifi_recv_msg[128];
     memset(wifi_recv_msg, 0, sizeof(wifi_recv_msg));
 
-    struct AdapterAT *at_adapter = ATAdapterFind(WIFI_ADAPTER_ID);
-    if (!at_adapter) {
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    if (!adapter) {
         printf("ATAdapterFind failed .\n");
     }
 
     printf("Waiting for msg...\n");
-    struct PingResult result;
     //www.baidu.com
     char *ip_str = "36.152.44.95";
 
-    at_adapter->parent.done.NetAiitOpen(&at_adapter->parent);
+    AdapterDeviceOpen(adapter);
 
-    at_adapter->atdone.ATPing(at_adapter, ip_str, &result);
-}
-
-void SetUpWifi()
-{
-    char wifi_recv_msg[128];
-    memset(wifi_recv_msg, 0, sizeof(wifi_recv_msg));
-    
-    struct AdapterAT* at_adapter =  ATAdapterFind(WIFI_ADAPTER_ID);
-    if (!at_adapter) {
-        printf("ATAdapterFind failed .\n");
-    }
-
-    printf("Waiting for msg...\n");
-    struct PingResult result; 
-
-    at_adapter->parent.done.NetAiitOpen(&at_adapter->parent);
-
-    if (EOK == at_adapter->atdone.ATOperateUp(at_adapter)) {
-        printf("WifiSetUp success (%s)\n", result.ip_addr.ipv4);
+    if (EOK == AdapterDevicePing(adapter, ip_str)) {
+        printf("PingWifi success \n");
     } else {
-        printf("WifiSetUp failed \n");
+        printf("PingWifi failed \n");
     }
 }
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0), PingWifi, PingWifi, PingWifi);
 
 void NetstatWifi()
 {
-    struct AdapterAT* at_adapter =  ATAdapterFind(WIFI_ADAPTER_ID);
-    if (!at_adapter) {
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    if (!adapter) {
         printf("ATAdapterFind failed .\n");
     }
 
     printf("Waiting for msg...\n");
 
-    at_adapter->parent.done.NetAiitOpen(&at_adapter->parent);
+    AdapterDeviceOpen(adapter);
 
-    if (EOK != at_adapter->atdone.ATNetstat(at_adapter))
-        printf("WifiNetstat failed \n");
+    if (EOK == AdapterDeviceNetstat(adapter)) {
+        printf("NetstatWifi success \n");
+    } else {
+        printf("NetstatWifi failed \n");
+    }
 }
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0), NetstatWifi, NetstatWifi, NetstatWifi);
+
+int ConnectWifi()
+{
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+
+    const char *ip = "192.168.66.33";
+    const char *port = "12345";
+    enum NetRoleType net_role = CLIENT;
+    enum IpType ip_type = IPV4;
+
+    if (!adapter) {
+        printf("ATAdapterFind failed .\n");
+    }
+
+    printf("Waiting for msg...\n");
+
+    AdapterDeviceOpen(adapter);
+
+    if (EOK == AdapterDeviceConnect(adapter, net_role, ip, port, ip_type)) {
+        printf("ConnectWifi success \n");
+    } else {
+        printf("ConnectWifi failed \n");
+    }
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0), ConnectWifi, ConnectWifi, ConnectWifi);
 
 void AtTestCmdWifi(int argc, char *argv[])
 {
@@ -159,21 +202,22 @@ void AtTestCmdWifi(int argc, char *argv[])
     }
 
     strcat(cmd,"\r");
-    struct AdapterAT* at_adapter =  ATAdapterFind(WIFI_ADAPTER_ID);
-    at_adapter->parent.done.NetAiitOpen(&at_adapter->parent);
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    // AdapterDeviceOpen(adapter);
 
     printf("Waiting for msg...\n");
 
-    ATOrderSend(at_adapter->agent, REPLY_TIME_OUT, NULL, "+++");
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
     UserTaskDelay(100);
 
-    ATOrderSend(at_adapter->agent, REPLY_TIME_OUT, NULL, "a");
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "a");
 
     UserTaskDelay(2500);
 
-    ATOrderSend(at_adapter->agent,REPLY_TIME_OUT, NULL,cmd);
+    ATOrderSend(adapter->agent,REPLY_TIME_OUT, NULL,cmd);
     UserTaskDelay(2500);
 
-    ATOrderSend(at_adapter->agent,REPLY_TIME_OUT, NULL,"AT+Z\r");
+    ATOrderSend(adapter->agent,REPLY_TIME_OUT, NULL,"AT+Z\r");
     UserTaskDelay(5000);
 }
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(0), AtTestCmdWifi, AtTestCmdWifi, AtTestCmdWifi);
