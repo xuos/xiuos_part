@@ -1,4 +1,4 @@
-SRC_FILES := adapter.c
+SRC_FILES := adapter.c adapter_agent.c
 
 ifeq ($(CONFIG_ADAPTER_LORA),y)
 	SRC_DIR += lora

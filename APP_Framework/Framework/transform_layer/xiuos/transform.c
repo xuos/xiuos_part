@@ -39,7 +39,7 @@ int PrivMutexObtain(pthread_mutex_t *p_mutex)
 
 int PrivMutexAbandon(pthread_mutex_t *p_mutex)
 {
-    return pthread_mutex_lock(p_mutex);
+    return pthread_mutex_unlock(p_mutex);
 }
 
 /**********************semaphore****************************/
@@ -121,15 +121,14 @@ int PrivWrite(int fd, const void *buf, size_t len)
 static int PrivSerialIoctl(int fd, int cmd, void *args)
 {
     struct SerialDataCfg *serial_cfg = (struct SerialDataCfg *)args;
-
-    return ioctl(fd, cmd, &serial_cfg);
+    return ioctl(fd, cmd, serial_cfg);
 }
 
 static int PrivPinIoctl(int fd, int cmd, void *args)
 {
     struct PinParam *pin_cfg = (struct PinParam *)args;
 
-    return ioctl(fd, cmd, &pin_cfg);
+    return ioctl(fd, cmd, pin_cfg);
 }
 
 int PrivIoctl(int fd, int cmd, void *args)
@@ -143,7 +142,7 @@ int PrivIoctl(int fd, int cmd, void *args)
         ret = PrivSerialIoctl(fd, cmd, ioctl_cfg->args);
         break;
     case PIN_TYPE:
-        ret = PrivSerialIoctl(fd, cmd, ioctl_cfg->args);
+        ret = PrivPinIoctl(fd, cmd, ioctl_cfg->args);
         break;
     default:
         break;

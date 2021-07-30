@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <sys/types.h>
+#include <at_agent.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,6 +58,8 @@ struct Adapter;
 struct AdapterProductInfo;
 typedef struct Adapter *AdapterType;
 typedef struct AdapterProductInfo *AdapterProductInfoType;
+
+#define ADAPTER_WIFI_NAME "wifi"
 
 struct Socket
 {
@@ -118,7 +121,14 @@ struct IpProtocolDone
     int (*open)(struct Adapter *adapter);
     int (*close)(struct Adapter *adapter);
     int (*ioctl)(struct Adapter *adapter, int cmd, void *args);
-    int (*connect)(struct Adapter *adapter, const char *ip, const char *port, enum IpType ip_type);
+    int (*setup)(struct Adapter *adapter);
+    int (*setdown)(struct Adapter *adapter);
+    int (*setaddr)(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask);
+    int (*setdns)(struct Adapter *adapter, const char *dns_addr, uint8 dns_count);
+    int (*setdhcp)(struct Adapter *adapter, int enable);
+    int (*ping)(struct Adapter *adapter, const char *destination);
+    int (*netstat)(struct Adapter *adapter);
+    int (*connect)(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type);
     int (*send)(struct Adapter *adapter, const void *buf, size_t len);
     int (*recv)(struct Adapter *adapter, void *buf, size_t len);
     int (*disconnect)(struct Adapter *adapter);
@@ -129,6 +139,13 @@ struct PrivProtocolDone
     int (*open)(struct Adapter *adapter);
     int (*close)(struct Adapter *adapter);
     int (*ioctl)(struct Adapter *adapter, int cmd, void *args);
+    int (*setup)(struct Adapter *adapter);
+    int (*setdown)(struct Adapter *adapter);
+    int (*setaddr)(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask);
+    int (*setdns)(struct Adapter *adapter, const char *dns_addr, uint8 dns_count);
+    int (*setdhcp)(struct Adapter *adapter, int enable);
+    int (*ping)(struct Adapter *adapter, const char *destination);
+    int (*netstat)(struct Adapter *adapter);
     int (*join)(struct Adapter *adapter, const char *priv_net_group);
     int (*send)(struct Adapter *adapter, const void *buf, size_t len);
     int (*recv)(struct Adapter *adapter, void *buf, size_t len);
@@ -142,6 +159,7 @@ struct Adapter
 
     int product_info_flag;
     struct AdapterProductInfo *info;
+    ATAgentType agent;
 
     //struct Socket *socket;
 
@@ -169,7 +187,7 @@ int AdapterDeviceRegister(struct Adapter *adapter);
 int AdapterDeviceUnregister(struct Adapter *adapter);
 
 /*Open adapter device*/
-int AdapterDeviceOpen(const char *name);
+int AdapterDeviceOpen(struct Adapter *adapter);
 
 /*Close adapter device*/
 int AdapterDeviceClose(struct Adapter *adapter);
@@ -184,13 +202,21 @@ ssize_t AdapterDeviceSend(struct Adapter *adapter, const void *src, size_t len);
 int AdapterDeviceControl(struct Adapter *adapter, int cmd, void *args);
 
 /*Connect to a certain ip net, only support IP_PROTOCOL*/
-int AdapterDeviceConnect(struct Adapter *adapter, const char *ip, const char *port, enum IpType ip_type);
+int AdapterDeviceConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type);
 
 /*Join to a certain private net, only support PRIVATE_PROTOCOL*/
 int AdapterDeviceJoin(struct Adapter *adapter, const char *priv_net_group);
 
 /*Adapter disconnect from ip net or private net group*/
 int AdapterDeviceDisconnect(struct Adapter *adapter);
+
+int AdapterDeviceSetUp(struct Adapter *adapter);
+int AdapterDeviceSetDown(struct Adapter *adapter);
+int AdapterDeviceSetAddr(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask);
+int AdapterDeviceSetDns(struct Adapter *adapter, const char *dns_addr, uint8 dns_count);
+int AdapterDeviceSetDhcp(struct Adapter *adapter, int enable);
+int AdapterDevicePing(struct Adapter *adapter, const char *destination);
+int AdapterDeviceNetstat(struct Adapter *adapter);
 
 #ifdef __cplusplus
 }

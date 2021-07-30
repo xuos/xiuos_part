@@ -62,6 +62,7 @@ AdapterType AdapterDeviceFindByName(const char *name)
             ret = adapter;
             break;
         }
+        printf("PrivMutexObtain in loop\n");
     }
     PrivMutexAbandon(&adapter_list_lock);
 
@@ -115,10 +116,8 @@ int AdapterDeviceUnregister(struct Adapter *adapter)
  * @param name - adapter device name
  * @return success: 0 , failure: other
  */
-int AdapterDeviceOpen(const char *name)
+int AdapterDeviceOpen(struct Adapter *adapter)
 {
-    struct Adapter *adapter = AdapterDeviceFindByName(name);
-    
     if (!adapter)
         return -1;
 
@@ -236,6 +235,68 @@ int AdapterDeviceClose(struct Adapter *adapter)
 }
 
 /**
+ * @description: Configure adapter device
+ * @param adapter - adapter device pointer
+ * @param cmd - command
+ * @param args - command parameter
+ * @return success: 0 , failure: other
+ */
+int AdapterDeviceControl(struct Adapter *adapter, int cmd, void *args)
+{
+    if (!adapter)
+        return -1;
+        
+    int result = 0;
+
+    struct IpProtocolDone *ip_done = NULL;
+    struct PrivProtocolDone *priv_done = NULL;
+
+    switch (adapter->net_protocol)
+    {
+    case PRIVATE_PROTOCOL:
+        priv_done = (struct PrivProtocolDone *)adapter->done;
+        if (NULL == priv_done->ioctl)
+            return 0;
+        
+        result = priv_done->ioctl(adapter, cmd, args);
+        if (0 == result) {
+            printf("Device %s ioctl success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s ioctl failed(%d).\n", adapter->name, result);
+        }
+        break;
+    
+    case IP_PROTOCOL:
+        ip_done = (struct IpProtocolDone *)adapter->done;
+        if (NULL == ip_done->ioctl)
+            return 0;
+        
+        result = ip_done->ioctl(adapter, cmd, args);
+        if (0 == result) {
+            printf("Device %s ioctl success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s ioctl failed(%d).\n", adapter->name, result);
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
+}
+
+/**
  * @description: Receice data from adapter
  * @param adapter - adapter device pointer
  * @param dst - buffer to save data
@@ -300,38 +361,6 @@ ssize_t AdapterDeviceSend(struct Adapter *adapter, const void *src, size_t len)
 }
 
 /**
- * @description: Configure adapter device
- * @param adapter - adapter device pointer
- * @param cmd - command
- * @param args - command parameter
- * @return success: 0 , failure: other
- */
-int AdapterDeviceControl(struct Adapter *adapter, int cmd, void *args)
-{
-    if (!adapter)
-        return -1;
-        
-    if (PRIVATE_PROTOCOL == adapter->net_protocol) {
-        struct PrivProtocolDone *priv_done = (struct PrivProtocolDone *)adapter->done; 
-        
-        if (NULL == priv_done->ioctl)
-            return -1;
-    
-        return priv_done->ioctl(adapter, cmd, args);
-    } else if (IP_PROTOCOL == adapter->net_protocol) {
-        struct IpProtocolDone *ip_done = (struct IpProtocolDone *)adapter->done;
-    
-        if (NULL == ip_done->ioctl)
-            return -1;
-    
-        return ip_done->ioctl(adapter, cmd, args);
-    } else {
-        printf("AdapterDeviceControl net_protocol %d not support\n", adapter->net_protocol);
-        return -1;
-    }
-}
-
-/**
  * @description: Connect to a certain ip net, only support IP_PROTOCOL
  * @param adapter - adapter device pointer
  * @param ip - connect ip
@@ -339,7 +368,7 @@ int AdapterDeviceControl(struct Adapter *adapter, int cmd, void *args)
  * @param ip_type - ip type, IPV4 or IPV6
  * @return success: 0 , failure: other
  */
-int AdapterDeviceConnect(struct Adapter *adapter, const char *ip, const char *port, enum IpType ip_type)
+int AdapterDeviceConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
 {
     if (!adapter)
         return -1;
@@ -353,7 +382,7 @@ int AdapterDeviceConnect(struct Adapter *adapter, const char *ip, const char *po
         if (NULL == ip_done->connect)
             return -1;
     
-        return ip_done->connect(adapter, ip, port, ip_type);
+        return ip_done->connect(adapter, net_role, ip, port, ip_type);
     } else {
         printf("AdapterDeviceConnect net_protocol %d not support\n", adapter->net_protocol);
         return -1;
@@ -379,7 +408,7 @@ int AdapterDeviceJoin(struct Adapter *adapter, const char *priv_net_group)
     
         return priv_done->join(adapter, priv_net_group);
     } else if (IP_PROTOCOL == adapter->net_protocol) {
-        printf("AdapterDeviceJoin not suuport ip_protocol, please use connect\n");
+        printf("AdapterDeviceJoin not support ip_protocol, please use connect\n");
         return -1;
     } else {
         printf("AdapterDeviceJoin net_protocol %d not support\n", adapter->net_protocol);
@@ -416,3 +445,279 @@ int AdapterDeviceDisconnect(struct Adapter *adapter)
         return -1;
     }
 }
+
+int AdapterDeviceSetUp(struct Adapter *adapter)
+{
+    if (!adapter)
+        return -1;
+
+    int result = 0;
+
+    struct IpProtocolDone *ip_done = NULL;
+    struct PrivProtocolDone *priv_done = NULL;
+
+    switch (adapter->net_protocol)
+    {
+    case PRIVATE_PROTOCOL:
+        priv_done = (struct PrivProtocolDone *)adapter->done;
+        if (NULL == priv_done->setup)
+            return 0;
+        
+        result = priv_done->setup(adapter);
+        if (0 == result) {
+            printf("Device %s setup success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setup failed(%d).\n", adapter->name, result);
+        }
+        break;
+    
+    case IP_PROTOCOL:
+        ip_done = (struct IpProtocolDone *)adapter->done;
+        if (NULL == ip_done->setup)
+            return 0;
+        
+        result = ip_done->setup(adapter);
+        if (0 == result) {
+            printf("Device %s setup success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setup failed(%d).\n", adapter->name, result);
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
+}
+
+int AdapterDeviceSetDown(struct Adapter *adapter)
+{
+    if (!adapter)
+        return -1;
+
+    int result = 0;
+
+    struct IpProtocolDone *ip_done = NULL;
+    struct PrivProtocolDone *priv_done = NULL;
+
+    switch (adapter->net_protocol)
+    {
+    case PRIVATE_PROTOCOL:
+        priv_done = (struct PrivProtocolDone *)adapter->done;
+        if (NULL == priv_done->setdown)
+            return 0;
+        
+        result = priv_done->setdown(adapter);
+        if (0 == result) {
+            printf("Device %s setdown success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setdown failed(%d).\n", adapter->name, result);
+        }
+        break;
+    
+    case IP_PROTOCOL:
+        ip_done = (struct IpProtocolDone *)adapter->done;
+        if (NULL == ip_done->setdown)
+            return 0;
+        
+        result = ip_done->setdown(adapter);
+        if (0 == result) {
+            printf("Device %s setdown success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setdown failed(%d).\n", adapter->name, result);
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
+}
+
+int AdapterDeviceSetAddr(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask)
+{
+    if (!adapter)
+        return -1;
+
+    int result = 0;
+
+    struct IpProtocolDone *ip_done = NULL;
+    struct PrivProtocolDone *priv_done = NULL;
+
+    switch (adapter->net_protocol)
+    {
+    case PRIVATE_PROTOCOL:
+        priv_done = (struct PrivProtocolDone *)adapter->done;
+        if (NULL == priv_done->setaddr)
+            return 0;
+        
+        result = priv_done->setaddr(adapter, ip, gateway, netmask);
+        if (0 == result) {
+            printf("Device %s setaddr success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setaddr failed(%d).\n", adapter->name, result);
+        }
+        break;
+    
+    case IP_PROTOCOL:
+        ip_done = (struct IpProtocolDone *)adapter->done;
+        if (NULL == ip_done->setaddr)
+            return 0;
+        
+        result = ip_done->setaddr(adapter, ip, gateway, netmask);
+        if (0 == result) {
+            printf("Device %s setaddr success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setaddr failed(%d).\n", adapter->name, result);
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
+}
+
+int AdapterDevicePing(struct Adapter *adapter, const char *destination)
+{
+    if (!adapter)
+        return -1;
+
+    int result = 0;
+
+    struct IpProtocolDone *ip_done = NULL;
+    struct PrivProtocolDone *priv_done = NULL;
+
+    switch (adapter->net_protocol)
+    {
+    case PRIVATE_PROTOCOL:
+        priv_done = (struct PrivProtocolDone *)adapter->done;
+        if (NULL == priv_done->ping)
+            return 0;
+        
+        result = priv_done->ping(adapter, destination);
+        if (0 == result) {
+            printf("Device %s ping success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s ping failed(%d).\n", adapter->name, result);
+        }
+        break;
+    
+    case IP_PROTOCOL:
+        ip_done = (struct IpProtocolDone *)adapter->done;
+        if (NULL == ip_done->ping)
+            return 0;
+        
+        result = ip_done->ping(adapter, destination);
+        if (0 == result) {
+            printf("Device %s ping success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s ping failed(%d).\n", adapter->name, result);
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
+}
+
+int AdapterDeviceNetstat(struct Adapter *adapter)
+{
+    if (!adapter)
+        return -1;
+        
+    int result = 0;
+
+    struct IpProtocolDone *ip_done = NULL;
+    struct PrivProtocolDone *priv_done = NULL;
+
+    switch (adapter->net_protocol)
+    {
+    case PRIVATE_PROTOCOL:
+        priv_done = (struct PrivProtocolDone *)adapter->done;
+        if (NULL == priv_done->netstat)
+            return 0;
+        
+        result = priv_done->netstat(adapter);
+        if (0 == result) {
+            printf("Device %s netstat success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s netstat failed(%d).\n", adapter->name, result);
+        }
+        break;
+    
+    case IP_PROTOCOL:
+        ip_done = (struct IpProtocolDone *)adapter->done;
+        if (NULL == ip_done->netstat)
+            return 0;
+        
+        result = ip_done->netstat(adapter);
+        if (0 == result) {
+            printf("Device %s netstat success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s netstat failed(%d).\n", adapter->name, result);
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
+}
+
