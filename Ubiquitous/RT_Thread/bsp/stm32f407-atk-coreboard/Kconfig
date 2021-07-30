@@ -16,9 +16,14 @@ config RTT_DIR
     string
     default "../../rt-thread"
 
+
+config APP_DIR
+    string
+    default "../../../../APP_Framework"
+
 source "$RTT_DIR/Kconfig"
 source "$RTT_DIR/bsp/stm32/libraries/Kconfig"
 source "board/Kconfig"
 source "$RT_Thread_DIR/drivers/Kconfig"
-source "$ROOT_DIR/APP_Framework/Applications/Kconfig"
-source "$ROOT_DIR/APP_Framework/Framework/Kconfig"
+source "$ROOT_DIR/APP_Framework/Kconfig"
+

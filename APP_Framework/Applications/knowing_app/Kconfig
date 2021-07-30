@@ -1,7 +1,4 @@
 menu "knowing app"
-
-    menuconfig APPLICATION_KNOWING
-        bool "Using knowing apps"
-        default n
-
+    source "$APP_DIR/Applications/knowing_app/mnist/Kconfig" 
+    source "$APP_DIR/Applications/knowing_app/face_detect/Kconfig" 
 endmenu

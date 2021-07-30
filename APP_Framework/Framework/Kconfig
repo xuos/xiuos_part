@@ -20,7 +20,7 @@ menu "Framework"
 
     source "$APP_DIR/Framework/sensor/Kconfig"
     source "$APP_DIR/Framework/connection/Kconfig"
-    source "$APP_DIR/Framework/know/Kconfig"
+    source "$APP_DIR/Framework/knowing/Kconfig"
     source "$APP_DIR/Framework/control/Kconfig"
 
 
