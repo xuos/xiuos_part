@@ -4,8 +4,8 @@
 cconfig.h
 *.bin
 *.map
-rtconfig.h
-.config
+# rtconfig.h
+# .config
 
 # General
 .DS_Store
