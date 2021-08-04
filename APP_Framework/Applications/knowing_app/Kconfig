@@ -1,4 +1,5 @@
 menu "knowing app"
     source "$APP_DIR/Applications/knowing_app/mnist/Kconfig" 
     source "$APP_DIR/Applications/knowing_app/face_detect/Kconfig" 
+    source "$APP_DIR/Applications/knowing_app/instrusion_detect/Kconfig" 
 endmenu
