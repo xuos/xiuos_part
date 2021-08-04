@@ -4,7 +4,7 @@
 #include "region_layer.h"
 #define ANCHOR_NUM 5
 #define STACK_SIZE (128 * 1024)
-#define JSON_FILE_PATH "/kmodel/human.json"
+#define JSON_FILE_PATH "/kmodel/helmet.json"
 #define JSON_BUFFER_SIZE (4 * 1024)
 
 // params from json
@@ -19,9 +19,9 @@ float nms_thresh = 0.0;
 char labels[20][32] = {};
 int class_num = 0;
 
-#define THREAD_PRIORITY_HUMAN_D (11)
-static pthread_t instrusiontid = 0;
-static void *thread_instrusion_detect_entry(void *parameter);
+#define THREAD_PRIORITY_HELMET_D (11)
+static pthread_t helmettid = 0;
+static void *thread_helmet_detect_entry(void *parameter);
 static int g_fd = 0;
 static int kmodel_fd = 0;
 static int if_exit = 0;
@@ -32,9 +32,9 @@ static _ioctl_shoot_para shoot_para_t = {0};
 unsigned char *model_data = NULL;  // kpu data  load memory
 unsigned char *model_data_align = NULL;
 
-kpu_model_context_t instrusion_detect_task;
-static region_layer_t instrusion_detect_rl;
-static obj_info_t instrusion_detect_info;
+kpu_model_context_t helmet_detect_task;
+static region_layer_t helmet_detect_rl;
+static obj_info_t helmet_detect_info;
 volatile uint32_t g_ai_done_flag;
 
 static void ai_done(void *ctx) { g_ai_done_flag = 1; }
@@ -170,7 +170,7 @@ static void param_parse()
     return;
 }
 
-void instrusion_detect()
+void helmet_detect()
 {
     int ret = 0;
     int result = 0;
@@ -239,7 +239,7 @@ void instrusion_detect()
                                net_input_size[0] * net_input_size[1]),
                     (uint32_t)(kpurgbbuffer + net_input_size[0] * net_input_size[1] * 2 +
                                net_input_size[1] * (net_input_size[0] - sensor_output_size[0])));
-    if (kpu_load_kmodel(&instrusion_detect_task, model_data_align) != 0) {
+    if (kpu_load_kmodel(&helmet_detect_task, model_data_align) != 0) {
         printf("\nmodel init error\n");
         close(g_fd);
         close(kmodel_fd);
@@ -248,14 +248,14 @@ void instrusion_detect()
         free(model_data);
         return;
     }
-    instrusion_detect_rl.anchor_number = ANCHOR_NUM;
-    instrusion_detect_rl.anchor = anchor;
-    instrusion_detect_rl.threshold = malloc(class_num * sizeof(float));
+    helmet_detect_rl.anchor_number = ANCHOR_NUM;
+    helmet_detect_rl.anchor = anchor;
+    helmet_detect_rl.threshold = malloc(class_num * sizeof(float));
     for (int idx = 0; idx < class_num; idx++) {
-        instrusion_detect_rl.threshold[idx] = obj_thresh[idx];
-    ;
-    instrusion_detect_rl.nms_value = nms_thresh;
-    result = region_layer_init(&instrusion_detect_rl, net_output_shape[0], net_output_shape[1], net_output_shape[2],
+        helmet_detect_rl.threshold[idx] = obj_thresh[idx];
+    }
+    helmet_detect_rl.nms_value = nms_thresh;
+    result = region_layer_init(&helmet_detect_rl, net_output_shape[0], net_output_shape[1], net_output_shape[2],
                                net_input_size[1], net_input_size[0]);
     printf("region_layer_init result %d \n\r", result);
     size_t stack_size = STACK_SIZE;
@@ -267,22 +267,22 @@ void instrusion_detect()
     pthread_attr_setstacksize(&attr, stack_size);
 
     /* 创建线程 1, 属性为 attr，入口函数是 thread_entry，入口函数参数是 1 */
-    result = pthread_create(&instrusiontid, &attr, thread_instrusion_detect_entry, NULL);
+    result = pthread_create(&helmettid, &attr, thread_helmet_detect_entry, NULL);
     if (0 == result) {
-        printf("thread_instrusion_detect_entry successfully!\n");
+        printf("thread_helmet_detect_entry successfully!\n");
     } else {
-        printf("thread_instrusion_detect_entry failed! error code is %d\n", result);
+        printf("thread_helmet_detect_entry failed! error code is %d\n", result);
         close(g_fd);
     }
 }
 #ifdef __RT_THREAD_H__
-MSH_CMD_EXPORT(instrusion_detect, instrusion detect task);
+MSH_CMD_EXPORT(helmet_detect, helmet detect task);
 #endif
 
-static void *thread_instrusion_detect_entry(void *parameter)
+static void *thread_helmet_detect_entry(void *parameter)
 {
     extern void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t * ptr);
-    printf("thread_instrusion_detect_entry start!\n");
+    printf("thread_helmet_detect_entry start!\n");
     int ret = 0;
     // sysctl_enable_irq();
     while (1) {
@@ -296,42 +296,42 @@ static void *thread_instrusion_detect_entry(void *parameter)
             pthread_exit(NULL);
             return NULL;
         }
-        kpu_run_kmodel(&instrusion_detect_task, kpurgbbuffer, DMAC_CHANNEL5, ai_done, NULL);
+        kpu_run_kmodel(&helmet_detect_task, kpurgbbuffer, DMAC_CHANNEL5, ai_done, NULL);
         while (!g_ai_done_flag)
             ;
         float *output;
         size_t output_size;
-        kpu_get_output(&instrusion_detect_task, 0, (uint8_t **)&output, &output_size);
-        instrusion_detect_rl.input = output;
-        region_layer_run(&instrusion_detect_rl, &instrusion_detect_info);
+        kpu_get_output(&helmet_detect_task, 0, (uint8_t **)&output, &output_size);
+        helmet_detect_rl.input = output;
+        region_layer_run(&helmet_detect_rl, &helmet_detect_info);
 /* display result */
 #ifdef BSP_USING_LCD
-        for (int instrusion_cnt = 0; instrusion_cnt < instrusion_detect_info.obj_number; instrusion_cnt++) {
-            // draw_edge((uint32_t *)showbuffer, &instrusion_detect_info, instrusion_cnt, 0xF800,
+        for (int helmet_cnt = 0; helmet_cnt < helmet_detect_info.obj_number; helmet_cnt++) {
+            // draw_edge((uint32_t *)showbuffer, &helmet_detect_info, helmet_cnt, 0xF800,
             // (uint16_t)sensor_output_size[1],
             //           (uint16_t)sensor_output_size[0]);
-            printf("%d: (%d, %d, %d, %d) cls: %d conf: %f\t", instrusion_cnt, instrusion_detect_info.obj[instrusion_cnt].x1,
-                   instrusion_detect_info.obj[instrusion_cnt].y1, instrusion_detect_info.obj[instrusion_cnt].x2,
-                   instrusion_detect_info.obj[instrusion_cnt].y2, instrusion_detect_info.obj[instrusion_cnt].class_id,
-                   instrusion_detect_info.obj[instrusion_cnt].prob);
+            printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", helmet_cnt, helmet_detect_info.obj[helmet_cnt].x1,
+                   helmet_detect_info.obj[helmet_cnt].y1, helmet_detect_info.obj[helmet_cnt].x2,
+                   helmet_detect_info.obj[helmet_cnt].y2, labels[helmet_detect_info.obj[helmet_cnt].class_id],
+                   helmet_detect_info.obj[helmet_cnt].prob);
         }
-        if (0 != instrusion_detect_info.obj_number) {
+        if (0 != helmet_detect_info.obj_number) {
             printf("\n");
         } else {
-            printf("No human found!\n");
+            printf("No helmet or head found!\n");
         }
         lcd_draw_picture(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (unsigned int *)showbuffer);
 #endif
         usleep(1);
         if (1 == if_exit) {
             if_exit = 0;
-            printf("thread_instrusion_detect_entry exit");
+            printf("thread_helmet_detect_entry exit");
             pthread_exit(NULL);
         }
     }
 }
 
-void instrusion_detect_delete()
+void helmet_detect_delete()
 {
     if (showbuffer != NULL) {
         int ret = 0;
@@ -340,12 +340,12 @@ void instrusion_detect_delete()
         free(showbuffer);
         free(kpurgbbuffer);
         free(model_data);
-        printf("instrusion detect task cancel!!! ret %d ", ret);
+        printf("helmet detect task cancel!!! ret %d ", ret);
         if_exit = 1;
     }
 }
 #ifdef __RT_THREAD_H__
-MSH_CMD_EXPORT(instrusion_detect_delete, instrusion detect task delete);
+MSH_CMD_EXPORT(helmet_detect_delete, helmet detect task delete);
 #endif
 
 void kmodel_load(unsigned char *model_data)

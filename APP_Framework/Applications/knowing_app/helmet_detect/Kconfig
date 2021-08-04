@@ -1,0 +1,7 @@
+config HELMET_DETECT
+    bool "enable apps/helmet detect"
+    depends on BOARD_K210_EVB
+	depends on DRV_USING_OV2640
+	depends on USING_KPU_POSTPROCESSING
+	depends on USING_YOLOV2
+    default n

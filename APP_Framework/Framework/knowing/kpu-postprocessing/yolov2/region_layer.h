@@ -20,7 +20,7 @@ typedef struct
 
 typedef struct
 {
-    float threshold;
+    float *threshold;
     float nms_value;
     uint32_t coords;
     uint32_t anchor_number;
