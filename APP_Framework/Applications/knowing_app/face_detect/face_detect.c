@@ -1,6 +1,7 @@
 #include <transform.h>
-
-#include "cJSON.h"
+#ifdef LIB_USING_CJSON
+#include <cJSON.h>
+#endif
 #include "region_layer.h"
 #define ANCHOR_NUM 5
 #define STACK_SIZE (128 * 1024)

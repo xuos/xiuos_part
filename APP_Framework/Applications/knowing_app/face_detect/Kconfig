@@ -4,4 +4,5 @@ config FACE_DETECT
 	depends on DRV_USING_OV2640
 	depends on USING_KPU_POSTPROCESSING
 	depends on USING_YOLOV2
+    select LIB_USING_CJSON
     default n
