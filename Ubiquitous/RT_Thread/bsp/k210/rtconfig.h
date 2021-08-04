@@ -160,6 +160,8 @@
 /* POSIX layer and C standard library */
 
 #define RT_USING_LIBC
+#define RT_USING_PTHREADS
+#define PTHREAD_NUM_MAX 8
 #define RT_USING_POSIX
 #define RT_LIBC_FIXED_TIMEZONE 8
 
@@ -254,7 +256,26 @@
 #define BSP_SPI1_SS0_PIN 29
 #define BSP_SPI1_USING_SS1
 #define BSP_SPI1_SS1_PIN 8
+#define BSP_USING_LCD
+#define BSP_LCD_CS_PIN 36
+#define BSP_LCD_WR_PIN 39
+#define BSP_LCD_DC_PIN 38
+#define BSP_LCD_RST_PIN 37
+#define BSP_LCD_X_MAX 240
+#define BSP_LCD_Y_MAX 320
 #define BSP_USING_SDCARD
+#define BSP_USING_DVP
+
+/* The default pin assignment is based on the Maix Duino K210 development board */
+
+#define BSP_DVP_SCCB_SDA_PIN 40
+#define BSP_DVP_SCCB_SCLK_PIN 41
+#define BSP_DVP_CMOS_RST_PIN 42
+#define BSP_DVP_CMOS_VSYNC_PIN 43
+#define BSP_DVP_CMOS_PWDN_PIN 44
+#define BSP_DVP_CMOS_XCLK_PIN 46
+#define BSP_DVP_CMOS_PCLK_PIN 47
+#define BSP_DVP_CMOS_HREF_PIN 45
 
 /* Kendryte SDK Config */
 
@@ -262,6 +283,7 @@
 
 /* More Drivers */
 
+#define DRV_USING_OV2640
 
 /* APP_Framework */
 
@@ -281,6 +303,7 @@
 
 /* knowing app */
 
+#define FACE_DETECT
 
 /* sensor app */
 
@@ -289,7 +312,10 @@
 
 #define TRANSFORM_LAYER_ATTRIUBUTE
 #define ADD_XIUOS_FETURES
+#define SUPPORT_SENSOR_FRAMEWORK
 #define SUPPORT_KNOWING_FRAMEWORK
+#define USING_KPU_POSTPROCESSING
+#define USING_YOLOV2
 
 /* app lib */
 
