@@ -8,24 +8,17 @@
 #define JSON_FILE_PATH "/kmodel/detect.json"
 #define JSON_BUFFER_SIZE (4 * 1024)
 
-// params from json 
-float anchor[ANCHOR_NUM * 2] = {};
-int net_output_shape[3] = {};
-int net_input_size[2] = {};
-int sensor_output_size[2] = {};
-char kmodel_path[127] = "";
-int kmodel_size = 0;
-float obj_thresh = 1.0;
-float nms_thresh = 0.0;
-
-// float anchor[ANCHOR_NUM * 2] = {1.889, 2.5245, 2.9465, 3.94056, 3.99987, 5.3658, 5.155437, 6.92275, 6.718375, 9.01025};
-// int net_output_shape[3] = {20, 15, 30};
-// int net_input_size[2] = {240, 320};
-// int sensor_output_size[2] = {240, 320};
-// char kmodel_path[127] = "/kmodel/detect.kmodel";
-// int kmodel_size = 388776;
-// float obj_thresh = 0.7;
-// float nms_thresh = 0.3;
+// params from json
+static float anchor[ANCHOR_NUM * 2] = {};
+static int net_output_shape[3] = {};
+static int net_input_size[2] = {};
+static int sensor_output_size[2] = {};
+static char kmodel_path[127] = "";
+static int kmodel_size = 0;
+static float obj_thresh[20] = {};
+static float nms_thresh = 0.0;
+static char labels[20][32] = {};
+static int class_num = 0;
 
 #define THREAD_PRIORITY_FACE_D (11)
 static pthread_t facetid = 0;
@@ -141,10 +134,34 @@ static void param_parse()
     json_item = cJSON_GetObjectItem(json_obj, "kmodel_size");
     kmodel_size = json_item->valueint;
     printf("Got kmodel_size: %d\n", kmodel_size);
+    // labels
+    json_item = cJSON_GetObjectItem(json_obj, "labels");
+    class_num = cJSON_GetArraySize(json_item);
+    if (0 >= class_num) {
+        printf("No labels!");
+        exit(-1);
+    } else {
+        printf("Got %d labels\n", class_num);
+    }
+    for (int i = 0; i < class_num; i++) {
+        json_array_item = cJSON_GetArrayItem(json_item, i);
+        memcpy(labels[i], json_array_item->valuestring, strlen(json_array_item->valuestring));
+        printf("%d: %s\n", i, labels[i]);
+    }
     // obj_thresh
     json_item = cJSON_GetObjectItem(json_obj, "obj_thresh");
-    obj_thresh = json_item->valuedouble;
-    printf("Got obj_thresh: %f\n", obj_thresh);
+    array_size = cJSON_GetArraySize(json_item);
+    if (class_num != array_size) {
+        printf("label number and thresh number mismatch! label number : %d, obj thresh number %d", class_num, array_size);
+        exit(-1);
+    } else {
+        printf("Got %d obj_thresh\n", array_size);
+    }
+    for (int i = 0; i < array_size; i++) {
+        json_array_item = cJSON_GetArrayItem(json_item, i);
+        obj_thresh[i] = json_array_item->valuedouble;
+        printf("%d: %f\n", i, obj_thresh[i]);
+    }
     // nms_thresh
     json_item = cJSON_GetObjectItem(json_obj, "nms_thresh");
     nms_thresh = json_item->valuedouble;
@@ -231,7 +248,10 @@ void face_detect()
     }
     face_detect_rl.anchor_number = ANCHOR_NUM;
     face_detect_rl.anchor = anchor;
-    face_detect_rl.threshold = obj_thresh;
+    face_detect_rl.threshold = malloc(class_num * sizeof(float));
+    for (int idx = 0; idx < class_num; idx++) {
+        face_detect_rl.threshold[idx] = obj_thresh[idx];
+    }
     face_detect_rl.nms_value = nms_thresh;
     result = region_layer_init(&face_detect_rl, net_output_shape[0], net_output_shape[1], net_output_shape[2],
                                net_input_size[1], net_input_size[0]);
@@ -287,9 +307,9 @@ static void *thread_face_detcet_entry(void *parameter)
         for (int face_cnt = 0; face_cnt < face_detect_info.obj_number; face_cnt++) {
             draw_edge((uint32_t *)showbuffer, &face_detect_info, face_cnt, 0xF800, (uint16_t)sensor_output_size[1],
                       (uint16_t)sensor_output_size[0]);
-            printf("%d: (%d, %d, %d, %d) cls: %d conf: %f\t", face_cnt, face_detect_info.obj[face_cnt].x1,
+            printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", face_cnt, face_detect_info.obj[face_cnt].x1,
                    face_detect_info.obj[face_cnt].y1, face_detect_info.obj[face_cnt].x2, face_detect_info.obj[face_cnt].y2,
-                   face_detect_info.obj[face_cnt].class_id, face_detect_info.obj[face_cnt].prob);
+                   labels[face_detect_info.obj[face_cnt].class_id], face_detect_info.obj[face_cnt].prob);
         }
         if (0 != face_detect_info.obj_number) printf("\n");
         lcd_draw_picture(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (unsigned int *)showbuffer);

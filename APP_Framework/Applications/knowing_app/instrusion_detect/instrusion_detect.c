@@ -1,6 +1,7 @@
 #include <transform.h>
-
-#include "cJSON.h"
+#ifdef LIB_USING_CJSON
+#include <cJSON.h>
+#endif
 #include "region_layer.h"
 #define ANCHOR_NUM 5
 #define STACK_SIZE (128 * 1024)
@@ -8,16 +9,16 @@
 #define JSON_BUFFER_SIZE (4 * 1024)
 
 // params from json
-float anchor[ANCHOR_NUM * 2] = {};
-int net_output_shape[3] = {};
-int net_input_size[2] = {};
-int sensor_output_size[2] = {};
-char kmodel_path[127] = "";
-int kmodel_size = 0;
-float obj_thresh[20] = {};
-float nms_thresh = 0.0;
-char labels[20][32] = {};
-int class_num = 0;
+static float anchor[ANCHOR_NUM * 2] = {};
+static int net_output_shape[3] = {};
+static int net_input_size[2] = {};
+static int sensor_output_size[2] = {};
+static char kmodel_path[127] = "";
+static int kmodel_size = 0;
+static float obj_thresh[20] = {};
+static float nms_thresh = 0.0;
+static char labels[20][32] = {};
+static int class_num = 0;
 
 #define THREAD_PRIORITY_HUMAN_D (11)
 static pthread_t instrusiontid = 0;
@@ -140,12 +141,12 @@ static void param_parse()
         printf("No labels!");
         exit(-1);
     } else {
-        printf("Got %d labels\n");
+        printf("Got %d labels\n", class_num);
     }
     for (int i = 0; i < class_num; i++) {
         json_array_item = cJSON_GetArrayItem(json_item, i);
-        memcpy(labels[i], json_item->valuestring, strlen(json_item->valuestring));
-        printf("%d: %f\n", i, labels[i]);
+        memcpy(labels[i], json_array_item->valuestring, strlen(json_array_item->valuestring));
+        printf("%d: %s\n", i, labels[i]);
     }
     // obj_thresh
     json_item = cJSON_GetObjectItem(json_obj, "obj_thresh");
@@ -154,7 +155,7 @@ static void param_parse()
         printf("label number and thresh number mismatch! label number : %d, obj thresh number %d", class_num, array_size);
         exit(-1);
     } else {
-        printf("Got %d obj_thresh\n");
+        printf("Got %d obj_thresh\n", array_size);
     }
     for (int i = 0; i < array_size; i++) {
         json_array_item = cJSON_GetArrayItem(json_item, i);
@@ -253,7 +254,7 @@ void instrusion_detect()
     instrusion_detect_rl.threshold = malloc(class_num * sizeof(float));
     for (int idx = 0; idx < class_num; idx++) {
         instrusion_detect_rl.threshold[idx] = obj_thresh[idx];
-    ;
+    }
     instrusion_detect_rl.nms_value = nms_thresh;
     result = region_layer_init(&instrusion_detect_rl, net_output_shape[0], net_output_shape[1], net_output_shape[2],
                                net_input_size[1], net_input_size[0]);
@@ -310,15 +311,13 @@ static void *thread_instrusion_detect_entry(void *parameter)
             // draw_edge((uint32_t *)showbuffer, &instrusion_detect_info, instrusion_cnt, 0xF800,
             // (uint16_t)sensor_output_size[1],
             //           (uint16_t)sensor_output_size[0]);
-            printf("%d: (%d, %d, %d, %d) cls: %d conf: %f\t", instrusion_cnt, instrusion_detect_info.obj[instrusion_cnt].x1,
+            printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", instrusion_cnt, instrusion_detect_info.obj[instrusion_cnt].x1,
                    instrusion_detect_info.obj[instrusion_cnt].y1, instrusion_detect_info.obj[instrusion_cnt].x2,
-                   instrusion_detect_info.obj[instrusion_cnt].y2, instrusion_detect_info.obj[instrusion_cnt].class_id,
+                   instrusion_detect_info.obj[instrusion_cnt].y2, labels[instrusion_detect_info.obj[instrusion_cnt].class_id],
                    instrusion_detect_info.obj[instrusion_cnt].prob);
         }
         if (0 != instrusion_detect_info.obj_number) {
             printf("\n");
-        } else {
-            printf("No human found!\n");
         }
         lcd_draw_picture(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (unsigned int *)showbuffer);
 #endif

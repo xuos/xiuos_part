@@ -26,6 +26,11 @@
 	],
 	"kmodel_path": "/kmodel/detect.kmodel",
 	"kmodel_size": 388776,
-	"obj_thresh": 0.7,
+	"obj_thresh": [
+		0.7
+	],
+	"labels": [
+		"face"
+	],
 	"nms_thresh": 0.3
 }
