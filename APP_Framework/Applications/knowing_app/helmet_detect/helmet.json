@@ -1,0 +1,38 @@
+{
+	"net_input_size": [
+		256,
+		256
+	],
+	"net_output_shape": [
+		8,
+		8,
+		35
+	],
+	"sensor_output_size": [
+		256,
+		256
+	],
+	"anchors": [
+		1.0432,
+		1.0920,
+		0.8391,
+		2.1250,
+		1.1085,
+		2.7463,
+		1.3783,
+		3.6706,
+		2.0491,
+		4.6711
+	],
+	"kmodel_path": "/kmodel/helmet.kmodel",
+	"kmodel_size": 2714044,
+	"obj_thresh": [
+		0.85,
+		0.6
+	],
+	"labels": [
+		"helmet",
+		"head"
+	],
+	"nms_thresh": 0.3
+}

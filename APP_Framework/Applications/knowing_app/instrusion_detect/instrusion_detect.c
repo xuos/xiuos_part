@@ -5,7 +5,7 @@
 #include "region_layer.h"
 #define ANCHOR_NUM 5
 #define STACK_SIZE (128 * 1024)
-#define JSON_FILE_PATH "/kmodel/detect.json"
+#define JSON_FILE_PATH "/kmodel/human.json"
 #define JSON_BUFFER_SIZE (4 * 1024)
 
 // params from json
@@ -20,9 +20,9 @@ static float nms_thresh = 0.0;
 static char labels[20][32] = {};
 static int class_num = 0;
 
-#define THREAD_PRIORITY_FACE_D (11)
-static pthread_t facetid = 0;
-static void *thread_face_detcet_entry(void *parameter);
+#define THREAD_PRIORITY_HUMAN_D (11)
+static pthread_t instrusiontid = 0;
+static void *thread_instrusion_detect_entry(void *parameter);
 static int g_fd = 0;
 static int kmodel_fd = 0;
 static int if_exit = 0;
@@ -33,9 +33,9 @@ static _ioctl_shoot_para shoot_para_t = {0};
 unsigned char *model_data = NULL;  // kpu data  load memory
 unsigned char *model_data_align = NULL;
 
-kpu_model_context_t face_detect_task;
-static region_layer_t face_detect_rl;
-static obj_info_t face_detect_info;
+kpu_model_context_t instrusion_detect_task;
+static region_layer_t instrusion_detect_rl;
+static obj_info_t instrusion_detect_info;
 volatile uint32_t g_ai_done_flag;
 
 static void ai_done(void *ctx) { g_ai_done_flag = 1; }
@@ -171,7 +171,7 @@ static void param_parse()
     return;
 }
 
-void face_detect()
+void instrusion_detect()
 {
     int ret = 0;
     int result = 0;
@@ -205,7 +205,7 @@ void face_detect()
     }
     memset(model_data, 0, kmodel_size + 255);
     memset(showbuffer, 0, sensor_output_size[0] * sensor_output_size[1] * 2);
-    memset(kpurgbbuffer, 0, net_input_size[0] * net_input_size[1] * 3);
+    memset(kpurgbbuffer, 127, net_input_size[0] * net_input_size[1] * 3);
     shoot_para_t.pdata = (unsigned int *)(showbuffer);
     shoot_para_t.length = (size_t)(sensor_output_size[0] * sensor_output_size[1] * 2);
     /*
@@ -235,9 +235,12 @@ void face_detect()
         }
     }
     unsigned char *model_data_align = (unsigned char *)(((unsigned int)model_data + 255) & (~255));
-    dvp_set_ai_addr((uint32_t)kpurgbbuffer, (uint32_t)(kpurgbbuffer + net_input_size[0] * net_input_size[1]),
-                    (uint32_t)(kpurgbbuffer + net_input_size[0] * net_input_size[1] * 2));
-    if (kpu_load_kmodel(&face_detect_task, model_data_align) != 0) {
+    dvp_set_ai_addr((uint32_t)(kpurgbbuffer + net_input_size[1] * (net_input_size[0] - sensor_output_size[0])),
+                    (uint32_t)(kpurgbbuffer + net_input_size[1] * (net_input_size[0] - sensor_output_size[0]) +
+                               net_input_size[0] * net_input_size[1]),
+                    (uint32_t)(kpurgbbuffer + net_input_size[0] * net_input_size[1] * 2 +
+                               net_input_size[1] * (net_input_size[0] - sensor_output_size[0])));
+    if (kpu_load_kmodel(&instrusion_detect_task, model_data_align) != 0) {
         printf("\nmodel init error\n");
         close(g_fd);
         close(kmodel_fd);
@@ -246,14 +249,14 @@ void face_detect()
         free(model_data);
         return;
     }
-    face_detect_rl.anchor_number = ANCHOR_NUM;
-    face_detect_rl.anchor = anchor;
-    face_detect_rl.threshold = malloc(class_num * sizeof(float));
+    instrusion_detect_rl.anchor_number = ANCHOR_NUM;
+    instrusion_detect_rl.anchor = anchor;
+    instrusion_detect_rl.threshold = malloc(class_num * sizeof(float));
     for (int idx = 0; idx < class_num; idx++) {
-        face_detect_rl.threshold[idx] = obj_thresh[idx];
+        instrusion_detect_rl.threshold[idx] = obj_thresh[idx];
     }
-    face_detect_rl.nms_value = nms_thresh;
-    result = region_layer_init(&face_detect_rl, net_output_shape[0], net_output_shape[1], net_output_shape[2],
+    instrusion_detect_rl.nms_value = nms_thresh;
+    result = region_layer_init(&instrusion_detect_rl, net_output_shape[0], net_output_shape[1], net_output_shape[2],
                                net_input_size[1], net_input_size[0]);
     printf("region_layer_init result %d \n\r", result);
     size_t stack_size = STACK_SIZE;
@@ -265,22 +268,22 @@ void face_detect()
     pthread_attr_setstacksize(&attr, stack_size);
 
     /* 创建线程 1, 属性为 attr，入口函数是 thread_entry，入口函数参数是 1 */
-    result = pthread_create(&facetid, &attr, thread_face_detcet_entry, NULL);
+    result = pthread_create(&instrusiontid, &attr, thread_instrusion_detect_entry, NULL);
     if (0 == result) {
-        printf("thread_face_detcet_entry successfully!\n");
+        printf("thread_instrusion_detect_entry successfully!\n");
     } else {
-        printf("thread_face_detcet_entry failed! error code is %d\n", result);
+        printf("thread_instrusion_detect_entry failed! error code is %d\n", result);
         close(g_fd);
     }
 }
 #ifdef __RT_THREAD_H__
-MSH_CMD_EXPORT(face_detect, face detect task);
+MSH_CMD_EXPORT(instrusion_detect, instrusion detect task);
 #endif
 
-static void *thread_face_detcet_entry(void *parameter)
+static void *thread_instrusion_detect_entry(void *parameter)
 {
     extern void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t * ptr);
-    printf("thread_face_detcet_entry start!\n");
+    printf("thread_instrusion_detect_entry start!\n");
     int ret = 0;
     // sysctl_enable_irq();
     while (1) {
@@ -294,36 +297,40 @@ static void *thread_face_detcet_entry(void *parameter)
             pthread_exit(NULL);
             return NULL;
         }
-        kpu_run_kmodel(&face_detect_task, kpurgbbuffer, DMAC_CHANNEL5, ai_done, NULL);
+        kpu_run_kmodel(&instrusion_detect_task, kpurgbbuffer, DMAC_CHANNEL5, ai_done, NULL);
         while (!g_ai_done_flag)
             ;
         float *output;
         size_t output_size;
-        kpu_get_output(&face_detect_task, 0, (uint8_t **)&output, &output_size);
-        face_detect_rl.input = output;
-        region_layer_run(&face_detect_rl, &face_detect_info);
+        kpu_get_output(&instrusion_detect_task, 0, (uint8_t **)&output, &output_size);
+        instrusion_detect_rl.input = output;
+        region_layer_run(&instrusion_detect_rl, &instrusion_detect_info);
 /* display result */
 #ifdef BSP_USING_LCD
-        for (int face_cnt = 0; face_cnt < face_detect_info.obj_number; face_cnt++) {
-            draw_edge((uint32_t *)showbuffer, &face_detect_info, face_cnt, 0xF800, (uint16_t)sensor_output_size[1],
-                      (uint16_t)sensor_output_size[0]);
-            printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", face_cnt, face_detect_info.obj[face_cnt].x1,
-                   face_detect_info.obj[face_cnt].y1, face_detect_info.obj[face_cnt].x2, face_detect_info.obj[face_cnt].y2,
-                   labels[face_detect_info.obj[face_cnt].class_id], face_detect_info.obj[face_cnt].prob);
+        for (int instrusion_cnt = 0; instrusion_cnt < instrusion_detect_info.obj_number; instrusion_cnt++) {
+            // draw_edge((uint32_t *)showbuffer, &instrusion_detect_info, instrusion_cnt, 0xF800,
+            // (uint16_t)sensor_output_size[1],
+            //           (uint16_t)sensor_output_size[0]);
+            printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", instrusion_cnt, instrusion_detect_info.obj[instrusion_cnt].x1,
+                   instrusion_detect_info.obj[instrusion_cnt].y1, instrusion_detect_info.obj[instrusion_cnt].x2,
+                   instrusion_detect_info.obj[instrusion_cnt].y2, labels[instrusion_detect_info.obj[instrusion_cnt].class_id],
+                   instrusion_detect_info.obj[instrusion_cnt].prob);
         }
-        if (0 != face_detect_info.obj_number) printf("\n");
+        if (0 != instrusion_detect_info.obj_number) {
+            printf("\n");
+        }
         lcd_draw_picture(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (unsigned int *)showbuffer);
 #endif
         usleep(1);
         if (1 == if_exit) {
             if_exit = 0;
-            printf("thread_face_detcet_entry exit");
+            printf("thread_instrusion_detect_entry exit");
             pthread_exit(NULL);
         }
     }
 }
 
-void face_detect_delete()
+void instrusion_detect_delete()
 {
     if (showbuffer != NULL) {
         int ret = 0;
@@ -332,12 +339,12 @@ void face_detect_delete()
         free(showbuffer);
         free(kpurgbbuffer);
         free(model_data);
-        printf("face detect task cancel!!! ret %d ", ret);
+        printf("instrusion detect task cancel!!! ret %d ", ret);
         if_exit = 1;
     }
 }
 #ifdef __RT_THREAD_H__
-MSH_CMD_EXPORT(face_detect_delete, face detect task delete);
+MSH_CMD_EXPORT(instrusion_detect_delete, instrusion detect task delete);
 #endif
 
 void kmodel_load(unsigned char *model_data)

@@ -189,7 +189,7 @@ static void get_region_boxes(region_layer_t *rl, float *predictions, float **pro
     uint32_t anchor_number = rl->anchor_number;
     uint32_t classes = rl->classes;
     uint32_t coords = rl->coords;
-    float threshold = rl->threshold;
+    float *threshold = rl->threshold;
 
     for (int i = 0; i < layer_width * layer_height; ++i) {
         int row = i / layer_width;
@@ -212,7 +212,7 @@ static void get_region_boxes(region_layer_t *rl, float *predictions, float **pro
                 int class_index = entry_index(rl, n * layer_width * layer_height + i, coords + 1 + j);
                 float prob = scale * predictions[class_index];
 
-                probs[index][j] = (prob > threshold) ? prob : 0;
+                probs[index][j] = (prob > threshold[j]) ? prob : 0;
                 if (prob > max) max = prob;
             }
             probs[index][classes] = max;
@@ -315,14 +315,14 @@ static void region_layer_output(region_layer_t *rl, obj_info_t *obj_info)
     uint32_t image_width = rl->image_width;
     uint32_t image_height = rl->image_height;
     uint32_t boxes_number = rl->boxes_number;
-    float threshold = rl->threshold;
+    float *threshold = rl->threshold;
     box_t *boxes = (box_t *)rl->boxes;
 
     for (int i = 0; i < rl->boxes_number; ++i) {
         int class = max_index(rl->probs[i], rl->classes);
         float prob = rl->probs[i][class];
 
-        if (prob > threshold) {
+        if (prob > threshold[class]) {
             box_t *b = boxes + i;
             obj_info->obj[obj_number].x1 = b->x * image_width - (b->w * image_width / 2);
             obj_info->obj[obj_number].y1 = b->y * image_height - (b->h * image_height / 2);
