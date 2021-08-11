@@ -76,3 +76,23 @@ void iris_DecisonTree_predict()
 #ifdef __RT_THREAD_H__
 MSH_CMD_EXPORT(iris_DecisonTree_predict, iris predict by decison tree classifier);
 #endif
+
+void iris_LogisticRegression_predict()
+{
+#include "LogisticRegressionModel.h"
+    int result;
+
+    simple_CSV_read();
+
+    for (int i = 0; i < data_len; i++) {
+        result = predict(data[i]);
+        printf("data %d: ", i + 1);
+        for (int j = 0; j < FEATURE_NUM; j++) {
+            printf("%.4f ", data[i][j]);
+        }
+        printf("result: %d\n", result);
+    }
+}
+#ifdef __RT_THREAD_H__
+MSH_CMD_EXPORT(iris_LogisticRegression_predict, iris predict by logistic regression);
+#endif
