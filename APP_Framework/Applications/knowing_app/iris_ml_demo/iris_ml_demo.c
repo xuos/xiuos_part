@@ -1,8 +1,6 @@
 #include <string.h>
 #include <transform.h>
 
-#include "SVCModel.h"
-
 #define FEATURE_NUM 4
 #define CSV_PATH "/csv/iris.csv"
 #define CSV_BUFFER_SIZE (1 * 1024)
@@ -41,6 +39,7 @@ void simple_CSV_read()
 
 void iris_SVC_predict()
 {
+#include "SVCModel.h"
     int result;
 
     simple_CSV_read();
@@ -56,4 +55,24 @@ void iris_SVC_predict()
 }
 #ifdef __RT_THREAD_H__
 MSH_CMD_EXPORT(iris_SVC_predict, iris predict by SVC);
+#endif
+
+void iris_DecisonTree_predict()
+{
+#include "DecisionTreeClassifierModel.h"
+    int result;
+
+    simple_CSV_read();
+
+    for (int i = 0; i < data_len; i++) {
+        result = predict(data[i]);
+        printf("data %d: ", i + 1);
+        for (int j = 0; j < FEATURE_NUM; j++) {
+            printf("%.4f ", data[i][j]);
+        }
+        printf("result: %d\n", result);
+    }
+}
+#ifdef __RT_THREAD_H__
+MSH_CMD_EXPORT(iris_DecisonTree_predict, iris predict by decison tree classifier);
 #endif
