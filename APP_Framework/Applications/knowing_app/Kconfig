@@ -3,4 +3,5 @@ menu "knowing app"
     source "$APP_DIR/Applications/knowing_app/face_detect/Kconfig" 
     source "$APP_DIR/Applications/knowing_app/instrusion_detect/Kconfig" 
     source "$APP_DIR/Applications/knowing_app/helmet_detect/Kconfig" 
+    source "$APP_DIR/Applications/knowing_app/iris_ml_demo/Kconfig" 
 endmenu
