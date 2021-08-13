@@ -144,7 +144,7 @@ Copy json config for deployment o SD card */kmodel*. Example config file is *hel
 
 - net_input_size: same as *input_size* in training config file, but array only.
 - net_output_shape: final feature map size, can be found in **nncase** output.
-- sensor_output_size: image height and width from camera, same as *dvp_set_image_size(Ubiquitous/RT_Thread/bsp/k210/base-drivers/drv_dvp.c L70(71))*.
+- sensor_output_size: image height and width from camera.
 - kmodel_size: kmodel size shown in file system.
 - anchors: same as *anchor* in training config file(multi-dimention anchors flatten to 1 dim).
 - labels: same as *label* in training config file.
