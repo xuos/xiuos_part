@@ -182,6 +182,8 @@ void helmet_detect()
         printf("open ov2640 fail !!");
         return;
     }
+    _ioctl_set_dvp_reso set_dvp_reso = {sensor_output_size[1], sensor_output_size[0]};
+    ioctl(g_fd, IOCTRL_CAMERA_SET_DVP_RESO, &set_dvp_reso);
     showbuffer = (unsigned char *)malloc(sensor_output_size[0] * sensor_output_size[1] * 2);
     if (NULL == showbuffer) {
         close(g_fd);
