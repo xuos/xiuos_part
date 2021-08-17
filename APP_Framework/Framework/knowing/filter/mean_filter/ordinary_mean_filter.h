@@ -1,0 +1,4 @@
+#ifndef _ORDINARY_MEAN_FILTER_H
+#define _ORDINARY_MEAN_FILTER_H
+
+#endif
