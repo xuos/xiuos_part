@@ -1,3 +1,11 @@
+/*
+ * @Author: chunyexixiaoyu
+ * @Date: 2021-08-16 15:16:51
+ * @LastEditTime: 2021-08-18 14:48:11
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \xiuos\APP_Framework\lib\queue\queue.h
+ */
 #ifndef __QUEUE_H__
 #define __QUEUE_H__
 #include <stdio.h>
@@ -11,7 +19,7 @@ typedef int Status;
 typedef int QElemType;
 typedef struct
 {
-	int data[MAXSIZE];
+	QElemType data[MAXSIZE];
 	int front;    	
 	int rear;		
 }SqQueue;
