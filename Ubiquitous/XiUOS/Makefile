@@ -109,4 +109,4 @@ distclean:
 	@echo Clean all configuration
 	@make clean
 	@rm -f .config*
-	@rm -f $(BSP_ROOT)/.config
+	@rm -f $(KERNEL_ROOT)/board/*/.config
