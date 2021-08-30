@@ -1,26 +1,11 @@
 # this
-*.map
-*.dblite
-*.bin
-*.axf
 *.old
-*~
-*.o
-*.bak
-*.dep
-*.i
-*.d
-*.uimg
-GPATH
-GRTAGS
-GTAGS
-JLinkLog.txt
-JLinkSettings.ini
-DebugConfig/
-RTE/
-settings/
-*.uvguix*
+*.dblite
 cconfig.h
+*.bin
+*.map
+# rtconfig.h
+# .config
 
 # General
 .DS_Store

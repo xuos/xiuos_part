@@ -1467,20 +1467,31 @@ static rt_err_t rt_ov2640_control(rt_device_t dev, int cmd, void *args)
 {
     RT_ASSERT(dev != RT_NULL);
     rt_err_t ret = RT_EOK;
-    if(cmd < IOCTRL_CAMERA_START_SHOT || cmd > IOCTRL_CAMERA_SET_EXPOSURE)
+    if(cmd < IOCTRL_CAMERA_SET_DVP_RESO || cmd > IOCTRL_CAMERA_SET_EXPOSURE)
     {
         LOG_E("CMD value should be 22 ~29");
         return RT_ERROR;
-    }    
+    }
+
     int value = 0;
     _ioctl_shoot_para shoot_para = {0};
-    
+     #ifdef  BOARD_K210_EVB
+    _ioctl_set_dvp_reso set_dvp_reso = {0};
+    #endif
     if(IOCTRL_CAMERA_START_SHOT == cmd)
     {
         shoot_para = *((_ioctl_shoot_para*)args);
         ret = rt_ov2640_start_shoot(shoot_para.pdata,shoot_para.length);
         return ret;
     }
+    #ifdef  BOARD_K210_EVB
+    else if(IOCTRL_CAMERA_SET_DVP_RESO == cmd)
+    {
+        set_dvp_reso =*((_ioctl_set_dvp_reso*)args);
+        dvp_set_image_size(set_dvp_reso.width, set_dvp_reso.height);
+        return RT_EOK;
+    }
+    #endif
     else
     {
         value = *((int*)args);

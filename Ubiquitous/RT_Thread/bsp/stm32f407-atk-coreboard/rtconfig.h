@@ -201,6 +201,8 @@
 
 /* knowing app */
 
+#define IRIS_ML_DEMO
+
 /* sensor app */
 
 
@@ -210,8 +212,9 @@
 #define ADD_XIUOS_FETURES
 #define SUPPORT_SENSOR_FRAMEWORK
 #define SUPPORT_KNOWING_FRAMEWORK
+#define USING_KPU_POSTPROCESSING
 
-/* app lib */
+/* lib */
 
 #define APP_SELECT_NEWLIB
 

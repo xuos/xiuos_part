@@ -1,5 +1,5 @@
-config FACE_DETECT
-    bool "enable apps/face detect"
+config HELMET_DETECT
+    bool "enable apps/helmet detect"
     depends on BOARD_K210_EVB
 	depends on DRV_USING_OV2640
 	depends on USING_KPU_POSTPROCESSING
