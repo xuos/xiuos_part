@@ -19,6 +19,7 @@
  */
 
 #include <adapter.h>
+#include <at_agent.h>
 
 static void Ec200tPowerSet(void)
 {
@@ -50,8 +51,6 @@ static void Ec200tPowerSet(void)
 
 static int Ec200tOpen(struct Adapter *adapter)
 {
-    uint8_t ec200t_cmd[64];
-
     /*step1: open ec200t serial port*/
     adapter->fd = PrivOpen(ADAPTER_EC200T_DRIVER, O_RDWR);
     if (adapter->fd < 0) {
@@ -59,43 +58,43 @@ static int Ec200tOpen(struct Adapter *adapter)
         return -1;
     }
 
-    /*step2: serial write "+++", quit transparent mode*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "+++");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    /*step2: init AT agent*/
+    if (!adapter->agent) {
+        char *agent_name = "4G_uart_client";
+        if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+            printf("at agent init failed !\n");
+            return -1;
+        }
+        ATAgentType at_agent = GetATAgent(agent_name);
 
-    /*step3: serial write "AT+CCID", get SIM ID*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+CCID\r\n");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+        adapter->agent = at_agent;
+    }
 
-    PrivTaskDelay(2500);
+    /*step3: serial write "+++", quit transparent mode*/
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
 
-    /*step4: serial write "AT+CPIN?", check SIM status*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+CPIN?\r\n");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
-
-    PrivTaskDelay(2500);
-
-    /*step5: serial write "AT+CREG?", check whether registered to GSM net*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+CREG?\r\n");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    /*step4: serial write "AT+CCID", get SIM ID*/
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+CCID\r\n");
 
     PrivTaskDelay(2500);
 
-    /*step6: serial write "AT+QICLOSE", close socket connect before open socket*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+QICLOSE=0\r\n");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    /*step5: serial write "AT+CPIN?", check SIM status*/
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+CPIN?\r\n");
 
     PrivTaskDelay(2500);
 
-    /*step7: serial write "AT+QIDEACT", close TCP net before open socket*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+QIDEACT=1\r\n");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    /*step6: serial write "AT+CREG?", check whether registered to GSM net*/
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+CREG?\r\n");
+
+    PrivTaskDelay(2500);
+
+    /*step7: serial write "AT+QICLOSE", close socket connect before open socket*/
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QICLOSE=0\r\n");
+
+    PrivTaskDelay(2500);
+
+    /*step8: serial write "AT+QIDEACT", close TCP net before open socket*/
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QIDEACT=1\r\n");
 
     PrivTaskDelay(2500);
     
@@ -106,24 +105,21 @@ static int Ec200tOpen(struct Adapter *adapter)
 
 static int Ec200tClose(struct Adapter *adapter)
 {
-    uint8_t ec200t_cmd[64];
+    if (!adapter->agent) {
+        printf("Ec200tClose AT agent NULL\n");
+        return -1;
+    }
 
     /*step1: serial write "+++", quit transparent mode*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "+++");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
 
     /*step2: serial write "AT+QICLOSE", close socket connect before open socket*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+QICLOSE=0\r\n");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QICLOSE=0\r\n");
 
     PrivTaskDelay(2500);
 
     /*step3: serial write "AT+QIDEACT", close TCP net before open socket*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+QIDEACT=1\r\n");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QIDEACT=1\r\n");
 
     PrivTaskDelay(2500);
 
@@ -167,7 +163,7 @@ static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
     return 0;
 }
 
-static int Ec200tConnect(struct Adapter *adapter, const char *ip, const char *port, enum IpType ip_type)
+static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
 {
     uint8_t ec200t_cmd[64];
 
@@ -180,14 +176,12 @@ static int Ec200tConnect(struct Adapter *adapter, const char *ip, const char *po
         strcpy(ec200t_cmd, "AT+QICSGP=1,2,\"CMNET\",\"\",\"\",1\r\n");
     }
     
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, ec200t_cmd);
 
     PrivTaskDelay(2500);
 
     /*step2: serial write "AT+QIACT", open TCP net*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+QIACT=1\r\n");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QIACT=1\r\n");
 
     PrivTaskDelay(2500);
 
@@ -200,7 +194,7 @@ static int Ec200tConnect(struct Adapter *adapter, const char *ip, const char *po
     strcat(ec200t_cmd, ",0,2\r\n");
 
     ADAPTER_DEBUG("Ec200t connect AT CMD :%s\n", ec200t_cmd);
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, ec200t_cmd);
 
     ADAPTER_DEBUG("Ec200t connect TCP done\n");
 
@@ -224,14 +218,10 @@ static int Ec200tDisconnect(struct Adapter *adapter)
     uint8_t ec200t_cmd[64];
     
     /*step1: serial write "+++", quit transparent mode*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "+++");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
 
     /*step2: serial write "AT+QICLOSE", close socket connect before open socket*/
-    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+QICLOSE=0\r\n");
-    PrivWrite(adapter->fd, ec200t_cmd, strlen(ec200t_cmd));
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QICLOSE=0\r\n");
 
     PrivTaskDelay(2500);
 
@@ -245,6 +235,13 @@ static const struct IpProtocolDone ec200t_done =
     .open = Ec200tOpen,
     .close = Ec200tClose,
     .ioctl = Ec200tIoctl,
+    .setup = NULL,
+    .setdown = NULL,
+    .setaddr = NULL,
+    .setdns = NULL,
+    .setdhcp = NULL,
+    .ping = NULL,
+    .netstat = NULL,
     .connect = Ec200tConnect,
     .send = Ec200tSend,
     .recv = Ec200tRecv,
