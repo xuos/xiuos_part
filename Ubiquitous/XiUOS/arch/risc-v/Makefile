@@ -16,4 +16,8 @@ ifeq ($(CONFIG_BOARD_AIIT_RISCV_EVB),y)
 SRC_DIR +=k210
 endif
 
+ifeq ($(CONFIG_BOARD_GAPUINO),y)
+SRC_DIR +=gap8
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
