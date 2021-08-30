@@ -6,4 +6,5 @@ if SUPPORT_KNOWING_FRAMEWORK
         source "$APP_DIR/Framework/knowing/tensorflow-lite/Kconfig"
         source "$APP_DIR/Framework/knowing/kpu-postprocessing/Kconfig"
         source "$APP_DIR/Framework/knowing/filter/Kconfig"
+        source "$APP_DIR/Framework/knowing/ota/Kconfig"
 endif
