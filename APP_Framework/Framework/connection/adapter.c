@@ -446,6 +446,11 @@ int AdapterDeviceDisconnect(struct Adapter *adapter)
     }
 }
 
+/**
+ * @description: Set up to net 
+ * @param adapter - adapter device pointer
+ * @return success: 0 , failure: other
+ */
 int AdapterDeviceSetUp(struct Adapter *adapter)
 {
     if (!adapter)
@@ -501,6 +506,11 @@ int AdapterDeviceSetUp(struct Adapter *adapter)
     return result;
 }
 
+/**
+ * @description: Set down from net 
+ * @param adapter - adapter device pointer
+ * @return success: 0 , failure: other
+ */
 int AdapterDeviceSetDown(struct Adapter *adapter)
 {
     if (!adapter)
@@ -556,6 +566,14 @@ int AdapterDeviceSetDown(struct Adapter *adapter)
     return result;
 }
 
+/**
+ * @description: Set ip/gateway/netmask address
+ * @param adapter - adapter device pointer
+ * @param ip - ip address
+ * @param gateway - gateway address
+ * @param netmast - netmast address
+ * @return success: 0 , failure: other
+ */
 int AdapterDeviceSetAddr(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask)
 {
     if (!adapter)
@@ -611,6 +629,135 @@ int AdapterDeviceSetAddr(struct Adapter *adapter, const char *ip, const char *ga
     return result;
 }
 
+/**
+ * @description: Set dns function
+ * @param adapter - adapter device pointer
+ * @param dns_addr - dns address
+ * @param dns_count - dns count
+ * @return success: 0 , failure: other
+ */
+int AdapterDeviceSetDns(struct Adapter *adapter, const char *dns_addr, uint8 dns_count)
+{
+    if (!adapter)
+        return -1;
+
+    int result = 0;
+
+    struct IpProtocolDone *ip_done = NULL;
+    struct PrivProtocolDone *priv_done = NULL;
+
+    switch (adapter->net_protocol)
+    {
+    case PRIVATE_PROTOCOL:
+        priv_done = (struct PrivProtocolDone *)adapter->done;
+        if (NULL == priv_done->setdns)
+            return 0;
+        
+        result = priv_done->setdns(adapter, dns_addr, dns_count);
+        if (0 == result) {
+            printf("Device %s setdns success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setdns failed(%d).\n", adapter->name, result);
+        }
+        break;
+    
+    case IP_PROTOCOL:
+        ip_done = (struct IpProtocolDone *)adapter->done;
+        if (NULL == ip_done->setdns)
+            return 0;
+        
+        result = ip_done->setdns(adapter, dns_addr, dns_count);
+        if (0 == result) {
+            printf("Device %s setdns success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setdns failed(%d).\n", adapter->name, result);
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
+}
+
+/**
+ * @description: Set DHCP function
+ * @param adapter - adapter device pointer
+ * @param enable - enable DHCP or not
+ * @return success: 0 , failure: other
+ */
+int AdapterDeviceSetDhcp(struct Adapter *adapter, int enable)
+{
+    if (!adapter)
+        return -1;
+
+    int result = 0;
+
+    struct IpProtocolDone *ip_done = NULL;
+    struct PrivProtocolDone *priv_done = NULL;
+
+    switch (adapter->net_protocol)
+    {
+    case PRIVATE_PROTOCOL:
+        priv_done = (struct PrivProtocolDone *)adapter->done;
+        if (NULL == priv_done->setdhcp)
+            return 0;
+        
+        result = priv_done->setdhcp(adapter, enable);
+        if (0 == result) {
+            printf("Device %s setdhcp success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setdhcp failed(%d).\n", adapter->name, result);
+        }
+        break;
+    
+    case IP_PROTOCOL:
+        ip_done = (struct IpProtocolDone *)adapter->done;
+        if (NULL == ip_done->setdhcp)
+            return 0;
+        
+        result = ip_done->setdhcp(adapter, enable);
+        if (0 == result) {
+            printf("Device %s setdhcp success.\n", adapter->name);
+            adapter->adapter_status = INSTALL;
+        } else {
+            if (adapter->fd) {
+                PrivClose(adapter->fd);
+                adapter->fd = 0;
+            }
+            printf("Device %s setdhcp failed(%d).\n", adapter->name, result);
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
+}
+
+/**
+ * @description: ping function
+ * @param adapter - adapter device pointer
+ * @param destination - the destination ip address
+ * @return success: 0 , failure: other
+ */
 int AdapterDevicePing(struct Adapter *adapter, const char *destination)
 {
     if (!adapter)
@@ -666,6 +813,11 @@ int AdapterDevicePing(struct Adapter *adapter, const char *destination)
     return result;
 }
 
+/**
+ * @description: Show the net status
+ * @param adapter - adapter device pointer
+ * @return success: 0 , failure: other
+ */
 int AdapterDeviceNetstat(struct Adapter *adapter)
 {
     if (!adapter)
