@@ -309,6 +309,9 @@ int gap8_udma_rx_poll(struct gap8_udma_peripheral *instance)
  ****************************************************************************/
 int gap8_udma_doirq(int irq, void *context, void *arg)
 {
+    int oldstat;
+    int newstat;
+
   struct gap8_udma_peripheral *the_peripheral;
   uint32_t event = SOC_EVENTS->CURRENT_EVENT & 0xff;
 
@@ -382,6 +385,10 @@ int gap8_udma_doirq(int irq, void *context, void *arg)
             }
         }
     }
+
+    asm volatile ("csrr %0, 0x300": "=r" (oldstat));
+  newstat = oldstat | (0x80) ;
+  asm volatile("csrw 0x300, %0" : /* no output */ : "r" (newstat));
 
   return 0;
 }

@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 /* Exception context size: EPC + 31 common regs + 6 loop regs */
-
+#include "boot.h"
 #define EXCEPTION_STACK_SIZE 4*38
 
 /****************************************************************************
@@ -112,7 +112,7 @@
     csrrw x0, 0x7B0, x28
     csrrw x0, 0x7B1, x29
     csrrw x0, 0x7B2, x30
-    li s0, 0x1890     /* machine mode, UPIE & MPIE enabled */
+    li s0, 0x1880     /* machine mode, UPIE & MPIE enabled */
     csrrw x0, mstatus, s0
     lw  x3,  3*4(sp)  /* gp */
     lw  x4,  4*4(sp)  /* tp */
@@ -149,31 +149,22 @@
     lw  sp,  2*4(sp)  /* restore original sp */
   .endm
 
-/* wrapper for IRQ vector */
-
-  .macro WRAP_IRQ Routine, IRQn
+    .macro WRAP_IRQ Routine, IRQn
   wrap_irq_\Routine :
-    SAVE_REGS
 
-    csrr s0, mepc
-    sw  s0,  0(sp)   /* exception PC */
+    SAVE_X_REGISTERS
+
+    mv  fp, sp
 
     li a0, \IRQn     /* irq = IRQn */
     mv a1, sp        /* context = sp */
-    jal x1, gap8_dispatch_irq
+    call gap8_dispatch_irq
 
-    /* If context switch is needed, return
-     * a new sp
-     */
+    mv  sp, fp
+    mv  a0, fp
+    call KTaskOsAssignAfterIrq
+    j SwitchKTaskContextExit
 
-    mv sp, a0
-
-    lw  s0, 0(sp)    /* restore ePC */
-    csrw mepc, s0
-
-    RESTORE_REGS
-
-    mret
   .endm
 
 

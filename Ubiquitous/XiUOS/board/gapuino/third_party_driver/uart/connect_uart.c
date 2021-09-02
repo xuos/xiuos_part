@@ -101,7 +101,7 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
 
     return EOK;
 }
-
+static char g_uart1rxbuffer[128];
 static uint32 SerialConfigure(struct SerialDriver *serial_drv, int serial_operation_cmd)
 {
     NULL_PARAM_CHECK(serial_drv);
@@ -117,7 +117,7 @@ static uint32 SerialConfigure(struct SerialDriver *serial_drv, int serial_operat
 
         gap8_udma_rx_setirq(uart_udma, 1);
 
-        gap8_udma_rx_start(uart_udma, serial_dev->serial_fifo.serial_rx->serial_rx_buffer, 1, 1);
+        gap8_udma_rx_start(uart_udma, g_uart1rxbuffer, 1, 1);
 
         ENABLE_INTERRUPT(lock);
     } else if (OPER_CLR_INT == serial_operation_cmd) {
@@ -179,13 +179,16 @@ static int SerialGetChar(struct SerialHardwareDevice *serial_dev)
     struct gap8_udma_peripheral *uart_udma = (struct gap8_udma_peripheral *)serial_cfg->hw_cfg.private_data;
     
     uint8_t rx_buf[4] = {0};
-    uint8_t ch = rx_buf[0];
+    uint8_t ch = g_uart1rxbuffer[0];
 
     /* Then trigger another reception */
+    gap8_udma_rx_setirq(uart_udma, 1);
+    gap8_udma_rx_start(uart_udma, g_uart1rxbuffer, 1, 1);
 
-    gap8_udma_rx_start(uart_udma, rx_buf, 1, 1);
     if (ch == 0)
         return -ERROR;
+
+    memset(g_uart1rxbuffer,0,128);
 
     return ch;
 }
@@ -201,9 +204,9 @@ static const struct SerialDataCfg data_cfg_init =
     .serial_buffer_size = SERIAL_RB_BUFSZ,
 };
 
-static  struct gap8_udma_peripheral gap8_udma = 
+static struct gap8_udma_peripheral gap8_udma = 
 {
-    .regs = (udma_reg_t *)UART,
+    .regs = (volatile udma_reg_t *)UART,
     .id    = GAP8_UDMA_ID_UART,
     .on_tx = NONE,//UartRxIsr??
     //  .on_tx = UartTxIsr,//UartRxIsr??

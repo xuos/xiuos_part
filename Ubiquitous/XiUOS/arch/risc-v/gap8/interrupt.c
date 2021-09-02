@@ -121,14 +121,14 @@ static inline void up_ack_irq(int irq)
  *
  ****************************************************************************/
 
-static inline uint32_t _current_privilege(void)
-{
-  uint32_t result;
+// static inline uint32_t _current_privilege(void)
+// {
+//   uint32_t result;
 
-  asm volatile ("csrr %0, 0xC10" : "=r" (result));
+//   asm volatile ("csrr %0, 0xC10" : "=r" (result));
 
-  return result;
-}
+//   return result;
+// }
 /****************************************************************************
  * Name: up_irq_restore
  *
@@ -137,21 +137,21 @@ static inline uint32_t _current_privilege(void)
  *
  ****************************************************************************/
 
-static inline void up_irq_restore(unsigned int pri)
-{
-  if (_current_privilege())
-    {
-      /* Machine mode - mstatus */
+// static inline void up_irq_restore(unsigned int pri)
+// {
+//   if (_current_privilege())
+//     {
+//       /* Machine mode - mstatus */
 
-      asm volatile("csrw 0x300, %0" : /* no output */ : "r" (pri));
-    }
-  else
-    {
-      /* User mode - ustatus */
+//       asm volatile("csrw 0x300, %0" : /* no output */ : "r" (pri));
+//     }
+//   else
+//     {
+//       /* User mode - ustatus */
 
-      asm volatile("csrw 0x000, %0" : /* no output */ : "r" (pri));
-    }
-}
+//       asm volatile("csrw 0x000, %0" : /* no output */ : "r" (pri));
+//     }
+// }
 /****************************************************************************
  * Name: up_irq_save
  *
@@ -160,30 +160,30 @@ static inline void up_irq_restore(unsigned int pri)
  *
  ****************************************************************************/
 
- x_base up_irq_save(void)
-{
-  x_base oldstat;
-  x_base newstat;
+//  x_base up_irq_save(void)
+// {
+//   x_base oldstat;
+//   x_base newstat;
 
-  if (_current_privilege())
-    {
-      /* Machine mode: Unset MIE and UIE */
+//   if (_current_privilege())
+//     {
+//       /* Machine mode: Unset MIE and UIE */
 
-      asm volatile ("csrr %0, 0x300": "=r" (oldstat));
-      newstat = oldstat & ~(0x9);
-      asm volatile("csrw 0x300, %0" : /* no output */ : "r" (newstat));
-    }
-  else
-    {
-      /* User mode: Unset UIE */
+//       asm volatile ("csrr %0, 0x300": "=r" (oldstat));
+//       newstat = oldstat & ~(0x9);
+//       asm volatile("csrw 0x300, %0" : /* no output */ : "r" (newstat));
+//     }
+//   else
+//     {
+//       /* User mode: Unset UIE */
 
-      asm volatile ("csrr %0, 0x000": "=r" (oldstat));
-      newstat = oldstat & ~(1L << 0);
-      asm volatile("csrw 0x000, %0" : /* no output */ : "r" (newstat));
-    }
+//       asm volatile ("csrr %0, 0x000": "=r" (oldstat));
+//       newstat = oldstat & ~(1L << 0);
+//       asm volatile("csrw 0x000, %0" : /* no output */ : "r" (newstat));
+//     }
 
-  return oldstat;
-}
+//   return oldstat;
+// }
 /****************************************************************************
  * Name: up_irq_save
  *
@@ -265,12 +265,12 @@ void EnableLocalInterrupt(x_base oldstat)
  *
  ****************************************************************************/
 
-// static inline void gap8_sleep_wait_sw_evnt(uint32_t event_mask)
-// {
-//   FCEU->MASK_OR = event_mask;
-//   __builtin_pulp_event_unit_read((void *)&FCEU->EVENT_WAIT_CLEAR, 0);
-//   FCEU->MASK_AND = event_mask;
-// }
+void gap8_sleep_wait_sw_evnt(uint32_t event_mask)
+{
+  FCEU->MASK_OR = event_mask;
+  // __builtin_pulp_event_unit_read((void *)&FCEU->EVENT_WAIT_CLEAR, 0);
+  FCEU->MASK_AND = event_mask;
+}
 
 /****************************************************************************
  * Public Function Prototypes
@@ -334,28 +334,17 @@ void *gap8_dispatch_irq(uint32_t vector, void *current_regs)
   /* Clear pending bit and trigger a software event.
    * GAP8 would sleep on sw event 3 on up_idle().
    */
-  
+
   FCEU->BUFFER_CLEAR = (1 << vector);
   EU_SW_EVNT_TRIG->TRIGGER_SET[3] = 0;
 
-  /* Call nuttx kernel, which may change curr_regs, to perform
-   * a context switch
-   */
-
   g_current_regs = current_regs;
-  // irq_dispatch(vector, current_regs);
+
 
   isrManager.done->incCounter();
   isrManager.done->handleIrq(vector);
-  
+
   isrManager.done->decCounter();
-
-  KTaskOsAssignAfterIrq(current_regs);
-
-  current_regs = (void *)g_current_regs;
-  g_current_regs = NONE;
-
-  return current_regs;
 }
 
 
