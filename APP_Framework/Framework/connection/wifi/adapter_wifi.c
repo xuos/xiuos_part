@@ -25,6 +25,8 @@
 extern AdapterProductInfoType Hfa21Attach(struct Adapter *adapter);
 #endif
 
+#define ADAPTER_WIFI_NAME "wifi"
+
 static int AdapterWifiRegister(struct Adapter *adapter)
 {
     int ret = 0;
@@ -151,15 +153,13 @@ int AdapterWifiTest(void)
 
     const char *wifi_msg = "LiuKai Test";
     int len = strlen(wifi_msg);
-    for(int i=0;i<10;++i)
-    {
+    for(int i = 0;i < 10; ++i) {
         AdapterDeviceSend(adapter, wifi_msg, len);
         PrivTaskDelay(4000);
     }
 
     char wifi_recv_msg[128];
-    while (1)
-    {
+    while (1) {
         AdapterDeviceRecv(adapter, wifi_recv_msg, 128);
     }
     

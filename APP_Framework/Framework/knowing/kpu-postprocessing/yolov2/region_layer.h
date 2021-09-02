@@ -20,7 +20,7 @@ typedef struct
 
 typedef struct
 {
-    float threshold;
+    float *threshold;
     float nms_value;
     uint32_t coords;
     uint32_t anchor_number;
@@ -44,6 +44,6 @@ typedef struct
 int region_layer_init(region_layer_t *rl, int width, int height, int channels, int origin_width, int origin_height);
 void region_layer_deinit(region_layer_t *rl);
 void region_layer_run(region_layer_t *rl, obj_info_t *obj_info);
-void draw_edge(uint32_t *gram, obj_info_t *obj_info, uint32_t index, uint16_t color);
+void draw_edge(uint32_t *gram, obj_info_t *obj_info, uint32_t index, uint16_t color, uint16_t image_width, uint16_t image_height);
 
 #endif // _REGION_LAYER

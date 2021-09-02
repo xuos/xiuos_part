@@ -123,9 +123,9 @@ extern "C" {
 #define OV2640_SENSOR_HISTO_LOW  0x61
 #define OV2640_SENSOR_HISTO_HIGH 0x62
 
-
-
-
+#ifdef BOARD_K210_EVB
+#define IOCTRL_CAMERA_SET_DVP_RESO     (21)     // set dev resolution
+#endif
 
 #define IOCTRL_CAMERA_START_SHOT       (22)     // start shoot
 #define IOCTRL_CAMERA_SET_RESO         (23)     //set resolution
@@ -135,6 +135,14 @@ extern "C" {
 #define IOCTRL_CAMERA_SET_CONTRAST     (27)     //set contrast
 #define IOCTRL_CAMERA_SET_EFFECT       (28)     //set effect
 #define IOCTRL_CAMERA_SET_EXPOSURE     (29)     //set auto exposure
+
+#ifdef BOARD_K210_EVB
+typedef struct 
+{
+    uint32_t width;         // width   The width  of image
+    uint32_t height;        // height  The height of image
+}_ioctl_set_dvp_reso;
+#endif
 
 
 struct camera_device

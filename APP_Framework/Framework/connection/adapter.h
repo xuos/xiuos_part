@@ -59,8 +59,6 @@ struct AdapterProductInfo;
 typedef struct Adapter *AdapterType;
 typedef struct AdapterProductInfo *AdapterProductInfoType;
 
-#define ADAPTER_WIFI_NAME "wifi"
-
 struct Socket
 {
     int id;
@@ -90,6 +88,8 @@ enum NetRoleType
 {
     CLIENT = 1, 
     SERVER,
+    MASTER,
+    SLAVE,
     ROLE_NONE,
 };
 
@@ -210,12 +210,25 @@ int AdapterDeviceJoin(struct Adapter *adapter, const char *priv_net_group);
 /*Adapter disconnect from ip net or private net group*/
 int AdapterDeviceDisconnect(struct Adapter *adapter);
 
+/*Set up to net*/
 int AdapterDeviceSetUp(struct Adapter *adapter);
+
+/*Set down from net*/
 int AdapterDeviceSetDown(struct Adapter *adapter);
+
+/*Set ip/gateway/netmask address*/
 int AdapterDeviceSetAddr(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask);
+
+/**/
 int AdapterDeviceSetDns(struct Adapter *adapter, const char *dns_addr, uint8 dns_count);
+
+/**/
 int AdapterDeviceSetDhcp(struct Adapter *adapter, int enable);
+
+/*ping function*/
 int AdapterDevicePing(struct Adapter *adapter, const char *destination);
+
+/*Show the net status*/
 int AdapterDeviceNetstat(struct Adapter *adapter);
 
 #ifdef __cplusplus

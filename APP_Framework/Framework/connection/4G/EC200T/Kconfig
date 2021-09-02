@@ -9,7 +9,7 @@ if ADD_XIUOS_FETURES
 
         config ADAPTER_EC200T_PIN_DRIVER
                 string "EC200T device pin driver path"
-                default "/dev/pin"
+                default "/dev/pin_dev"
 
         config ADAPTER_EC200T_DRIVER_EXTUART
                 bool "Using extra uart to support 4G"

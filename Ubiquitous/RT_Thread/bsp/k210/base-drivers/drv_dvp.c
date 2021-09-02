@@ -67,7 +67,7 @@ static rt_err_t rt_dvp_init(rt_device_t dev)
     dvp_set_output_enable(0, 1);
     dvp_set_output_enable(1, 1);
     dvp_set_image_format(DVP_CFG_RGB_FORMAT);////////////////
-    dvp_set_image_size(320, 240);
+    dvp_set_image_size(320, 240);       // default
     dvp_config_interrupt(DVP_CFG_FINISH_INT_ENABLE, 0);
     dvp_disable_auto();
     plic_set_priority(IRQN_DVP_INTERRUPT, 1);

@@ -48,8 +48,6 @@ static int Hfa21InitAtCmd(ATAgentType at_agent)
  */
 static int Hfa21Open(struct Adapter *adapter)
 {
-    uint8_t hfa21_cmd[64];
-
     /*step1: open ec200t serial port*/
     adapter->fd = PrivOpen(ADAPTER_HFA21_DRIVER, O_RDWR);
     if (adapter->fd < 0) {
@@ -58,14 +56,16 @@ static int Hfa21Open(struct Adapter *adapter)
     }
 
     /*step2: init AT agent*/
-    char *agent_name = "uart3_client";
-    if (InitATAgent(agent_name, adapter->fd, 512)) {
-        printf("at agent init failed !\n");
-        return -1;
-    }
-    ATAgentType at_agent = GetATAgent(agent_name);
+    if (!adapter->agent) {
+        char *agent_name = "wifi_uart_client";
+        if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+            printf("at agent init failed !\n");
+            return -1;
+        }
+        ATAgentType at_agent = GetATAgent(agent_name);
 
-    adapter->agent = at_agent;
+        adapter->agent = at_agent;
+    }
 
     ADAPTER_DEBUG("Hfa21 open done\n");
 
@@ -195,7 +195,7 @@ static int Hfa21SetDown(struct Adapter *adapter)
 }
 
 /**
- * @description: set wifi ip/gatewy/netmask address(in sta mode)
+ * @description: set wifi ip/gateway/netmask address(in sta mode)
  * @param adapter - wifi device pointer
  * @param ip - ip address
  * @param gateway - gateway address
