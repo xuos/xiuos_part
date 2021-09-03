@@ -15,7 +15,7 @@
 * @brief support gap8-board uart function and register to bus framework
 * @version 1.1
 * @author AIIT XUOS Lab
-* @date 2021-07-23
+* @date 2021-09-02
 */
 
 #include <xiuos.h>

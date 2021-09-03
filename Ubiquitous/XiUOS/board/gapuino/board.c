@@ -12,10 +12,10 @@
 
 /**
 * @file board.c
-* @brief support hifive1-rev-B-board init configure and start-up
+* @brief support gap8 init configure and start-up
 * @version 1.0 
 * @author AIIT XUOS Lab
-* @date 2021-04-25
+* @date 2021-09-02
 */
 
 #include <board.h>
@@ -27,13 +27,9 @@ extern void entry(void);
 extern int InitHwUart(void);
 extern void irqinitialize(void);
 extern void timer_initialize(void);
-extern void up_serialinit(void);
+extern void gapuino_sysinit(void);
 
 extern unsigned int __bss_end__;
-
-extern void test_dma_txstart(char c, uint32_t size);
-extern void test_gap8_uartinit();
-extern void gapuino_sysinit(void);
 
 void GapuinoStart(uint32_t mhartid)
 {
@@ -42,8 +38,6 @@ void GapuinoStart(uint32_t mhartid)
 }
 void InitBoardHardware(void)
 {
-    x_base newstat;
-    x_base oldstat;
     irqinitialize();
     
     InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
@@ -51,10 +45,6 @@ void InitBoardHardware(void)
     InitHwUart();
     InstallConsole("uart0", "uart0_drv", "uart0_dev0");
 
-    // asm volatile("nop");
-    // asm volatile ("csrr %0, 0x300": "=r" (oldstat));
-    // newstat = oldstat | (0x8);
-    // asm volatile("csrw mstatus, %0" : /* no output */ : "r" (newstat));
 	KPrintf("console init completed.\n");
     KPrintf("board initialization......\n");
     

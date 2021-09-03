@@ -34,6 +34,25 @@
  *
  ****************************************************************************/
 
+/**
+* @file: gap8_fll.c
+* @brief: support gap8 clk
+* @version: 1.0
+* @author:  AIIT XUOS Lab
+* @date:    2021-09-02
+*/
+
+/*************************************************
+File name: hardware_gpio.c
+Description: support gap8 clk
+Others: 
+History: 
+1. Date: 2021-09-02
+Author: AIIT XUOS Lab
+Modification: 
+
+*************************************************/
+
 /****************************************************************************
  *  FC can run up to 250MHz@1.2V, and 150MHz@1.0V. While the default voltage
  *  of PMU is 1.2V, it's okay to boost up without considering PMU.

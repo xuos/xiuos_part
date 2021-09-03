@@ -40,6 +40,24 @@
  *  event unit, and then by the FC event unit or cluster event unit, and
  *  finally to FC or cluster. Peripherals share the same IRQ entry.
  ****************************************************************************/
+/**
+* @file arch_interrupt.h
+* @brief support gap8 interrupt
+* @version 1.0 
+* @author AIIT XUOS Lab
+* @date 2021-09-02
+*/
+
+/*************************************************
+File name: arch_interrupt.h
+Description: support gap8 interrupt
+Others: take nuttx/arch/risc-v/include/gap8/irq.h  for references
+                https://github.com/apache/incubator-nuttx.git
+History: 
+1. Date: 2021-09-02
+Author: AIIT XUOS Lab
+Modification: add interrupt function definition
+*************************************************/
 
 #ifndef ARCH_INTERRUPT_H__
 #define ARCH_INTERRUPT_H__

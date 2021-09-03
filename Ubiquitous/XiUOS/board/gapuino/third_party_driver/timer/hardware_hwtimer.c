@@ -34,6 +34,25 @@
  *
  ****************************************************************************/
 
+/**
+* @file: hardware_hwtimer.c
+* @brief: support gap8 tick interrupt
+* @version: 1.0
+* @author:  AIIT XUOS Lab
+* @date:    2021-09-02
+*/
+
+/*************************************************
+File name: hardware_hwtimer.c
+Description: support gap8 tick interrupt
+Others: 
+History: 
+1. Date: 2021-09-02
+Author: AIIT XUOS Lab
+Modification: 
+    add tick interrupt isr
+*************************************************/
+
 /****************************************************************************
  *  FC core has a 64-bit basic timer, able to split into 2 32-bit timers,
  *  with identicle memory map and 2 IRQ channels, for both FC core and
@@ -88,7 +107,7 @@ void gap8_timisr(int irq, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_timer_initialize
+ * Name: timer_initialize
  *
  * Description:
  *   Initialize the timer based on the frequency of source clock and ticks

@@ -41,6 +41,25 @@
  *  finally to FC or cluster. Peripherals share the same IRQ entry.
  ****************************************************************************/
 
+/**
+* @file interrupt.c
+* @brief support gap8 interrupt enable and disable
+* @version 1.0 
+* @author AIIT XUOS Lab
+* @date 2021-09-02
+*/
+
+/*************************************************
+File name: interrupt.c
+Description: support gap8 interrupt enable and disable
+Others: take nuttx/arch/risc-v/gap8/gap8_interrupt.c  for references
+                https://github.com/apache/incubator-nuttx.git
+History: 
+1. Date: 2021-09-02
+Author: AIIT XUOS Lab
+Modification: modify interrupt enable/disable function and add interrupt process function
+*************************************************/
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -73,7 +92,7 @@ void up_mdelay(unsigned int time)
 }
 
 /****************************************************************************
- * Name: up_disable_irq
+ * Name: ArchDisableHwIrq
  *
  * Description:
  *   Disable the IRQ specified by 'irq'. Mind the Machine privilege.
@@ -85,7 +104,7 @@ int ArchDisableHwIrq(uint32_t irq_num)
   FCEU->MASK_IRQ_AND = (1UL << irq_num);
 }
 /****************************************************************************
- * Name: up_enable_irq
+ * Name: ArchEnableHwIrq
  *
  * Description:
  *   Enable the IRQ specified by 'irq'. Mind the Machine privilege.
@@ -98,124 +117,8 @@ int ArchEnableHwIrq(uint32_t irq_num)
 }
 
 
-
-
-/****************************************************************************
- * Name: up_ack_irq
- *
- * Description:
- *   Acknowledge the IRQ
- *
- ****************************************************************************/
-
-static inline void up_ack_irq(int irq)
-{
-}
-
-/****************************************************************************
- * Name: _current_privilege
- *
- * Description:
- *   Get the current privilege mode. 0x0 for user mode, and 0x3 for machine
- *   mode.
- *
- ****************************************************************************/
-
-// static inline uint32_t _current_privilege(void)
-// {
-//   uint32_t result;
-
-//   asm volatile ("csrr %0, 0xC10" : "=r" (result));
-
-//   return result;
-// }
-/****************************************************************************
- * Name: up_irq_restore
- *
- * Description:
- *   Restore previous IRQ mask state
- *
- ****************************************************************************/
-
-// static inline void up_irq_restore(unsigned int pri)
-// {
-//   if (_current_privilege())
-//     {
-//       /* Machine mode - mstatus */
-
-//       asm volatile("csrw 0x300, %0" : /* no output */ : "r" (pri));
-//     }
-//   else
-//     {
-//       /* User mode - ustatus */
-
-//       asm volatile("csrw 0x000, %0" : /* no output */ : "r" (pri));
-//     }
-// }
-/****************************************************************************
- * Name: up_irq_save
- *
- * Description:
- *   Disable interrupt and return the current interrupt state.
- *
- ****************************************************************************/
-
-//  x_base up_irq_save(void)
-// {
-//   x_base oldstat;
-//   x_base newstat;
-
-//   if (_current_privilege())
-//     {
-//       /* Machine mode: Unset MIE and UIE */
-
-//       asm volatile ("csrr %0, 0x300": "=r" (oldstat));
-//       newstat = oldstat & ~(0x9);
-//       asm volatile("csrw 0x300, %0" : /* no output */ : "r" (newstat));
-//     }
-//   else
-//     {
-//       /* User mode: Unset UIE */
-
-//       asm volatile ("csrr %0, 0x000": "=r" (oldstat));
-//       newstat = oldstat & ~(1L << 0);
-//       asm volatile("csrw 0x000, %0" : /* no output */ : "r" (newstat));
-//     }
-
-//   return oldstat;
-// }
-/****************************************************************************
- * Name: up_irq_save
- *
- * Description:
- *   Disable interrupt and return the current interrupt state.
- *
- ****************************************************************************/
-
 x_base DisableLocalInterrupt(void)
 {
-  // x_base oldstat;
-  // x_base newstat;
-
-  // if (_current_privilege())
-  //   {
-  //     /* Machine mode: Unset MIE and UIE */
-      // asm volatile("nop");
-      // asm volatile ("csrr %0, 0x300": "=r" (oldstat));
-      // newstat = oldstat & ~(0x9);
-      // asm volatile("csrw 0x300, %0" : /* no output */ : "r" (newstat));
-  //   }
-  // else
-  //   {
-  //     /* User mode: Unset UIE */
-
-  //     asm volatile ("csrr %0, 0x000": "=r" (oldstat));
-  //     newstat = oldstat & ~(1L << 0);
-  //     asm volatile("csrw 0x000, %0" : /* no output */ : "r" (newstat));
-  //   }
-
-  // return oldstat;
-
     x_base level;
     asm volatile("nop");
     asm volatile ("csrrci %0, mstatus, 8" : "=r"(level));
@@ -226,7 +129,7 @@ x_base DisableLocalInterrupt(void)
 
 
 /****************************************************************************
- * Name: up_irq_enable
+ * Name: EnableLocalInterrupt
  *
  * Description:
  *   Return the current interrupt state and enable interrupts
@@ -237,23 +140,6 @@ void EnableLocalInterrupt(x_base oldstat)
 {
   x_base newstat;
 
-  // if (_current_privilege())
-  //   {
-  //     /* Machine mode: Set MIE and UIE */
-      // asm volatile("nop");
-      // asm volatile ("csrr %0, 0x300": "=r" (oldstat));
-      // newstat = oldstat | (0x8);
-      // // asm volatile("csrw 0x300, %0" : /* no output */ : "r" (newstat));
-      // asm volatile("csrw mstatus, %0" : /* no output */ : "r" (newstat));
-  //   }
-  // else
-  //   {
-  //     /* User mode: Set UIE */
-
-  //     asm volatile ("csrr %0, 0x000": "=r" (oldstat));
-  //     newstat = oldstat | (1L << 0);
-  //     asm volatile("csrw 0x000, %0" : /* no output */ : "r" (newstat));
-  //   }
   asm volatile ("csrw mstatus, %0" :: "r"(oldstat));
 }
 
@@ -273,25 +159,7 @@ void gap8_sleep_wait_sw_evnt(uint32_t event_mask)
 }
 
 /****************************************************************************
- * Public Function Prototypes
- *
-
-
-/****************************************************************************
- * Name: up_get_newintctx
- *
- * Description:
- *   Return a value for EPIC. But GAP8 doesn't use EPIC for event control.
- *
- ****************************************************************************/
-
-uint32_t up_get_newintctx(void)
-{
-  return 0;
-}
-
-/****************************************************************************
- * Name: up_irqinitialize
+ * Name: irqinitialize
  *
  * Description:
  *   Initialize the IRQ on FC.
@@ -300,7 +168,6 @@ uint32_t up_get_newintctx(void)
 extern void gap8_udma_doirq(int irq, void *arg);
 void irqinitialize(void)
 {
-  x_base level;
   /* Deactivate all the soc events */
 
   SOC_EU->FC_MASK_MSB = 0xffffffff;
@@ -311,12 +178,6 @@ void irqinitialize(void)
   isrManager.done->registerIrq(GAP8_IRQ_FC_UDMA, gap8_udma_doirq, NONE);
   isrManager.done->enableIrq(GAP8_IRQ_FC_UDMA);
 
-  /* Attach system call handler */
-
-  // extern int up_swint(int irq, FAR void *context, FAR void *arg);
-  // RegisterHwIrq(GAP8_IRQ_SYSCALL, up_swint, NULL);
-
-  // EnableLocalInterrupt(0);
 }
 
 /****************************************************************************
@@ -327,8 +188,6 @@ void irqinitialize(void)
  *   or not.
  *
  ****************************************************************************/
-extern  void KTaskOsAssignAfterIrq(void *context);
-
 void *gap8_dispatch_irq(uint32_t vector, void *current_regs)
 {
   /* Clear pending bit and trigger a software event.

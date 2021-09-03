@@ -35,6 +35,26 @@
  *
  ****************************************************************************/
 
+/**
+* @file boot.s
+* @brief support gap8 interrupt and startup
+* @version 1.0 
+* @author AIIT XUOS Lab
+* @date 2021-09-02
+*/
+
+/*************************************************
+File name: boot.s
+Description: support gap8 interrupt and startup
+Others: take nuttx/arch/risc-v/gap8/gap8_head.S  for references
+                https://github.com/apache/incubator-nuttx.git
+History: 
+1. Date: 2021-09-02
+Author: AIIT XUOS Lab
+Modification: modify startup  sequence and interrupt process 
+*************************************************/
+
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -172,8 +192,6 @@
  * External Variables and Functions
  *******************************************************************************/
 
-  # .extern _sbss
-  # .extern _ebss
   .extern __bss_start
   .extern __bss_end
   .extern _idle_stack_end
@@ -219,20 +237,10 @@ zero_loop:
 
 zero_loop_end:
 
-  /* TODO: initialize data section */
-
-  /* Initialize cache and clock */
-
-
-  # jal x1, gapuino_sysinit
-
-  /* Directly call NuttX nx_start() */
   csrr a0, 0xf14 /* Cluster ID */
   andi a1, a0, 0x1f       /* Core ID */
 
   j   GapuinoStart
-
-  /* If it ever returns, spin here forever... */
 
 dead_loop:
   jal x0, dead_loop

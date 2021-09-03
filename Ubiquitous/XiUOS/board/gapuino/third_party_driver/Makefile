@@ -1,8 +1,5 @@
 SRC_FILES := 
-
-ifeq ($(CONFIG_BSP_USING_DMA),y)
-  SRC_DIR += udma
-endif
+SRC_DIR := timer
 
 ifeq ($(CONFIG_BSP_USING_GPIO),y)
   SRC_DIR += gpio
@@ -14,10 +11,6 @@ endif
 
 ifeq ($(CONFIG_BSP_USING_SYSCLOCK),y)
   SRC_DIR += sys_clock
-endif
-
-ifeq ($(CONFIG_BSP_USING_HWTIMER),y)
-  SRC_DIR += timer
 endif
 
 ifeq ($(CONFIG_BSP_USING_UART),y)

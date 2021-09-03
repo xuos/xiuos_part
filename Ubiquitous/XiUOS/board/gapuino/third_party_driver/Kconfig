@@ -13,14 +13,6 @@ menuconfig BSP_USING_SYSCLOCK
         source "$BSP_DIR/third_party_driver/sys_clock/Kconfig"
     endif
 
-menuconfig BSP_USING_HWTIMER
-    bool "Using HWTIMER device"
-    default n
-    select RESOURCES_HWTIMER
-    if BSP_USING_HWTIMER
-        source "$BSP_DIR/third_party_driver/timer/Kconfig"
-    endif
-
 menuconfig BSP_USING_UART
     bool "Using UART device"
     default y

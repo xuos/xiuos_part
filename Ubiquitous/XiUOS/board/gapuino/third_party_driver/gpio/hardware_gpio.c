@@ -45,7 +45,7 @@
 *                https://greenwavesdev2.wpengine.com/sdk-manuals/
 * @version 1.1
 * @author AIIT XUOS Lab
-* @date 2021-07-27
+* @date 2021-09-02
 */
 
 /****************************************************************************
