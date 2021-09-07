@@ -11,4 +11,5 @@ menu "lib"
                 bool "app select other lib"
     endchoice
      source "$APP_DIR/lib/cJSON/Kconfig"
+	 source "$APP_DIR/lib/queue/Kconfig"
 endmenu

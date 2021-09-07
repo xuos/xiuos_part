@@ -308,7 +308,7 @@ static void *thread_instrusion_detect_entry(void *parameter)
         instrusion_detect_rl.input = output;
         region_layer_run(&instrusion_detect_rl, &instrusion_detect_info);
 /* display result */
-#ifdef BSP_USING_LCD
+
         for (int instrusion_cnt = 0; instrusion_cnt < instrusion_detect_info.obj_number; instrusion_cnt++) {
             // draw_edge((uint32_t *)showbuffer, &instrusion_detect_info, instrusion_cnt, 0xF800,
             // (uint16_t)sensor_output_size[1],
@@ -321,6 +321,7 @@ static void *thread_instrusion_detect_entry(void *parameter)
         if (0 != instrusion_detect_info.obj_number) {
             printf("\n");
         }
+#ifdef BSP_USING_LCD
         lcd_draw_picture(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (unsigned int *)showbuffer);
 #endif
         usleep(1);

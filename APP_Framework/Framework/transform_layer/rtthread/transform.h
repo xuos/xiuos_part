@@ -22,7 +22,13 @@
 #define TRANSFORM_H
 #include <rtthread.h>
 #include <rtdevice.h>
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <sys/time.h>
+#include <errno.h>
 #include <pthread.h>
 #include <sched.h>
 #include <unistd.h>
@@ -33,9 +39,18 @@
 #ifdef DRV_USING_OV2640
 #include <drv_ov2640.h>
 #endif
+#if defined(RT_USING_SAL)
+#include <netdb.h>
+#include <sys/socket.h>
+#else
+#include <lwip/netdb.h>
+#include <lwip/sockets.h>
+#endif /* RT_USING_SAL */
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
 
 #ifdef __cplusplus
 }

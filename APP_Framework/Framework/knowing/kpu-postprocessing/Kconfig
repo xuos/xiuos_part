@@ -1,5 +1,6 @@
 menuconfig USING_KPU_POSTPROCESSING
     bool "kpu model postprocessing"
     default y
-
-source "$APP_DIR/Framework/knowing/kpu-postprocessing/yolov2/Kconfig"
+if USING_KPU_POSTPROCESSING
+        source "$APP_DIR/Framework/knowing/kpu-postprocessing/yolov2/Kconfig"
+endif
