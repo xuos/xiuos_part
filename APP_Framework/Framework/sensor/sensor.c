@@ -27,10 +27,10 @@ static DoublelistType quant_table[SENSOR_QUANTITY_END];
 static DoublelistType sensor_device_list;
 
 /* Sensor quantity list lock */
-static int quant_table_lock;
+static pthread_mutex_t quant_table_lock;
 
 /* Sensor device list lock */
-static int sensor_device_list_lock;
+static pthread_mutex_t sensor_device_list_lock;
 
 /**
  * @description: Init perception framework

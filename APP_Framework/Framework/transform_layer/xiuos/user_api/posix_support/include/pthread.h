@@ -61,6 +61,7 @@ extern "C" {
 // };
 
 typedef int   pid_t;
+// typedef int pthread_mutex_t ;
 
 /* function in pthread.c */
 int       pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void));
