@@ -52,7 +52,7 @@ static void ReadTask(struct SensorDevice *sdev)
  */
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
-    int result = 1;
+    int result = 0;
 
     buff_lock = UserMutexCreate();
 
@@ -66,8 +66,10 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     cfg.serial_parity_mode  = PARITY_NONE;
     cfg.serial_bit_order    = 0;
     cfg.serial_invert_mode  = 0;
+#ifdef SENSOR_PS5308_DRIVER_EXTUART
     cfg.ext_uart_no         = SENSOR_DEVICE_PS5308_DEV_EXT_PORT;
     cfg.port_configure      = PORT_CFG_INIT;
+#endif
 
     result = ioctl(sdev->fd, OPE_INT, &cfg);
 
@@ -95,7 +97,7 @@ static int SensorDeviceClose(struct SensorDevice *sdev)
 {
     UserTaskDelete(active_task_id);
     UserMutexDelete(buff_lock);
-    return 1;
+    return 0;
 }
 
 /**

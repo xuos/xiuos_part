@@ -40,7 +40,7 @@ static struct SensorProductInfo info =
  */
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
-    int result = 1;
+    int result = 0;
 
     sdev->fd = PrivOpen(SENSOR_DEVICE_ZG09_DEV, O_RDWR);
     
@@ -52,8 +52,10 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     cfg.serial_parity_mode  = PARITY_NONE;
     cfg.serial_bit_order    = 0;
     cfg.serial_invert_mode  = 0;
+#ifdef SENSOR_ZG09_DRIVER_EXTUART
     cfg.ext_uart_no         = SENSOR_DEVICE_ZG09_DEV_EXT_PORT;
     cfg.port_configure      = PORT_CFG_INIT;
+#endif
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
@@ -115,7 +117,7 @@ static int SensorDeviceIoctl(struct SensorDevice *sdev, int cmd)
         sdev->done->read(sdev, 8);
         if (memcmp(sdev->buffer, zg09_set_passive, 8) == 0) {
             sdev->status = SENSOR_DEVICE_PASSIVE;
-            return 1;
+            return 0;
         }
         break;
 
@@ -124,7 +126,7 @@ static int SensorDeviceIoctl(struct SensorDevice *sdev, int cmd)
         sdev->done->read(sdev, 8);
         if (memcmp(sdev->buffer, zg09_set_active, 8) == 0) {
             sdev->status = SENSOR_DEVICE_ACTIVE;
-            return 1;
+            return 0;
         }
         break;
     

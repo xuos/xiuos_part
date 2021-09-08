@@ -38,7 +38,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     sdev->fd = PrivOpen(SENSOR_DEVICE_HS300X_DEV, O_RDWR);
 
-    return 1;
+    return 0;
 }
 
 /**
@@ -57,7 +57,7 @@ static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
     if (PrivRead(sdev->fd, sdev->buffer, len) != 1)
         return -1;
 
-    return 1;
+    return 0;
 }
 
 static struct SensorDone done =
