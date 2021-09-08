@@ -12,7 +12,7 @@
 
 /**
  * @file ps5308.c
- * @brief PS5308 PM1.0, PM2.5, PM10, driver base perception
+ * @brief PS5308 PM1.0, PM2.5, PM10, driver base sensor
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2021.04.22

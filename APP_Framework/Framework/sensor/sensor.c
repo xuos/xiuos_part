@@ -33,7 +33,7 @@ static pthread_mutex_t quant_table_lock;
 static pthread_mutex_t sensor_device_list_lock;
 
 /**
- * @description: Init perception framework
+ * @description: Init sensor framework
  * @return 0
  */
 int SensorFrameworkInit(void)

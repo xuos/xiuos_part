@@ -12,7 +12,7 @@
 
 /**
  * @file zg09.c
- * @brief ZG09 CO2 driver base perception
+ * @brief ZG09 CO2 driver base sensor
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2021.04.22

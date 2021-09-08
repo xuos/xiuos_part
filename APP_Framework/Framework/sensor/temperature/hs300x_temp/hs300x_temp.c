@@ -12,7 +12,7 @@
 
 /**
  * @file hs300x_temp.c
- * @brief HS300x temperature driver base perception
+ * @brief HS300x temperature driver base sensor
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2021.04.22

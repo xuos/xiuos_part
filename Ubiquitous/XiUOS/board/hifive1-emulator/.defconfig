@@ -209,11 +209,6 @@ CONFIG_FS_DFS=n
 #
 
 #
-# Perception
-#
-# CONFIG_PERCEPTION_SENSORDEVICE is not set
-
-#
 # connection
 #
 # CONFIG_CONNECTION_AT is not set

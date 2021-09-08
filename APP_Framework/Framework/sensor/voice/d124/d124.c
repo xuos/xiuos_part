@@ -12,7 +12,7 @@
 
 /**
  * @file d124.c
- * @brief D124 voice driver base perception
+ * @brief D124 voice driver base sensor
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2021.04.22

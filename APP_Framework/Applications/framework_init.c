@@ -49,7 +49,7 @@ static int AppInitDesc(struct InitDesc sub_desc[])
 static struct InitDesc framework[] = 
 {
 #ifdef SUPPORT_SENSOR_FRAMEWORK
-	{ "perception_framework", SensorFrameworkInit },
+	{ "sensor_framework", SensorFrameworkInit },
 #endif
 
 #ifdef SUPPORT_CONNECTION_FRAMEWORK
@@ -59,13 +59,13 @@ static struct InitDesc framework[] =
 	{ "NULL", NULL },
 };
 
-static struct InitDesc perception_desc[] = 
+static struct InitDesc sensor_desc[] = 
 {
-#ifdef PERCEPTION_D124
+#ifdef SENSOR_DEVICE_ZG09
 	{ "d124_voice", D124VoiceInit },
 #endif
 
-#ifdef PERCEPTION_HS300X
+#ifdef SENSOR_DEVICE_HS300X
 #ifdef SENSOR_QUANTITY_HS300X_TEMPERATURE
 	{ "hs300x_temperature", Hs300xTemperatureInit },
 #endif
@@ -74,13 +74,13 @@ static struct InitDesc perception_desc[] =
 #endif
 #endif
 
-#ifdef PERCEPTION_PS5308
+#ifdef SENSOR_PS5308
 #ifdef SENSOR_QUANTITY_PS5308_PM1_0
 	{ "ps5308_pm1_0", Ps5308Pm1_0Init },
 #endif
 #endif
 
-#ifdef PERCEPTION_ZG09
+#ifdef SENSOR_ZG09
 	{ "zg09_co2", Zg09Co2Init },
 #endif
 
@@ -99,24 +99,24 @@ static struct InitDesc connection_desc[] =
 };
 
 /**
- * This function will init perception framework and all sub perception sensors
+ * This function will init sensor framework and all sub sensors
  * @param sub_desc framework
  * 
  */
-static int PerceptionFrameworkInit(struct InitDesc sub_desc[])
+static int SensorDeviceFrameworkInit(struct InitDesc sub_desc[])
 {
 	int i = 0;
 	int ret = 0;
 	for ( i = 0; sub_desc[i].fn != NULL; i++ ) {
-		if (0 == strncmp(sub_desc[i].fn_name, "perception_framework", strlen("perception_framework"))) {
+		if (0 == strncmp(sub_desc[i].fn_name, "sensor_framework", strlen("sensor_framework"))) {
 			ret = sub_desc[i].fn();
 			break;
 		}
 	}
 
 	if (0 == ret) {
-		printf("initialize perception_framework success.\n");
-		AppInitDesc(perception_desc);
+		printf("initialize sensor_framework success.\n");
+		AppInitDesc(sensor_desc);
 	}
 
 	return ret;
@@ -127,7 +127,7 @@ static int PerceptionFrameworkInit(struct InitDesc sub_desc[])
  * @param sub_desc framework
  * 
  */
-static int ConnectionFrameworkInit(struct InitDesc sub_desc[])
+static int ConnectionDeviceFrameworkInit(struct InitDesc sub_desc[])
 {
 	int i = 0;
 	int ret = 0;
@@ -153,11 +153,11 @@ static int ConnectionFrameworkInit(struct InitDesc sub_desc[])
 int FrameworkInit()
 {
 #ifdef SUPPORT_SENSOR_FRAMEWORK
-	PerceptionFrameworkInit(framework);
+	SensorDeviceFrameworkInit(framework);
 #endif
 
 #ifdef SUPPORT_CONNECTION_FRAMEWORK
-	ConnectionFrameworkInit(framework);
+	ConnectionDeviceFrameworkInit(framework);
 #endif
 
     return 0;

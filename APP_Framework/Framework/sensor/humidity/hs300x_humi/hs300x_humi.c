@@ -12,7 +12,7 @@
 
 /**
  * @file hs300x_humi.c
- * @brief HS300x humidity driver base perception
+ * @brief HS300x humidity driver base sensor
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2021.04.22
