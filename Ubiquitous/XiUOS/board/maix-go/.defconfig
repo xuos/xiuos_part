@@ -202,11 +202,6 @@ CONFIG_FS_VFS_DEVFS=y
 #
 
 #
-# Perception
-#
-# CONFIG_PERCEPTION_SENSORDEVICE is not set
-
-#
 # connection
 #
 # CONFIG_CONNECTION_AT is not set

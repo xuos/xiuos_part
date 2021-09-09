@@ -13,13 +13,24 @@ config SENSOR_ZG09
                         default "co2_1"
                 
                 if ADD_XIUOS_FETURES
-                        config SENSOR_DEVICE_ZG09_DEV
-                                string "zg09 device name"
-                                default "/dev/uart2_dev2"
+                        config SENSOR_ZG09_DRIVER_EXTUART
+                                bool "Using extra uart to support zg09"
+                                default y
 
-                        config SENSOR_DEVICE_ZG09_DEV_EXT_PORT
-                                int "if ZG09 device using extuart, choose port"
-                                default "4"
+                        config SENSOR_DEVICE_ZG09_DEV
+                                string "zg09 device uart path"
+                                default "/dev/uart2_dev2"
+                                depends on !SENSOR_ZG09_DRIVER_EXTUART
+
+                        if SENSOR_ZG09_DRIVER_EXTUART
+                                config SENSOR_DEVICE_ZG09_DEV
+                                        string "zg09 device extra uart path"
+                                        default "/dev/extuart_dev4"
+
+                                config SENSOR_DEVICE_ZG09_DEV_EXT_PORT
+                                        int "if ZG09 device using extuart, choose port"
+                                        default "4"
+                        endif
                 endif
 
                 if ADD_NUTTX_FETURES

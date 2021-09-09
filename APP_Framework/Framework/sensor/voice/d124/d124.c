@@ -12,7 +12,7 @@
 
 /**
  * @file d124.c
- * @brief D124 voice driver base perception
+ * @brief D124 voice driver base sensor
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2021.04.22
@@ -52,7 +52,7 @@ static void ReadTask(struct SensorDevice *sdev)
  */
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
-    int result = 1;
+    int result = 0;
 
     buff_lock = UserMutexCreate();
 
@@ -66,8 +66,10 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     cfg.serial_parity_mode  = PARITY_NONE;
     cfg.serial_bit_order    = 0;
     cfg.serial_invert_mode  = 0;
+#ifdef SENSOR_D124_DRIVER_EXTUART    
     cfg.ext_uart_no         = SENSOR_DEVICE_D124_DEV_EXT_PORT;
     cfg.port_configure      = PORT_CFG_INIT;
+#endif
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
@@ -98,7 +100,7 @@ static int SensorDeviceClose(struct SensorDevice *sdev)
 {
     UserTaskDelete(active_task_id);
     UserMutexDelete(buff_lock);
-    return 1;
+    return 0;
 }
 
 /**

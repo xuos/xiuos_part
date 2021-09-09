@@ -12,7 +12,7 @@
 
 /**
  * @file hs300x_humi.c
- * @brief HS300x humidity driver base perception
+ * @brief HS300x humidity driver base sensor
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2021.04.22
@@ -38,7 +38,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     sdev->fd = PrivOpen(SENSOR_DEVICE_HS300X_DEV, O_RDWR);
 
-    return 1;
+    return 0;
 }
 
 /**
@@ -57,7 +57,7 @@ static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
     if (PrivRead(sdev->fd, sdev->buffer, len) != 1)
         return -1;
 
-    return 1;
+    return 0;
 }
 
 static struct SensorDone done =

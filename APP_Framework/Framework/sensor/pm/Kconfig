@@ -21,13 +21,24 @@ config SENSOR_PS5308
                         default "pm10_1"
                 
                 if ADD_XIUOS_FETURES
+                        config SENSOR_PS5308_DRIVER_EXTUART
+                                bool "Using extra uart to support PS5308"
+                                default y
+
                         config SENSOR_DEVICE_PS5308_DEV
                                 string "PS5308 device name"
                                 default "/dev/uart2_dev2"
+                                depends on !SENSOR_PS5308_DRIVER_EXTUART
 
-                        config SENSOR_DEVICE_PS5308_DEV_EXT_PORT
-                                int "if PS5308 device using extuart, choose port"
-                                default "4"
+                        if SENSOR_PS5308_DRIVER_EXTUART
+                                config SENSOR_DEVICE_PS5308_DEV
+                                        string "PS5308 device extra uart path"
+                                        default "/dev/extuart_dev4"
+
+                                config SENSOR_DEVICE_PS5308_DEV_EXT_PORT
+                                        int "if PS5308 device using extuart, choose port"
+                                        default "4"
+                        endif
                 endif
 
                 if ADD_NUTTX_FETURES
