@@ -22,6 +22,7 @@ menu "Framework"
     source "$APP_DIR/Framework/connection/Kconfig"
     source "$APP_DIR/Framework/knowing/Kconfig"
     source "$APP_DIR/Framework/control/Kconfig"
+    source "$APP_DIR/Framework/security/Kconfig"
 
 
 endmenu

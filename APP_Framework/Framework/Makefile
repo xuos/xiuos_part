@@ -16,6 +16,9 @@ ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK),y)
 	SRC_DIR += control
 endif
 
+ifeq ($(CONFIG_CRYPTO),y)
+	SRC_DIR += security
+endif
 
 include $(KERNEL_ROOT)/compiler.mk
 

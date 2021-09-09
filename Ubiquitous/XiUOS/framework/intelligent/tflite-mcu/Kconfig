@@ -1,4 +1,0 @@
-config INTELLIGENT_TFLITE
-    bool "Tensorflow Lite for Micro"
-    select  LIB_CPLUSPLUS
-    default n
