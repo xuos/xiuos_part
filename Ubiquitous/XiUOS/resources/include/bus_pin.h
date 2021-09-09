@@ -56,7 +56,7 @@ int PinDriverAttachToBus(const char *drv_name, const char *bus_name);
 int PinDriverRegister(struct Driver *driver);
 
 /*Find the register driver*/
-DriverType PinDriverFind(const char *drv_name, enum DriverType drv_type);
+DriverType PinDriverFind(const char *drv_name, enum DriverType_e drv_type);
 
 /*Get the initialized Pin bus*/
 BusType PinBusInitGet(void);

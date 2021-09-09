@@ -164,13 +164,38 @@ ifeq ($(CONFIG_FS_CH376), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/fs/compatibility_ch376 #
 endif
 
+ifeq ($(CONFIG_TRANSFORM_LAYER_ATTRIUBUTE), y)
+ifeq ($(CONFIG_ADD_XIUOS_FETURES), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xiuos/user_api/posix_support/include #
-KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/sensor #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xiuos #
+endif
+
+ifeq ($(CONFIG_ADD_NUTTX_FETURES), y)
+#
+endif
+
+ifeq ($(CONFIG_ADD_RTTHREAD_FETURES), y)
+#
+endif
+
+endif
+
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/general_functions/list #
+
+ifeq ($(CONFIG_SUPPORT_SENSOR_FRAMEWORK), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/sensor #
+endif
 
 ifeq ($(CONFIG_SUPPORT_CONNECTION_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection #
+endif
+
+ifeq ($(CONFIG_SUPPORT_KNOWING_FRAMEWORK), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/gemmlowp #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/flatbuffers/include #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/ruy #
 endif
 
 ifeq ($(CONFIG_CRYPTO), y)

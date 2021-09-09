@@ -29,7 +29,7 @@ static void SpiDrvLinkInit()
     InitDoubleLinkList(&spidrv_linklist);
 }
 
-DriverType SpiDriverFind(const char *drv_name, enum DriverType drv_type)
+DriverType SpiDriverFind(const char *drv_name, enum DriverType_e drv_type)
 {
     NULL_PARAM_CHECK(drv_name);
     

@@ -9,7 +9,7 @@ ifeq ($(CONFIG_SUPPORT_CONNECTION_FRAMEWORK),y)
 endif
 
 ifeq ($(CONFIG_SUPPORT_KNOWING_FRAMEWORK),y)
-	SRC_DIR += know
+	SRC_DIR += knowing
 endif
 
 ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK),y)

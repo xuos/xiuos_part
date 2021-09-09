@@ -30,7 +30,7 @@ static void I2cDrvLinkInit()
 }
 
 /*Find the regiter driver*/
-DriverType I2cDriverFind(const char *drv_name, enum DriverType drv_type)
+DriverType I2cDriverFind(const char *drv_name, enum DriverType_e drv_type)
 {
     NULL_PARAM_CHECK(drv_name);
     

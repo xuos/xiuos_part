@@ -29,7 +29,7 @@ static void PinDrvLinkInit()
     InitDoubleLinkList(&pindrv_linklist);
 }
 
-DriverType PinDriverFind(const char *drv_name, enum DriverType DrvType)
+DriverType PinDriverFind(const char *drv_name, enum DriverType_e DrvType)
 {
     NULL_PARAM_CHECK(drv_name);
     

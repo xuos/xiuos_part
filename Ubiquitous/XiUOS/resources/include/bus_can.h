@@ -58,7 +58,7 @@ int CanDriverAttachToBus(const char *drv_name, const char *bus_name);
 int CanDriverRegister(struct Driver *driver);
 
 /*Find the register driver*/
-DriverType CanDriverFind(const char *drv_name, enum DriverType drv_type);
+DriverType CanDriverFind(const char *drv_name, enum DriverType_e drv_type);
 
 #ifdef __cplusplus
 }

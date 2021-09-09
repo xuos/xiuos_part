@@ -96,3 +96,12 @@ _ssize_t _write_r(struct _reent *ptr, int fd, const void *buf, size_t nbytes)
 {
     return write(fd, buf, nbytes);
 }
+
+void exit(int __status);
+void _exit(int __status){}
+void _kill(int k)
+{}
+int _getpid(void)
+{
+
+}

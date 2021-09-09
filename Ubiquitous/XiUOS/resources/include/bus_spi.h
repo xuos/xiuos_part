@@ -57,7 +57,7 @@ int SpiDriverAttachToBus(const char *drv_name, const char *bus_name);
 int SpiDriverRegister(struct Driver *driver);
 
 /*Find the register driver*/
-DriverType SpiDriverFind(const char *drv_name, enum DriverType drv_type);
+DriverType SpiDriverFind(const char *drv_name, enum DriverType_e drv_type);
 
 #ifdef __cplusplus
 }

@@ -103,7 +103,7 @@ int SerialDriverAttachToBus(const char *drv_name, const char *bus_name);
 int SerialDriverRegister(struct Driver *driver);
 
 /*Find the regiter driver*/
-DriverType SerialDriverFind(const char *drv_name, enum DriverType drv_type);
+DriverType SerialDriverFind(const char *drv_name, enum DriverType_e drv_type);
 
 #ifdef __cplusplus
 }

@@ -30,7 +30,7 @@ static void CanDrvLinkInit()
 }
 
 /*Find the regiter driver*/
-DriverType CanDriverFind(const char *drv_name, enum DriverType drv_type)
+DriverType CanDriverFind(const char *drv_name, enum DriverType_e drv_type)
 {
     NULL_PARAM_CHECK(drv_name);
     
