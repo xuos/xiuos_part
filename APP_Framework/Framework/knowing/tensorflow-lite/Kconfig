@@ -1,6 +1,7 @@
 menuconfig USING_TENSORFLOWLITEMICRO
     bool "Tensorflow Lite for Micro"
     select RT_USING_CPLUSPLUS
+    select  LIB_CPLUSPLUS
     default n
 
 if USING_TENSORFLOWLITEMICRO

@@ -56,7 +56,7 @@ int TouchDriverAttachToBus(const char *drv_name, const char *bus_name);
 int TouchDriverRegister(struct Driver *driver);
 
 /*Find the register driver*/
-DriverType TouchDriverFind(const char *drv_name, enum DriverType drv_type);
+DriverType TouchDriverFind(const char *drv_name, enum DriverType_e drv_type);
 
 #ifdef __cplusplus
 }

@@ -31,6 +31,12 @@ SECTIONS
         *(.rodata .rodata*)
         *(.glue_7)
         *(.glue_7t)
+
+        PROVIDE(__ctors_start__ = .);
+        KEEP (*(SORT(.init_array.*)))
+        KEEP (*(.init_array))
+        PROVIDE(__ctors_end__ = .);
+        
         PROVIDE(_uetext = ABSOLUTE(.));
     } > usram
     

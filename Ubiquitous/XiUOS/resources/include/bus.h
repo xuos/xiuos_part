@@ -38,7 +38,7 @@ typedef struct HardwareDev *HardwareDevType;
 typedef struct Driver *DriverType;
 
 /* need to add new bus type in ../tool/shell/letter-shell/cmd.c, ensure ShowBus cmd supported*/
-enum BusType
+enum BusType_e
 {
     TYPE_I2C_BUS = 0,
     TYPE_SPI_BUS,
@@ -86,7 +86,7 @@ enum DevState
     DEV_UNINSTALL,
 };
 
-enum DriverType
+enum DriverType_e
 {
     TYPE_I2C_DRV = 0,
     TYPE_SPI_DRV,
@@ -168,7 +168,7 @@ struct HardwareDev
 struct Driver
 {
     int8 drv_name[NAME_NUM_MAX];
-    enum DriverType driver_type;
+    enum DriverType_e driver_type;
     enum DriverState driver_state;
 
     uint32 (*configure)(void *drv, struct BusConfigureInfo *configure_info);
@@ -182,7 +182,7 @@ struct Driver
 struct Bus
 {
     int8 bus_name[NAME_NUM_MAX];
-    enum BusType bus_type;
+    enum BusType_e bus_type;
     enum BusState bus_state;
 
     int32 (*match)(struct Driver *driver, struct HardwareDev *device);

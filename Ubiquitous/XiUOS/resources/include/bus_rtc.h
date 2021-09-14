@@ -86,7 +86,7 @@ int RtcDriverAttachToBus(const char *drv_name, const char *bus_name);
 int RtcDriverRegister(struct Driver *driver);
 
 /*Find the register driver*/
-DriverType RtcDriverFind(const char *drv_name, enum DriverType drv_type);
+DriverType RtcDriverFind(const char *drv_name, enum DriverType_e drv_type);
 
 /*Set Rtc time and date*/
 int RtcDrvSetFunction(char *driver_name, struct RtcSetParam *rtc_set_param);

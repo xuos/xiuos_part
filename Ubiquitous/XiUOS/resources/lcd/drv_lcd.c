@@ -29,7 +29,7 @@ static void LcdDrvLinkInit()
     InitDoubleLinkList(&lcddrv_linklist);
 }
 
-DriverType LcdDriverFind(const char *drv_name, enum DriverType drv_type)
+DriverType LcdDriverFind(const char *drv_name, enum DriverType_e drv_type)
 {
     NULL_PARAM_CHECK(drv_name);
     

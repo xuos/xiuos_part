@@ -29,7 +29,7 @@ static void TouchDrvLinkInit()
     InitDoubleLinkList(&touchdrv_linklist);
 }
 
-DriverType TouchDriverFind(const char *drv_name, enum DriverType drv_type)
+DriverType TouchDriverFind(const char *drv_name, enum DriverType_e drv_type)
 {
     NULL_PARAM_CHECK(drv_name);
     

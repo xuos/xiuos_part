@@ -81,7 +81,7 @@ int I2cDriverAttachToBus(const char *drv_name, const char *bus_name);
 int I2cDriverRegister(struct Driver *driver);
 
 /*Find the register driver*/
-DriverType I2cDriverFind(const char *drv_name, enum DriverType drv_type);
+DriverType I2cDriverFind(const char *drv_name, enum DriverType_e drv_type);
 
 #ifdef __cplusplus
 }

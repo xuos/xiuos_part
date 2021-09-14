@@ -15,6 +15,18 @@ ifeq ($(CONFIG_SUPPORT_CONNECTION_FRAMEWORK), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection #
 endif
 
+ifeq ($(CONFIG_SUPPORT_KNOWING_FRAMEWORK), y)
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing #
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source #
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/gemmlowp #
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/flatbuffers/include #
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/ruy #
+endif
+
+ifeq ($(CONFIG_CRYPTO), y)
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/security/crypto/include #
+endif
+
 COMPILE_APP:
 	@$(eval CPPPATHS=$(APPPATHS))
 	@echo $(SRC_APP_DIR)

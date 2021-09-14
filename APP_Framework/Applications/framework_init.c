@@ -61,7 +61,7 @@ static struct InitDesc framework[] =
 
 static struct InitDesc sensor_desc[] = 
 {
-#ifdef SENSOR_DEVICE_ZG09
+#ifdef SENSOR_DEVICE_D124
 	{ "d124_voice", D124VoiceInit },
 #endif
 

@@ -29,7 +29,7 @@ static void RtcDrvLinkInit()
     InitDoubleLinkList(&rtcdrv_linklist);
 }
 
-DriverType RtcDriverFind(const char *drv_name, enum DriverType drv_type)
+DriverType RtcDriverFind(const char *drv_name, enum DriverType_e drv_type)
 {
     NULL_PARAM_CHECK(drv_name);
     

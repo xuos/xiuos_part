@@ -242,7 +242,7 @@ static inline unsigned long KSwitch0(unsigned int knum)
 {
     uintptr_t param[1] = {0};
     uint8_t num = 0;
-    SERVICETABLE[knum].fun(knum, param, num);
+    return SERVICETABLE[knum].fun(knum, param, num);
 }
 
 static inline unsigned long KSwitch1(unsigned int knum, unsigned long arg1)
@@ -250,7 +250,7 @@ static inline unsigned long KSwitch1(unsigned int knum, unsigned long arg1)
      uintptr_t param[1] = {0};
      uint8_t num = 0;
      param[0] = arg1;
-     SERVICETABLE[knum].fun(knum, param, num );
+     return SERVICETABLE[knum].fun(knum, param, num );
 }
 
 
@@ -261,7 +261,7 @@ static inline unsigned long KSwitch2(unsigned int knum, unsigned long arg1,
      uint8_t num = 0;
      param[0] = arg1;
      param[1] = arg2;
-     SERVICETABLE[knum].fun(knum, param, num );
+     return SERVICETABLE[knum].fun(knum, param, num );
 }
 
 
@@ -274,7 +274,7 @@ static inline unsigned long KSwitch3(unsigned int knum, unsigned long arg1,
     param[1] = arg2;
     param[2] = arg3;
 
-    SERVICETABLE[knum].fun(knum, param, num );
+    return SERVICETABLE[knum].fun(knum, param, num );
 }
 
 static inline unsigned long KSwitch4(unsigned int knum, unsigned long arg1,
@@ -287,7 +287,7 @@ static inline unsigned long KSwitch4(unsigned int knum, unsigned long arg1,
     param[1] = arg2;
     param[2] = arg3;
     param[3] = arg4;
-    SERVICETABLE[knum].fun(knum, param, num );
+    return SERVICETABLE[knum].fun(knum, param, num );
 }
 
 static inline unsigned long KSwitch5(unsigned int knum, unsigned long arg1,
@@ -301,7 +301,7 @@ static inline unsigned long KSwitch5(unsigned int knum, unsigned long arg1,
     param[2] = arg3;
     param[3] = arg4;
     param[4] = arg5;
-    SERVICETABLE[knum].fun(knum, param, num );
+    return SERVICETABLE[knum].fun(knum, param, num );
 }
 
 static inline unsigned long KSwitch6(unsigned int knum, unsigned long arg1,
@@ -317,7 +317,7 @@ static inline unsigned long KSwitch6(unsigned int knum, unsigned long arg1,
     param[3] = arg4;
     param[4] = arg5;
     param[5] = arg6;
-    SERVICETABLE[knum].fun(knum, param, num );
+    return SERVICETABLE[knum].fun(knum, param, num );
 }
 
 #endif

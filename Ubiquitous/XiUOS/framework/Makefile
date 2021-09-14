@@ -1,3 +1,0 @@
-SRC_DIR := intelligent security
-
-include $(KERNEL_ROOT)/compiler.mk
