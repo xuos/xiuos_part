@@ -9,7 +9,7 @@ config SENSOR_D124
                         default "d124_1"
                 
                 config SENSOR_QUANTITY_D124_VOICE
-                        string "D124 quantity PM1.0 name"
+                        string "D124 quantity voice name"
                         default "voice_1"
                 
                 if ADD_XIUOS_FETURES

@@ -61,8 +61,7 @@ void SX1276Init( void )
 
     SX1276Reset( );                 
 
-	SX1276Read(0x06, &TempReg);      
-    KPrintf("SX1276 Read 0x%x\n", &TempReg);
+	SX1276Read(0x06, &TempReg);
 
 	if(TempReg != 0x6C)
 	{
