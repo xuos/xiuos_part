@@ -21,8 +21,8 @@
 #include <sensor.h>
 
 static struct SensorDevice ps5308;
-static int32_t active_task_id;
-static int buff_lock;
+static pthread_t active_task_id;
+static pthread_mutex_t buff_lock;
 
 static struct SensorProductInfo info =
 {
@@ -35,13 +35,14 @@ static struct SensorProductInfo info =
  * @description: Read sensor task
  * @param sdev - sensor device pointer
  */
-static void ReadTask(struct SensorDevice *sdev)
+static void *ReadTask(void *parameter)
 {
+    struct SensorDevice *sdev = (struct SensorDevice *)parameter;
     while (1) {
-        UserMutexObtain(buff_lock, WAITING_FOREVER);
+        PrivMutexObtain(&buff_lock);
         sdev->done->read(sdev, 32);
-        UserMutexAbandon(buff_lock);
-        UserTaskDelay(750);
+        PrivMutexAbandon(&buff_lock);
+        PrivTaskDelay(750);
     }
 }
 
@@ -54,7 +55,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     int result = 0;
 
-    buff_lock = UserMutexCreate();
+    PrivMutexCreate(&buff_lock, 0);
 
     sdev->fd = open(SENSOR_DEVICE_PS5308_DEV, O_RDWR);
     
@@ -73,17 +74,8 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
 
     result = ioctl(sdev->fd, OPE_INT, &cfg);
 
-    UtaskType active_task;
-    const char name[NAME_NUM_MAX] = "ps5308_task";
-
-    strncpy(active_task.name, name, strlen(name));
-    active_task.func_entry  = ReadTask;
-    active_task.func_param  = sdev;
-    active_task.prio        = KTASK_PRIORITY_MAX/2;
-    active_task.stack_size  = 1024;
-
-    active_task_id = UserTaskCreate(active_task);
-    result = UserTaskStartup(active_task_id);
+    PrivTaskCreate(&active_task_id, NULL, &ReadTask, sdev);
+    PrivTaskStartup(&active_task_id);
 
     return result;
 }
@@ -95,8 +87,8 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
  */
 static int SensorDeviceClose(struct SensorDevice *sdev)
 {
-    UserTaskDelete(active_task_id);
-    UserMutexDelete(buff_lock);
+    PrivTaskDelete(active_task_id, 0);
+    PrivMutexDelete(&buff_lock);
     return 0;
 }
 
@@ -114,7 +106,7 @@ static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
         read(sdev->fd, &tmp, 1);
         if ((tmp == 0x44) || (timeout >= 1000))
             break;
-        UserTaskDelay(10);
+        PrivTaskDelay(10);
         ++timeout;
     }
     
@@ -175,7 +167,7 @@ static int32_t ReadPm1_0(struct SensorQuantity *quant)
     uint32_t result;
     if (quant->sdev->done->read != NULL) {
         uint16_t checksum = 0;
-        UserMutexObtain(buff_lock, WAITING_FOREVER);
+        PrivMutexObtain(&buff_lock);
 
         for (uint8_t i = 0; i < 30; i++)
             checksum += quant->sdev->buffer[i];          
@@ -242,7 +234,7 @@ static int32_t ReadPm2_5(struct SensorQuantity *quant)
     uint32_t result;
     if (quant->sdev->done->read != NULL) {
         uint16_t checksum = 0;
-        UserMutexObtain(buff_lock, WAITING_FOREVER);
+        PrivMutexObtain(&buff_lock);
 
         for (uint i = 0; i < 30; i++)
             checksum += quant->sdev->buffer[i];
@@ -309,7 +301,7 @@ static int32_t ReadPm10(struct SensorQuantity *quant)
     uint32_t result;
     if (quant->sdev->done->read != NULL) {
         uint16_t checksum = 0;
-        UserMutexObtain(buff_lock, WAITING_FOREVER);
+        PrivMutexObtain(&buff_lock);
 
         for (uint i = 0; i < 30; i++)
             checksum += quant->sdev->buffer[i];

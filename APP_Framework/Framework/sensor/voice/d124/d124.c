@@ -22,7 +22,7 @@
 
 static struct SensorDevice d124;
 static int32_t active_task_id;
-static int buff_lock;
+static pthread_mutex_t buff_lock;
 
 static struct SensorProductInfo info =
 {
@@ -35,13 +35,14 @@ static struct SensorProductInfo info =
  * @description: Read sensor task
  * @param sdev - sensor device pointer
  */
-static void ReadTask(struct SensorDevice *sdev)
+static void *ReadTask(void *parameter)
 {
+    struct SensorDevice *sdev = (struct SensorDevice *)parameter;
     while (1) {
-        UserMutexObtain(buff_lock, WAITING_FOREVER);
+        PrivMutexObtain(&buff_lock);
         sdev->done->read(sdev, 5);
-        UserMutexAbandon(buff_lock);
-        UserTaskDelay(750);
+        PrivMutexAbandon(&buff_lock);
+        PrivTaskDelay(750);
     }
 }
 
@@ -53,8 +54,9 @@ static void ReadTask(struct SensorDevice *sdev)
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     int result = 0;
+    pthread_attr_t attr;
 
-    buff_lock = UserMutexCreate();
+    PrivMutexCreate(&buff_lock, 0);
 
     sdev->fd = PrivOpen(SENSOR_DEVICE_D124_DEV, O_RDWR);
     
@@ -76,17 +78,11 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     ioctl_cfg.args = &cfg;
     result = PrivIoctl(sdev->fd, OPE_INT, &ioctl_cfg);
 
-    UtaskType active_task;
-    const char name[NAME_NUM_MAX] = "d124_task";
+    attr.schedparam.sched_priority = 20;
+    attr.stacksize = 2048;
 
-    strncpy(active_task.name, name, strlen(name));
-    active_task.func_entry  = ReadTask;
-    active_task.func_param  = sdev;
-    active_task.prio        = KTASK_PRIORITY_MAX/2;
-    active_task.stack_size  = 2048;
-
-    active_task_id = UserTaskCreate(active_task);
-    result = UserTaskStartup(active_task_id);
+    PrivTaskCreate(&active_task_id, &attr, &ReadTask, sdev);
+    PrivTaskStartup(&active_task_id);
 
     return result;
 }
@@ -98,8 +94,8 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
  */
 static int SensorDeviceClose(struct SensorDevice *sdev)
 {
-    UserTaskDelete(active_task_id);
-    UserMutexDelete(buff_lock);
+    PrivTaskDelete(active_task_id, 0);
+    PrivMutexDelete(&buff_lock);
     return 0;
 }
 
@@ -117,7 +113,7 @@ static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
         PrivRead(sdev->fd, &tmp, 1);
         if ((tmp == 0xAA) || (timeout >= 1000))
             break;
-        UserTaskDelay(10);
+        PrivTaskDelay(10);
         ++timeout;
     }
     
@@ -176,7 +172,7 @@ static int32_t ReadVoice(struct SensorQuantity *quant)
 
     uint32_t result;
     if (quant->sdev->done->read != NULL) {
-        UserMutexObtain(buff_lock, WAITING_FOREVER);      
+        PrivMutexObtain(&buff_lock);      
         
         if (quant->sdev->buffer[3] == quant->sdev->buffer[1] + quant->sdev->buffer[2]) {
             result = ((uint16_t)quant->sdev->buffer[1] << 8) + (uint16_t)quant->sdev->buffer[2];

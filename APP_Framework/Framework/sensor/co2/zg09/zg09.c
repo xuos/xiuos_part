@@ -81,7 +81,7 @@ static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
         PrivRead(sdev->fd, &tmp, 1);
         if ((tmp == 0xFE) || (timeout >= 1000))
             break;
-        UserTaskDelay(10);
+        PrivTaskDelay(10);
         ++timeout;
     }
     

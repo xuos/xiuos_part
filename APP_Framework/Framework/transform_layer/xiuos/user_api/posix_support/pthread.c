@@ -18,7 +18,8 @@
 * @date:    2020/4/20
 *
 */
-#include<string.h>
+#include <string.h>
+#include <stdio.h>
 #include "include/pthread.h"
 
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
@@ -26,12 +27,22 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 {
     int ret ;
     int pid ;
+    char task_name[32] = {0};
+    static int utask_id = 0;
     UtaskType task ;
+
+    if (NULL == attr) {
+        task.prio = KTASK_PRIORITY_MAX / 2;
+        task.stack_size = 1024 ;
+    } else {
+        task.prio = attr->schedparam.sched_priority ;
+        task.stack_size = attr->stacksize ;
+    }
+
     task.func_entry = start_routine ;
-    task.func_param = arg ;
-    memcpy(task.name , "utask", 6);
-    task.prio = 20 ;
-    task.stack_size = 1024 ;
+    task.func_param = arg;
+    snprintf(task_name, sizeof(task_name) - 1, "utask%02d",utask_id++);
+    memcpy(task.name , task_name, sizeof(task_name) - 1);
 
     pid = UserTaskCreate(task);
     if (pid < 0)

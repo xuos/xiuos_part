@@ -52,7 +52,7 @@ static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
     if (PrivWrite(sdev->fd, NULL, 0) != 1)
         return -1;
     
-    UserTaskDelay(50);
+    PrivTaskDelay(50);
 
     if (PrivRead(sdev->fd, sdev->buffer, len) != 1)
         return -1;
