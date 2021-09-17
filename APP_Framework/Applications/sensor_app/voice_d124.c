@@ -29,7 +29,7 @@ void VoiceD124(void)
 {
     struct SensorQuantity *voice = SensorQuantityFind(SENSOR_QUANTITY_D124_VOICE, SENSOR_QUANTITY_VOICE);
     SensorQuantityOpen(voice);
-    UserTaskDelay(2000);
+    PrivTaskDelay(2000);
     uint16 result = SensorQuantityRead(voice);
     printf("voice : %d.%d dB\n", result/(10*voice->value.decimal_places), result%(10*voice->value.decimal_places));
     SensorQuantityClose(voice);
