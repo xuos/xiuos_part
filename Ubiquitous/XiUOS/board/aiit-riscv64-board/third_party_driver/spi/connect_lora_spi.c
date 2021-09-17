@@ -1,31 +1,22 @@
 /*
- * Original Copyright (c) 2006-2018, RT-Thread Development Team
- * Modified Copyright (c) 2020 AIIT XUOS Lab
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
 
- * http://www.apache.org/licenses/LICENSE-2.0
-
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * Change Logs:
- * Date           Author           Notes
- * 2019-02-20     XiaojieFan       the first version
- */
-
-/* 
- * Modified by:     AIIT XUOS Lab
- * Modified date:   2020-09-01
- * Description:     replace original macro and basic date type with AIIT XUOS Lab's own defination
- *                  start using AIIT XUOS Lab's own functional interfaces 
- *                  change some header files
- */
+/**
+* @file connect_lora_spi.c
+* @brief support to register spi lora pointer and function
+* @version 1.0 
+* @author AIIT XUOS Lab
+* @date 2021-05-17
+*/
 
 #include <connect_spi_lora.h>
 
@@ -136,14 +127,7 @@ inline uint8_t SX1276ReadDio5(void)
 
 inline void SX1276WriteRxTx(uint8_t txEnable)
 {
-    if (txEnable != 0)
-    {
-
-    }
-    else
-    {
-
-    }
+    return;
 }
 
 void SX1276SetReset(uint8_t state)
@@ -319,6 +303,11 @@ static uint32 SpiLoraOpen(void *dev)
     KPrintf("SpiLoraOpen start\n");
 
     x_err_t ret = EOK;
+    static x_bool lora_init_status = RET_FALSE;
+
+    if (RET_TRUE == lora_init_status) {
+        return EOK;
+    }
 
     struct HardwareDev *haldev = (struct HardwareDev *)dev;
 
@@ -361,13 +350,22 @@ static uint32 SpiLoraOpen(void *dev)
         KPrintf("LoRa check ok!\nNote: The length of the message that can be sent in a single time is 120 characters\n");
     }
     
+    lora_init_status = RET_TRUE;
+
     return ret;
+}
+
+static uint32 SpiLoraClose(void *dev)
+{
+    NULL_PARAM_CHECK(dev);
+
+    return EOK;
 }
 
 static const struct LoraDevDone lora_done =
 {
     .open = SpiLoraOpen,
-    .close = NONE,
+    .close = SpiLoraClose,
     .write = SpiLoraWrite,
     .read = SpiLoraRead,
 };
@@ -467,7 +465,7 @@ int LoraSx12xxSpiDeviceInit(void)
     return EOK;
 }
 
-
+#ifdef LORA_TEST
 /*Just for lora test*/
 static struct Bus *bus;
 static struct HardwareDev *dev;
@@ -532,4 +530,4 @@ static void LoraSend(int argc, char *argv[])
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
 LoraSend, LoraSend,  lora send message );
-
+#endif
