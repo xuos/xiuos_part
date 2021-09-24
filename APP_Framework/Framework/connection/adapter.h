@@ -90,6 +90,9 @@ enum NetRoleType
     SERVER,
     MASTER,
     SLAVE,
+    COORDINATOR,
+    ROUTER,
+    END_DEVICE,
     ROLE_NONE,
 };
 
@@ -112,6 +115,7 @@ struct AdapterProductInfo
     uint32_t functions;
     const char *vendor_name;
     const char *model_name;
+    uint32_t work_mode;
 
     void *model_done;
 };
@@ -154,7 +158,7 @@ struct PrivProtocolDone
 
 struct Adapter
 {
-    char *name;
+    char name[32];
     int fd;
 
     int product_info_flag;

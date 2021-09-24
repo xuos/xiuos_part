@@ -24,7 +24,7 @@ ifeq ($(CONFIG_ADAPTER_BLUETOOTH),y)
 	SRC_DIR += bluetooth
 endif
 
-ifeq ($(CONFIG_ADAPTER_ZIGBEE),y)
+ifeq ($(CONFIG_CONNECTION_ADAPTER_ZIGBEE),y)
 	SRC_DIR += zigbee
 endif
 
