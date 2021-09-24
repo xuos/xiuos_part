@@ -1,14 +1,7 @@
-config ADAPTER_BLUETOOTH
-        bool "Using bluetooth adapter function"
+config ADAPTER_HC08
+        bool "Using bluetooth adapter device HC08"
         default y
 
-        if ADAPTER_BLUETOOTH
-            config ADAPTER_HC08
-                    bool "Using bluetooth adapter device HC08"
-                    default y
-            
-            if ADAPTER_HC08
-                source "$APP_DIR/Framework/connection/bluetooth/HC08/Kconfig"
-            endif
-                
-        endif
+if ADAPTER_HC08
+    source "$APP_DIR/Framework/connection/bluetooth/HC08/Kconfig"
+endif      

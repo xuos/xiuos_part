@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <user_api.h>
-#include <bus.h>
 
 #define AT_CMD_MAX_LEN 128
 #define AT_AGENT_MAX 2
@@ -36,12 +35,13 @@ static uint32 last_cmd_len = 0;
 
 static struct ATAgent at_agent_table[AT_AGENT_MAX] = {0};
 
-uint IpTint(char *ipstr){
+unsigned int IpTint(char *ipstr)
+{
     if (ipstr == NULL)
         return 0;
 
     char *token;
-    uint i = 3, total = 0, cur;
+    unsigned int i = 3, total = 0, cur;
 
     token = strtok(ipstr, ".");
 
@@ -70,7 +70,7 @@ void SwapStr(char *str, int begin, int end)
     }
 }
 
-char *IpTstr(uint ipint)
+char *IpTstr(unsigned int ipint)
 {
     int LEN = 16;
     char *new = (char *)malloc(LEN);
@@ -124,12 +124,16 @@ uint32 ATSprintf(int fd, const char *format, va_list params)
 	PrivWrite(fd, send_buf, last_cmd_len);
 }
 
-int ATOrderSend(ATAgentType agent, uint32 timeout, ATReplyType reply, const char *cmd_expr, ...)
+int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const char *cmd_expr, ...)
 {
     if (agent == NULL){
         printf("ATAgent is null");
         return -ERROR;
     }
+
+    struct timespec abstime;
+
+    abstime.tv_sec = timeout_s;
 
     agent->receive_mode = AT_MODE;
 
@@ -152,7 +156,7 @@ int ATOrderSend(ATAgentType agent, uint32 timeout, ATReplyType reply, const char
         va_start(params, cmd_expr);
         ATSprintf(agent->fd, cmd_expr, params);
         va_end(params);
-        if (UserSemaphoreObtain(agent->rsp_sem, timeout) != EOK){
+        if (PrivSemaphoreObtainWait(&agent->rsp_sem, &abstime) != EOK){
             result = -ETIMEOUT;
             goto __out;
         }
@@ -185,21 +189,23 @@ int EntmSend(ATAgentType agent, const char *data, int len)
     memcpy(send_buf, data, len);
     memcpy(send_buf + len, "!@", 2);
 
-	write(agent->fd, send_buf, len + 2);
+	PrivWrite(agent->fd, send_buf, len + 2);
 
     return EOK;
 }
 
-int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int time_out)
+int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
 {
-    UserTaskDelay(1000);
+    struct timespec abstime;
+
+    abstime.tv_sec = timeout_s;
+
+    PrivTaskDelay(1000);
 
     memset(agent->entm_recv_buf, 0, ENTM_RECV_MAX);
     agent->entm_recv_len = 0;
 
-    UserSemaphoreSetValue(agent->entm_rx_notice, 0);
-
-    if (UserSemaphoreObtain(agent->entm_rx_notice, time_out)){
+    if (PrivSemaphoreObtainWait(&agent->entm_rx_notice, &abstime)){
         return ERROR;
     }
 
@@ -225,16 +231,17 @@ static int GetCompleteATReply(ATAgentType agent)
     agent->maintain_len = 0;
 
     while (1){
-        read(agent->fd, &ch, 1);
+        PrivRead(agent->fd, &ch, 1);
 
         printf(" %c(0x%x)\n", ch, ch);
 
         if (agent->receive_mode == ENTM_MODE){
             if (agent->entm_recv_len < ENTM_RECV_MAX){
-                agent->entm_recv_buf[agent->entm_recv_len++] = ch;
+                agent->entm_recv_buf[agent->entm_recv_len] = ch;
+                agent->entm_recv_len++;
 
                 if (last_ch == '!' && ch == '@'){
-                    UserSemaphoreAbandon(agent->entm_rx_notice);
+                    PrivSemaphoreAbandon(&agent->entm_rx_notice);
                 }
 
                 last_ch = ch;
@@ -245,7 +252,8 @@ static int GetCompleteATReply(ATAgentType agent)
         }
         else if (agent->receive_mode == AT_MODE){
             if (read_len < agent->maintain_max){
-                agent->maintain_buffer[read_len++] = ch;
+                agent->maintain_buffer[read_len] = ch;
+                read_len++;
                 agent->maintain_len = read_len;
             }else{
                 printf("maintain_len is_full ...\n");
@@ -289,25 +297,25 @@ static int DeleteATAgent(ATAgentType agent)
     }
 
     if (agent->entm_rx_notice){
-        UserSemaphoreDelete(agent->entm_rx_notice);
+        PrivSemaphoreDelete(&agent->entm_rx_notice);
     }
 
     if (agent->fd > 0){
-        close(agent->fd);
+        PrivClose(agent->fd);
     }
 
     if (agent->rsp_sem){
-        UserSemaphoreDelete(agent->rsp_sem);
+        PrivSemaphoreDelete(&agent->rsp_sem);
     }
 
     if (agent->maintain_buffer){
-        free(agent->maintain_buffer);
+        PrivFree(agent->maintain_buffer);
     }
 
     memset(agent, 0x00, sizeof(struct ATAgent));
 }
 
-static void ATAgentReceiveProcess(void *param)
+static void *ATAgentReceiveProcess(void *param)
 {
     ATAgentType agent = (ATAgentType)param;
     const struct at_urc *urc;
@@ -329,7 +337,7 @@ static void ATAgentReceiveProcess(void *param)
                 }
 
                 agent->reply = NULL;
-                UserSemaphoreAbandon(agent->rsp_sem);
+                PrivSemaphoreAbandon(&agent->rsp_sem);
             }
         }
     }
@@ -339,56 +347,51 @@ static int ATAgentInit(ATAgentType agent)
 {
     int result = EOK;
 	UtaskType at_utask;
-    do
-    {
-        agent->maintain_len = 0;
-        agent->maintain_buffer = (char *)malloc(agent->maintain_max);
 
-        if (agent->maintain_buffer == NONE){
-            break;
-        }
+    agent->maintain_len = 0;
+    agent->maintain_buffer = (char *)malloc(agent->maintain_max);
 
-        agent->entm_rx_notice = UserSemaphoreCreate(0);
-        if (agent->entm_rx_notice == 0){
-            break;
-        }
+    if (agent->maintain_buffer == NONE){
+        printf("ATAgentInit malloc maintain_buffer error\n");
+        goto __out;
+    }
 
-        agent->rsp_sem = UserSemaphoreCreate(0);
-        if (agent->rsp_sem == 0){
-            break;
-        }
-        if(PrivMutexCreate(&agent->lock, 0) < 0) {
-            printf("AdapterFrameworkInit mutex create failed.\n");
-        }
-        if (agent->lock == 0){
-            break;
-        }
+    result = PrivSemaphoreCreate(&agent->entm_rx_notice, 0, 0);
+    if (result < 0){
+        printf("ATAgentInit create entm sem error\n");
+        goto __out;
+    }
 
-        agent->receive_mode = ENTM_MODE;
+    result = PrivSemaphoreCreate(&agent->rsp_sem, 0, 0);
+    if (result < 0){
+        printf("ATAgentInit create rsp sem error\n");
+        goto __out;
+    }
 
-		strncpy(at_utask.name, "recv_task", strlen("recv_task"));
-        at_utask.func_entry = ATAgentReceiveProcess;
-        at_utask.func_param = agent;
-        at_utask.stack_size = 1024;
-        at_utask.prio = 18;
+    if(PrivMutexCreate(&agent->lock, 0) < 0) {
+        printf("AdapterFrameworkInit mutex create failed.\n");
+        goto __out;
+    }
 
-        agent->at_handler = UserTaskCreate(at_utask);
+    agent->receive_mode = ENTM_MODE;
 
-        // struct SerialDataCfg data_cfg;
-        // memset(&data_cfg, 0, sizeof(struct SerialDataCfg));
-        // data_cfg.serial_baud_rate = 57600;
-        // ioctl(agent->fd, OPE_INT, &data_cfg);
+    pthread_attr_t attr;
+    attr.schedparam.sched_priority = 18;
+    attr.stacksize = 1024;
 
-        if (agent->at_handler == 0)        {
-            break;
-        }
+    PrivTaskCreate(&agent->at_handler, &attr, ATAgentReceiveProcess, agent);
 
-        result = EOK;
-        return result;
-    } while (1);
+    // struct SerialDataCfg data_cfg;
+    // memset(&data_cfg, 0, sizeof(struct SerialDataCfg));
+    // data_cfg.serial_baud_rate = 57600;
+    // ioctl(agent->fd, OPE_INT, &data_cfg);
 
+    return result;
+
+__out:
     DeleteATAgent(agent);
     result = -ERROR;
+
     return result;
 }
 
@@ -424,7 +427,7 @@ int InitATAgent(const char *agent_name, int agent_fd, uint32 maintain_max)
     result = ATAgentInit(agent);
     if (result == EOK)
     {
-        UserTaskStartup(agent->at_handler);
+        PrivTaskStartup(&agent->at_handler);
     }
 
     return result;
@@ -445,7 +448,7 @@ ATReplyType CreateATReply(uint32 reply_max_len)
     reply->reply_buffer = (char *)malloc(reply_max_len);
     if (reply->reply_buffer == NULL){
         printf("no more memory\n");
-        free(reply);
+        PrivFree(reply);
         return NULL;
     }
 
@@ -456,13 +459,13 @@ void DeleteATReply(ATReplyType reply)
 {
     if (reply){
         if (reply->reply_buffer){
-            free(reply->reply_buffer);
+            PrivFree(reply->reply_buffer);
             reply->reply_buffer = NULL;
         }
     }
 
     if (reply){
-        free(reply);
+        PrivFree(reply);
         reply = NULL;
     }
 }

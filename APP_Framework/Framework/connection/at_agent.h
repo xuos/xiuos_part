@@ -54,7 +54,7 @@ struct ATAgent
     ATReplyType reply;
     int rsp_sem;
 
-    int32 at_handler;
+    pthread_t at_handler;
 
     #define ENTM_RECV_MAX 256
     char entm_recv_buf[ENTM_RECV_MAX];
@@ -65,7 +65,7 @@ struct ATAgent
 typedef struct ATAgent *ATAgentType;
 
 int EntmSend(ATAgentType agent, const char *data, int len);
-int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int time_out);
+int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s);
 char *GetReplyText(ATReplyType reply);
 ATReplyType CreateATReply(uint32 reply_max_len);
 uint IpTint(char *ipstr);
@@ -75,7 +75,7 @@ ATAgentType GetATAgent(const char *agent_name);
 int InitATAgent(const char *agent_name, int fd, uint32 maintain_max);
 int ParseATReply(char* str, const char *format, ...);
 void DeleteATReply(ATReplyType reply);
-int ATOrderSend(ATAgentType agent, uint32 timeout, ATReplyType reply, const char *cmd_expr, ...);
+int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const char *cmd_expr, ...);
 
 #define REPLY_TIME_OUT 3000
 
