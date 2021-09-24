@@ -5,7 +5,7 @@ Import('rtconfig')
 cwd = GetCurrentDir()
 DEPENDS = [""]
 
-SOURCES = []
+SOURCES = ['transform.c']
 path =  [cwd]
 objs = DefineGroup('transform', src = SOURCES, depend = DEPENDS,CPPPATH = path) 
 Return("objs") 
