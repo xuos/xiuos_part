@@ -200,11 +200,11 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int time_out)
     UserSemaphoreSetValue(agent->entm_rx_notice, 0);
 
     if (UserSemaphoreObtain(agent->entm_rx_notice, time_out)){
-        return ERROR;
+        return -ERROR;
     }
 
     if (buffer_len < agent->entm_recv_len){
-        return ERROR;
+        return -ERROR;
     }
 
     printf("EntmRecv once .\n");

@@ -363,7 +363,7 @@ static int E18Send(struct Adapter *adapter, const void *buf, size_t len)
     switch (adapter->info->work_mode)
     {
         case TT_MODE1:
-            PrivWrite(adapter->fd, buf, len);
+            EntmSend(adapter->agent, buf, len);
             break;
         case STT_MODE2:
             /* need to do */
@@ -390,12 +390,7 @@ static int E18Recv(struct Adapter *adapter, void *buf, size_t len)
             if(!adapter->agent){
                 PrivRead(adapter->fd, buf, len);
             } else {
-                // while(1){
-                    if(adapter->agent->temp_recv_len > 0){
-                        memcpy(buf,adapter->agent->temp_recv_buf,adapter->agent->temp_recv_len);
-                        break;
-                    }
-                // }
+               EntmRecv(adapter->agent, buf, len, 3000);/* wait timeout 3000ms*/
             }
             break;
         case STT_MODE2:
