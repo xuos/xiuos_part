@@ -4,8 +4,9 @@ Import('rtconfig')
 from building import *
 
 cwd = GetCurrentDir()
-
-SOURCES = ['framework_init.c']
+SOURCES = []
+if GetDepend(['SUPPORT_SENSOR_FRAMEWORK']):
+    SOURCES = ['sensor.c'] + SOURCES
 path =  [cwd]
 objs = []
 group = DefineGroup('sensor', SOURCES, depend = [], CPPPATH = [cwd])

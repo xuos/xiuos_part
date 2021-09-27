@@ -11,12 +11,13 @@
 */
 #include <stdio.h>
 #include <string.h>
-#include <user_api.h>
+#include <transform.h>
 
 extern int SensorFrameworkInit(void);
 extern int AdapterFrameworkInit(void);
 
 extern int Adapter4GInit(void);
+extern int AdapterBlueToothInit(void);
 extern int AdapterWifiInit(void);
 extern int AdapterZigbeeInit(void);
 
@@ -90,13 +91,16 @@ static struct InitDesc sensor_desc[] =
 
 static struct InitDesc connection_desc[] = 
 {
-#ifdef ADAPTER_4G
+#ifdef CONNECTION_ADAPTER_4G
 	{ "4G adpter", Adapter4GInit},
 #endif
 #ifdef CONNECTION_ADAPTER_ZIGBEE
 	{ "zigbee adpter", AdapterZigbeeInit},
 #endif
-#ifdef ADAPTER_WIFI
+#ifdef CONNECTION_ADAPTER_BLUETOOTH
+	{ "BlueTooth adpter", AdapterBlueToothInit},
+#endif
+#ifdef CONNECTION_ADAPTER_WIFI
 	{ "Wifi adpter", AdapterWifiInit},
 #endif
 	{ "NULL", NULL },

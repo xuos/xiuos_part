@@ -439,7 +439,7 @@ AdapterProductInfoType E18Attach(struct Adapter *adapter)
         return NULL;
     }
 
-    product_info->model_name = ADAPTER_ZIGBEE_E18;
+    strncpy(product_info->model_name, ADAPTER_ZIGBEE_E18,sizeof(product_info->model_name));
     product_info->model_done = (void *)&E18_done;
 
     return product_info;

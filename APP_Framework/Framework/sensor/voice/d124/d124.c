@@ -21,7 +21,7 @@
 #include <sensor.h>
 
 static struct SensorDevice d124;
-static int32_t active_task_id;
+static pthread_t active_task_id;
 static pthread_mutex_t buff_lock;
 
 static struct SensorProductInfo info =
