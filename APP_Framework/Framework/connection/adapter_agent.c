@@ -369,7 +369,7 @@ static int ATAgentInit(ATAgentType agent)
 		strncpy(at_utask.name, "recv_task", strlen("recv_task"));
         at_utask.func_entry = ATAgentReceiveProcess;
         at_utask.func_param = agent;
-        at_utask.stack_size = 1024;
+        at_utask.stack_size = 2048;
         at_utask.prio = 18;
 
         agent->at_handler = UserTaskCreate(at_utask);
@@ -448,7 +448,7 @@ ATReplyType CreateATReply(uint32 reply_max_len)
         free(reply);
         return NULL;
     }
-
+    memset(reply->reply_buffer,0,reply_max_len);
     return reply;
 }
 

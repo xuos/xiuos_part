@@ -91,11 +91,9 @@ int AdapterZigbeeInit(void)
     return ret;
 }
 
-/******************4G TEST*********************/
+/******************TEST*********************/
 int openzigbee(void)
 {
-    const char *send_msg = "SendHeart";
-    char recv_msg[128];
     int ret = 0;
 
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_ZIGBEE_NAME);
@@ -118,24 +116,6 @@ int openzigbee(void)
         printf("join adapter failed\n");
         return -1;
     }
-
-    adapter->net_role = COORDINATOR;
-    ret = AdapterDeviceControl(adapter, CONFIG_ZIGBEE_NET_ROLE, NULL);
-    if(ret < 0){
-        printf("control adapter failed\n");
-        return -1;
-    }
-
-    // while (1) {
-    //     ret = AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
-    //     if(ret < 0){
-    //         printf(" adapter send failed\n");
-    //         break;
-    //     }
-    //     printf("zigbee send msg %s\n", send_msg);
-    //     AdapterDeviceRecv(adapter, recv_msg, 128);
-    //     printf("zigbee recv msg %s\n", recv_msg);
-    // }
 #endif
 
     return 0;    

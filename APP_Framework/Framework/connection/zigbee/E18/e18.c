@@ -159,15 +159,8 @@ static int E18NetworkModeConfig(struct Adapter *adapter)
             break;
     }
 
-    if(!ret){
-        ret = AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
-        if(ret < 0) {
-            printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_exit);
-            ret = -1;
-        }
-    }
-
 out:
+    AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
     return ret;
 }
 
@@ -221,20 +214,16 @@ static int E18NetRoleConfig(struct Adapter *adapter)
             ret = -1;
             break;
     }
-    if(!ret){
-        ret = AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
-        if(ret < 0) {
-            printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_exit);
-            ret = -1;
-        }
-    }
+
 out:
+    AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
     return ret;
 }
 
 static int E18Open(struct Adapter *adapter)
 {
     int ret = 0;
+    int try_times = 5;
 
     if (NULL == adapter) {
         return -1;
@@ -255,7 +244,16 @@ static int E18Open(struct Adapter *adapter)
         ATAgentType at_agent = GetATAgent(agent_name);
         adapter->agent = at_agent;
     }
-    ret = E18NetRoleConfig(adapter);
+    
+try_again:
+    while(try_times--){
+        ret = E18NetRoleConfig(adapter);
+        if(ret < 0){
+            printf("E18NetRoleConfig failed [%d] times.\n",try_times);
+            goto try_again;
+        }
+    }
+    
     if(ret < 0){
         printf("E18NetRoleConfig failed\n");
         return -1;
