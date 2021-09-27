@@ -11,7 +11,7 @@
 */
 #include <stdio.h>
 #include <string.h>
-#include <user_api.h>
+#include <transform.h>
 
 extern int SensorFrameworkInit(void);
 extern int AdapterFrameworkInit(void);

@@ -23,7 +23,7 @@
 #define __LIST_H__
 
 #include "libc.h"
-
+#include<stddef.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
