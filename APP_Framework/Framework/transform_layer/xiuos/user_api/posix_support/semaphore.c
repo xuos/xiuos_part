@@ -24,9 +24,8 @@
 
 int sem_init(sem_t *sem, int pshared, unsigned int value)
 {
-    int32 ret = 0;
-    ret = UserSemaphoreCreate(value);
-    if (ret < 0) {
+    *sem = UserSemaphoreCreate(value);
+    if (*sem < 0) {
         return -1;
     }
 

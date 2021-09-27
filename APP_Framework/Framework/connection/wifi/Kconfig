@@ -1,14 +1,7 @@
-config ADAPTER_WIFI
-        bool "Using WIFI adapter function"
+config ADAPTER_HFA21
+        bool "Using wifi adapter device HFA21"
         default y
 
-        if ADAPTER_WIFI
-            config ADAPTER_HFA21
-                    bool "Using wifi adapter device HFA21"
-                    default y
-            
-            if ADAPTER_HFA21
-                source "$APP_DIR/Framework/connection/wifi/HFA21/Kconfig"
-            endif
-                
-        endif
+if ADAPTER_HFA21
+    source "$APP_DIR/Framework/connection/wifi/HFA21/Kconfig"
+endif

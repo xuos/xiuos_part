@@ -253,11 +253,11 @@ AdapterProductInfoType Ec200tAttach(struct Adapter *adapter)
     struct AdapterProductInfo *product_info = malloc(sizeof(struct AdapterProductInfo));
     if (!product_info) {
         printf("Ec200tAttach malloc product_info error\n");
-        free(product_info);
+        PrivFree(product_info);
         return NULL;
     }
 
-    product_info->model_name = ADAPTER_4G_EC200T;
+    strcpy(product_info->model_name, ADAPTER_4G_EC200T);
 
     product_info->model_done = (void *)&ec200t_done;
 

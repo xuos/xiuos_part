@@ -39,15 +39,6 @@ extern "C" {
 #define ADAPTER_LWIP_OPERATION    2
 #define ADAPTER_RAWIP_OPERATION    3
 
-#define ADAPTER_LORA_FUNC       ((uint32_t)(1 << ATAPTER_LORA))
-#define ADAPTER_4G_FUNC         ((uint32_t)(1 << ADAPTER_4G))
-#define ADAPTER_NBIOT_FUNC      ((uint32_t)(1 << ADAPTER_NBIOT))
-#define ADAPTER_WIFI_FUNC       ((uint32_t)(1 << ADAPTER_WIFI))
-#define ADAPTER_ETHERNET_FUNC   ((uint32_t)(1 << ADAPTER_ETHERNET))
-#define ADAPTER_BLUETOOTH_FUNC  ((uint32_t)(1 << ADAPTER_BLUETOOTH))
-#define ADAPTER_ZIGBEE_FUNC     ((uint32_t)(1 << ADAPTER_ZIGBEE))
-#define ADAPTER_5G_FUNC         ((uint32_t)(1 << ADAPTER_5G))
-
 #ifdef CONNECTION_FRAMEWORK_DEBUG
 #define ADAPTER_DEBUG printf
 #else
@@ -110,8 +101,8 @@ enum IpType
 struct AdapterProductInfo
 {
     uint32_t functions;
-    const char *vendor_name;
-    const char *model_name;
+    char vendor_name[NAME_NUM_MAX];
+    char model_name[NAME_NUM_MAX];
 
     void *model_done;
 };
@@ -154,7 +145,7 @@ struct PrivProtocolDone
 
 struct Adapter
 {
-    char *name;
+    char name[NAME_NUM_MAX];
     int fd;
 
     int product_info_flag;

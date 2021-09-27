@@ -210,10 +210,10 @@ static int Hfa21SetAddr(struct Adapter *adapter, const char *ip, const char *gat
     char *gw_str = NULL;
     char *mask_str = NULL;
 
-    dhcp_mode = (char *) UserCalloc(1, 8);
-    ip_str = (char *) UserCalloc(1, 17);
-    gw_str = (char *) UserCalloc(1, 17);
-    mask_str = (char *) UserCalloc(1, 17);
+    dhcp_mode = (char *) PrivCalloc(1, 8);
+    ip_str = (char *) PrivCalloc(1, 17);
+    gw_str = (char *) PrivCalloc(1, 17);
+    mask_str = (char *) PrivCalloc(1, 17);
 
     Hfa21InitAtCmd(adapter->agent);
 
@@ -260,8 +260,8 @@ static int Hfa21Ping(struct Adapter *adapter, const char *destination)
 {
     char *ping_result = NONE;
     char *dst = NONE;
-    ping_result = (char *) UserCalloc(1, 17);
-    dst = (char *) UserCalloc(1, 17);
+    ping_result = (char *) PrivCalloc(1, 17);
+    dst = (char *) PrivCalloc(1, 17);
     strcpy(dst, destination);
     strcat(dst, "\r");
 
@@ -327,11 +327,11 @@ static int Hfa21Netstat(struct Adapter *adapter)
     char *local_ipaddr = NULL;
     char *gateway = NULL;
     char *netmask = NULL;
-    local_ipaddr = (char *) UserCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
-    gateway = (char *) UserCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
-    netmask = (char *) UserCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
-    work_mode = (char *) UserCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
-    ip_mode = (char *) UserCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
+    local_ipaddr = (char *) PrivCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
+    gateway = (char *) PrivCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
+    netmask = (char *) PrivCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
+    work_mode = (char *) PrivCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
+    ip_mode = (char *) PrivCalloc(1, HFA21_NETSTAT_IPADDR_SIZE);
 
     reply = CreateATReply(HFA21_NETSTAT_RESP_SIZE);
     if (reply == NULL) {
@@ -391,13 +391,13 @@ __exit:
     if (reply)
         DeleteATReply(reply);
     if (local_ipaddr)
-        UserFree(local_ipaddr);
+        PrivFree(local_ipaddr);
     if (netmask)
-        UserFree(netmask);
+        PrivFree(netmask);
     if (gateway)
-        UserFree(gateway);
+        PrivFree(gateway);
     if (work_mode)
-        UserFree(work_mode);
+        PrivFree(work_mode);
 }
 
 static int Hfa21Connect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
@@ -504,11 +504,11 @@ AdapterProductInfoType Hfa21Attach(struct Adapter *adapter)
     struct AdapterProductInfo *product_info = malloc(sizeof(struct AdapterProductInfo));
     if (!product_info) {
         printf("Hfa21Attach Attach malloc product_info error\n");
-        free(product_info);
+        PrivFree(product_info);
         return NULL;
     }
 
-    product_info->model_name = ADAPTER_WIFI_HFA21;
+    strcpy(product_info->model_name, ADAPTER_WIFI_HFA21);
 
     product_info->model_done = (void *)&hfa21_done;
 
