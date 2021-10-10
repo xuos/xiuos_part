@@ -210,7 +210,7 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
     }
 
     if (buffer_len < agent->entm_recv_len){
-        return ERROR;
+        return -ERROR;
     }
 
     printf("EntmRecv once .\n");
@@ -377,7 +377,7 @@ static int ATAgentInit(ATAgentType agent)
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 18;
-    attr.stacksize = 1024;
+    attr.stacksize = 2048;
 
     PrivTaskCreate(&agent->at_handler, &attr, ATAgentReceiveProcess, agent);
 
@@ -451,7 +451,7 @@ ATReplyType CreateATReply(uint32 reply_max_len)
         PrivFree(reply);
         return NULL;
     }
-
+    memset(reply->reply_buffer,0,reply_max_len);
     return reply;
 }
 

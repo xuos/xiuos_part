@@ -81,6 +81,9 @@ enum NetRoleType
     SERVER,
     MASTER,
     SLAVE,
+    COORDINATOR,
+    ROUTER,
+    END_DEVICE,
     ROLE_NONE,
 };
 
@@ -103,6 +106,7 @@ struct AdapterProductInfo
     uint32_t functions;
     char vendor_name[NAME_NUM_MAX];
     char model_name[NAME_NUM_MAX];
+    uint32_t work_mode;
 
     void *model_done;
 };

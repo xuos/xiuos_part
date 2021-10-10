@@ -19,6 +19,7 @@ extern int AdapterFrameworkInit(void);
 extern int Adapter4GInit(void);
 extern int AdapterBlueToothInit(void);
 extern int AdapterWifiInit(void);
+extern int AdapterZigbeeInit(void);
 
 extern int D124VoiceInit(void);
 extern int Hs300xTemperatureInit(void);
@@ -92,6 +93,9 @@ static struct InitDesc connection_desc[] =
 {
 #ifdef CONNECTION_ADAPTER_4G
 	{ "4G adpter", Adapter4GInit},
+#endif
+#ifdef CONNECTION_ADAPTER_ZIGBEE
+	{ "zigbee adpter", AdapterZigbeeInit},
 #endif
 #ifdef CONNECTION_ADAPTER_BLUETOOTH
 	{ "BlueTooth adpter", AdapterBlueToothInit},

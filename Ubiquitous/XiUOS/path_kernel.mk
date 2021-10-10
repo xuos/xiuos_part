@@ -188,6 +188,7 @@ endif
 
 ifeq ($(CONFIG_SUPPORT_CONNECTION_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/zigbee #
 endif
 
 ifeq ($(CONFIG_SUPPORT_KNOWING_FRAMEWORK), y)
