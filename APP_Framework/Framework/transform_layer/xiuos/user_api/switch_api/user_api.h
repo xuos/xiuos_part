@@ -22,6 +22,7 @@
 #ifndef XS_USER_API_H
 #define XS_USER_API_H
 
+#include <xiuos.h>
 #include <xsconfig.h>
 #include <stddef.h>
 #include <stdint.h>
