@@ -49,11 +49,13 @@ int Adapter4GInit(void)
 {
     int ret = 0;
 
-    struct Adapter *adapter = malloc(sizeof(struct Adapter));
+    struct Adapter *adapter = PrivMalloc(sizeof(struct Adapter));
     if (!adapter) {
         free(adapter);
         return -1;
     }
+
+    memset(adapter, 0, sizeof(struct Adapter));
 
     ret = Adapter4GRegister(adapter);
     if (ret < 0) {

@@ -52,7 +52,7 @@ menuconfig BSP_USING_UART4
             default "uart4"
         config SERIAL_DRV_NAME_4
             string "serial bus 4 driver name"
-            default "uart4drv"
+            default "uart4_drv"
         config SERIAL_4_DEVICE_NAME_0
                 string "serial bus 4 device 0 name"
                 default "uart4_dev4"   

@@ -28,7 +28,7 @@ static void Ec200tPowerSet(void)
 
     struct PinParam pin_param;
     pin_param.cmd = GPIO_CONFIG_MODE;
-    pin_param.mode = GPIO_CFG_INPUT_PULLUP;
+    pin_param.mode = GPIO_CFG_OUTPUT;
     pin_param.pin = ADAPTER_EC200T_PWRKEY;
 
     struct PrivIoctlCfg ioctl_cfg;
@@ -250,7 +250,7 @@ static const struct IpProtocolDone ec200t_done =
 
 AdapterProductInfoType Ec200tAttach(struct Adapter *adapter)
 {
-    struct AdapterProductInfo *product_info = malloc(sizeof(struct AdapterProductInfo));
+    struct AdapterProductInfo *product_info = PrivMalloc(sizeof(struct AdapterProductInfo));
     if (!product_info) {
         printf("Ec200tAttach malloc product_info error\n");
         PrivFree(product_info);
