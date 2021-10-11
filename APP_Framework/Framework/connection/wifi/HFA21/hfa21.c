@@ -501,7 +501,7 @@ static const struct IpProtocolDone hfa21_done =
  */
 AdapterProductInfoType Hfa21Attach(struct Adapter *adapter)
 {
-    struct AdapterProductInfo *product_info = malloc(sizeof(struct AdapterProductInfo));
+    struct AdapterProductInfo *product_info = PrivMalloc(sizeof(struct AdapterProductInfo));
     if (!product_info) {
         printf("Hfa21Attach Attach malloc product_info error\n");
         PrivFree(product_info);

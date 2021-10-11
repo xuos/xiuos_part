@@ -73,7 +73,7 @@ void SwapStr(char *str, int begin, int end)
 char *IpTstr(unsigned int ipint)
 {
     int LEN = 16;
-    char *new = (char *)malloc(LEN);
+    char *new = (char *)PrivMalloc(LEN);
     memset(new, '\0', LEN);
     new[0] = '.';
     char token[4];
@@ -120,7 +120,7 @@ int ParseATReply(char *str, const char *format, ...)
 uint32 ATSprintf(int fd, const char *format, va_list params)
 {
     last_cmd_len = vsnprintf(send_buf, sizeof(send_buf), format, params);
-    printf("ATSprintf send %s\n",send_buf);
+    printf("ATSprintf send %s len %u\n",send_buf, last_cmd_len);
 	PrivWrite(fd, send_buf, last_cmd_len);
 }
 
@@ -180,6 +180,28 @@ char *GetReplyText(ATReplyType reply)
     return reply->reply_buffer;
 }
 
+int AtSetReplyEndChar(ATAgentType agent, char ch)
+{  
+    if (!agent) {
+        return -ERROR;
+    }
+
+    agent->reply_end_char = ch;
+
+    return EOK;
+}
+
+int AtSetReplyCharNum(ATAgentType agent, unsigned int num)
+{  
+    if (!agent) {
+        return -ERROR;
+    }
+
+    agent->reply_char_num = num;
+
+    return EOK;
+}
+
 int EntmSend(ATAgentType agent, const char *data, int len)
 {
     char send_buf[128];
@@ -200,13 +222,15 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
 
     abstime.tv_sec = timeout_s;
 
+    agent->receive_mode = ENTM_MODE;
+
     PrivTaskDelay(1000);
 
     memset(agent->entm_recv_buf, 0, ENTM_RECV_MAX);
     agent->entm_recv_len = 0;
 
     if (PrivSemaphoreObtainWait(&agent->entm_rx_notice, &abstime)){
-        return ERROR;
+        return -ERROR;
     }
 
     if (buffer_len < agent->entm_recv_len){
@@ -233,7 +257,7 @@ static int GetCompleteATReply(ATAgentType agent)
     while (1){
         PrivRead(agent->fd, &ch, 1);
 
-        printf(" %c(0x%x)\n", ch, ch);
+        printf(" %c (0x%x)\n", ch, ch);
 
         if (agent->receive_mode == ENTM_MODE){
             if (agent->entm_recv_len < ENTM_RECV_MAX){
@@ -260,14 +284,16 @@ static int GetCompleteATReply(ATAgentType agent)
                 is_full = true;
             }
 
-            if ((ch == '\n' && last_ch == '\r')){
+            if ((ch == '\n' && last_ch == '\r') || 
+               ((ch == agent->reply_end_char) && (agent->reply_end_char)) ||
+               ((read_len == agent->reply_char_num) && (agent->reply_char_num))){
                 if (is_full){
                     printf("read line failed. The line data length is out of buffer size(%d)!", agent->maintain_max);
                     memset(agent->maintain_buffer, 0x00, agent->maintain_max);
                     agent->maintain_len = 0;
                     return -ERROR;
                 }
-                printf("GetCompleteATReply get n r ...\n");
+                printf("GetCompleteATReply done\n");
                 break;
             }
             last_ch = ch;
@@ -349,12 +375,14 @@ static int ATAgentInit(ATAgentType agent)
 	UtaskType at_utask;
 
     agent->maintain_len = 0;
-    agent->maintain_buffer = (char *)malloc(agent->maintain_max);
+    agent->maintain_buffer = (char *)PrivMalloc(agent->maintain_max);
 
     if (agent->maintain_buffer == NONE){
         printf("ATAgentInit malloc maintain_buffer error\n");
         goto __out;
     }
+
+    memset(agent->maintain_buffer, 0, agent->maintain_max);
 
     result = PrivSemaphoreCreate(&agent->entm_rx_notice, 0, 0);
     if (result < 0){
@@ -380,11 +408,6 @@ static int ATAgentInit(ATAgentType agent)
     attr.stacksize = 2048;
 
     PrivTaskCreate(&agent->at_handler, &attr, ATAgentReceiveProcess, agent);
-
-    // struct SerialDataCfg data_cfg;
-    // memset(&data_cfg, 0, sizeof(struct SerialDataCfg));
-    // data_cfg.serial_baud_rate = 57600;
-    // ioctl(agent->fd, OPE_INT, &data_cfg);
 
     return result;
 
@@ -437,7 +460,7 @@ ATReplyType CreateATReply(uint32 reply_max_len)
 {
     ATReplyType reply = NULL;
 
-    reply = (ATReplyType)malloc(sizeof(struct ATReply));
+    reply = (ATReplyType)PrivMalloc(sizeof(struct ATReply));
     if (reply == NULL){
         printf("no more memory\n");
         return NULL;
@@ -445,13 +468,15 @@ ATReplyType CreateATReply(uint32 reply_max_len)
 
     reply->reply_max_len = reply_max_len;
 
-    reply->reply_buffer = (char *)malloc(reply_max_len);
+    reply->reply_buffer = (char *)PrivMalloc(reply_max_len);
     if (reply->reply_buffer == NULL){
         printf("no more memory\n");
         PrivFree(reply);
         return NULL;
     }
-    memset(reply->reply_buffer,0,reply_max_len);
+
+    memset(reply->reply_buffer, 0, reply_max_len);
+
     return reply;
 }
 
@@ -469,6 +494,3 @@ void DeleteATReply(ATReplyType reply)
         reply = NULL;
     }
 }
-
-
-

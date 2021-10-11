@@ -52,6 +52,8 @@ struct ATAgent
     int lock;
 
     ATReplyType reply;
+    char reply_end_char;
+    uint32 reply_char_num;
     int rsp_sem;
 
     pthread_t at_handler;
@@ -67,6 +69,8 @@ typedef struct ATAgent *ATAgentType;
 int EntmSend(ATAgentType agent, const char *data, int len);
 int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s);
 char *GetReplyText(ATReplyType reply);
+int AtSetReplyEndChar(ATAgentType agent, char ch);
+int AtSetReplyCharNum(ATAgentType agent, unsigned int num);
 ATReplyType CreateATReply(uint32 reply_max_len);
 uint IpTint(char *ipstr);
 void SwapStr(char *str, int begin, int end);
