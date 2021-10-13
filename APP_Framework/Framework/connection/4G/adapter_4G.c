@@ -95,16 +95,18 @@ int Adapter4GTest(void)
     uint8 server_addr[64] = "115.238.53.61";
     uint8 server_port[64] = "33333";
 
+    adapter->socket.socket_id = 0;
+
     AdapterDeviceOpen(adapter);
     AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
 
     AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
 
-    while (1) {
-        AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
-        AdapterDeviceRecv(adapter, recv_msg, 128);
-        printf("4G recv msg %s\n", recv_msg);
-    }
+    // while (1) {
+    //     AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
+    //     AdapterDeviceRecv(adapter, recv_msg, 128);
+    //     printf("4G recv msg %s\n", recv_msg);
+    // }
 #endif
 
     return 0;    

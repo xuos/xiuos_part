@@ -98,19 +98,19 @@ static int Hc08AtConfigure(ATAgentType agent, enum Hc08AtCmd hc08_at_cmd, void *
     switch (hc08_at_cmd)
     {
     case HC08_AT_CMD_DETECT:
-        AtSetReplyEndChar(agent, 0x4B);
+        AtSetReplyEndChar(agent, 0x4F, 0x4B);
         ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_DETECT_CMD);
         break;
     case HC08_AT_CMD_DEFAULT:
-        AtSetReplyEndChar(agent, 0x4B);
+        AtSetReplyEndChar(agent, 0x4F, 0x4B);
         ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_DEFAULT_CMD);
         break;
     case HC08_AT_CMD_RESET:
-        AtSetReplyEndChar(agent, 0x4B);
+        AtSetReplyEndChar(agent, 0x4F, 0x4B);
         ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_RESET_CMD);
         break;
     case HC08_AT_CMD_CLEAR:
-        AtSetReplyEndChar(agent, 0x4B);
+        AtSetReplyEndChar(agent, 0x4F, 0x4B);
         ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_CLEAR_CMD);
         break;
     case HC08_AT_CMD_GET_DEVICE_INFO:
@@ -121,23 +121,23 @@ static int Hc08AtConfigure(ATAgentType agent, enum Hc08AtCmd hc08_at_cmd, void *
         baudrate = *(unsigned int *)param;
         sprintf(cmd_str, HC08_SET_BAUDRATE_CMD, baudrate);
         strcat(cmd_str, ",N");
-        AtSetReplyEndChar(agent, 0x45);
+        AtSetReplyEndChar(agent, 0x4E, 0x45);
         ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd_str);
         reply_ok_flag = 0;
         break;
     case HC08_AT_CMD_GET_BAUDRATE:
-        AtSetReplyEndChar(agent, 0x4E);
+        AtSetReplyEndChar(agent, 0x2C, 0x4E);
         ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_GET_BAUDRATE_CMD);
         reply_ok_flag = 0;
         break;
     case HC08_AT_CMD_SET_CONNECTABLE:
         connectable = (char *)param;
         sprintf(cmd_str, HC08_SET_CONNECTABLE, connectable);
-        AtSetReplyEndChar(agent, 0x4B);
+        AtSetReplyEndChar(agent, 0x4F, 0x4B);
         ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd_str);
         break;
     case HC08_AT_CMD_GET_CONNECTABLE:
-        AtSetReplyEndChar(agent, 0x65);
+        AtSetReplyEndChar(agent, 0x6C, 0x65);
         ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_GET_CONNECTABLE);
         reply_ok_flag = 0;
         break;
@@ -346,7 +346,7 @@ static int Hc08Send(struct Adapter *adapter, const void *buf, size_t len)
     x_err_t result = EOK;
     if (adapter->agent) {
         EntmSend(adapter->agent, (const char *)buf, len);
-    }else {
+    } else {
         printf("Hc08Send can not find agent\n");
 	}
     return 0;

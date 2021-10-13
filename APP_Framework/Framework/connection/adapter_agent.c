@@ -175,18 +175,67 @@ __out:
     return result;
 }
 
+int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
+{
+    int ret = 0;
+    char *result = NULL;
+    if (NULL == agent || NULL == cmd || NULL == check ) {
+        return -1;
+    }
+
+    ATReplyType reply = CreateATReply(64);
+    if (NULL == reply) {
+        printf("%s %d at_create_resp failed!\n",__func__,__LINE__);
+        ret = -1;
+        goto __exit;
+    }
+
+    ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd);
+    PrivTaskDelay(3000);
+
+    result = GetReplyText(reply);
+    if (!result) {
+        printf("%s %n get reply failed.\n",__func__,__LINE__);
+        ret = -1;
+        goto __exit;
+    }
+    printf("[reply result :\n");
+    printf("%s]\n", result);
+    if(!strstr(result, check)) {
+        printf("%s %d check[%s] reply[%s] failed.\n",__func__,__LINE__,check,result);
+        ret = -1;
+        goto __exit;
+    }
+
+__exit:
+    DeleteATReply(reply);
+    return ret;
+}
+
 char *GetReplyText(ATReplyType reply)
 {
     return reply->reply_buffer;
 }
 
-int AtSetReplyEndChar(ATAgentType agent, char ch)
+int AtSetReplyLrEnd(ATAgentType agent, char enable)
 {  
     if (!agent) {
         return -ERROR;
     }
 
-    agent->reply_end_char = ch;
+    agent->reply_lr_end = enable;
+
+    return EOK;
+}
+
+int AtSetReplyEndChar(ATAgentType agent, char last_ch, char end_ch)
+{  
+    if (!agent) {
+        return -ERROR;
+    }
+
+    agent->reply_end_last_char = last_ch;
+    agent->reply_end_char = end_ch;
 
     return EOK;
 }
@@ -284,10 +333,11 @@ static int GetCompleteATReply(ATAgentType agent)
                 is_full = true;
             }
 
-            if ((ch == '\n' && last_ch == '\r') || 
-               ((ch == agent->reply_end_char) && (agent->reply_end_char)) ||
+            if (((ch == '\n') && (last_ch == '\r') && (agent->reply_lr_end)) || 
+               ((ch == agent->reply_end_char) && (agent->reply_end_char) &&
+                (last_ch == agent->reply_end_last_char) && (agent->reply_end_last_char)) ||
                ((read_len == agent->reply_char_num) && (agent->reply_char_num))){
-                if (is_full){
+                if (is_full) {
                     printf("read line failed. The line data length is out of buffer size(%d)!", agent->maintain_max);
                     memset(agent->maintain_buffer, 0x00, agent->maintain_max);
                     agent->maintain_len = 0;
@@ -351,7 +401,7 @@ static void *ATAgentReceiveProcess(void *param)
             if (agent->reply != NULL){
                 ATReplyType reply = agent->reply;
 
-                agent->maintain_buffer[agent->maintain_len - 1] = '\0';
+                agent->maintain_buffer[agent->maintain_len] = '\0';
 
                 if (agent->maintain_len < reply->reply_max_len){
                     memcpy(reply->reply_buffer, agent->maintain_buffer, agent->maintain_len);

@@ -17,7 +17,7 @@ if ADD_XIUOS_FETURES
 
         config ADAPTER_EC200T_DRIVER
                 string "EC200T device uart driver path"
-                default "/dev/uart2_dev2"
+                default "/dev/usart2_dev2"
                 depends on !ADAPTER_EC200T_DRIVER_EXTUART
 
         if ADAPTER_EC200T_DRIVER_EXTUART                    
