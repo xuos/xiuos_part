@@ -52,8 +52,15 @@ typedef struct AdapterProductInfo *AdapterProductInfoType;
 
 struct Socket
 {
-    int id;
-    struct Adapter *adapter;
+    uint8_t type;                ///< socket type:DGRAM->UDP,STREAM->TCP
+    uint8_t protocal;            ///< udp or tcp
+    unsigned short listen_port;  ///< 0-65535
+    uint8_t socket_id;           ///< socket id
+    uint8_t recv_control;        ///< receive control
+    uint8_t af_type;               ///< IPv4 or IPv6
+    char * src_ip_addr;          ///< source P address  
+    char * dst_ip_addr;          ///< destination IP address
+
 };
 
 enum AdapterType
@@ -156,7 +163,7 @@ struct Adapter
     struct AdapterProductInfo *info;
     ATAgentType agent;
 
-    //struct Socket *socket;
+    struct Socket socket;
 
     enum NetProtocolType net_protocol;
     enum NetRoleType net_role;
