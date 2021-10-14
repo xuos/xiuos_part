@@ -30,6 +30,7 @@
 
 enum ReceiveMode
 {
+    DEFAULT_MODE = 0,
     ENTM_MODE = 1,
     AT_MODE = 2,
 };

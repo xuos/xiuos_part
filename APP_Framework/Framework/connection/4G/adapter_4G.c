@@ -84,16 +84,16 @@ int Adapter4GInit(void)
 /******************4G TEST*********************/
 int Adapter4GTest(void)
 {
-    const char *send_msg = "SendHeart";
-    char recv_msg[128];
+    const char *send_msg = "Adapter_4G Test";
+    char recv_msg[256] = {0};
     int baud_rate = BAUD_RATE_115200;
 
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_4G_NAME);
 
 #ifdef ADAPTER_EC200T
-    //Using DSD server to test 4G Socket connection
-    uint8 server_addr[64] = "115.238.53.61";
-    uint8 server_port[64] = "33333";
+    //Using Hang Xiao server to test 4G Socket connection
+    uint8 server_addr[64] = "101.68.82.219";
+    uint8 server_port[64] = "9898";
 
     adapter->socket.socket_id = 0;
 
@@ -102,11 +102,12 @@ int Adapter4GTest(void)
 
     AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
 
-    // while (1) {
-    //     AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
-    //     AdapterDeviceRecv(adapter, recv_msg, 128);
-    //     printf("4G recv msg %s\n", recv_msg);
-    // }
+    while (1) {
+        AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
+        AdapterDeviceRecv(adapter, recv_msg, 256);
+        printf("4G recv msg %s\n", recv_msg);
+        memset(recv_msg, 0, 256);
+    }
 #endif
 
     return 0;    
