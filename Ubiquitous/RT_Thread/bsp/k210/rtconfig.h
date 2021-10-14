@@ -18,12 +18,13 @@
 #define RT_ALIGN_SIZE 8
 #define RT_THREAD_PRIORITY_32
 #define RT_THREAD_PRIORITY_MAX 32
-#define RT_TICK_PER_SECOND 1000
+#define RT_TICK_PER_SECOND 80
 #define RT_USING_OVERFLOW_CHECK
 #define RT_USING_HOOK
 #define RT_USING_IDLE_HOOK
 #define RT_IDLE_HOOK_LIST_SIZE 4
 #define IDLE_THREAD_STACK_SIZE 4096
+#define SYSTEM_THREAD_STACK_SIZE 4096
 
 /* kservice optimization */
 
@@ -74,17 +75,17 @@
 /* Command shell */
 
 #define RT_USING_FINSH
+#define RT_USING_MSH
+#define FINSH_USING_MSH
 #define FINSH_THREAD_NAME "tshell"
+#define FINSH_THREAD_PRIORITY 20
+#define FINSH_THREAD_STACK_SIZE 16384
 #define FINSH_USING_HISTORY
 #define FINSH_HISTORY_LINES 5
 #define FINSH_USING_SYMTAB
-#define FINSH_USING_DESCRIPTION
-#define FINSH_THREAD_PRIORITY 20
-#define FINSH_THREAD_STACK_SIZE 16384
 #define FINSH_CMD_SIZE 80
-#define FINSH_USING_MSH
-#define FINSH_USING_MSH_DEFAULT
-#define FINSH_USING_MSH_ONLY
+#define MSH_USING_BUILT_IN_COMMANDS
+#define FINSH_USING_DESCRIPTION
 #define FINSH_ARG_MAX 10
 
 /* Device virtual file system */
@@ -108,6 +109,7 @@
 #define RT_DFS_ELM_DRIVES 2
 #define RT_DFS_ELM_MAX_SECTOR_SIZE 4096
 #define RT_DFS_ELM_REENTRANT
+#define RT_DFS_ELM_MUTEX_TIMEOUT 3000
 #define RT_USING_DFS_DEVFS
 
 /* Device Drivers */
@@ -118,6 +120,7 @@
 #define RT_SYSTEM_WORKQUEUE_STACKSIZE 2048
 #define RT_SYSTEM_WORKQUEUE_PRIORITY 23
 #define RT_USING_SERIAL
+#define RT_USING_SERIAL_V1
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
@@ -163,7 +166,8 @@
 #define RT_USING_PTHREADS
 #define PTHREAD_NUM_MAX 8
 #define RT_USING_POSIX
-#define RT_LIBC_FIXED_TIMEZONE 8
+#define RT_LIBC_USING_TIME
+#define RT_LIBC_DEFAULT_TIMEZONE 8
 
 /* Network */
 
@@ -245,9 +249,14 @@
 /* Board Drivers Config */
 
 #define BSP_USING_UART_HS
+
+/* General Purpose UARTs */
+
 #define BSP_USING_UART1
 #define BSP_UART1_TXD_PIN 20
 #define BSP_UART1_RXD_PIN 21
+#define BSP_UART1_RTS_PIN -1
+#define BSP_UART1_CTS_PIN -1
 #define BSP_USING_SPI1
 #define BSP_SPI1_CLK_PIN 27
 #define BSP_SPI1_D0_PIN 28
@@ -261,6 +270,10 @@
 #define BSP_LCD_WR_PIN 39
 #define BSP_LCD_DC_PIN 38
 #define BSP_LCD_RST_PIN 37
+#define BSP_LCD_BACKLIGHT_PIN -1
+#define BSP_LCD_BACKLIGHT_ACTIVE_LOW
+#define BSP_LCD_CLK_FREQ 20000000
+#define BSP_BOARD_USER
 #define BSP_LCD_X_MAX 240
 #define BSP_LCD_Y_MAX 320
 #define BSP_USING_SDCARD
@@ -276,6 +289,9 @@
 #define BSP_DVP_CMOS_XCLK_PIN 46
 #define BSP_DVP_CMOS_PCLK_PIN 47
 #define BSP_DVP_CMOS_HREF_PIN 45
+#define RW007_SPIDEV_NAME "spi11"
+#define RW007_INT_BUSY_PIN 7
+#define RW007_RST_PIN 6
 
 /* Kendryte SDK Config */
 
@@ -283,6 +299,9 @@
 
 /* More Drivers */
 
+#define PKG_USING_RW007
+#define RW007_NOT_USE_EXAMPLE_DRIVERS
+#define RW007_SPI_MAX_HZ 20000000
 #define DRV_USING_OV2640
 
 /* APP_Framework */
@@ -303,23 +322,36 @@
 
 /* knowing app */
 
+#define APPLICATION_KNOWING
 #define FACE_DETECT
 
 /* sensor app */
 
+#define APPLICATION_SENSOR
+#define APPLICATION_SENSOR_VOICE
+#define APPLICATION_SENSOR_VOICE_D124
 
 /* Framework */
 
 #define TRANSFORM_LAYER_ATTRIUBUTE
 #define ADD_XIUOS_FETURES
 #define SUPPORT_SENSOR_FRAMEWORK
+#define SENSOR_VOICE
+#define SENSOR_D124
+#define SENSOR_DEVICE_D124 "d124_1"
+#define SENSOR_QUANTITY_D124_VOICE "voice_1"
+#define SENSOR_DEVICE_D124_DEV "/dev/uar2"
 #define SUPPORT_KNOWING_FRAMEWORK
 #define USING_KPU_POSTPROCESSING
 #define USING_YOLOV2
 
-/* app lib */
+/* Security */
+
+
+/* lib */
 
 #define APP_SELECT_NEWLIB
+#define LIB_USING_CJSON
 #define __STACKSIZE__ 4096
 
 #endif
