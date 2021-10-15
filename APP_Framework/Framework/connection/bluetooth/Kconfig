@@ -3,5 +3,5 @@ config ADAPTER_HC08
         default y
 
 if ADAPTER_HC08
-    source "$APP_DIR/Framework/connection/bluetooth/HC08/Kconfig"
+    source "$APP_DIR/Framework/connection/bluetooth/hc08/Kconfig"
 endif      
