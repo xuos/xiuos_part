@@ -85,7 +85,6 @@ int AdapterBlueToothTest(void)
 {
     const char *bluetooth_msg = "BT Adapter Test";
     char bluetooth_recv_msg[128];
-    char recv_msg[128];
     int len;
     int baud_rate = BAUD_RATE_115200;
 
@@ -103,6 +102,7 @@ int AdapterBlueToothTest(void)
         AdapterDeviceSend(adapter, bluetooth_msg, len);
         printf("send %s after recv\n", bluetooth_msg);
         PrivTaskDelay(100);
+        memset(bluetooth_recv_msg, 0, 128);
     }
 
 #endif
