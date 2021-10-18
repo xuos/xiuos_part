@@ -26,8 +26,11 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#define REPLY_TIME_OUT 3000
+
 enum ReceiveMode
 {
+    DEFAULT_MODE = 0,
     ENTM_MODE = 1,
     AT_MODE = 2,
 };
@@ -52,6 +55,8 @@ struct ATAgent
     int lock;
 
     ATReplyType reply;
+    char reply_lr_end;
+    char reply_end_last_char;
     char reply_end_char;
     uint32 reply_char_num;
     int rsp_sem;
@@ -69,18 +74,18 @@ typedef struct ATAgent *ATAgentType;
 int EntmSend(ATAgentType agent, const char *data, int len);
 int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s);
 char *GetReplyText(ATReplyType reply);
-int AtSetReplyEndChar(ATAgentType agent, char ch);
+int AtSetReplyEndChar(ATAgentType agent, char last_ch, char end_ch);
 int AtSetReplyCharNum(ATAgentType agent, unsigned int num);
+int AtSetReplyLrEnd(ATAgentType agent, char enable);
 ATReplyType CreateATReply(uint32 reply_max_len);
-uint IpTint(char *ipstr);
+unsigned int IpTint(char *ipstr);
 void SwapStr(char *str, int begin, int end);
-char* IpTstr(uint ipint);
+char* IpTstr(unsigned int ipint);
 ATAgentType GetATAgent(const char *agent_name);
 int InitATAgent(const char *agent_name, int fd, uint32 maintain_max);
 int ParseATReply(char* str, const char *format, ...);
 void DeleteATReply(ATReplyType reply);
 int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const char *cmd_expr, ...);
-
-#define REPLY_TIME_OUT 3000
+int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check);
 
 #endif

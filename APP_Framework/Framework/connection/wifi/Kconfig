@@ -1,7 +1,7 @@
-config ADAPTER_HFA21
+config ADAPTER_HFA21_WIFI
         bool "Using wifi adapter device HFA21"
         default y
 
-if ADAPTER_HFA21
-    source "$APP_DIR/Framework/connection/wifi/HFA21/Kconfig"
+if ADAPTER_HFA21_WIFI
+    source "$APP_DIR/Framework/connection/wifi/hfa21_wifi/Kconfig"
 endif

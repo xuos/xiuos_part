@@ -1,6 +1,6 @@
 config ADAPTER_WIFI_HFA21
-        string "HFA21 adapter name"
-        default "hfa21"
+        string "HFA21 WIFI adapter name"
+        default "hfa21_wifi"
 
 if ADD_XIUOS_FETURES
 

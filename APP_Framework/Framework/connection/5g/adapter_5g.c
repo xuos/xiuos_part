@@ -11,7 +11,7 @@
 */
 
 /**
- * @file adapter_5G.c
+ * @file adapter_5g.c
  * @brief Implement the connection 5G adapter function
  * @version 1.1
  * @author AIIT XUOS Lab

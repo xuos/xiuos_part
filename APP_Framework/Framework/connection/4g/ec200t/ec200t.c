@@ -21,6 +21,21 @@
 #include <adapter.h>
 #include <at_agent.h>
 
+#define EC200T_AT_MODE_CMD          "+++"
+#define EC200T_GET_CCID_CMD         "AT+CCID\r\n"
+#define EC200T_GET_CPIN_CMD         "AT+CPIN?\r\n"
+#define EC200T_GET_CREG_CMD         "AT+CREG?\r\n"
+#define EC200T_OPEN_SOCKET_CMD      "AT+QIOPEN=1,%u"
+#define EC200T_CLOSE_SOCKET_CMD     "AT+QICLOSE=%u\r\n"
+#define EC200T_ACTIVE_PDP_CMD       "AT+QIACT=1\r\n"
+#define EC200T_DEACTIVE_PDP_CMD     "AT+QIDEACT=1\r\n"
+#define EC200T_CFG_TCP_CMD          "AT+QICSGP"
+
+#define EC200T_OK_REPLY             "OK"
+#define EC200T_READY_REPLY          "READY"
+#define EC200T_CREG_REPLY           ",1"
+#define EC200T_CONNECT_REPLY        "CONNECT"
+
 static void Ec200tPowerSet(void)
 {
     int pin_fd;
@@ -47,6 +62,8 @@ static void Ec200tPowerSet(void)
     PrivWrite(pin_fd, &pin_stat, 1);
 
     PrivClose(pin_fd);
+
+    PrivTaskDelay(10000);
 }
 
 static int Ec200tOpen(struct Adapter *adapter)
@@ -70,32 +87,6 @@ static int Ec200tOpen(struct Adapter *adapter)
         adapter->agent = at_agent;
     }
 
-    /*step3: serial write "+++", quit transparent mode*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
-
-    /*step4: serial write "AT+CCID", get SIM ID*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+CCID\r\n");
-
-    PrivTaskDelay(2500);
-
-    /*step5: serial write "AT+CPIN?", check SIM status*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+CPIN?\r\n");
-
-    PrivTaskDelay(2500);
-
-    /*step6: serial write "AT+CREG?", check whether registered to GSM net*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+CREG?\r\n");
-
-    PrivTaskDelay(2500);
-
-    /*step7: serial write "AT+QICLOSE", close socket connect before open socket*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QICLOSE=0\r\n");
-
-    PrivTaskDelay(2500);
-
-    /*step8: serial write "AT+QIDEACT", close TCP net before open socket*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QIDEACT=1\r\n");
-
     PrivTaskDelay(2500);
     
     ADAPTER_DEBUG("Ec200t open done\n");
@@ -105,31 +96,41 @@ static int Ec200tOpen(struct Adapter *adapter)
 
 static int Ec200tClose(struct Adapter *adapter)
 {
+    int ret = 0;
+    uint8_t ec200t_cmd[64];
+    
     if (!adapter->agent) {
         printf("Ec200tClose AT agent NULL\n");
         return -1;
     }
 
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
+
     /*step1: serial write "+++", quit transparent mode*/
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
 
     /*step2: serial write "AT+QICLOSE", close socket connect before open socket*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QICLOSE=0\r\n");
-
-    PrivTaskDelay(2500);
+    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
+    sprintf(ec200t_cmd, EC200T_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
+    ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_OK_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
 
     /*step3: serial write "AT+QIDEACT", close TCP net before open socket*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QIDEACT=1\r\n");
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_DEACTIVE_PDP_CMD, EC200T_OK_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
 
-    PrivTaskDelay(2500);
-
+out:
     /*step4: close ec200t serial port*/
     PrivClose(adapter->fd);
 
     /*step5: power down ec200t*/
     Ec200tPowerSet();
     
-    return 0;
+    return ret;
 }
 
 static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
@@ -159,15 +160,41 @@ static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
     ioctl_cfg.args = &serial_cfg;
     PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
+
+    Ec200tPowerSet();
     
     return 0;
 }
 
 static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
 {
+    int ret = 0;
     uint8_t ec200t_cmd[64];
 
-    /*step1: serial write "AT+QICSGP", connect to China Mobile using ipv4 or ipv6*/
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
+
+    /*step1: serial write "+++", quit transparent mode*/
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
+
+    /*step2: serial write "AT+CCID", get SIM ID*/
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_GET_CCID_CMD, EC200T_OK_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
+
+    /*step3: serial write "AT+CPIN?", check SIM status*/
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_GET_CPIN_CMD, EC200T_READY_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
+
+    /*step4: serial write "AT+CREG?", check whether registered to GSM net*/
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_GET_CREG_CMD, EC200T_CREG_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
+
+    /*step5: serial write "AT+QICSGP", connect to China Mobile using ipv4 or ipv6*/
     memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
 
     if (IPV4 == ip_type) {
@@ -176,58 +203,105 @@ static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, con
         strcpy(ec200t_cmd, "AT+QICSGP=1,2,\"CMNET\",\"\",\"\",1\r\n");
     }
     
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, ec200t_cmd);
+    ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_OK_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
 
-    PrivTaskDelay(2500);
-
-    /*step2: serial write "AT+QIACT", open TCP net*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QIACT=1\r\n");
-
-    PrivTaskDelay(2500);
-
-    /*step3: serial write "AT+QIOPEN", connect socket using TCP*/
+    /*step6: serial write "AT+QICLOSE", close socket connect before open socket*/
     memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
-    strcpy(ec200t_cmd, "AT+QIOPEN=1,0,\"TCP\",\"");
+    sprintf(ec200t_cmd, EC200T_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
+    ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_OK_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
+
+    /*step7: serial write "AT+QIDEACT", close TCP net before open socket*/
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_DEACTIVE_PDP_CMD, EC200T_OK_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
+
+    /*step8: serial write "AT+QIACT", open TCP net*/
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_ACTIVE_PDP_CMD, EC200T_OK_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
+
+    /*step9: serial write "AT+QIOPEN", connect socket using TCP*/
+    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
+    sprintf(ec200t_cmd, EC200T_OPEN_SOCKET_CMD, adapter->socket.socket_id);
+    strcat(ec200t_cmd, ",\"TCP\",\"");
     strcat(ec200t_cmd, ip);
     strcat(ec200t_cmd, "\",");
     strcat(ec200t_cmd, port);
     strcat(ec200t_cmd, ",0,2\r\n");
 
-    ADAPTER_DEBUG("Ec200t connect AT CMD :%s\n", ec200t_cmd);
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, ec200t_cmd);
+    AtSetReplyEndChar(adapter->agent, 0x43, 0x54);
+
+    ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_CONNECT_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
 
     ADAPTER_DEBUG("Ec200t connect TCP done\n");
 
     return 0;
+
+out:
+    ADAPTER_DEBUG("Ec200t connect TCP failed. Power down\n");
+    Ec200tPowerSet();
+    return -1;
 }
 
 static int Ec200tSend(struct Adapter *adapter, const void *buf, size_t len)
 {
-    PrivWrite(adapter->fd, buf, len);
+    x_err_t result = EOK;
+    if (adapter->agent) {
+        EntmSend(adapter->agent, (const char *)buf, len);
+    } else {
+        printf("Ec200tSend can not find agent\n");
+    }
     return 0;
 }
 
 static int Ec200tRecv(struct Adapter *adapter, void *buf, size_t len)
 {
-    PrivRead(adapter->fd, buf, len);
-    return 0;
+    if (adapter->agent) {
+        return EntmRecv(adapter->agent, (char *)buf, len, 40000);
+    } else {
+        printf("Ec200tRecv can not find agent\n");
+	}
+    
+    return -1;
 }
 
 static int Ec200tDisconnect(struct Adapter *adapter)
 {
+    int ret = 0;
     uint8_t ec200t_cmd[64];
+
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
     
     /*step1: serial write "+++", quit transparent mode*/
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
 
     /*step2: serial write "AT+QICLOSE", close socket connect before open socket*/
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+QICLOSE=0\r\n");
-
-    PrivTaskDelay(2500);
+    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
+    sprintf(ec200t_cmd, EC200T_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
+    ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_OK_REPLY);
+    if (ret < 0) {
+        goto out;
+    }
 
     ADAPTER_DEBUG("Ec200t disconnect TCP done\n");
 
     return 0;
+
+out:
+    ADAPTER_DEBUG("Ec200t disconnect TCP failed. Power down\n");
+    Ec200tPowerSet();
+    return -1;
 }
 
 static const struct IpProtocolDone ec200t_done = 
@@ -261,10 +335,5 @@ AdapterProductInfoType Ec200tAttach(struct Adapter *adapter)
 
     product_info->model_done = (void *)&ec200t_done;
 
-    Ec200tPowerSet();
-
     return product_info;
 }
-
-
-
