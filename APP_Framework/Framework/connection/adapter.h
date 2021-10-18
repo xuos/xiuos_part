@@ -42,7 +42,7 @@ extern "C" {
 #ifdef CONNECTION_FRAMEWORK_DEBUG
 #define ADAPTER_DEBUG printf
 #else
-#define ADAPTER_DEBUF
+#define ADAPTER_DEBUG
 #endif
 
 struct Adapter;
@@ -57,10 +57,9 @@ struct Socket
     unsigned short listen_port;  ///< 0-65535
     uint8_t socket_id;           ///< socket id
     uint8_t recv_control;        ///< receive control
-    uint8_t af_type;               ///< IPv4 or IPv6
-    char * src_ip_addr;          ///< source P address  
-    char * dst_ip_addr;          ///< destination IP address
-
+    uint8_t af_type;             ///< IPv4 or IPv6
+    char *src_ip_addr;           ///< source P address  
+    char *dst_ip_addr;           ///< destination IP address
 };
 
 enum AdapterType

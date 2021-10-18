@@ -21,7 +21,7 @@
 #include <adapter.h>
 #include <bus_pin.h>
 
-#ifdef ADAPTER_HFA21
+#ifdef ADAPTER_HFA21_WIFI
 extern AdapterProductInfoType Hfa21Attach(struct Adapter *adapter);
 #endif
 
@@ -65,7 +65,7 @@ int AdapterWifiInit(void)
         return -1;
     }
 
-#ifdef ADAPTER_HFA21
+#ifdef ADAPTER_HFA21_WIFI
     AdapterProductInfoType product_info = Hfa21Attach(adapter);
     if (!product_info) {
         printf("AdapterWifiInit hfa21 attach error\n");

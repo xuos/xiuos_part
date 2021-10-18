@@ -5,7 +5,7 @@ ifeq ($(CONFIG_CONNECTION_ADAPTER_LORA),y)
 endif
 
 ifeq ($(CONFIG_CONNECTION_ADAPTER_4G),y)
-	SRC_DIR += 4G
+	SRC_DIR += 4g
 endif
 
 ifeq ($(CONFIG_CONNECTION_ADAPTER_NB),y)
@@ -29,7 +29,7 @@ ifeq ($(CONFIG_CONNECTION_ADAPTER_ZIGBEE),y)
 endif
 
 ifeq ($(CONFIG_CONNECTION_ADAPTER_5G),y)
-	SRC_DIR += 5G
+	SRC_DIR += 5g
 endif
 
 include $(KERNEL_ROOT)/compiler.mk

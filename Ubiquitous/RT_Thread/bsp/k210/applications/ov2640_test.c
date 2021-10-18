@@ -21,10 +21,10 @@
 static int g_fd = 0;
 static _ioctl_shoot_para shoot_para_t = {0};
 
-
+extern void lcd_show_image(int x, int y, int wide, int height,const rt_uint8_t *buf);
+extern void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t *ptr);
 void ov2640_test(int argc, char **argv)
 {
-    extern void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t *ptr);
  
     g_fd = open("/dev/ov2640",O_RDONLY);
     if(g_fd < 0)
@@ -71,7 +71,7 @@ void ov2640_test(int argc, char **argv)
             close(g_fd);
             return;
         }
-        lcd_draw_picture(0, 0, 320, 240, rgbbuffer);
+        lcd_show_image(0, 0, 320, 240, rgbbuffer);
         rt_thread_mdelay(100);
         printf("the lcd has shown the image \n");
         rt_free(rgbbuffer);
@@ -82,7 +82,6 @@ MSH_CMD_EXPORT(ov2640_test,lcd show camera shot image);
 
 void lcd_show_ov2640_thread(uint32_t* rgbbuffer)
 {
-    extern void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t *ptr);
     rt_err_t ret = 0;
     while(1)
     {
@@ -94,8 +93,9 @@ void lcd_show_ov2640_thread(uint32_t* rgbbuffer)
             rt_free(rgbbuffer);
             return;
         }
+        //lcd_show_image(0, 0, 320, 240, rgbbuffer); 
         lcd_draw_picture(0, 0, 320, 240, rgbbuffer); 
-        rt_thread_mdelay(2);
+        rt_thread_mdelay(1);
     }
     
 }

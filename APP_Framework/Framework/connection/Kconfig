@@ -18,7 +18,7 @@ if SUPPORT_CONNECTION_FRAMEWORK
                 bool "Using 4G adapter device"
                 default n
         if CONNECTION_ADAPTER_4G
-        source "$APP_DIR/Framework/connection/4G/Kconfig"
+        source "$APP_DIR/Framework/connection/4g/Kconfig"
         endif
 
         menuconfig CONNECTION_ADAPTER_NB
@@ -60,6 +60,6 @@ if SUPPORT_CONNECTION_FRAMEWORK
                 bool "Using 5G adapter device"
                 default n
         if CONNECTION_ADAPTER_5G
-        source "$APP_DIR/Framework/connection/5G/Kconfig"
+        source "$APP_DIR/Framework/connection/5g/Kconfig"
         endif
 endif

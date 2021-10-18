@@ -27,7 +27,7 @@
 	"kmodel_path": "/kmodel/human.kmodel",
 	"kmodel_size": 2713236,
 	"obj_thresh": [
-		0.55
+		0.7
 	],
 	"labels": [
 		"human"

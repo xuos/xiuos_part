@@ -1,4 +1,5 @@
 #include <transform.h>
+#include <unistd.h>
 #ifdef LIB_USING_CJSON
 #include <cJSON.h>
 #endif
@@ -7,7 +8,9 @@
 #define STACK_SIZE (128 * 1024)
 #define JSON_FILE_PATH "/kmodel/human.json"
 #define JSON_BUFFER_SIZE (4 * 1024)
+static dmac_channel_number_t dma_ch = DMAC_CHANNEL_MAX;
 
+extern void lcd_show_image(int x, int y, int wide, int height,const rt_uint8_t *buf);
 // params from json
 static float anchor[ANCHOR_NUM * 2] = {};
 static int net_output_shape[3] = {};
@@ -184,23 +187,23 @@ void instrusion_detect()
     }
     _ioctl_set_dvp_reso set_dvp_reso = {sensor_output_size[1], sensor_output_size[0]};
     ioctl(g_fd, IOCTRL_CAMERA_SET_DVP_RESO, &set_dvp_reso);
-    showbuffer = (unsigned char *)malloc(sensor_output_size[0] * sensor_output_size[1] * 2);
+    showbuffer = (unsigned char *)rt_malloc_align(sensor_output_size[0] * sensor_output_size[1] * 2,64);
     if (NULL == showbuffer) {
         close(g_fd);
         printf("showbuffer apply memory fail !!");
         return;
     }
-    kpurgbbuffer = (unsigned char *)malloc(net_input_size[0] * net_input_size[1] * 3);
+    kpurgbbuffer = (unsigned char *)rt_malloc_align(net_input_size[0] * net_input_size[1] * 3,64);
     if (NULL == kpurgbbuffer) {
         close(g_fd);
-        free(showbuffer);
+        rt_free_align(showbuffer);
         printf("kpurgbbuffer apply memory fail !!");
         return;
     }
     model_data = (unsigned char *)malloc(kmodel_size + 255);
     if (NULL == model_data) {
-        free(showbuffer);
-        free(kpurgbbuffer);
+        rt_free_align(showbuffer);
+        rt_free_align(kpurgbbuffer);
         close(g_fd);
         printf("model_data apply memory fail !!");
         return;
@@ -281,10 +284,12 @@ void instrusion_detect()
 #ifdef __RT_THREAD_H__
 MSH_CMD_EXPORT(instrusion_detect, instrusion detect task);
 #endif
+ extern void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t * ptr);
+ extern void lcd_show_image(int x, int y, int wide, int height,const rt_uint8_t *buf);
+ extern void lcd_draw_16_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t * ptr);
 
 static void *thread_instrusion_detect_entry(void *parameter)
 {
-    extern void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t * ptr);
     printf("thread_instrusion_detect_entry start!\n");
     int ret = 0;
     // sysctl_enable_irq();
@@ -299,31 +304,35 @@ static void *thread_instrusion_detect_entry(void *parameter)
             pthread_exit(NULL);
             return NULL;
         }
+        if (dmalock_sync_take(&dma_ch, 2000))
+        {
+            printf("Fail to take DMA channel");
+        }
         kpu_run_kmodel(&instrusion_detect_task, kpurgbbuffer, DMAC_CHANNEL5, ai_done, NULL);
         while (!g_ai_done_flag)
             ;
+        dmalock_release(dma_ch);
         float *output;
         size_t output_size;
         kpu_get_output(&instrusion_detect_task, 0, (uint8_t **)&output, &output_size);
         instrusion_detect_rl.input = output;
         region_layer_run(&instrusion_detect_rl, &instrusion_detect_info);
 /* display result */
-
-        for (int instrusion_cnt = 0; instrusion_cnt < instrusion_detect_info.obj_number; instrusion_cnt++) {
-            // draw_edge((uint32_t *)showbuffer, &instrusion_detect_info, instrusion_cnt, 0xF800,
-            // (uint16_t)sensor_output_size[1],
-            //           (uint16_t)sensor_output_size[0]);
+        for (int instrusion_cnt = 0; instrusion_cnt < instrusion_detect_info.obj_number; instrusion_cnt++) 
+        {
+            draw_edge((uint32_t *)showbuffer, &instrusion_detect_info, instrusion_cnt, 0xF800,(uint16_t)sensor_output_size[1],(uint16_t)sensor_output_size[0]);
             printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", instrusion_cnt, instrusion_detect_info.obj[instrusion_cnt].x1,
                    instrusion_detect_info.obj[instrusion_cnt].y1, instrusion_detect_info.obj[instrusion_cnt].x2,
                    instrusion_detect_info.obj[instrusion_cnt].y2, labels[instrusion_detect_info.obj[instrusion_cnt].class_id],
                    instrusion_detect_info.obj[instrusion_cnt].prob);
         }
+#ifdef BSP_USING_LCD
+        //lcd_show_image(0, 0,(uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0],(unsigned int *)showbuffer);
+        lcd_draw_picture(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (uint32_t *)showbuffer);
+#endif
         if (0 != instrusion_detect_info.obj_number) {
             printf("\n");
         }
-#ifdef BSP_USING_LCD
-        lcd_draw_picture(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (unsigned int *)showbuffer);
-#endif
         usleep(1);
         if (1 == if_exit) {
             if_exit = 0;

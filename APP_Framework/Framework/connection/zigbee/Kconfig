@@ -4,7 +4,7 @@ if CONNECTION_ADAPTER_ZIGBEE
             default y
     
     if ADAPTER_E18
-        source "$APP_DIR/Framework/connection/zigbee/E18/Kconfig"
+        source "$APP_DIR/Framework/connection/zigbee/e18/Kconfig"
     endif
         
 endif
