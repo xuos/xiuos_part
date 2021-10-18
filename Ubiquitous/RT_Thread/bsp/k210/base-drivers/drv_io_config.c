@@ -6,7 +6,6 @@
  * Change Logs:
  * Date           Author       Notes
  * 2019-03-19     ZYH          first version
- * 2021-01-28     tianchunyu   Modify macro definitions
  */
 
 #include <rtthread.h>
@@ -24,7 +23,18 @@ static struct io_config
     fpioa_function_t func;
     const char * func_name;
 } io_config[] = 
-{  
+{
+#ifdef BSP_USING_LCD
+    IOCONFIG(BSP_LCD_CS_PIN, FUNC_SPI0_SS0),                 /* LCD CS PIN */
+    IOCONFIG(BSP_LCD_WR_PIN, FUNC_SPI0_SCLK),                /* LCD WR PIN */
+    IOCONFIG(BSP_LCD_DC_PIN, HS_GPIO(LCD_DC_PIN)),           /* LCD DC PIN */
+#if BSP_LCD_RST_PIN >= 0
+    IOCONFIG(BSP_LCD_RST_PIN, HS_GPIO(LCD_RST_PIN)),         /* LCD RESET PIN */
+#endif 
+#if BSP_LCD_BACKLIGHT_PIN >= 0
+    IOCONFIG(BSP_LCD_BACKLIGHT_PIN, HS_GPIO(LCD_BACKLIGHT_PIN)),    /* LCD BACKLIGHT PIN */
+#endif
+#endif
 
 #ifdef BSP_USING_DVP
     IOCONFIG(BSP_DVP_SCCB_SDA_PIN, FUNC_SCCB_SDA),
@@ -35,13 +45,6 @@ static struct io_config
     IOCONFIG(BSP_DVP_CMOS_XCLK_PIN, FUNC_CMOS_XCLK),
     IOCONFIG(BSP_DVP_CMOS_PCLK_PIN, FUNC_CMOS_PCLK),
     IOCONFIG(BSP_DVP_CMOS_HREF_PIN, FUNC_CMOS_HREF),
-#endif
-
-#if 0       //here is a drv lcd bug now don't know why
-    IOCONFIG(BSP_LCD_CS_PIN, FUNC_SPI0_SS3),                 /* LCD CS PIN */
-    IOCONFIG(BSP_LCD_WR_PIN, FUNC_SPI0_SCLK),                /* LCD WR PIN */
-    IOCONFIG(BSP_LCD_DC_PIN, FUNC_GPIOHS2),                 /* LCD DC PIN */
-    IOCONFIG(BSP_LCD_RST_PIN,FUNC_GPIOHS3),                 /* LCD DC PIN */
 #endif
 
 #ifdef BSP_USING_SPI1
@@ -69,14 +72,72 @@ static struct io_config
 #ifdef BSP_USING_UART1
     IOCONFIG(BSP_UART1_TXD_PIN, FUNC_UART1_TX),
     IOCONFIG(BSP_UART1_RXD_PIN, FUNC_UART1_RX),
+    #if BSP_UART1_RTS_PIN >= 0
+    IOCONFIG(BSP_UART1_RTS_PIN, FUNC_UART1_RTS),
+    #endif
+    #if BSP_UART1_CTS_PIN >= 0
+    IOCONFIG(BSP_UART1_CTS_PIN, FUNC_UART1_CTS),
+    #endif      
 #endif
 #ifdef BSP_USING_UART2
     IOCONFIG(BSP_UART2_TXD_PIN, FUNC_UART2_TX),
     IOCONFIG(BSP_UART2_RXD_PIN, FUNC_UART2_RX),
+    #if BSP_UART2_RTS_PIN >= 0
+    IOCONFIG(BSP_UART2_RTS_PIN, FUNC_UART2_RTS),
+    #endif
+    #if BSP_UART2_CTS_PIN >= 0
+    IOCONFIG(BSP_UART2_CTS_PIN, FUNC_UART2_CTS),
+    #endif    
 #endif
 #ifdef BSP_USING_UART3
     IOCONFIG(BSP_UART3_TXD_PIN, FUNC_UART3_TX),
     IOCONFIG(BSP_UART3_RXD_PIN, FUNC_UART3_RX),
+    #if BSP_UART3_RTS_PIN >= 0
+    IOCONFIG(BSP_UART3_RTS_PIN, FUNC_UART3_RTS),
+    #endif
+    #if BSP_UART3_CTS_PIN >= 0
+    IOCONFIG(BSP_UART3_CTS_PIN, FUNC_UART3_CTS),
+    #endif       
+#endif
+#ifdef BSP_USING_I2C0
+    IOCONFIG(BSP_I2C0_SCL_PIN, FUNC_I2C0_SCLK),
+    IOCONFIG(BSP_I2C0_SDA_PIN, FUNC_I2C0_SDA),
+#endif
+#ifdef BSP_USING_I2C1
+    IOCONFIG(BSP_I2C1_SCL_PIN, FUNC_I2C1_SCLK),
+    IOCONFIG(BSP_I2C1_SDA_PIN, FUNC_I2C1_SDA),
+#endif
+#ifdef BSP_USING_I2C2
+    IOCONFIG(BSP_I2C2_SCL_PIN, FUNC_I2C2_SCLK),
+    IOCONFIG(BSP_I2C2_SDA_PIN, FUNC_I2C2_SDA),
+#endif
+#ifdef BSP_USING_I2S0
+    IOCONFIG(BSP_I2S0_OUT_D1_PIN, FUNC_I2S0_OUT_D1),
+    IOCONFIG(BSP_I2S0_WS_PIN, FUNC_I2S0_WS),
+    IOCONFIG(BSP_I2S0_SCLK_PIN, FUNC_I2S0_SCLK),
+#endif
+#ifdef BSP_USING_I2S1
+    IOCONFIG(BSP_I2S1_IN_D0_PIN, FUNC_I2S1_IN_D0),
+    IOCONFIG(BSP_I2S1_WS_PIN, FUNC_I2S1_WS),
+    IOCONFIG(BSP_I2S1_SCLK_PIN, FUNC_I2S1_SCLK),
+#endif
+#ifdef BSP_USING_I2S2
+    IOCONFIG(BSP_I2S2_OUT_D1_PIN, FUNC_I2S2_OUT_D1),
+    IOCONFIG(BSP_I2S2_WS_PIN, FUNC_I2S2_WS),
+    IOCONFIG(BSP_I2S2_SCLK_PIN, FUNC_I2S2_SCLK),
+#endif
+
+#ifdef BSP_PWM_CHN0_ENABLE
+    IOCONFIG(BSP_PWM_CHN0_PIN, FUNC_TIMER2_TOGGLE1),
+#endif
+#ifdef BSP_PWM_CHN1_ENABLE
+    IOCONFIG(BSP_PWM_CHN1_PIN, FUNC_TIMER2_TOGGLE2),
+#endif
+#ifdef BSP_PWM_CHN2_ENABLE
+    IOCONFIG(BSP_PWM_CHN2_PIN, FUNC_TIMER2_TOGGLE3),
+#endif
+#ifdef BSP_PWM_CHN3_ENABLE
+    IOCONFIG(BSP_PWM_CHN3_PIN, FUNC_TIMER2_TOGGLE4),
 #endif
 };
 
@@ -101,16 +162,35 @@ int io_config_init(void)
     int count = sizeof(io_config) / sizeof(io_config[0]);
     int i;
 
+/* IO GroupA Power Supply Setting */
+#if defined(BSP_GROUPA_POWER_SUPPLY_3V3)
+    sysctl_set_power_mode(SYSCTL_POWER_BANK0, SYSCTL_POWER_V33);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK1, SYSCTL_POWER_V33);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK2, SYSCTL_POWER_V33);
+#else
     sysctl_set_power_mode(SYSCTL_POWER_BANK0, SYSCTL_POWER_V18);
     sysctl_set_power_mode(SYSCTL_POWER_BANK1, SYSCTL_POWER_V18);
     sysctl_set_power_mode(SYSCTL_POWER_BANK2, SYSCTL_POWER_V18);
-#ifdef BSP_USING_UART2
-    // for IO-27/28
-    sysctl_set_power_mode(SYSCTL_POWER_BANK4, SYSCTL_POWER_V33);
 #endif
-#if  defined(BSP_USING_UART1) || defined(BSP_USING_UART3)
-    // for IO-20~23
+
+/* IO GroupB Power Supply Setting */
+#if defined(BSP_GROUPB_POWER_SUPPLY_3V3)
     sysctl_set_power_mode(SYSCTL_POWER_BANK3, SYSCTL_POWER_V33);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK4, SYSCTL_POWER_V33);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK5, SYSCTL_POWER_V33);
+#else
+    sysctl_set_power_mode(SYSCTL_POWER_BANK3, SYSCTL_POWER_V18);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK4, SYSCTL_POWER_V18);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK5, SYSCTL_POWER_V18);
+#endif
+
+/* IO GroupC Power Supply Setting */
+#if defined(BSP_GROUPC_POWER_SUPPLY_3V3)
+    sysctl_set_power_mode(SYSCTL_POWER_BANK6, SYSCTL_POWER_V33);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK7, SYSCTL_POWER_V33);
+#else
+    sysctl_set_power_mode(SYSCTL_POWER_BANK6, SYSCTL_POWER_V18);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK7, SYSCTL_POWER_V18);
 #endif
 
     for(i = 0; i < count; i++)
@@ -120,12 +200,20 @@ int io_config_init(void)
 
 #if defined(BSP_USING_DVP) || defined(BSP_USING_LCD)
     sysctl_set_spi0_dvp_data(1);
-    sysctl_set_power_mode(SYSCTL_POWER_BANK6, SYSCTL_POWER_V18);
-    sysctl_set_power_mode(SYSCTL_POWER_BANK7, SYSCTL_POWER_V18);
-#endif
-#ifdef FACE_DETECT
     sysctl_clock_enable(SYSCTL_CLOCK_AI);
 #endif
 }
-INIT_BOARD_EXPORT(io_config_init);
 
+int io_config_used(int io_num)
+{
+    int count = sizeof(io_config) / sizeof(io_config[0]);
+    int i;
+
+    for(i = 0; i < count; i++)
+    {
+        if (io_config[i].io_num == io_num)
+            break;
+    }
+
+    return (i < count);
+}

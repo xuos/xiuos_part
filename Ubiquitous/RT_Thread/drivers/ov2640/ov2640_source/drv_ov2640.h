@@ -125,6 +125,8 @@ extern "C" {
 
 #ifdef BOARD_K210_EVB
 #define IOCTRL_CAMERA_SET_DVP_RESO     (21)     // set dev resolution
+#else
+#define IOCTRL_CAMERA_SET_DVP_RESO     (22)     // same as IOCTRL_CAMERA_START_SHOT
 #endif
 
 #define IOCTRL_CAMERA_START_SHOT       (22)     // start shoot

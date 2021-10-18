@@ -7,7 +7,7 @@
 #define STACK_SIZE (128 * 1024)
 #define JSON_FILE_PATH "/kmodel/detect.json"
 #define JSON_BUFFER_SIZE (4 * 1024)
-
+static dmac_channel_number_t dma_ch = DMAC_CHANNEL_MAX;
 // params from json
 static float anchor[ANCHOR_NUM * 2] = {};
 static int net_output_shape[3] = {};
@@ -184,23 +184,23 @@ void face_detect()
     }
     _ioctl_set_dvp_reso set_dvp_reso = {sensor_output_size[1], sensor_output_size[0]};
     ioctl(g_fd, IOCTRL_CAMERA_SET_DVP_RESO, &set_dvp_reso);
-    showbuffer = (unsigned char *)malloc(sensor_output_size[0] * sensor_output_size[1] * 2);
+    showbuffer = (unsigned char *)rt_malloc_align(sensor_output_size[0] * sensor_output_size[1] * 2,64);
     if (NULL == showbuffer) {
         close(g_fd);
         printf("showbuffer apply memory fail !!");
         return;
     }
-    kpurgbbuffer = (unsigned char *)malloc(net_input_size[0] * net_input_size[1] * 3);
+    kpurgbbuffer = (unsigned char *)rt_malloc_align(net_input_size[0] * net_input_size[1] * 3,64);
     if (NULL == kpurgbbuffer) {
         close(g_fd);
-        free(showbuffer);
+        rt_free_align(showbuffer);
         printf("kpurgbbuffer apply memory fail !!");
         return;
     }
     model_data = (unsigned char *)malloc(kmodel_size + 255);
     if (NULL == model_data) {
-        free(showbuffer);
-        free(kpurgbbuffer);
+        rt_free_align(showbuffer);
+        rt_free_align(kpurgbbuffer);
         close(g_fd);
         printf("model_data apply memory fail !!");
         return;
@@ -296,27 +296,33 @@ static void *thread_face_detcet_entry(void *parameter)
             pthread_exit(NULL);
             return NULL;
         }
+        if (dmalock_sync_take(&dma_ch, 2000))
+        {
+            printf("Fail to take DMA channel");
+        }
         kpu_run_kmodel(&face_detect_task, kpurgbbuffer, DMAC_CHANNEL5, ai_done, NULL);
         while (!g_ai_done_flag)
             ;
+        dmalock_release(dma_ch);
         float *output;
         size_t output_size;
         kpu_get_output(&face_detect_task, 0, (uint8_t **)&output, &output_size);
         face_detect_rl.input = output;
         region_layer_run(&face_detect_rl, &face_detect_info);
 /* display result */
-#ifdef BSP_USING_LCD
+
         for (int face_cnt = 0; face_cnt < face_detect_info.obj_number; face_cnt++) {
             draw_edge((uint32_t *)showbuffer, &face_detect_info, face_cnt, 0xF800, (uint16_t)sensor_output_size[1],
                       (uint16_t)sensor_output_size[0]);
-            printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", face_cnt, face_detect_info.obj[face_cnt].x1,
-                   face_detect_info.obj[face_cnt].y1, face_detect_info.obj[face_cnt].x2, face_detect_info.obj[face_cnt].y2,
-                   labels[face_detect_info.obj[face_cnt].class_id], face_detect_info.obj[face_cnt].prob);
-        }
-        if (0 != face_detect_info.obj_number) printf("\n");
-        lcd_draw_picture(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (unsigned int *)showbuffer);
+        //     printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", face_cnt, face_detect_info.obj[face_cnt].x1,
+        //            face_detect_info.obj[face_cnt].y1, face_detect_info.obj[face_cnt].x2, face_detect_info.obj[face_cnt].y2,
+        //            labels[face_detect_info.obj[face_cnt].class_id], face_detect_info.obj[face_cnt].prob);
+         }
+#ifdef BSP_USING_LCD
+        lcd_draw_picture(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (uint32_t *)showbuffer);
+        //lcd_show_image(0, 0, (uint16_t)sensor_output_size[1], (uint16_t)sensor_output_size[0], (unsigned int *)showbuffer);
 #endif
-        usleep(1);
+        usleep(500);
         if (1 == if_exit) {
             if_exit = 0;
             printf("thread_face_detcet_entry exit");

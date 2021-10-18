@@ -37,6 +37,7 @@
 #include <dfs_poll.h>
 #include <dfs_posix.h>
 #include <dfs.h>
+#include<sys/ioctl.h>
 #ifdef RT_USING_POSIX_TERMIOS
 #include <posix_termios.h>
 #endif
@@ -50,6 +51,12 @@
 #include <lwip/netdb.h>
 #include <lwip/sockets.h>
 #endif /* RT_USING_SAL */
+#ifdef BOARD_K210_EVB
+#include <dmac.h>
+#include <dmalock.h>
+#endif
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
