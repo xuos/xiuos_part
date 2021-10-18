@@ -3,8 +3,8 @@ config ADAPTER_NBIOT_BC28
         default "bc28"
 
 if ADD_XIUOS_FETURES
-        config ADAPTER_BC28_PWRKEY
-                int "BC28 PWRKEY pin number"
+        config ADAPTER_BC28_RESETPIN
+                int "BC28 RESET pin number"
                 default "100"
 
         config ADAPTER_BC28_PIN_DRIVER
@@ -23,11 +23,11 @@ if ADD_XIUOS_FETURES
         if ADAPTER_BC28_DRIVER_EXTUART                    
                 config ADAPTER_BC28_DRIVER
                         string "BC28 device extra uart driver path"
-                        default "/dev/extuart_dev0"
+                        default "/dev/extuart_dev5"
 
                 config ADAPTER_BC28_DRIVER_EXT_PORT
                         int "if BC28 device using extuart, choose port"
-                        default "0"
+                        default "5"
         endif
 endif
 

@@ -79,66 +79,93 @@ int AdapterNbiotInit(void)
 }
 
 /******************TEST*********************/
-// int openzigbee(void)
-// {
-//     int ret = 0;
+int opennb(void)
+{
+    int ret = 0;
 
-//     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_ZIGBEE_NAME);
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_NBIOT_NAME);
 
-// #ifdef ADAPTER_E18
-//     ret = AdapterDeviceOpen(adapter);
-//     if(ret < 0){
-//         printf("open adapter failed\n");
-//         return -1;
-//     }
+#ifdef ADAPTER_BC28
+    ret = AdapterDeviceOpen(adapter);
+    if(ret < 0){
+        printf("open adapter failed\n");
+        return -1;
+    }
 
-//     adapter->info->work_mode = 1;
-//     ret = AdapterDeviceControl(adapter, CONFIG_ZIGBEE_NET_MODE,NULL);
-//     if(ret < 0){
-//         printf("control adapter failed\n");
-//         return -1;
-//     }
-//     ret = AdapterDeviceJoin(adapter, NULL);
-//     if(ret < 0){
-//         printf("join adapter failed\n");
-//         return -1;
-//     }
-// #endif
+#endif
 
-//     return 0;    
-// }
-// SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, openzigbee, openzigbee, show adapter zigbee information);
+     return 0;    
+ }
+ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, opennb, opennb, show adapter nb information);
+int closenb(void)
+{
+    int ret = 0;
 
-// int sendzigbee(int argc, char *argv[])
-// {
-//     const char *send_msg = argv[1];
-//     int ret = 0;
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_NBIOT_NAME);
 
-//     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_ZIGBEE_NAME);
+#ifdef ADAPTER_BC28
+    ret = AdapterDeviceClose(adapter);
+    if(ret < 0){
+        printf("open adapter failed\n");
+        return -1;
+    }
 
-//     printf("send argv1 %s\n",argv[1]);
-//     ret = AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
-//     if(ret < 0){
-//         printf(" adapter send failed\n");
-//         return -1;
-//     }
-//     printf("zigbee send msg %s\n", send_msg);
+#endif
+
+     return 0;    
+ }
+ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, closenb, closenb, show adapter nb information);
+ 
+ int connectnb(int argc, char *argv[])
+ {
+     const char *send_msg = argv[1];
+     int ret = 0;
+
+     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_NBIOT_NAME);
+
+    
+     ret = AdapterDeviceConnect(adapter, 1, "192.168.131.20","3333",1);
+     if(ret < 0){
+         printf(" adapter send failed\n");
+         return -1;
+     }
     
 
-//     return 0;    
-// }
-// SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, sendzigbee, sendzigbee, show adapter zigbee information);
 
-// int recvzigbee(void)
-// {
-//     char recv_msg[128];
-//     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_ZIGBEE_NAME);
-//     memset(recv_msg,0,128);
-//     AdapterDeviceRecv(adapter, recv_msg, 128);
-//     PrivTaskDelay(2000);
-//     printf("zigbee recv msg %s\n", recv_msg);
-    
-//     return 0;    
-// }
-// SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, recvzigbee, recvzigbee, show adapter zigbee information);
+     return 0;    
+ }
+ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, connectnb, connectnb, show adapter nb information);
+
+ int sendnb(int argc, char *argv[])
+ {
+     const char *send_msg = argv[1];
+     int ret = 0;
+
+     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_NBIOT_NAME);
+
+     printf("send argv1 %s\n",argv[1]);
+     ret = AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
+     if(ret < 0){
+         printf(" adapter send failed\n");
+         return -1;
+     }
+     printf("nb send msg %s\n", send_msg);
+
+
+     return 0;    
+ }
+ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, sendnb, sendnb, show adapter nb information);
+
+ int recvnb(void)
+ {
+     char recv_msg[128];
+     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_NBIOT_NAME);
+     memset(recv_msg,0,128);
+     AdapterDeviceRecv(adapter, recv_msg, 128);
+     PrivTaskDelay(2000);
+     printf("nb recv msg %s\n", recv_msg);
+
+     return 0;    
+ }
+ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, recvnb, recvnb, show adapter nb information);
 

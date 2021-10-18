@@ -81,6 +81,6 @@ int ParseATReply(char* str, const char *format, ...);
 void DeleteATReply(ATReplyType reply);
 int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const char *cmd_expr, ...);
 
-#define REPLY_TIME_OUT 3000
+#define REPLY_TIME_OUT 3
 
 #endif

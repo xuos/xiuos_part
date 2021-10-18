@@ -30,6 +30,38 @@
 
 #define SOCKET_INVALID_ID  (-1)
 
+static int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
+{
+    char *result = NULL;
+    if (NULL == agent || NULL == cmd || NULL == check ) {
+        return -1;
+    }
+
+    ATReplyType reply = CreateATReply(64);
+    if (NULL == reply) {
+        printf("%s %d at_create_resp failed!\n",__func__,__LINE__);
+        return -1;
+    }
+
+    ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd);
+    PrivTaskDelay(300);
+
+    result = GetReplyText(reply);
+    if (!result) {
+        printf("%s %n get reply failed.\n",__func__,__LINE__);
+        goto __exit;
+    }
+    if(0 != strncmp(result, check, strlen(check))) {
+        printf("%s %d check[%s] reply[%s] failed.\n",__func__,__LINE__,check,result);
+        goto __exit;
+    }
+    return 0;
+
+__exit:
+    DeleteATReply(reply);
+    return -1;
+}
+
 static int BC28UartOpen(struct Adapter *adapter)
 {
     if (NULL == adapter) {
@@ -80,7 +112,7 @@ static void BC28PowerSet(void)
     struct PinParam pin_param;
     pin_param.cmd = GPIO_CONFIG_MODE;
     pin_param.mode = GPIO_CFG_OUTPUT; 
-    pin_param.pin = ADAPTER_BC28_PWRKEY;
+    pin_param.pin = ADAPTER_BC28_RESETPIN;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = PIN_TYPE;
@@ -88,7 +120,7 @@ static void BC28PowerSet(void)
     PrivIoctl(pin_fd, OPE_CFG, &ioctl_cfg);
 
     struct PinStat pin_stat;
-    pin_stat.pin = ADAPTER_BC28_PWRKEY;
+    pin_stat.pin = ADAPTER_BC28_RESETPIN;
     pin_stat.val = GPIO_HIGH;
     PrivWrite(pin_fd, &pin_stat, 1);
 
@@ -115,22 +147,15 @@ int NBIoTSocketCreate(struct Adapter *adapter, struct Socket *socket )
         return -1;
     }
 
-    ATReplyType reply = CreateATReply(64);
-    if (NULL == reply) {
-        printf("at create failed ! \n");
-        result = -1;
-        goto __exit;
-    }
-
     if ( socket->af_type == NET_TYPE_AF_INET6 ) {
         printf("IPv6 not surport !\n");
         result = -1;
-        goto __exit;
+        goto out;
     }
 
     char *str_af_type = "AF_INET";
     char *str_type;
-    char str_fd[3] = {0};
+    char str_fd[3] = {1};
     char *str_protocol ;
     char at_cmd[64] = {0};
     char listen_port[] = {0};
@@ -141,7 +166,7 @@ int NBIoTSocketCreate(struct Adapter *adapter, struct Socket *socket )
     } else {
         printf("surport max 0-6, socket_id = [%d] is error!\n",socket->socket_id);
         result = -1;
-        goto __exit;
+        goto out;
     }
 
     if( socket->listen_port >= 0 && socket->listen_port <= 65535){
@@ -154,18 +179,18 @@ int NBIoTSocketCreate(struct Adapter *adapter, struct Socket *socket )
         adapter->socket.protocal = SOCKET_PROTOCOL_TCP;
         adapter->socket.type = SOCKET_TYPE_STREAM;
         str_type = "STREAM";
-        char *str_protocol = "6";
+        str_protocol = "6";
 
     } else if ( socket->type == SOCKET_TYPE_DGRAM ){  //udp
         adapter->socket.type = SOCKET_TYPE_DGRAM;
         adapter->socket.protocal = SOCKET_PROTOCOL_UDP;
         str_type = "DGRAM";
-        char *str_protocol = "17";
+        str_protocol = "17";
 
     } else {
         printf("error socket type \n");
         result = -1;
-        goto __exit;
+        goto out;
     }
 
     memcpy(at_cmd, "AT+NSOCR=", 9);
@@ -181,18 +206,13 @@ int NBIoTSocketCreate(struct Adapter *adapter, struct Socket *socket )
     strcat(at_cmd, "\n");
 
     printf("cmd : %s\n", at_cmd);
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, reply, at_cmd);
-    PrivTaskDelay(3000);
-    printf("bak : ");
-    for(int i = 0; i < strlen(reply->reply_buffer); i++)
-        printf(" 0x%02x", reply->reply_buffer[i]);
-    printf("\n");
-
-__exit:
-    if (reply) {
-        DeleteATReply(reply);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    if(result < 0) {
+        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+        result = -1;
     }
 
+out:
     return result;
 }
 
@@ -204,23 +224,14 @@ __exit:
  */
 int NBIoTSocketDelete(struct Adapter *adapter )
 {
-    int result = 0;
 
-    if (!adapter){
+    if (!adapter) {
         return -1;
-    }
-
-    ATReplyType reply = CreateATReply(64);
-    if (NULL == reply) {
-        printf("at create failed ! \n");
-        result = -1;
-        goto __exit;
     }
 
     if (adapter->socket.socket_id >= 7) {
         printf("socket fd error \n");
-        result = -1;
-        goto __exit;
+        return -1;
     }
 
     char str_fd[2] = {0};
@@ -232,17 +243,12 @@ int NBIoTSocketDelete(struct Adapter *adapter )
     strcat(at_cmd, "\n");
 
     printf("cmd : %s\n", at_cmd);
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, reply, at_cmd);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, at_cmd);
     PrivTaskDelay(300);
 
     adapter->socket.socket_id = SOCKET_INVALID_ID;
 
-__exit:
-    if (reply) {
-        DeleteATReply(reply);
-    }
-
-    return result;
+    return 0;
 }
 
 static int BC28Open(struct Adapter *adapter)
@@ -322,13 +328,6 @@ static int BC28Connect(struct Adapter *adapter, enum NetRoleType net_role, const
 {
     int result = 0;
 
-    ATReplyType reply = CreateATReply(64);
-    if (NULL == reply) {
-        printf("at create failed ! \n");
-        result = -1;
-        goto __exit;
-    }
-
     if (adapter->socket.socket_id > 6) {
         printf("socket fd error \n");
         result = -1;
@@ -337,6 +336,8 @@ static int BC28Connect(struct Adapter *adapter, enum NetRoleType net_role, const
 
     if ( ip_type != SOCKET_TYPE_STREAM) {
         printf("socket type error \n");
+        result = -1;
+        goto __exit;
     }
 
     char at_cmd[64] = {0};
@@ -353,32 +354,25 @@ static int BC28Connect(struct Adapter *adapter, enum NetRoleType net_role, const
     strcat(at_cmd, "\n");
 
     printf("cmd : %s\n", at_cmd);
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, reply, at_cmd);
-    PrivTaskDelay(300);
-
-__exit:
-    if (reply) {
-        DeleteATReply(reply);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    if(result < 0) {
+        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+        result = -1;
     }
 
+__exit:
     return result;
 }
 
 static int BC28Send(struct Adapter *adapter, const void *buf, size_t len)
 {
     uint32_t result = 0;
+    char at_cmd[64] = {0};
+    char str_fd[2] = {0};
 
-    ATReplyType reply = CreateATReply(64);
-    if (NULL == reply) {
-        printf("at create failed ! \n");
-        result = -ERROR;
-        goto __exit;
-    }
 
     if (adapter->socket.type == SOCKET_TYPE_STREAM ) {
-        
-        char at_cmd[64] = {0};
-        char str_fd[2] = {0};
+
         char size[2] = {0};
 
         itoa(adapter->socket.socket_id, str_fd, 10);
@@ -392,13 +386,8 @@ static int BC28Send(struct Adapter *adapter, const void *buf, size_t len)
         strcat(at_cmd, buf);
         strcat(at_cmd, "\n");
 
-        printf("cmd : %s\n", at_cmd);
-        ATOrderSend(adapter->agent, REPLY_TIME_OUT, reply, at_cmd);
-        PrivTaskDelay(300);
-
     } else if(adapter->socket.type == SOCKET_TYPE_DGRAM ) {
-        char at_cmd[64] = {0};
-        char str_fd[2] = {0};
+
         char listen_port[] = {0};
 
         itoa(adapter->socket.socket_id, str_fd, 10);
@@ -415,14 +404,13 @@ static int BC28Send(struct Adapter *adapter, const void *buf, size_t len)
         strcat(at_cmd, buf);
         strcat(at_cmd, "\n");
 
-        printf("cmd : %s\n", at_cmd);
-        ATOrderSend(adapter->agent, REPLY_TIME_OUT, reply, at_cmd);
-        PrivTaskDelay(300);
     }
 
-__exit:
-    if (reply) {
-        DeleteATReply(reply);
+    printf("cmd : %s\n", at_cmd);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    if(result < 0) {
+        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+        result = -1;
     }
 
     return result;

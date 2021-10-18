@@ -388,7 +388,7 @@ static int E18Recv(struct Adapter *adapter, void *buf, size_t len)
             if(!adapter->agent){
                 PrivRead(adapter->fd, buf, len);
             } else {
-               EntmRecv(adapter->agent, buf, len, 3000);/* wait timeout 3000ms*/
+               EntmRecv(adapter->agent, buf, len, 3);/* wait timeout 3000ms*/
             }
             break;
         case STT_MODE2:
