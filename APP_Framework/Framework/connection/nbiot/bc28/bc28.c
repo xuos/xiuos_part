@@ -30,37 +30,6 @@
 
 #define SOCKET_INVALID_ID  (-1)
 
-static int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
-{
-    char *result = NULL;
-    if (NULL == agent || NULL == cmd || NULL == check ) {
-        return -1;
-    }
-
-    ATReplyType reply = CreateATReply(64);
-    if (NULL == reply) {
-        printf("%s %d at_create_resp failed!\n",__func__,__LINE__);
-        return -1;
-    }
-
-    ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd);
-    PrivTaskDelay(300);
-
-    result = GetReplyText(reply);
-    if (!result) {
-        printf("%s %n get reply failed.\n",__func__,__LINE__);
-        goto __exit;
-    }
-    if(0 != strncmp(result, check, strlen(check))) {
-        printf("%s %d check[%s] reply[%s] failed.\n",__func__,__LINE__,check,result);
-        goto __exit;
-    }
-    return 0;
-
-__exit:
-    DeleteATReply(reply);
-    return -1;
-}
 
 static int BC28UartOpen(struct Adapter *adapter)
 {

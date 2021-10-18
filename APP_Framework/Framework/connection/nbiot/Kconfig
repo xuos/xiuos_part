@@ -4,7 +4,7 @@ if CONNECTION_ADAPTER_NB
             default y
     
     if ADAPTER_BC28
-        source "$APP_DIR/Framework/connection/nbiot/BC28/Kconfig"
+        source "$APP_DIR/Framework/connection/nbiot/bc28/Kconfig"
     endif
         
 endif
