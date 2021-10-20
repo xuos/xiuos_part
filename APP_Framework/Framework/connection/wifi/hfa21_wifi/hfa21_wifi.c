@@ -11,7 +11,7 @@
 */
 
 /**
- * @file hfa21.c
+ * @file hfa21_wifi.c
  * @brief Implement the connection wifi adapter function, using HFA21 device
  * @version 1.1
  * @author AIIT XUOS Lab
@@ -23,14 +23,14 @@
 
 #define LEN_PARA_BUF 128
 
-static int Hfa21SetDown(struct Adapter *adapter_at);
+static int Hfa21WifiSetDown(struct Adapter *adapter_at);
 
 /**
  * @description: enter AT command mode
  * @param at_agent - wifi device agent pointer
  * @return success: EOK
  */
-static int Hfa21InitAtCmd(ATAgentType at_agent)
+static int Hfa21WifiInitAtCmd(ATAgentType at_agent)
 {
     ATOrderSend(at_agent, REPLY_TIME_OUT, NULL, "+++");
     PrivTaskDelay(100);
@@ -46,12 +46,12 @@ static int Hfa21InitAtCmd(ATAgentType at_agent)
  * @param adapter - wifi device pointer
  * @return success: EOK, failure: ENOMEMORY
  */
-static int Hfa21Open(struct Adapter *adapter)
+static int Hfa21WifiOpen(struct Adapter *adapter)
 {
-    /*step1: open ec200t serial port*/
+    /*step1: open hfa21 serial port*/
     adapter->fd = PrivOpen(ADAPTER_HFA21_DRIVER, O_RDWR);
     if (adapter->fd < 0) {
-        printf("Hfa21Open get serial %s fd error\n", ADAPTER_HFA21_DRIVER);
+        printf("Hfa21WifiOpen get serial %s fd error\n", ADAPTER_HFA21_DRIVER);
         return -1;
     }
 
@@ -67,7 +67,7 @@ static int Hfa21Open(struct Adapter *adapter)
         adapter->agent = at_agent;
     }
 
-    ADAPTER_DEBUG("Hfa21 open done\n");
+    ADAPTER_DEBUG("Hfa21Wifi open done\n");
 
     return 0;
 }
@@ -77,25 +77,25 @@ static int Hfa21Open(struct Adapter *adapter)
  * @param adapter - wifi device pointer
  * @return success: EOK
  */
-static int Hfa21Close(struct Adapter *adapter)
+static int Hfa21WifiClose(struct Adapter *adapter)
 {
-    return Hfa21SetDown(adapter);
+    return Hfa21WifiSetDown(adapter);
 }
 
 /**
  * @description: send data to adapter
  * @param adapter - wifi device pointer
- * @param data - data bufferd
+ * @param data - data buffer
  * @param data - data length
  * @return success: EOK
  */
-static int Hfa21Send(struct Adapter *adapter, const void *data, size_t len)
+static int Hfa21WifiSend(struct Adapter *adapter, const void *data, size_t len)
 {
     x_err_t result = EOK;
     if (adapter->agent) {
         EntmSend(adapter->agent, (const char *)data, len);
     }else {
-        printf("Can not find agent \n");
+        printf("Hfa21WifiSend can not find agent!\n");
 	}
 
 __exit:
@@ -106,11 +106,11 @@ __exit:
 /**
  * @description: receive data from adapter
  * @param adapter - wifi device pointer
- * @param data - data bufferd
+ * @param data - data buffer
  * @param data - data length
  * @return success: EOK
  */
-static int Hfa21Receive(struct Adapter *adapter, void *rev_buffer, size_t buffer_len)
+static int Hfa21WifiReceive(struct Adapter *adapter, void *rev_buffer, size_t buffer_len)
 {
     x_err_t result = EOK;
     printf("hfa21 receive waiting ... \n");
@@ -118,7 +118,7 @@ static int Hfa21Receive(struct Adapter *adapter, void *rev_buffer, size_t buffer
     if (adapter->agent) {
         return EntmRecv(adapter->agent, (char *)rev_buffer, buffer_len, 40000);
     } else {
-        printf("Can not find agent \n");
+        printf("Hfa21WifiReceive can not find agent!\n");
 	}
 
 __exit:
@@ -131,26 +131,25 @@ __exit:
  * @param adapter - wifi device pointer
  * @return success: EOK
  */
-static int Hfa21SetUp(struct Adapter *adapter)
+static int Hfa21WifiSetUp(struct Adapter *adapter)
 {
     uint8 wifi_ssid[LEN_PARA_BUF] = "AIIT-Guest";
     uint8 wifi_pwd[LEN_PARA_BUF] = "";
     char cmd[LEN_PARA_BUF];
 
-    //struct at_device_esp8266 *esp8266 = (struct at_device_esp8266 *) device->UserData;
     struct ATAgent *agent = adapter->agent;
 
     /* wait hfa21 device startup finish */
     PrivTaskDelay(5000);
 
-    Hfa21InitAtCmd(agent);
+    Hfa21WifiInitAtCmd(agent);
 
     memset(cmd,0,sizeof(cmd));
     strcpy(cmd,"AT+FCLR\r");
     ATOrderSend(agent, REPLY_TIME_OUT, NULL, cmd);
     PrivTaskDelay(20000);
 
-    Hfa21InitAtCmd(agent);
+    Hfa21WifiInitAtCmd(agent);
 
     memset(cmd,0,sizeof(cmd));
     strcpy(cmd,"AT+WSSSID=");
@@ -184,9 +183,9 @@ static int Hfa21SetUp(struct Adapter *adapter)
  * @param adapter - wifi device pointer
  * @return success: EOK
  */
-static int Hfa21SetDown(struct Adapter *adapter)
+static int Hfa21WifiSetDown(struct Adapter *adapter)
 {
-    Hfa21InitAtCmd(adapter->agent);
+    Hfa21WifiInitAtCmd(adapter->agent);
 
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+FCLR\r");
     PrivTaskDelay(20000);
@@ -202,7 +201,7 @@ static int Hfa21SetDown(struct Adapter *adapter)
  * @param netmask - netmask address
  * @return success: EOK, failure: ENOMEMORY
  */
-static int Hfa21SetAddr(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask)
+static int Hfa21WifiSetAddr(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask)
 {
     #define HFA21_SET_ADDR_EXPRESSION        "+ok=%[^,],%[^,],%[^,],%[^,]\r"
     char *dhcp_mode =NULL;
@@ -215,7 +214,7 @@ static int Hfa21SetAddr(struct Adapter *adapter, const char *ip, const char *gat
     gw_str = (char *) PrivCalloc(1, 17);
     mask_str = (char *) PrivCalloc(1, 17);
 
-    Hfa21InitAtCmd(adapter->agent);
+    Hfa21WifiInitAtCmd(adapter->agent);
 
     x_err_t result = EOK;
 
@@ -251,12 +250,12 @@ __exit:
 }
 
 /**
- * @description: ping
+ * @description: wifi ping function
  * @param adapter - wifi device pointer
  * @param destination - domain name or ip address
  * @return success: EOK, failure: ENOMEMORY
  */
-static int Hfa21Ping(struct Adapter *adapter, const char *destination)
+static int Hfa21WifiPing(struct Adapter *adapter, const char *destination)
 {
     char *ping_result = NONE;
     char *dst = NONE;
@@ -265,7 +264,7 @@ static int Hfa21Ping(struct Adapter *adapter, const char *destination)
     strcpy(dst, destination);
     strcat(dst, "\r");
 
-    Hfa21InitAtCmd(adapter->agent);
+    Hfa21WifiInitAtCmd(adapter->agent);
 
     uint32 result = EOK;
 
@@ -301,11 +300,11 @@ __exit:
 }
 
 /**
- * @description: display network configuration
+ * @description: display wifi network configuration
  * @param adapter - wifi device pointer
  * @return success: EOK, failure: ENOMEMORY
  */
-static int Hfa21Netstat(struct Adapter *adapter)
+static int Hfa21WifiNetstat(struct Adapter *adapter)
 {
     #define HFA21_NETSTAT_RESP_SIZE         320
     #define HFA21_NETSTAT_TYPE_SIZE         10
@@ -400,7 +399,16 @@ __exit:
         PrivFree(work_mode);
 }
 
-static int Hfa21Connect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
+/**
+ * @description: wifi connect function
+ * @param adapter - wifi device pointer
+ * @param net_role - net role, CLIENT or SERVER
+ * @param ip - ip address
+ * @param port - port num
+ * @param ip_type - ip type, IPV4 or IPV6
+ * @return success: 0, failure: -1
+ */
+static int Hfa21WifiConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
 {
     int result = EOK;
     ATReplyType reply = NONE;
@@ -413,7 +421,7 @@ static int Hfa21Connect(struct Adapter *adapter, enum NetRoleType net_role, cons
         return ENOMEMORY;
     }
 
-    Hfa21InitAtCmd(adapter->agent);
+    Hfa21WifiInitAtCmd(adapter->agent);
 
     memset(cmd,0,sizeof(cmd));
     strcpy(cmd,"AT+NETP=TCP,");
@@ -446,10 +454,10 @@ __exit:
     return result;
 }
 
-static int Hfa21Ioctl(struct Adapter *adapter, int cmd, void *args)
+static int Hfa21WifiIoctl(struct Adapter *adapter, int cmd, void *args)
 {
     if (OPE_INT != cmd) {
-        printf("Hfa21Ioctl only support OPE_INT, do not support %d\n", cmd);
+        printf("Hfa21WifiIoctl only support OPE_INT, do not support %d\n", cmd);
         return -1;
     }
 
@@ -473,25 +481,25 @@ static int Hfa21Ioctl(struct Adapter *adapter, int cmd, void *args)
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
     ioctl_cfg.args = &serial_cfg;
     PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
-    printf("Hfa21Ioctl success\n");
+    printf("Hfa21WifiIoctl success\n");
     return 0;
 }
 
-static const struct IpProtocolDone hfa21_done =
+static const struct IpProtocolDone hfa21_wifi_done =
 {
-    .open = Hfa21Open,
-    .close =  Hfa21Close,
-    .ioctl = Hfa21Ioctl,
-    .setup = Hfa21SetUp,
-    .setdown = Hfa21SetDown,
-    .setaddr = Hfa21SetAddr,
+    .open = Hfa21WifiOpen,
+    .close =  Hfa21WifiClose,
+    .ioctl = Hfa21WifiIoctl,
+    .setup = Hfa21WifiSetUp,
+    .setdown = Hfa21WifiSetDown,
+    .setaddr = Hfa21WifiSetAddr,
     .setdns = NULL,
     .setdhcp = NULL,
-    .ping = Hfa21Ping,
-    .netstat = Hfa21Netstat,
-    .connect = Hfa21Connect,
-    .send = Hfa21Send,
-    .recv = Hfa21Receive,
+    .ping = Hfa21WifiPing,
+    .netstat = Hfa21WifiNetstat,
+    .connect = Hfa21WifiConnect,
+    .send = Hfa21WifiSend,
+    .recv = Hfa21WifiReceive,
     .disconnect = NULL,
 };
 
@@ -499,18 +507,18 @@ static const struct IpProtocolDone hfa21_done =
  * @description: Register wifi device hfa21
  * @return success: EOK, failure: ERROR
  */
-AdapterProductInfoType Hfa21Attach(struct Adapter *adapter)
+AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter)
 {
     struct AdapterProductInfo *product_info = PrivMalloc(sizeof(struct AdapterProductInfo));
     if (!product_info) {
-        printf("Hfa21Attach Attach malloc product_info error\n");
+        printf("Hfa21WifiAttach Attach malloc product_info error\n");
         PrivFree(product_info);
         return NULL;
     }
 
     strcpy(product_info->model_name, ADAPTER_WIFI_HFA21);
 
-    product_info->model_done = (void *)&hfa21_done;
+    product_info->model_done = (void *)&hfa21_wifi_done;
 
     return product_info;
 }

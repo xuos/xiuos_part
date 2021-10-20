@@ -19,6 +19,7 @@ extern int AdapterFrameworkInit(void);
 extern int Adapter4GInit(void);
 extern int AdapterBlueToothInit(void);
 extern int AdapterWifiInit(void);
+extern int AdapterEthernetInit(void);
 extern int AdapterZigbeeInit(void);
 
 extern int D124VoiceInit(void);
@@ -92,16 +93,19 @@ static struct InitDesc sensor_desc[] =
 static struct InitDesc connection_desc[] = 
 {
 #ifdef CONNECTION_ADAPTER_4G
-	{ "4G adpter", Adapter4GInit},
+	{ "4G adapter", Adapter4GInit},
 #endif
 #ifdef CONNECTION_ADAPTER_ZIGBEE
-	{ "zigbee adpter", AdapterZigbeeInit},
+	{ "zigbee adapter", AdapterZigbeeInit},
 #endif
 #ifdef CONNECTION_ADAPTER_BLUETOOTH
-	{ "BlueTooth adpter", AdapterBlueToothInit},
+	{ "bluetooth adapter", AdapterBlueToothInit},
 #endif
 #ifdef CONNECTION_ADAPTER_WIFI
-	{ "Wifi adpter", AdapterWifiInit},
+	{ "wifi adapter", AdapterWifiInit},
+#endif
+#ifdef CONNECTION_ADAPTER_ETHERNET
+	{ "ethernet adapter", AdapterEthernetInit},
 #endif
 	{ "NULL", NULL },
 };

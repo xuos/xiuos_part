@@ -1,6 +1,8 @@
 config ADAPTER_HFA21_WIFI
+        help
+            Please check HFA21 can only work for adapter_wifi or adapter_ethernet in the meantime!
         bool "Using wifi adapter device HFA21"
-        default y
+        default n
 
 if ADAPTER_HFA21_WIFI
     source "$APP_DIR/Framework/connection/wifi/hfa21_wifi/Kconfig"
