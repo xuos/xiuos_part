@@ -124,7 +124,7 @@ int closenb(void)
      struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_NBIOT_NAME);
 
     
-     ret = AdapterDeviceConnect(adapter, 1, "192.168.131.20","3333",1);
+     ret = AdapterDeviceConnect(adapter, 1, "101.68.82.219","9898",1);
      if(ret < 0){
          printf(" adapter send failed\n");
          return -1;
@@ -139,12 +139,13 @@ int closenb(void)
  int sendnb(int argc, char *argv[])
  {
      const char *send_msg = argv[1];
+     int msg_len = atoi(argv[2]);
      int ret = 0;
 
      struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_NBIOT_NAME);
 
-     printf("send argv1 %s\n",argv[1]);
-     ret = AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
+     printf("send argv1 %s len = %d\n",argv[1],msg_len);
+     ret = AdapterDeviceSend(adapter, send_msg, msg_len);
      if(ret < 0){
          printf(" adapter send failed\n");
          return -1;

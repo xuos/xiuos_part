@@ -100,6 +100,76 @@ static void BC28PowerSet(void)
 
     PrivClose(pin_fd);
 }
+
+int NBIoTStatusCheck(struct Adapter *adapter )
+{
+    int32 result = 0;
+
+    if (!adapter ){
+        return -1;
+    }
+
+    char at_cmd[64] = {0};
+
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B); /* set receive end flag as 'OK'*/
+
+    memcpy(at_cmd, "AT+CSQ", 6);
+    strcat(at_cmd, "\n");
+    printf("cmd : %s\n", at_cmd);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    if(result < 0) {
+        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+        result = -1;
+    }
+
+    memcpy(at_cmd, "AT+CFUN?", 8);
+    strcat(at_cmd, "\n");
+    printf("cmd : %s\n", at_cmd);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    if(result < 0) {
+        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+        result = -1;
+    }
+
+    memcpy(at_cmd, "AT+CIMI", 7);
+    strcat(at_cmd, "\n");
+    printf("cmd : %s\n", at_cmd);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    if(result < 0) {
+        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+        result = -1;
+    }
+
+    memcpy(at_cmd, "AT+CEREG?", 9);
+    strcat(at_cmd, "\n");
+    printf("cmd : %s\n", at_cmd);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    if(result < 0) {
+        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+        result = -1;
+    }   
+
+    memcpy(at_cmd, "AT+CGATT?", 9);
+    strcat(at_cmd, "\n");
+    printf("cmd : %s\n", at_cmd);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    if(result < 0) {
+        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+        result = -1;
+    }
+
+    memcpy(at_cmd, "AT+CGPADDR", 10);
+    strcat(at_cmd, "\n");
+    printf("cmd : %s\n", at_cmd);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    if(result < 0) {
+        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+        result = -1;
+    }
+
+    return result;
+}
+
 /**
  * @description: NBIoT device create a socket connection
  * @param adapter - NBIoT adapter AT
@@ -175,6 +245,9 @@ int NBIoTSocketCreate(struct Adapter *adapter, struct Socket *socket )
     strcat(at_cmd, "\n");
 
     printf("cmd : %s\n", at_cmd);
+
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B); /* set receive end flag as 'OK'*/
+
     result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
     if(result < 0) {
         printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
@@ -212,6 +285,7 @@ int NBIoTSocketDelete(struct Adapter *adapter )
     strcat(at_cmd, "\n");
 
     printf("cmd : %s\n", at_cmd);
+    AtSetReplyCharNum(adapter->agent, 1);
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, at_cmd);
     PrivTaskDelay(300);
 
@@ -246,8 +320,13 @@ static int BC28Open(struct Adapter *adapter)
     }
     create_socket.type = SOCKET_TYPE_STREAM;
     create_socket.listen_port = 0;
-    create_socket.socket_id = 0;
+    create_socket.socket_id = 1;
     create_socket.af_type = NET_TYPE_AF_INET;
+
+    BC28PowerSet(); /* reset bc28 module by set reset pin */
+    PrivTaskDelay(6000);
+
+    NBIoTStatusCheck(adapter); /* ask module status*/
 
     /*step3: create a tcp socket default */
     ret = NBIoTSocketCreate(adapter, &create_socket);
@@ -323,6 +402,7 @@ static int BC28Connect(struct Adapter *adapter, enum NetRoleType net_role, const
     strcat(at_cmd, "\n");
 
     printf("cmd : %s\n", at_cmd);
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
     result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
     if(result < 0) {
         printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
@@ -376,6 +456,7 @@ static int BC28Send(struct Adapter *adapter, const void *buf, size_t len)
     }
 
     printf("cmd : %s\n", at_cmd);
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
     result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
     if(result < 0) {
         printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
@@ -390,6 +471,7 @@ static int BC28Recv(struct Adapter *adapter, void *buf, size_t len)
     char at_cmd[64] = {0};
     char str_fd[2] = {0};
     char size[2] = {0};
+    char *result = NULL;
 
     ATReplyType reply = CreateATReply(64);
     if (NULL == reply) {
@@ -398,7 +480,7 @@ static int BC28Recv(struct Adapter *adapter, void *buf, size_t len)
     }
     
     itoa(adapter->socket.socket_id, str_fd, 10);
-    size[0] = len + '0';
+    itoa(len, size, 10);
 
     memcpy(at_cmd, "AT+NSORF=", 9);
     strcat(at_cmd, str_fd);
@@ -409,11 +491,12 @@ static int BC28Recv(struct Adapter *adapter, void *buf, size_t len)
     printf("cmd : %s\n", at_cmd);
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, reply, at_cmd);
     PrivTaskDelay(300);
-
-    buf = GetReplyText(reply);
-    if (!buf) {
+    
+    result = GetReplyText(reply);
+    if (!result) {
         printf("%s %n get reply failed.\n",__func__,__LINE__);
     }
+    memcpy(buf, result, reply->reply_len);
 
     if (reply) {
         DeleteATReply(reply);
@@ -461,7 +544,6 @@ AdapterProductInfoType BC28Attach(struct Adapter *adapter)
     strncpy(product_info->model_name, ADAPTER_NBIOT_BC28,sizeof(product_info->model_name));
     product_info->model_done = (void *)&BC28_done;
 
-    BC28PowerSet();
     return product_info;
 }
 

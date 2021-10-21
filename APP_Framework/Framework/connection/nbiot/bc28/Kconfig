@@ -17,7 +17,7 @@ if ADD_XIUOS_FETURES
 
         config ADAPTER_BC28_DRIVER
                 string "BC28 device uart driver path"
-                default "/dev/uart2_dev2"
+                default "/dev/usart2_dev2"
                 depends on !ADAPTER_BC28_DRIVER_EXTUART
 
         if ADAPTER_BC28_DRIVER_EXTUART                    

@@ -309,9 +309,9 @@ static int GetCompleteATReply(ATAgentType agent)
 
     while (1) {
         PrivRead(agent->fd, &ch, 1);
-
+#ifdef CONNECTION_FRAMEWORK_DEBUG
         printf(" %c (0x%x)\n", ch, ch);
-
+#endif
         if (agent->receive_mode == ENTM_MODE){
             if (agent->entm_recv_len < ENTM_RECV_MAX) {
                 PrivMutexObtain(&agent->lock); 

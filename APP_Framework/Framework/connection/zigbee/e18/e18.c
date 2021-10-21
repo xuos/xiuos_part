@@ -211,7 +211,9 @@ static int E18Open(struct Adapter *adapter)
         ATAgentType at_agent = GetATAgent(agent_name);
         adapter->agent = at_agent;
     }
-    
+
+    AtSetReplyLrEnd(adapter->agent, 1);
+
 try_again:
     while(try_times--){
         ret = E18NetRoleConfig(adapter);
