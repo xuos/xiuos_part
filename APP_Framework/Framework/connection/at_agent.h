@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#define REPLY_TIME_OUT 3000
+#define REPLY_TIME_OUT 3
 
 enum ReceiveMode
 {

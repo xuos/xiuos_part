@@ -355,7 +355,7 @@ static int Hc08Send(struct Adapter *adapter, const void *buf, size_t len)
 static int Hc08Recv(struct Adapter *adapter, void *buf, size_t len)
 {
     if (adapter->agent) {
-        return EntmRecv(adapter->agent, (char *)buf, len, 40000);
+        return EntmRecv(adapter->agent, (char *)buf, len, 40);
     } else {
         printf("Hc08Recv can not find agent\n");
 	}

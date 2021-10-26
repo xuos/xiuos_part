@@ -116,7 +116,7 @@ static int Hfa21Receive(struct Adapter *adapter, void *rev_buffer, size_t buffer
     printf("hfa21 receive waiting ... \n");
 
     if (adapter->agent) {
-        return EntmRecv(adapter->agent, (char *)rev_buffer, buffer_len, 40000);
+        return EntmRecv(adapter->agent, (char *)rev_buffer, buffer_len, 40);
     } else {
         printf("Can not find agent \n");
 	}
