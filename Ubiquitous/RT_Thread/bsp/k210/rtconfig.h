@@ -71,6 +71,7 @@
 
 /* C++ features */
 
+#define RT_USING_CPLUSPLUS
 
 /* Command shell */
 
@@ -124,6 +125,7 @@
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
+#define RT_USING_RTC
 #define RT_USING_SPI
 #define RT_USING_SPI_MSD
 #define RT_USING_SFUD
@@ -178,7 +180,7 @@
 /* protocol stack implement */
 
 #define SAL_USING_LWIP
-#define SAL_SOCKETS_NUM 16
+#define SAL_USING_POSIX
 
 /* Network interface device */
 
@@ -323,6 +325,7 @@
 /* knowing app */
 
 #define APPLICATION_KNOWING
+#define APP_MNIST
 #define FACE_DETECT
 
 /* sensor app */
@@ -342,6 +345,8 @@
 #define SENSOR_QUANTITY_D124_VOICE "voice_1"
 #define SENSOR_DEVICE_D124_DEV "/dev/uar2"
 #define SUPPORT_KNOWING_FRAMEWORK
+#define USING_TENSORFLOWLITEMICRO
+#define USING_TENSORFLOWLITEMICRO_NORMAL
 #define USING_KPU_POSTPROCESSING
 #define USING_YOLOV2
 
