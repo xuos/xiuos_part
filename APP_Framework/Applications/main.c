@@ -15,11 +15,12 @@
 #include <user_api.h>
 
 extern int FrameworkInit();
-
+extern void ApplicationOtaTaskInit(void);
 int main(void)
 {
 	printf("Hello, world!\n");
 	FrameworkInit();
+	ApplicationOtaTaskInit();
     return 0;
 }
 // int cppmain(void);

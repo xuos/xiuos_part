@@ -1,6 +1,10 @@
-SRC_DIR := general_functions
+SRC_DIR := general_functions app_test 
 
-SRC_FILES := main.c framework_init.c
+SRC_FILES := main.c framework_init.c 
+
+ifeq ($(CONFIG_APPLICATION_OTA),y)
+	SRC_DIR += ota
+endif
 
 ifeq ($(CONFIG_APPLICATION_SENSOR),y)
 	SRC_DIR += sensor_app
