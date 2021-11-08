@@ -73,14 +73,16 @@ uint32_t OtaCrc16(uint8_t * data, uint8_t length)
     return reg_crc;
 }
 
-static int SaveAppBin(char* buf, int len)
+static int SaveAppBin(int fd, char* buf, int len)
 {
-    int fd = 0;
-    fd = open( BOARD_APP_NAME, O_RDWR | O_CREAT );
-    lseek(fd, 0, SEEK_END);
+    // int fd = 0;
+    // fd = open( BOARD_APP_NAME, O_RDWR | O_CREAT );
     write(fd, buf, len);
-    close(fd);
+    lseek(fd, len, SEEK_CUR);
+    
+    // close(fd);
 }
+
 static int CrcFileCheck(uint32 crc_check, unsigned long total_len)
 {
     int ret = 0;
@@ -121,6 +123,9 @@ static int OtaDataRecv(struct Adapter* adapter)
     char reply[16] = {0};
     int ret = 0;
     int try_times = 5;
+    int fd = 0;
+
+    fd = open( BOARD_APP_NAME, O_RDWR | O_CREAT | O_TRUNC);
 
     while(1) {
         memset(&recv_msg, 0, sizeof(struct ota_data));
@@ -140,7 +145,7 @@ static int OtaDataRecv(struct Adapter* adapter)
 
             if (recv_msg.frame.crc == OtaCrc16(recv_msg.frame.frame_data,recv_msg.frame.frame_len))
             {
-                SaveAppBin(recv_msg.frame.frame_data, recv_msg.frame.frame_len);
+                SaveAppBin(fd, recv_msg.frame.frame_data, recv_msg.frame.frame_len);
             }  
             else 
             {
@@ -166,6 +171,7 @@ try_again:
             continue;
         }
     }
+    close(fd);
     return ret;
 }
 
@@ -218,6 +224,7 @@ static void *OtaKTaskEntry(void *parameter)
         PrivTaskDelay(3000); /* check ota signal every 3s */
     }
     AdapterDeviceClose(adapter);
+    
 }
 
 void ApplicationOtaTaskInit(void)

@@ -51,7 +51,7 @@ int Adapter4GInit(void)
 
     struct Adapter *adapter = PrivMalloc(sizeof(struct Adapter));
     if (!adapter) {
-        free(adapter);
+        Privfree(adapter);
         return -1;
     }
 
@@ -60,7 +60,7 @@ int Adapter4GInit(void)
     ret = Adapter4GRegister(adapter);
     if (ret < 0) {
         printf("Adapter4GInit register 4G adapter error\n");
-        free(adapter);
+        Privfree(adapter);
         return -1;
     }
 
@@ -68,7 +68,7 @@ int Adapter4GInit(void)
     AdapterProductInfoType product_info = Ec200tAttach(adapter);
     if (!product_info) {
         printf("Adapter4GInit ec200t attach error\n");
-        free(adapter);
+        Privfree(adapter);
         return -1;
     }
 
@@ -112,4 +112,4 @@ int Adapter4GTest(void)
 
     return 0;    
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, Adapter4GTest, Adapter4GTest, show adapter 4G information);
+// SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, Adapter4GTest, Adapter4GTest, show adapter 4G information);

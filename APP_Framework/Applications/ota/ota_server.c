@@ -153,6 +153,10 @@ int OtaFileSend(int fd)
     char * file_buf = NULL;
 
     file_fd = fopen("/tmp/xiuos_app.bin", "r");
+    if (NULL == file_fd){
+        printf("open file failed.\n");
+        return -1;
+    }
 
     while((ch = fgetc(file_fd)) != EOF)
     {
@@ -166,12 +170,13 @@ int OtaFileSend(int fd)
             data.frame.crc = OtaCrc16(data.frame.frame_data, len);
             file_length += len;
         }
+        memcpy(data.frame.frame_data[len], "!@", strlen("!@")); /* add '!@' as ending flag */
         lseek(file_fd, len, SEEK_CUR);
 
 try_again:
         send(fd, &data, sizeof(data), MSG_NOSIGNAL);
         len = recv(fd, buf, sizeof(buf), 0);
-        if(0 == strncmp(buf, "ok", len))
+        if(0 == strncmp(buf, "ok!@", len))
         {
             frame_cnt++;
             continue;
@@ -219,6 +224,7 @@ void* server_thread(void* p)
     int fd = *(int*)p;
     unsigned char buf[32] = { 0 };
     struct ota_data data;
+    int ret = 0;
 
     printf("pthread = %d\n",fd);
 
@@ -231,19 +237,26 @@ void* server_thread(void* p)
 
         send(fd, &data, sizeof(data), MSG_NOSIGNAL);
 
-        len = recv(fd, buf, sizeof(buf),0);
+        len = recv(fd, buf, sizeof(buf), 0);
         if (len <= 0)
         {
             continue;
         }
         else 
         {
-            if(0 == strncmp(buf, "ok", len))
+            if(0 == strncmp(buf, "ok!@", len))
             {
-                OtaFileSend(fd);
+                ret = OtaFileSend(fd);
+                if (ret == 0) {
+                    printf("ota file send successful.\n");
+                    break;
+                } else { /* ota failed then restart the ota process */
+                    continue;
+                }
             }
         }
     }
+    close(fd);
 }
 
 void server(void)
