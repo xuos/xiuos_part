@@ -51,7 +51,7 @@ int Adapter4GInit(void)
 
     struct Adapter *adapter = PrivMalloc(sizeof(struct Adapter));
     if (!adapter) {
-        Privfree(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -60,7 +60,7 @@ int Adapter4GInit(void)
     ret = Adapter4GRegister(adapter);
     if (ret < 0) {
         printf("Adapter4GInit register 4G adapter error\n");
-        Privfree(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -68,7 +68,7 @@ int Adapter4GInit(void)
     AdapterProductInfoType product_info = Ec200tAttach(adapter);
     if (!product_info) {
         printf("Adapter4GInit ec200t attach error\n");
-        Privfree(adapter);
+        PrivFree(adapter);
         return -1;
     }
 

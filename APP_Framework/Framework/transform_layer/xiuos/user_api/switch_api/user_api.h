@@ -22,15 +22,15 @@
 #ifndef XS_USER_API_H
 #define XS_USER_API_H
 
-#include <xiuos.h>
 #include <xsconfig.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <libc.h>
-#include "../../../../../../Ubiquitous/XiUOS/arch/kswitch.h"
 
 
 #ifdef  SEPARATE_COMPILE
+
+#include "../../../../../../Ubiquitous/XiUOS/arch/kswitch.h"
 
 #define TASK_INFO      1
 #define MEM_INFO       2
@@ -58,22 +58,22 @@ typedef void DIR;
 
 int32_t UserTaskCreate(UtaskType utask);
 
-x_err_t UserTaskStartup(int32_t id);
-x_err_t UserTaskDelete(int32_t id);
+long UserTaskStartup(int32_t id);
+long UserTaskDelete(int32_t id);
 void UserTaskQuit(void);
-x_err_t UserTaskDelay(int32_t ms);
-x_err_t UserGetTaskName(int32_t id ,char *name);
+long UserTaskDelay(int32_t ms);
+long UserGetTaskName(int32_t id ,char *name);
 int32_t UserGetTaskID(void);
 uint8_t UserGetTaskStat(int32_t id);
 
 #ifdef ARCH_SMP
-x_err_t UserTaskCoreCombine(int32_t id,uint8_t core_id);
-x_err_t UserTaskCoreUnCombine(int32_t id);
+long UserTaskCoreCombine(int32_t id,uint8_t core_id);
+long UserTaskCoreUnCombine(int32_t id);
 uint8_t UserGetTaskCombinedCore(int32_t id);
 uint8_t UserGetTaskRunningCore(int32_t id);
 #endif
 
-x_err_t UserGetTaskErrorstatus(int32_t id);
+long UserGetTaskErrorstatus(int32_t id);
 uint8_t UserGetTaskPriority(int32_t id);
 
 
@@ -93,10 +93,10 @@ int32_t UserMutexAbandon(int32_t mutex);
 #ifdef KERNEL_SEMAPHORE
 typedef int32  sem_t;
 sem_t UserSemaphoreCreate(uint16_t val);
-x_err_t UserSemaphoreDelete(sem_t sem);
-x_err_t UserSemaphoreObtain(sem_t sem, int32_t wait_time);
-x_err_t UserSemaphoreAbandon(sem_t sem);
-x_err_t UserSemaphoreSetValue(sem_t sem, uint16_t val);
+long UserSemaphoreDelete(sem_t sem);
+long UserSemaphoreObtain(sem_t sem, int32_t wait_time);
+long UserSemaphoreAbandon(sem_t sem);
+long UserSemaphoreSetValue(sem_t sem, uint16_t val);
 #endif
 
 
@@ -104,22 +104,22 @@ x_err_t UserSemaphoreSetValue(sem_t sem, uint16_t val);
 typedef int32 EventIdType;
 EventIdType UserEventCreate(uint8_t flag);
 void UserEventDelete(EventIdType event);
-x_err_t UserEventTrigger(EventIdType event, uint32_t set);
-x_err_t UserEventProcess(EventIdType event, uint32_t set, uint8_t option, 
+long UserEventTrigger(EventIdType event, uint32_t set);
+long UserEventProcess(EventIdType event, uint32_t set, uint8_t option, 
                          int32_t   wait_time, uint32_t *Recved);
-x_err_t UserEventReinit(EventIdType event);
+long UserEventReinit(EventIdType event);
 #endif
 
 
 #ifdef KERNEL_MESSAGEQUEUE
 int32_t UserMsgQueueCreate(size_t   msg_size, size_t   max_msgs);
-x_err_t UserMsgQueueDelete(int32_t mq );
-x_err_t UserMsgQueueSendwait(int32_t mq, const void *buffer,
+long UserMsgQueueDelete(int32_t mq );
+long UserMsgQueueSendwait(int32_t mq, const void *buffer,
                                       size_t   size, int32_t  wait_time);
-x_err_t UserMsgQueueSend(int32_t mq, const void *buffer, size_t size);
-x_err_t UserMsgQueueUrgentSend(int32_t mq, const void *buffer, size_t size);
-x_err_t UserMsgQueueRecv(int32_t mq, void *buffer, size_t  size,int32_t wait_time);
-x_err_t UserMsgQueueReinit(int32_t mq);
+long UserMsgQueueSend(int32_t mq, const void *buffer, size_t size);
+long UserMsgQueueUrgentSend(int32_t mq, const void *buffer, size_t size);
+long UserMsgQueueRecv(int32_t mq, void *buffer, size_t  size,int32_t wait_time);
+long UserMsgQueueReinit(int32_t mq);
 #endif
 
 int open(const char *path, int flags, ...);
@@ -154,13 +154,17 @@ struct statfs {
 };
 
 int statfs(const char *path, struct statfs *buf);
-#endif
 
+/* NOTE!!!: when cutting out file system, the 'printf' function can not output angthing */
 int Userprintf(const char *fmt, ...);
+#define printf      Userprintf 
 
-#define printf      Userprintf    
+#endif
+ 
 
 #else
+
+#include <xiuos.h>
 
 #ifdef FS_VFS
 #include <iot-vfs_posix.h>
@@ -182,7 +186,7 @@ int32_t UserTaskCreate(UtaskType utask);
 #define UserTaskQuit             KTaskQuit
 #define UserTaskDelay            MdelayKTask
 
-x_err_t UserGetTaskName(int32_t id ,char *name);
+long UserGetTaskName(int32_t id ,char *name);
 int32_t UserGetTaskID(void);
 uint8_t UserGetTaskStat(int32_t id);
 
@@ -194,7 +198,7 @@ uint8_t UserGetTaskCombinedCore(int32_t id);
 uint8_t UserGetTaskRunningCore(int32_t id);
 #endif
 
-x_err_t UserGetTaskErrorstatus(int32_t id);
+long UserGetTaskErrorstatus(int32_t id);
 uint8_t UserGetTaskPriority(int32_t id);
 
 #define UserMalloc               x_malloc

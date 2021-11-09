@@ -20,7 +20,9 @@ int main(void)
 {
 	printf("Hello, world!\n");
 	FrameworkInit();
+#ifdef APPLICATION_OTA
 	ApplicationOtaTaskInit();
+#endif
     return 0;
 }
 // int cppmain(void);

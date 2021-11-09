@@ -25,6 +25,8 @@
 #include <xs_sem.h>
 #include <xs_memory.h>
 #include <xs_mutex.h>
+#include <xs_event.h>
+#include <xs_msg.h>
 
 #ifdef FS_VFS
 #include <iot-vfs_posix.h>
