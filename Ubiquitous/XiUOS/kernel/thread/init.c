@@ -100,11 +100,15 @@ struct InitSequenceDesc components_init[] =
 };
 struct InitSequenceDesc env_init[] = 
 {
-#ifdef ARCH_RISCV
-#if defined (RESOURCES_SPI_SD)|| defined(RESOURCES_SDIO )
+// #ifdef ARCH_RISCV
+// #if defined (RESOURCES_SPI_SD)|| defined(RESOURCES_SDIO )
+// 	{ "MountSDCard", MountSDCard },
+// #endif
+// #endif
+#ifdef MOUNT_SDCARD
 	{ "MountSDCard", MountSDCard },
 #endif
-#endif
+
 #ifdef FS_VFS_MNTTABLE
 	{ "DfsMountTable", DfsMountTable },
 #endif
