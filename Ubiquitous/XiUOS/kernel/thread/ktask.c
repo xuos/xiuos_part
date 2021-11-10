@@ -1053,6 +1053,36 @@ x_err_t KTaskWakeup(int32 id)
 
 #ifdef SEPARATE_COMPILE
 /**
+ * find the first user task in manage list.
+ *
+ * @param 
+ *
+ * @note in interrupt status,this function is not permitted to call.
+ */
+int UTaskSearch(void)
+{
+    x_base lock = 0;
+    KTaskDescriptorType temp_task = NONE;
+    struct SysDoubleLinklistNode *node = NONE;
+	
+	lock = CriticalAreaLock();
+
+    DOUBLE_LINKLIST_FOR_EACH(node,&xiaoshan_task_head)
+	{
+		temp_task = SYS_DOUBLE_LINKLIST_ENTRY(node, struct TaskDescriptor, link);
+		if (1 == temp_task->task_dync_sched_member.isolation_flag)
+		{
+			CriticalAreaUnLock(lock);
+			return temp_task->id.id;
+		}
+	}
+
+	CriticalAreaUnLock(lock);
+
+	return -1;
+}
+
+/**
  *
  * This function init a user task in dynamic way .
  *

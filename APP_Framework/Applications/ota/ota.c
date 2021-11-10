@@ -22,6 +22,8 @@
 #include <transform.h>
 #include <adapter.h>
 
+extern int main(void);
+
 struct ota_header_t
 {
     int16 frame_flag;          ///< frame start flag 2 Bytes
@@ -47,7 +49,8 @@ struct ota_data
     struct ota_frame_t frame;
 };
 
-pthread_t ota_ktask;
+pthread_t ota_task;
+pthread_t restart_main;
 
 /**
  * @description: CRC16 check
@@ -117,6 +120,26 @@ static int CrcFileCheck(uint32 crc_check, unsigned long total_len)
     return ret;
 }
 
+static void RestartApplication(void)
+{
+    pthread_attr_t attr;
+    attr.schedparam.sched_priority = 10;
+    attr.stacksize = 2048;
+
+    while(1) 
+    {
+        unsigned long pid = PrivUserTaskSearch();
+        if (pid > 0) 
+        {
+            PrivTaskDelete(pid, 0);
+        } 
+        else 
+        {
+            break;
+        }
+    }
+    PrivTaskCreate(&restart_main, &attr, (void *)main, NULL);
+}
 static int OtaDataRecv(struct Adapter* adapter)
 {
     struct ota_data recv_msg;
@@ -172,6 +195,7 @@ try_again:
         }
     }
     close(fd);
+    RestartApplication();
     return ret;
 }
 
@@ -233,6 +257,6 @@ void ApplicationOtaTaskInit(void)
     attr.schedparam.sched_priority = 10;
     attr.stacksize = 2048;
 
-    PrivTaskCreate(&ota_ktask, &attr, OtaKTaskEntry, NULL);
+    PrivTaskCreate(&ota_task, &attr, OtaKTaskEntry, NULL);
 
 }

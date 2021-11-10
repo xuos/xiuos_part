@@ -99,6 +99,7 @@ int pthread_setcanceltype(int type, int *oldtype)
 int pthread_kill(pthread_t thread, int sig)
 {
     /* This api should not be used, and will not be supported */
+    UserTaskDelete(thread);
     return -1;
 }
 

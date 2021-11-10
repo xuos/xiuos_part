@@ -1,12 +1,12 @@
 # OTA README
 
-xiuos当前的ota功能允许应用bin文件可以通过4G实现远程的bin文件更新（限制：1、bin文件存放在设备SD卡并且应用从SD卡启动；2、暂且支持4G实现；3、暂时只支持aiit终端）。
+xiuos当前的ota功能允许应用bin文件可以通过4G实现远程的bin文件更新（限制：1、bin文件存放在设备SD卡并且应用从SD卡启动；2、暂且支持4G实现；3、暂时只支持aiit终端;4、只支持xiuos内核）。
 
 ## 文件说明
 
 | 名称 | 说明 |
 | -- | -- |
-| ota.c| 设备OTA代码 |
+| ota.c| xiuos设备OTA代码 |
 | ota_server.c | pc服务端的实例代码供参考 |
 
 

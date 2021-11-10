@@ -60,6 +60,7 @@ int32_t UserTaskCreate(UtaskType utask);
 
 long UserTaskStartup(int32_t id);
 long UserTaskDelete(int32_t id);
+long UserTaskSearch(void);
 void UserTaskQuit(void);
 long UserTaskDelay(int32_t ms);
 long UserGetTaskName(int32_t id ,char *name);
@@ -185,6 +186,7 @@ int32_t UserTaskCreate(UtaskType utask);
 #define UserTaskDelete           KTaskDelete
 #define UserTaskQuit             KTaskQuit
 #define UserTaskDelay            MdelayKTask
+#define UserTaskSearch           UTaskSearch
 
 long UserGetTaskName(int32_t id ,char *name);
 int32_t UserGetTaskID(void);
