@@ -82,6 +82,10 @@ struct InitSequenceDesc device_init[] =
 	{ "W25Qxx_spi", FlashW25qxxSpiDeviceInit},
 #endif
 #endif
+
+#ifdef RESOURCES_SPI_LORA
+	{"LORA_spi", LoraSx12xxSpiDeviceInit},
+#endif
 	{ " NONE ", NONE },
 };
 struct InitSequenceDesc components_init[] = 

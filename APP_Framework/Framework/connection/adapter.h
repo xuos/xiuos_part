@@ -90,6 +90,7 @@ enum NetRoleType
     COORDINATOR,
     ROUTER,
     END_DEVICE,
+    GATEWAY,
     ROLE_NONE,
 };
 
@@ -147,7 +148,7 @@ struct PrivProtocolDone
     int (*setdhcp)(struct Adapter *adapter, int enable);
     int (*ping)(struct Adapter *adapter, const char *destination);
     int (*netstat)(struct Adapter *adapter);
-    int (*join)(struct Adapter *adapter, const char *priv_net_group);
+    int (*join)(struct Adapter *adapter, unsigned char *priv_net_group);
     int (*send)(struct Adapter *adapter, const void *buf, size_t len);
     int (*recv)(struct Adapter *adapter, void *buf, size_t len);
     int (*quit)(struct Adapter *adapter);
@@ -164,6 +165,7 @@ struct Adapter
 
     struct Socket socket;
 
+    int net_role_id;
     enum NetProtocolType net_protocol;
     enum NetRoleType net_role;
     enum AdapterStatus adapter_status;
@@ -171,6 +173,7 @@ struct Adapter
     char buffer[ADAPTER_BUFFSIZE];
     
     void *done;
+    void *adapter_param;
 
     struct DoublelistNode link;
 };
@@ -206,7 +209,7 @@ int AdapterDeviceControl(struct Adapter *adapter, int cmd, void *args);
 int AdapterDeviceConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type);
 
 /*Join to a certain private net, only support PRIVATE_PROTOCOL*/
-int AdapterDeviceJoin(struct Adapter *adapter, const char *priv_net_group);
+int AdapterDeviceJoin(struct Adapter *adapter, unsigned char *priv_net_group);
 
 /*Adapter disconnect from ip net or private net group*/
 int AdapterDeviceDisconnect(struct Adapter *adapter);
@@ -220,10 +223,10 @@ int AdapterDeviceSetDown(struct Adapter *adapter);
 /*Set ip/gateway/netmask address*/
 int AdapterDeviceSetAddr(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask);
 
-/**/
+/*Set DNS function*/
 int AdapterDeviceSetDns(struct Adapter *adapter, const char *dns_addr, uint8 dns_count);
 
-/**/
+/*Set DHCP function*/
 int AdapterDeviceSetDhcp(struct Adapter *adapter, int enable);
 
 /*ping function*/

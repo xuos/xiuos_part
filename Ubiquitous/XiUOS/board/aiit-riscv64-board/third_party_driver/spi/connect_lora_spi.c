@@ -38,17 +38,17 @@ void SX1276InitIo(void)
     buspin = PinBusInitGet();  
 
     PinCfg.cmd = GPIO_CONFIG_MODE;
-    PinCfg.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_DO0_PIN;
+    PinCfg.pin = SX12XX_DEVICE_DO0_PIN;
     PinCfg.mode = GPIO_CFG_INPUT;
     BusDrvConfigure(buspin->owner_driver, &configure_info);
 
     PinCfg.cmd = GPIO_CONFIG_MODE;
-    PinCfg.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_DO1_PIN;
+    PinCfg.pin = SX12XX_DEVICE_DO1_PIN;
     PinCfg.mode = GPIO_CFG_INPUT;
     BusDrvConfigure(buspin->owner_driver, &configure_info);
 
     PinCfg.cmd = GPIO_CONFIG_MODE;
-    PinCfg.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_DO2_PIN;
+    PinCfg.pin = SX12XX_DEVICE_DO2_PIN;
     PinCfg.mode = GPIO_CFG_INPUT;
     BusDrvConfigure(buspin->owner_driver, &configure_info);
 }
@@ -60,7 +60,7 @@ inline uint8_t SX1276ReadDio0(void)
     struct BusBlockReadParam read_param;
     read_param.buffer = (void *)&PinStat;
 
-    PinStat.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_DO0_PIN;
+    PinStat.pin = SX12XX_DEVICE_DO0_PIN;
     
     return BusDevReadData(buspin->owner_haldev, &read_param);
 }
@@ -72,7 +72,7 @@ inline uint8_t SX1276ReadDio1(void)
     struct BusBlockReadParam read_param;
     read_param.buffer = (void *)&PinStat;
 
-    PinStat.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_DO1_PIN;
+    PinStat.pin = SX12XX_DEVICE_DO1_PIN;
     
     return BusDevReadData(buspin->owner_haldev, &read_param);
 }
@@ -84,7 +84,7 @@ inline uint8_t SX1276ReadDio2(void)
     struct BusBlockReadParam read_param;
     read_param.buffer = (void *)&PinStat;
 
-    PinStat.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_DO2_PIN;
+    PinStat.pin = SX12XX_DEVICE_DO2_PIN;
     
     return BusDevReadData(buspin->owner_haldev, &read_param);
 }
@@ -96,7 +96,7 @@ inline uint8_t SX1276ReadDio3(void)
     struct BusBlockReadParam read_param;
     read_param.buffer = (void *)&PinStat;
 
-    PinStat.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_DO3_PIN;
+    PinStat.pin = SX12XX_DEVICE_DO3_PIN;
     
     return BusDevReadData(buspin->owner_haldev, &read_param);
 }
@@ -108,7 +108,7 @@ inline uint8_t SX1276ReadDio4(void)
     struct BusBlockReadParam read_param;
     read_param.buffer = (void *)&PinStat;
 
-    PinStat.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_DO4_PIN;
+    PinStat.pin = SX12XX_DEVICE_DO4_PIN;
     
     return BusDevReadData(buspin->owner_haldev, &read_param);
 }
@@ -120,7 +120,7 @@ inline uint8_t SX1276ReadDio5(void)
     struct BusBlockReadParam read_param;
     read_param.buffer = (void *)&PinStat;
 
-    PinStat.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_DO5_PIN;
+    PinStat.pin = SX12XX_DEVICE_DO5_PIN;
     
     return BusDevReadData(buspin->owner_haldev, &read_param);
 }
@@ -145,18 +145,18 @@ void SX1276SetReset(uint8_t state)
     if (state == RADIO_RESET_ON)
     {
         PinCfg.cmd = GPIO_CONFIG_MODE;
-        PinCfg.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_RST_PIN;
+        PinCfg.pin = SX12XX_DEVICE_RST_PIN;
         PinCfg.mode = GPIO_CFG_OUTPUT;
         BusDrvConfigure(buspin->owner_driver, &configure_info);
 
         PinStat.val = GPIO_LOW;
-        PinStat.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_RST_PIN;
+        PinStat.pin = SX12XX_DEVICE_RST_PIN;
         BusDevWriteData(buspin->owner_haldev, &write_param);
     }
     else
     {
         PinCfg.cmd = GPIO_CONFIG_MODE;
-        PinCfg.pin = CONNECTION_COMMUNICATION_LORA_SX12XX_RST_PIN;
+        PinCfg.pin = SX12XX_DEVICE_RST_PIN;
         PinCfg.mode = GPIO_CFG_INPUT;
         BusDrvConfigure(buspin->owner_driver, &configure_info);
     }
@@ -255,10 +255,7 @@ static uint32 SpiLoraWrite(void *dev, struct BusBlockWriteParam *write_param)
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(write_param);
 
-    uint8 i;
-    char Msg[SPI_LORA_BUFFER_SIZE] = {0};
-
-    if (write_param->size > 120) {
+    if (write_param->size > 256) {
         KPrintf("SpiLoraWrite ERROR:The message is too long!\n");
         return ERROR;
     } else {
@@ -290,10 +287,9 @@ static uint32 SpiLoraRead(void *dev, struct BusBlockReadParam *read_param)
     //while(Radio->Process() != RF_RX_DONE);
     //Radio->GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);     
     while(SX1276Process() != RF_RX_DONE);
-    SX1276GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);     
-    KPrintf("SpiLoraRead : %s\n", read_param->buffer);
+    SX1276GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);
 
-    return EOK;
+    return read_param->read_length;
 }
 
 static uint32 SpiLoraOpen(void *dev)
@@ -347,7 +343,7 @@ static uint32 SpiLoraOpen(void *dev)
         KPrintf("LoRa check failed!\n!");
     } else {
         Radio = RadioDriverInit();
-        KPrintf("LoRa check ok!\nNote: The length of the message that can be sent in a single time is 120 characters\n");
+        KPrintf("LoRa check ok!\nNote: The length of the message that can be sent in a single time is 256 characters\n");
     }
     
     lora_init_status = RET_TRUE;
@@ -465,6 +461,7 @@ int LoraSx12xxSpiDeviceInit(void)
     return EOK;
 }
 
+#define LORA_TEST
 #ifdef LORA_TEST
 /*Just for lora test*/
 static struct Bus *bus;

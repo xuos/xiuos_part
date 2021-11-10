@@ -395,7 +395,7 @@ int AdapterDeviceConnect(struct Adapter *adapter, enum NetRoleType net_role, con
  * @param priv_net_group - private net group
  * @return success: 0 , failure: other
  */
-int AdapterDeviceJoin(struct Adapter *adapter, const char *priv_net_group)
+int AdapterDeviceJoin(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     if (!adapter)
         return -1;

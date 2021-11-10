@@ -1125,7 +1125,7 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
 {
     int state;
     x_size_t message_length, already_send_length;
-    uint16 send_length;
+    uint16 read_length;
     const uint8 *ReadBuf;
 
     NULL_PARAM_CHECK(spi_dev);
@@ -1145,24 +1145,24 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
     ReadBuf = spi_datacfg->rx_buff;
     while (message_length) {
         if (message_length > 65535) {
-            send_length = 65535;
+            read_length = 65535;
             message_length = message_length - 65535;
         } else {
-            send_length = message_length;
+            read_length = message_length;
             message_length = 0;
         }
 
         /* calculate the start address */
-        already_send_length = spi_datacfg->length - send_length - message_length;
+        already_send_length = spi_datacfg->length - read_length - message_length;
         ReadBuf = (uint8 *)spi_datacfg->rx_buff + already_send_length;
         
         /* start once data exchange in DMA mode */
         if (spi_datacfg->rx_buff) {
-            memset((uint8_t *)ReadBuf, 0xff, send_length);
+            memset((uint8_t *)ReadBuf, 0xff, read_length);
             if (StmSpi->spi_dma_flag & SPI_USING_RX_DMA_FLAG) {
-                state = SpiReceiveDma(*spi_init, spi_instance, StmSpi->dma.dma_rx.init, StmSpi->dma.dma_rx.instance, StmSpi->dma.dma_tx.init, StmSpi->dma.dma_tx.instance, (uint8_t *)ReadBuf, send_length);
+                state = SpiReceiveDma(*spi_init, spi_instance, StmSpi->dma.dma_rx.init, StmSpi->dma.dma_rx.instance, StmSpi->dma.dma_tx.init, StmSpi->dma.dma_tx.instance, (uint8_t *)ReadBuf, read_length);
             } else {
-                state = SpiReceive(*spi_init, spi_instance, (uint8_t *)ReadBuf, send_length, 1000);
+                state = SpiReceive(*spi_init, spi_instance, (uint8_t *)ReadBuf, read_length, 1000);
             }
         }
 

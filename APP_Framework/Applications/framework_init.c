@@ -21,6 +21,7 @@ extern int AdapterBlueToothInit(void);
 extern int AdapterWifiInit(void);
 extern int AdapterEthernetInit(void);
 extern int AdapterZigbeeInit(void);
+extern int AdapterLoraInit(void);
 
 extern int D124VoiceInit(void);
 extern int Hs300xTemperatureInit(void);
@@ -106,6 +107,9 @@ static struct InitDesc connection_desc[] =
 #endif
 #ifdef CONNECTION_ADAPTER_ETHERNET
 	{ "ethernet adapter", AdapterEthernetInit},
+#endif
+#ifdef CONNECTION_ADAPTER_LORA
+	{ "lora adapter", AdapterLoraInit},
 #endif
 	{ "NULL", NULL },
 };

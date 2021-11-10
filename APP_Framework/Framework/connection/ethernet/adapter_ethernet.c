@@ -51,7 +51,7 @@ int AdapterEthernetInit(void)
     struct Adapter *adapter = PrivMalloc(sizeof(struct Adapter));
     if (!adapter) {
         printf("AdapterEthernetInit malloc error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -60,7 +60,7 @@ int AdapterEthernetInit(void)
     ret = AdapterEthernetRegister(adapter);
     if (ret < 0) {
         printf("AdapterEthernetInit register ethernet adapter error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -68,7 +68,7 @@ int AdapterEthernetInit(void)
     AdapterProductInfoType product_info = Hfa21EthernetAttach(adapter);
     if (!product_info) {
         printf("AdapterEthernetInit hfa21 attach error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 

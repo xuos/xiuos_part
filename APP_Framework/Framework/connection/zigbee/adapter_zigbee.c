@@ -72,14 +72,14 @@ int AdapterZigbeeInit(void)
     ret = AdapterZigbeeRegister(adapter);
     if (ret < 0) {
         printf("AdapterZigbeeRegister register zigbee adapter error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 #ifdef ADAPTER_E18
     AdapterProductInfoType product_info = E18Attach(adapter);
     if (!product_info) {
         printf("AdapterZigbeeRegister e18 attach error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 

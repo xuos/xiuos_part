@@ -52,7 +52,7 @@ int AdapterWifiInit(void)
     struct Adapter *adapter = PrivMalloc(sizeof(struct Adapter));
     if (!adapter) {
         printf("AdapterWifiInit malloc error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -61,7 +61,7 @@ int AdapterWifiInit(void)
     ret = AdapterWifiRegister(adapter);
     if (ret < 0) {
         printf("AdapterWifiInit register wifi adapter error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -69,7 +69,7 @@ int AdapterWifiInit(void)
     AdapterProductInfoType product_info = Hfa21WifiAttach(adapter);
     if (!product_info) {
         printf("AdapterWifiInit hfa21 attach error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
