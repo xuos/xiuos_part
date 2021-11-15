@@ -207,6 +207,7 @@ try_again:
 
         len = read(file_fd, file_buf, file_length);
         if(len > 0) {
+            data.header.total_len = file_length;
             data.frame.frame_len = strlen("aiit_ota_end!@");;
             data.frame.crc = OtaCrc16(file_buf, len);
             memcpy(data.frame.frame_data,"aiit_ota_end!@",strlen("aiit_ota_end!@"));
