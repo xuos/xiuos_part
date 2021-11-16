@@ -17,29 +17,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-/*******************************mail*****************************/
-
-#define MAX_BUFF_SIZE   (2048)
-#define IP_ADDR         ("smtp.163.com")
-#define IP_ADDR_PORT    (25)
-#define USERNAME        ("18535861947@163.com")
-#define TO_ADDRESS      ("522736215@qq.com")
-#define ACCESS_PORT     ("有链接已接入服务器端口")
-#define USING_DEVICE_AUTH            1
-
-
-#define BUFLEN 1024
-#define LISTNUM 20
-#define IP_ADDRESS "0.0.0.0"
-
-/*宏定义*/
-#define SID_MAX_LENGHT 16
-#define NAME_MAX_LENGHT 16
-#define MAJOR_MAX_LENGHT 64
-#define CMD_MAX_LENGHT  1024
-#define REDIS_SERVER_IP "127.0.0.1"
-#define REDIS_SERVER_PORT 6379
-
 typedef int BOOL;
 #define true 1
 #define false 0
@@ -53,9 +30,9 @@ socklen_t len;
 
 struct ota_header_t
 {
-    int16 frame_flag;          ///< frame start flag 2 Bytes
-    uint8 dev_type;            ///< device type
-    uint8 burn_mode;           ///< data burn way
+    int16_t frame_flag;          ///< frame start flag 2 Bytes
+    uint8_t dev_type;            ///< device type
+    uint8_t burn_mode;           ///< data burn way
     unsigned long total_len;   ///< send data total length caculated from each frame_len 
     unsigned long dev_hid;     ///< device hardware version
     unsigned long dev_sid;     ///< device software version
@@ -64,10 +41,10 @@ struct ota_header_t
 
 struct ota_frame_t
 {
-    uint32 frame_id;           ///< Current frame id
-    uint32 frame_len;          ///< Current frame data length
+    uint32_t frame_id;           ///< Current frame id
+    uint32_t frame_len;          ///< Current frame data length
     char   frame_data[224];    ///< Current frame data,max length 224
-    uint32 crc;                ///< Current frame data crc
+    uint32_t crc;                ///< Current frame data crc
 };
 
 struct ota_data
@@ -163,15 +140,15 @@ int OtaFileSend(int fd)
         memset(&data, 0, sizeof(data));
 
         data.header.frame_flag = 0x5A5A;
-        len = read(file_fd, data.frame.frame_data, 200 );
+        len = fread( data.frame.frame_data, 200, 1, file_fd );
         if(len > 0) {
             data.frame.frame_id = frame_cnt;
             data.frame.frame_len = len;
             data.frame.crc = OtaCrc16(data.frame.frame_data, len);
             file_length += len;
         }
-        memcpy(data.frame.frame_data[len], "!@", strlen("!@")); /* add '!@' as ending flag */
-        lseek(file_fd, len, SEEK_CUR);
+        memcpy(&data.frame.frame_data[len], "!@", strlen("!@")); /* add '!@' as ending flag */
+        fseek(file_fd, len, SEEK_CUR);
 
 try_again:
         send(fd, &data, sizeof(data), MSG_NOSIGNAL);
@@ -205,7 +182,7 @@ try_again:
 
         data.header.frame_flag = 0x5A5A;
 
-        len = read(file_fd, file_buf, file_length);
+        len = fread(file_buf, file_length,1,file_fd);
         if(len > 0) {
             data.header.total_len = file_length;
             data.frame.frame_len = strlen("aiit_ota_end!@");;
