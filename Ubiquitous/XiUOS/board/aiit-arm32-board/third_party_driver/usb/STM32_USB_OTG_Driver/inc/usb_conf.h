@@ -240,8 +240,10 @@
 #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
 
 
-#if defined   ( __GNUC__ )   /* GNU Compiler */                        
+#if defined   ( __GNUC__ )   /* GNU Compiler */     
+#ifndef __packed               
   #define __packed    __attribute__ ((__packed__))
+#endif
 #endif 
 
 /**

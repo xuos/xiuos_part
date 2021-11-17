@@ -37,6 +37,10 @@ extern AdapterProductInfoType Sx1278Attach(struct Adapter *adapter);
 #define ADAPTER_LORA_DATA_TYPE_USERDATA   0x0E
 #define ADAPTER_LORA_DATA_TYPE_CMD        0x0F
 
+//need to change status if the lora client wants to quit the net when timeout or a certain event
+//eg.can also use sem to trigger quit function
+static int g_adapter_lora_quit_flag = 0;
+
 enum ClientState
 {
     CLIENT_DISCONNECT = 0,
@@ -51,12 +55,22 @@ enum DataType
     LORA_USER_DATA,
 };
 
+enum LoraGatewayState {
+    LORA_STATE_IDLE = 0,
+    LORA_JOIN_NET,
+    LORA_QUIT_NET,
+    LORA_RECV_DATA,
+};
+
+static uint8 LoraGatewayState = LORA_STATE_IDLE;
+
 struct LoraGatewayParam 
 {
     uint8 gateway_id;
     uint16 panid;
     uint8 client_id[ADAPTER_LORA_CLIENT_NUM];
     int client_num;
+    int receive_data_sem;
 };
 
 struct LoraClientParam 
@@ -144,18 +158,30 @@ static int LoraCrc16Check(uint8 *data, uint16 length)
 static int LoraGatewayReply(struct Adapter *adapter, struct LoraDataFormat *gateway_recv_data)
 {
     int i;
+    int client_join_flag = 0;
     struct LoraGatewayParam *gateway = (struct LoraGatewayParam *)adapter->adapter_param;
     struct LoraDataFormat gateway_reply_data;
 
     memset(&gateway_reply_data, 0, sizeof(struct LoraDataFormat));
 
     if (ADAPTER_LORA_DATA_TYPE_JOIN == gateway_recv_data->data_type) {
-        if (gateway->client_num > 6) {
-            printf("Lora gateway only support 6(max) client\n");
-            gateway->client_num = 0;
+        
+        for (i = 0; i < gateway->client_num; i ++) {
+            if (gateway_recv_data->client_id == gateway->client_id[i]) {
+                printf("Lora client_%d 0x%x has already join net 0x%x\n", i, gateway_recv_data->client_id, gateway->gateway_id);
+                client_join_flag = 1;
+                break;
+            }
         }
-        gateway->client_id[gateway->client_num] = gateway_recv_data->client_id;
-        gateway->client_num ++;
+        
+        if (!client_join_flag) {
+            if (gateway->client_num > 6) {
+                printf("Lora gateway only support 6(max) client\n");
+                gateway->client_num = 0;
+            }
+            gateway->client_id[gateway->client_num] = gateway_recv_data->client_id;
+            gateway->client_num ++;
+        }
 
         gateway_reply_data.flame_head = ADAPTER_LORA_DATA_HEAD;
         gateway_reply_data.length = sizeof(struct LoraDataFormat);
@@ -231,8 +257,8 @@ static int LoraGatewaySendCmd(struct Adapter *adapter, unsigned char client_id, 
  * @param gateway_recv_data Lora Client user data
  */
 static int LoraGatewayHandleData(struct Adapter *adapter, struct LoraDataFormat *gateway_recv_data)
-{
-    /*User need to handle client data depends on the requirement*/
+{    
+    /*User needs to handle client data depends on the requirement*/
     printf("Lora Gateway receive Client %d data:\n", gateway_recv_data->client_id);
     printf("%s\n", gateway_recv_data->data);
     return 0;
@@ -307,37 +333,27 @@ static int LoraClientSendData(struct Adapter *adapter, void *send_buf, int lengt
 /**
  * @description: Lora Gateway receive data analyzing
  * @param adapter Lora adapter pointer
+ * @param gateway_recv_data Lora gateway receive data pointer
  */
-static int LoraGateWayDataAnalyze(struct Adapter *adapter)
+static int LoraGateWayDataAnalyze(struct Adapter *adapter, struct LoraDataFormat *gateway_recv_data)
 {
     int ret = 0;
-    
-    struct LoraDataFormat gateway_recv_data;
 
-    memset(&gateway_recv_data, 0, sizeof(struct LoraDataFormat));
-    
-    AdapterDeviceRecv(adapter, &gateway_recv_data, sizeof(struct LoraDataFormat));
-
-    // printf("gateway_recv_data\n");
-    // printf("head 0x%x length %d panid 0x%x data_type 0x%x client_id 0x%x gateway_id 0x%x crc 0x%x\n",
-    //     gateway_recv_data->flame_head, gateway_recv_data->length, gateway_recv_data->panid, gateway_recv_data->data_type,
-    //     gateway_recv_data->client_id, gateway_recv_data->gateway_id, gateway_recv_data->crc16);
-
-    if (LoraCrc16Check((uint8 *)&gateway_recv_data, sizeof(struct LoraDataFormat)) < 0) {
+    if (LoraCrc16Check((uint8 *)gateway_recv_data, sizeof(struct LoraDataFormat)) < 0) {
         printf("LoraGateWayDataAnalyze CRC check error\n");
         return -1;
     }
 
-    if ((ADAPTER_LORA_DATA_HEAD == gateway_recv_data.flame_head) && 
-        (ADAPTER_LORA_NET_PANID == gateway_recv_data.panid)) {
-        switch (gateway_recv_data.data_type)
+    if ((ADAPTER_LORA_DATA_HEAD == gateway_recv_data->flame_head) && 
+        (ADAPTER_LORA_NET_PANID == gateway_recv_data->panid)) {
+        switch (gateway_recv_data->data_type)
         {
         case ADAPTER_LORA_DATA_TYPE_JOIN : 
         case ADAPTER_LORA_DATA_TYPE_QUIT :
-            ret = LoraGatewayReply(adapter, &gateway_recv_data);
+            ret = LoraGatewayReply(adapter, gateway_recv_data);
             break;
         case ADAPTER_LORA_DATA_TYPE_USERDATA :
-            ret = LoraGatewayHandleData(adapter, &gateway_recv_data);
+            ret = LoraGatewayHandleData(adapter, gateway_recv_data);
             break;
         default:
             break;
@@ -357,31 +373,37 @@ static int LoraClientDataAnalyze(struct Adapter *adapter, void *send_buf, int le
 {
     int ret = 0;
     
-    struct LoraDataFormat client_recv_data;
+    struct LoraDataFormat *client_recv_data = PrivMalloc(sizeof(struct LoraDataFormat));
 
-    memset(&client_recv_data, 0, sizeof(struct LoraDataFormat));
+    memset(client_recv_data, 0, sizeof(struct LoraDataFormat));
     
-    AdapterDeviceRecv(adapter, &client_recv_data, sizeof(struct LoraDataFormat));
-
-    // printf("client_recv_data\n");
-    // printf("head 0x%x length %d panid 0x%x data_type 0x%x client_id 0x%x gateway_id 0x%x crc 0x%x\n",
-    //     client_recv_data.flame_head, client_recv_data.length, client_recv_data.panid, client_recv_data.data_type,
-    //     client_recv_data.client_id, client_recv_data.gateway_id, client_recv_data.crc16);
-
-    if (LoraCrc16Check((uint8 *)&client_recv_data, sizeof(struct LoraDataFormat)) < 0) {
-        printf("LoraClientDataAnalyze CRC check error\n");
+    ret = AdapterDeviceRecv(adapter, client_recv_data, sizeof(struct LoraDataFormat));
+    if (0 == ret) {
+        printf("LoraClientDataAnalyze recv error.Just return\n");
+        PrivFree(client_recv_data);
         return -1;
     }
 
-    if ((ADAPTER_LORA_DATA_HEAD == client_recv_data.flame_head) && 
-        (ADAPTER_LORA_NET_PANID == client_recv_data.panid)) {
+    printf("client_recv_data\n");
+    printf("head 0x%x length %d panid 0x%x data_type 0x%x client_id 0x%x gateway_id 0x%x crc 0x%x\n",
+        client_recv_data->flame_head, client_recv_data->length, client_recv_data->panid, client_recv_data->data_type,
+        client_recv_data->client_id, client_recv_data->gateway_id, client_recv_data->crc16);
 
-        if (client_recv_data.client_id == adapter->net_role_id) {
-            switch (client_recv_data.data_type)
+    if ((ADAPTER_LORA_DATA_HEAD == client_recv_data->flame_head) && 
+        (ADAPTER_LORA_NET_PANID == client_recv_data->panid)) {
+        if (LoraCrc16Check((uint8 *)client_recv_data, sizeof(struct LoraDataFormat)) < 0) {
+            printf("LoraClientDataAnalyze CRC check error\n");
+            PrivFree(client_recv_data);
+            return -1;
+        }
+
+        //only handle this client_id information from gateway
+        if (client_recv_data->client_id == adapter->net_role_id) {
+            switch (client_recv_data->data_type)
             {
             case ADAPTER_LORA_DATA_TYPE_JOIN_REPLY : 
             case ADAPTER_LORA_DATA_TYPE_QUIT_REPLY :
-                ret = LoraClientUpdate(adapter, &client_recv_data);
+                ret = LoraClientUpdate(adapter, client_recv_data);
                 break;
             case ADAPTER_LORA_DATA_TYPE_CMD :
                 if (send_buf) {
@@ -394,6 +416,7 @@ static int LoraClientDataAnalyze(struct Adapter *adapter, void *send_buf, int le
         }
     }
 
+    PrivFree(client_recv_data);
     return ret;
 }
 
@@ -423,6 +446,104 @@ static int LoraClientJoinNet(struct Adapter *adapter, unsigned short panid)
 }
 
 /**
+ * @description: Lora Client quit net function
+ * @param adapter Lora adapter pointer
+ * @param panid Lora net panid
+ */
+static int LoraClientQuitNet(struct Adapter *adapter, unsigned short panid)
+{
+    struct LoraDataFormat client_join_data;
+
+    memset(&client_join_data, 0, sizeof(struct LoraDataFormat));
+
+    client_join_data.flame_head = ADAPTER_LORA_DATA_HEAD;
+    client_join_data.length = sizeof(struct LoraDataFormat);
+    client_join_data.panid = panid;
+    client_join_data.data_type = ADAPTER_LORA_DATA_TYPE_QUIT;
+    client_join_data.client_id = adapter->net_role_id;
+    client_join_data.crc16 = LoraCrc16((uint8 *)&client_join_data, sizeof(struct LoraDataFormat) - 2);
+    
+    if (AdapterDeviceDisconnect(adapter, (uint8 *)&client_join_data) < 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/**
+ * @description: Lora Gateway Process function
+ * @param lora_adapter Lora adapter pointer
+ * @param gateway Lora gateway pointer
+ * @param gateway_recv_data Lora gateway receive data pointer
+ */
+int LoraGatewayProcess(struct Adapter *lora_adapter, struct LoraGatewayParam *gateway, struct LoraDataFormat *gateway_recv_data)
+{
+    int i, ret = 0;
+    switch (LoraGatewayState)
+    {
+    case LORA_STATE_IDLE:
+        ret = AdapterDeviceRecv(lora_adapter, gateway_recv_data, sizeof(struct LoraDataFormat));
+        if (0 == ret) {
+            printf("LoraGatewayProcess IDLE recv error.Just return\n");
+            break;
+        }
+
+        if (ADAPTER_LORA_DATA_TYPE_JOIN == gateway_recv_data->data_type) {
+            LoraGatewayState = LORA_JOIN_NET;
+        } else if (ADAPTER_LORA_DATA_TYPE_QUIT == gateway_recv_data->data_type) {
+            LoraGatewayState = LORA_QUIT_NET;
+        } else {
+            LoraGatewayState = LORA_STATE_IDLE;
+        }
+        break;
+    case LORA_JOIN_NET:
+    case LORA_QUIT_NET:
+        ret = LoraGateWayDataAnalyze(lora_adapter, gateway_recv_data);
+        if (ret < 0) {
+            printf("LoraGateWayDataAnalyze state %d error, re-send data cmd to client\n", LoraGatewayState);
+            PrivTaskDelay(500);
+        }
+        LoraGatewayState = LORA_RECV_DATA;
+        break;
+    case LORA_RECV_DATA:
+        for (i = 0; i < gateway->client_num; i ++) {
+            if (gateway->client_id[i]) {
+                printf("LoraGatewayProcess send to client %d for data\n", gateway->client_id[i]);
+                ret = LoraGatewaySendCmd(lora_adapter, gateway->client_id[i], ADAPTER_LORA_DATA_TYPE_CMD);
+                if (ret < 0) {
+                    printf("LoraGatewaySendCmd client ID %d error\n", gateway->client_id[i]);
+                    PrivTaskDelay(500);
+                    continue;
+                }
+
+                ret = AdapterDeviceRecv(lora_adapter, gateway_recv_data, sizeof(struct LoraDataFormat));
+                if (0 == ret) {
+                    printf("LoraGatewayProcess recv error.Just return\n");
+                    continue;
+                }
+
+                if (ADAPTER_LORA_DATA_TYPE_JOIN == gateway_recv_data->data_type) {
+                    LoraGatewayState = LORA_JOIN_NET;
+                } else if (ADAPTER_LORA_DATA_TYPE_QUIT == gateway_recv_data->data_type) {
+                    LoraGatewayState = LORA_QUIT_NET;
+                } else {
+                    ret = LoraGateWayDataAnalyze(lora_adapter, gateway_recv_data);
+                    if (ret < 0) {
+                        printf("LoraGateWayDataAnalyze error, re-send data cmd to client\n");
+                        PrivTaskDelay(500);
+                    }
+                }
+            }
+        }
+        break;
+    default:
+        break;
+    }
+
+    return 0;
+}
+
+/**
  * @description: Lora Gateway task
  * @param parameter - Lora adapter pointer
  */
@@ -432,30 +553,10 @@ static void *LoraGatewayTask(void *parameter)
     int ret = 0;
     struct Adapter *lora_adapter = (struct Adapter *)parameter;
     struct LoraGatewayParam *gateway = (struct LoraGatewayParam *)lora_adapter->adapter_param;
+    struct LoraDataFormat gateway_recv_data;
     
     while (1) {
-
-        ret = LoraGateWayDataAnalyze(lora_adapter);
-        if (ret < 0) {
-            printf("LoraGateWayDataAnalyze error\n");
-            PrivTaskDelay(500);
-            continue;
-        }
-
-        PrivTaskDelay(2000);
-
-        if (gateway->client_num > 0) {
-            for (i = 0; i < ADAPTER_LORA_CLIENT_NUM; i ++) {
-                if (gateway->client_id[i]) {
-                    ret = LoraGatewaySendCmd(lora_adapter, gateway->client_id[i], ADAPTER_LORA_DATA_TYPE_CMD);
-                    if (ret < 0) {
-                        printf("LoraGatewaySendCmd client %d ID %d error\n", i, gateway->client_id[i]);
-                        PrivTaskDelay(500);
-                        continue;
-                    }
-                }
-            }
-        } 
+        LoraGatewayProcess(lora_adapter, gateway, &gateway_recv_data);
     }
 
     return 0;
@@ -467,28 +568,29 @@ static void *LoraGatewayTask(void *parameter)
  */
 static void *LoraClientDataTask(void *parameter)
 {
-    int ret = 0;
+    int i, ret = 0;
+    int join_times = 10;
     struct Adapter *lora_adapter = (struct Adapter *)parameter;
     struct LoraClientParam *client = (struct LoraClientParam *)lora_adapter->adapter_param;
 
+    //set lora_send_buf for test
     uint8 lora_send_buf[ADAPTER_LORA_DATA_LENGTH];
     memset(lora_send_buf, 0, ADAPTER_LORA_DATA_LENGTH);
-    sprintf(lora_send_buf, "Lora adapter test\n");
+    sprintf(lora_send_buf, "Lora client %d adapter test\n", client->client_id);
 
     while (1) {
 
         PrivTaskDelay(100);
 
-        if (CLIENT_DISCONNECT == client->client_state) {
+        if ((CLIENT_DISCONNECT == client->client_state) && (!g_adapter_lora_quit_flag)) {
             ret = LoraClientJoinNet(lora_adapter, client->panid);
             if (ret < 0) {
                 printf("LoraClientJoinNet error panid 0x%x\n", client->panid);
-                continue;
             }
 
             ret = LoraClientDataAnalyze(lora_adapter, NULL, 0);
             if (ret < 0) {
-                printf("LoraClientDataAnalyze error\n");
+                printf("LoraClientDataAnalyze error, reconnect to gateway\n");
                 PrivTaskDelay(500);
                 continue;
             }
@@ -497,12 +599,46 @@ static void *LoraClientDataTask(void *parameter)
         if (CLIENT_CONNECT == client->client_state) {
             ret = LoraClientDataAnalyze(lora_adapter, (void *)lora_send_buf, strlen(lora_send_buf));
             if (ret < 0) {
-                printf("LoraClientDataAnalyze error\n");
+                printf("LoraClientDataAnalyze error, wait for next data cmd\n");
                 PrivTaskDelay(500);
                 continue;
             }
         }
     }
+
+    return 0;
+}
+
+/**
+ * @description: Lora Client quit task
+ * @param parameter - Lora adapter pointer
+ */
+static void *LoraClientQuitTask(void *parameter)
+{
+    int ret = 0;
+    struct Adapter *lora_adapter = (struct Adapter *)parameter;
+    struct LoraClientParam *client = (struct LoraClientParam *)lora_adapter->adapter_param;
+
+    while (1) {
+        PrivTaskDelay(100);
+
+        if ((CLIENT_CONNECT == client->client_state) && (g_adapter_lora_quit_flag)) {
+            ret = LoraClientQuitNet(lora_adapter, client->panid);
+            if (ret < 0) {
+                printf("LoraClientQuitNet error panid 0x%x, re-quit net\n", client->panid);
+                continue;
+            }
+
+            ret = LoraClientDataAnalyze(lora_adapter, NULL, 0);
+            if (ret < 0) {
+                printf("LoraClientQuitTask LoraClientDataAnalyze error\n");
+                PrivTaskDelay(500);
+                continue;
+            }
+        }
+    }
+
+    return 0;
 }
 
 /*******************LORA ADAPTER FUNCTION********************/
@@ -607,6 +743,7 @@ int AdapterLoraInit(void)
 static pthread_t lora_gateway_task;
 #else //AS_LORA_CLIENT_ROLE
 static pthread_t lora_client_data_task;
+static pthread_t lora_client_quit_task;
 #endif
 
 int AdapterLoraTest(void)
@@ -619,7 +756,7 @@ int AdapterLoraTest(void)
 #ifdef AS_LORA_GATEWAY_ROLE
     pthread_attr_t lora_gateway_attr;
     lora_gateway_attr.schedparam.sched_priority = 20;
-    lora_gateway_attr.stacksize = 4096;
+    lora_gateway_attr.stacksize = 2048;
 
     PrivTaskCreate(&lora_gateway_task, &lora_gateway_attr, &LoraGatewayTask, (void *)adapter);
     PrivTaskStartup(&lora_gateway_task);
@@ -628,10 +765,15 @@ int AdapterLoraTest(void)
     //create lora client task
     pthread_attr_t lora_client_attr;
     lora_client_attr.schedparam.sched_priority = 20;
-    lora_client_attr.stacksize = 4096;
+    lora_client_attr.stacksize = 2048;
 
     PrivTaskCreate(&lora_client_data_task, &lora_client_attr, &LoraClientDataTask, (void *)adapter);
     PrivTaskStartup(&lora_client_data_task);
+
+    lora_client_attr.stacksize = 1024;
+
+    PrivTaskCreate(&lora_client_quit_task, &lora_client_attr, &LoraClientQuitTask, (void *)adapter);
+    PrivTaskStartup(&lora_client_quit_task);
 #endif
 
     return 0;

@@ -1097,7 +1097,7 @@ static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDat
         }
 
         if (state != 0) {
-            KPrintf("spi transfer error : %d\n", state);
+            KPrintf("spi write error : %d\n", state);
             spi_datacfg->length = 0;
         }
     }
@@ -1109,7 +1109,7 @@ static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDat
     spi_datacfg = spi_datacfg->next;
   }
 
-    return spi_datacfg->length;
+    return EOK;
 }
 
 /**
@@ -1125,7 +1125,7 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
 {
     int state;
     x_size_t message_length, already_send_length;
-    uint16 read_length;
+    uint16 read_length, spi_read_length = 0;
     const uint8 *ReadBuf;
 
     NULL_PARAM_CHECK(spi_dev);
@@ -1158,7 +1158,7 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
         
         /* start once data exchange in DMA mode */
         if (spi_datacfg->rx_buff) {
-            memset((uint8_t *)ReadBuf, 0xff, read_length);
+            //memset((uint8_t *)ReadBuf, 0xff, read_length);
             if (StmSpi->spi_dma_flag & SPI_USING_RX_DMA_FLAG) {
                 state = SpiReceiveDma(*spi_init, spi_instance, StmSpi->dma.dma_rx.init, StmSpi->dma.dma_rx.instance, StmSpi->dma.dma_tx.init, StmSpi->dma.dma_tx.instance, (uint8_t *)ReadBuf, read_length);
             } else {
@@ -1167,7 +1167,7 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
         }
 
         if (state != 0) {
-            KPrintf("spi transfer error : %d\n", state);
+            KPrintf("spi read error : %d\n", state);
             spi_datacfg->length = 0;
         }
     }
@@ -1176,10 +1176,11 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
         GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_SET);
     }
   
+    spi_read_length += spi_datacfg->length;
     spi_datacfg = spi_datacfg->next;
   }
 
-    return spi_datacfg->length;
+    return spi_read_length;
 }
 
 /**

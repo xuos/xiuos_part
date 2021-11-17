@@ -214,13 +214,14 @@ static uint32 SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStan
         spi_datacfg = spi_datacfg->next;
     }
 
-    return spi_datacfg->length;    
+    return EOK;    
 }
 
 static uint32 SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStandard *spi_datacfg)
 {
     SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_dev->haldev.private_data);
 
+    uint32 spi_read_length = 0;;
     uint8 device_id = dev_param->spi_slave_param->spi_slave_id;
     uint8 device_master_id = dev_param->spi_dma_param->spi_master_id;
     uint8 cs_gpio_pin = dev_param->spi_slave_param->spi_cs_gpio_pin;
@@ -282,10 +283,11 @@ static uint32 SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStand
             gpiohs_set_pin(cs_gpio_pin, GPIO_PV_HIGH);
         }
 
+        spi_read_length += spi_datacfg->length;
         spi_datacfg = spi_datacfg->next;
     }
 
-    return spi_datacfg->length;    
+    return spi_read_length;    
 }
 
 /*manage the spi device operations*/

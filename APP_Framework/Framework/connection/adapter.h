@@ -151,7 +151,7 @@ struct PrivProtocolDone
     int (*join)(struct Adapter *adapter, unsigned char *priv_net_group);
     int (*send)(struct Adapter *adapter, const void *buf, size_t len);
     int (*recv)(struct Adapter *adapter, void *buf, size_t len);
-    int (*quit)(struct Adapter *adapter);
+    int (*quit)(struct Adapter *adapter, unsigned char *priv_net_group);
 };
 
 struct Adapter
@@ -212,7 +212,7 @@ int AdapterDeviceConnect(struct Adapter *adapter, enum NetRoleType net_role, con
 int AdapterDeviceJoin(struct Adapter *adapter, unsigned char *priv_net_group);
 
 /*Adapter disconnect from ip net or private net group*/
-int AdapterDeviceDisconnect(struct Adapter *adapter);
+int AdapterDeviceDisconnect(struct Adapter *adapter, unsigned char *priv_net_group);
 
 /*Set up to net*/
 int AdapterDeviceSetUp(struct Adapter *adapter);

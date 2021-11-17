@@ -262,9 +262,6 @@ static uint32 SpiLoraWrite(void *dev, struct BusBlockWriteParam *write_param)
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(write_param);
 
-    uint8 i;
-    char Msg[SPI_LORA_BUFFER_SIZE] = {0};
-
     if (write_param->size > 256) {
         KPrintf("SpiLoraWrite ERROR:The message is too long!\n");
         return ERROR;
@@ -289,15 +286,32 @@ static uint32 SpiLoraRead(void *dev, struct BusBlockReadParam *read_param)
 {
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(read_param);
+
+    int read_times = 100;
     
     //Radio->StartRx();
     SX1276StartRx();
     KPrintf("SpiLoraRead Ready!\n");
+
+    while (read_times) {
+        if (SX1276Process() != RF_RX_DONE) {
+            read_times --;
+            MdelayKTask(500);
+        } else {
+            break;
+        }
+    }
+
+    if (read_times > 0) {
+        SX1276GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);
+    } else {
+        read_param->read_length = 0;
+    }
     
     //while(Radio->Process() != RF_RX_DONE);
     //Radio->GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);     
-    while(SX1276Process() != RF_RX_DONE);
-    SX1276GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);
+    // while(SX1276Process() != RF_RX_DONE);
+    // SX1276GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);
 
     return read_param->read_length;
 }
@@ -479,7 +493,7 @@ int LoraSx12xxSpiDeviceInit(void)
     return EOK;
 }
 
-#define LORA_TEST
+//#define LORA_TEST
 #ifdef LORA_TEST
 /*Just for lora test*/
 static struct Bus *bus;

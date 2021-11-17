@@ -103,17 +103,18 @@ static int Sx1278Send(struct Adapter *adapter, const void *buf, size_t len)
  */
 static int Sx1278Recv(struct Adapter *adapter, void *buf, size_t len)
 {
-    return PrivRead(adapter->fd, buf, len);;
+    return PrivRead(adapter->fd, buf, len);
 }
 
 /**
  * @description: SX1278 quit lora net group function
  * @param adapter - Lora device pointer
+ * @param priv_net_group - priv_net_group params
  * @return success: 0, failure: -1
  */
-static int Sx1278Quit(struct Adapter *adapter)
+static int Sx1278Quit(struct Adapter *adapter, unsigned char *priv_net_group)
 {
-    /*to do*/
+    PrivWrite(adapter->fd, (void *)priv_net_group, 144);
 
     return 0;
 }
