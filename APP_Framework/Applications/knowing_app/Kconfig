@@ -10,5 +10,7 @@ menu "knowing app"
         source "$APP_DIR/Applications/knowing_app/helmet_detect/Kconfig" 
         source "$APP_DIR/Applications/knowing_app/iris_ml_demo/Kconfig" 
         source "$APP_DIR/Applications/knowing_app/k210_fft_test/Kconfig" 
+        source "$APP_DIR/Applications/knowing_app/image_processing/Kconfig" 
+ 
     endif 
 endmenu
