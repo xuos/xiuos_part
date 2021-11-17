@@ -116,7 +116,7 @@ static int Hfa21WifiReceive(struct Adapter *adapter, void *rev_buffer, size_t bu
     printf("hfa21 receive waiting ... \n");
 
     if (adapter->agent) {
-        return EntmRecv(adapter->agent, (char *)rev_buffer, buffer_len, 40000);
+        return EntmRecv(adapter->agent, (char *)rev_buffer, buffer_len, 40);
     } else {
         printf("Hfa21WifiReceive can not find agent!\n");
 	}

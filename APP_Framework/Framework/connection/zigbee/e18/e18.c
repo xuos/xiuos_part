@@ -211,7 +211,9 @@ static int E18Open(struct Adapter *adapter)
         ATAgentType at_agent = GetATAgent(agent_name);
         adapter->agent = at_agent;
     }
-    
+
+    AtSetReplyLrEnd(adapter->agent, 1);
+
 try_again:
     while(try_times--){
         ret = E18NetRoleConfig(adapter);
@@ -355,7 +357,7 @@ static int E18Recv(struct Adapter *adapter, void *buf, size_t len)
             if(!adapter->agent){
                 PrivRead(adapter->fd, buf, len);
             } else {
-               EntmRecv(adapter->agent, buf, len, 3000);/* wait timeout 3000ms*/
+               EntmRecv(adapter->agent, buf, len, 3);/* wait timeout 3000ms*/
             }
             break;
         case STT_MODE2:
@@ -405,7 +407,8 @@ AdapterProductInfoType E18Attach(struct Adapter *adapter)
         printf("E18Attach malloc product_info error\n");
         return NULL;
     }
-
+    memset(product_info, 0, sizeof(struct AdapterProductInfo));
+    
     strncpy(product_info->model_name, ADAPTER_ZIGBEE_E18,sizeof(product_info->model_name));
     product_info->model_done = (void *)&E18_done;
 

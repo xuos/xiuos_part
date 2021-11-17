@@ -105,6 +105,7 @@ BSSInit:
 
 BSSInitEnd:
   bl  SystemInit
-  bl  stm32f407_start
+
+  bl  entry
   bx  lr
 .size  Reset_Handler, .-Reset_Handler
