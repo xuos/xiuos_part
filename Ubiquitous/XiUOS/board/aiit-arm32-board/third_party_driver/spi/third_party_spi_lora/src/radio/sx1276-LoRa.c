@@ -183,6 +183,7 @@ tSX1276LR* SX1276LR;
  * Local RF buffer for communication support
  */
 static uint8_t RFBuffer[RF_BUFFER_SIZE];
+static uint8_t TFBuffer[RF_BUFFER_SIZE];
 
 /*!
  * RF state machine variable
@@ -401,7 +402,7 @@ void SX1276LoRaSetTxPacket( const void *buffer, uint16_t size )
     {
         TxPacketSize = 255;
     }
-    memcpy( ( void * )RFBuffer, buffer, ( size_t )TxPacketSize );  
+    memcpy( ( void * )TFBuffer, buffer, ( size_t )TxPacketSize );  
 
     RFLRState = RFLR_STATE_TX_INIT;                                
 }
@@ -678,7 +679,7 @@ uint32_t SX1276LoRaProcess( void )
 			 SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoTxBaseAddr;
 			 SX1276Write( REG_LR_FIFOADDRPTR, SX1276LR->RegFifoAddrPtr );
 			  // Write payload buffer to LORA modem
-			 SX1276WriteFifo( RFBuffer, SX1276LR->RegPayloadLength );                
+			 SX1276WriteFifo( TFBuffer, SX1276LR->RegPayloadLength );                
 			 								// TxDone               RxTimeout                   FhssChangeChannel          ValidHeader         
 			 SX1276LR->RegDioMapping1 = RFLR_DIOMAPPING1_DIO0_01 | RFLR_DIOMAPPING1_DIO1_00 | RFLR_DIOMAPPING1_DIO2_00 | RFLR_DIOMAPPING1_DIO3_01;
 											// PllLock              Mode Ready

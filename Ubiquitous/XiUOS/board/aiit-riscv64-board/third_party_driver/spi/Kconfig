@@ -29,38 +29,38 @@ if BSP_USING_SPI1
         config BSP_SPI1_SS0_PIN
             int "spi1 ss0 pin number"
             default 9
-    menuconfig CONNECTION_COMMUNICATION_LORA_USING_SX1278
-    bool "Using spi lora SX1278"
+    menuconfig RESOURCES_SPI_LORA
+    bool "Using spi lora function"
     default n
-        if CONNECTION_COMMUNICATION_LORA_USING_SX1278
+        if RESOURCES_SPI_LORA
         config SX12XX_DEVICE_NAME
-            string "SX1278 device name"
+            string "SX1278 lora device name"
             default "spi1_lora"
-        config CONNECTION_COMMUNICATION_LORA_SX12XX_RST_PIN
+        config SX12XX_DEVICE_RST_PIN
             int
             default 10
 
-        config CONNECTION_COMMUNICATION_LORA_SX12XX_DO0_PIN
+        config SX12XX_DEVICE_DO0_PIN
             int
             default 10
 
-        config CONNECTION_COMMUNICATION_LORA_SX12XX_DO1_PIN
+        config SX12XX_DEVICE_DO1_PIN
             int
             default 10
 
-        config CONNECTION_COMMUNICATION_LORA_SX12XX_DO2_PIN
+        config SX12XX_DEVICE_DO2_PIN
             int
             default 10
         
-        config CONNECTION_COMMUNICATION_LORA_SX12XX_DO3_PIN
+        config SX12XX_DEVICE_DO3_PIN
             int
             default 10
         
-        config CONNECTION_COMMUNICATION_LORA_SX12XX_DO4_PIN
+        config SX12XX_DEVICE_DO4_PIN
             int
             default 10
         
-        config CONNECTION_COMMUNICATION_LORA_SX12XX_DO5_PIN
+        config SX12XX_DEVICE_DO5_PIN
             int
             default 10
         endif

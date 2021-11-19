@@ -52,17 +52,30 @@ static uint32 SpiDeviceWrite(void *dev, struct BusBlockWriteParam *write_param)
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(write_param);
 
+    int ret;
     struct SpiHardwareDevice *spi_dev = (struct SpiHardwareDevice *)dev;
-    struct SpiDataStandard spi_msg;
+    struct SpiDataStandard *spi_msg;
 
-    spi_msg.tx_buff = (uint8 *)write_param->buffer;
-    spi_msg.rx_buff = NONE;
-    spi_msg.length = write_param->size;
-    spi_msg.spi_chip_select = 0;
-    spi_msg.spi_cs_release = 0;
-    spi_msg.next = NONE;
+    spi_msg = (struct SpiDataStandard *)x_malloc(sizeof(struct SpiDataStandard));
+    if (NONE == spi_msg) {
+        KPrintf("SpiDeviceWrite x_malloc msg error\n");
+        x_free(spi_msg);
+        return ERROR;
+    }
 
-    return spi_dev->spi_dev_done->dev_write(spi_dev, &spi_msg);
+    //memset(spi_msg, 0, sizeof(struct SpiDataStandard));
+
+    spi_msg->tx_buff = (uint8 *)write_param->buffer;
+    spi_msg->rx_buff = NONE;
+    spi_msg->length = write_param->size;
+    spi_msg->spi_chip_select = 0;
+    spi_msg->spi_cs_release = 0;
+    spi_msg->next = NONE;
+
+    ret = spi_dev->spi_dev_done->dev_write(spi_dev, spi_msg);
+    x_free(spi_msg);
+
+    return ret;
 }
 
 static uint32 SpiDeviceRead(void *dev, struct BusBlockReadParam *read_param)
@@ -70,17 +83,30 @@ static uint32 SpiDeviceRead(void *dev, struct BusBlockReadParam *read_param)
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(read_param);
 
+    int ret;
     struct SpiHardwareDevice *spi_dev = (struct SpiHardwareDevice *)dev;
-    struct SpiDataStandard spi_msg;
+    struct SpiDataStandard *spi_msg;
 
-    spi_msg.tx_buff = NONE;
-    spi_msg.rx_buff = (uint8 *)read_param->buffer;
-    spi_msg.length = read_param->size;
-    spi_msg.spi_chip_select = 0;
-    spi_msg.spi_cs_release = 0;
-    spi_msg.next = NONE;
+    spi_msg = (struct SpiDataStandard *)x_malloc(sizeof(struct SpiDataStandard));
+    if (NONE == spi_msg) {
+        KPrintf("SpiDeviceRead x_malloc msg error\n");
+        x_free(spi_msg);
+        return ERROR;
+    }
 
-    return spi_dev->spi_dev_done->dev_read(spi_dev, &spi_msg);
+    //memset(spi_msg, 0, sizeof(struct SpiDataStandard));
+
+    spi_msg->tx_buff = NONE;
+    spi_msg->rx_buff = (uint8 *)read_param->buffer;
+    spi_msg->length = read_param->size;
+    spi_msg->spi_chip_select = 0;
+    spi_msg->spi_cs_release = 0;
+    spi_msg->next = NONE;
+
+    ret = spi_dev->spi_dev_done->dev_read(spi_dev, spi_msg);
+    x_free(spi_msg);
+
+    return ret;
 }
 
 static const struct HalDevDone dev_done =
@@ -183,12 +209,27 @@ int SpiDevConfigureCs(struct HardwareDev *dev, uint8 spi_chip_select, uint8 spi_
 {
     NULL_PARAM_CHECK(dev);
 
+    int ret;
     struct SpiHardwareDevice *spi_dev = (struct SpiHardwareDevice *)dev;
-    struct SpiDataStandard msg;
+    struct SpiDataStandard *msg;
 
-    memset(&msg, 0, sizeof(struct SpiDataStandard));
-    msg.spi_chip_select = spi_chip_select;
-    msg.spi_cs_release = spi_cs_release;
+    msg = (struct SpiDataStandard *)x_malloc(sizeof(struct SpiDataStandard));
+    if (NONE == msg) {
+        KPrintf("SpiDevConfigureCs x_malloc msg error\n");
+        x_free(msg);
+        return ERROR;
+    }
 
-    return spi_dev->spi_dev_done->dev_write(spi_dev, &msg);
+    //memset(msg, 0, sizeof(struct SpiDataStandard));
+    msg->length = 0;
+    msg->rx_buff = NONE;
+    msg->tx_buff = NONE;
+    msg->next = NONE;
+    msg->spi_chip_select = spi_chip_select;
+    msg->spi_cs_release = spi_cs_release;
+
+    ret = spi_dev->spi_dev_done->dev_write(spi_dev, msg);
+
+    x_free(msg);
+    return ret;
 }

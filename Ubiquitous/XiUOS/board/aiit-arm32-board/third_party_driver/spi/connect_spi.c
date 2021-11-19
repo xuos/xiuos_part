@@ -91,15 +91,11 @@ Modification:
 #endif
 
 /**
- * This function                        SPI device initialization
- *
- * @param SpiDrv                  SPI device structure   pointer
- * 
- *  @param cfg                        SPI device operating mode configuration structure   pointer
- * 
- *  @return                                 if   successful   return  EOK
+ * This function                  SPI device initialization
+ * @param SpiDrv                  SPI device structure pointer
+ * @param cfg                     SPI device operating mode configuration structure pointer
+ * @return                        if successful return EOK
  */
-
 static x_err_t Stm32SpiInit(struct Stm32Spi *SpiDrv, struct SpiMasterParam *cfg)
 {
     NULL_PARAM_CHECK(SpiDrv);
@@ -248,20 +244,15 @@ static x_err_t Stm32SpiInit(struct Stm32Spi *SpiDrv, struct SpiMasterParam *cfg)
 
     return EOK;
 }
-/**
- * This function                                 Use DMA during spi transfer
- *
- * @param spi_bus                          SPI bus handle
- * 
- *  @param SettingLen                   Set data length
- * 
- * @param RxBaseAddr                 Base address for receiving data
- * 
- * @param TxBaseAddr                 Base address for sending data
- * 
- * @return                                          none
- */
 
+/**
+ * This function                     Use DMA during spi transfer
+ * @param spi_bus                    SPI bus handle
+ * @param SettingLen                 Set data length
+ * @param RxBaseAddr                 Base address for receiving data
+ * @param TxBaseAddr                 Base address for sending data
+ * @return                           none
+ */
 static void DmaSpiConfig(struct SpiBus *spi_bus, uint32_t setting_len, void *rx_base_addr, void *tx_base_addr)
 {
     struct Stm32Spi *spi = (struct Stm32Spi *)spi_bus->private_data;
@@ -349,11 +340,9 @@ static void DmaSpiConfig(struct SpiBus *spi_bus, uint32_t setting_len, void *rx_
 }
 
 /**
- * This function                   DMA receiving completion interrupt
- *
+ * This function            DMA receiving completion interrupt
  * @param spi_bus           SPI bus pointer
- * 
- * @return                            none
+ * @return                  none
  */
 static void DmaRxDoneIsr(struct SpiBus *spi_bus)
 {
@@ -373,11 +362,9 @@ static void DmaRxDoneIsr(struct SpiBus *spi_bus)
 }
 
 /**
- * This function                      DMA sending completion interrupt
- *
+ * This function              DMA sending completion interrupt
  * @param spi_bus             SPI bus pointer
- * 
- * @return                               none
+ * @return                    none
  */
 static void DmaTxDoneIsr(struct SpiBus *spi_bus)
 {
@@ -395,22 +382,16 @@ static void DmaTxDoneIsr(struct SpiBus *spi_bus)
         DMA_ClearFlag(spi->dma.dma_tx.instance, spi->spi_dma_flag);
     }
 }
+
 /**
- * This function                         SPI wait timeout function
- *
- * @param SpiInit                 SPI Init structure definition  
- * 
- *  @param SpiInstance       SPI control handle
- * 
- * @param Flag                          SPI  Status flag
- * 
- * @param State                        SPI status
- * 
- * @param Timeout                Overflow time
- * 
- * @param Tickstart                Starting time
- * 
- * @return                                   if   successful   return  EOK
+ * This function            SPI wait timeout function
+ * @param SpiInit           SPI Init structure definition  
+ * @param SpiInstance       SPI control handle
+ * @param Flag              SPI Status flag
+ * @param State             SPI status
+ * @param Timeout           Overflow time
+ * @param Tickstart         Starting time
+ * @return                  if successful return EOK
  */
 static int SpiWaitUntilTimeout(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, uint32_t Flag, uint32_t State, uint32_t Timeout, uint32_t Tickstart)
 {
@@ -434,22 +415,16 @@ static int SpiWaitUntilTimeout(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance
   }
   return 0;
 }
+
 /**
- * This function                                   SPI sends data through DMA
- *
- * @param SpiInit                           SPI Init structure  
- * 
- *  @param SpiInstance                SPI control handle
- * 
- *  @param dma_init                        DMA Init structure
- * 
- *  @param dma_instance             DMA Controller
- * 
- *  @param pData                              Send data buffer address
- * 
- * @param Size                                   Amount of data sent
- * 
- * @return                                            if   successful   return  EOK
+ * This function                   SPI sends data through DMA
+ * @param SpiInit                  SPI Init structure  
+ * @param SpiInstance              SPI control handle
+ * @param dma_init                 DMA Init structure
+ * @param dma_instance             DMA Controller
+ * @param pData                    Send data buffer address
+ * @param Size                     Amount of data sent
+ * @return                         if successful return EOK
  */
 int SpiTransmitDma(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, DMA_InitTypeDef dma_init, DMA_Stream_TypeDef *dma_instance, uint8_t *pData, uint16_t Size)
 {
@@ -520,28 +495,19 @@ int SpiTransmitDma(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, DMA_InitTy
 error :
   return errorcode;
 }
+
 /**
- * This function                             SPI carries out duplex communication through DMA
- *
- * @param SpiInit                       SPI Init structure  
- * 
- *  @param SpiInstance            SPI control handle
- * 
- * @param dmarx_init                DMA Init structure---Rx
- * 
+ * This function             SPI carries out duplex communication through DMA
+ * @param SpiInit            SPI Init structure  
+ * @param SpiInstance        SPI control handle
+ * @param dmarx_init         DMA Init structure---Rx
  * @param dmarx_instance     DMA Controller
- * 
- * @param dmatx_init                DMA Init structure---Tx
- * 
+ * @param dmatx_init         DMA Init structure---Tx
  * @param dmatx_instance     DMA Controller
- * 
- * @param pTxData                      Send data buffer address
- * 
- * @param pRxData                     Receive data buffer address
- * 
- * @param Size                              Amount of data 
- * 
- * @return                                        if   successful   return  EOK
+ * @param pTxData            Send data buffer address
+ * @param pRxData            Receive data buffer address
+ * @param Size               Amount of data 
+ * @return                   if successful return EOK
  */
 int SpiTransmitreceiveDma(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, DMA_InitTypeDef dmarx_init, DMA_Stream_TypeDef *dmarx_instance, DMA_InitTypeDef dmatx_init, DMA_Stream_TypeDef *dmatx_instance, uint8_t *pTxData, uint8_t *pRxData, uint16_t Size)
 {
@@ -653,26 +619,18 @@ int SpiTransmitreceiveDma(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, DMA
 error :
   return errorcode;
 }
+
 /**
- * This function                             SPI receives data through DMA
- *
- * @param SpiInit                       SPI Init structure  
- * 
- *  @param SpiInstance            SPI control handle
- * 
- * @param dmarx_init                DMA Init structure---Rx
- * 
+ * This function             SPI receives data through DMA
+ * @param SpiInit            SPI Init structure  
+ * @param SpiInstance        SPI control handle
+ * @param dmarx_init         DMA Init structure---Rx
  * @param dmarx_instance     DMA Controller
- * 
- * @param dmatx_init                DMA Init structure---Tx
- * 
+ * @param dmatx_init         DMA Init structure---Tx
  * @param dmatx_instance     DMA Controller
- * 
- * @param pData                         Receive data buffer address
- * 
- * @param Size                             Amount of data 
- * 
- * @return                                        if   successful   return  EOK
+ * @param pData              Receive data buffer address
+ * @param Size               Amount of data 
+ * @return                   if successful return EOK
  */
 int SpiReceiveDma(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, DMA_InitTypeDef dmarx_init, DMA_Stream_TypeDef *dmarx_instance, DMA_InitTypeDef dmatx_init, DMA_Stream_TypeDef *dmatx_instance, uint8_t *pData, uint16_t Size)
 {
@@ -748,20 +706,15 @@ int SpiReceiveDma(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, DMA_InitTyp
 error:
   return errorcode;
 }
+
 /**
- * This function                             SPI receives data 
- *
- * @param SpiInit                       SPI Init structure  
- * 
- *  @param SpiInstance            SPI control handle
- * 
- * @param pData                         Transmit data buffer address
- * 
- * @param Size                             Amount of data 
- * 
- * @param Timeout                    waiting time
- * 
- * @return                                        if   successful   return  EOK
+ * This function                 SPI receives data 
+ * @param SpiInit                SPI Init structure  
+ * @param SpiInstance            SPI control handle
+ * @param pData                  Transmit data buffer address
+ * @param Size                   Amount of data 
+ * @param Timeout                waiting time
+ * @return                       if successful return EOK
  */
 int SpiTransmit(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 {
@@ -876,22 +829,16 @@ int SpiTransmit(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, uint8_t *pDat
 error:
   return errorcode;
 }
+
 /**
- * This function                             SPI Transmit   and  receive
- *
- * @param SpiInit                       SPI Init structure  
- * 
- *  @param SpiInstance            SPI control handle
- * 
- * @param pTxData                      Transmit data buffer address
- * 
- * @param pRxData                     receive data buffer address
- * 
-  * @param Size                              Amount of data 
- * 
- * @param Timeout                      waiting time
- * 
- * @return                                        if   successful   return  EOK
+ * This function                 SPI Transmit and receive
+ * @param SpiInit                SPI Init structure  
+ * @param SpiInstance            SPI control handle
+ * @param pTxData                Transmit data buffer address
+ * @param pRxData                receive data buffer address
+ * @param Size                   Amount of data 
+ * @param Timeout                waiting time
+ * @return                       if successful return EOK
  */
 int SpiTransmitreceive(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, uint8_t *pTxData, uint8_t *pRxData, uint16_t Size, uint32_t Timeout)
 {
@@ -1029,20 +976,15 @@ int SpiTransmitreceive(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, uint8_
 error :
     return errorcode;
 }
+
 /**
- * This function                             SPI   receive  data
- *
- * @param SpiInit                       SPI Init structure  
- * 
- *  @param SpiInstance            SPI control handle
- * 
- * @param pData                          data buffer address
- * 
-  * @param Size                              Amount of data 
- * 
- * @param Timeout                      waiting time
- * 
- * @return                                        if   successful   return  EOK
+ * This function                 SPI receive data
+ * @param SpiInit                SPI Init structure  
+ * @param SpiInstance            SPI control handle
+ * @param pData                  data buffer address
+ * @param Size                   Amount of data 
+ * @param Timeout                waiting time
+ * @return                       if successful return EOK
  */
 int SpiReceive(SPI_InitTypeDef SpiInit, SPI_TypeDef *SpiInstance, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 {
@@ -1140,208 +1082,197 @@ error :
 }
 
 /**
- * This function                             SPI write data
- *
- * @param spi_dev                             SPI device structure  handle
- * 
- *  @param spi_datacfg                    SPI device information structure  handle
- * 
- * @return                                      datacfg  length
+ * This function                         SPI write data
+ * @param spi_dev                        SPI device structure handle
+ * @param spi_datacfg                    SPI device information structure handle
+ * @return                               datacfg length
  */
 static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStandard *spi_datacfg)
 {
-    int state;
-    x_size_t message_length, already_send_length;
-    uint16 send_length;
-    const uint8 *WriteBuf;
+  int state = 0;
+  x_size_t message_length, already_send_length;
+  uint16 send_length;
+  const uint8 *WriteBuf;
 
-    NULL_PARAM_CHECK(spi_dev);
-    NULL_PARAM_CHECK(spi_datacfg);
+  NULL_PARAM_CHECK(spi_dev);
+  NULL_PARAM_CHECK(spi_datacfg);
 
-    struct Stm32Spi *StmSpi = CONTAINER_OF(spi_dev->haldev.owner_bus, struct Stm32Spi, spi_bus);
-    SPI_TypeDef *SpiInstance = StmSpi->instance;
-    SPI_InitTypeDef *SpiInit = &StmSpi->init;
-    struct Stm32HwSpiCs *cs = (struct Stm32HwSpiCs *)spi_dev->private_data;
+  struct Stm32Spi *StmSpi = CONTAINER_OF(spi_dev->haldev.owner_bus, struct Stm32Spi, spi_bus);
+  SPI_TypeDef *SpiInstance = StmSpi->instance;
+  SPI_InitTypeDef *SpiInit = &StmSpi->init;
+  struct Stm32HwSpiCs *cs = (struct Stm32HwSpiCs *)spi_dev->private_data;
 
-  while(NONE != spi_datacfg) {    
+  while (NONE != spi_datacfg) {    
     if (spi_datacfg->spi_chip_select) {
-        GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_RESET);
+      GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_RESET);
     }
 
     message_length = spi_datacfg->length;
     WriteBuf = spi_datacfg->tx_buff;
     while (message_length) {
-        if (message_length > 65535) {
-            send_length = 65535;
-            message_length = message_length - 65535;
-        } else {
-            send_length = message_length;
-            message_length = 0;
-        }
+      if (message_length > 65535) {
+          send_length = 65535;
+          message_length = message_length - 65535;
+      } else {
+          send_length = message_length;
+          message_length = 0;
+      }
 
-        /* calculate the start address */
-        already_send_length = spi_datacfg->length - send_length - message_length;
-        WriteBuf = (uint8 *)spi_datacfg->tx_buff + already_send_length;
-        
-        /* start once data exchange in DMA mode */
-        if (spi_datacfg->tx_buff) {
-            if (StmSpi->spi_dma_flag & SPI_USING_TX_DMA_FLAG) {
-                state = SpiTransmitDma(*SpiInit, SpiInstance, StmSpi->dma.dma_tx.init, StmSpi->dma.dma_tx.instance, (uint8_t *)WriteBuf, send_length);
-            } else {
-                state = SpiTransmit(*SpiInit, SpiInstance, (uint8_t *)WriteBuf, send_length, 1000);
-            }
-        }
+      /* calculate the start address */
+      already_send_length = spi_datacfg->length - send_length - message_length;
+      WriteBuf = (uint8 *)spi_datacfg->tx_buff + already_send_length;
+      
+      /* start once data exchange in DMA mode */
+      if (spi_datacfg->tx_buff) {
+          if (StmSpi->spi_dma_flag & SPI_USING_TX_DMA_FLAG) {
+            state = SpiTransmitDma(*SpiInit, SpiInstance, StmSpi->dma.dma_tx.init, StmSpi->dma.dma_tx.instance, (uint8_t *)WriteBuf, send_length);
+          } else {
+            state = SpiTransmit(*SpiInit, SpiInstance, (uint8_t *)WriteBuf, send_length, 1000);
+          }
+      }
 
-        if (state != 0) {
-            KPrintf("spi transfer error : %d\n", state);
-            spi_datacfg->length = 0;
-        }
+      if (state != 0) {
+        KPrintf("spi write error : %d\n", state);
+        spi_datacfg->length = 0;
+      }
     }
 
     if (spi_datacfg->spi_cs_release) {
-        GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_SET);
+      GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_SET);
     }
   
     spi_datacfg = spi_datacfg->next;
   }
 
-    return spi_datacfg->length;
+  return EOK;
 }
 
 /**
- * This function                             SPI read data
- *
- * @param spi_dev                             SPI device structure  handle
- * 
- *  @param spi_datacfg                    SPI device information structure  handle
- * 
- * @return                                      datacfg  length
+ * This function                         SPI read data
+ * @param spi_dev                        SPI device structure  handle
+ * @param spi_datacfg                    SPI device information structure  handle
+ * @return                               datacfg  length
  */
 static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStandard *spi_datacfg)
 {
-    int state;
-    x_size_t message_length, already_send_length;
-    uint16 send_length;
-    const uint8 *ReadBuf;
+  NULL_PARAM_CHECK(spi_dev);
+  NULL_PARAM_CHECK(spi_datacfg);
 
-    NULL_PARAM_CHECK(spi_dev);
-    NULL_PARAM_CHECK(spi_datacfg);
+  int state;
+  x_size_t message_length, already_send_length;
+  uint16 read_length, spi_read_length = 0;
+  uint8 *ReadBuf;
 
-    struct Stm32Spi *StmSpi = CONTAINER_OF(spi_dev->haldev.owner_bus, struct Stm32Spi, spi_bus);
-    SPI_TypeDef *SpiInstance = StmSpi->instance;
-    SPI_InitTypeDef *SpiInit = &StmSpi->init;
-    struct Stm32HwSpiCs *cs = (struct Stm32HwSpiCs *)spi_dev->private_data;
+  struct Stm32Spi *StmSpi = CONTAINER_OF(spi_dev->haldev.owner_bus, struct Stm32Spi, spi_bus);
+  SPI_TypeDef *SpiInstance = StmSpi->instance;
+  SPI_InitTypeDef *SpiInit = &StmSpi->init;
+  struct Stm32HwSpiCs *cs = (struct Stm32HwSpiCs *)spi_dev->private_data;
 
   while(NONE != spi_datacfg) {    
-    if(spi_datacfg->spi_chip_select) {
-        GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_RESET);
+    if (spi_datacfg->spi_chip_select) {
+      GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_RESET);
     }
 
     message_length = spi_datacfg->length;
     ReadBuf = spi_datacfg->rx_buff;
     while (message_length) {
-        if (message_length > 65535){
-            send_length = 65535;
-            message_length = message_length - 65535;
+      if (message_length > 65535){
+          read_length = 65535;
+          message_length = message_length - 65535;
+      } else {
+          read_length = message_length;
+          message_length = 0;
+      }
+
+      /* calculate the start address */
+      already_send_length = spi_datacfg->length - read_length - message_length;
+      ReadBuf = spi_datacfg->rx_buff + already_send_length;
+      /* start once data exchange in DMA mode */
+      if ((spi_datacfg->rx_buff) && (ReadBuf)) {
+        //memset(ReadBuf, 0, read_length);
+        if (StmSpi->spi_dma_flag & SPI_USING_RX_DMA_FLAG) {
+          state = SpiReceiveDma(*SpiInit, SpiInstance, StmSpi->dma.dma_rx.init, StmSpi->dma.dma_rx.instance, StmSpi->dma.dma_tx.init, StmSpi->dma.dma_tx.instance, (uint8_t *)ReadBuf, read_length);
         } else {
-            send_length = message_length;
-            message_length = 0;
+          state = SpiReceive(*SpiInit, SpiInstance, ReadBuf, read_length, 1000);
         }
+      }
 
-        /* calculate the start address */
-        already_send_length = spi_datacfg->length - send_length - message_length;
-        ReadBuf = (uint8 *)spi_datacfg->rx_buff + already_send_length;
-        
-        /* start once data exchange in DMA mode */
-        if (spi_datacfg->rx_buff) {
-            memset((uint8_t *)ReadBuf, 0xff, send_length);
-            if (StmSpi->spi_dma_flag & SPI_USING_RX_DMA_FLAG) {
-                state = SpiReceiveDma(*SpiInit, SpiInstance, StmSpi->dma.dma_rx.init, StmSpi->dma.dma_rx.instance, StmSpi->dma.dma_tx.init, StmSpi->dma.dma_tx.instance, (uint8_t *)ReadBuf, send_length);
-            } else {
-                state = SpiReceive(*SpiInit, SpiInstance, (uint8_t *)ReadBuf, send_length, 1000);
-            }
-        }
-
-        if (state != 0) {
-            KPrintf("spi transfer error : %d\n", state);
-            spi_datacfg->length = 0;
-        }
+      if (state != 0) {
+        KPrintf("spi read error : %d\n", state);
+        spi_datacfg->length = 0;
+      }
     }
 
     if (spi_datacfg->spi_cs_release) {
-        GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_SET);
+      GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_SET);
     }
   
+    spi_read_length += spi_datacfg->length;
     spi_datacfg = spi_datacfg->next;
   }
 
-    return spi_datacfg->length;
+  return spi_read_length;
 }
 
 /**
- * This function                                 SPI driver initialization function
- *
+ * This function                             SPI driver initialization function
  * @param spi_drv                            SPI driver structure  handle
- * 
- * @return                                             if   successful   return  EOK
+ * @return                                   if successful return  EOK
  */
 static uint32 SpiDrvInit(struct SpiDriver *spi_drv)
 {
-    NULL_PARAM_CHECK(spi_drv);
+  NULL_PARAM_CHECK(spi_drv);
 
-    SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_drv->driver.private_data);
+  SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_drv->driver.private_data);
 
-    struct Stm32Spi *StmSpi = CONTAINER_OF(spi_drv->driver.owner_bus, struct Stm32Spi, spi_bus);
+  struct Stm32Spi *StmSpi = CONTAINER_OF(spi_drv->driver.owner_bus, struct Stm32Spi, spi_bus);
 
-    return Stm32SpiInit(StmSpi, dev_param->spi_master_param);
+  return Stm32SpiInit(StmSpi, dev_param->spi_master_param);
 }
 
 /**
- * This function                                 SPI driver configuration param
- *
+ * This function                            SPI driver configuration param
  * @param spi_drv                           SPI driver structure  handle
- * 
- *  @param spi_param                   SPI master param structure  handle
- * 
- * @return                                            if   successful   return  EOK
+ * @param spi_param                        SPI master param structure  handle
+ * @return                                  if successful return EOK
  */
 static uint32 SpiDrvConfigure(struct SpiDriver *spi_drv, struct SpiMasterParam *spi_param)
 {
-    NULL_PARAM_CHECK(spi_drv);
-    NULL_PARAM_CHECK(spi_param);
+  NULL_PARAM_CHECK(spi_drv);
+  NULL_PARAM_CHECK(spi_param);
 
-    SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_drv->driver.private_data);
+  SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_drv->driver.private_data);
 
-    dev_param->spi_master_param = spi_param;
-    dev_param->spi_master_param->spi_work_mode = dev_param->spi_master_param->spi_work_mode  & SPI_MODE_MASK;    
+  dev_param->spi_master_param = spi_param;
+  dev_param->spi_master_param->spi_work_mode = dev_param->spi_master_param->spi_work_mode  & SPI_MODE_MASK;    
 
-    return EOK;
+  return EOK;
 }
 
 /*Configure the spi device param, make sure struct (configure_info->private_data) = (SpiMasterParam)*/
 static uint32 Stm32SpiDrvConfigure(void *drv, struct BusConfigureInfo *configure_info)
 {
-    NULL_PARAM_CHECK(drv);
-    NULL_PARAM_CHECK(configure_info);
+  NULL_PARAM_CHECK(drv);
+  NULL_PARAM_CHECK(configure_info);
 
-    x_err_t ret = EOK;   
-    struct SpiDriver *spi_drv = (struct SpiDriver *)drv;
-    struct SpiMasterParam *spi_param;
+  x_err_t ret = EOK;   
+  struct SpiDriver *spi_drv = (struct SpiDriver *)drv;
+  struct SpiMasterParam *spi_param;
 
-    switch (configure_info->configure_cmd)
-    {
-      case OPE_INT:
-          ret = SpiDrvInit(spi_drv);
-          break;
-      case OPE_CFG:
-          spi_param = (struct SpiMasterParam *)configure_info->private_data;
-          ret = SpiDrvConfigure(spi_drv, spi_param);
-          break;
-      default:
-          break;
-    }
+  switch (configure_info->configure_cmd)
+  {
+    case OPE_INT:
+        ret = SpiDrvInit(spi_drv);
+        break;
+    case OPE_CFG:
+        spi_param = (struct SpiMasterParam *)configure_info->private_data;
+        ret = SpiDrvConfigure(spi_drv, spi_param);
+        break;
+    default:
+        break;
+  }
 
-    return ret;
+  return ret;
 }
 
 /*manage the spi device operations*/
@@ -1354,11 +1285,11 @@ static const struct SpiDevDone spi_dev_done =
 };
 
 #if defined(BSP_USING_SPI1)
-struct Stm32Spi spi1;
+static struct Stm32Spi spi1;
 #if defined(BSP_SPI1_TX_USING_DMA)
 void DMA2_Stream3_IRQHandler(int irq_num, void *arg)
 {
-    DmaTxDoneIsr(&spi1.spi_bus);
+  DmaTxDoneIsr(&spi1.spi_bus);
 }
 DECLARE_HW_IRQ(DMA2_Stream3_IRQn, DMA2_Stream3_IRQHandler, NONE);
 #endif
@@ -1366,18 +1297,18 @@ DECLARE_HW_IRQ(DMA2_Stream3_IRQn, DMA2_Stream3_IRQHandler, NONE);
 #if defined(BSP_SPI1_RX_USING_DMA)
 void DMA2_Stream0_IRQHandler(int irq_num, void *arg)
 {
-    DmaRxDoneIsr(&spi1.spi_bus);
+  DmaRxDoneIsr(&spi1.spi_bus);
 }
 DECLARE_HW_IRQ(DMA2_Stream0_IRQn, DMA2_Stream0_IRQHandler, NONE);
 #endif
 #endif
 
 #if defined(BSP_USING_SPI2)
-struct Stm32Spi spi2;
+static struct Stm32Spi spi2;
 #if defined(BSP_SPI2_TX_USING_DMA)
 void DMA1_Stream4_IRQHandler(int irq_num, void *arg)
 {
-    DmaTxDoneIsr(&spi2.spi_bus);
+  DmaTxDoneIsr(&spi2.spi_bus);
 }
 DECLARE_HW_IRQ(DMA1_Stream4_IRQn, DMA1_Stream4_IRQHandler, NONE);
 #endif
@@ -1385,18 +1316,18 @@ DECLARE_HW_IRQ(DMA1_Stream4_IRQn, DMA1_Stream4_IRQHandler, NONE);
 #if defined(BSP_SPI2_RX_USING_DMA)
 void DMA1_Stream3_IRQHandler(int irq_num, void *arg)
 {
-    DmaTxDoneIsr(&spi2.spi_bus);
+  DmaTxDoneIsr(&spi2.spi_bus);
 }
 DECLARE_HW_IRQ(DMA1_Stream3_IRQn, DMA1_Stream3_IRQHandler, NONE);
 #endif
 #endif
 
 #if defined(BSP_USING_SPI3)
-struct Stm32Spi spi3;
+static struct Stm32Spi spi3;
 #if defined(BSP_SPI3_TX_USING_DMA)
 void DMA1_Stream7_IRQHandler(int irq_num, void *arg)
 {
-    DmaTxDoneIsr(&spi3.spi_bus);
+  DmaTxDoneIsr(&spi3.spi_bus);
 }
 DECLARE_HW_IRQ(DMA1_Stream7_IRQn, DMA1_Stream7_IRQHandler, NONE);
 #endif
@@ -1409,7 +1340,7 @@ DECLARE_HW_IRQ(DMA1_Stream7_IRQn, DMA1_Stream7_IRQHandler, NONE);
  */
 void DMA1_Stream2_IRQHandler(int irq_num, void *arg)
 {
-    DmaRxDoneIsr(&spi3.spi_bus);
+  DmaRxDoneIsr(&spi3.spi_bus);
 }
 DECLARE_HW_IRQ(DMA1_Stream2_IRQn, DMA1_Stream2_IRQHandler, NONE);
 #endif
@@ -1417,33 +1348,31 @@ DECLARE_HW_IRQ(DMA1_Stream2_IRQn, DMA1_Stream2_IRQHandler, NONE);
 
 /**
  * This function                 RCC clock configuration function  
- *
- * @return                            none
+ * @return                       none
  */
 static void RCCConfiguration(void)
 {
 #ifdef BSP_USING_SPI1
-    RCC_AHB1PeriphClockCmd(SPI1_GPIO_RCC, ENABLE);
-    
-    RCC_APB2PeriphClockCmd(RCC_APBPeriph_SPI1, ENABLE);
+  RCC_AHB1PeriphClockCmd(SPI1_GPIO_RCC, ENABLE);
+  
+  RCC_APB2PeriphClockCmd(RCC_APBPeriph_SPI1, ENABLE);
 #endif
 
 #ifdef BSP_USING_SPI2
-    RCC_AHB1PeriphClockCmd(SPI2_GPIO_RCC | SPI2_GPIO_RCC_SCK, ENABLE);
-    
-    RCC_APB1PeriphClockCmd(RCC_APBPeriph_SPI2, ENABLE);
+  RCC_AHB1PeriphClockCmd(SPI2_GPIO_RCC | SPI2_GPIO_RCC_SCK, ENABLE);
+  
+  RCC_APB1PeriphClockCmd(RCC_APBPeriph_SPI2, ENABLE);
 #endif
 
 #ifdef BSP_USING_SPI3
-    RCC_AHB1PeriphClockCmd(SPI3_GPIO_RCC | SPI3_GPIO_RCC_NSS, ENABLE);
-    
-    RCC_APB2PeriphClockCmd(RCC_APBPeriph_SPI3, ENABLE);
+  RCC_AHB1PeriphClockCmd(SPI3_GPIO_RCC | SPI3_GPIO_RCC_NSS, ENABLE);
+  
+  RCC_APB2PeriphClockCmd(RCC_APBPeriph_SPI3, ENABLE);
 #endif
 }
 /**
- * This function                   GPIO  Configuration      function  
- * 
- * @return                            none
+ * This function                   GPIO Configuration function  
+ * @return                         none
  */
 static void GPIOConfiguration(void)
 {
@@ -1498,236 +1427,228 @@ static void GPIOConfiguration(void)
 }
 
 /**
- * This function                                   Init the spi bus 、spi driver and attach to the bus          
- *
+ * This function                             Init the spi bus 、spi driver and attach to the bus          
  * @param  spi_bus                           Spi bus info pointer
- * 
- *  @param spi_driver                      Spi driver info pointer
- * 
- * @return                                               EOK
+ *  @param spi_driver                        Spi driver info pointer
+ * @return                                   EOK
  */
 static int BoardSpiBusInit(struct Stm32Spi *stm32spi_bus, struct SpiDriver *spi_driver, char* drv_name)
 {
-    x_err_t ret = EOK;
+  x_err_t ret = EOK;
 
-    /*Init the spi bus */
-    ret = SpiBusInit(&stm32spi_bus->spi_bus, stm32spi_bus->bus_name);
-    if (EOK != ret) {
-        KPrintf("Board_Spi_init SpiBusInit error %d\n", ret);
-        return ERROR;
-    }
+  /*Init the spi bus */
+  ret = SpiBusInit(&stm32spi_bus->spi_bus, stm32spi_bus->bus_name);
+  if (EOK != ret) {
+      KPrintf("Board_Spi_init SpiBusInit error %d\n", ret);
+      return ERROR;
+  }
 
-    /*Init the spi driver*/
-    ret = SpiDriverInit(spi_driver, drv_name);
-    if (EOK != ret) {
-        KPrintf("Board_Spi_init SpiDriverInit error %d\n", ret);
-        return ERROR;
-    }
+  /*Init the spi driver*/
+  ret = SpiDriverInit(spi_driver, drv_name);
+  if (EOK != ret) {
+      KPrintf("Board_Spi_init SpiDriverInit error %d\n", ret);
+      return ERROR;
+  }
 
-    /*Attach the spi driver to the spi bus*/
-    ret = SpiDriverAttachToBus(drv_name, stm32spi_bus->bus_name);
-    if (EOK != ret) {
-        KPrintf("Board_Spi_init SpiDriverAttachToBus error %d\n", ret);
-        return ERROR;
-    } 
+  /*Attach the spi driver to the spi bus*/
+  ret = SpiDriverAttachToBus(drv_name, stm32spi_bus->bus_name);
+  if (EOK != ret) {
+      KPrintf("Board_Spi_init SpiDriverAttachToBus error %d\n", ret);
+      return ERROR;
+  } 
 
-    return ret;
+  return ret;
 }
 
 /**
  * This function                    SPI bus initialization            
- *
- * @return                              EOK
+ * @return                          EOK
  */
 static int Stm32HwSpiBusInit(void)
 {
-    x_err_t ret = EOK;
-    struct Stm32Spi *StmSpiBus;
+  x_err_t ret = EOK;
+  struct Stm32Spi *StmSpiBus;
 
-    RCCConfiguration();
-    GPIOConfiguration();
+  RCCConfiguration();
+  GPIOConfiguration();
 
 #ifdef BSP_USING_SPI1
-    StmSpiBus = &spi1;
-    StmSpiBus->instance = SPI1;
-    StmSpiBus->bus_name = SPI_BUS_NAME_1;
-    StmSpiBus->spi_bus.private_data = &spi1;
-    DmaSpiConfig(&StmSpiBus->spi_bus, 0, NONE, NONE);
+  memset(&spi1, 0, sizeof(struct Stm32Spi));
+  StmSpiBus = &spi1;
+  StmSpiBus->instance = SPI1;
+  StmSpiBus->bus_name = SPI_BUS_NAME_1;
+  StmSpiBus->spi_bus.private_data = &spi1;
+  DmaSpiConfig(&StmSpiBus->spi_bus, 0, NONE, NONE);
 
-    static struct SpiDriver spi_driver_1;
-    memset(&spi_driver_1, 0, sizeof(struct SpiDriver));
+  static struct SpiDriver spi_driver_1;
+  memset(&spi_driver_1, 0, sizeof(struct SpiDriver));
 
-    spi_driver_1.configure = &(Stm32SpiDrvConfigure);
+  spi_driver_1.configure = &(Stm32SpiDrvConfigure);
 
-    ret = BoardSpiBusInit(StmSpiBus, &spi_driver_1, SPI_1_DRV_NAME);
-    if (EOK != ret) {
-      KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
-      return ERROR;
-    }
+  ret = BoardSpiBusInit(StmSpiBus, &spi_driver_1, SPI_1_DRV_NAME);
+  if (EOK != ret) {
+    KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
+    return ERROR;
+  }
 #endif
 
 #ifdef BSP_USING_SPI2
-    StmSpiBus = &spi2;
-    StmSpiBus->instance = SPI2;
-    StmSpiBus->bus_name = SPI_BUS_NAME_2;
-    StmSpiBus->spi_bus.private_data = &spi2;
-    DmaSpiConfig(&StmSpiBus->spi_bus, 0, NONE, NONE);
+  memset(&spi2, 0, sizeof(struct Stm32Spi));
+  StmSpiBus = &spi2;
+  StmSpiBus->instance = SPI2;
+  StmSpiBus->bus_name = SPI_BUS_NAME_2;
+  StmSpiBus->spi_bus.private_data = &spi2;
+  DmaSpiConfig(&StmSpiBus->spi_bus, 0, NONE, NONE);
 
-    static struct SpiDriver spi_driver_2;
-    memset(&spi_driver_2, 0, sizeof(struct SpiDriver));
+  static struct SpiDriver spi_driver_2;
+  memset(&spi_driver_2, 0, sizeof(struct SpiDriver));
 
-    spi_driver_2.configure = &(Stm32SpiDrvConfigure);
+  spi_driver_2.configure = &(Stm32SpiDrvConfigure);
 
-    ret = BoardSpiBusInit(StmSpiBus, &spi_driver_2, SPI_2_DRV_NAME);
-    if (EOK != ret) {
-      return ERROR;
-    }
+  ret = BoardSpiBusInit(StmSpiBus, &spi_driver_2, SPI_2_DRV_NAME);
+  if (EOK != ret) {
+    return ERROR;
+  }
 #endif
 
 #ifdef BSP_USING_SPI3
-    StmSpiBus = &spi3;
-    StmSpiBus->instance = SPI3;
-    StmSpiBus->bus_name = SPI_BUS_NAME_3;
-    StmSpiBus->spi_bus.private_data = &spi3;
-    DmaSpiConfig(&StmSpiBus->spi_bus, 0, NONE, NONE);
+  memset(&spi3, 0, sizeof(struct Stm32Spi));
+  StmSpiBus = &spi3;
+  StmSpiBus->instance = SPI3;
+  StmSpiBus->bus_name = SPI_BUS_NAME_3;
+  StmSpiBus->spi_bus.private_data = &spi3;
+  DmaSpiConfig(&StmSpiBus->spi_bus, 0, NONE, NONE);
 
-    static struct SpiDriver spi_driver_3;
-    memset(&spi_driver_3, 0, sizeof(struct SpiDriver));
+  static struct SpiDriver spi_driver_3;
+  memset(&spi_driver_3, 0, sizeof(struct SpiDriver));
 
-    spi_driver_3.configure = &(Stm32SpiDrvConfigure);
+  spi_driver_3.configure = &(Stm32SpiDrvConfigure);
 
-    ret = BoardSpiBusInit(StmSpiBus, &spi_driver_3, SPI_3_DRV_NAME);
-    if (EOK != ret) {
-      KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
-      return ERROR;
-    }
+  ret = BoardSpiBusInit(StmSpiBus, &spi_driver_3, SPI_3_DRV_NAME);
+  if (EOK != ret) {
+    KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
+    return ERROR;
+  }
 #endif
-    return EOK;
+  return EOK;
 }
 
 /**
- * This function                                   Mount the spi device to the bus           
- *
- * @param bus_name                         Bus   Name
- * 
- *  @param device_name                spi   device  name
- * 
- *  @param cs_gpiox                         GPIO pin configuration handle
- * 
- * @param cs_gpio_pin                    GPIO  number
- * 
- * @return                                               EOK
+ * This function                           Mount the spi device to the bus           
+ * @param bus_name                         Bus Name
+ * @param device_name                      spi device name
+ * @param cs_gpiox                         GPIO pin configuration handle
+ * @param cs_gpio_pin                      GPIO number
+ * @return                                 EOK
  */
 x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name, GPIO_TypeDef *cs_gpiox, uint16_t cs_gpio_pin)
 {
-    NULL_PARAM_CHECK(bus_name);
-    NULL_PARAM_CHECK(device_name);
+  NULL_PARAM_CHECK(bus_name);
+  NULL_PARAM_CHECK(device_name);
 
-    x_err_t result;
-    struct SpiHardwareDevice *spi_device;
-    struct Stm32HwSpiCs *cs_pin_param;
-    static SpiDeviceParam spi_dev_param;
-    memset(&spi_dev_param, 0, sizeof(SpiDeviceParam));
+  x_err_t result;
+  struct SpiHardwareDevice *spi_device;
+  struct Stm32HwSpiCs *cs_pin_param;
+  static SpiDeviceParam spi_dev_param;
+  memset(&spi_dev_param, 0, sizeof(SpiDeviceParam));
 
-    /* initialize the cs pin && select the slave*/
-    GPIO_InitTypeDef GPIO_Initure;
-    GPIO_Initure.GPIO_Pin = cs_gpio_pin;
-    GPIO_Initure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_Initure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Initure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(cs_gpiox, &GPIO_Initure);
-    GPIO_WriteBit(cs_gpiox, cs_gpio_pin, Bit_SET);
+  /* initialize the cs pin && select the slave*/
+  GPIO_InitTypeDef GPIO_Initure;
+  GPIO_Initure.GPIO_Pin = cs_gpio_pin;
+  GPIO_Initure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_Initure.GPIO_PuPd = GPIO_PuPd_UP;
+  GPIO_Initure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(cs_gpiox, &GPIO_Initure);
+  GPIO_WriteBit(cs_gpiox, cs_gpio_pin, Bit_SET);
 
-    /* attach the device to spi bus*/
-    spi_device = (struct SpiHardwareDevice *)x_malloc(sizeof(struct SpiHardwareDevice));
-    CHECK(spi_device);
-    memset(spi_device, 0, sizeof(struct SpiHardwareDevice));
-    cs_pin_param = (struct Stm32HwSpiCs *)x_malloc(sizeof(struct Stm32HwSpiCs));
-    CHECK(cs_pin_param);
-    memset(cs_pin_param, 0, sizeof(struct Stm32HwSpiCs));
-    cs_pin_param->GPIOx = cs_gpiox;
-    cs_pin_param->GPIO_Pin = cs_gpio_pin;
+  /* attach the device to spi bus*/
+  spi_device = (struct SpiHardwareDevice *)x_malloc(sizeof(struct SpiHardwareDevice));
+  CHECK(spi_device);
+  memset(spi_device, 0, sizeof(struct SpiHardwareDevice));
+  cs_pin_param = (struct Stm32HwSpiCs *)x_malloc(sizeof(struct Stm32HwSpiCs));
+  CHECK(cs_pin_param);
+  memset(cs_pin_param, 0, sizeof(struct Stm32HwSpiCs));
+  cs_pin_param->GPIOx = cs_gpiox;
+  cs_pin_param->GPIO_Pin = cs_gpio_pin;
 
-    spi_device->spi_dev_done = &spi_dev_done;
-    spi_device->private_data = (void *)cs_pin_param;
+  spi_device->spi_dev_done = &spi_dev_done;
+  spi_device->private_data = (void *)cs_pin_param;
 
-    result = SpiDeviceRegister(spi_device, (void *)&spi_dev_param, device_name);
-    if (result != EOK) {
-        SYS_ERR("%s device %p register faild, %d\n", device_name, spi_device, result);
-    }
+  result = SpiDeviceRegister(spi_device, (void *)&spi_dev_param, device_name);
+  if (result != EOK) {
+      SYS_ERR("%s device %p register faild, %d\n", device_name, spi_device, result);
+  }
 
-    result = SpiDeviceAttachToBus(device_name, bus_name);
-    if (result != EOK) {
-        SYS_ERR("%s attach to %s faild, %d\n", device_name, bus_name, result);
-    }
+  result = SpiDeviceAttachToBus(device_name, bus_name);
+  if (result != EOK) {
+      SYS_ERR("%s attach to %s faild, %d\n", device_name, bus_name, result);
+  }
 
-    CHECK(result == EOK);
+  CHECK(result == EOK);
 
-    KPrintf("%s attach to %s done\n", device_name, bus_name);
+  KPrintf("%s attach to %s done\n", device_name, bus_name);
 
-    return result;
+  return result;
 }
 
 /**
  * This function                   Get DMA information            
- * 
- * @return                              none
+ * @return                         none
  */
 static void Stm32GetDmaInfo(void)
 {
 #ifdef BSP_SPI1_RX_USING_DMA                                            /*SPI1 uses DMA receive enable*/
-    spi1.spi_dma_flag |= SPI_USING_RX_DMA_FLAG;
-    spi1.dma.dma_rx.instance = DMA2_Stream0;
-    spi1.dma.dma_rx.dma_rcc = RCC_AHB1ENR_DMA2EN;
-    spi1.dma.dma_rx.channel = DMA_Channel_3;
-    spi1.dma.dma_rx.dma_irq = DMA2_Stream0_IRQn;
+  spi1.spi_dma_flag |= SPI_USING_RX_DMA_FLAG;
+  spi1.dma.dma_rx.instance = DMA2_Stream0;
+  spi1.dma.dma_rx.dma_rcc = RCC_AHB1ENR_DMA2EN;
+  spi1.dma.dma_rx.channel = DMA_Channel_3;
+  spi1.dma.dma_rx.dma_irq = DMA2_Stream0_IRQn;
 #endif
 #ifdef BSP_SPI1_TX_USING_DMA                                      /*SPI1 uses DMA    send   enable*/         
-    spi1.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
-    spi1.dma.dma_tx.instance = DMA2_Stream3;
-    spi1.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA2EN;
-    spi1.dma.dma_tx.channel = DMA_Channel_3;
-    spi1.dma.dma_tx.dma_irq = DMA2_Stream3_IRQn;
+  spi1.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
+  spi1.dma.dma_tx.instance = DMA2_Stream3;
+  spi1.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA2EN;
+  spi1.dma.dma_tx.channel = DMA_Channel_3;
+  spi1.dma.dma_tx.dma_irq = DMA2_Stream3_IRQn;
 #endif
 
 #ifdef BSP_SPI2_RX_USING_DMA                                                      /*SPI2  uses DMA receive enable*/
-    spi2.spi_dma_flag |= SPI_USING_RX_DMA_FLAG;
-    spi2.dma.dma_rx.instance = DMA1_Stream3;                         /* DMA1 Data stream 3*/
-    spi2.dma.dma_rx.dma_rcc = RCC_AHB1ENR_DMA1EN;
-    spi2.dma.dma_rx.channel = DMA_Channel_0;
-    spi2.dma.dma_rx.dma_irq = DMA1_Stream3_IRQn;
+  spi2.spi_dma_flag |= SPI_USING_RX_DMA_FLAG;
+  spi2.dma.dma_rx.instance = DMA1_Stream3;                         /* DMA1 Data stream 3*/
+  spi2.dma.dma_rx.dma_rcc = RCC_AHB1ENR_DMA1EN;
+  spi2.dma.dma_rx.channel = DMA_Channel_0;
+  spi2.dma.dma_rx.dma_irq = DMA1_Stream3_IRQn;
 #endif
 #ifdef BSP_SPI2_TX_USING_DMA                                      /*SPI2 uses DMA send   enable*/
-    spi2.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
-    spi2.dma.dma_tx.instance = DMA1_Stream4;                      /* DMA1 Data stream 4*/
-    spi2.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA1EN;
-    spi2.dma.dma_tx.channel = DMA_Channel_0;
-    spi2.dma.dma_tx.dma_irq = DMA1_Stream4_IRQn;         /*Enable DMA interrupt line*/
+  spi2.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
+  spi2.dma.dma_tx.instance = DMA1_Stream4;                      /* DMA1 Data stream 4*/
+  spi2.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA1EN;
+  spi2.dma.dma_tx.channel = DMA_Channel_0;
+  spi2.dma.dma_tx.dma_irq = DMA1_Stream4_IRQn;         /*Enable DMA interrupt line*/
 #endif
 
 #ifdef BSP_SPI3_RX_USING_DMA                                        /*SPI3 uses DMA receive enable*/
-    spi3.spi_dma_flag |= SPI_USING_RX_DMA_FLAG;
-    spi3.dma.dma_rx.instance = DMA1_Stream2;             /* DMA1 Data stream 2*/
-    spi3.dma.dma_rx.dma_rcc = RCC_AHB1ENR_DMA1EN;
-    spi3.dma.dma_rx.channel = DMA_Channel_0;
-    spi3.dma.dma_rx.dma_irq = DMA1_Stream2_IRQn;         /*Enable DMA interrupt line*/
+  spi3.spi_dma_flag |= SPI_USING_RX_DMA_FLAG;
+  spi3.dma.dma_rx.instance = DMA1_Stream2;             /* DMA1 Data stream 2*/
+  spi3.dma.dma_rx.dma_rcc = RCC_AHB1ENR_DMA1EN;
+  spi3.dma.dma_rx.channel = DMA_Channel_0;
+  spi3.dma.dma_rx.dma_irq = DMA1_Stream2_IRQn;         /*Enable DMA interrupt line*/
 #endif
 #ifdef BSP_SPI3_TX_USING_DMA                                       /*SPI3 uses DMA send   enable*/
-    spi3.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
-    spi3.dma.dma_tx.instance = DMA1_Stream7;           /* DMA1 Data stream 7*/
-    spi3.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA1EN;
-    spi3.dma.dma_tx.channel = DMA_Channel_0;
-    spi3.dma.dma_tx.dma_irq = DMA1_Stream7_IRQn;       /*Enable DMA interrupt line*/
+  spi3.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
+  spi3.dma.dma_tx.instance = DMA1_Stream7;           /* DMA1 Data stream 7*/
+  spi3.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA1EN;
+  spi3.dma.dma_tx.channel = DMA_Channel_0;
+  spi3.dma.dma_tx.dma_irq = DMA1_Stream7_IRQn;       /*Enable DMA interrupt line*/
 #endif
 }
 
 /**
  * This function             hardware spi initialization             
- *
- * @return                             EOK
+ * @return                   EOK
  */
 int Stm32HwSpiInit(void)
 {
-    Stm32GetDmaInfo();
-    return Stm32HwSpiBusInit();
+  Stm32GetDmaInfo();
+  return Stm32HwSpiBusInit();
 }

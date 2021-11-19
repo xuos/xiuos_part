@@ -395,7 +395,7 @@ int AdapterDeviceConnect(struct Adapter *adapter, enum NetRoleType net_role, con
  * @param priv_net_group - private net group
  * @return success: 0 , failure: other
  */
-int AdapterDeviceJoin(struct Adapter *adapter, const char *priv_net_group)
+int AdapterDeviceJoin(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     if (!adapter)
         return -1;
@@ -419,9 +419,10 @@ int AdapterDeviceJoin(struct Adapter *adapter, const char *priv_net_group)
 /**
  * @description: Adapter disconnect from ip net or private net group 
  * @param adapter - adapter device pointer
+ * @param priv_net_group - private net group for PRIVATE_PROTOCOL quit function
  * @return success: 0 , failure: other
  */
-int AdapterDeviceDisconnect(struct Adapter *adapter)
+int AdapterDeviceDisconnect(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     if (!adapter)
         return -1;
@@ -432,7 +433,7 @@ int AdapterDeviceDisconnect(struct Adapter *adapter)
         if (NULL == priv_done->quit)
             return -1;
     
-        return priv_done->quit(adapter);
+        return priv_done->quit(adapter, priv_net_group);
     } else if (IP_PROTOCOL == adapter->net_protocol) {
         struct IpProtocolDone *ip_done = (struct IpProtocolDone *)adapter->done;
     

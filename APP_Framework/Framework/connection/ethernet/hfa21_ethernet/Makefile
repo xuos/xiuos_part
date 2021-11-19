@@ -1,3 +1,3 @@
-SRC_FILES := sx1278.c
+SRC_FILES := hfa21_ethernet.c
 
 include $(KERNEL_ROOT)/compiler.mk

@@ -257,7 +257,7 @@ static int E18Ioctl(struct Adapter *adapter, int cmd, void *args)
     return ret;
 }
 
-static int E18Join(struct Adapter *adapter, const char *priv_net_group)
+static int E18Join(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret = 0;
 
