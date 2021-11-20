@@ -49,6 +49,8 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
       return -1 ;
     
     ret = UserTaskStartup(pid);
+    *thread = pid;
+    
     return ret;
 
 }

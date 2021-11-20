@@ -33,17 +33,17 @@ struct ota_header_t
     int16_t frame_flag;          ///< frame start flag 2 Bytes
     uint8_t dev_type;            ///< device type
     uint8_t burn_mode;           ///< data burn way
-    unsigned long total_len;   ///< send data total length caculated from each frame_len 
-    unsigned long dev_hid;     ///< device hardware version
-    unsigned long dev_sid;     ///< device software version
-    char resv[32];             ///< reserve
+    uint32_t total_len;          ///< send data total length caculated from each frame_len 
+    uint32_t dev_hid;            ///< device hardware version
+    uint32_t dev_sid;            ///< device software version
+    char resv[8];               ///< reserve
 };
 
 struct ota_frame_t
 {
     uint32_t frame_id;           ///< Current frame id
     uint32_t frame_len;          ///< Current frame data length
-    char   frame_data[224];    ///< Current frame data,max length 224
+    char     frame_data[64];       ///< Current frame data,max length 224
     uint32_t crc;                ///< Current frame data crc
 };
 
@@ -51,6 +51,7 @@ struct ota_data
 {
     struct ota_header_t header;
     struct ota_frame_t frame;
+    char end[2];
 };
 
 pthread_t ota_ktask;
@@ -129,32 +130,37 @@ int OtaFileSend(int fd)
     int file_length = 0;
     char * file_buf = NULL;
 
-    file_fd = fopen("/tmp/xiuos_app.bin", "r");
+    file_fd = fopen("/home/aep04/wwg/XiUOS_aiit-arm32-board_app.bin", "r");
     if (NULL == file_fd){
         printf("open file failed.\n");
         return -1;
     }
-
-    while((ch = fgetc(file_fd)) != EOF)
+    fseek(file_fd, 0, SEEK_SET);
+    printf("start send file.\n");
+    // while((ch = fgetc(file_fd)) != EOF)
+    while(!feof(file_fd))
     {
         memset(&data, 0, sizeof(data));
 
         data.header.frame_flag = 0x5A5A;
-        len = fread( data.frame.frame_data, 200, 1, file_fd );
-        if(len > 0) {
+        len = fread( data.frame.frame_data, 1, 64, file_fd );
+        if(len > 0) 
+        {
             data.frame.frame_id = frame_cnt;
             data.frame.frame_len = len;
             data.frame.crc = OtaCrc16(data.frame.frame_data, len);
             file_length += len;
         }
-        memcpy(&data.frame.frame_data[len], "!@", strlen("!@")); /* add '!@' as ending flag */
+        memcpy(data.end,"!@",2);
         fseek(file_fd, len, SEEK_CUR);
 
 try_again:
         send(fd, &data, sizeof(data), MSG_NOSIGNAL);
         len = recv(fd, buf, sizeof(buf), 0);
-        if(0 == strncmp(buf, "ok!@", len))
+        if(0 == strncmp(buf, "ok", len))
         {
+            try_times = 5;
+            printf("ota send current[%d] frame.\n",frame_cnt);
             frame_cnt++;
             continue;
         } 
@@ -185,9 +191,10 @@ try_again:
         len = fread(file_buf, file_length,1,file_fd);
         if(len > 0) {
             data.header.total_len = file_length;
-            data.frame.frame_len = strlen("aiit_ota_end!@");;
+            data.frame.frame_len = strlen("aiit_ota_end");;
             data.frame.crc = OtaCrc16(file_buf, len);
-            memcpy(data.frame.frame_data,"aiit_ota_end!@",strlen("aiit_ota_end!@"));
+            memcpy(data.frame.frame_data,"aiit_ota_end",strlen("aiit_ota_end"));
+            memcpy(data.end,"!@",2);
         }
         send(fd, &data, sizeof(data), MSG_NOSIGNAL);
         free(file_buf);
@@ -205,16 +212,19 @@ void* server_thread(void* p)
     int ret = 0;
 
     printf("pthread = %d\n",fd);
-
+    sleep(10);
     while(1)
     {
         memset(&data, 0 , sizeof(struct ota_data));
         data.header.frame_flag = 0x5A5A;
-        memcpy(data.frame.frame_data,"aiit_ota_start!@",strlen("aiit_ota_start!@"));
-        data.frame.frame_len = strlen("aiit_ota_start!@");
-
-        send(fd, &data, sizeof(data), MSG_NOSIGNAL);
-
+        memcpy(data.frame.frame_data,"aiit_ota_start",strlen("aiit_ota_start"));
+        data.frame.frame_len = strlen("aiit_ota_start");
+        memcpy(data.end,"!@",2);
+        ret = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
+        if (ret > 0){
+            printf("send %s[%d] Bytes\n",data.frame.frame_data,ret);
+        }
+        // sleep(1);
         len = recv(fd, buf, sizeof(buf), 0);
         if (len <= 0)
         {
@@ -222,7 +232,8 @@ void* server_thread(void* p)
         }
         else 
         {
-            if(0 == strncmp(buf, "ok!@", len))
+            printf("recv buf %s\n",buf);
+            if(0 == strncmp(buf, "ready", len))
             {
                 ret = OtaFileSend(fd);
                 if (ret == 0) {
@@ -234,12 +245,14 @@ void* server_thread(void* p)
             }
         }
     }
+    printf("exit fd = %d\n",fd);
     close(fd);
+    pthread_exit(0);
 }
 
 void server(void)
 {
-    printf("Server startup\n");
+    printf("ota Server startup\n");
     while(1)
     {
         struct sockaddr_in fromaddr;

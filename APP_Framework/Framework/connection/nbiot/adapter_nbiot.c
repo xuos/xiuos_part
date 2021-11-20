@@ -17,8 +17,9 @@
  * @author AIIT XUOS Lab
  * @date 2021.06.25
  */
+#include <transform.h>
 #include <adapter.h>
-
+#include <stdlib.h>
 
 #ifdef ADAPTER_BC28
 extern AdapterProductInfoType BC28Attach(struct Adapter *adapter);
@@ -50,7 +51,7 @@ int AdapterNbiotInit(void)
 {
     int ret = 0;
 
-    struct Adapter *adapter = malloc(sizeof(struct Adapter));
+    struct Adapter *adapter = PrivMalloc(sizeof(struct Adapter));
     if (!adapter) {
         printf("malloc adapter failed.\n");
         return -1;
@@ -59,14 +60,14 @@ int AdapterNbiotInit(void)
     ret = AdapterNbiotRegister(adapter);
     if (ret < 0) {
         printf("register nbiot adapter error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 #ifdef ADAPTER_BC28
     AdapterProductInfoType product_info = BC28Attach(adapter);
     if (!product_info) {
         printf("bc28 attach error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -96,7 +97,7 @@ int opennb(void)
 
      return 0;    
  }
- SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, opennb, opennb, show adapter nb information);
+//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, opennb, opennb, show adapter nb information);
 int closenb(void)
 {
     int ret = 0;
@@ -114,7 +115,7 @@ int closenb(void)
 
      return 0;    
  }
- SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, closenb, closenb, show adapter nb information);
+//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, closenb, closenb, show adapter nb information);
  
  int connectnb(int argc, char *argv[])
  {
@@ -134,7 +135,7 @@ int closenb(void)
 
      return 0;    
  }
- SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, connectnb, connectnb, show adapter nb information);
+//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, connectnb, connectnb, show adapter nb information);
 
  int sendnb(int argc, char *argv[])
  {
@@ -155,7 +156,7 @@ int closenb(void)
 
      return 0;    
  }
- SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, sendnb, sendnb, show adapter nb information);
+//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, sendnb, sendnb, show adapter nb information);
 
  int recvnb(void)
  {
@@ -168,5 +169,5 @@ int closenb(void)
 
      return 0;    
  }
- SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, recvnb, recvnb, show adapter nb information);
+//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, recvnb, recvnb, show adapter nb information);
 

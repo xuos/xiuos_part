@@ -21,6 +21,7 @@
 #include <adapter.h>
 #include <at_agent.h>
 #include "../adapter_nbiot.h"
+#include <stdlib.h>
 
 #define SOCKET_PROTOCOL_TCP  (6)
 #define SOCKET_PROTOCOL_UDP  (17)
@@ -112,25 +113,55 @@ int NBIoTStatusCheck(struct Adapter *adapter )
     char at_cmd[64] = {0};
 
     AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B); /* set receive end flag as 'OK'*/
+    
+    // memset(at_cmd, 0 ,64);
+    // memcpy(at_cmd, "AT+NRB", 6);
+    // strcat(at_cmd, "\n");
+    // printf("cmd : %s\n", at_cmd);
+    // result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    // if(result < 0) {
+    //     printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+    //     result = -1;
+    //     goto out;
+    // }
+    // BC28PowerSet(); /* reset bc28 module by set reset pin */
+    // PrivTaskDelay(6000);
 
-    memcpy(at_cmd, "AT+CSQ", 6);
+    // memset(at_cmd, 0 ,64);
+    // memcpy(at_cmd, "AT+NBAND=5", 10);
+    // strcat(at_cmd, "\n");
+    // printf("cmd : %s\n", at_cmd);
+    // result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    // if(result < 0) {
+    //     printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+    //     result = -1;
+    //     goto out;
+    // }
+    
+
+    memset(at_cmd, 0 ,64);
+    memcpy(at_cmd, "AT+CFUN=1", 10);
     strcat(at_cmd, "\n");
     printf("cmd : %s\n", at_cmd);
     result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
     if(result < 0) {
         printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
         result = -1;
+        goto out;
     }
 
-    memcpy(at_cmd, "AT+CFUN?", 8);
-    strcat(at_cmd, "\n");
-    printf("cmd : %s\n", at_cmd);
-    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
-    if(result < 0) {
-        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
-        result = -1;
-    }
+    // memset(at_cmd, 0 ,64);
+    // memcpy(at_cmd, "AT+CFUN?", 8);
+    // strcat(at_cmd, "\n");
+    // printf("cmd : %s\n", at_cmd);
+    // result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    // if(result < 0) {
+    //     printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+    //     result = -1;
+    //     goto out;
+    // }
 
+    memset(at_cmd, 0 ,64);
     memcpy(at_cmd, "AT+CIMI", 7);
     strcat(at_cmd, "\n");
     printf("cmd : %s\n", at_cmd);
@@ -138,26 +169,65 @@ int NBIoTStatusCheck(struct Adapter *adapter )
     if(result < 0) {
         printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
         result = -1;
+        goto out;
     }
 
-    memcpy(at_cmd, "AT+CEREG?", 9);
+    memset(at_cmd, 0 ,64);
+    memcpy(at_cmd, "AT+CGATT=1", 10);
     strcat(at_cmd, "\n");
     printf("cmd : %s\n", at_cmd);
     result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
     if(result < 0) {
         printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
         result = -1;
-    }   
+        goto out;
+    }
 
-    memcpy(at_cmd, "AT+CGATT?", 9);
+    // memset(at_cmd, 0 ,64);
+    // memcpy(at_cmd, "AT+CGATT?", 9);
+    // strcat(at_cmd, "\n");
+    // printf("cmd : %s\n", at_cmd);
+    // result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    // if(result < 0) {
+    //     printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+    //     result = -1;
+    //     goto out;
+    // }
+
+    // memset(at_cmd, 0 ,64);
+    // memcpy(at_cmd, "AT+CEREG?", 9);
+    // strcat(at_cmd, "\n");
+    // printf("cmd : %s\n", at_cmd);
+    // result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    // if(result < 0) {
+    //     printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+    //     result = -1;
+    //     goto out;
+    // }
+
+    memset(at_cmd, 0 ,64);
+    memcpy(at_cmd, "AT+QREGSWT=2", 12);
     strcat(at_cmd, "\n");
     printf("cmd : %s\n", at_cmd);
     result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
     if(result < 0) {
         printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
         result = -1;
+        goto out;
     }
 
+    memset(at_cmd, 0 ,64);
+    memcpy(at_cmd, "AT+CSQ", 6);
+    strcat(at_cmd, "\n");
+    printf("cmd : %s\n", at_cmd);
+    result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
+    // if(result < 0) {
+    //     printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
+    //     result = -1;
+    //     goto out;
+    // }
+
+    memset(at_cmd, 0 ,64);
     memcpy(at_cmd, "AT+CGPADDR", 10);
     strcat(at_cmd, "\n");
     printf("cmd : %s\n", at_cmd);
@@ -166,7 +236,7 @@ int NBIoTStatusCheck(struct Adapter *adapter )
         printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,at_cmd);
         result = -1;
     }
-
+out:
     return result;
 }
 
@@ -231,7 +301,7 @@ int NBIoTSocketCreate(struct Adapter *adapter, struct Socket *socket )
         result = -1;
         goto out;
     }
-
+    memset(at_cmd, 0 ,64);
     memcpy(at_cmd, "AT+NSOCR=", 9);
     strcat(at_cmd, str_type);
     strcat(at_cmd, ",");
@@ -258,6 +328,96 @@ out:
     return result;
 }
 
+static int BC28ParseData(void *dst, ATReplyType reply)
+{
+    int nbdata_len = 0;
+    int check_cnt = 0;
+    int left = 0;
+    int right = 0;
+    int tag = 0;
+    char *nbdata = NULL;
+    char *result = NULL;
+
+    if (NULL == reply) {
+        printf("at create failed ! \n");
+        return -1;
+    }
+
+    result = GetReplyText(reply);
+    if (!result) {
+        printf("%s %n get reply failed.\n",__func__,__LINE__);
+        return -1;
+    }
+
+    /*the data style of BC28: eg.'<socket id>,<ip addr>,<port>,<data length>,<data>,<data length>,' ,its assic code*/
+
+    /*step1: get the <data> section between the fourth and fifth ','*/
+    for(int i = 0; i < reply->reply_len; i++) 
+    {
+        if(',' == *(result + i)) 
+        {
+            check_cnt++;
+            if(4 == check_cnt) /*the fourth ','*/
+            {
+                left = i;
+            }
+
+            if(5 == check_cnt) /*the fifth ',' */
+            {
+                right = i;
+                break;
+            }
+        }   
+    }
+    if(left > 0 && right > 0)
+    {
+        /*step2: transform assic code as hexadecimal*/
+        for(int j = (left + 1);j <= (right - 1);j++) 
+        {
+            if(*(result + j) >= 0x30 && *(result + j) <= 0x39){
+                *(result + j) = (*(result + j) - 0x30); /* transform [0-9]*/
+            }
+            else if(*(result + j) >= 0x41 && *(result + j) <= 0x46)
+            {
+                *(result + j) = (*(result + j) - 0x37); /* transform [A-F],NOTE!!! A-F can not be regarded as a char,only can be reagrded as a number*/
+            }
+            
+            printf("0x%x ",*(result + j));
+        }
+
+        printf("\n");
+        nbdata_len = (right - left - 1) / 2; /*caculate the data length */
+        nbdata = PrivMalloc(nbdata_len);
+        if (!nbdata) {
+            printf("%s %n malloc failed.\n",__func__,__LINE__);
+            return -1;
+        }
+
+        tag = left;
+        printf("left = %d right = %d nbdata_len = %d\n",left ,right ,nbdata_len);
+        
+        /*step3: transform hexadecimal as actual data */
+        for(int k = 0; k < nbdata_len; k++ )
+        {
+            *(nbdata + k) =  (*(result + tag + 1) * 16 + *(result + tag + 2));
+            tag = tag + 2; /* transform with two data*/
+            printf("0x%x ",*(nbdata + k));
+        }
+        printf("\n");
+
+        memcpy(dst, nbdata, nbdata_len);
+
+        PrivFree(nbdata);
+
+        return nbdata_len;
+    }
+    else
+    {
+        return 0;
+    }
+    
+}
+
 /**
  * @description: NBIoT device close a socket connection
  * @param adapter - NBIoT adapter AT
@@ -277,9 +437,11 @@ int NBIoTSocketDelete(struct Adapter *adapter )
     }
 
     char str_fd[2] = {0};
-    char at_cmd[16] = {0};
+    char at_cmd[32] = {0};
+    printf("NBIOT close socket id = %d\n",adapter->socket.socket_id);
     itoa(adapter->socket.socket_id, str_fd, 10);
 
+    memset(at_cmd, 0 ,32);
     memcpy(at_cmd, "AT+NSOCL=", 9);
     strcat(at_cmd, str_fd);
     strcat(at_cmd, "\n");
@@ -312,6 +474,7 @@ static int BC28Open(struct Adapter *adapter)
     if (!adapter->agent) {
         char *agent_name = "niot_device";
         if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+            PrivClose(adapter->fd);
             printf("at agent init failed !\n");
             return -1;
         }
@@ -326,11 +489,19 @@ static int BC28Open(struct Adapter *adapter)
     BC28PowerSet(); /* reset bc28 module by set reset pin */
     PrivTaskDelay(6000);
 
-    NBIoTStatusCheck(adapter); /* ask module status*/
+    ret = NBIoTStatusCheck(adapter); /* ask module status*/
+    // if(ret < 0){
+    //     PrivClose(adapter->fd);
+    //     printf("NBIot status check failed.\n");
+    //     return -1;
+    // }
 
     /*step3: create a tcp socket default */
     ret = NBIoTSocketCreate(adapter, &create_socket);
     if(ret < 0){
+        DeleteATAgent(adapter->agent);
+        // adapter->agent = NULL;
+        PrivClose(adapter->fd);
         printf("NBIot create tcp socket failed.\n");
         return -1;
     }
@@ -342,6 +513,8 @@ static int BC28Open(struct Adapter *adapter)
 static int BC28Close(struct Adapter *adapter)
 {
     NBIoTSocketDelete(adapter);
+    DeleteATAgent(adapter->agent);
+    adapter->agent = NULL;
     PrivClose(adapter->fd);
     return 0;
 }
@@ -393,6 +566,7 @@ static int BC28Connect(struct Adapter *adapter, enum NetRoleType net_role, const
 
     itoa(adapter->socket.socket_id, str_fd, 10);
 
+    memset(at_cmd, 0 ,64);
     memcpy(at_cmd, "AT+NSOCO=", 9);
     strcat(at_cmd, str_fd);
     strcat(at_cmd, ",");
@@ -418,8 +592,26 @@ static int BC28Send(struct Adapter *adapter, const void *buf, size_t len)
     uint32_t result = 0;
     char at_cmd[64] = {0};
     char str_fd[2] = {0};
+    char assic_str[2] = {0};
 
+    char *nbdata = PrivMalloc(2 * len);
+    int assic_val = 0;
+    int length = 0;
 
+    for(int i = 0; i < len; i++)
+    {
+        assic_val = 0;
+        for( ; assic_val <= 0x7f; assic_val++) 
+        {
+            if(*(char*)(buf + i) == assic_val) 
+            {
+                break;
+            }
+        }
+        itoa(assic_val, assic_str, 16);
+        memcpy(nbdata + length, assic_str, 2);
+        length = length + 2;
+    }
     if (adapter->socket.type == SOCKET_TYPE_STREAM ) {
 
         char size[2] = {0};
@@ -427,12 +619,13 @@ static int BC28Send(struct Adapter *adapter, const void *buf, size_t len)
         itoa(adapter->socket.socket_id, str_fd, 10);
         size[0] = len + '0';
 
+        memset(at_cmd, 0 ,64);
         memcpy(at_cmd, "AT+NSOSD=", 9);
         strcat(at_cmd, str_fd);
         strcat(at_cmd, ",");
         strcat(at_cmd, size);
         strcat(at_cmd, ",");
-        strcat(at_cmd, buf);
+        strncat(at_cmd, nbdata,length);
         strcat(at_cmd, "\n");
 
     } else if(adapter->socket.type == SOCKET_TYPE_DGRAM ) {
@@ -443,6 +636,7 @@ static int BC28Send(struct Adapter *adapter, const void *buf, size_t len)
 
         itoa(adapter->socket.listen_port, listen_port, 10);
 
+        memset(at_cmd, 0 ,64);
         memcpy(at_cmd, "AT+NSOST=", 9);
         strcat(at_cmd, str_fd);
         strcat(at_cmd, ",");
@@ -450,11 +644,11 @@ static int BC28Send(struct Adapter *adapter, const void *buf, size_t len)
         strcat(at_cmd, ",");
         strcat(at_cmd, listen_port);
         strcat(at_cmd, ",");
-        strcat(at_cmd, buf);
+        strncat(at_cmd, nbdata,length);
         strcat(at_cmd, "\n");
 
     }
-
+    PrivFree(nbdata);
     printf("cmd : %s\n", at_cmd);
     AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
     result = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
@@ -466,14 +660,17 @@ static int BC28Send(struct Adapter *adapter, const void *buf, size_t len)
     return result;
 }
 
+
 static int BC28Recv(struct Adapter *adapter, void *buf, size_t len)
 {
     char at_cmd[64] = {0};
     char str_fd[2] = {0};
     char size[2] = {0};
+    int ret = 0;
     char *result = NULL;
+    
 
-    ATReplyType reply = CreateATReply(64);
+    ATReplyType reply = CreateATReply(256);
     if (NULL == reply) {
         printf("at create failed ! \n");
         return -1;
@@ -482,6 +679,7 @@ static int BC28Recv(struct Adapter *adapter, void *buf, size_t len)
     itoa(adapter->socket.socket_id, str_fd, 10);
     itoa(len, size, 10);
 
+    memset(at_cmd, 0 ,64);
     memcpy(at_cmd, "AT+NSORF=", 9);
     strcat(at_cmd, str_fd);
     strcat(at_cmd, ",");
@@ -492,17 +690,16 @@ static int BC28Recv(struct Adapter *adapter, void *buf, size_t len)
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, reply, at_cmd);
     PrivTaskDelay(300);
     
-    result = GetReplyText(reply);
-    if (!result) {
-        printf("%s %n get reply failed.\n",__func__,__LINE__);
+    ret = BC28ParseData(buf, reply);
+    if (ret < 0){
+        return ret;
     }
-    memcpy(buf, result, reply->reply_len);
 
     if (reply) {
         DeleteATReply(reply);
     }
 
-    return 0;
+    return ret;
 }
 
 static int BC28Disconnect(struct Adapter *adapter)
@@ -534,7 +731,7 @@ static const struct IpProtocolDone BC28_done =
 
 AdapterProductInfoType BC28Attach(struct Adapter *adapter)
 {
-    struct AdapterProductInfo *product_info = malloc(sizeof(struct AdapterProductInfo));
+    struct AdapterProductInfo *product_info = PrivMalloc(sizeof(struct AdapterProductInfo));
     if (!product_info) {
         printf("BC28Attach malloc product_info error\n");
         return NULL;

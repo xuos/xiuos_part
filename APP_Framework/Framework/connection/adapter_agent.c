@@ -168,9 +168,8 @@ int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const ch
     }
 
 __out:
-    agent->reply = NULL;
+    // agent->reply = NULL;
     PrivMutexAbandon(&agent->lock); 
-    agent->receive_mode = DEFAULT_MODE;
 
     return result;
 }
@@ -183,15 +182,14 @@ int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
         return -1;
     }
 
-    ATReplyType reply = CreateATReply(64);
+    ATReplyType reply = CreateATReply(256);
     if (NULL == reply) {
         printf("%s %d at_create_resp failed!\n",__func__,__LINE__);
         ret = -1;
         goto __exit;
     }
-
     ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd);
-    PrivTaskDelay(3000);
+    // PrivTaskDelay(3000);
 
     result = GetReplyText(reply);
     if (!result) {
@@ -310,7 +308,7 @@ static int GetCompleteATReply(ATAgentType agent)
     while (1) {
         PrivRead(agent->fd, &ch, 1);
 #ifdef CONNECTION_FRAMEWORK_DEBUG
-        printf(" %c (0x%x)\n", ch, ch);
+        printf("data[%d] %c (0x%x)\n",agent->maintain_len, ch, ch);
 #endif
         if (agent->receive_mode == ENTM_MODE){
             if (agent->entm_recv_len < ENTM_RECV_MAX) {
@@ -372,18 +370,21 @@ ATAgentType GetATAgent(const char *agent_name)
 }
 
 
-static int DeleteATAgent(ATAgentType agent)
+int DeleteATAgent(ATAgentType agent)
 {
+    printf("delete agent->at_handler = %d\n",agent->at_handler);
+    PrivTaskDelete(agent->at_handler, 0);
+
+    if (agent->fd > 0) {
+        PrivClose(agent->fd);
+    }
+
     if (agent->lock) {
         PrivMutexDelete(&agent->lock);
     }
 
     if (agent->entm_rx_notice) {
         PrivSemaphoreDelete(&agent->entm_rx_notice);
-    }
-
-    if (agent->fd > 0) {
-        PrivClose(agent->fd);
     }
 
     if (agent->rsp_sem) {
@@ -408,16 +409,16 @@ static void *ATAgentReceiveProcess(void *param)
                 ATReplyType reply = agent->reply;
 
                 agent->maintain_buffer[agent->maintain_len] = '\0';
-
-                if (agent->maintain_len < reply->reply_max_len) {
+                if (agent->maintain_len <= reply->reply_max_len) {
+                    memset(reply->reply_buffer, 0 , reply->reply_max_len);
                     memcpy(reply->reply_buffer, agent->maintain_buffer, agent->maintain_len);
-
                     reply->reply_len = agent->maintain_len;
                 } else {
-                    printf("out of memory (%d)!", reply->reply_max_len);
+                    printf("out of memory (%d)!\n", reply->reply_max_len);
                 }
 
-                agent->reply = NULL;
+                // agent->reply = NULL;
+                agent->receive_mode = DEFAULT_MODE;
                 PrivSemaphoreAbandon(&agent->rsp_sem);
             }
         }
@@ -463,7 +464,7 @@ static int ATAgentInit(ATAgentType agent)
     attr.stacksize = 2048;
 
     PrivTaskCreate(&agent->at_handler, &attr, ATAgentReceiveProcess, agent);
-
+    printf("create agent->at_handler = %d\n",agent->at_handler);
     return result;
 
 __out:
