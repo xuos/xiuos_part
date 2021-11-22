@@ -79,11 +79,13 @@ int PrivTaskStartup(pthread_t *thread)
 {
     return 0;
 }
+#ifdef SEPARATE_COMPILE
 /* private API of xiuos to search the first user task in manage list */
 int PrivUserTaskSearch(void)
 {
     return UserTaskSearch();
 }
+#endif
 
 int PrivTaskDelete(pthread_t thread, int sig)
 {

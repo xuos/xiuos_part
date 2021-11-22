@@ -240,6 +240,7 @@ static void *OtaKTaskEntry(void *parameter)
 
     while(1)
     {
+        int connect_times = 5;
         ret = AdapterDeviceOpen(adapter);
         if(ret < 0)
         {
@@ -248,12 +249,18 @@ static void *OtaKTaskEntry(void *parameter)
         }
 
 connect_again:
+        connect_times--;   
         ret = AdapterDeviceConnect(adapter, 1, "115.238.53.61","9898",1);
         if(ret < 0)
         {
-            // AdapterDeviceClose(adapter);
-            // continue;
-            goto connect_again;
+            if(connect_times > 0){
+                goto connect_again;
+            }
+            else
+            {
+                AdapterDeviceClose(adapter);
+                continue;
+            }
         }
         break;
     }
@@ -270,7 +277,7 @@ connect_again:
             {
                 memset(reply, 0, 16);
                 memcpy(reply, "ready", strlen("ready"));
-                PrivTaskDelay(3000);
+                // PrivTaskDelay(3000);
                 printf("receive start signal,send [ready] signal to server\n");
 send_ready_again:
                 ret = AdapterDeviceSend(adapter, reply, strlen(reply));
@@ -278,7 +285,7 @@ send_ready_again:
                 {
                     goto send_ready_again;
                 }
-
+                PrivTaskDelay(3000);
                 printf("start receive ota file.\n");
                 /* step2: start receive source bin file of application*/
                 ret = OtaDataRecv(adapter);
@@ -299,9 +306,10 @@ send_ready_again:
         {
             memset(reply, 0, 16);
             memcpy(reply, "notready", strlen("notready"));
+            printf("ota status:not ready\n");
             ret = AdapterDeviceSend(adapter, reply, strlen(reply));
         }
-        PrivTaskDelay(3000); /* check ota signal every 3s */
+        PrivTaskDelay(5000); /* check ota signal every 5s */
     }
     AdapterDeviceClose(adapter);
     
@@ -310,8 +318,8 @@ send_ready_again:
 void ApplicationOtaTaskInit(void)
 {   
     pthread_attr_t attr;
-    attr.schedparam.sched_priority = 10;
-    attr.stacksize = 2048;
+    attr.schedparam.sched_priority = 20;
+    attr.stacksize = 4096;
 
     PrivTaskCreate(&ota_task, &attr, OtaKTaskEntry, NULL);
 

@@ -212,7 +212,7 @@ void* server_thread(void* p)
     int ret = 0;
 
     printf("pthread = %d\n",fd);
-    sleep(10);
+    // sleep(5);
     while(1)
     {
         memset(&data, 0 , sizeof(struct ota_data));
