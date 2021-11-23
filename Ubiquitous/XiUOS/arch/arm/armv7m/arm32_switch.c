@@ -21,19 +21,37 @@
 
 void __attribute__((naked)) HwInterruptcontextSwitch(x_ubase from, x_ubase to, struct TaskDescriptor *to_task, void *context)
 {
+    asm volatile ("PUSH {R4}");
+    asm volatile ("PUSH {R5}");
+
     asm volatile ("LDR r4, =KtaskSwitchInterruptFlag");
     asm volatile ("LDR r5, [r4]");
     asm volatile ("CMP r5, #1");
+
+    asm volatile ("POP {R5}");
+    asm volatile ("POP {R4}");
+
     asm volatile ("BEQ Arm32SwitchReswitch");
+
+    asm volatile ("PUSH {R4}");
+    asm volatile ("PUSH {R5}");
+    asm volatile ("LDR r4, =KtaskSwitchInterruptFlag");
+
     asm volatile ("MOV r5, #1");
     asm volatile ("STR r5, [r4]");
     asm volatile ("LDR r4, =InterruptFromKtask");
     asm volatile ("STR r0, [r4]");
+
+    asm volatile ("POP {R5}");
+    asm volatile ("POP {R4}");
+
     asm volatile ("B Arm32SwitchReswitch");
 }
 
 void __attribute__((naked)) Arm32SwitchReswitch()
 {
+    asm volatile ("PUSH {R4}");
+
     asm volatile ("LDR r4, =InterruptToKtask");
     asm volatile ("STR r1, [r4]");
     asm volatile ("LDR r4, =InterruptToKtaskDescriptor");
@@ -41,6 +59,9 @@ void __attribute__((naked)) Arm32SwitchReswitch()
     asm volatile ("LDR r0, =" NVIC_INT_CTRL);
     asm volatile ("LDR r1, =" NVIC_PENDSVSET);
     asm volatile ("STR r1, [r0]");
+
+    asm volatile ("POP {R4}");
+
     asm volatile ("BX LR");
 }
 

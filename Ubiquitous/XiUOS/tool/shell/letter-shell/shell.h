@@ -256,6 +256,7 @@ typedef struct
 
 #define shellSetPath(_shell, _path)     (_shell)->info.path = _path
 #define shellGetPath(_shell)            ((_shell)->info.path)
+#define KEY_LENGTH       8
 
 void shellInit(Shell *shell, char *buffer, unsigned short size);
 unsigned short shellWriteString(Shell *shell, const char *string);

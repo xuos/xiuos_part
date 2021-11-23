@@ -73,6 +73,7 @@ extern "C" {
 
 #define SERIAL_DMA_RX                0x01
 #define SERIAL_DMA_TX                0x02
+#define KEY_LENGTH                      8
 
 struct SerialTx
 {

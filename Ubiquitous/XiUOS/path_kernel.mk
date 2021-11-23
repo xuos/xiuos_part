@@ -135,6 +135,17 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/cortex-m0-emulator)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m0 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/Libraries/driverlib \
+	-I$(BSP_ROOT)/third_party_driver/Libraries/ \
+	-I$(BSP_ROOT)/third_party_driver/Libraries/inc \
+	-I$(KERNEL_ROOT)/include \
+	-I$(BSP_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/cortex-m3-emulator)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m3 \
