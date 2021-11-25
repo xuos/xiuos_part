@@ -58,7 +58,7 @@ struct SpiDataStandard
     const uint8 *tx_buff;
     uint32 tx_len;
 
-    const uint8 *rx_buff;
+    uint8 *rx_buff;
     uint32 rx_len;
 
     uint32 length;

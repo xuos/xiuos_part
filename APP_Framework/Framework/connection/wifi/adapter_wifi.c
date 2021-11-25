@@ -22,7 +22,7 @@
 #include <bus_pin.h>
 
 #ifdef ADAPTER_HFA21_WIFI
-extern AdapterProductInfoType Hfa21Attach(struct Adapter *adapter);
+extern AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter);
 #endif
 
 #define ADAPTER_WIFI_NAME "wifi"
@@ -52,7 +52,7 @@ int AdapterWifiInit(void)
     struct Adapter *adapter = PrivMalloc(sizeof(struct Adapter));
     if (!adapter) {
         printf("AdapterWifiInit malloc error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -61,15 +61,15 @@ int AdapterWifiInit(void)
     ret = AdapterWifiRegister(adapter);
     if (ret < 0) {
         printf("AdapterWifiInit register wifi adapter error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
 #ifdef ADAPTER_HFA21_WIFI
-    AdapterProductInfoType product_info = Hfa21Attach(adapter);
+    AdapterProductInfoType product_info = Hfa21WifiAttach(adapter);
     if (!product_info) {
         printf("AdapterWifiInit hfa21 attach error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -167,7 +167,3 @@ int AdapterWifiTest(void)
     
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterWifiTest, AdapterWifiTest, show adapter wifi information);
-
-
-
-

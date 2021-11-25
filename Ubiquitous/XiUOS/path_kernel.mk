@@ -139,6 +139,24 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/include #
 endif
 
+
+
+
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/cortex-m4-emulator)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/sdio\
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/usb/STM32_USB_OTG_Driver/inc \
+	-I$(KERNEL_ROOT)/include \
+	-I$(BSP_ROOT)/include #
+endif
+
+
+
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/ok1052-c)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \

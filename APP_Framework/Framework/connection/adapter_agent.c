@@ -117,10 +117,10 @@ int ParseATReply(char *str, const char *format, ...)
     return counts;
 }
 
-uint32 ATSprintf(int fd, const char *format, va_list params)
+void ATSprintf(int fd, const char *format, va_list params)
 {
     last_cmd_len = vsnprintf(send_buf, sizeof(send_buf), format, params);
-    printf("ATSprintf send %s len %u\n",send_buf, last_cmd_len);
+    printf("AT send %s len %u\n",send_buf, last_cmd_len);
 	PrivWrite(fd, send_buf, last_cmd_len);
 }
 
@@ -128,7 +128,7 @@ int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const ch
 {
     if (agent == NULL) {
         printf("ATAgent is null");
-        return -ERROR;
+        return -1;
     }
 
     struct timespec abstime;
@@ -146,7 +146,7 @@ int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const ch
 
     va_list params;
     uint32 cmd_size = 0;
-    uint32 result = EOK;
+    uint32 result = 0;
     const char *cmd = NULL;
 
     agent->reply = reply;
@@ -227,35 +227,35 @@ char *GetReplyText(ATReplyType reply)
 int AtSetReplyLrEnd(ATAgentType agent, char enable)
 {  
     if (!agent) {
-        return -ERROR;
+        return -1;
     }
 
     agent->reply_lr_end = enable;
 
-    return EOK;
+    return 0;
 }
 
 int AtSetReplyEndChar(ATAgentType agent, char last_ch, char end_ch)
 {  
     if (!agent) {
-        return -ERROR;
+        return -1;
     }
 
     agent->reply_end_last_char = last_ch;
     agent->reply_end_char = end_ch;
 
-    return EOK;
+    return 0;
 }
 
 int AtSetReplyCharNum(ATAgentType agent, unsigned int num)
 {  
     if (!agent) {
-        return -ERROR;
+        return -1;
     }
 
     agent->reply_char_num = num;
 
-    return EOK;
+    return 0;
 }
 
 int EntmSend(ATAgentType agent, const char *data, int len)
@@ -476,13 +476,12 @@ static void *ATAgentReceiveProcess(void *param)
 
 static int ATAgentInit(ATAgentType agent)
 {
-    int result = EOK;
-	UtaskType at_utask;
+    int result = 0;
 
     agent->maintain_len = 0;
     agent->maintain_buffer = (char *)PrivMalloc(agent->maintain_max);
 
-    if (agent->maintain_buffer == NONE) {
+    if (agent->maintain_buffer == NULL) {
         printf("ATAgentInit malloc maintain_buffer error\n");
         goto __out;
     }
@@ -518,7 +517,7 @@ static int ATAgentInit(ATAgentType agent)
 
 __out:
     DeleteATAgent(agent);
-    result = -ERROR;
+    result = -1;
 
     return result;
 }
@@ -526,9 +525,9 @@ __out:
 int InitATAgent(const char *agent_name, int agent_fd, uint32 maintain_max)
 {
     int i = 0;
-    int result = EOK;
-    int open_result = EOK;
-    struct ATAgent *agent = NONE;
+    int result = 0;
+    int open_result = 0;
+    struct ATAgent *agent = NULL;
 
     if (GetATAgent(agent_name) != NULL) {
         return result;
@@ -540,7 +539,7 @@ int InitATAgent(const char *agent_name, int agent_fd, uint32 maintain_max)
 
     if (i >= AT_AGENT_MAX) {
         printf("agent buffer(%d) is full.", AT_AGENT_MAX);
-        result = -ERROR;
+        result = -1;
         return result;
     }
 
@@ -553,7 +552,7 @@ int InitATAgent(const char *agent_name, int agent_fd, uint32 maintain_max)
     agent->maintain_max = maintain_max;
 
     result = ATAgentInit(agent);
-    if (result == EOK) {
+    if (result == 0) {
         PrivTaskStartup(&agent->at_handler);
     }
 

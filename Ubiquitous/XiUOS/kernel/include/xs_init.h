@@ -37,6 +37,7 @@ void InitCmpts(void);
 extern int VfsInit(void);
 extern int WorkSysWorkQueueInit(void);
 extern int FlashW25qxxSpiDeviceInit(void);
+extern int LoraSx12xxSpiDeviceInit(void);
 extern int FatfsInit(void);
 extern int Ch376fsInit(void);
 extern int LibcSystemInit(void);

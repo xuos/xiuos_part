@@ -24,7 +24,7 @@
 extern AdapterProductInfoType Hc08Attach(struct Adapter *adapter);
 #endif
 
-#define ADAPTER_BLUETOOTH_NAME "BlueTooth"
+#define ADAPTER_BLUETOOTH_NAME "bluetooth"
 
 static int AdapterBlueToothRegister(struct Adapter *adapter)
 {
@@ -50,7 +50,7 @@ int AdapterBlueToothInit(void)
 
     struct Adapter *adapter = PrivMalloc(sizeof(struct Adapter));
     if (!adapter) {
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -59,7 +59,7 @@ int AdapterBlueToothInit(void)
     ret = AdapterBlueToothRegister(adapter);
     if (ret < 0) {
         printf("AdapterBlueToothInit register BT adapter error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
@@ -67,7 +67,7 @@ int AdapterBlueToothInit(void)
     AdapterProductInfoType product_info = Hc08Attach(adapter);
     if (!product_info) {
         printf("AdapterBlueToothInit hc08 attach error\n");
-        free(adapter);
+        PrivFree(adapter);
         return -1;
     }
 
