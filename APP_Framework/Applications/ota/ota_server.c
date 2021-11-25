@@ -26,7 +26,6 @@ int clientfd[100000];//客户端的socketfd,100个元素，clientfd[0]~clientfd[
 int size = 99999;//用来控制进入聊天室的人数为50以内
 int PORT = 9898;//端口号
 typedef struct sockaddr meng;
-socklen_t len;
 
 struct ota_header_t
 {
@@ -51,7 +50,7 @@ struct ota_data
 {
     struct ota_header_t header;
     struct ota_frame_t frame;
-    char end[2];
+    char end[4];
 };
 
 pthread_t ota_ktask;
@@ -98,8 +97,11 @@ void init(void)
     addr.sin_addr.s_addr = htons(INADDR_ANY);//当sin_addr = INADDR_ANY时，表示从本机的任一网卡接收数据
 
 //绑定套接字
-    int on = 1;
-    if(setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
+    // int on = 1;
+    struct timeval timeout;
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
+    if(setsockopt(serverfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(struct timeval)) < 0)
     {
         perror("端口设置失败");
         exit(-1);
@@ -123,8 +125,9 @@ int OtaFileSend(int fd)
     struct ota_data data;
     FILE *file_fd;
     char ch;
-    int len = 0;
-    int try_times = 5;
+    int length = 0;
+    int try_times = 10;
+    int recv_end_times = 3;
     int ret = 0;
     int  frame_cnt = 0;
     int file_length = 0;
@@ -137,30 +140,43 @@ int OtaFileSend(int fd)
     }
     fseek(file_fd, 0, SEEK_SET);
     printf("start send file.\n");
-    // while((ch = fgetc(file_fd)) != EOF)
     while(!feof(file_fd))
     {
         memset(&data, 0, sizeof(data));
 
         data.header.frame_flag = 0x5A5A;
-        len = fread( data.frame.frame_data, 1, 64, file_fd );
-        if(len > 0) 
+        length = fread( data.frame.frame_data, 1, 64, file_fd );
+        if(length > 0) 
         {
+            printf("read %d Bytes\n",length);
             data.frame.frame_id = frame_cnt;
-            data.frame.frame_len = len;
-            data.frame.crc = OtaCrc16(data.frame.frame_data, len);
-            file_length += len;
+            data.frame.frame_len = length;
+            data.frame.crc = OtaCrc16(data.frame.frame_data, length);
+            file_length += length;
         }
-        memcpy(data.end,"!@",2);
-        fseek(file_fd, len, SEEK_CUR);
 
-try_again:
-        send(fd, &data, sizeof(data), MSG_NOSIGNAL);
-        len = recv(fd, buf, sizeof(buf), 0);
-        if(0 == strncmp(buf, "ok", len))
+send_again:
+        usleep(50000);
+        printf("ota send current[%d] frame.\n",frame_cnt);
+        length = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
+        if(length < 0){
+            printf("send [%d] frame faile.go to send again\n",frame_cnt);
+            goto send_again;
+        }
+        
+recv_again:
+        memset(buf, 0, 32);
+        length = recv(fd, buf, sizeof(buf), 0);
+        if(length < 0 ){
+            printf("[%d] frame waiting for ok timeout,receive again.\n",frame_cnt);
+            goto recv_again;
+        }
+
+        printf("receive buf[%s] length = %d\n",buf, length);
+        if(0 == strncmp(buf, "ok", length))
         {
-            try_times = 5;
-            printf("ota send current[%d] frame.\n",frame_cnt);
+            try_times = 10;
+            printf("[%d]frame data send done.\n",frame_cnt);
             frame_cnt++;
             continue;
         } 
@@ -169,34 +185,68 @@ try_again:
             if(try_times > 0)
             {
                 try_times--;
-                goto try_again;
+                goto send_again;
             } 
             else
             {
-                printf("send frame[%d] 5 times failed.\n",frame_cnt);
+                printf("send frame[%d] 10 times failed.\n",frame_cnt);
                 ret = -1;
                 break;
             }
         }
     }
 
+    /* finally,check total bin file.*/
     if (ret == 0)
     {
+        sleep(1);
+        printf("total send file length[%d] Bytes.\n",file_length);
+        printf("now check total bin file.\n");
         file_buf = malloc(file_length);
         memset(file_buf, 0, file_length);
         memset(&data, 0, sizeof(data));
 
         data.header.frame_flag = 0x5A5A;
-
-        len = fread(file_buf, file_length,1,file_fd);
-        if(len > 0) {
+        fseek(file_fd, 0, SEEK_SET);
+        length = fread(file_buf,1, file_length, file_fd);
+        if(length > 0) {
             data.header.total_len = file_length;
-            data.frame.frame_len = strlen("aiit_ota_end");;
-            data.frame.crc = OtaCrc16(file_buf, len);
+            data.frame.frame_len = strlen("aiit_ota_end");
+            data.frame.crc = OtaCrc16(file_buf, length);
             memcpy(data.frame.frame_data,"aiit_ota_end",strlen("aiit_ota_end"));
-            memcpy(data.end,"!@",2);
         }
-        send(fd, &data, sizeof(data), MSG_NOSIGNAL);
+
+send_end_signal:
+        printf("send aiit_ota_end signal.\n");
+        length = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
+        if(length < 0){
+            printf("send end signal faile,send end signal again\n");
+            goto send_end_signal;
+        }
+
+recv_end_signal:
+        memset(buf, 0, 32);
+        length = recv(fd, buf, sizeof(buf), 0);
+        if(length < 0 )
+        {
+            recv_end_times--;
+            printf("end signal waiting for ok timeout,receive again.\n");
+            if(recv_end_times > 0)
+            {
+                goto recv_end_signal;
+            }
+            else
+            {
+                ret = -1;
+            }
+        }
+
+        if(0 != strncmp(buf, "ok", length))
+        {
+            printf("error end !!!\n");
+            ret = -1;
+        } 
+
         free(file_buf);
     }
 
@@ -210,30 +260,33 @@ void* server_thread(void* p)
     unsigned char buf[32] = { 0 };
     struct ota_data data;
     int ret = 0;
+    int length = 0;
 
     printf("pthread = %d\n",fd);
-    // sleep(5);
+    sleep(8);
     while(1)
     {
-        memset(&data, 0 , sizeof(struct ota_data));
+        memset(&data, 0x0 , sizeof(struct ota_data));
         data.header.frame_flag = 0x5A5A;
         memcpy(data.frame.frame_data,"aiit_ota_start",strlen("aiit_ota_start"));
         data.frame.frame_len = strlen("aiit_ota_start");
-        memcpy(data.end,"!@",2);
+
+        printf("send start signal.\n");
         ret = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
         if (ret > 0){
             printf("send %s[%d] Bytes\n",data.frame.frame_data,ret);
         }
         // sleep(1);
-        len = recv(fd, buf, sizeof(buf), 0);
-        if (len <= 0)
+        memset(buf, 0, 32);
+        length = recv(fd, buf, sizeof(buf), 0);
+        if (length <= 0)
         {
             continue;
         }
         else 
         {
-            printf("recv buf %s\n",buf);
-            if(0 == strncmp(buf, "ready", len))
+            printf("recv buf %s length %d\n",buf,length);
+            if(0 == strncmp(buf, "ready", length))
             {
                 ret = OtaFileSend(fd);
                 if (ret == 0) {
@@ -263,7 +316,7 @@ void server(void)
 
         if (fd == -1)
         {
-            printf("The client connection is wrong...\n");
+            // printf("The client connection is wrong...\n");
             continue;
         }
 

@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#define REPLY_TIME_OUT 6
+#define REPLY_TIME_OUT 10
 
 enum ReceiveMode
 {
@@ -47,6 +47,7 @@ struct ATAgent
 {
     char agent_name[64];
     int fd;
+    int read_len;   ///< control data length of wanting reading
 
     char *maintain_buffer;
     uint32 maintain_len;

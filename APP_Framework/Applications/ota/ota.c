@@ -47,7 +47,7 @@ struct ota_data
 {
     struct ota_header_t header;
     struct ota_frame_t frame;
-    char end[2];
+    char end[4];
 };
 
 pthread_t ota_task;
@@ -81,8 +81,11 @@ static int SaveAppBin(int fd, char* buf, int len)
 {
     // int fd = 0;
     // fd = open( BOARD_APP_NAME, O_RDWR | O_CREAT );
+   
     write(fd, buf, len);
+    printf("write buf done\n");
     lseek(fd, len, SEEK_CUR);
+    printf("lseek done\n");
     
     // close(fd);
 }
@@ -146,8 +149,9 @@ static int OtaDataRecv(struct Adapter* adapter)
     struct ota_data recv_msg;
     char reply[16] = {0};
     int ret = 0;
-    int try_times = 5;
+    int try_times = 10;
     int fd = 0;
+    int frame_cnt = 0;
 
     fd = open( BOARD_APP_NAME, O_RDWR | O_CREAT | O_TRUNC);
     if(fd < 0)
@@ -158,9 +162,12 @@ static int OtaDataRecv(struct Adapter* adapter)
 
     while(1) {
         memset(&recv_msg, 0, sizeof(struct ota_data));
-        ret = AdapterDeviceRecv(adapter, &recv_msg, 256);
-        if(ret > 0 && recv_msg.header.frame_flag == 0x5A5A) 
+        printf("recv msg...\n");
+        ret = AdapterDeviceRecv(adapter, &recv_msg, sizeof(struct ota_data));
+        if(ret >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
         {
+            frame_cnt = recv_msg.frame.frame_id;
+
             if(0 == strncmp("aiit_ota_end",recv_msg.frame.frame_data, strlen("aiit_ota_end"))) 
             {
                 printf("total [%d]frames [%d]Bytes,receive successful,\n",recv_msg.frame.frame_id,recv_msg.header.total_len);
@@ -168,49 +175,74 @@ static int OtaDataRecv(struct Adapter* adapter)
                 {
                     printf("crc check %s bin failed.please try again.\n", BOARD_APP_NAME);
                     ret = -1;
+                    break;
                 }
+                PrivTaskDelay(500);
+                memset(reply, 0, 16);
+                memcpy(reply, "ok", strlen("ok"));
+
+                AdapterDeviceSend(adapter, reply, strlen(reply));
+                ret = 0;
                 break;
+            }
+
+            if(0 == strncmp("wait_ok_timeout",recv_msg.frame.frame_data, strlen("wait_ok_timeout"))) 
+            {
+                printf("go to send ok again.\n");
+                goto send_ok_again;
+                
             }
 
             if (recv_msg.frame.crc == OtaCrc16(recv_msg.frame.frame_data,recv_msg.frame.frame_len))
             {
-                printf("save current [%d] frame,length[%d] Bytes.\n",recv_msg.frame.frame_id,recv_msg.frame.frame_len);
+                printf("save current [%d] frame,length[%d] Bytes.\n",frame_cnt,recv_msg.frame.frame_len);
+                for(int i = 0; i < recv_msg.frame.frame_len;i++ ){
+                    printf(" %x ",*((char *)&recv_msg.frame.frame_data + i));
+                }
+                printf("\n");
                 SaveAppBin(fd, recv_msg.frame.frame_data, recv_msg.frame.frame_len);
             }  
             else 
             {
-                printf("current [%d] frame crc check failed,try again!\n",recv_msg.frame.frame_id);
+                printf("current [%d] frame crc check failed,try again!\n",frame_cnt);
                 goto try_again;
             }
+            
+send_ok_again:
             memset(reply, 0, 16);
             memcpy(reply, "ok", strlen("ok"));
-            PrivTaskDelay(200);
-send_ok_again:
+            // PrivTaskDelay(100);
+
             ret = AdapterDeviceSend(adapter, reply, strlen(reply));
             if(ret < 0){
                 printf("send ok failed.\n");
                 goto send_ok_again;
             }
-            try_times = 5;
+            printf("send reply[%s] done.\n",reply);
+            try_times = 10;
+            continue;
         } 
         else 
         {
 try_again:
             if(try_times == 0)
             {
-                printf("oops!!! current [%d] frame try 5 times failed,break out!\n",recv_msg.frame.frame_id);
+                printf("oops!!! current [%d] frame try 10 times failed,break out!\n",frame_cnt);
                 ret = -1;
                 break;
             }
             memset(reply, 0, 16);
             memcpy(reply, "retry", strlen("retry"));
+            printf("[%d] frame receive failed. retry\n",frame_cnt);
             AdapterDeviceSend(adapter, reply, strlen(reply));
             try_times--;
+            continue;
         }
     }
     close(fd);
 
     if(0 == ret) {
+        printf("ota file done,start application.\n");
         RestartApplication();
     }
     return ret;
@@ -224,53 +256,57 @@ static void *OtaKTaskEntry(void *parameter)
     int len = 0;
     int ret = 0;
 
-    // struct Adapter* adapter =  AdapterDeviceFindByName("4G");
-    // uint8 server_addr[64] = "115.238.53.61";
-    // uint8 server_port[64] = "9898";
+    struct Adapter* adapter =  AdapterDeviceFindByName("4G");
+    uint8 server_addr[64] = "115.238.53.61";
+    uint8 server_port[64] = "9898";
 
-    // adapter->socket.socket_id = 0;
+    adapter->socket.socket_id = 0;
 
-    // AdapterDeviceOpen(adapter);
-    // AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
-    // AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
+    AdapterDeviceOpen(adapter);
+    AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+    AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
 
     /* using nbiot as connection way*/
 
-    struct Adapter* adapter =  AdapterDeviceFindByName("nbiot");
+//     struct Adapter* adapter =  AdapterDeviceFindByName("nbiot");
 
-    while(1)
-    {
-        int connect_times = 5;
-        ret = AdapterDeviceOpen(adapter);
-        if(ret < 0)
-        {
-           printf("open adapter failed\n");
-           continue;
-        }
+//     while(1)
+//     {
+//         int connect_times = 5;
+//         ret = AdapterDeviceOpen(adapter);
+//         if(ret < 0)
+//         {
+//            printf("open adapter failed\n");
+//            continue;
+//         }
 
-connect_again:
-        connect_times--;   
-        ret = AdapterDeviceConnect(adapter, 1, "115.238.53.61","9898",1);
-        if(ret < 0)
-        {
-            if(connect_times > 0){
-                goto connect_again;
-            }
-            else
-            {
-                AdapterDeviceClose(adapter);
-                continue;
-            }
-        }
-        break;
-    }
-    
+// connect_again:
+//         connect_times--;   
+//         ret = AdapterDeviceConnect(adapter, 1, "115.238.53.61","9898",1);
+//         if(ret < 0)
+//         {
+//             if(connect_times > 0){
+//                 goto connect_again;
+//             }
+//             else
+//             {
+//                 AdapterDeviceClose(adapter);
+//                 continue;
+//             }
+//         }
+//         break;
+//     }
+    PrivTaskDelay(5000);
     while(1)
     {
         memset(&recv_msg, 0, sizeof(struct ota_data));
         /* step1: Confirm the start signal of transmission*/
-        
-        ret = AdapterDeviceRecv(adapter, &recv_msg, 256);
+        printf("waiting for start msg...\n");
+        ret = AdapterDeviceRecv(adapter, &recv_msg, sizeof(struct ota_data));
+        for(int i = 0; i < sizeof(struct ota_data);i++ ){
+            printf(" %x ",*((char *)&recv_msg + i));
+        }
+        printf("\n");
         if(ret >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
         {
             if (0 == strncmp("aiit_ota_start",recv_msg.frame.frame_data, strlen("aiit_ota_start"))) 
@@ -292,7 +328,7 @@ send_ready_again:
                 if (0 != ret)
                 {
                     memset(reply, 0, 16);
-                    memcpy(reply, "send_restart", strlen("send_restart"));
+                    memcpy(reply, "ota_restart", strlen("ota_restart"));
                     AdapterDeviceSend(adapter, reply, strlen(reply));
                     continue;
                 } 
@@ -309,7 +345,7 @@ send_ready_again:
             printf("ota status:not ready\n");
             ret = AdapterDeviceSend(adapter, reply, strlen(reply));
         }
-        PrivTaskDelay(5000); /* check ota signal every 5s */
+        PrivTaskDelay(3000); /* check ota signal every 5s */
     }
     AdapterDeviceClose(adapter);
     

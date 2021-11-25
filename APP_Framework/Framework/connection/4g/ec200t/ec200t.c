@@ -268,7 +268,7 @@ static int Ec200tSend(struct Adapter *adapter, const void *buf, size_t len)
 static int Ec200tRecv(struct Adapter *adapter, void *buf, size_t len)
 {
     if (adapter->agent) {
-        return EntmRecv(adapter->agent, (char *)buf, len, 40000);
+        return EntmRecv(adapter->agent, (char *)buf, len, 6);
     } else {
         printf("Ec200tRecv can not find agent\n");
 	}

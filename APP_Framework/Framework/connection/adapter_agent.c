@@ -153,18 +153,23 @@ int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const ch
     PrivMutexAbandon(&agent->lock); 
     
     if(agent->reply != NULL) {
+        PrivMutexObtain(&agent->lock);
         reply->reply_len = 0;
         va_start(params, cmd_expr);
         ATSprintf(agent->fd, cmd_expr, params);
         va_end(params);
+        PrivMutexAbandon(&agent->lock);
         if (PrivSemaphoreObtainWait(&agent->rsp_sem, &abstime) != EOK) {
+            printf("take sem %d timeout\n",agent->rsp_sem);
             result = -ETIMEOUT;
             goto __out;
         }
     } else {
+        PrivMutexObtain(&agent->lock);
         va_start(params, cmd_expr);
         ATSprintf(agent->fd, cmd_expr, params);
         va_end(params);
+        PrivMutexAbandon(&agent->lock);
         goto __out;
     }
 
@@ -256,14 +261,22 @@ int AtSetReplyCharNum(ATAgentType agent, unsigned int num)
 int EntmSend(ATAgentType agent, const char *data, int len)
 {
     char send_buf[128];
+    if(len > 128){
+        printf("send length %d more then max 128 Bytes.\n",len);
+        return -1;
+    }
+
+    PrivMutexObtain(&agent->lock);
     memset(send_buf, 0, 128);
+
     agent->receive_mode = ENTM_MODE;
 
     memcpy(send_buf, data, len);
-    memcpy(send_buf + len, "!@", 2);
+    // memcpy(send_buf + len, "!@", 2);
 
-	PrivWrite(agent->fd, send_buf, len + 2);
-
+	PrivWrite(agent->fd, send_buf, len);
+    PrivMutexAbandon(&agent->lock);
+    printf("entm send %s length %d\n",send_buf, len);
     return EOK;
 }
 
@@ -272,32 +285,32 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
     struct timespec abstime;
 
     abstime.tv_sec = timeout_s;
-
+    if(buffer_len > ENTM_RECV_MAX){
+        printf("read length more then max length[%d] Bytes",ENTM_RECV_MAX);
+      return -1;  
+    }
+    PrivMutexObtain(&agent->lock); 
     agent->receive_mode = ENTM_MODE;
-
-    PrivTaskDelay(1000);
-
+    agent->read_len = buffer_len;
+    PrivMutexAbandon(&agent->lock); 
+    // PrivTaskDelay(1000);
     if (PrivSemaphoreObtainWait(&agent->entm_rx_notice, &abstime)) {
+        printf("wait sem[%d] timeout\n",agent->entm_rx_notice);
         return -ERROR;
     }
-
     PrivMutexObtain(&agent->lock); 
 
-    if (buffer_len < agent->entm_recv_len) {
-        return -ERROR;
-    }
 
-    printf("EntmRecv once len %u.\n", agent->entm_recv_len);
+    printf("EntmRecv once len %d.\n", agent->entm_recv_len);
 
-    agent->entm_recv_buf[agent->entm_recv_len - 1] = '\0';
-    memcpy(rev_buffer, agent->entm_recv_buf, agent->entm_recv_len - 2);
+    memcpy(rev_buffer, agent->entm_recv_buf, agent->entm_recv_len);
 
     memset(agent->entm_recv_buf, 0, ENTM_RECV_MAX);
     agent->entm_recv_len = 0;
-
+    agent->read_len = 0;
     PrivMutexAbandon(&agent->lock); 
 
-    return EOK;
+    return buffer_len;
 }
 
 static int GetCompleteATReply(ATAgentType agent)
@@ -311,13 +324,16 @@ static int GetCompleteATReply(ATAgentType agent)
     memset(agent->maintain_buffer, 0x00, agent->maintain_max);
     agent->maintain_len = 0;
 
+    memset(agent->entm_recv_buf, 0x00, 256);
+    agent->entm_recv_len = 0;
+
     PrivMutexAbandon(&agent->lock); 
 
     while (1) 
     {
         PrivRead(agent->fd, &ch, 1);
 #ifdef CONNECTION_FRAMEWORK_DEBUG
-        // printf(" %c (0x%x)\n", ch, ch);
+        printf(" %c (0x%x)\n", ch, ch);
 #endif
 
         PrivMutexObtain(&agent->lock);
@@ -328,13 +344,17 @@ static int GetCompleteATReply(ATAgentType agent)
                 agent->entm_recv_buf[agent->entm_recv_len] = ch;
                 agent->entm_recv_len++;
 
-                if (last_ch == '!' && ch == '@')
+                if(agent->entm_recv_len < agent->read_len){
+                    PrivMutexAbandon(&agent->lock);
+                    continue;
+                }
+                else 
                 {
+                    printf("ENTM_MODE recv %d Bytes done.\n",agent->entm_recv_len);
                     agent->receive_mode = DEFAULT_MODE;
                     PrivSemaphoreAbandon(&agent->entm_rx_notice);
                 }
 
-                last_ch = ch;
             } else {
                 printf("entm_recv_buf is_full ...\n");
             }
@@ -364,12 +384,13 @@ static int GetCompleteATReply(ATAgentType agent)
                 }
                
                 printf("GetCompleteATReply done\n");
-                PrivMutexAbandon(&agent->lock);
                 agent->receive_mode = DEFAULT_MODE;
+                PrivMutexAbandon(&agent->lock);
                 break;
             }
             last_ch = ch;
         }
+
         PrivMutexAbandon(&agent->lock);
     }
 
@@ -432,8 +453,8 @@ static void *ATAgentReceiveProcess(void *param)
     while (1) {
         if (GetCompleteATReply(agent) > 0) 
         {
+            PrivMutexObtain(&agent->lock); 
             if (agent->reply != NULL){
-                PrivMutexObtain(&agent->lock); 
                 ATReplyType reply = agent->reply;
 
                 agent->maintain_buffer[agent->maintain_len] = '\0';
@@ -446,9 +467,9 @@ static void *ATAgentReceiveProcess(void *param)
                 }
 
                 // agent->reply = NULL;
-                PrivMutexAbandon(&agent->lock);
                 PrivSemaphoreAbandon(&agent->rsp_sem);
             }
+            PrivMutexAbandon(&agent->lock);
         }
     }
 }
@@ -473,13 +494,13 @@ static int ATAgentInit(ATAgentType agent)
         printf("ATAgentInit create entm sem error\n");
         goto __out;
     }
-
+    printf("create entm_rx_notice_sem %d\n ",agent->entm_rx_notice);
     result = PrivSemaphoreCreate(&agent->rsp_sem, 0, 0);
     if (result < 0) {
         printf("ATAgentInit create rsp sem error\n");
         goto __out;
     }
-
+    printf("create rsp_sem %d\n ",agent->rsp_sem);
     if(PrivMutexCreate(&agent->lock, 0) < 0) {
         printf("AdapterFrameworkInit mutex create failed.\n");
         goto __out;
