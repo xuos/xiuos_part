@@ -1,10 +1,7 @@
-#公共部分
-SRC_DIR := shared
-
 # The following three platforms support compatiable instructions.
 
 ifeq ($(CONFIG_BOARD_CORTEX_M3_EVB),y)
-SRC_DIR += armv7m
+SRC_DIR := shared
 SRC_DIR += cortex-m3
 endif
 
@@ -13,19 +10,18 @@ SRC_DIR +=cortex-m3
 endif
 
 ifeq ($(CONFIG_BOARD_STM32F407_EVB),y)
-SRC_DIR += armv7m
+SRC_DIR := shared
 SRC_DIR += cortex-m4
 endif
 
 ifeq ($(CONFIG_BOARD_CORTEX_M7_EVB),y)
-SRC_DIR += armv7m
+SRC_DIR := shared
 SRC_DIR += cortex-m7
 endif
 
 # cortex-m0 is ARMv6-m
 
 ifeq ($(CONFIG_BOARD_CORTEX_M0_EVB),y)
-SRC_DIR += armv6m
 SRC_DIR += cortex-m0
 endif
 
