@@ -180,6 +180,7 @@ static void RestartApplication(void)
         unsigned long pid = PrivUserTaskSearch();
         if (pid > 0) 
         {
+            printf("kill usertask pid[%d]\n",pid);
             PrivTaskDelete(pid, 0);
         } 
         else 
@@ -187,6 +188,7 @@ static void RestartApplication(void)
             break;
         }
     }
+    printf("restart main.\n");
     PrivTaskCreate(&restart_main, &attr, (void *)main, NULL);
 }
 static int OtaDataRecv(struct Adapter* adapter)
