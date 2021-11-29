@@ -59,11 +59,12 @@ pthread_t restart_main;
  * @param length data length
  * @return check code
  */
-uint32_t OtaCrc16(uint8_t * data, uint8_t length)
+uint32_t OtaCrc16(uint8_t * data, uint32_t length)
 {
     int j;
     unsigned int reg_crc=0xFFFF;
-    
+    printf("crc data length[%d] Bytes,",length);
+
     while (length--) {
         reg_crc ^= *data++;
         for (j=0;j<8;j++) {
@@ -73,21 +74,46 @@ uint32_t OtaCrc16(uint8_t * data, uint8_t length)
                 reg_crc=reg_crc >>1;
         }
     }
-    
+    printf(" crc = [0x%x]\n",reg_crc);
     return reg_crc;
 }
 
+uint32_t FileCrc16(uint8_t * data, uint32_t length, unsigned int last_crc)
+{
+    int j;
+    //printf("crc data length[%d] Bytes,",length);
+ 
+    while (length--) {
+        last_crc ^= *data++;
+        for (j=0;j<8;j++) {
+            if(last_crc & 0x01)
+                last_crc = last_crc >>1 ^ 0xA001;
+            else
+                last_crc = last_crc >>1;
+        }
+    }
+
+    //printf(" crc = [0x%x]\n",last_crc);
+
+    return last_crc;
+}
+
+
 static int SaveAppBin(int fd, char* buf, int len)
 {
-    // int fd = 0;
-    // fd = open( BOARD_APP_NAME, O_RDWR | O_CREAT );
-   
-    write(fd, buf, len);
-    printf("write buf done\n");
-    lseek(fd, len, SEEK_CUR);
-    printf("lseek done\n");
+    int ret = 0;
+    int fd_t = 0;
+    fd_t = open( BOARD_APP_NAME, O_RDWR | O_APPEND);
+    ret = write(fd, buf, len);
+    if(ret < 0){
+        printf("fd = %d write buf len[%d] failed.ret = %d\n",fd_t,len,ret);
+    }
+    else
+    {
+        printf("fd[%d] write buf length[%d] done.\n",fd_t,ret);
+    }
     
-    // close(fd);
+    close(fd_t);
 }
 
 static int CrcFileCheck(uint32 crc_check, unsigned long total_len)
@@ -96,6 +122,8 @@ static int CrcFileCheck(uint32 crc_check, unsigned long total_len)
     int fd = 0;
     int len = 0;
     char *buf = NULL;
+    unsigned int last_crc = 0xffff;
+    unsigned long already_crc_length = 0;
     
     fd = open( BOARD_APP_NAME, O_RDONLY );
     if(fd < 0){
@@ -103,18 +131,35 @@ static int CrcFileCheck(uint32 crc_check, unsigned long total_len)
         return -1;
     }
 
-    buf = PrivMalloc(total_len);
+    buf = PrivMalloc(128);
     if(NULL == buf)
     {
         printf("malloc failed.\n");
         close(fd);
-        return -1;
+        return 0;
     }
 
-    len = read(fd, buf, total_len);
-
-    if (crc_check != OtaCrc16(buf, len))
+    /* crc check every 1024 Bytes until crc all the total file */
+    while(already_crc_length != total_len)
     {
+        memset(buf , 0 , 128);
+        len = read(fd, buf, 128);
+        if(len < 0)
+        {
+            printf("file read failed.ret = %d\n",len);
+            ret = -1;
+            break;
+        }
+        
+        last_crc = FileCrc16(buf, len, last_crc);
+        already_crc_length += len;
+        printf("read len[%d] Bytes,already_crc_length[%d]\n",len,already_crc_length);
+    }
+    
+
+    if (last_crc != crc_check)
+    {
+       printf("file crc error!!! last crc[%x] != check[%x]\n",last_crc,crc_check);
        ret =-1;
     }
 
@@ -153,12 +198,13 @@ static int OtaDataRecv(struct Adapter* adapter)
     int fd = 0;
     int frame_cnt = 0;
 
-    fd = open( BOARD_APP_NAME, O_RDWR | O_CREAT | O_TRUNC);
+    fd = open( BOARD_APP_NAME, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if(fd < 0)
     {
         printf("open %s failed\n",BOARD_APP_NAME);
         return -1;
     }
+    close(fd);
 
     while(1) {
         memset(&recv_msg, 0, sizeof(struct ota_data));
@@ -166,11 +212,9 @@ static int OtaDataRecv(struct Adapter* adapter)
         ret = AdapterDeviceRecv(adapter, &recv_msg, sizeof(struct ota_data));
         if(ret >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
         {
-            frame_cnt = recv_msg.frame.frame_id;
-
             if(0 == strncmp("aiit_ota_end",recv_msg.frame.frame_data, strlen("aiit_ota_end"))) 
             {
-                printf("total [%d]frames [%d]Bytes,receive successful,\n",recv_msg.frame.frame_id,recv_msg.header.total_len);
+                printf("total [%d]frames [%d]Bytes crc[%x],receive successful,\n",frame_cnt,recv_msg.header.total_len,recv_msg.frame.crc);
                 if(0 != CrcFileCheck(recv_msg.frame.crc, recv_msg.header.total_len))
                 {
                     printf("crc check %s bin failed.please try again.\n", BOARD_APP_NAME);
@@ -178,6 +222,7 @@ static int OtaDataRecv(struct Adapter* adapter)
                     break;
                 }
                 PrivTaskDelay(500);
+                printf("tolal file crc done.send ok\n");
                 memset(reply, 0, 16);
                 memcpy(reply, "ok", strlen("ok"));
 
@@ -185,6 +230,7 @@ static int OtaDataRecv(struct Adapter* adapter)
                 ret = 0;
                 break;
             }
+            frame_cnt = recv_msg.frame.frame_id;
 
             if(0 == strncmp("wait_ok_timeout",recv_msg.frame.frame_data, strlen("wait_ok_timeout"))) 
             {

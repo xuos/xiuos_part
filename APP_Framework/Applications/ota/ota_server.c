@@ -61,11 +61,13 @@ pthread_t ota_ktask;
  * @param length data length
  * @return check code
  */
-uint32_t OtaCrc16(uint8_t * data, uint8_t length)
+uint32_t OtaCrc16(uint8_t * data, uint32_t length)
 {
     int j;
     unsigned int reg_crc=0xFFFF;
-    
+
+    printf("crc data length[%d] Bytes,",length);
+
     while (length--) {
         reg_crc ^= *data++;
         for (j=0;j<8;j++) {
@@ -75,7 +77,7 @@ uint32_t OtaCrc16(uint8_t * data, uint8_t length)
                 reg_crc=reg_crc >>1;
         }
     }
-    
+    printf(" crc = [0x%x]\n",reg_crc);
     return reg_crc;
 }
 
@@ -196,20 +198,28 @@ recv_again:
         }
     }
 
-    /* finally,check total bin file.*/
+    /* finally,crc check total bin file.*/
     if (ret == 0)
     {
         sleep(1);
-        printf("total send file length[%d] Bytes.\n",file_length);
-        printf("now check total bin file.\n");
+        printf("total send file length[%d] Bytes [%d] frames.\n",file_length,frame_cnt);
+        printf("now crc check total bin file.\n");
         file_buf = malloc(file_length);
         memset(file_buf, 0, file_length);
         memset(&data, 0, sizeof(data));
 
         data.header.frame_flag = 0x5A5A;
+
+        file_fd = fopen("/home/aep04/wwg/XiUOS_aiit-arm32-board_app.bin", "r");
+        if (NULL == file_fd){
+            printf("open file failed.\n");
+            return -1;
+        }
         fseek(file_fd, 0, SEEK_SET);
         length = fread(file_buf,1, file_length, file_fd);
+        printf("read file length = %d\n",length);
         if(length > 0) {
+            data.frame.frame_id = frame_cnt;
             data.header.total_len = file_length;
             data.frame.frame_len = strlen("aiit_ota_end");
             data.frame.crc = OtaCrc16(file_buf, length);
