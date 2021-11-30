@@ -178,10 +178,11 @@ static void RestartApplication(void)
     while(1) 
     {
         unsigned long pid = PrivUserTaskSearch();
-        if (pid > 0) 
+        if ((pid > 0) && (pid != pthread_self())) 
         {
             printf("kill usertask pid[%d]\n",pid);
             PrivTaskDelete(pid, 0);
+            PrivTaskDelay(1000);
         } 
         else 
         {
