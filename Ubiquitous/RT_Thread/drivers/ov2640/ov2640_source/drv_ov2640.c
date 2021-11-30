@@ -1188,12 +1188,12 @@ void rt_stm32407_atk_miniexpolre()
     __HAL_RCC_GPIOD_CLK_ENABLE();
     __HAL_RCC_GPIOG_CLK_ENABLE();  //
     GPIO_Initure.Pin=GPIO_PIN_6;
-    GPIO_Initure.Mode=GPIO_MODE_OUTPUT_PP;  
+    GPIO_Initure.Mode=GPIO_MODE_OUTPUT_OD;  
     GPIO_Initure.Pull=GPIO_PULLUP;          
     GPIO_Initure.Speed=GPIO_SPEED_FREQ_VERY_HIGH;     
     HAL_GPIO_Init(GPIOD,&GPIO_Initure); 
     GPIO_Initure.Pin=GPIO_PIN_7;
-    GPIO_Initure.Mode=GPIO_MODE_OUTPUT_OD;  
+    GPIO_Initure.Mode=GPIO_MODE_OUTPUT_PP;  
     GPIO_Initure.Pull=GPIO_PULLUP;          
     GPIO_Initure.Speed=GPIO_SPEED_FREQ_VERY_HIGH;     
     HAL_GPIO_Init(GPIOD,&GPIO_Initure); 
