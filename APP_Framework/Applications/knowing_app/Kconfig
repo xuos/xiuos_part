@@ -11,6 +11,7 @@ menu "knowing app"
         source "$APP_DIR/Applications/knowing_app/iris_ml_demo/Kconfig" 
         source "$APP_DIR/Applications/knowing_app/k210_fft_test/Kconfig" 
         source "$APP_DIR/Applications/knowing_app/image_processing/Kconfig" 
+        source "$APP_DIR/Applications/knowing_app/cmsis_5_demo/Kconfig" 
  
     endif 
 endmenu
