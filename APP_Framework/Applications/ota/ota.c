@@ -182,7 +182,7 @@ static void RestartApplication(void)
         {
             printf("kill usertask pid[%d]\n",pid);
             PrivTaskDelete(pid, 0);
-            PrivTaskDelay(1000);
+            PrivTaskDelay(1000); /* NOTE:this delay will make a schedule and recycle all user task */
         } 
         else 
         {
