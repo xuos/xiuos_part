@@ -62,6 +62,32 @@ extern int HwWdtInit(void);
 extern int HwLcdInit(void);
 extern int HwTimerInit(void);
 
+#if defined(FS_VFS) && defined (MOUNT_SDCARD)
+#include <iot-vfs.h>
+#include <sd_spi.h>
+extern SpiSdDeviceType SpiSdInit(struct Bus *bus, const char *dev_name, const char *drv_name, const char *sd_name);
+
+/**
+ * @description: Mount SD card
+ * @return 0
+ */
+int MountSDCard(void)
+{
+    struct Bus *spi_bus;
+    spi_bus = BusFind(SPI_BUS_NAME_1);
+
+    if (NONE == SpiSdInit(spi_bus, SPI_1_DEVICE_NAME_0, SPI_1_DRV_NAME, SPI_SD_NAME)) {
+        KPrintf("MountSDCard SpiSdInit error!\n");
+        return 0;
+    }
+    
+    if (EOK == MountFilesystem(SPI_BUS_NAME_1, SPI_SD_NAME, SPI_1_DRV_NAME, FSTYPE_FATFS, "/"))
+        KPrintf("SPI SD card fatfs mounted\n");
+
+    return 0;
+}
+#endif
+
 void InitBss(void)
 {
     unsigned int *dst;

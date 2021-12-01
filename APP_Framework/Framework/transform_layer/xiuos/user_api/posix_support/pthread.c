@@ -49,6 +49,8 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
       return -1 ;
     
     ret = UserTaskStartup(pid);
+    *thread = pid;
+    
     return ret;
 
 }
@@ -99,6 +101,7 @@ int pthread_setcanceltype(int type, int *oldtype)
 int pthread_kill(pthread_t thread, int sig)
 {
     /* This api should not be used, and will not be supported */
+    UserTaskDelete(thread);
     return -1;
 }
 

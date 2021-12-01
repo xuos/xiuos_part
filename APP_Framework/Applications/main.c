@@ -13,13 +13,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <user_api.h>
+#include <transform.h>
 
 extern int FrameworkInit();
-
+extern void ApplicationOtaTaskInit(void);
 int main(void)
 {
 	printf("Hello, world!\n");
 	FrameworkInit();
+#ifdef APPLICATION_OTA
+	ApplicationOtaTaskInit();
+#endif
     return 0;
 }
 // int cppmain(void);

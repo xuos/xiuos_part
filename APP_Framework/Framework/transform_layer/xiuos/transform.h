@@ -101,7 +101,7 @@ struct PinParam
     long  pin;//< pin number
     int mode;//< pin mode: input/output
     struct PinDevIrq irq_set;//< pin irq set
-    uint64 arg;
+    uint64_t arg;
 };
 
 struct PinStat
@@ -128,7 +128,7 @@ struct SerialDataCfg
     uint8_t serial_invert_mode;
     uint16_t serial_buffer_size;
 
-    uint8 ext_uart_no;
+    uint8_t ext_uart_no;
     enum ExtSerialPortConfigure port_configure;
 };
 
@@ -171,6 +171,7 @@ int PrivTaskStartup(pthread_t *thread);
 int PrivTaskDelete(pthread_t thread, int sig);
 void PrivTaskQuit(void *value_ptr);
 int PrivTaskDelay(int32_t ms);
+int PrivUserTaskSearch(void);
 
 /*********************driver*************************/
 

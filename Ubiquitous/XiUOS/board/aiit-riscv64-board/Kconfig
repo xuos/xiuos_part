@@ -53,6 +53,13 @@ menu "aiit-riscv64-board feature"
             endif
         endmenu
 
+        menu "config board peripheral"
+            config MOUNT_SDCARD
+                bool "mount cd card"
+                default n
+                select  BSP_USING_SDIO
+        endmenu
+
     endmenu
 
     config __STACKSIZE__
