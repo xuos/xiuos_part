@@ -64,6 +64,28 @@ extern int HwRtcInit(void);
 extern int HwTouchBusInit(void);
 extern int HwCh376Init(void);
 
+#if defined(FS_VFS) && defined(MOUNT_SDCARD)
+#include <iot-vfs.h>
+
+/**
+ * @description: Mount SD card
+ * @return 0
+ */
+/**
+ * @description: Mount SD card
+ * @return 0
+ */
+int  MountSDCard(void)
+{
+    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, FSTYPE_CH376, "/") == 0)
+        DBG("sd card mount to '/'");
+    else
+        SYS_WARN("sd card mount to '/' failed!");
+    
+    return 0;
+}
+#endif
+
 void init_bss(void)
 {
     unsigned int *dst;

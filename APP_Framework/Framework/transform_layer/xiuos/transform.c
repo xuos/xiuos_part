@@ -79,6 +79,13 @@ int PrivTaskStartup(pthread_t *thread)
 {
     return 0;
 }
+#ifdef SEPARATE_COMPILE
+/* private API of xiuos to search the first user task in manage list */
+int PrivUserTaskSearch(void)
+{
+    return UserTaskSearch();
+}
+#endif
 
 int PrivTaskDelete(pthread_t thread, int sig)
 {
@@ -96,7 +103,7 @@ int PrivTaskDelay(int32_t ms)
 }
 
 /*********************fs**************************/
-
+#ifdef FS_VFS
 /************************Driver Posix Transform***********************/
 int PrivOpen(const char *path, int flags)
 {
@@ -150,7 +157,7 @@ int PrivIoctl(int fd, int cmd, void *args)
 
     return ret;
 }
-
+#endif
 /********************memory api************/
 void *PrivMalloc(size_t size)
 {

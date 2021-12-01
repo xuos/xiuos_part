@@ -25,6 +25,8 @@
 #include <xs_sem.h>
 #include <xs_memory.h>
 #include <xs_mutex.h>
+#include <xs_event.h>
+#include <xs_msg.h>
 
 #ifdef FS_VFS
 #include <iot-vfs_posix.h>
@@ -116,6 +118,11 @@ uintptr_t KsTaskDelete(uint32_t knum,uintptr_t *param, uint8_t num)
     x_err_t ret ;
     ret = KTaskDelete((int32) (param[0]));
     return  (uintptr_t)ret;
+}
+
+uintptr_t KsUserTaskSerach(uint32_t knum,uintptr_t *param, uint8_t num )
+{
+   return  (uintptr_t)UTaskSearch();
 }
 
 extern void KTaskQuit(void);
@@ -565,6 +572,7 @@ struct KernelService g_service_table[256]  __attribute__ ((section (".g_service_
     [KS_USER_TASK_CREATE]          = { KsTaskCreate, 5 },
     [KS_USER_TASK_STARTUP]         = { KsStartupTask, 1 },
     [KS_USER_TASK_DELETE]          = { KsTaskDelete, 1 },
+    [KS_USER_TASK_SEARCH]          = { KsUserTaskSerach, 0 },
 	 [KS_USER_TASK_EXECEXIT]      = { KsTaskQuit, 0 },
     [KS_USER_TASK_CORE_COMBINE]     = { KsTaskCoreCombine, 2 },
     [KS_USER_TASK_CORE_UNCOMBINE]   = { KsTaskCoreUnCombine, 1 },

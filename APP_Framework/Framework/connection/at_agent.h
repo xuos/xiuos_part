@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#define REPLY_TIME_OUT 3
+#define REPLY_TIME_OUT 10
 
 enum ReceiveMode
 {
@@ -47,6 +47,7 @@ struct ATAgent
 {
     char agent_name[64];
     int fd;
+    int read_len;   ///< control data length of wanting reading
 
     char *maintain_buffer;
     uint32 maintain_len;
@@ -83,6 +84,7 @@ void SwapStr(char *str, int begin, int end);
 char* IpTstr(unsigned int ipint);
 ATAgentType GetATAgent(const char *agent_name);
 int InitATAgent(const char *agent_name, int fd, uint32 maintain_max);
+int DeleteATAgent(ATAgentType agent);
 int ParseATReply(char* str, const char *format, ...);
 void DeleteATReply(ATReplyType reply);
 int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const char *cmd_expr, ...);

@@ -104,11 +104,11 @@ struct InitSequenceDesc components_init[] =
 };
 struct InitSequenceDesc env_init[] = 
 {
-#ifdef ARCH_RISCV
-#if defined (RESOURCES_SPI_SD)|| defined(RESOURCES_SDIO )
+
+#ifdef MOUNT_SDCARD
 	{ "MountSDCard", MountSDCard },
 #endif
-#endif
+
 #ifdef FS_VFS_MNTTABLE
 	{ "DfsMountTable", DfsMountTable },
 #endif
@@ -119,9 +119,6 @@ struct InitSequenceDesc env_init[] =
 };
 struct InitSequenceDesc communication_init[] = 
 {
-// #ifdef BSP_USING_SDIO
-//     { "Stm32SdcardMount",Stm32SdcardMount },
-// #endif
 #ifdef BSP_USING_USBH
     { "STM32USBHostRegister", STM32USBHostRegister },
 	{ "hw usb", Stm32HwUsbInit },

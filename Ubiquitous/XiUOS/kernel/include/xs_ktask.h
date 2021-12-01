@@ -159,6 +159,7 @@ int32 KTaskCreate(const char *name,
 void KTaskQuit(void);
 
 #ifdef  SEPARATE_COMPILE
+int UTaskSearch(void);
 int32 UTaskCreate(const char *name,
 							void (*entry)(void *parameter),
 							void       *parameter,

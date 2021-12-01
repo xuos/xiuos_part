@@ -350,11 +350,12 @@ static void* BigMemMalloc(struct DynamicBuddyMemory *dynamic_buddy, x_size_t siz
 
 	/* best-fit method */
 	for (node = dynamic_buddy->mm_freenode_list[ndx].next;
-			 node && (node->size < allocsize);
+			 (ndx < MEM_LINKNRS ) && (node->size < allocsize);
 			 node = node->next) {
+				 ndx++;
 	};
 	/* get the best-fit freeNode */
-	if (node && (node->size > allocsize)) {
+	if (node && (node->size >= allocsize)) {
 		struct DynamicFreeNode *remainder;
 		struct DynamicFreeNode *next;
 		uint32 remaining;
@@ -1197,25 +1198,47 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHE
  */
 void ShowBuddy(void)
 {
+	
 	int i = 0;
 	int lock = 0;
 	struct DynamicFreeNode *debug = NONE;
 
 	lock = CriticalAreaLock();
 	KPrintf("\n\033[41;1mlist memory information\033[0m\n", __func__);
-    for (debug = ByteManager.dynamic_buddy_manager.mm_freenode_list[0].next;
-         debug;debug = debug->next){
-        KPrintf("%s,current is %x,next is %x, size %u, flag %x\n",__func__, debug, debug->next,debug->size,debug->flag);
-    };
+	for(int level = 0; level < MEM_LINKNRS; level++) {
+		KPrintf("\n %s level [%d],memory size[2^%d] \n",__func__, level,level +6);
+		for (debug = &ByteManager.dynamic_buddy_manager.mm_freenode_list[level];  ; ) {
+			if(debug->size > 0)
+				KPrintf("	[current  node %x,next node %x, size %u, flag %x]\n",debug, debug->next,debug->size,debug->flag);
+			else
+				KPrintf("	[listhead node %x,next node %x]\n",debug, debug->next);
+			if(debug->next)
+				debug = debug->next;
+
+			if(debug->size == 0)
+				break;
+    	};
+	}
+    
     KPrintf("\nlist memory information\n\n");
 #ifdef MEM_EXTERN_SRAM
 	for(i = 0; i < EXTSRAM_MAX_NUM; i++) {
 		if(NONE != ExtByteManager[i].done){
 			KPrintf("\nlist extern sram[%d] memory information\n\n",i);
-			for (debug = ExtByteManager[i].dynamic_buddy_manager.mm_freenode_list[0].next;
-				debug;debug = debug->next){
-				KPrintf("%s,current is %x,next is %x, size %u, flag %x\n",__func__, debug, debug->next,debug->size,debug->flag);
-			};
+			for(int lev = 0; lev < MEM_LINKNRS; lev++) {
+			KPrintf("\n %s level [%d],memory size[2^%d] \n",__func__, lev,lev +6);
+				for (debug = & ExtByteManager[i].dynamic_buddy_manager.mm_freenode_list[lev];  ; ) {
+					if(debug->size > 0)
+						KPrintf("	[current  node %x,next node %x, size %u, flag %x]\n",debug, debug->next,debug->size,debug->flag);
+					else
+						KPrintf("	[listhead node %x,next node %x]\n",debug, debug->next);
+					if(debug->next)
+						debug = debug->next;
+
+					if(debug->size == 0)
+						break;
+				}
+			}
 		}
 	}
 	

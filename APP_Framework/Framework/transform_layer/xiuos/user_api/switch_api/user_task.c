@@ -60,6 +60,17 @@ x_err_t UserTaskDelete(int32_t id){
     return (x_err_t)KSwitch1(KS_USER_TASK_DELETE,(uintptr_t)id);
 }
 
+/**
+ * This function will find the first user task in task manage list.
+ *
+ * @param 
+ *
+ * @return task id on success; EINVALED on failure
+ */
+x_err_t UserTaskSearch(void){
+    return KSwitch0(KS_USER_TASK_SEARCH);
+}
+
 void UserTaskQuit(void){
     KSwitch0(KS_USER_TASK_EXECEXIT);
     return ;

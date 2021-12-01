@@ -45,7 +45,6 @@ extern int RtcNtpSyncInit(void);
 extern int MountSDCard(void);
 extern int DfsMountTable(void);
 extern int userShellInit(void);
-extern int Stm32SdcardMount(void);
 extern int STM32USBHostRegister(void);
 extern int WorkSysWorkQueueInit(void);
 
