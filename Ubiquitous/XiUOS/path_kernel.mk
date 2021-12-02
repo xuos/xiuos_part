@@ -80,6 +80,15 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/gd32vf103_rvstar)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(KERNEL_ROOT)/arch/risc-v/gd32vf103_rvstar \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(KERNEL_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/hifive1-rev-B)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver \
@@ -253,6 +262,9 @@ ifeq ($(MCU), FE310)
 endif
 ifeq ($(MCU), GAP8)
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/gap8
+endif
+ifeq ($(MCU), GD32VF103)
+	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/gd32vf103
 endif
 endif
 
