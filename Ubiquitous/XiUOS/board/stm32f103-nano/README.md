@@ -184,7 +184,7 @@ XiUOS板级驱动当前支持使用GPIO、UART。
 make BOARD=stm32f103-nano
 ```
 
-4.如果编译正确无误，会产生XiUOS_stm32f103-nano.elf、XiUOS_stm32f103-nano.bin文件。其中XiUOS_stm32f103-nano.bin需要烧写到设备中进行运行。
+5.如果编译正确无误，会产生XiUOS_stm32f103-nano.elf、XiUOS_stm32f103-nano.bin文件。其中XiUOS_stm32f103-nano.bin需要烧写到设备中进行运行。
 
 ## 3. 烧写及执行
 
