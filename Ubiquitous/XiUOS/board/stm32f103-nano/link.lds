@@ -11,7 +11,7 @@ MEMORY
 OUTPUT_ARCH(arm)
 
 ENTRY(Reset_Handler)
-_system_stack_size = 0x1000;
+_system_stack_size = 0x200;
 
 SECTIONS
 {

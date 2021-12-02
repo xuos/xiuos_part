@@ -1,7 +1,6 @@
 
 menuconfig RESOURCES_SERIAL
     bool "Using SERIAL bus drivers"
-    select KERNEL_WORKQUEUE
     default y
 
 if RESOURCES_SERIAL

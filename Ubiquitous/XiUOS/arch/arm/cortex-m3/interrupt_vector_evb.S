@@ -38,7 +38,7 @@
 //*****************************************************************************
 
 /**
-* @file interrupt_vector.S
+* @file interrupt_vector_evb.S
 * @brief derived from Stellaris Firmware Development Package
 * @version 1.0 
 * @author AIIT XUOS Lab
@@ -46,7 +46,7 @@
 */
 
 /*************************************************
-File name: interrupt_vector.S
+File name: interrupt_vector_evb.S
 Description: vector table for a Cortex M3
 Others: 
 History: 
@@ -87,7 +87,7 @@ InterruptVectors:
   .word  IsrEntry                     //DebugMon_Handler
   .word  IsrEntry
   .word  PendSV_Handler
-  .word  IsrEntry                     //systick 
+  .word  SysTick_Handler              //systick 
   .word  IsrEntry                     // GPIO Port A              
   .word  IsrEntry                     // GPIO Port B              
   .word  IsrEntry                     // GPIO Port C              

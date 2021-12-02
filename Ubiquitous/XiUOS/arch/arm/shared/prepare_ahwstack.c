@@ -15,7 +15,9 @@
 #include <xs_assign.h>
 #include "svc_handle.h"
 #include <board.h>
+#ifdef TOOL_SHELL
 #include <shell.h>
+#endif
 
 #if (defined ( __GNUC__ ) && defined ( __VFP_FP__ ) && !defined(__SOFTFP__))
 #define USE_FPU   1

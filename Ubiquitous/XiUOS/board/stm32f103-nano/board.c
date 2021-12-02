@@ -75,7 +75,7 @@ void SysTick_Handler(int irqn, void *arg)
 {
     TickAndTaskTimesliceUpdate();
 }
-DECLARE_HW_IRQ(SYSTICK_IRQN, SysTick_Handler, NONE);
+
 
 void InitBoardHardware()
 {

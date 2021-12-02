@@ -122,29 +122,63 @@ XiUOS板级驱动当前支持使用GPIO、UART。
 ### 编译工具链：`arm-none-eabi-gcc`
 使用`VScode`打开工程的方法有多种，本文介绍一种快捷键，在项目目录下将`code .`输入linux系统命令终端即可打开目标项目
 
-修改`applications`文件夹下`main.c`
-在输出函数中写入 `Hello, world!!! \n   Running on stm32f103-nano`完成代码编辑。
+修改`APP_Framework/Applications`文件夹下`main.c`
+在输出函数中写入 `Hello, world!`完成代码编辑。
 
 ![main](img/main.png)
 
 编译步骤：
 
-1.在VScode命令终端中执行以下命令，生成配置文件
+1.在VScode命令终端中执行以下命令，生成配置文件。
 
 ```c
    make BOARD=stm32f103-nano distclean
    make BOARD=stm32f103-nano menuconfig
 ```
 
-2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）
+2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）。
 
 ![menuconfig1](img/menuconfig1.png)
 
 退出时选择`yes`保存上面所配置的内容，如下图所示：
 
-![menuconfig2](img/menuconfig2.jpg)
+![menuconfig2](img/menuconfig2.png)
 
-3.继续执行以下命令，进行编译
+3.需要注意的是，stm32f103-nano开发板中CPU RAM大小为20KB，需要调整XiUOS中堆栈相关配置的默认值，避免出现超出堆栈大小而无法正常启动。
+
+（1）ID hash table配置，ID num配置为16，减少.bss段大小;
+
+![ID_HASH_TABLE](img/ID_HASH_TABLE.png)
+
+（2）IPC feature配置，保留信号量、互斥锁等必需的进程间通信，关闭队列等未用到的方式;
+
+![IPC_FEATURE](img/IPC_FEATURE.png)
+
+（3）ENV task配置，该线程栈大小配置为1024;
+
+![KTASK_SIZE](img/KTASK_SIZE.png)
+
+（4）MAIN task配置，该线程栈大小配置为256;
+
+![MAIN_STACK_SIZE](img/MAIN_STACK_SIZE.png)
+
+（5）大内存分配页对齐配置，页对齐配置为1KB，减少页对齐后优化的ram空间，增加可分配的堆大小;
+
+![MEMORY_PAGE_SIZE](img/MEMORY_PAGE_SIZE.png)
+
+（6）SHELL task配置，该线程栈大小配置为4096，建议无优化空间时再选择减少SHELL线程栈大小，避免出现SHELL工作异常的情况;
+
+![SHELL_STACK_SIZE](img/SHELL_STACK_SIZE.png)
+
+（7）WORKQUEUE配置，若未用到工作队列，可关闭该功能，减少堆栈空间申请;
+
+![WORKQUEUE](img/WORKQUEUE.png)
+
+（7）ZOMBIE RECYCLE task配置 ，僵尸线程回收线程栈大小同样在无优化空间时可选择减少。
+
+![ZOMBIE_STACK_SIZE](img/ZOMBIE_STACK_SIZE.png)
+
+4.继续执行以下命令，进行编译
 
 ```c
 make BOARD=stm32f103-nano
@@ -160,9 +194,7 @@ stm32f103-nano开发板内置板载st-link SWD下载接口，连接USB后便可�
 
 ### 烧写工具
 
-ARM：ST-LINK（ST-LINK V2实物如图，可在购物网站搜索关键字购买）
-
-![st-link](img/st-link.png)
+ARM：ST-LINK, stm32f103-nano 板卡内置st-link SWD, 因此无需额外外接工具，只需安装st-flash相关依赖驱动即可。
 
 下载并以下执行命令以下命令安装st-link工具(本文使用v1.5.1版本)。
 
@@ -180,29 +212,7 @@ cd build/Release && make install DESTDIR=_install
 代码根目录下执行st-flash工具烧录
 
 ```
-sudo st-flash  write  build/XiUOS_stm32f103-nano.bin 0x8000000
-```
-
-此外，推荐用户使用putty作为终端工具，安装命令如下：
-
-```c
-sudo apt install  putty
-```
-
-打开putty配置串口信息
-
-```c
-sudo puty
-```
-
-选择ttyUSB0（这个端口号根据具体情况而定），配置波特率为115200。
-
-![putty](img/putty.png)
-
-注意：选择正确的终端端口号，最后可以执行以下命令，清除配置文件和编译生成的文件
-
-```c
-make  BOARD=stm32f103-nano distclean
+sudo st-flash write build/XiUOS_stm32f103-nano.bin 0x8000000
 ```
 
 ### 3.1 运行结果

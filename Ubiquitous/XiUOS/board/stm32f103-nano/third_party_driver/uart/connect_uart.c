@@ -105,7 +105,6 @@ void UartIsr1(int vector, void *param)
 	/* get serial bus 1 */
 	UartHandler(&serial_bus_1, &serial_driver_1);
 }
-DECLARE_HW_IRQ(USART1_IRQn, UartIsr1, NONE);
 #endif
 
 #ifdef BSP_USING_UART2
@@ -114,7 +113,6 @@ void UartIsr2(int vector, void *param)
 	/* get serial bus 2 */
 	UartHandler(&serial_bus_2, &serial_driver_2);
 }
-DECLARE_HW_IRQ(USART2_IRQn, UartIsr2, NONE);
 #endif
 
 static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInfo *configure_info)

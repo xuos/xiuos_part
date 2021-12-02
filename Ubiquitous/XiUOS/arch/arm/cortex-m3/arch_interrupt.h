@@ -15,12 +15,20 @@
 
 #include <xs_base.h>
 
+#ifdef BOARD_CORTEX_M3_EVB
 #define ARCH_MAX_IRQ_NUM (256)
+#endif
+
+#ifdef BOARD_STM32F103_NANO
+#define ARCH_MAX_IRQ_NUM (64)
+#endif
 
 #define ARCH_IRQ_NUM_OFFSET 0
 
+#ifdef BOARD_CORTEX_M3_EVB
 #define SYSTICK_IRQN       15
 #define UART1_IRQn         21
+#endif
 
 int32 ArchEnableHwIrq(uint32 irq_num);
 int32 ArchDisableHwIrq(uint32 irq_num);
