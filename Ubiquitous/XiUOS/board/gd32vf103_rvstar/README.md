@@ -63,7 +63,7 @@ cd kconfig-frontends
 ### 编译工具链：
 
 RISC-V: riscv-nuclei-elf-，默认安装到Ubuntu的/opt/，下载源码并解压。[下载网址 https://www.nucleisys.com/download.php]
-![vscode](img/riscv_gnu.png)
+![gnu](img/riscv_gnu.png)
 
 ```shell
 $ tar -xjf nuclei_riscv_newlibc_prebuilt_linux64_2020.08.tar.bz2 -C /opt/
@@ -131,6 +131,12 @@ make BOARD=gd32vf103_rvstar distclean
 ```
 
 ## 3. 烧写及调试执行
+rvstar开发板启动模式说明：
+![boot_mode](./img/boot_mode.png)
+
+
+### 3.1 openocd gdb 调试方法
+选择boot模式，将引脚BOOT0 = H BOOT1 = H；
 
 rvstar支持openocd，可以通过openocd和gdb进行调试。
 调试需要下载openocd和nuclei sdk,下载配置方法参见以下文档：
@@ -171,4 +177,19 @@ riscv-nuclei-elf-gdb build/XiUOS_gd32vf103_rvstar.elf -ex "target remote localho
 6、再输入load，最后输入continue命令即可在串口终端看到系统运行界面，如下图所示：
 ![terminal](./img/terminal.png)
 
+该调试方式会同步将ELF文件load到片上flash，此时将boot模式改成“主闪存”，断开gdb一样可以启动.
 
+### 3.2 bin文件烧写flash
+
+1、选择boot模式为“系统存储器”，将引脚BOOT0 = 1,BOOT1 = 0;
+烧写可以通过如下两个支持ISP的串口：
+![isp_usart](./img/ISP_support_usart.png)
+
+2、通过串口连接上开发板：串口RX接D5(tx)，串口TX接D6(rx)两个位置。
+
+3、通过软件GigaDevice MCU ISP Programmer工具（下载地址：http://www.gd32mcu.com/en/download/7?kw=GD32VF1） 进行bin文件烧写。
+![GigaDevice](./img/GigaDevice.png)
+
+4、烧写完成后，改变BOOT模式为“主闪存”,将引脚BOOT0 = 0;，此时接上开发板调试串口UART4就可以进行串口输出了。
+
+![binflash](./img/bin_flash.png)
