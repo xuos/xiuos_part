@@ -215,9 +215,8 @@ static int SerialPutChar(struct SerialHardwareDevice *serial_dev, char c)
 
 static int SerialGetChar(struct SerialHardwareDevice *serial_dev)
 {
-    char ch = -1;
+    int ch = -1;
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
-    // struct UsartHwCfg *serial_hw_cfg = (struct UsartHwCfg *)serial_cfg->hw_cfg.private_data;
 
     if (RESET != usart_flag_get(serial_cfg->hw_cfg.serial_register_base, USART_FLAG_RBNE))
     {
