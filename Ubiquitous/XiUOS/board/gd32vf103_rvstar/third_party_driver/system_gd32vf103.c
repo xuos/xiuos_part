@@ -23,6 +23,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+* @file system_gd32vf103.c
+* @brief add from nuclei SDK
+*                https://github.com/Nuclei-Software/nuclei-sdk
+* @version 1.1
+* @author AIIT XUOS Lab
+* @date 2021-12-03
+*/
+
 #include <stdint.h>
 #include <stdio.h>
 #include "nuclei_sdk_hal.h"

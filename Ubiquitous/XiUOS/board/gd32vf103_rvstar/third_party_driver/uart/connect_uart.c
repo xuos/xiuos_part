@@ -12,10 +12,10 @@
 
 /**
 * @file connect_usart.c
-* @brief support gap8-board uart function and register to bus framework
+* @brief supportrvstar-board uart function and register to bus framework
 * @version 1.1
 * @author AIIT XUOS Lab
-* @date 2021-09-02
+* @date 2021-12-03
 */
 
 #include <xiuos.h>

@@ -12,7 +12,7 @@
 
 /**
 * @file board.c
-* @brief support gap8 init configure and start-up
+* @brief support rvstar init configure and start-up
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2021-09-02

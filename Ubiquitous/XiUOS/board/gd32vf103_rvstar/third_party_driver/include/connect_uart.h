@@ -12,10 +12,10 @@
 
 /**
 * @file connect_uart.h
-* @brief define gap8-board uart function and struct
+* @brief define rvstar uart function 
 * @version 1.1
 * @author AIIT XUOS Lab
-* @date 2021-07-27
+* @date 2021-12-03
 */
 
 #ifndef CONNECT_UART_H

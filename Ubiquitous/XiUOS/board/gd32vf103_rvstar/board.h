@@ -12,7 +12,7 @@
 
 /**
 * @file board.h
-* @brief define gapuino-board init configure and start-up function
+* @brief define rvstar-board init configure and start-up function
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2021-09-02
@@ -20,14 +20,14 @@
 
 /*************************************************
 File name: board.h
-Description: define gapuino-board init configure and start-up function
+Description: define rvstar-board init configure and start-up function
 Others: 
 History: 
 1. Date: 2021-09-02
 Author: AIIT XUOS Lab
 Modification: 
-1. define gapuino-board InitBoardHardware
-2. define gapuino-board data and bss struct
+1. define rvstar-board InitBoardHardware
+2. define rvstar-board data and bss struct
 *************************************************/
 #ifndef BOARD_H__
 #define BOARD_H__

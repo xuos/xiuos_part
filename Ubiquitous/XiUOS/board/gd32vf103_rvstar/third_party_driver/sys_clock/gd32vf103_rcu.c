@@ -32,6 +32,15 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
+/**
+* @file gd32vf103_rcu.c
+* @brief add from nuclei SDK
+*                https://github.com/Nuclei-Software/nuclei-sdk
+* @version 1.1
+* @author AIIT XUOS Lab
+* @date 2021-12-03
+*/
+
 #include "gd32vf103_rcu.h"
 
 

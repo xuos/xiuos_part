@@ -62,31 +62,32 @@ cd kconfig-frontends
 
 ### 编译工具链：
 
-RISC-V: riscv-none-embed-，默认安装到Ubuntu的/opt/，下载源码并解压。[下载网址 http://101.36.126.201:8011/gnu-mcu-eclipse.tar.bz2](http://101.36.126.201:8011/gnu-mcu-eclipse.tar.bz2)
+RISC-V: riscv-nuclei-elf-，默认安装到Ubuntu的/opt/，下载源码并解压。[下载网址 https://www.nucleisys.com/download.php]
+![vscode](img/riscv_gnu.png)
 
 ```shell
-$ tar -xjf gnu-mcu-eclipse.tar.bz2 -C /opt/
+$ tar -xjf nuclei_riscv_newlibc_prebuilt_linux64_2020.08.tar.bz2 -C /opt/
 ```
 
 将上述解压的编译工具链的路径添加到board/hifive1-rev-B/config.mk文件当中，例如：
 
 ```
-export CROSS_COMPILE ?=/opt/gnu-mcu-eclipse/riscv-none-gcc/8.2.0-2.1-20190425-1021/bin/riscv-none-embed-
+export CROSS_COMPILE ?=/opt/Nuclei/gcc/bin/riscv-nuclei-elf-
 ```
 
 若已存在`export CROSS_COMPILE ?=xxxx`   应该将原有的语句注释，再写入上面的语句。
 
-# 在gapuino board 上创建第一个应用
+# 在gd32vf103_rvstar board 上创建第一个应用
 
-## 1.gapuino board 简介
+## 1.gd32vf103_rvstar board 简介
 
 | 硬件 | 描述 |
 | -- | -- |
-|芯片型号| gap8 |
+|芯片型号| gd32vf103 |
 |架构| RV32IMAC |
-|主频| 200+MHz |
-|片内SRAM| 512KB |
-| 外设 | UART、SPI、I2C |
+|主频| 108MHz |
+|片内SRAM| 32KB |
+| 外设 | Timer（高级16位定时器，通用16位定时器）、U(S)ART、I2C、SPI/I2S、CAN、USBFS、ADC（16路外部通道）、DAC、EXMC、GPIO |
 
 XiUOS板级当前支持使用UART。
 
@@ -108,7 +109,7 @@ XiUOS板级当前支持使用UART。
 1.在VScode终端下执行以下命令，生成配置文件
 
 ```
-make BOARD=gapuino menuconfig
+make BOARD=gd32vf103_rvstar menuconfig
 ```
 
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后选择Exit保存并退出
@@ -118,40 +119,38 @@ make BOARD=gapuino menuconfig
 3.继续执行以下命令，进行编译
 
 ```
-make BOARD=gapuino
+make BOARD=gd32vf103_rvstar
 ```
 
-4.如果编译正确无误，build文件夹下会产生XiUOS_gapuino.elf、XiUOS_gapuino.bin文件。
+4.如果编译正确无误，build文件夹下会产生XiUOS_gd32vf103_rvstar.elf、XiUOS_gd32vf103_rvstar.bin文件。
 
 >注：最后可以执行以下命令，清除配置文件和编译生成的文件
 
 ```
-make BOARD=gapuino distclean
+make BOARD=gd32vf103_rvstar distclean
 ```
 
-## 3. 烧写及执行
+## 3. 烧写及调试执行
 
-gapuino支持jtag，可以通过jtag进行烧录和调试。
-调试烧写需要下载gap sdk和openocd,下载配置方法参见以下文档：
-https://greenwaves-technologies.com/setting-up-sdk/
+rvstar支持openocd，可以通过openocd和gdb进行调试。
+调试需要下载openocd和nuclei sdk,下载配置方法参见以下文档：
+https://doc.nucleisys.com/nuclei_sdk/quickstart.html#figure-quickstart-5
 
-在SDK 和openocd安装完成以后，按照如下步骤进行调试：
+openocd安装完成以后，按照如下步骤进行调试：
 
-1、进入sdk目录路径下
+1、进入xiuos目录路径下
 ```
-cd ~/gap_sdk 
+cd ~/xiuos/Ubiquitous/XiUOS 
 ```
 
-2、在当前终端输入
-```
-source sourceme.sh 
-```
-出现如下图所示的界面，输入7选择单板名称；
-![choose](./img/choose_board.png)
+2、编译生成elf文件
 
-3、先按开发板的复位键，再在当前终端输入
+
+3、使用USB先和串口连接好开发板，进入openocd目录下，再在当前终端输入
 ```
-gap8-openocd  -f interface/ftdi/gapuino_ftdi.cfg -f target/gap8.tcl -f tcl/jtag_boot_entry.tcl 
+cd ~/Nuclei/openocd/0.10.0-15/bin
+
+./openocd -f ~/nuclei-sdk/SoC/gd32vf103/Board/gd32vf103v_rvstar/openocd_gd32vf103.cfg 
 ```
 在当前终端连接openocd，连接如下图所示：
 ![openocd](./img/openocd.png)
@@ -164,7 +163,7 @@ screen /dev/ttyUSB0 115200
 
 5、打开一个新的终端，进入编译生成的elf路径,输入例如：
 ```
-riscv32-unknown-elf-gdb build/XiUOS_gapuino.elf -ex "target remote localhost:3333"
+riscv-nuclei-elf-gdb build/XiUOS_gd32vf103_rvstar.elf -ex "target remote localhost:3333"
 ```
 结果如下图所示：
 ![gdb](./img/gdb_load.png)

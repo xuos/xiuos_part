@@ -5,6 +5,15 @@
  *  \version 2020-02-05, V1.0.0, rvstar board functions for GD32VF103
  */
 
+/**
+* @file gd32vf103_rvstar.c
+* @brief add from nuclei SDK
+*                https://github.com/Nuclei-Software/nuclei-sdk
+* @version 1.1
+* @author AIIT XUOS Lab
+* @date 2021-12-03
+*/
+
 /*
     Copyright (c) 2019, GigaDevice Semiconductor Inc.
 

@@ -1,3 +1,12 @@
+/**
+* @file gd32vf103_soc.c
+* @brief add from nuclei SDK
+*                https://github.com/Nuclei-Software/nuclei-sdk
+* @version 1.1
+* @author AIIT XUOS Lab
+* @date 2021-12-03
+*/
+
 #include "nuclei_sdk_soc.h"
 #include <core_feature_timer.h>
 
