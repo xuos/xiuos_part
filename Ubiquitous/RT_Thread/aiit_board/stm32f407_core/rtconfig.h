@@ -331,6 +331,7 @@
 #define SENSOR_QUANTITY_D124_VOICE "voice_1"
 #define SENSOR_DEVICE_D124_DEV "/dev/uart2"
 #define SUPPORT_KNOWING_FRAMEWORK
+#define USING_KPU_PROCESSING
 
 /* Security */
 
