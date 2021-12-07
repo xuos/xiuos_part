@@ -40,6 +40,12 @@ Modification:
 extern "C" {
 #endif
 
+#ifdef ARCH_CPU_64BIT
+typedef uint64 x_usb_format;
+#else
+typedef uint32 x_usb_format;
+#endif
+
 #define USB_MAX_DEVICE                       0x20
 #define USB_MAX_INTERFACE               0x08
 #define USB_HUB_PORT_NUM             0x04

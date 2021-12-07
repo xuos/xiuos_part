@@ -491,14 +491,14 @@ x_err_t UsbhClearFeature(UinstPointer device, int endpoint, int feature)
 x_err_t UsbhGetInterfaceDescriptor(UcfgDescPointer CfgDesc, int num, 
     UintfDescPointer* IntfDesc)
 {
-    uint32 ptr, depth = 0;
+    x_usb_format ptr, depth = 0;
     UdescPointer desc;
 
  
     NULL_PARAM_CHECK(CfgDesc);
 
-    ptr = (uint32)CfgDesc + CfgDesc->bLength;
-    while(ptr < (uint32)CfgDesc + CfgDesc->wTotalLength)
+    ptr = (x_usb_format)CfgDesc + CfgDesc->bLength;
+    while(ptr < (x_usb_format)CfgDesc + CfgDesc->wTotalLength)
     {
         if(depth++ > 0x20) 
         {
@@ -517,7 +517,7 @@ x_err_t UsbhGetInterfaceDescriptor(UcfgDescPointer CfgDesc, int num,
                 return EOK;
             }
         }    
-        ptr = (uint32)desc + desc->bLength;
+        ptr = (x_usb_format)desc + desc->bLength;
     }
 
     KPrintf("usb_get_interface_descriptor %d failed\n", num);
@@ -538,7 +538,7 @@ x_err_t UsbhGetEndpointDescriptor(UintfDescPointer IntfDesc, int num,
     UepDescPointer* EpDesc)
 {
     int count = 0, depth = 0;
-    uint32 ptr;    
+    x_usb_format ptr;    
     UdescPointer desc;
 
    
@@ -546,7 +546,7 @@ x_err_t UsbhGetEndpointDescriptor(UintfDescPointer IntfDesc, int num,
     CHECK(num < IntfDesc->bNumEndpoints);
     *EpDesc = NONE;
 
-    ptr = (uint32)IntfDesc + IntfDesc->bLength;
+    ptr = (x_usb_format)IntfDesc + IntfDesc->bLength;
     while(count < IntfDesc->bNumEndpoints)
     {
         if(depth++ > 0x20) 
@@ -567,7 +567,7 @@ x_err_t UsbhGetEndpointDescriptor(UintfDescPointer IntfDesc, int num,
             }
             else count++;
         }
-        ptr = (uint32)desc + desc->bLength;
+        ptr = (x_usb_format)desc + desc->bLength;
     }
 
     KPrintf("usb_get_endpoint_descriptor %d failed\n", num);

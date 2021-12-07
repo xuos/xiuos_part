@@ -58,6 +58,10 @@ menu "aiit-riscv64-board feature"
                 bool "mount cd card"
                 default n
                 select  BSP_USING_SDIO
+            config MOUNT_USB
+                bool "mount usb"
+                default n
+                select  BSP_USING_USB
         endmenu
 
     endmenu
