@@ -103,7 +103,7 @@ x_err_t _StartRun(TimerType timer)
     return EOK;
 }
 
-// Just stop working, don't free memory
+// Just stop working, don't x_free memory
 x_err_t _QuitRun(TimerType timer)
 {
     x_base lock = 0;
@@ -246,7 +246,7 @@ static void TimerCBEnter(void *param)
     struct Timer *t = (struct Timer *)param;
 
     t->func_callback(t->param);
-    free(t->t_work);
+    x_free(t->t_work);
 }
 
 void timer_work_func(struct Work *work, void *work_data)
