@@ -59,8 +59,6 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/include #
 endif
 
-
-
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32f407zgt6)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
@@ -148,9 +146,6 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/include #
 endif
 
-
-
-
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/cortex-m4-emulator)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
@@ -163,9 +158,6 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/include #
 endif
 
-
-
-
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/ok1052-c)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
@@ -174,6 +166,16 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052 \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052/drivers \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/Include \
+	-I$(KERNEL_ROOT)/include \
+	-I$(BSP_ROOT)/include #
+endif
+
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32f103-nano)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m3 \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/libraries/STM32F1xx_HAL/inc \
+	-I$(BSP_ROOT)/third_party_driver/libraries/CMSIS \
 	-I$(KERNEL_ROOT)/include \
 	-I$(BSP_ROOT)/include #
 endif

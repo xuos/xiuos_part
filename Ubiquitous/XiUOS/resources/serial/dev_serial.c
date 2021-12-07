@@ -382,18 +382,18 @@ static uint32 SerialDevOpen(void *dev)
  
     if (NONE == serial_dev->serial_fifo.serial_rx) { 
         if (SIGN_OPER_INT_RX & serial_dev_param->serial_set_mode) {
-            serial_dev->serial_fifo.serial_rx = (struct SerialRx *)malloc(sizeof(struct SerialRx));
+            serial_dev->serial_fifo.serial_rx = (struct SerialRx *)x_malloc(sizeof(struct SerialRx));
             if (NONE == serial_dev->serial_fifo.serial_rx) {   
-                KPrintf("SerialDevOpen malloc serial_rx error\n");
-                free(serial_dev->serial_fifo.serial_rx);
+                KPrintf("SerialDevOpen x_malloc serial_rx error\n");
+                x_free(serial_dev->serial_fifo.serial_rx);
                 return ERROR;
             }
 
-            serial_dev->serial_fifo.serial_rx->serial_rx_buffer = (uint8 *)malloc(serial_cfg->data_cfg.serial_buffer_size);
+            serial_dev->serial_fifo.serial_rx->serial_rx_buffer = (uint8 *)x_malloc(serial_cfg->data_cfg.serial_buffer_size);
             if (NONE == serial_dev->serial_fifo.serial_rx->serial_rx_buffer) {   
-                KPrintf("SerialDevOpen malloc serial_rx_buffer error\n");
-                free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
-                free(serial_dev->serial_fifo.serial_rx);
+                KPrintf("SerialDevOpen x_malloc serial_rx_buffer error\n");
+                x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
+                x_free(serial_dev->serial_fifo.serial_rx);
                 return ERROR;
             }
 
@@ -409,27 +409,27 @@ static uint32 SerialDevOpen(void *dev)
 #ifdef SERIAL_USING_DMA        
         else if (SIGN_OPER_DMA_RX & serial_dev_param->serial_set_mode) {
             if (0 == serial_cfg->data_cfg.serial_buffer_size) {
-                serial_dev->serial_fifo.serial_rx = (struct SerialRx *)malloc(sizeof(struct SerialRx));
+                serial_dev->serial_fifo.serial_rx = (struct SerialRx *)x_malloc(sizeof(struct SerialRx));
                 if (NONE == serial_dev->serial_fifo.serial_rx) {   
-                    KPrintf("SerialDevOpen DMA buffer 0 malloc serial_rx error\n");
-                    free(serial_dev->serial_fifo.serial_rx);
+                    KPrintf("SerialDevOpen DMA buffer 0 x_malloc serial_rx error\n");
+                    x_free(serial_dev->serial_fifo.serial_rx);
                     return ERROR;
                 }
                 serial_dev->serial_fifo.serial_rx->serial_dma_enable = RET_FALSE;
                 serial_dev_param->serial_work_mode |= SIGN_OPER_DMA_RX;
             } else {
-                serial_dev->serial_fifo.serial_rx = (struct SerialRx *)malloc(sizeof(struct SerialRx));
+                serial_dev->serial_fifo.serial_rx = (struct SerialRx *)x_malloc(sizeof(struct SerialRx));
                 if (NONE == serial_dev->serial_fifo.serial_rx) {   
-                    KPrintf("SerialDevOpen DMA malloc serial_rx error\n");
-                    free(serial_dev->serial_fifo.serial_rx);
+                    KPrintf("SerialDevOpen DMA x_malloc serial_rx error\n");
+                    x_free(serial_dev->serial_fifo.serial_rx);
                     return ERROR;
                 }
 
-                serial_dev->serial_fifo.serial_rx->serial_rx_buffer = (uint8 *)malloc(serial_cfg->data_cfg.serial_buffer_size);
+                serial_dev->serial_fifo.serial_rx->serial_rx_buffer = (uint8 *)x_malloc(serial_cfg->data_cfg.serial_buffer_size);
                 if (NONE == serial_dev->serial_fifo.serial_rx->serial_rx_buffer) {   
-                    KPrintf("SerialDevOpen DMA malloc serial_rx_buffer error\n");
-                    free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
-                    free(serial_dev->serial_fifo.serial_rx);
+                    KPrintf("SerialDevOpen DMA x_malloc serial_rx_buffer error\n");
+                    x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
+                    x_free(serial_dev->serial_fifo.serial_rx);
                     return ERROR;
                 }
 
@@ -460,10 +460,10 @@ static uint32 SerialDevOpen(void *dev)
 
     if (NONE == serial_dev->serial_fifo.serial_tx) {
         if (SIGN_OPER_INT_TX & serial_dev_param->serial_set_mode) {
-            serial_dev->serial_fifo.serial_tx = (struct SerialTx *)malloc(sizeof(struct SerialTx));
+            serial_dev->serial_fifo.serial_tx = (struct SerialTx *)x_malloc(sizeof(struct SerialTx));
             if (NONE == serial_dev->serial_fifo.serial_tx) {   
-                KPrintf("SerialDevOpen malloc serial_tx error\n");
-                free(serial_dev->serial_fifo.serial_tx);
+                KPrintf("SerialDevOpen x_malloc serial_tx error\n");
+                x_free(serial_dev->serial_fifo.serial_tx);
                 return ERROR;
             }
 
@@ -475,10 +475,10 @@ static uint32 SerialDevOpen(void *dev)
         }
 #ifdef SERIAL_USING_DMA
         else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_set_mode) {
-            serial_dev->serial_fifo.serial_tx = (struct SerialTx *)malloc(sizeof(struct SerialTx));
+            serial_dev->serial_fifo.serial_tx = (struct SerialTx *)x_malloc(sizeof(struct SerialTx));
             if (NONE == serial_dev->serial_fifo.serial_tx) {   
-                KPrintf("SerialDevOpen DMA malloc serial_tx error\n");
-                free(serial_dev->serial_fifo.serial_tx);
+                KPrintf("SerialDevOpen DMA x_malloc serial_tx error\n");
+                x_free(serial_dev->serial_fifo.serial_tx);
                 return ERROR;
             }
 
@@ -511,13 +511,13 @@ static uint32 SerialDevOpen(void *dev)
 		KPrintf("SerialDevOpen create sem failed .\n");
 
         if (serial_dev->serial_fifo.serial_rx->serial_rx_buffer) {
-            free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
+            x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
         }
         if (serial_dev->serial_fifo.serial_rx) {
-            free(serial_dev->serial_fifo.serial_rx);
+            x_free(serial_dev->serial_fifo.serial_rx);
         }
         if (serial_dev->serial_fifo.serial_tx) {
-            free(serial_dev->serial_fifo.serial_tx);
+            x_free(serial_dev->serial_fifo.serial_tx);
         }
     
 		return ERROR;
@@ -540,8 +540,8 @@ static uint32 SerialDevClose(void *dev)
     if (SIGN_OPER_INT_RX & serial_dev_param->serial_work_mode) {
         NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
         NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx);
-        free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
-        free(serial_dev->serial_fifo.serial_rx);
+        x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
+        x_free(serial_dev->serial_fifo.serial_rx);
 
         serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
     }
@@ -550,12 +550,12 @@ static uint32 SerialDevClose(void *dev)
         if(0 == serial_cfg->data_cfg.serial_buffer_size)
         {
             NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx);
-            free(serial_dev->serial_fifo.serial_rx);
+            x_free(serial_dev->serial_fifo.serial_rx);
         } else {
             NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
             NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx);
-            free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
-            free(serial_dev->serial_fifo.serial_rx);
+            x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
+            x_free(serial_dev->serial_fifo.serial_rx);
         }
 
         serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
@@ -564,14 +564,14 @@ static uint32 SerialDevClose(void *dev)
     
     if (SIGN_OPER_INT_TX & serial_dev_param->serial_work_mode) {
         NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_tx);
-        free(serial_dev->serial_fifo.serial_tx);
+        x_free(serial_dev->serial_fifo.serial_tx);
 
         serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);    
     }
 #ifdef SERIAL_USING_DMA
     else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_work_mode) {
         NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_tx);
-        free(serial_dev->serial_fifo.serial_tx);
+        x_free(serial_dev->serial_fifo.serial_tx);
 
         serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
     }

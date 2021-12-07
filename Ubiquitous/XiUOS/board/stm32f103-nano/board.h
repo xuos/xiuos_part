@@ -10,27 +10,26 @@
 * See the Mulan PSL v2 for more details.
 */
 
-#ifndef ARCH_INTERRUPT_H__
-#define ARCH_INTERRUPT_H__
+/**
+* @file board.h
+* @brief define stm32f103-nano init configure and start-up function
+* @version 1.0 
+* @author AIIT XUOS Lab
+* @date 2021-11-25
+*/
 
-#include <xs_base.h>
+#ifndef __BOARD_H__
+#define __BOARD_H__
 
-#ifdef BOARD_CORTEX_M3_EVB
-#define ARCH_MAX_IRQ_NUM (256)
-#endif
+#include <stm32f1xx.h>
+#include <connect_uart.h>
 
-#ifdef BOARD_STM32F103_NANO
-#define ARCH_MAX_IRQ_NUM (64)
-#endif
+extern void *__bss_end;
+extern void *_heap_end;
 
-#define ARCH_IRQ_NUM_OFFSET 0
+#define HEAP_START  ((void *)&__bss_end)
+#define HEAP_END    ((void *)&_heap_end)
 
-#ifdef BOARD_CORTEX_M3_EVB
-#define SYSTICK_IRQN       15
-#define UART1_IRQn         21
-#endif
-
-int32 ArchEnableHwIrq(uint32 irq_num);
-int32 ArchDisableHwIrq(uint32 irq_num);
+void SystemClock_Config(void);
 
 #endif
