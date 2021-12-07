@@ -43,13 +43,13 @@ static x_err_t RootHubCtrl(struct uhcd *hcd, uint16 port, uint8 cmd, void *args)
     switch(cmd)
     {
     case RH_GET_PORT_STATUS:
-        (*(uint32 *)args) = hcd->roothub->PortStatus[port-1];
+        (*(x_usb_format *)args) = hcd->roothub->PortStatus[port-1];
         break;
     case RH_SET_PORT_STATUS:
-        hcd->roothub->PortStatus[port-1] = (*(uint32 *)args);
+        hcd->roothub->PortStatus[port-1] = (*(x_usb_format *)args);
         break;
     case RH_CLEAR_PORT_FEATURE:
-        switch(((uint32)args))
+        switch(((x_usb_format)args))
         {
         case PORT_FEAT_C_CONNECTION:
             hcd->roothub->PortStatus[port-1] &= ~PORT_CCSC;
@@ -69,7 +69,7 @@ static x_err_t RootHubCtrl(struct uhcd *hcd, uint16 port, uint8 cmd, void *args)
         }
         break;
     case RH_SET_PORT_FEATURE:
-        switch((uint32)args)
+        switch((x_usb_format)args)
         {
         case PORT_FEAT_CONNECTION:
             hcd->roothub->PortStatus[port-1] |= PORT_CCSC;
@@ -222,7 +222,7 @@ x_err_t UsbhHubClearPortFeature(UhubPointer hub, uint16 port, uint16 feature)
     if(hub->IsRoothub)
     {
         RootHubCtrl(hub->hcd, port, RH_CLEAR_PORT_FEATURE, 
-            (void*)(uint32)feature);
+            (void*)(x_usb_format)feature);
         return EOK;
     }
 
@@ -254,7 +254,7 @@ x_err_t UsbhHubSetPortFeature(UhubPointer hub, uint16 port,
     if(hub->IsRoothub)
     {
         RootHubCtrl(hub->hcd, port, RH_SET_PORT_FEATURE, 
-            (void*)(uint32)feature);
+            (void*)(x_usb_format)feature);
         return EOK;
     }
 

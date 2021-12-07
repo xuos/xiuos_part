@@ -64,13 +64,24 @@ extern int HwRtcInit(void);
 extern int HwTouchBusInit(void);
 extern int HwCh376Init(void);
 
-#if defined(FS_VFS) && defined(MOUNT_SDCARD)
+#ifdef FS_CH376
 #include <iot-vfs.h>
-
+#ifdef MOUNT_USB
 /**
- * @description: Mount SD card
+ * @description: Mount USB
  * @return 0
  */
+int  MountUSB(void)
+{
+    if (MountFilesystem(USB_BUS_NAME, USB_DEVICE_NAME, USB_DRIVER_NAME, FSTYPE_CH376, "/") == 0)
+        KPrintf("usb mount to '/'");
+    else
+        KPrintf("usb mount to '/' failed!");
+    
+    return 0;
+}
+#endif
+#ifdef MOUNT_SDCARD
 /**
  * @description: Mount SD card
  * @return 0
@@ -84,6 +95,7 @@ int  MountSDCard(void)
     
     return 0;
 }
+#endif
 #endif
 
 void init_bss(void)
@@ -184,6 +196,9 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_SDIO
     { "hw_sdio", HwCh376Init},
+#endif
+#ifdef BSP_USING_USB
+    { "hw_usb", HwCh376Init},
 #endif
 #ifdef BSP_USING_TOUCH
     { "hw_touch", HwTouchBusInit},

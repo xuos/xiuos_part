@@ -109,6 +109,10 @@ struct InitSequenceDesc env_init[] =
 	{ "MountSDCard", MountSDCard },
 #endif
 
+#ifdef MOUNT_USB
+	{ "MountUSB", MountUSB },
+#endif
+
 #ifdef FS_VFS_MNTTABLE
 	{ "DfsMountTable", DfsMountTable },
 #endif
