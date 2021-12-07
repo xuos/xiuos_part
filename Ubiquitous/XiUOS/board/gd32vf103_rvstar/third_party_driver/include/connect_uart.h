@@ -10,22 +10,29 @@
 * See the Mulan PSL v2 for more details.
 */
 
-#include <stdio.h>
-#include <string.h>
-// #include <user_api.h>
-#include <transform.h>
+/**
+* @file connect_uart.h
+* @brief define rvstar uart function 
+* @version 1.1
+* @author AIIT XUOS Lab
+* @date 2021-12-03
+*/
 
-extern int FrameworkInit();
-extern void ApplicationOtaTaskInit(void);
-int main(void)
-{
-	printf("Hello, world!\n");
-	FrameworkInit();
-#ifdef APPLICATION_OTA
-	ApplicationOtaTaskInit();
+#ifndef CONNECT_UART_H
+#define CONNECT_UART_H
+
+#include <device.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
-    return 0;
+
+
+
+int InitHwUart(void);
+
+#ifdef __cplusplus
 }
-// int cppmain(void);
+#endif
 
-
+#endif

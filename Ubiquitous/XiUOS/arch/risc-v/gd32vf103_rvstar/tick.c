@@ -9,23 +9,20 @@
 * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 * See the Mulan PSL v2 for more details.
 */
+#include <xs_ktick.h>
+#include <gd32vf103.h>
+#include <core_feature_timer.h>
 
-#include <stdio.h>
-#include <string.h>
-// #include <user_api.h>
-#include <transform.h>
+#define SysTick_Handler     eclic_mtip_handler
 
-extern int FrameworkInit();
-extern void ApplicationOtaTaskInit(void);
-int main(void)
+/* This is the timer interrupt service routine. */
+void SysTick_Handler(void)
 {
-	printf("Hello, world!\n");
-	FrameworkInit();
-#ifdef APPLICATION_OTA
-	ApplicationOtaTaskInit();
-#endif
-    return 0;
+    SysTick_Reload(SYSTICK_TICK_CONST);
+
+    // isrManager.done->incCounter();
+
+    TickAndTaskTimesliceUpdate();
+
+    // isrManager.done->decCounter();
 }
-// int cppmain(void);
-
-

@@ -20,4 +20,8 @@ ifeq ($(CONFIG_BOARD_GAPUINO),y)
 SRC_DIR +=gap8
 endif
 
+ifeq ($(CONFIG_BOARD_GD32VF103RVSTAR),y)
+SRC_DIR +=gd32vf103_rvstar
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
