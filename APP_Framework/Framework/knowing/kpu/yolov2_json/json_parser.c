@@ -93,6 +93,7 @@ yolov2_params_t param_parse(char *json_file_path)
     }
     // kmodel_path
     json_item = cJSON_GetObjectItem(json_obj, "kmodel_path");
+    memset(params_return.kmodel_path, 0, 127);
     memcpy(params_return.kmodel_path, json_item->valuestring, strlen(json_item->valuestring));
     printf("Got kmodel_path: %s\n", params_return.kmodel_path);
     // kmodel_size
@@ -110,6 +111,7 @@ yolov2_params_t param_parse(char *json_file_path)
     }
     for (int i = 0; i < params_return.class_num; i++) {
         json_array_item = cJSON_GetArrayItem(json_item, i);
+        memset(params_return.labels[i], 0, 127);
         memcpy(params_return.labels[i], json_array_item->valuestring, strlen(json_array_item->valuestring));
         printf("%d: %s\n", i, params_return.labels[i]);
     }

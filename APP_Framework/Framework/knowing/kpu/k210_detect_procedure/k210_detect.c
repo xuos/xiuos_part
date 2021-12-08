@@ -1,4 +1,4 @@
-#include <transform.h>
+#include "k210_detect.h"
 
 #include "cJSON.h"
 #ifdef USING_YOLOV2_JSONPARSER
@@ -6,13 +6,12 @@
 #endif
 #include "region_layer.h"
 #define STACK_SIZE (128 * 1024)
-#define JSON_FILE_PATH "/kmodel/detect.json"
 
 static dmac_channel_number_t dma_ch = DMAC_CHANNEL_MAX;
 
-#define THREAD_PRIORITY_FACE_D (11)
-static pthread_t facetid = 0;
-static void *thread_face_detcet_entry(void *parameter);
+#define THREAD_PRIORITY_D (11)
+static pthread_t tid = 0;
+static void *thread_detect_entry(void *parameter);
 static int g_fd = 0;
 static int kmodel_fd = 0;
 static int if_exit = 0;
@@ -23,19 +22,19 @@ static _ioctl_shoot_para shoot_para_t = {0};
 unsigned char *model_data = NULL;  // kpu data  load memory
 unsigned char *model_data_align = NULL;
 
-kpu_model_context_t face_detect_task;
-static region_layer_t face_detect_rl;
-static obj_info_t face_detect_info;
+kpu_model_context_t detect_task;
+static region_layer_t detect_rl;
+static obj_info_t detect_info;
 volatile uint32_t g_ai_done_flag;
 
 static void ai_done(void *ctx) { g_ai_done_flag = 1; }
 
-void face_detect()
+void k210_detect(char *json_file_path)
 {
     int ret = 0;
     int result = 0;
     int size = 0;
-    yolov2_params_t detect_params = param_parse(JSON_FILE_PATH);
+    yolov2_params_t detect_params = param_parse(json_file_path);
     g_fd = open("/dev/ov2640", O_RDONLY);
     if (g_fd < 0) {
         printf("open ov2640 fail !!");
@@ -73,6 +72,7 @@ void face_detect()
     /*
         load memory
     */
+    printf("%s\n", detect_params.kmodel_path);
     kmodel_fd = open(detect_params.kmodel_path, O_RDONLY);
     if (kmodel_fd < 0) {
         printf("open kmodel fail");
@@ -100,7 +100,7 @@ void face_detect()
     dvp_set_ai_addr((uint32_t)kpurgbbuffer,
                     (uint32_t)(kpurgbbuffer + detect_params.net_input_size[0] * detect_params.net_input_size[1]),
                     (uint32_t)(kpurgbbuffer + detect_params.net_input_size[0] * detect_params.net_input_size[1] * 2));
-    if (kpu_load_kmodel(&face_detect_task, model_data_align) != 0) {
+    if (kpu_load_kmodel(&detect_task, model_data_align) != 0) {
         printf("\nmodel init error\n");
         close(g_fd);
         close(kmodel_fd);
@@ -109,15 +109,15 @@ void face_detect()
         free(model_data);
         return;
     }
-    face_detect_rl.anchor_number = ANCHOR_NUM;
-    face_detect_rl.anchor = detect_params.anchor;
-    face_detect_rl.threshold = malloc(detect_params.class_num * sizeof(float));
+    detect_rl.anchor_number = ANCHOR_NUM;
+    detect_rl.anchor = detect_params.anchor;
+    detect_rl.threshold = malloc(detect_params.class_num * sizeof(float));
     for (int idx = 0; idx < detect_params.class_num; idx++) {
-        face_detect_rl.threshold[idx] = detect_params.obj_thresh[idx];
+        detect_rl.threshold[idx] = detect_params.obj_thresh[idx];
     }
-    face_detect_rl.nms_value = detect_params.nms_thresh;
+    detect_rl.nms_value = detect_params.nms_thresh;
     result =
-        region_layer_init(&face_detect_rl, detect_params.net_output_shape[0], detect_params.net_output_shape[1],
+        region_layer_init(&detect_rl, detect_params.net_output_shape[0], detect_params.net_output_shape[1],
                           detect_params.net_output_shape[2], detect_params.net_input_size[1], detect_params.net_input_size[0]);
     printf("region_layer_init result %d \n\r", result);
     size_t stack_size = STACK_SIZE;
@@ -129,23 +129,23 @@ void face_detect()
     pthread_attr_setstacksize(&attr, stack_size);
 
     /* 创建线程 1, 属性为 attr，入口函数是 thread_entry，入口函数参数是 1 */
-    result = pthread_create(&facetid, &attr, thread_face_detcet_entry, &detect_params);
+    result = pthread_create(&tid, &attr, thread_detect_entry, &detect_params);
     if (0 == result) {
-        printf("thread_face_detcet_entry successfully!\n");
+        printf("thread_detect_entry successfully!\n");
     } else {
-        printf("thread_face_detcet_entry failed! error code is %d\n", result);
+        printf("thread_detect_entry failed! error code is %d\n", result);
         close(g_fd);
     }
 }
-#ifdef __RT_THREAD_H__
-MSH_CMD_EXPORT(face_detect, face detect task);
-#endif
+// #ifdef __RT_THREAD_H__
+// MSH_CMD_EXPORT(detect, detect task);
+// #endif
 
-static void *thread_face_detcet_entry(void *parameter)
+static void *thread_detect_entry(void *parameter)
 {
     yolov2_params_t detect_params = *(yolov2_params_t *)parameter;
     extern void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t * ptr);
-    printf("thread_face_detcet_entry start!\n");
+    printf("thread_detect_entry start!\n");
     int ret = 0;
     // sysctl_enable_irq();
     while (1) {
@@ -162,24 +162,23 @@ static void *thread_face_detcet_entry(void *parameter)
         if (dmalock_sync_take(&dma_ch, 2000)) {
             printf("Fail to take DMA channel");
         }
-        kpu_run_kmodel(&face_detect_task, kpurgbbuffer, DMAC_CHANNEL5, ai_done, NULL);
+        kpu_run_kmodel(&detect_task, kpurgbbuffer, DMAC_CHANNEL5, ai_done, NULL);
         while (!g_ai_done_flag)
             ;
         dmalock_release(dma_ch);
         float *output;
         size_t output_size;
-        kpu_get_output(&face_detect_task, 0, (uint8_t **)&output, &output_size);
-        face_detect_rl.input = output;
-        region_layer_run(&face_detect_rl, &face_detect_info);
+        kpu_get_output(&detect_task, 0, (uint8_t **)&output, &output_size);
+        detect_rl.input = output;
+        region_layer_run(&detect_rl, &detect_info);
         /* display result */
 
-        for (int face_cnt = 0; face_cnt < face_detect_info.obj_number; face_cnt++) {
-            draw_edge((uint32_t *)showbuffer, &face_detect_info, face_cnt, 0xF800,
-                      (uint16_t)detect_params.sensor_output_size[1], (uint16_t)detect_params.sensor_output_size[0]);
-            //     printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", face_cnt, face_detect_info.obj[face_cnt].x1,
-            //            face_detect_info.obj[face_cnt].y1, face_detect_info.obj[face_cnt].x2,
-            //            face_detect_info.obj[face_cnt].y2, detect_params.labels[face_detect_info.obj[face_cnt].class_id],
-            //            face_detect_info.obj[face_cnt].prob);
+        for (int cnt = 0; cnt < detect_info.obj_number; cnt++) {
+            draw_edge((uint32_t *)showbuffer, &detect_info, cnt, 0xF800, (uint16_t)detect_params.sensor_output_size[1],
+                      (uint16_t)detect_params.sensor_output_size[0]);
+            printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", cnt, detect_info.obj[cnt].x1, detect_info.obj[cnt].y1,
+                   detect_info.obj[cnt].x2, detect_info.obj[cnt].y2, detect_params.labels[detect_info.obj[cnt].class_id],
+                   detect_info.obj[cnt].prob);
         }
 #ifdef BSP_USING_LCD
         lcd_draw_picture(0, 0, (uint16_t)detect_params.sensor_output_size[1], (uint16_t)detect_params.sensor_output_size[0],
@@ -190,13 +189,13 @@ static void *thread_face_detcet_entry(void *parameter)
         usleep(500);
         if (1 == if_exit) {
             if_exit = 0;
-            printf("thread_face_detcet_entry exit");
+            printf("thread_detect_entry exit");
             pthread_exit(NULL);
         }
     }
 }
 
-void face_detect_delete()
+void detect_delete()
 {
     if (showbuffer != NULL) {
         int ret = 0;
@@ -205,13 +204,13 @@ void face_detect_delete()
         free(showbuffer);
         free(kpurgbbuffer);
         free(model_data);
-        printf("face detect task cancel!!! ret %d ", ret);
+        printf("detect task cancel!!! ret %d ", ret);
         if_exit = 1;
     }
 }
-#ifdef __RT_THREAD_H__
-MSH_CMD_EXPORT(face_detect_delete, face detect task delete);
-#endif
+// #ifdef __RT_THREAD_H__
+// MSH_CMD_EXPORT(detect_delete, detect task delete);
+// #endif
 
 // void kmodel_load(unsigned char *model_data)
 // {

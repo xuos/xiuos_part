@@ -24,6 +24,7 @@
 #define RT_USING_IDLE_HOOK
 #define RT_IDLE_HOOK_LIST_SIZE 4
 #define IDLE_THREAD_STACK_SIZE 4096
+#define SYSTEM_THREAD_STACK_SIZE 4096
 
 /* kservice optimization */
 
@@ -75,16 +76,17 @@
 /* Command shell */
 
 #define RT_USING_FINSH
+#define RT_USING_MSH
+#define FINSH_USING_MSH
 #define FINSH_THREAD_NAME "tshell"
+#define FINSH_THREAD_PRIORITY 20
+#define FINSH_THREAD_STACK_SIZE 16384
 #define FINSH_USING_HISTORY
 #define FINSH_HISTORY_LINES 5
 #define FINSH_USING_SYMTAB
-#define FINSH_USING_DESCRIPTION
-#define FINSH_THREAD_PRIORITY 20
-#define FINSH_THREAD_STACK_SIZE 16384
 #define FINSH_CMD_SIZE 80
-#define FINSH_USING_MSH
-#define FINSH_USING_MSH_DEFAULT
+#define MSH_USING_BUILT_IN_COMMANDS
+#define FINSH_USING_DESCRIPTION
 #define FINSH_ARG_MAX 10
 
 /* Device virtual file system */
@@ -108,6 +110,7 @@
 #define RT_DFS_ELM_DRIVES 2
 #define RT_DFS_ELM_MAX_SECTOR_SIZE 4096
 #define RT_DFS_ELM_REENTRANT
+#define RT_DFS_ELM_MUTEX_TIMEOUT 3000
 #define RT_USING_DFS_DEVFS
 
 /* Device Drivers */
@@ -118,6 +121,7 @@
 #define RT_SYSTEM_WORKQUEUE_STACKSIZE 2048
 #define RT_SYSTEM_WORKQUEUE_PRIORITY 23
 #define RT_USING_SERIAL
+#define RT_USING_SERIAL_V1
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
@@ -164,7 +168,8 @@
 #define RT_USING_PTHREADS
 #define PTHREAD_NUM_MAX 8
 #define RT_USING_POSIX
-#define RT_LIBC_FIXED_TIMEZONE 8
+#define RT_LIBC_USING_TIME
+#define RT_LIBC_DEFAULT_TIMEZONE 8
 
 /* Network */
 
@@ -286,9 +291,6 @@
 #define BSP_DVP_CMOS_XCLK_PIN 46
 #define BSP_DVP_CMOS_PCLK_PIN 47
 #define BSP_DVP_CMOS_HREF_PIN 45
-#define RW007_SPIDEV_NAME "spi11"
-#define RW007_INT_BUSY_PIN 7
-#define RW007_RST_PIN 6
 
 /* Kendryte SDK Config */
 
@@ -296,9 +298,6 @@
 
 /* More Drivers */
 
-#define PKG_USING_RW007
-#define RW007_NOT_USE_EXAMPLE_DRIVERS
-#define RW007_SPI_MAX_HZ 20000000
 #define DRV_USING_OV2640
 
 /* APP_Framework */
@@ -308,6 +307,9 @@
 /* config stack size and priority of main task */
 
 #define MAIN_KTASK_STACK_SIZE 1024
+
+/* ota app  */
+
 
 /* test app */
 
@@ -320,8 +322,8 @@
 /* knowing app */
 
 #define APPLICATION_KNOWING
-#define APP_MNIST
-#define FACE_DETECT
+#define K210_DETECT_ENTRY
+#define K210_DETECT_CONFIGJSON "/kmodel/face.json"
 
 /* sensor app */
 
@@ -345,6 +347,7 @@
 #define USING_KPU_PROCESSING
 #define USING_YOLOV2
 #define USING_YOLOV2_JSONPARSER
+#define USING_K210_DETECT
 
 /* Security */
 
