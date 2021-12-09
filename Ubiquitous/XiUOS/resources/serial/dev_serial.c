@@ -122,30 +122,41 @@ static inline int SerialDevIntRead(struct SerialHardwareDevice *serial_dev, stru
     NULL_PARAM_CHECK(serial_dev);
     NULL_PARAM_CHECK(read_param);
 
+    int char_num = 0;
     struct SerialHwDevDone *hwdev_done = serial_dev->hwdev_done;
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
     uint8 *read_data = (uint8 *)read_param->buffer;
     x_size_t read_length = read_param->size;
 
+    int start_pointer, end_pointer;
+    int i;
+
     while (read_length)
     {
-        uint8 get_char;
         x_base lock;
 
+        start_pointer = serial_dev->serial_fifo.serial_rx->serial_recv_num;
+        end_pointer = serial_dev->serial_fifo.serial_rx->serial_send_num;
         lock = CriticalAreaLock();
      
-        if (serial_dev->serial_fifo.serial_rx->serial_recv_num == serial_dev->serial_fifo.serial_rx->serial_send_num) {
+        if (start_pointer == end_pointer) {
             if (RET_FALSE == serial_dev->serial_fifo.serial_rx->serial_rx_full) {
                 CriticalAreaUnLock(lock);
                 break;
             }
         }
-        
-        get_char = serial_dev->serial_fifo.serial_rx->serial_rx_buffer[serial_dev->serial_fifo.serial_rx->serial_recv_num];
-        serial_dev->serial_fifo.serial_rx->serial_recv_num += 1;
-        if (serial_dev->serial_fifo.serial_rx->serial_recv_num >= serial_cfg->data_cfg.serial_buffer_size) {
-            serial_dev->serial_fifo.serial_rx->serial_recv_num = 0;
+
+        /* Read all the chars from the serial_rx_buffer */
+        while (start_pointer != end_pointer)
+        {
+            read_data[char_num] = serial_dev->serial_fifo.serial_rx->serial_rx_buffer[start_pointer];
+            start_pointer += 1;
+            if (start_pointer >= serial_cfg->data_cfg.serial_buffer_size) {
+                start_pointer = 0;
+            }
+            char_num = char_num + 1;
         }
+        read_data[char_num]='\0';
 
         if (RET_TRUE == serial_dev->serial_fifo.serial_rx->serial_rx_full) {
             serial_dev->serial_fifo.serial_rx->serial_rx_full = RET_FALSE;
@@ -153,10 +164,9 @@ static inline int SerialDevIntRead(struct SerialHardwareDevice *serial_dev, stru
 
         CriticalAreaUnLock(lock);
 
-        *read_data = get_char;
-        read_data++; 
         read_length--;
-        read_param->read_length++;
+        read_param->read_length += char_num;
+        serial_dev->serial_fifo.serial_rx->serial_recv_num = start_pointer;
     }
 
     return EOK;

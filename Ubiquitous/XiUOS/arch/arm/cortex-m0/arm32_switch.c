@@ -19,6 +19,8 @@
 #define NVIC_PENDSV_PRI "0x00FF0000"
 #define NVIC_PENDSVSET "0x10000000"
 
+/* We replaced instructions that were not supported in thumb mode. */
+
 void __attribute__((naked)) HwInterruptcontextSwitch(x_ubase from, x_ubase to, struct TaskDescriptor *to_task, void *context)
 {
     asm volatile ("PUSH {R4}");
@@ -51,7 +53,6 @@ void __attribute__((naked)) HwInterruptcontextSwitch(x_ubase from, x_ubase to, s
 void __attribute__((naked)) Arm32SwitchReswitch()
 {
     asm volatile ("PUSH {R4}");
-
     asm volatile ("LDR r4, =InterruptToKtask");
     asm volatile ("STR r1, [r4]");
     asm volatile ("LDR r4, =InterruptToKtaskDescriptor");
@@ -59,9 +60,7 @@ void __attribute__((naked)) Arm32SwitchReswitch()
     asm volatile ("LDR r0, =" NVIC_INT_CTRL);
     asm volatile ("LDR r1, =" NVIC_PENDSVSET);
     asm volatile ("STR r1, [r0]");
-
     asm volatile ("POP {R4}");
-
     asm volatile ("BX LR");
 }
 
@@ -70,7 +69,7 @@ void __attribute__((naked)) SwitchKtaskContext(x_ubase from, x_ubase to, struct 
     asm volatile("B HwInterruptcontextSwitch");
 }
 
-void __attribute__((naked)) SwitchKtaskContextTo(x_ubase to, struct TaskDescriptor *to_task)
+void SwitchKtaskContextTo(x_ubase to, struct TaskDescriptor *to_task)
 {
     asm volatile ("LDR r2, =InterruptToKtask");
     asm volatile ("STR r0, [r2]");
@@ -89,7 +88,8 @@ void __attribute__((naked)) SwitchKtaskContextTo(x_ubase to, struct TaskDescript
     asm volatile ("STR r0, [r1]");
     asm volatile ("LDR r0, =" NVIC_SYSPRI2);
     asm volatile ("LDR r1, =" NVIC_PENDSV_PRI);
-    asm volatile ("LDR.W   r2, [r0,#0x00]");
+    // asm volatile ("LDR.W   r2, [r0,#0x00]");
+    asm volatile ("LDR   r2, [r0,#0x00]");
     asm volatile ("ORR     r1,r1,r2");
     asm volatile ("STR     r1, [r0]");
     asm volatile ("LDR r0, =" NVIC_INT_CTRL);
@@ -108,7 +108,12 @@ void __attribute__((naked)) SwitchKtaskContextTo(x_ubase to, struct TaskDescript
 void __attribute__((naked)) HardFaultHandler()
 {
     asm volatile ("MRS     r0, msp");
-    asm volatile ("TST     lr, #0x04");
+
+    // asm volatile ("TST     lr, #0x04");
+    asm volatile ("MOV     r1, lr");
+    asm volatile ("MOV     r2, #0x04");
+    asm volatile ("TST     r1, r2");
+
     asm volatile ("BEQ     Arm32SwitchGetSpDone");
     asm volatile ("MRS     r0, psp");
     asm volatile ("B       Arm32SwitchGetSpDone");
@@ -117,15 +122,35 @@ void __attribute__((naked)) HardFaultHandler()
 void __attribute__((naked)) Arm32SwitchGetSpDone()
 {
     asm volatile ("MRS     r3, primask");
-    asm volatile ("STMFD   r0!, {r3 - r11}");
-    asm volatile ("STMFD   r0!, {lr}");
+
+    // asm volatile ("STMFD   r0!, {r3 - r11}");
+    asm volatile ("SUB   r0, r0, #0x24");
+    asm volatile ("STMIA   r0!, {r3 - r7}");
+    asm volatile ("MOV r3, r8");
+    asm volatile ("MOV r4, r9");
+    asm volatile ("MOV r5, r10");
+    asm volatile ("MOV r6, r11");
+    asm volatile ("STMIA   r0!, {r3 - r6}");
+    asm volatile ("SUB   r0, r0, #0x24");
+
+    // asm volatile ("STMFD   r0!, {lr}");
+    asm volatile ("SUB   r0, r0, #0x4");
+    asm volatile ("MOV   r0, lr");
 #if defined (__VFP_FP__) && !defined(__SOFTFP__)
     asm volatile ("MOV     r4, #0x00");
-    asm volatile ("TST     lr, #0x10");
+    // asm volatile ("TST     lr, #0x10");
+    asm volatile ("MOV     r1, lr");
+    asm volatile ("MOV     r2, #0x10");
+    asm volatile ("TST     r1, r2");
+
     asm volatile ("MOVEQ   r4, #0x01");
     asm volatile ("STMFD   r0!, {r4}");
 #endif
-    asm volatile ("TST     lr, #0x04");
+    // asm volatile ("TST     lr, #0x04");
+    asm volatile ("MOV     r1, lr");
+    asm volatile ("MOV     r2, #0x04");
+    asm volatile ("TST     r1, r2");
+
     asm volatile ("BEQ     Arm32SwitchUpdateMsp");
     asm volatile ("MSR     psp, r0");
     asm volatile ("B       Arm32SwitchUpdateDone");
@@ -142,15 +167,29 @@ void __attribute__((naked)) Arm32SwitchUpdateDone()
 {
     asm volatile ("PUSH    {LR}");
     asm volatile ("BL      HwHardFaultException");
-    asm volatile ("POP     {LR}");
-    asm volatile ("ORR     lr, lr, #0x04");
+
+    // asm volatile ("POP     {LR}");
+    asm volatile ("POP     {R1}");
+    asm volatile ("MOV     lr, r1");
+
+    // asm volatile ("ORR     lr, lr, #0x04");
+    asm volatile ("MOV     r1, lr");
+    asm volatile ("MOV     r2, #0x04");
+    asm volatile ("ORR     r1, r2");
+    asm volatile ("MOV     lr, r1");
+
     asm volatile ("BX      lr");
 }
 
 void __attribute__((naked)) MemFaultHandler()
 {
     asm volatile ("MRS     r0, msp");
-    asm volatile ("TST     lr, #0x04");
+
+    // asm volatile ("TST     lr, #0x04");
+    asm volatile ("MOV     r1, lr");
+    asm volatile ("MOV     r2, #0x04");
+    asm volatile ("TST     r1, r2");
+
     asm volatile ("BEQ     Arm32Switch1");
     asm volatile ("MRS     r0, psp");
     asm volatile ("B       Arm32Switch1");
@@ -159,17 +198,44 @@ void __attribute__((naked)) MemFaultHandler()
 void __attribute__((naked)) Arm32Switch1()
 {
     asm volatile ("MRS     r3, primask");
-    asm volatile ("STMFD   r0!, {r3 - r11}");
+
+    // asm volatile ("STMFD   r0!, {r3 - r11}");
+    asm volatile ("SUB   r0, r0, #0x24");
+    asm volatile ("STMIA   r0!, {r3 - r7}");
+    asm volatile ("MOV r3, r8");
+    asm volatile ("MOV r4, r9");
+    asm volatile ("MOV r5, r10");
+    asm volatile ("MOV r6, r11");
+    asm volatile ("STMIA   r0!, {r3 - r6}");
+    asm volatile ("SUB   r0, r0, #0x24");
+
 #if defined (__VFP_FP__) && !defined(__SOFTFP__)
     asm volatile ("MOV     r4, #0x00");
-    asm volatile ("TST     lr, #0x10");
+    // asm volatile ("TST     lr, #0x10");
+    asm volatile ("MOV     r1, lr");
+    asm volatile ("MOV     r2, #0x10");
+    asm volatile ("TST     r1, r2");
+    asm volatile ("MOV     lr, r1");
+
     asm volatile ("MOVEQ   r4, #0x01");
     asm volatile ("STMFD   r0!, {r4}");
 #endif
-    asm volatile ("STMFD   r0!, {lr}");
+    // asm volatile ("STMFD   r0!, {lr}");
+    asm volatile ("SUB   r0, r0, #0x4");
+    asm volatile ("MOV   r0, lr");
+
     asm volatile ("PUSH    {LR}");
     asm volatile ("BL      MemFaultHandle");
-    asm volatile ("POP     {LR}");
-    asm volatile ("ORR     lr, lr, #0x04");
+
+    // asm volatile ("POP     {LR}");
+    asm volatile ("POP     {R5}");
+    asm volatile ("MOV     lr, r5");
+
+    // asm volatile ("ORR     lr, lr, #0x04");
+    asm volatile ("MOV     r5, lr");
+    asm volatile ("MOV     r6, #0x04");
+    asm volatile ("ORR     r5, r6");
+    asm volatile ("MOV     lr, r5");
+
     asm volatile ("BX      lr");
 }

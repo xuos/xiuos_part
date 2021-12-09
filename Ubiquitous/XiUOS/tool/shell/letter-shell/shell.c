@@ -9,7 +9,6 @@
  */
 /*change log:
     Change Chinese comment to English comment 
-
 */
 
 #include "shell.h"
@@ -18,15 +17,12 @@
 #include "stdarg.h"
 #include "shell_ext.h"
 #include <xiuos.h>
-
 #ifdef FS_VFS
 #include "iot-vfs.h"
 #endif
-
 #ifndef CommandDescSize
 #define CommandDescSize 36
 #endif
-
 /**
  * @brief default user
  */
@@ -47,7 +43,6 @@ const ShellCommand shellUserDefault SECTION("shellCommand") =
         extern const unsigned long _shell_command_start;
         extern const unsigned long _shell_command_end;
     #endif
-
 
 /**
  * @brief shell Constant text index 
@@ -186,7 +181,6 @@ void shellInit(Shell *shell, char *buffer, unsigned short size)
         #error not supported compiler, please use command table mode
     #endif
 
-
     shellAdd(shell);
 
     shellSetUser(shell, shellSeekCommand(shell,
@@ -298,7 +292,6 @@ static unsigned short shellWriteCommandDesc(Shell *shell, const char *string)
 #ifdef FS_VFS
 extern char working_dir[];
 #endif
-
 /**
  * @brief Shell write new command line
  * 
@@ -1515,7 +1508,6 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
 0x0D0A0000, shellEnter, enter);
 #endif
 
-
 /**
  * @brief shell help
  * 
@@ -1569,7 +1561,6 @@ void shellHandler(Shell *shell, char data)
         }
     }
 #endif
-
     /* Calculate the offset of the current byte in the key value according to the recorded key value  */
     char keyByteOffset = 24;
     int keyFilter = 0x00000000;
@@ -1645,14 +1636,21 @@ void shellTask(void *param)
 {
     // KPrintf("this is in 1733");
     Shell *shell = (Shell *)param;
-    char data;
+
+    /* One input key from the the keyboard/uart may consist of mutliple characters (e.g., arrow keys). */
+    char data[KEY_LENGTH];
+    int i;
+    int data_len;
+
     while(RET_TRUE)
     {
-        if (shell->read && shell->read(&data) == 0)
-        {
+        if (shell->read && shell->read(data) == 0) {
             //   KPrintf("in 1741 the char is:                    '%c' and ascii code is %d.\n\n",data,data);
             // KPrintf("the buffer is:'%s'\n\n",shell->parser.);
-           shellHandler(shell, data);
+            data_len = strlen(data);
+            for (i = 0; i < data_len; i++) {
+                shellHandler(shell, data[i]);
+            }
         }
     }
 }
@@ -1676,7 +1674,6 @@ users, shellUsers, list all user);
 #endif
 
 
-
 /**
  * @brief Output variable list (shell call) 
  */
@@ -1694,7 +1691,6 @@ SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_DISABLE_RE
 vars, shellVars, list all var);
 #endif
 
-
 /**
  * @brief Output key list (shell call) 
  */
@@ -1711,7 +1707,6 @@ SHELL_EXPORT_CMD(
 SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_DISABLE_RETURN,
 keys, shellKeys, list all key);
 #endif
-
 /**
  * @brief Clear the console (shell call) 
  */
@@ -1726,4 +1721,3 @@ void shellClear(void)
 SHELL_EXPORT_CMD(
 SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_DISABLE_RETURN,
 clear, shellClear, clear console);
-
