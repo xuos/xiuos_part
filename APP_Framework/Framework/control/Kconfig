@@ -1,3 +1,4 @@
 menuconfig SUPPORT_CONTROL_FRAMEWORK
     bool "support control framework"
     default n
+    select TRANSFORM_LAYER_ATTRIUBUTE

@@ -1,6 +1,7 @@
 menuconfig SUPPORT_SENSOR_FRAMEWORK
         bool "support sensor framework"
-        default y
+        default n
+        select TRANSFORM_LAYER_ATTRIUBUTE
 
 if SUPPORT_SENSOR_FRAMEWORK
         menuconfig SENSOR_CO2

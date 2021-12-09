@@ -3,6 +3,7 @@ menu "Security"
 menuconfig CRYPTO
     bool "using crypto"
     default n
+    select TRANSFORM_LAYER_ATTRIUBUTE
 if CRYPTO
     menuconfig CRYPTO_SM3
         bool "using sm3"
