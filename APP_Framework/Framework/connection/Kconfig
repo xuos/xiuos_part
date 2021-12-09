@@ -1,6 +1,7 @@
 menuconfig SUPPORT_CONNECTION_FRAMEWORK
         bool "support connection framework"
         default n
+        select TRANSFORM_LAYER_ATTRIUBUTE
 
 if SUPPORT_CONNECTION_FRAMEWORK
         config CONNECTION_FRAMEWORK_DEBUG
