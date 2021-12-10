@@ -32,28 +32,42 @@ static struct SensorProductInfo info =
 /**
  * @description: Open HS300x sensor device
  * @param sdev - sensor device pointer
- * @return 1
+ * @return success : 0 error : -1
  */
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
+    int result;
+    uint16_t i2c_dev_addr = SENSOR_DEVICE_HS300X_I2C_ADDR;
+    
     sdev->fd = PrivOpen(SENSOR_DEVICE_HS300X_DEV, O_RDWR);
+    if (sdev->fd < 0) {
+        printf("open %s error\n", SENSOR_DEVICE_HS300X_DEV);
+        return -1;
+    }
 
-    return 0;
+    struct PrivIoctlCfg ioctl_cfg;
+    ioctl_cfg.ioctl_driver_type = I2C_TYPE;
+    ioctl_cfg.args = &i2c_dev_addr;
+    result = PrivIoctl(sdev->fd, OPE_INT, &ioctl_cfg);
+
+    return result;
 }
 
 /**
  * @description: Read sensor device
  * @param sdev - sensor device pointer
  * @param len - the length of the read data
- * @return success: 1 , failure: -1
+ * @return success: 0 , failure: -1
  */
 static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
 {
+    //send i2c device start signal and address, need to implemente in OS i2c driver
     if (PrivWrite(sdev->fd, NULL, 0) != 1)
         return -1;
     
     PrivTaskDelay(50);
 
+    //Read i2c device data from i2c device address
     if (PrivRead(sdev->fd, sdev->buffer, len) != 1)
         return -1;
 
@@ -101,6 +115,7 @@ static int32_t ReadTemperature(struct SensorQuantity *quant)
     if (quant->sdev->done->read != NULL) {
         if (quant->sdev->status == SENSOR_DEVICE_PASSIVE) {
             quant->sdev->done->read(quant->sdev, 4);
+            PrivTaskDelay(50);
             quant->sdev->done->read(quant->sdev, 4);    /* It takes two reads to get the data right */
             result = ((quant->sdev->buffer[2]  << 8 | quant->sdev->buffer[3]) >> 2) * 165.0 /( (1 << 14) - 1) -  40.0;
 

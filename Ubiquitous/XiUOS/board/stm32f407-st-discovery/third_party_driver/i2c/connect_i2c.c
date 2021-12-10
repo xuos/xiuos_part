@@ -600,6 +600,41 @@ out:
     return ret;
 }
 
+static uint32 I2cInit(struct I2cDriver *i2c_drv, struct BusConfigureInfo *configure_info)
+{
+    NULL_PARAM_CHECK(i2c_drv);
+
+    struct I2cHardwareDevice *i2c_dev = (struct I2cHardwareDevice *)i2c_drv->driver.owner_bus->owner_haldev;
+
+    if (configure_info->private_data) {
+        i2c_dev->i2c_dev_addr = *((uint16 *)configure_info->private_data);
+        return EOK;
+    }
+    
+    KPrintf("I2cInit need set i2c dev addr\n");
+    return ERROR;
+}
+
+static uint32 I2cDrvConfigure(void *drv, struct BusConfigureInfo *configure_info)
+{
+    NULL_PARAM_CHECK(drv);
+    NULL_PARAM_CHECK(configure_info);
+
+    x_err_t ret = EOK;
+    struct I2cDriver *i2c_drv = (struct I2cDriver *)drv;
+
+    switch (configure_info->configure_cmd)
+    {
+        case OPE_INT:
+            ret = I2cInit(i2c_drv, configure_info);
+            break;
+        default:
+            break;
+    }
+
+    return ret;
+}
+
 /*manage the i2c device operations*/
 static const struct I2cDevDone i2c_dev_done =
 {
@@ -676,6 +711,8 @@ int Stm32HwI2cInit(void)
 
 #ifdef  BSP_USING_I2C1
     I2cGpioInit(&i2c_bus_param);
+
+    i2c_driver.configure = I2cDrvConfigure;
 
     ret = BoardI2cBusInit(&i2c_bus, &i2c_driver);
     if (EOK != ret) {

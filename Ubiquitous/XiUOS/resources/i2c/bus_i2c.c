@@ -64,6 +64,8 @@ int I2cDriverInit(struct I2cDriver *i2c_driver, const char *driver_name)
 
         i2c_driver->driver.private_data = i2c_driver->private_data;
 
+        i2c_driver->driver.configure = i2c_driver->configure;
+
         ret = I2cDriverRegister(&i2c_driver->driver);
         if (EOK != ret) {
             KPrintf("I2cDriverInit DriverRegister error %u\n", ret);

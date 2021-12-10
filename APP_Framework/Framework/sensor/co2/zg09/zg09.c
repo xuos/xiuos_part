@@ -43,6 +43,10 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     int result = 0;
 
     sdev->fd = PrivOpen(SENSOR_DEVICE_ZG09_DEV, O_RDWR);
+    if (sdev->fd < 0) {
+        printf("open %s error\n", SENSOR_DEVICE_ZG09_DEV);
+        return -1;
+    }
     
     struct SerialDataCfg cfg;
     cfg.serial_baud_rate    = BAUD_RATE_9600;

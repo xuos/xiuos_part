@@ -27,7 +27,6 @@
 extern "C" {
 #endif
 
-#define I2C_SLAVE_ADDR           0x44
 #define I2C_WR                               0x0000
 #define I2C_RD                                (1u << 0)
 #define I2C_ADDR_10BIT            (1u << 2)
@@ -61,7 +60,7 @@ struct I2cHardwareDevice
     struct HardwareDev haldev;
     const struct I2cDevDone *i2c_dev_done;
 
-    void *private_data;
+    uint16 i2c_dev_addr;
 };
 
 /*Register the I2C device*/

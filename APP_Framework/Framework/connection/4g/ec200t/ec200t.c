@@ -40,6 +40,10 @@ static void Ec200tPowerSet(void)
 {
     int pin_fd;
     pin_fd = PrivOpen(ADAPTER_EC200T_PIN_DRIVER, O_RDWR);
+    if (pin_fd < 0) {
+        printf("open %s error\n", ADAPTER_EC200T_PIN_DRIVER);
+        return;
+    }
 
     struct PinParam pin_param;
     pin_param.cmd = GPIO_CONFIG_MODE;
