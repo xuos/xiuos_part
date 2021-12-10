@@ -1,3 +1,3 @@
-SRC_DIR :=wifi_demo
+SRC_DIR :=
 
 include $(KERNEL_ROOT)/compiler.mk
