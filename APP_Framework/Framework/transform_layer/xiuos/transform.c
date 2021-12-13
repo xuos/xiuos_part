@@ -151,6 +151,9 @@ int PrivIoctl(int fd, int cmd, void *args)
     case PIN_TYPE:
         ret = PrivPinIoctl(fd, cmd, ioctl_cfg->args);
         break;
+    case I2C_TYPE:
+        ret = ioctl(fd, cmd, ioctl_cfg->args);
+        break;
     default:
         break;
     }

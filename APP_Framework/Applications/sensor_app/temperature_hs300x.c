@@ -27,12 +27,20 @@
  */
 void TempHs300x(void)
 {
+    int i = 0;
+    int32 temperature;
     struct SensorQuantity *temp = SensorQuantityFind(SENSOR_QUANTITY_HS300X_TEMPERATURE, SENSOR_QUANTITY_TEMP);
     SensorQuantityOpen(temp);
-    int32 temperature = SensorQuantityRead(temp);
-    if (temperature > 0)
-        printf("Temperature : %d.%d ℃\n", temperature/10, temperature%10);
-    else
-        printf("Temperature : %d.%d ℃\n", temperature/10, -temperature%10);
+    for (i = 0; i < 100; i ++) {
+        temperature = SensorQuantityRead(temp);
+        if (temperature > 0)
+            printf("Temperature : %d.%d ℃\n", temperature/10, temperature%10);
+        else
+            printf("Temperature : %d.%d ℃\n", temperature/10, -temperature%10);
+
+        PrivTaskDelay(5000);
+    }
+
     SensorQuantityClose(temp);
 }
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, TempHs300x, TempHs300x, TempHs300x function);

@@ -58,6 +58,10 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     PrivMutexCreate(&buff_lock, 0);
 
     sdev->fd = open(SENSOR_DEVICE_PS5308_DEV, O_RDWR);
+    if (sdev->fd < 0) {
+        printf("open %s error\n", SENSOR_DEVICE_PS5308_DEV);
+        return -1;
+    }
     
     struct SerialDataCfg cfg;
     cfg.serial_baud_rate    = BAUD_RATE_9600;

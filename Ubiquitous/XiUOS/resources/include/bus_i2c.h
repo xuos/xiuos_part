@@ -55,6 +55,8 @@ struct I2cDriver
 {
     struct Driver driver;
 
+    uint32 (*configure) (void *drv, struct BusConfigureInfo *configure_info);
+
     void *private_data;
 };
 
