@@ -68,7 +68,8 @@ void InitBoardHardware(void)
     timer_initialize();
     KPrintf("memory address range: [0x%08x - 0x%08x], size: %d\n", (x_ubase) MEMORY_START_ADDRESS, (x_ubase) MEMORY_END_ADDRESS, GAP8_SRAM_SIZE);
     /* initialize memory system */
-	KPrintf("gap8 cluster id: [0x%x], _procid: [0x%x]\n", _clusterid(),_procid());
+    KPrintf("gap8 cluster id: [0x%x], _procid: [0x%x]\n", _clusterid(),_procid());
+	
     KPrintf("board init done.\n");
 	KPrintf("start kernel...\n");
     return;

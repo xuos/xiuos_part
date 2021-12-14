@@ -155,6 +155,7 @@ ShellCommand* shellSeekCommand(Shell *shell,
  */
 void shellInit(Shell *shell, char *buffer, unsigned short size)
 {
+
     shell->parser.length = 0;
     shell->parser.cursor = 0;
     shell->history.offset = 0;
@@ -187,6 +188,7 @@ void shellInit(Shell *shell, char *buffer, unsigned short size)
                                          SHELL_DEFAULT_USER,
                                          shell->commandList.base,
                                          0));
+
     shellWriteCommandLine(shell, 1);
 }
 
@@ -863,7 +865,7 @@ ShellCommand* shellSeekCommand(Shell *shell,
         name = shellGetCommandName(&base[i]);
         if (!compareLength)
         {
-            if (strcmp(cmd, name) == 0)
+            if (strncmp(cmd, name, strlen(cmd)) == 0)
             {
                 return &base[i];
             }
