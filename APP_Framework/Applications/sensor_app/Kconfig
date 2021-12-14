@@ -5,6 +5,16 @@ menu "sensor app"
         default n
 
         if APPLICATION_SENSOR
+            menuconfig APPLICATION_SENSOR_CH4
+                bool "Using sensor CH4 apps"
+                default n
+
+                if APPLICATION_SENSOR_CH4
+                    config APPLICATION_SENSOR_CH4_AS830
+                    bool "Using sensor AS830 apps"
+                    default n
+                endif
+
             menuconfig APPLICATION_SENSOR_CO2
                 bool "Using sensor CO2 apps"
                 default n

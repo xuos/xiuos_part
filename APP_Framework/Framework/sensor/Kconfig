@@ -4,6 +4,13 @@ menuconfig SUPPORT_SENSOR_FRAMEWORK
         select TRANSFORM_LAYER_ATTRIUBUTE
 
 if SUPPORT_SENSOR_FRAMEWORK
+        menuconfig SENSOR_CH4
+                bool "Using Ch4 sensor device"
+                default n
+        if SENSOR_CH4
+        source "$APP_DIR/Framework/sensor/ch4/Kconfig"
+        endif
+
         menuconfig SENSOR_CO2
                 bool "Using CO2 sensor device"
                 default n

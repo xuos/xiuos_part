@@ -1,5 +1,9 @@
 SRC_FILES := 
 
+ifeq ($(CONFIG_APPLICATION_SENSOR_CH4_AS830), y)
+	SRC_FILES += ch4_as830.c
+endif
+
 ifeq ($(CONFIG_APPLICATION_SENSOR_CO2_ZG09), y)
 	SRC_FILES += co2_zg09.c
 endif

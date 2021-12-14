@@ -10,24 +10,25 @@
 * See the Mulan PSL v2 for more details.
 */
 
-#include <stdio.h>
-#include <string.h>
-// #include <user_api.h>
-#include <transform.h>
+/**
+ * @file ch4_as830.c
+ * @brief CH4 AS830 example
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2021.12.10
+ */
 
-extern int FrameworkInit();
-extern void ApplicationOtaTaskInit(void);
-extern void Ch4As830(void);
-int main(void)
+#include <user_api.h>
+#include <sensor.h>
+
+/**
+ * @description: Read a ch4
+ * @return 0
+ */
+void Ch4As830(void)
 {
-	printf("Hello, world!\n");
-	FrameworkInit();
-#ifdef APPLICATION_OTA
-	ApplicationOtaTaskInit();
-#endif
-	Ch4As830();
-    return 0;
+    struct SensorQuantity *ch4 = SensorQuantityFind(SENSOR_QUANTITY_AS830_CH4, SENSOR_QUANTITY_CH4);
+    SensorQuantityOpen(ch4);
+    printf("CH4 : %d %%LTL\n", SensorQuantityRead(ch4));
+    SensorQuantityClose(ch4);
 }
-// int cppmain(void);
-
-
