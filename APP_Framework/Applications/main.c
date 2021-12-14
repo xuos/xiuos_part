@@ -17,16 +17,13 @@
 
 extern int FrameworkInit();
 extern void ApplicationOtaTaskInit(void);
-extern void ShowMemory(void);
-extern long ShowTask(void);
 int main(void)
 {
-	printf("Hello, world! Running on gapuino board.\n");
+	printf("Hello, world! \n");
 	FrameworkInit();
 #ifdef APPLICATION_OTA
 	ApplicationOtaTaskInit();
 #endif
-	Ch4As830();
     return 0;
 }
 // int cppmain(void);

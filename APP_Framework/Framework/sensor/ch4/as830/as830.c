@@ -39,6 +39,10 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     int result = 0;
 
     sdev->fd = PrivOpen(SENSOR_DEVICE_AS830_DEV, O_RDWR);
+    if (sdev->fd < 0) {
+        printf("open %s error\n", SENSOR_DEVICE_AS830_DEV);
+        return -1;
+    }
     
     struct SerialDataCfg cfg;
     cfg.serial_baud_rate    = BAUD_RATE_9600;
@@ -57,8 +61,6 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
     ioctl_cfg.args = &cfg;
     result = PrivIoctl(sdev->fd, OPE_INT, &ioctl_cfg);
-
-    sdev->done->ioctl(sdev, SENSOR_DEVICE_PASSIVE);
 
     return result;
 }
