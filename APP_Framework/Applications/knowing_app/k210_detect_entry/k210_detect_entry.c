@@ -1,5 +1,5 @@
-#ifdef USING_K210_DETECT
-#include "k210_detect.h"
+#ifdef USING_K210_YOLOV2_DETECT
+#include "k210_yolov2_detect.h"
 #endif
 #include <transform.h>
 

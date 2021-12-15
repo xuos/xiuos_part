@@ -1,4 +1,4 @@
-#include "k210_detect.h"
+#include "k210_yolov2_detect.h"
 
 #include "cJSON.h"
 #ifdef USING_YOLOV2_JSONPARSER

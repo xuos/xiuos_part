@@ -4,6 +4,6 @@ cwd     = GetCurrentDir()
 src     = Glob('*.c') + Glob('*.cpp')
 CPPPATH = [cwd]
 
-group = DefineGroup('Applications', src, depend = ['USING_K210_DETECT'], LOCAL_CPPPATH = CPPPATH)
+group = DefineGroup('Applications', src, depend = ['USING_K210_YOLOV2_DETECT'], LOCAL_CPPPATH = CPPPATH)
 
 Return('group')
