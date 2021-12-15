@@ -31,6 +31,7 @@ extern int Ps5308Pm1_0Init(void);
 extern int Zg09Co2Init(void);
 extern int As830Ch4Init(void);
 extern int Tb600bIaq10IaqInit(void);
+extern int Tb600bTvoc10TvocInit(void);
 
 typedef int (*InitFunc)(void);
 struct InitDesc
@@ -97,6 +98,10 @@ static struct InitDesc sensor_desc[] =
 
 #ifdef SENSOR_TB600B_IAQ10
 	{ "iaq_tb600b_iaq10", Tb600bIaq10IaqInit },
+#endif
+
+#ifdef SENSOR_TB600B_TVOC10
+	{ "tvoc_tb600b_tvoc10", Tb600bTvoc10TvocInit },
 #endif
 
 	{ "NULL", NULL },

@@ -11,35 +11,27 @@
 */
 
 /**
- * @file tb600b_iaq10.c
- * @brief tb600b_iaq10 driver base sensor
+ * @file tb600b_tvoc10.c
+ * @brief tb600b_tvoc10 driver base sensor
  * @version 1.0
  * @author AIIT XUOS Lab
- * @date 2021.12.14
+ * @date 2021.12.15
  */
 
 #include <sensor.h>
 
-static struct SensorDevice tb600b_iaq10;
+static struct SensorDevice tb600b_tvoc10;
 static uint8_t ReadInstruction[9];
-
-struct iaq_data {
-    uint16_t gas;
-    uint8_t TH;
-    uint8_t TL;
-    uint8_t RhH;
-    uint8_t RhL;
-};
 
 static struct SensorProductInfo info =
 {
-    SENSOR_ABILITY_IAQ,
+    SENSOR_ABILITY_TVOC,
     "AQS",
-    "TB600B_IAQ10",
+    "TB600B_TVOC10",
 };
 
 /**
- * @description: Open tb600b_iaq10 sensor device
+ * @description: Open TB600B TVOC10 sensor device
  * @param sdev - sensor device pointer
  * @return success: 1 , failure: other
  */
@@ -47,9 +39,9 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     int result = 0;
 
-    sdev->fd = PrivOpen(SENSOR_DEVICE_TB600B_IAQ10_DEV, O_RDWR);
+    sdev->fd = PrivOpen(SENSOR_DEVICE_TB600B_TVOC10_DEV, O_RDWR);
     if (sdev->fd < 0) {
-        printf("open %s error\n", SENSOR_DEVICE_TB600B_IAQ10_DEV);
+        printf("open %s error\n", SENSOR_DEVICE_TB600B_TVOC10_DEV);
         return -1;
     }
     
@@ -61,8 +53,8 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     cfg.serial_parity_mode  = PARITY_NONE;
     cfg.serial_bit_order    = 0;
     cfg.serial_invert_mode  = 0;
-#ifdef SENSOR_TB600B_IAQ10_DRIVER_EXTUART
-    cfg.ext_uart_no         = SENSOR_DEVICE_TB600B_IAQ10_DEV_EXT_PORT;
+#ifdef SENSOR_TB600B_TVOC10_DRIVER_EXTUART
+    cfg.ext_uart_no         = SENSOR_DEVICE_TB600B_TVOC10_DEV_EXT_PORT;
     cfg.port_configure      = PORT_CFG_INIT;
 #endif
 
@@ -84,7 +76,6 @@ static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
 {
     uint8_t tmp = 0;
     uint8_t idx = 0;
-    int32_t ret = 0;
 
     /* this instruction will read gas with temperature and humidity,return 13 datas*/
     ReadInstruction[0] = 0xFF;
@@ -130,19 +121,19 @@ static struct SensorDone done =
 };
 
 /**
- * @description: Init tb600b_iaq10 sensor and register
+ * @description: Init TB600B TVOC10 sensor and register
  * @return void
  */
-static void SensorDeviceTb600bIaq10Init(void)
+static void SensorDeviceTb600bTvoc10Init(void)
 {
-    tb600b_iaq10.name = SENSOR_DEVICE_TB600B_IAQ10;
-    tb600b_iaq10.info = &info;
-    tb600b_iaq10.done = &done;
+    tb600b_tvoc10.name = SENSOR_DEVICE_TB600B_TVOC10;
+    tb600b_tvoc10.info = &info;
+    tb600b_tvoc10.done = &done;
 
-    SensorDeviceRegister(&tb600b_iaq10);
+    SensorDeviceRegister(&tb600b_tvoc10);
 }
 
-static struct SensorQuantity tb600b_iaq10_iaq;
+static struct SensorQuantity tb600b_tvoc10_tvoc;
 
 /* check data*/
 static uint8_t getCheckSum(uint8_t *packet)
@@ -159,7 +150,7 @@ static uint8_t getCheckSum(uint8_t *packet)
 }
 
 /**
- * @description: Analysis tb600b_iaq10 result
+ * @description: Analysis TB600B TVOC10 result
  * @param quant - sensor quantity pointer
  * @return quantity value
  */
@@ -171,8 +162,7 @@ static int32_t QuantityRead(struct SensorQuantity *quant)
     uint32_t len = 0;
     uint8_t checksum = 0;
     uint8_t TH, TL, RhH, RhL;
-    uint16_t gas;
-    struct iaq_data result;
+    uint16_t ppb, ugm3;
 
     if (quant->sdev->done->read != NULL) {
         if(quant->sdev->status == SENSOR_DEVICE_PASSIVE) {
@@ -185,13 +175,15 @@ static int32_t QuantityRead(struct SensorQuantity *quant)
             checksum = getCheckSum(quant->sdev->buffer);
             if(checksum == quant->sdev->buffer[12])
             {
-                result.gas = (uint16_t)quant->sdev->buffer[6] * 256 + (uint16_t)quant->sdev->buffer[7];
-                result.TH = ((int)((quant->sdev->buffer[8] << 8)|quant->sdev->buffer[9]))/100;
-                result.TL = ((int)((quant->sdev->buffer[8] << 8)|quant->sdev->buffer[9]))%100;
-                result.RhH = ((unsigned int)((quant->sdev->buffer[10] << 8)|quant->sdev->buffer[11]))/100;
-                result.RhL = ((unsigned int)((quant->sdev->buffer[10] << 8)|quant->sdev->buffer[11]))%100;
-                printf("Gas concentration is : %dppb\nThe temperature is : %d.%d℃\nThe humidity is : %d.%drh%%\n", result.gas, result.TH, result.TL, result.RhH, result.RhL);
-                return result.gas;
+                ugm3 = (uint16_t)quant->sdev->buffer[2] * 256 + (uint16_t)quant->sdev->buffer[3];
+                ppb = (uint16_t)quant->sdev->buffer[6] * 256 + (uint16_t)quant->sdev->buffer[7];
+                TH = ((int)((quant->sdev->buffer[8] << 8)|quant->sdev->buffer[9]))/100;
+                TL = ((int)((quant->sdev->buffer[8] << 8)|quant->sdev->buffer[9]))%100;
+                RhH = ((unsigned int)((quant->sdev->buffer[10] << 8)|quant->sdev->buffer[11]))/100;
+                RhL = ((unsigned int)((quant->sdev->buffer[10] << 8)|quant->sdev->buffer[11]))%100;
+
+                printf("tvoc concentration is : %dug/m³(%dppb)\nThe temperature is : %d.%d℃\nThe humidity is : %d.%drh%%\n", ugm3, ppb, TH, TL, RhH, RhL);
+                return ppb;
             }
             else
             {
@@ -211,25 +203,25 @@ static int32_t QuantityRead(struct SensorQuantity *quant)
 }
 
 /**
- * @description: Init tb600b_iaq10 quantity and register
+ * @description: Init TB600B TVOC10 quantity and register
  * @return 0
  */
-int Tb600bIaq10IaqInit(void)
+int Tb600bTvoc10TvocInit(void)
 {
-    SensorDeviceTb600bIaq10Init();
+    SensorDeviceTb600bTvoc10Init();
     
-    tb600b_iaq10_iaq.name = SENSOR_QUANTITY_TB600B_IAQ;
-    tb600b_iaq10_iaq.type = SENSOR_QUANTITY_IAQ;
-    tb600b_iaq10_iaq.value.decimal_places = 0;
-    tb600b_iaq10_iaq.value.max_std = SENSOR_QUANTITY_VALUE_ERROR;
-    tb600b_iaq10_iaq.value.min_std = SENSOR_QUANTITY_VALUE_ERROR;
-    tb600b_iaq10_iaq.value.last_value = SENSOR_QUANTITY_VALUE_ERROR;
-    tb600b_iaq10_iaq.value.max_value = SENSOR_QUANTITY_VALUE_ERROR;
-    tb600b_iaq10_iaq.value.min_value = SENSOR_QUANTITY_VALUE_ERROR;
-    tb600b_iaq10_iaq.sdev = &tb600b_iaq10;
-    tb600b_iaq10_iaq.ReadValue = QuantityRead;
+    tb600b_tvoc10_tvoc.name = SENSOR_QUANTITY_TB600B_TVOC;
+    tb600b_tvoc10_tvoc.type = SENSOR_QUANTITY_TVOC;
+    tb600b_tvoc10_tvoc.value.decimal_places = 0;
+    tb600b_tvoc10_tvoc.value.max_std = SENSOR_QUANTITY_VALUE_ERROR;
+    tb600b_tvoc10_tvoc.value.min_std = SENSOR_QUANTITY_VALUE_ERROR;
+    tb600b_tvoc10_tvoc.value.last_value = SENSOR_QUANTITY_VALUE_ERROR;
+    tb600b_tvoc10_tvoc.value.max_value = SENSOR_QUANTITY_VALUE_ERROR;
+    tb600b_tvoc10_tvoc.value.min_value = SENSOR_QUANTITY_VALUE_ERROR;
+    tb600b_tvoc10_tvoc.sdev = &tb600b_tvoc10;
+    tb600b_tvoc10_tvoc.ReadValue = QuantityRead;
 
-    SensorQuantityRegister(&tb600b_iaq10_iaq);
+    SensorQuantityRegister(&tb600b_tvoc10_tvoc);
 
     return 0;
 }

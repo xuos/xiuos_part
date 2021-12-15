@@ -4,6 +4,13 @@ menuconfig SUPPORT_SENSOR_FRAMEWORK
         select TRANSFORM_LAYER_ATTRIUBUTE
 
 if SUPPORT_SENSOR_FRAMEWORK
+        menuconfig SENSOR_TVOC
+                bool "Using TVOC sensor device"
+                default n
+        if SENSOR_TVOC
+        source "$APP_DIR/Framework/sensor/tvoc/Kconfig"
+        endif
+
         menuconfig SENSOR_IAQ
                 bool "Using IAQ sensor device"
                 default n
