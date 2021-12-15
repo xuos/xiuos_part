@@ -323,7 +323,6 @@
 
 #define APPLICATION_KNOWING
 #define K210_DETECT_ENTRY
-#define K210_DETECT_CONFIGJSON "/kmodel/face.json"
 
 /* sensor app */
 

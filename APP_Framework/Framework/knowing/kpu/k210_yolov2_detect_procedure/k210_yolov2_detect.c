@@ -34,6 +34,8 @@ void k210_detect(char *json_file_path)
     int ret = 0;
     int result = 0;
     int size = 0;
+    char kmodel_path[127] = {};
+
     yolov2_params_t detect_params = param_parse(json_file_path);
     g_fd = open("/dev/ov2640", O_RDONLY);
     if (g_fd < 0) {
@@ -72,8 +74,16 @@ void k210_detect(char *json_file_path)
     /*
         load memory
     */
-    printf("%s\n", detect_params.kmodel_path);
-    kmodel_fd = open(detect_params.kmodel_path, O_RDONLY);
+    // kmodel path generate from json file path, *.json -> *.kmodel
+    memcpy(kmodel_path, json_file_path, strlen(json_file_path));
+    int idx_suffix_start = strlen(json_file_path) - 4;
+    const char kmodel_suffix[7] = "kmodel";
+    int kmodel_suffix_len = 6;
+    while (kmodel_suffix_len--) {
+        kmodel_path[idx_suffix_start + 5 - kmodel_suffix_len] = kmodel_suffix[5 - kmodel_suffix_len];
+    }
+    printf("kmodel path: %s\n", kmodel_path);
+    kmodel_fd = open(kmodel_path, O_RDONLY);
     if (kmodel_fd < 0) {
         printf("open kmodel fail");
         close(g_fd);
@@ -225,7 +235,17 @@ void detect_delete()
 // {
 //     int kmodel_fd = 0;
 //     int size = 0;
-//     kmodel_fd = open(detect_params.kmodel_path, O_RDONLY);
+//     char kmodel_path[127] = {};
+//     // kmodel path generate from json file path, *.json -> *.kmodel
+//     memcpy(kmodel_path, json_file_path, strlen(json_file_path));
+//     int idx_suffix_start = strlen(json_file_path) - 4;
+//     const char kmodel_suffix[5] = "kmodel";
+//     int kmodel_suffix_len = 5;
+//     while (kmodel_suffix_len--) {
+//         kmodel_path[idx_suffix_start + 4 - kmodel_suffix_len] = kmodel_suffix[4 - kmodel_suffix_len];
+//     }
+//     printf("Kmodel path: %s\n", kmodel_path);
+//     kmodel_fd = open(kmodel_path, O_RDONLY);
 
 //     model_data = (unsigned char *)malloc(detect_params.kmodel_size + 255);
 //     if (NULL == model_data) {

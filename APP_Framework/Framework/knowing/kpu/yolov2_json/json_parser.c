@@ -23,8 +23,10 @@ yolov2_params_t param_parse(char *json_file_path)
 
     fin = open(json_file_path, O_RDONLY);
     if (!fin) {
-        printf("Error open file %s", json_file_path);
+        printf("Error open file %s\n", json_file_path);
         exit(-1);
+    } else{
+        printf("Reading config from: %s\n", json_file_path);
     }
     read(fin, buffer, sizeof(buffer));
     close(fin);
@@ -96,11 +98,11 @@ yolov2_params_t param_parse(char *json_file_path)
         printf("Net input width must match sensor output width!\n");
         exit(-1);
     }
-    // kmodel_path
-    json_item = cJSON_GetObjectItem(json_obj, "kmodel_path");
-    memset(params_return.kmodel_path, 0, 127);
-    memcpy(params_return.kmodel_path, json_item->valuestring, strlen(json_item->valuestring));
-    printf("Got kmodel_path: %s\n", params_return.kmodel_path);
+    // // kmodel_path
+    // json_item = cJSON_GetObjectItem(json_obj, "kmodel_path");
+    // memset(params_return.kmodel_path, 0, 127);
+    // memcpy(params_return.kmodel_path, json_item->valuestring, strlen(json_item->valuestring));
+    // printf("Got kmodel_path: %s\n", params_return.kmodel_path);
     // kmodel_size
     json_item = cJSON_GetObjectItem(json_obj, "kmodel_size");
     params_return.kmodel_size = json_item->valueint;

@@ -10,7 +10,6 @@ typedef struct {
     int net_output_shape[3];
     int net_input_size[2];
     int sensor_output_size[2];
-    char kmodel_path[127];
     int kmodel_size;
     float obj_thresh[20];
     float nms_thresh;

@@ -8,9 +8,3 @@ config K210_DETECT_ENTRY
 	depends on USING_K210_YOLOV2_DETECT
     select LIB_USING_CJSON
     default n
-
-config K210_DETECT_CONFIGJSON
-	string "k210 detect config path"
-	default "/kmodel/face.json"
-	---help---
-		k210 detect task config json path
