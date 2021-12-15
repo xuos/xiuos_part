@@ -5,6 +5,16 @@ menu "sensor app"
         default n
 
         if APPLICATION_SENSOR
+            menuconfig APPLICATION_SENSOR_IAQ
+                bool "Using sensor IAQ apps"
+                default n
+
+                if APPLICATION_SENSOR_IAQ
+                    config APPLICATION_SENSOR_IAQ_TB600B_IAQ10
+                    bool "Using sensor TB600B_IAQ10 apps"
+                    default n
+                endif
+
             menuconfig APPLICATION_SENSOR_CH4
                 bool "Using sensor CH4 apps"
                 default n

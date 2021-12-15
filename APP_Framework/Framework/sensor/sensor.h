@@ -52,6 +52,7 @@ extern "C" {
 #define SENSOR_ABILITY_PM       ((uint32_t)(1 << SENSOR_QUANTITY_PM))
 #define SENSOR_ABILITY_VOICE    ((uint32_t)(1 << SENSOR_QUANTITY_VOICE))
 #define SENSOR_ABILITY_CH4      ((uint32_t)(1 << SENSOR_QUANTITY_CH4))
+#define SENSOR_ABILITY_IAQ      ((uint32_t)(1 << SENSOR_QUANTITY_IAQ))
 
 struct SensorProductInfo {
     uint32_t ability;           /* Bitwise OR of sensor ability */
@@ -91,6 +92,7 @@ enum SensorQuantityType {
     SENSOR_QUANTITY_PM,
     SENSOR_QUANTITY_VOICE,
     SENSOR_QUANTITY_CH4,
+    SENSOR_QUANTITY_IAQ,
     /* ...... */
     SENSOR_QUANTITY_END,
 };

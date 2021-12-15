@@ -4,6 +4,13 @@ menuconfig SUPPORT_SENSOR_FRAMEWORK
         select TRANSFORM_LAYER_ATTRIUBUTE
 
 if SUPPORT_SENSOR_FRAMEWORK
+        menuconfig SENSOR_IAQ
+                bool "Using IAQ sensor device"
+                default n
+        if SENSOR_IAQ
+        source "$APP_DIR/Framework/sensor/iaq/Kconfig"
+        endif
+
         menuconfig SENSOR_CH4
                 bool "Using Ch4 sensor device"
                 default n

@@ -1,5 +1,9 @@
 SRC_FILES := 
 
+ifeq ($(CONFIG_APPLICATION_SENSOR_IAQ_TB600B_IAQ10), y)
+	SRC_FILES += iaq_tb600b_iaq10.c
+endif
+
 ifeq ($(CONFIG_APPLICATION_SENSOR_CH4_AS830), y)
 	SRC_FILES += ch4_as830.c
 endif

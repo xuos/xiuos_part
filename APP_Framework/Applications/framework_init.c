@@ -30,6 +30,7 @@ extern int Hs300xHumidityInit(void);
 extern int Ps5308Pm1_0Init(void);
 extern int Zg09Co2Init(void);
 extern int As830Ch4Init(void);
+extern int Tb600bIaq10IaqInit(void);
 
 typedef int (*InitFunc)(void);
 struct InitDesc
@@ -92,6 +93,10 @@ static struct InitDesc sensor_desc[] =
 
 #ifdef SENSOR_AS830
 	{ "ch4_as830", As830Ch4Init },
+#endif
+
+#ifdef SENSOR_TB600B_IAQ10
+	{ "iaq_tb600b_iaq10", Tb600bIaq10IaqInit },
 #endif
 
 	{ "NULL", NULL },

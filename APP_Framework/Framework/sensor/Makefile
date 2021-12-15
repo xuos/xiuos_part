@@ -1,5 +1,9 @@
 SRC_FILES := sensor.c
 
+ifeq ($(CONFIG_SENSOR_IAQ),y)
+	SRC_DIR += iaq
+endif
+
 ifeq ($(CONFIG_SENSOR_CH4),y)
 	SRC_DIR += ch4
 endif
