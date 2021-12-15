@@ -5,6 +5,16 @@ menu "sensor app"
         default n
 
         if APPLICATION_SENSOR
+            menuconfig APPLICATION_SENSOR_HCHO
+                bool "Using sensor HCHO apps"
+                default n
+
+                if APPLICATION_SENSOR_HCHO
+                    config APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS
+                    bool "Using sensor TB600B_WQ_HCHO1OS apps"
+                    default n
+                endif
+
             menuconfig APPLICATION_SENSOR_TVOC
                 bool "Using sensor TVOC apps"
                 default n

@@ -4,6 +4,13 @@ menuconfig SUPPORT_SENSOR_FRAMEWORK
         select TRANSFORM_LAYER_ATTRIUBUTE
 
 if SUPPORT_SENSOR_FRAMEWORK
+        menuconfig SENSOR_HCHO
+                bool "Using HCHO sensor device"
+                default n
+        if SENSOR_HCHO
+        source "$APP_DIR/Framework/sensor/hcho/Kconfig"
+        endif
+
         menuconfig SENSOR_TVOC
                 bool "Using TVOC sensor device"
                 default n

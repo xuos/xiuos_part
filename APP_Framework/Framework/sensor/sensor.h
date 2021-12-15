@@ -54,6 +54,7 @@ extern "C" {
 #define SENSOR_ABILITY_CH4      ((uint32_t)(1 << SENSOR_QUANTITY_CH4))
 #define SENSOR_ABILITY_IAQ      ((uint32_t)(1 << SENSOR_QUANTITY_IAQ))
 #define SENSOR_ABILITY_TVOC     ((uint32_t)(1 << SENSOR_QUANTITY_TVOC))
+#define SENSOR_ABILITY_HCHO     ((uint32_t)(1 << SENSOR_QUANTITY_HCHO))
 
 struct SensorProductInfo {
     uint32_t ability;           /* Bitwise OR of sensor ability */

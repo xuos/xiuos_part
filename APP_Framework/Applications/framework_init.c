@@ -32,6 +32,7 @@ extern int Zg09Co2Init(void);
 extern int As830Ch4Init(void);
 extern int Tb600bIaq10IaqInit(void);
 extern int Tb600bTvoc10TvocInit(void);
+extern int Tb600bWqHcho1osInit(void);
 
 typedef int (*InitFunc)(void);
 struct InitDesc
@@ -102,6 +103,10 @@ static struct InitDesc sensor_desc[] =
 
 #ifdef SENSOR_TB600B_TVOC10
 	{ "tvoc_tb600b_tvoc10", Tb600bTvoc10TvocInit },
+#endif
+
+#ifdef SENSOR_TB600B_WQ_HCHO1OS
+	{ "tvoc_tb600b_wq_hcho1os", Tb600bWqHcho1osInit },
 #endif
 
 	{ "NULL", NULL },
