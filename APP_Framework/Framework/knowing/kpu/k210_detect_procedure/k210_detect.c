@@ -97,9 +97,18 @@ void k210_detect(char *json_file_path)
         }
     }
     unsigned char *model_data_align = (unsigned char *)(((unsigned int)model_data + 255) & (~255));
-    dvp_set_ai_addr((uint32_t)kpurgbbuffer,
-                    (uint32_t)(kpurgbbuffer + detect_params.net_input_size[0] * detect_params.net_input_size[1]),
-                    (uint32_t)(kpurgbbuffer + detect_params.net_input_size[0] * detect_params.net_input_size[1] * 2));
+    // dvp_set_ai_addr((uint32_t)kpurgbbuffer,
+    //                 (uint32_t)(kpurgbbuffer + detect_params.net_input_size[0] * detect_params.net_input_size[1]),
+    //                 (uint32_t)(kpurgbbuffer + detect_params.net_input_size[0] * detect_params.net_input_size[1] * 2));
+    dvp_set_ai_addr(
+        (uint32_t)(kpurgbbuffer +
+                   detect_params.net_input_size[1] * (detect_params.net_input_size[0] - detect_params.sensor_output_size[0])),
+        (uint32_t)(kpurgbbuffer +
+                   detect_params.net_input_size[1] * (detect_params.net_input_size[0] - detect_params.sensor_output_size[0]) +
+                   detect_params.net_input_size[0] * detect_params.net_input_size[1]),
+        (uint32_t)(kpurgbbuffer +
+                   detect_params.net_input_size[1] * (detect_params.net_input_size[0] - detect_params.sensor_output_size[0]) +
+                   detect_params.net_input_size[0] * detect_params.net_input_size[1] * 2));
     if (kpu_load_kmodel(&detect_task, model_data_align) != 0) {
         printf("\nmodel init error\n");
         close(g_fd);

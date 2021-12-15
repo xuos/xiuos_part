@@ -91,6 +91,11 @@ yolov2_params_t param_parse(char *json_file_path)
         params_return.sensor_output_size[i] = json_array_item->valueint;
         printf("%d: %d\n", i, params_return.sensor_output_size[i]);
     }
+    // check sensor output width and net input width
+    if (params_return.sensor_output_size[1] != params_return.net_input_size[1]) {
+        printf("Net input width must match sensor output width!\n");
+        exit(-1);
+    }
     // kmodel_path
     json_item = cJSON_GetObjectItem(json_obj, "kmodel_path");
     memset(params_return.kmodel_path, 0, 127);
