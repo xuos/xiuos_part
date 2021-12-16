@@ -1,5 +1,21 @@
 SRC_FILES := 
 
+ifeq ($(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS), y)
+	SRC_FILES += hcho_tb600b_wq_hcho1os.c
+endif
+
+ifeq ($(CONFIG_APPLICATION_SENSOR_TVOC_TB600B_TVOC10), y)
+	SRC_FILES += tvoc_tb600b_tvoc10.c
+endif
+
+ifeq ($(CONFIG_APPLICATION_SENSOR_IAQ_TB600B_IAQ10), y)
+	SRC_FILES += iaq_tb600b_iaq10.c
+endif
+
+ifeq ($(CONFIG_APPLICATION_SENSOR_CH4_AS830), y)
+	SRC_FILES += ch4_as830.c
+endif
+
 ifeq ($(CONFIG_APPLICATION_SENSOR_CO2_ZG09), y)
 	SRC_FILES += co2_zg09.c
 endif

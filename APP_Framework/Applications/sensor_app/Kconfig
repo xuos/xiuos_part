@@ -5,6 +5,46 @@ menu "sensor app"
         default n
 
         if APPLICATION_SENSOR
+            menuconfig APPLICATION_SENSOR_HCHO
+                bool "Using sensor HCHO apps"
+                default n
+
+                if APPLICATION_SENSOR_HCHO
+                    config APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS
+                    bool "Using sensor TB600B_WQ_HCHO1OS apps"
+                    default n
+                endif
+
+            menuconfig APPLICATION_SENSOR_TVOC
+                bool "Using sensor TVOC apps"
+                default n
+
+                if APPLICATION_SENSOR_TVOC
+                    config APPLICATION_SENSOR_TVOC_TB600B_TVOC10
+                    bool "Using sensor TB600B_TVOC10 apps"
+                    default n
+                endif
+
+            menuconfig APPLICATION_SENSOR_IAQ
+                bool "Using sensor IAQ apps"
+                default n
+
+                if APPLICATION_SENSOR_IAQ
+                    config APPLICATION_SENSOR_IAQ_TB600B_IAQ10
+                    bool "Using sensor TB600B_IAQ10 apps"
+                    default n
+                endif
+
+            menuconfig APPLICATION_SENSOR_CH4
+                bool "Using sensor CH4 apps"
+                default n
+
+                if APPLICATION_SENSOR_CH4
+                    config APPLICATION_SENSOR_CH4_AS830
+                    bool "Using sensor AS830 apps"
+                    default n
+                endif
+
             menuconfig APPLICATION_SENSOR_CO2
                 bool "Using sensor CO2 apps"
                 default n
