@@ -7,14 +7,16 @@
 yolov2_params_t param_parse(char *json_file_path)
 {
     yolov2_params_t params_return;
+    params_return.is_valid = 1;
     int fin;
     char buffer[JSON_BUFFER_SIZE] = "";
     // char *buffer;
-    // if (NULL != (buffer = (char*)malloc(JSON_BUFFER_SIZE * sizeof(char)))) {
+    // if ((yolov2_params_t *)NULL != (buffer = (char*)malloc(JSON_BUFFER_SIZE * sizeof(char)))) {
     //     memset(buffer, 0, JSON_BUFFER_SIZE * sizeof(char));
     // } else {
     //     printf("Json buffer malloc failed!");
-    //     exit(-1);
+    //     params_return.is_valid = 0;
+    //     return params_return;
     // }
     int array_size;
     cJSON *json_obj;
@@ -24,8 +26,9 @@ yolov2_params_t param_parse(char *json_file_path)
     fin = open(json_file_path, O_RDONLY);
     if (!fin) {
         printf("Error open file %s\n", json_file_path);
-        exit(-1);
-    } else{
+        params_return.is_valid = 0;
+        return params_return;
+    } else {
         printf("Reading config from: %s\n", json_file_path);
     }
     read(fin, buffer, sizeof(buffer));
@@ -42,7 +45,8 @@ yolov2_params_t param_parse(char *json_file_path)
     array_size = cJSON_GetArraySize(json_item);
     if (ANCHOR_NUM * 2 != array_size) {
         printf("Expect anchor size: %d, got %d in json file", ANCHOR_NUM * 2, array_size);
-        exit(-1);
+        params_return.is_valid = 0;
+        return params_return;
     } else {
         printf("Got %d anchors from json file\n", ANCHOR_NUM);
     }
@@ -56,7 +60,8 @@ yolov2_params_t param_parse(char *json_file_path)
     array_size = cJSON_GetArraySize(json_item);
     if (2 != array_size) {
         printf("Expect net_input_size: %d, got %d in json file", 2, array_size);
-        exit(-1);
+        params_return.is_valid = 0;
+        return params_return;
     } else {
         printf("Got %d net_input_size from json file\n", 2);
     }
@@ -70,7 +75,8 @@ yolov2_params_t param_parse(char *json_file_path)
     array_size = cJSON_GetArraySize(json_item);
     if (3 != array_size) {
         printf("Expect net_output_shape: %d, got %d in json file", 3, array_size);
-        exit(-1);
+        params_return.is_valid = 0;
+        return params_return;
     } else {
         printf("Got %d net_output_shape from json file\n", 3);
     }
@@ -84,7 +90,8 @@ yolov2_params_t param_parse(char *json_file_path)
     array_size = cJSON_GetArraySize(json_item);
     if (2 != array_size) {
         printf("Expect sensor_output_size: %d, got %d in json file", 2, array_size);
-        exit(-1);
+        params_return.is_valid = 0;
+        return params_return;
     } else {
         printf("Got %d sensor_output_size from json file\n", 2);
     }
@@ -96,7 +103,8 @@ yolov2_params_t param_parse(char *json_file_path)
     // check sensor output width and net input width
     if (params_return.sensor_output_size[1] != params_return.net_input_size[1]) {
         printf("Net input width must match sensor output width!\n");
-        exit(-1);
+        params_return.is_valid = 0;
+        return params_return;
     }
     // // kmodel_path
     // json_item = cJSON_GetObjectItem(json_obj, "kmodel_path");
@@ -112,7 +120,8 @@ yolov2_params_t param_parse(char *json_file_path)
     params_return.class_num = cJSON_GetArraySize(json_item);
     if (0 >= params_return.class_num) {
         printf("No labels!");
-        exit(-1);
+        params_return.is_valid = 0;
+        return params_return;
     } else {
         printf("Got %d labels\n", params_return.class_num);
     }
@@ -128,7 +137,8 @@ yolov2_params_t param_parse(char *json_file_path)
     if (params_return.class_num != array_size) {
         printf("label number and thresh number mismatch! label number : %d, obj thresh number %d", params_return.class_num,
                array_size);
-        exit(-1);
+        params_return.is_valid = 0;
+        return params_return;
     } else {
         printf("Got %d obj_thresh\n", array_size);
     }

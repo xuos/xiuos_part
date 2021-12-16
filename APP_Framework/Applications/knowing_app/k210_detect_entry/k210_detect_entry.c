@@ -7,10 +7,9 @@ static void detect_app(int argc, char *argv[])
 {
     if (2 != argc) {
         printf("Usage: detect_app <ABSOLUTE_CONFIG_JSON_PATH>");
-        exit(-1);
+    } else {
+        k210_detect(argv[1]);
     }
-
-    k210_detect(argv[1]);
 
     return;
 }

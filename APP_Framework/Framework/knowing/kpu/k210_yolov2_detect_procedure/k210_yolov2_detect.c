@@ -37,6 +37,10 @@ void k210_detect(char *json_file_path)
     char kmodel_path[127] = {};
 
     yolov2_params_t detect_params = param_parse(json_file_path);
+    if (!detect_params.is_valid) {
+        return;
+    }
+
     g_fd = open("/dev/ov2640", O_RDONLY);
     if (g_fd < 0) {
         printf("open ov2640 fail !!");
@@ -128,17 +132,19 @@ void k210_detect(char *json_file_path)
         free(model_data);
         return;
     }
+
     detect_rl.anchor_number = ANCHOR_NUM;
     detect_rl.anchor = detect_params.anchor;
-    detect_rl.threshold = malloc(detect_params.class_num * sizeof(float));
-    for (int idx = 0; idx < detect_params.class_num; idx++) {
-        detect_rl.threshold[idx] = detect_params.obj_thresh[idx];
-    }
     detect_rl.nms_value = detect_params.nms_thresh;
+    detect_rl.classes = detect_params.class_num;
     result =
         region_layer_init(&detect_rl, detect_params.net_output_shape[0], detect_params.net_output_shape[1],
                           detect_params.net_output_shape[2], detect_params.net_input_size[1], detect_params.net_input_size[0]);
     printf("region_layer_init result %d \n\r", result);
+    for (int idx = 0; idx < detect_params.class_num; idx++) {
+        detect_rl.threshold[idx] = detect_params.obj_thresh[idx];
+    }
+
     size_t stack_size = STACK_SIZE;
     pthread_attr_t attr;                      /* 线程属性 */
     struct sched_param prio;                  /* 线程优先级 */
@@ -200,8 +206,8 @@ static void *thread_detect_entry(void *parameter)
                    detect_info.obj[cnt].prob);
         }
 #ifdef BSP_USING_LCD
-        lcd_draw_picture(0, 0, (uint16_t)detect_params.sensor_output_size[1], (uint16_t)detect_params.sensor_output_size[0],
-                         (uint32_t *)showbuffer);
+        lcd_draw_picture(0, 0, (uint16_t)detect_params.sensor_output_size[1] - 1,
+                         (uint16_t)detect_params.sensor_output_size[0] - 1, (uint32_t *)showbuffer);
         // lcd_show_image(0, 0, (uint16_t)detect_params.sensor_output_size[1], (uint16_t)detect_params.sensor_output_size[0],
         // (unsigned int *)showbuffer);
 #endif

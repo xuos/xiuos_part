@@ -15,6 +15,7 @@ typedef struct {
     float nms_thresh;
     char labels[20][32];
     int class_num;
+    int is_valid;
 } yolov2_params_t;
 
 yolov2_params_t param_parse(char *json_file_path);

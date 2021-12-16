@@ -27,7 +27,7 @@
 	"kmodel_size": 2714044,
 	"obj_thresh": [
 		0.7,
-		0.9
+		0.99
 	],
 	"labels": [
 		"head",

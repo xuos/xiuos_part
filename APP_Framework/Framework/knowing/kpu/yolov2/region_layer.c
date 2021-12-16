@@ -58,12 +58,14 @@ int region_layer_init(region_layer_t *rl, int width, int height, int channels, i
         goto malloc_error;
     }
     for (uint32_t i = 0; i < rl->boxes_number; i++) rl->probs[i] = &(rl->probs_buf[i * (rl->classes + 1)]);
+    rl->threshold = malloc(rl->classes * sizeof(float));
     return 0;
 malloc_error:
     free(rl->output);
     free(rl->boxes);
     free(rl->probs_buf);
     free(rl->probs);
+    free(rl->threshold);
     return flag;
 }
 
@@ -73,6 +75,7 @@ void region_layer_deinit(region_layer_t *rl)
     free(rl->boxes);
     free(rl->probs_buf);
     free(rl->probs);
+    free(rl->threshold);
 }
 
 static inline float sigmoid(float x) { return 1.f / (1.f + expf(-x)); }
