@@ -23,6 +23,11 @@ APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-li
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/ruy #
 endif
 
+ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK), y)
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/interoperability/opcua #
+endif
+
 ifeq ($(CONFIG_CRYPTO), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/security/crypto/include #
 endif

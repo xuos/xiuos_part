@@ -1,3 +1,5 @@
-SRC_DIR := shared plc
+SRC_DIR := 
 
 include $(KERNEL_ROOT)/compiler.mk
+
+

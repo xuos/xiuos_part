@@ -1,0 +1,5 @@
+
+menuconfig USING_CONTROL_PLC_OPCUA
+        bool "PLC support OPCUA"
+        default y
+
