@@ -1,8 +1,4 @@
-#ifdef USING_K210_YOLOV2_DETECT
 #include "k210_yolov2_detect.h"
-#endif
-#include <transform.h>
-
 static void detect_app(int argc, char *argv[])
 {
     if (2 != argc) {
