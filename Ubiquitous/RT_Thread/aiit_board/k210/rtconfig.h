@@ -291,9 +291,6 @@
 #define BSP_DVP_CMOS_XCLK_PIN 46
 #define BSP_DVP_CMOS_PCLK_PIN 47
 #define BSP_DVP_CMOS_HREF_PIN 45
-#define RW007_SPIDEV_NAME "spi11"
-#define RW007_INT_BUSY_PIN 7
-#define RW007_RST_PIN 6
 
 /* Kendryte SDK Config */
 
@@ -301,9 +298,6 @@
 
 /* More Drivers */
 
-#define PKG_USING_RW007
-#define RW007_NOT_USE_EXAMPLE_DRIVERS
-#define RW007_SPI_MAX_HZ 20000000
 #define DRV_USING_OV2640
 
 /* APP_Framework */
@@ -313,6 +307,9 @@
 /* config stack size and priority of main task */
 
 #define MAIN_KTASK_STACK_SIZE 1024
+
+/* ota app  */
+
 
 /* test app */
 
@@ -325,30 +322,21 @@
 /* knowing app */
 
 #define APPLICATION_KNOWING
-#define APP_MNIST
-#define FACE_DETECT
+#define K210_DETECT_ENTRY
 
 /* sensor app */
 
 #define APPLICATION_SENSOR
-#define APPLICATION_SENSOR_VOICE
-#define APPLICATION_SENSOR_VOICE_D124
 
 /* Framework */
 
 #define TRANSFORM_LAYER_ATTRIUBUTE
 #define ADD_XIUOS_FETURES
-#define SUPPORT_SENSOR_FRAMEWORK
-#define SENSOR_VOICE
-#define SENSOR_D124
-#define SENSOR_DEVICE_D124 "d124_1"
-#define SENSOR_QUANTITY_D124_VOICE "voice_1"
-#define SENSOR_DEVICE_D124_DEV "/dev/uar2"
 #define SUPPORT_KNOWING_FRAMEWORK
-#define USING_TENSORFLOWLITEMICRO
-#define USING_TENSORFLOWLITEMICRO_NORMAL
-#define USING_KPU_POSTPROCESSING
+#define USING_KPU_PROCESSING
 #define USING_YOLOV2
+#define USING_YOLOV2_JSONPARSER
+#define USING_K210_YOLOV2_DETECT
 
 /* Security */
 
