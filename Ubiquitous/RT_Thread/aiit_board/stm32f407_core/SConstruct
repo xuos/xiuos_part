@@ -74,7 +74,7 @@ objs.extend(SConscript(os.path.join(libraries_path_prefix, stm32_library, 'SCons
 objs.extend(SConscript(os.path.join(libraries_path_prefix, 'HAL_Drivers', 'SConscript')))
 
 # include more drivers
-objs.extend(SConscript(os.getcwd() + '/../../drivers/SConscript'))
+objs.extend(SConscript(os.getcwd() + '/../../app_match_rt-thread/SConscript'))
 
 # include APP_Framework/Framework
 objs.extend(SConscript(os.getcwd() + '/../../../../APP_Framework/Framework/SConscript'))
