@@ -2,8 +2,28 @@
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2018 NXP
  * All rights reserved.
- * 
+ *
  * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+/*
+ * Copyright (c) 2021 AIIT XUOS Lab
+ * XiUOS is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *        http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
+
+/**
+ * @file fsl_common.h
+ * @brief common drivers header
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2021.11.11
  */
 
 #ifndef _FSL_COMMON_H_
@@ -126,7 +146,7 @@ enum _status_groups
     kStatusGroup_LPC_I2C_1 = 97,              /*!< Group number for LPC_I2C_1 status codes. */
     kStatusGroup_NOTIFIER = 98,               /*!< Group number for NOTIFIER status codes. */
     kStatusGroup_DebugConsole = 99,           /*!< Group number for debug console status codes. */
-    kStatusGroup_SEMC = 100,                  /*!< Group number for SEMC status codes. */    
+    kStatusGroup_SEMC = 100,                  /*!< Group number for SEMC status codes. */
     kStatusGroup_ApplicationRangeStart = 101, /*!< Starting number for application groups. */
     kStatusGroup_IAP = 102,                   /*!< Group number for IAP status codes */
 
@@ -371,7 +391,7 @@ _Pragma("diag_suppress=Pm120")
 #define AT_QUICKACCESS_SECTION_DATA(func) func
 #else
 #error Toolchain not supported.
-#endif    
+#endif
 #endif /* __FSL_SDK_DRIVER_QUICK_ACCESS_ENABLE */
 /* @} */
 
@@ -525,7 +545,7 @@ _Pragma("diag_suppress=Pm120")
      */
     uint32_t InstallIRQHandler(IRQn_Type irq, uint32_t irqHandler);
 #endif /* ENABLE_RAM_VECTOR_TABLE. */
-		
+
 #if (defined(FSL_FEATURE_SOC_SYSCON_COUNT) && (FSL_FEATURE_SOC_SYSCON_COUNT > 0))
     /*!
      * @brief Enable specific interrupt for wake-up from deep-sleep mode.
@@ -566,15 +586,15 @@ _Pragma("diag_suppress=Pm120")
      * @param size The length required to malloc.
      * @param alignbytes The alignment size.
      * @retval The allocated memory.
-     */    
+     */
     void *SDK_Malloc(size_t size, size_t alignbytes);
-    
+
     /*!
      * @brief Free memory.
      *
      * @param ptr The memory to be release.
-     */ 
-    void SDK_Free(void *ptr);    
+     */
+    void SDK_Free(void *ptr);
 
 #if defined(__cplusplus)
 }

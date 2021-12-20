@@ -1,3 +1,4 @@
-SRC_DIR := shared plc
+SRC_DIR := shared interoperability
 
 include $(KERNEL_ROOT)/compiler.mk
+

@@ -29,7 +29,7 @@
 /**
 * @file link.lds
 * @brief ok1052-c Linker script
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-28
 */
@@ -38,10 +38,10 @@
 File name: link.lds
 Description: ok1052-c Linker script
 Others: take MIMXRT1052xxxxx_flexspi_nor.ld for references
-History: 
+History:
 1. Date: 2021-05-28
 Author: AIIT XUOS Lab
-Modification: 
+Modification:
 1. add shell cmd table and g_service_table
 *************************************************/
 
@@ -57,7 +57,7 @@ MEMORY
   m_interrupts          (RX)  : ORIGIN = 0x60002000, LENGTH = 0x00000400
   m_text                (RX)  : ORIGIN = 0x60002400, LENGTH = 0x03FFDC00
   m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00020000
-  m_data2               (RW)  : ORIGIN = 0x20200000, LENGTH = 0x00040000
+  m_data2               (RW)  : ORIGIN = 0x20200000, LENGTH = 0x00060000
 }
 
 /* Define output sections */
@@ -241,9 +241,9 @@ SECTIONS
     stack_end = .;
     __StackTop = .;
     heap_start = .;
-  } > m_data
+  } > m_data2
 
-  PROVIDE(heap_end = ORIGIN(m_data) + LENGTH(m_data));
+  PROVIDE(heap_end = ORIGIN(m_data2) + LENGTH(m_data2));
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }

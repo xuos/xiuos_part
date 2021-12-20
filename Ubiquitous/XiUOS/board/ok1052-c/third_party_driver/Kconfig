@@ -5,3 +5,8 @@ select RESOURCES_SERIAL
 if BSP_USING_LPUART
 source "$BSP_DIR/third_party_driver/uart/Kconfig"
 endif
+
+menuconfig BSP_USING_LWIP
+bool "Using LwIP device"
+default n
+select RESOURCES_LWIP
