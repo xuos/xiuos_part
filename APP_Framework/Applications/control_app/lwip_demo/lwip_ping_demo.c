@@ -46,8 +46,6 @@
 
 #include "pin_mux.h"
 #include "clock_config.h"
-#include "fsl_gpio.h"
-#include "fsl_iomuxc.h"
 
 #include <transform.h>
 #include <sys_arch.h>

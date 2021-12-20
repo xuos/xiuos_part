@@ -426,8 +426,6 @@ void ENET_Init(ENET_Type *base,
     /* Reset ENET module. */
     ENET_Reset(base);
 
-    lw_print("lw: [%s] config %p %x\n", __func__, config, config->interrupt);
-
     /* Initializes the ENET transmit buffer descriptors. */
     ENET_SetTxBufferDescriptors(handle, config, bufferConfig);
 
@@ -504,9 +502,6 @@ static void ENET_SetHandler(ENET_Type *base,
         handle->txBdCurrent[count]     = buffCfg->txBdStartAddrAlign;
         handle->txBuffSizeAlign[count] = buffCfg->txBuffSizeAlign;
 
-        lw_print("lw: [%s] %d instance %d ring %d %p IRQ %p %#x\n", __func__,
-            count, instance, handle->ringNum, buffCfg->rxBdStartAddrAlign, config, config->interrupt);
-
         buffCfg++;
     }
 
@@ -516,19 +511,16 @@ static void ENET_SetHandler(ENET_Type *base,
     /* Set the IRQ handler when the interrupt is enabled. */
     if (config->interrupt & ENET_TX_INTERRUPT)
     {
-        lw_trace();
         s_enetTxIsr = ENET_TransmitIRQHandler;
         EnableIRQ(s_enetTxIrqId[instance]);
     }
     if (config->interrupt & ENET_RX_INTERRUPT)
     {
-        lw_trace();
         s_enetRxIsr = ENET_ReceiveIRQHandler;
         EnableIRQ(s_enetRxIrqId[instance]);
     }
     if (config->interrupt & ENET_ERR_INTERRUPT)
     {
-        lw_trace();
         s_enetErrIsr = ENET_ErrorIRQHandler;
         EnableIRQ(s_enetErrIrqId[instance]);
     }
@@ -920,10 +912,6 @@ static void ENET_ActiveSend(ENET_Type *base, uint32_t ringId)
 
     /* Ensure previous data update is completed with Data Synchronization Barrier before activing Tx BD. */
     __DSB();
-
-
-    //tst by wly
-//    lw_print("lw: [%s] ring %d\n", __func__, ringId);
 
     switch (ringId)
     {
@@ -1322,11 +1310,8 @@ status_t ENET_GetRxFrameSize(enet_handle_t *handle, uint32_t *length)
             }
             /* FCS is removed by MAC. */
             *length = curBuffDescrip->length;
-//            lw_print("lw: [%s] %p %p ctrl %#x ok\n", __func__, curBuffDescrip, handle->rxBdCurrent[0], curBuffDescrip->control);
             return kStatus_Success;
         }
-
-//        lw_print("lw: [%s] %p %p ctrl %#x\n", __func__, curBuffDescrip, handle->rxBdCurrent[0], curBuffDescrip->control);
 
         /* Increase the buffer descriptor, if it is the last one, increase to first one of the ring buffer. */
         if (curBuffDescrip->control & ENET_BUFFDESCRIPTOR_RX_WRAP_MASK)
@@ -1396,8 +1381,6 @@ status_t ENET_ReadFrame(ENET_Type *base, enet_handle_t *handle, uint8_t *data, u
     /* For data-NULL input, only update the buffer descriptor. */
     if (!data)
     {
-//        lw_print("lw: [%s] data %d ctrl %#x\n", __func__, length, handle->rxBdCurrent[0]->control);
-
         do
         {
             /* Update the control flag. */
@@ -1417,8 +1400,6 @@ status_t ENET_ReadFrame(ENET_Type *base, enet_handle_t *handle, uint8_t *data, u
     }
     else
     {
-
-//        lw_print("lw: [%s] data len %d ctrl %#x\n", __func__, length, handle->rxBdCurrent[0]->control);
 
 /* A frame on one buffer or several receive buffers are both considered. */
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
@@ -1489,9 +1470,6 @@ status_t ENET_ReadFrame(ENET_Type *base, enet_handle_t *handle, uint8_t *data, u
             /* Get the current buffer descriptor. */
             curBuffDescrip = handle->rxBdCurrent[0];
 
-
-//            lw_print("lw: [%s] ctrl %#x\n", __func__, handle->rxBdCurrent[0]->control);
-
 /* Add the cache invalidate maintain. */
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
             address = MEMORY_ConvertMemoryMapAddress((uint32_t)curBuffDescrip->buffer, kMEMORY_DMA2Local);
@@ -1517,8 +1495,6 @@ static void ENET_UpdateReadBuffers(ENET_Type *base, enet_handle_t *handle, uint3
     /* Sets the receive buffer descriptor with the empty flag. */
     handle->rxBdCurrent[ringId]->control |= ENET_BUFFDESCRIPTOR_RX_EMPTY_MASK;
 
-//    lw_print("lw: [%s] ring %d ctrl %#x\n", __func__, ringId, handle->rxBdCurrent[ringId]->control);
-
     /* Increase current buffer descriptor to the next one. */
     if (handle->rxBdCurrent[ringId]->control & ENET_BUFFDESCRIPTOR_RX_WRAP_MASK)
     {
@@ -1528,8 +1504,6 @@ static void ENET_UpdateReadBuffers(ENET_Type *base, enet_handle_t *handle, uint3
     {
         handle->rxBdCurrent[ringId]++;
     }
-
-//    lw_print("lw: [%s] ring %d changed ctrl %#x\n", __func__, ringId, handle->rxBdCurrent[ringId]->control);
 
     /* Ensure previous data update is completed with Data Synchronization Barrier before activing Rx BD. */
     __DSB();
@@ -1635,8 +1609,6 @@ status_t ENET_SendFrame(ENET_Type *base, enet_handle_t *handle, const uint8_t *d
         {
             handle->txBdCurrent[0]++;
         }
-
-//        lw_print("lw: [%s] ctrl %#x\n", __func__, curBuffDescrip->control);
 
         /* Active the transmit buffer descriptor. */
         ENET_ActiveSend(base, 0);
@@ -3129,8 +3101,6 @@ void ENET_ReceiveIRQHandler(ENET_Type *base, enet_handle_t *handle)
 {
     assert(handle);
     uint32_t mask = kENET_RxFrameInterrupt | kENET_RxBufferInterrupt;
-
-    lw_print("lw: [%s] input\n", __func__);
 
 /* Check if the receive interrupt happen. */
 #if FSL_FEATURE_ENET_QUEUE > 1

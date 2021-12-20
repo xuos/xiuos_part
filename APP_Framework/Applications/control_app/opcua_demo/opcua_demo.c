@@ -25,12 +25,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <lwip/altcp.h>
-#include <fsl_gpio.h>
-#include <fsl_iomuxc.h>
-
 #include "netif/ethernet.h"
-#include "enet_ethernetif.h"
-#include "connect_ethernet.h"
+
+#include "board.h"
 
 typedef unsigned int nfds_t;
 #include "../../../../APP_Framework/Framework/control/plc/interoperability/opcua/open62541.h"
@@ -70,14 +67,13 @@ typedef unsigned int nfds_t;
 /* System clock name. */
 #define EXAMPLE_CLOCK_NAME kCLOCK_CoreSysClk
 
-//#define sourceClock CLOCK_GetFreq(kCLOCK_CoreSysClk)
-
 const char *test_uri = "opc.tcp://192.168.250.5:4840";
 const char *test_cb_str = "tcp client connected\r\n";
 
 
 void ua_ip_init(void)
 {
+#ifdef BOARD_CORTEX_M7_EVB
     struct netif fsl_netif0;
 #if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
     mem_range_t non_dma_memory[] = NON_DMA_MEMORY_ARRAY;
@@ -92,8 +88,6 @@ void ua_ip_init(void)
 #endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
     };
 
-    gpio_pin_config_t gpio_config = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
-
     ua_print("lw: [%s] start ...\n", __func__);
 
     IP4_ADDR(&fsl_netif0_ipaddr, configIP_ADDR0, configIP_ADDR1, configIP_ADDR2, configIP_ADDR3);
@@ -107,8 +101,6 @@ void ua_ip_init(void)
     netif_set_default(&fsl_netif0);
     netif_set_up(&fsl_netif0);
 
-//    ping_init(&fsl_netif0_gw);
-
     ua_print("\r\n************************************************\r\n");
     ua_print(" PING example\r\n");
     ua_print("************************************************\r\n");
@@ -119,7 +111,7 @@ void ua_ip_init(void)
     ua_print(" IPv4 Gateway     : %u.%u.%u.%u\r\n", ((u8_t *)&fsl_netif0_gw)[0], ((u8_t *)&fsl_netif0_gw)[1],
            ((u8_t *)&fsl_netif0_gw)[2], ((u8_t *)&fsl_netif0_gw)[3]);
     ua_print("************************************************\r\n");
-
+#endif
 }
 
 // tcp client callback
@@ -242,5 +234,4 @@ void TestUaConnect(int argc, char *argv[])
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
                  UaConnect, TestUaConnect, TestUaConnect);
-
 
