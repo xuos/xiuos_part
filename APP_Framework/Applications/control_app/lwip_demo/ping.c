@@ -102,6 +102,9 @@ static u32_t ping_time;
 static struct raw_pcb *ping_pcb;
 #endif /* PING_USE_SOCKETS */
 
+#define PING_THREAD_STACKSIZE 4096
+#define PING_THREAD_PRIO 15
+
 
 /** Prepare a echo ICMP request */
 static void
@@ -354,8 +357,6 @@ ping_send(struct raw_pcb *raw, const ip_addr_t *addr)
 #endif /* LWIP_DEBUG */
   }
   pbuf_free(p);
-
-//  lw_print("lw: [%s] send %d\n", __func__, ping_size);
 }
 
 static void
@@ -390,9 +391,6 @@ ping_send_now(void)
 
 #endif /* PING_USE_SOCKETS */
 
-#define PING_THREAD_STACKSIZE 4096
-#define PING_THREAD_PRIO 0
-
 void
 ping_init(const ip_addr_t* ping_addr)
 {
@@ -402,7 +400,7 @@ ping_init(const ip_addr_t* ping_addr)
 
 #if PING_USE_SOCKETS
   th = sys_thread_new("ping_thread", ping_thread, NULL, PING_THREAD_STACKSIZE, PING_THREAD_PRIO);
-  lw_print("lw: [%s] sys %d addr %#x\n", __func__, th, (*ping_addr).addr);
+  lw_print("lw: [%s] new thread %d addr %#x\n", __func__, th, (*ping_addr).addr);
 #else /* PING_USE_SOCKETS */
   ping_raw_init();
 #endif /* PING_USE_SOCKETS */

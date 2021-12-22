@@ -269,12 +269,13 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn function, void *arg
                          arg,
                          (uint32)stacksize,
                          (uint8)prio);
-
   if (handle >= 0)
   {
     StartupKTask(handle);
+    lw_print("lw: [%s] create %s handle %x\n", __func__, name, handle);
     return handle;
   }
+  lw_print("lw: [%s] create %s failed\n", __func__, name);
   return -ERROR;
 }
 

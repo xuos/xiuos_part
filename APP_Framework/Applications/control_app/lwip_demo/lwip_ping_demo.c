@@ -32,11 +32,13 @@
  * Includes
  ******************************************************************************/
 
-//#if LWIP_IPV4 && LWIP_RAW
-#if 1
+#include <transform.h>
+#include "lwip/opt.h"
+
+#if LWIP_IPV4 && LWIP_RAW
+
 #include "ping.h"
 
-#include "lwip/opt.h"
 #include "lwip/timeouts.h"
 #include "lwip/init.h"
 #include "netif/ethernet.h"
@@ -88,6 +90,8 @@
  * Variables
  ******************************************************************************/
 
+static pthread_t ping_demo_id = 0;
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -95,7 +99,7 @@
 /*!
  * @brief Main function.
  */
-int lwip_ping_test(void)
+static void *lwip_ping_test(void *param)
 {
     struct netif fsl_netif0;
 #if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
@@ -127,8 +131,6 @@ int lwip_ping_test(void)
     netif_set_default(&fsl_netif0);
     netif_set_up(&fsl_netif0);
 
-    ping_init(&fsl_netif0_gw);
-
     lw_print("\r\n************************************************\r\n");
     lw_print(" PING example\r\n");
     lw_print("************************************************\r\n");
@@ -140,6 +142,8 @@ int lwip_ping_test(void)
            ((u8_t *)&fsl_netif0_gw)[2], ((u8_t *)&fsl_netif0_gw)[3]);
     lw_print("************************************************\r\n");
 
+    ping_init(&fsl_netif0_gw);
+
     while (1)
     {
         /* Poll the driver, get any outstanding frames */
@@ -148,8 +152,25 @@ int lwip_ping_test(void)
     }
 }
 
+void lwip_ping_thread(void)
+{
+    int result = 0;
+
+    pthread_attr_t attr;
+
+    attr.schedparam.sched_priority = 15;
+    attr.stacksize = 4096;
+
+    result = pthread_create(&ping_demo_id, &attr, lwip_ping_test, NULL);
+    if (0 == result) {
+        lw_print("lwip_ping_test successfully!\n");
+    } else {
+        lw_print("lwip_ping_test failed! error code is %d\n", result);
+    }
+}
+
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-                 LwPingTest, lwip_ping_test, lwip_ping_test);
+                 LwPingTest, lwip_ping_thread, lwip_ping_thread);
 
 #endif

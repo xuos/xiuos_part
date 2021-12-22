@@ -326,7 +326,7 @@ int gethostname_lwip(char* name, size_t len);
  *    Copyright 2017-2018 (c) Stefan Profanter, fortiss GmbH
  *    Copyright 2018 (c) Jose Cabral, fortiss GmbH
  */
-// tst by wly
+
 #define UA_ARCHITECTURE_FREERTOSLWIP 1
 
 #ifdef UA_ARCHITECTURE_FREERTOSLWIP
