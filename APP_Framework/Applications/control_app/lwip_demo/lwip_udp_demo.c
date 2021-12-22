@@ -63,4 +63,3 @@ int LwipUdpDemo(int argc, char *argv[])
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
     UdpTest, LwipUdpDemo,  UDP socket demo function);
 #endif
-
