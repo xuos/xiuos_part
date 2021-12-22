@@ -287,7 +287,7 @@ err_t ethernetif_init(struct netif *netif, struct ethernetif *ethernetif,
 
     /* Init ethernetif parameters.*/
     *ethernetif_enet_ptr(ethernetif) = ethernetif_get_enet_base(enetIdx);
-    LWIP_ASSERT("*ethernetif_enet_ptr(ethernetif) != NULL", (*ethernetif_enet_ptr(ethernetif) != NULL));
+//    LWIP_ASSERT("*ethernetif_enet_ptr(ethernetif) != NULL", (*ethernetif_enet_ptr(ethernetif) != NULL));
 
     /* set MAC hardware address length */
     netif->hwaddr_len = ETH_HWADDR_LEN;

@@ -39,8 +39,7 @@
  */
 
 #include "lwip/opt.h"
-//tst by wly
-#include "ip.h"
+
 #if LWIP_RAW /* don't build if not configured for use in lwipopts.h */
 
 #include "ping.h"
@@ -183,8 +182,6 @@ ping_recv(int s)
   int len;
   struct sockaddr_storage from;
   int fromlen = sizeof(from);
-
-//    lw_print("lw: [%s] recv %d\n",__func__, fromlen);
 
   while((len = lwip_recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr*)&from, (socklen_t*)&fromlen)) > 0) {
     if (len >= (int)(sizeof(struct ip_hdr)+sizeof(struct icmp_echo_hdr))) {
@@ -344,7 +341,6 @@ ping_send(struct raw_pcb *raw, const ip_addr_t *addr)
 
   p = pbuf_alloc(PBUF_IP, (u16_t)ping_size, PBUF_RAM);
   if (!p) {
-    lw_trace();
     return;
   }
   if ((p->len == p->tot_len) && (p->next == NULL)) {
@@ -379,9 +375,6 @@ ping_raw_init(void)
 {
   ping_pcb = raw_new(IP_PROTO_ICMP);
   LWIP_ASSERT("ping_pcb != NULL", ping_pcb != NULL);
-
-//tst by wly
-  lw_print("lw: [%s] pcb %p\n", __func__, ping_pcb);
 
   raw_recv(ping_pcb, ping_recv, NULL);
   raw_bind(ping_pcb, IP_ADDR_ANY);

@@ -32,9 +32,8 @@
  * Includes
  ******************************************************************************/
 
-
-#if LWIP_IPV4 && LWIP_RAW
-
+//#if LWIP_IPV4 && LWIP_RAW
+#if 1
 #include "ping.h"
 
 #include "lwip/opt.h"
@@ -80,7 +79,6 @@
 
 /* System clock name. */
 #define TEST_CLOCK_NAME kCLOCK_CoreSysClk
-
 
 /*******************************************************************************
  * Prototypes
