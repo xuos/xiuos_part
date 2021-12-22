@@ -13,7 +13,7 @@
 /**
 * @file tcp_echo_socket_demo.c
 * @brief One UDP demo based on LwIP
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-29
 */
@@ -30,7 +30,7 @@ extern void TcpIpInit(void);
 extern char* send_msg;
 
 int UdpEchoSocketDemo(int argc, char *argv[])
-{	
+{
   if (argc == 2)
   {
     send_msg = argv[1];
@@ -42,28 +42,25 @@ int UdpEchoSocketDemo(int argc, char *argv[])
                         (const char*    )"NetStackTaskCreate",
                         NetStackTaskCreate,
                         (void*          )NULL,
-                        (uint16_t       )512,  
+                        (uint16_t       )512,
                         15);
 
   if(thr_id >= 0)
-    StartupKTask(thr_id);  
+    StartupKTask(thr_id);
   else{
     KPrintf("NetStackTaskCreate create failed !\n");
-    return -1;  
+    return -1;
   }
 }
+
 #ifndef SEPARATE_COMPILE
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
-UdpEchoSocketDemo, UdpEchoSocketDemo,  tcp_echo_socket function );
+    UdpTest, UdpEchoSocketDemo,  UDP socket demo function);
 #endif
 
 static void NetStackTaskCreate(void* param)
 {
   TcpIpInit();
-
   UdpEchoInit();
 }
-
-
-
 
