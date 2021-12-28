@@ -102,7 +102,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     cfg.port_configure      = PORT_CFG_INIT;
 #endif
 
-    //result = PrivIoctl(sdev->fd, OPE_INT, &cfg);
+    result = PrivIoctl(sdev->fd, OPE_INT, &cfg);
 
     PrivTaskCreate(&active_task_id, NULL, &ReadTask, sdev);
     PrivTaskStartup(&active_task_id);
