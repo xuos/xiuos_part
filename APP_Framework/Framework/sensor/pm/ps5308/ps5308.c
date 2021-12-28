@@ -51,6 +51,32 @@ static void *ReadTask(void *parameter)
  * @param sdev - sensor device pointer
  * @return success: 1 , failure: other
  */
+#ifdef ADD_NUTTX_FETURES
+static int SensorDeviceOpen(struct SensorDevice *sdev)
+{
+    int result = 0;
+
+    result = PrivMutexCreate(&buff_lock, 0);
+    if (result != 0){
+      printf("SensorDeviceOpen:mutex create failed, status=%d\n", result);
+    }
+
+    sdev->fd = open(SENSOR_DEVICE_PS5308_DEV, O_RDWR);
+    if (sdev->fd < 0) {
+        printf("SensorDeviceOpen:open %s error\n", SENSOR_DEVICE_PS5308_DEV);
+        return -1;
+    }
+
+    result = PrivTaskCreate(&active_task_id, NULL, &ReadTask, sdev);
+    if (result != 0){
+      printf("SensorDeviceOpen:task create failed, status=%d\n", result);
+    }
+
+    PrivTaskStartup(&active_task_id);
+
+    return result;
+}
+#else
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     int result = 0;
@@ -76,13 +102,14 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     cfg.port_configure      = PORT_CFG_INIT;
 #endif
 
-    result = ioctl(sdev->fd, OPE_INT, &cfg);
+    //result = PrivIoctl(sdev->fd, OPE_INT, &cfg);
 
     PrivTaskCreate(&active_task_id, NULL, &ReadTask, sdev);
     PrivTaskStartup(&active_task_id);
 
     return result;
 }
+#endif
 
 /**
  * @description: Close PS5308 sensor device
