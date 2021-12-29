@@ -21,11 +21,11 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
-#include <pthread.h>
-#include <semaphore.h>
+#include <nuttx/pthread.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/time.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <time.h>
 
 typedef uint8_t uint8;
 typedef uint16_t uint16;

@@ -53,6 +53,21 @@
 extern int FrameworkInit(void);
 
 /****************************************************************************
+ * Name: cmd_Co2Zg09
+ ****************************************************************************/
+
+#if defined(CONFIG_APPLICATION_SENSOR_CO2_ZG09) && !defined(CONFIG_NSH_DISABLE_CO2ZG09)
+extern void Co2Zg09(void);
+int cmd_Co2Zg09(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    Co2Zg09();
+    return 0;
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_Pm10Ps5308
  ****************************************************************************/
 
@@ -93,6 +108,21 @@ int cmd_Pm100Ps5308(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     printf("Hello, world!\n");
     FrameworkInit();
     Pm100Ps5308();
+    return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_VoiceD124
+ ****************************************************************************/
+
+#if defined(CONFIG_APPLICATION_SENSOR_VOICE_D124) && !defined(CONFIG_NSH_DISABLE_VOICED124)
+extern void VoiceD124(void);
+int cmd_VoiceD124(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    VoiceD124();
     return 0;
 }
 #endif

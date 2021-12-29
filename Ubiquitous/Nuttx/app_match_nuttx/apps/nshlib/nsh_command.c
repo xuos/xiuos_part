@@ -580,24 +580,32 @@ static const struct cmdmap_s g_cmdmap[] =
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
 #endif
 
+#if defined(CONFIG_APPLICATION_SENSOR_CO2_ZG09) && !defined(CONFIG_NSH_DISABLE_CO2ZG09)
+  { "zg09",       cmd_Co2Zg09,       1, 1, "[get co2 concentration with sensor ZG09.]" },
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_PM1_0_PS5308) && !defined(CONFIG_NSH_DISABLE_PM1_0PS5308)
-  { "pm1.0",       cmd_Pm10Ps5308,       1, 1, "[get pm1.0 with sensor Ps5308]" },
+  { "pm1.0",       cmd_Pm10Ps5308,       1, 1, "[get pm1.0 with sensor Ps5308.]" },
 #endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_PM2_5_PS5308) && !defined(CONFIG_NSH_DISABLE_PM2_5PS5308)
-  { "pm2.5",       cmd_Pm25Ps5308,       1, 1, "[get pm2.5with sensor Ps5308]" },
+  { "pm2.5",       cmd_Pm25Ps5308,       1, 1, "[get pm2.5with sensor Ps5308.]" },
 #endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_PM10_PS5308) && !defined(CONFIG_NSH_DISABLE_PM10PS5308)
-  { "pm10",       cmd_Pm100Ps5308,       1, 1, "[get pm10 with sensor Ps5308]" },
+  { "pm10",       cmd_Pm100Ps5308,       1, 1, "[get pm10 with sensor Ps5308.]" },
+#endif
+
+#if defined(CONFIG_APPLICATION_SENSOR_VOICE_D124) && !defined(CONFIG_NSH_DISABLE_VOICED124)
+  { "d124",       cmd_VoiceD124,       1, 1, "[get decibel of noise with sensor D124.]" },
 #endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_TEMPERATURE_HS300X) && !defined(CONFIG_NSH_DISABLE_TEMPHS300X)
-  { "temp",       cmd_TempHs300x,       1, 1, "[Get humidity with sensor HS300x]" },
+  { "temp",       cmd_TempHs300x,       1, 1, "[get temperature with sensor HS300x.]" },
 #endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_HUMIDITY_HS300X) && !defined(CONFIG_NSH_DISABLE_HUMIHS300X)
-  { "humi",       cmd_HumiHs300x,       1, 1, "[Get temperature with sensor HS300x]" },
+  { "humi",       cmd_HumiHs300x,       1, 1, "[get humidity with sensor HS300x.]" },
 #endif
 
   { NULL,       NULL,         1, 1, NULL }

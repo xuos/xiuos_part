@@ -1,3 +1,12 @@
-SRC_FILES := d124.c
+include $(KERNEL_ROOT)/.config
 
-include $(KERNEL_ROOT)/compiler.mk
+ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
+    include $(APPDIR)/Make.defs
+    CSRCS += d124.c
+    include $(APPDIR)/Application.mk
+endif
+
+ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
+    SRC_FILES := d124.c
+    include $(KERNEL_ROOT)/compiler.mk
+endif

@@ -588,6 +588,10 @@ config NSH_DISABLE_XD
 	default y if DEFAULT_SMALL
 	default n if !DEFAULT_SMALL
 
+config NSH_DISABLE_CO2ZG09
+	bool "Disable the co2 function of the sensor zg09"
+	default n
+
 config NSH_DISABLE_PM1_0PS5308
 	bool "Disable the pm1.0 function of the sensor ps5308"
 	default n
@@ -598,6 +602,10 @@ config NSH_DISABLE_PM2_5PS5308
 
 config NSH_DISABLE_PM10PS5308
 	bool "Disable the pm10 function of the sensor ps5308"
+	default n
+
+config NSH_DISABLE_VOICED124
+	bool "Disable the voice function of the sensor d124"
 	default n
 
 config NSH_DISABLE_TEMPHS300X
