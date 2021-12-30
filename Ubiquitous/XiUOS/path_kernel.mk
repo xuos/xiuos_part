@@ -175,6 +175,7 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/third_party_driver/ethernet \
+	-I$(BSP_ROOT)/third_party_driver/ethernet/ksz8081 \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052 \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052/drivers \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/Include \
@@ -249,6 +250,11 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/ruy #
 endif
 
+ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/interoperability/opcua #
+endif
+
 ifeq ($(CONFIG_CRYPTO), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/framework/security/crypto/include #
 endif
@@ -256,10 +262,10 @@ endif
 KERNELPATHS += -I$(KERNEL_ROOT)/resources/include #
 
 ifeq ($(CONFIG_RESOURCES_SPI), y)
-KERNELPATHS +=-I$(KERNEL_ROOT)/resources/spi # 
+KERNELPATHS +=-I$(KERNEL_ROOT)/resources/spi #
 
 ifeq ($(CONFIG_RESOURCES_SPI_SFUD),y)
-KERNELPATHS += -I$(KERNEL_ROOT)/resources/spi/third_party_spi/SFUD/sfud/inc # 
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/spi/third_party_spi/SFUD/sfud/inc #
 endif
 
 endif

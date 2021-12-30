@@ -1,4 +1,4 @@
-SRC_DIR := MIMXRT1052  
+SRC_DIR := common gpio
 
 ifeq ($(CONFIG_BSP_USING_LPUART),y)
   SRC_DIR += uart

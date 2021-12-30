@@ -32,7 +32,6 @@
 #endif /* FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL */
 
 #include "lwipopts.h"
-unsigned short *lw_enet_ctrl;
 
 /*******************************************************************************
  * Definitions
@@ -1564,6 +1563,7 @@ status_t ENET_SendFrame(ENET_Type *base, enet_handle_t *handle, const uint8_t *d
     curBuffDescrip = handle->txBdCurrent[0];
     if (curBuffDescrip->control & ENET_BUFFDESCRIPTOR_TX_READY_MASK)
     {
+        lw_trace();
         return kStatus_ENET_TxFrameBusy;
     }
 #ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
@@ -1571,6 +1571,9 @@ status_t ENET_SendFrame(ENET_Type *base, enet_handle_t *handle, const uint8_t *d
     /* Check PTP message with the PTP header. */
     isPtpEventMessage = ENET_Ptp1588ParseFrame(data, NULL, true);
 #endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
+
+//    lw_print("lw: [%s] size %d len %d\n", __func__, handle->txBuffSizeAlign[0], length);
+
     /* One transmit buffer is enough for one frame. */
     if (handle->txBuffSizeAlign[0] >= length)
     {
@@ -1613,6 +1616,7 @@ status_t ENET_SendFrame(ENET_Type *base, enet_handle_t *handle, const uint8_t *d
         /* Active the transmit buffer descriptor. */
         ENET_ActiveSend(base, 0);
 
+//    lw_trace();
         return kStatus_Success;
     }
     else
@@ -1620,6 +1624,8 @@ status_t ENET_SendFrame(ENET_Type *base, enet_handle_t *handle, const uint8_t *d
         /* One frame requires more than one transmit buffers. */
         do
         {
+            lw_trace();
+
 #ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
             /* For enable the timestamp. */
             if (isPtpEventMessage)

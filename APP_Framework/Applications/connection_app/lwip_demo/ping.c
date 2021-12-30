@@ -245,6 +245,7 @@ ping_thread(void *arg)
 {
   int s;
   int ret;
+  int cnt = 5;
 
 #if LWIP_SO_SNDRCVTIMEO_NONSTANDARD
   int timeout = PING_RCV_TIMEO;
@@ -277,7 +278,7 @@ ping_thread(void *arg)
   LWIP_ASSERT("setting receive timeout failed", ret == 0);
   LWIP_UNUSED_ARG(ret);
 
-  while (1) {
+  while (cnt --) {
     if (ping_send(s, ping_target) == ERR_OK) {
       LWIP_DEBUGF( PING_DEBUG, ("ping: send "));
       ip_addr_debug_print(PING_DEBUG, ping_target);
