@@ -65,12 +65,12 @@
  * Name: board_hs300x_initialize
  *
  * Description:
- *   Initialize and register the HS300x Temperature Sensor driver.
+ *   Initialize and register the hs300x Temperature Sensor driver.
  *
  * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/i2cN
+ *   devno - The device number
  *   busno - The I2C bus number
- *
+ *   used to build the device path as /dev/i2c1_dev0
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
@@ -79,19 +79,20 @@
 int board_hs300x_initialize(int devno, int busno)
 {
   FAR struct i2c_master_s *i2c;
-  char devpath[12];
+  char devpath[20];
   int ret;
 
-  /* Get an instance of the I2C1 interface */
+  sninfo("Initializing HS300x!\n");
 
+  /* Get an instance of the I2C interface */
   i2c =  stm32_i2cbus_initialize(busno);
   if (!i2c)
     {
       return -ENODEV;
     }
 
-  /* Then register the temperature sensor */
-  snprintf(devpath, 12, "/dev/i2c%d", devno);
+  /* Then register the temperature sensor,such as /dev/i2c1_dev0. */
+  snprintf(devpath, 20, "/dev/i2c%d_dev%d", busno, devno);
   ret = hs300x_register(devpath, i2c, CONFIG_SENSOR_DEVICE_HS300X_I2C_ADDR);
   if (ret < 0)
     {

@@ -62,9 +62,9 @@ extern "C"
  *   Initialize and register the hs300x Temperature Sensor driver.
  *
  * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/i2cN
+ *   devno - The device number
  *   busno - The I2C bus number
- *
+ *   used to build the device path as /dev/i2c1_dev0
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *

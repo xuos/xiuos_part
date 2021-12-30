@@ -112,12 +112,12 @@
 #include "stm32_xen1210.h"
 #endif
 
-#ifdef CONFIG_SENSORS_HS300X
-#include "stm32_hs300x.h"
-#endif
-
 #ifdef CONFIG_USBADB
 #  include <nuttx/usb/adb.h>
+#endif
+
+#ifdef CONFIG_SENSORS_HS300X
+#include "stm32_hs300x.h"
 #endif
 
 /****************************************************************************
@@ -535,18 +535,17 @@ int stm32_bringup(void)
     }
 #endif /* CONFIG_LPWAN_SX127X */
 
-#ifdef CONFIG_SENSORS_HS300X
-  ret = board_hs300x_initialize(1,1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize hs300x:"
-                      " %d\n", ret);
-    }
-#endif /* CONFIG_SENSORS_HS300X */
-
 #ifdef CONFIG_USBADB
   usbdev_adb_initialize();
 #endif
+
+#ifdef CONFIG_SENSORS_HS300X
+  ret = board_hs300x_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize HS300x, error %d\n", ret);
+    }
+#endif /* CONFIG_SENSORS_HS300X */
 
   return ret;
 }

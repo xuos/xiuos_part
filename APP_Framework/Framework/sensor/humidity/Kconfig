@@ -26,7 +26,7 @@ config SENSOR_HS300X_HUMIDITY
                 if ADD_NUTTX_FETURES
                         config SENSOR_DEVICE_HS300X_DEV
                                 string "HS300x device name"
-                                default "/dev/i2c1"
+                                default "/dev/i2c1_dev0"
                         
                         config SENSOR_DEVICE_HS300X_I2C_ADDR
                                 hex "HS300x device i2c address"
