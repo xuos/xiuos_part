@@ -70,29 +70,39 @@
 #include "lwip/igmp.h"
 #include "lwip/mld6.h"
 
+//
+//#define USE_RTOS 1
+//#define FSL_RTOS_FREE_RTOS
+//#define FSL_RTOS_XIUOS
+
 #if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
+
+#ifdef FSL_RTOS_XIUOS
+#include "xs_sem.h"
+
+#else
 #include "FreeRTOS.h"
 #include "event_groups.h"
-
 #include "list.h"
+#endif
 
 typedef uint32_t     TickType_t;
-#define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
+#define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
 
-typedef TickType_t               EventBits_t;
+typedef TickType_t       EventBits_t;
 
 typedef long             BaseType_t;
 typedef unsigned long    UBaseType_t;
 
-#define portBASE_TYPE     long
+#define portBASE_TYPE    long
 
-#define pdFALSE                                  ( ( BaseType_t ) 0 )
-#define pdTRUE                                   ( ( BaseType_t ) 1 )
+#define pdFALSE          ( ( BaseType_t ) 0 )
+#define pdTRUE           ( ( BaseType_t ) 1 )
 
-#define pdPASS                                   ( pdTRUE )
-#define pdFAIL                                   ( pdFALSE )
+#define pdPASS           ( pdTRUE )
+#define pdFAIL           ( pdFALSE )
 
-
+#ifndef FSL_RTOS_XIUOS
 typedef struct EventGroupDef_t
 {
     EventBits_t uxEventBits;
@@ -109,7 +119,7 @@ typedef struct EventGroupDef_t
 
 struct EventGroupDef_t;
 typedef struct EventGroupDef_t   * EventGroupHandle_t;
-
+#endif
 
 #endif
 
@@ -120,6 +130,8 @@ typedef struct EventGroupDef_t   * EventGroupHandle_t;
 #include "fsl_phy.h"
 
 #include "sys_arch.h"
+
+
 
 /*******************************************************************************
  * Definitions
@@ -136,7 +148,12 @@ struct ethernetif
     enet_handle_t handle;
 #endif
 #if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
+
+#ifdef FSL_RTOS_XIUOS
+    int enetSemaphore;
+#else
     EventGroupHandle_t enetTransmitAccessEvent;
+#endif
     EventBits_t txFlag;
 #endif
     enet_rx_bd_struct_t *RxBuffDescrip;
@@ -161,6 +178,8 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
     BaseType_t xResult;
 
 
+    lw_print("lw: [%s] input event %#x \n", __func__, event);
+
     switch (event)
     {
         case kENET_RxEvent:
@@ -170,6 +189,9 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
         {
             portBASE_TYPE taskToWake = pdFALSE;
 
+#ifdef FSL_RTOS_XIUOS
+
+#else
 #ifdef __CA7_REV
             if (SystemGetIRQNestingLevel())
 #else
@@ -186,11 +208,14 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
             {
                 xEventGroupSetBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag);
             }
+#endif
         }
         break;
         default:
             break;
     }
+
+    KSemaphoreAbandon(ethernetif->enetSemaphore);
 }
 #endif
 
@@ -274,6 +299,56 @@ err_t ethernetif_mld_mac_filter(struct netif *netif, const ip6_addr_t *group,
 }
 #endif
 
+#define netifINTERFACE_TASK_STACK_SIZE ( 4096 )
+
+/**
+ * This function is the ethernetif_input task, it is processed when a packet
+ * is ready to be read from the interface. It uses the function low_level_input()
+ * that should handle the actual reception of bytes from the network
+ * interface. Then the type of the received packet is determined and
+ * the appropriate input function is called.
+ *
+ * @param netif the lwip network interface structure for this ethernetif
+ */
+//void eth_input( void * pvParameters )
+//{
+//  struct pbuf *p;
+//
+//  for( ;; )
+//  {
+//    if (KSemaphoreObtain( s_xSemaphore, WAITING_FOREVER)==EOK)
+//    {
+//      p = low_level_input( s_pxNetIf );
+//
+//      if (ERR_OK != s_pxNetIf->input( p, s_pxNetIf))
+//      {
+//        KPrintf("netif input return not OK ! \n");
+//        pbuf_free(p);
+//        p=NULL;
+//      }
+//    }
+//  }
+//}
+//
+//void low_level_init()
+//{
+//    /* create the task that handles the ETH_MAC */
+//    uint32 thr_id = KTaskCreate((signed char*) "eth_input",
+//                          eth_input,
+//                          NULL,
+//                          netifINTERFACE_TASK_STACK_SIZE,
+//                          15);
+//    if (thr_id >= 0)
+//    {
+//        StartupKTask(thr_id);
+//    }
+//    else
+//    {
+//        KPrintf("Eth create failed !");
+//    }
+//}
+
+
 /**
  * Initializes ENET driver.
  */
@@ -313,7 +388,14 @@ void ethernetif_enet_init(struct netif *netif, struct ethernetif *ethernetif,
 #endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
 
     /* Create the Event for transmit busy release trigger. */
+#ifdef FSL_RTOS_XIUOS
+    if(ethernetif->enetSemaphore < 0)
+    {
+        ethernetif->enetSemaphore = KSemaphoreCreate(0);
+    }
+#else
     ethernetif->enetTransmitAccessEvent = xEventGroupCreate();
+#endif
     ethernetif->txFlag = 0x1;
 
     config.interrupt |= kENET_RxFrameInterrupt | kENET_TxFrameInterrupt | kENET_TxBufferInterrupt;
@@ -350,6 +432,7 @@ void ethernetif_enet_init(struct netif *netif, struct ethernetif *ethernetif,
 #endif
 
     ENET_ActiveRead(ethernetif->base);
+//    low_level_init();
 }
 
 ENET_Type **ethernetif_enet_ptr(struct ethernetif *ethernetif)
@@ -376,17 +459,27 @@ static err_t enet_send_frame(struct ethernetif *ethernetif, unsigned char *data,
     {
         status_t result;
 
+    lw_print("lw: [%s] len %d\n", __func__, length);
+
         do
         {
             result = ENET_SendFrame(ethernetif->base, &ethernetif->handle, data, length);
 
             if (result == kStatus_ENET_TxFrameBusy)
             {
+#ifdef FSL_RTOS_XIUOS
+//                KSemaphoreObtain(ethernetif->enetSemaphore, portMAX_DELAY);
+                lw_trace();
+
+#else
                 xEventGroupWaitBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag, pdTRUE, (BaseType_t) false,
                                     portMAX_DELAY);
+#endif
             }
 
         } while (result == kStatus_ENET_TxFrameBusy);
+        lw_trace();
+
         return ERR_OK;
     }
 #else

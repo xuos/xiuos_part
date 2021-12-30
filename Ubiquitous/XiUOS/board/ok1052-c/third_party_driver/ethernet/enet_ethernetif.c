@@ -206,6 +206,7 @@ void ethernetif_phy_init(struct ethernetif *ethernetif,
 void ethernetif_input(struct netif *netif)
 {
     struct pbuf *p;
+    err_t ret = 0;
 
     LWIP_ASSERT("netif != NULL", (netif != NULL));
 
@@ -213,9 +214,10 @@ void ethernetif_input(struct netif *netif)
     while ((p = ethernetif_linkinput(netif)) != NULL)
     {
         /* pass all packets to ethernet_input, which decides what packets it supports */
-        if (netif->input(p, netif) != ERR_OK)
+        if ((ret = netif->input(p, netif)) != ERR_OK)
         {
-            LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
+//            LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
+            lw_print("lw: [%s] ret %d p %p\n", __func__, ret, p);
             pbuf_free(p);
             p = NULL;
         }
@@ -287,7 +289,7 @@ err_t ethernetif_init(struct netif *netif, struct ethernetif *ethernetif,
 
     /* Init ethernetif parameters.*/
     *ethernetif_enet_ptr(ethernetif) = ethernetif_get_enet_base(enetIdx);
-//    LWIP_ASSERT("*ethernetif_enet_ptr(ethernetif) != NULL", (*ethernetif_enet_ptr(ethernetif) != NULL));
+    LWIP_ASSERT("*ethernetif_enet_ptr(ethernetif) != NULL", (*ethernetif_enet_ptr(ethernetif) != NULL));
 
     /* set MAC hardware address length */
     netif->hwaddr_len = ETH_HWADDR_LEN;

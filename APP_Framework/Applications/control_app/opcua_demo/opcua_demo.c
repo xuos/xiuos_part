@@ -20,196 +20,45 @@
 
 #include <list.h>
 #include <transform.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <lwip/altcp.h>
-#include "netif/ethernet.h"
-
 #include "board.h"
+#include <lwip/altcp.h>
+#include "open62541.h"
+#include "ua_api.h"
 
-typedef unsigned int nfds_t;
-#include "../../../../APP_Framework/Framework/control/plc/interoperability/opcua/open62541.h"
-
-#define ua_print printf
-#define ua_trace() printf("ua: [%s] %d pass!\n", __func__, __LINE__)
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+//#define ua_print KPrintf
+#define ua_trace() KPrintf("ua: [%s] %d pass!\n", __func__, __LINE__)
 
 #define TCP_LOCAL_PORT 4840
 
-/* IP address configuration. */
-#define configIP_ADDR0 192
-#define configIP_ADDR1 168
-#define configIP_ADDR2 250
-#define configIP_ADDR3 253
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
 
-/* Netmask configuration. */
-#define configNET_MASK0 255
-#define configNET_MASK1 255
-#define configNET_MASK2 255
-#define configNET_MASK3 0
-
-/* Gateway address configuration. */
-#define configGW_ADDR0 192
-#define configGW_ADDR1 168
-#define configGW_ADDR2 250
-#define configGW_ADDR3 252
-
-/* MAC address configuration. */
-#define configMAC_ADDR { 0x02, 0x12, 0x13, 0x10, 0x15, 0x11}
-
-/* ENET PHY address. */
-#define BOARD_ENET0_PHY_ADDRESS (0x02U) /* Phy address of enet port 0. */
-
-/* Address of PHY interface. */
-#define EXAMPLE_PHY_ADDRESS BOARD_ENET0_PHY_ADDRESS
-
-/* System clock name. */
-#define EXAMPLE_CLOCK_NAME kCLOCK_CoreSysClk
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
 
 const char *test_uri = "opc.tcp://192.168.250.5:4840";
 const char *test_cb_str = "tcp client connected\r\n";
 
+char test_ua_gw[] = {192, 168, 250, 5};
 
-void ua_ip_init(void)
+static pthread_t eth_input_id = 0;
+static pthread_t ua_demo_id;
+
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
+
+void *test_ua_get_server_info(void *param);
+
+static void test_ua_connect(void *arg)
 {
-#ifdef BOARD_CORTEX_M7_EVB
-    struct netif fsl_netif0;
-#if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
-    mem_range_t non_dma_memory[] = NON_DMA_MEMORY_ARRAY;
-#endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
-    ip4_addr_t fsl_netif0_ipaddr, fsl_netif0_netmask, fsl_netif0_gw;
-    ethernetif_config_t fsl_enet_config0 = {
-        .phyAddress = EXAMPLE_PHY_ADDRESS,
-        .clockName  = EXAMPLE_CLOCK_NAME,
-        .macAddress = configMAC_ADDR,
-#if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
-        .non_dma_memory = non_dma_memory,
-#endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
-    };
-
-    ua_print("lw: [%s] start ...\n", __func__);
-
-    IP4_ADDR(&fsl_netif0_ipaddr, configIP_ADDR0, configIP_ADDR1, configIP_ADDR2, configIP_ADDR3);
-    IP4_ADDR(&fsl_netif0_netmask, configNET_MASK0, configNET_MASK1, configNET_MASK2, configNET_MASK3);
-    IP4_ADDR(&fsl_netif0_gw, configGW_ADDR0, configGW_ADDR1, configGW_ADDR2, configGW_ADDR3);
-
-    lwip_init();
-
-    netif_add(&fsl_netif0, &fsl_netif0_ipaddr, &fsl_netif0_netmask, &fsl_netif0_gw, &fsl_enet_config0, ethernetif0_init,
-              ethernet_input);
-    netif_set_default(&fsl_netif0);
-    netif_set_up(&fsl_netif0);
-
-    ua_print("\r\n************************************************\r\n");
-    ua_print(" PING example\r\n");
-    ua_print("************************************************\r\n");
-    ua_print(" IPv4 Address     : %u.%u.%u.%u\r\n", ((u8_t *)&fsl_netif0_ipaddr)[0], ((u8_t *)&fsl_netif0_ipaddr)[1],
-           ((u8_t *)&fsl_netif0_ipaddr)[2], ((u8_t *)&fsl_netif0_ipaddr)[3]);
-    ua_print(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&fsl_netif0_netmask)[0], ((u8_t *)&fsl_netif0_netmask)[1],
-           ((u8_t *)&fsl_netif0_netmask)[2], ((u8_t *)&fsl_netif0_netmask)[3]);
-    ua_print(" IPv4 Gateway     : %u.%u.%u.%u\r\n", ((u8_t *)&fsl_netif0_gw)[0], ((u8_t *)&fsl_netif0_gw)[1],
-           ((u8_t *)&fsl_netif0_gw)[2], ((u8_t *)&fsl_netif0_gw)[3]);
-    ua_print("************************************************\r\n");
-#endif
-}
-
-// tcp client callback
-static err_t TcpClientCallback(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
-{
-    uint32_t i;
-
-    if (p != NULL)
-    {
-        struct pbuf *ptmp = p;
-
-        ua_print("get msg from %d:%d:%d:%d port:%d:\r\n",
-                 *((uint8_t *)&tpcb->remote_ip.addr),
-                 *((uint8_t *)&tpcb->remote_ip.addr + 1),
-                 *((uint8_t *)&tpcb->remote_ip.addr + 2),
-                 *((uint8_t *)&tpcb->remote_ip.addr + 3),
-                 tpcb->remote_port);
-
-        while (ptmp != NULL)
-        {
-            for (i = 0; i < p->len; i++)
-            {
-                ua_print("%c", *((char *)p->payload + i));
-            }
-
-            ptmp = p->next;
-        }
-        ua_print("\r\n");
-        tcp_recved(tpcb, p->tot_len);
-        pbuf_free(p);
-    }
-    else if (err == ERR_OK)
-    {
-        ua_print("tcp: tcp client closed\r\n");
-        tcp_recved(tpcb, p->tot_len);
-        return tcp_close(tpcb);
-    }
-
-    return ERR_OK;
-}
-
-// connect callback function
-static err_t TcpClientConnected(void *arg, struct tcp_pcb *tpcb, err_t err)
-{
-    ua_print(test_cb_str);
-    tcp_write(tpcb, test_cb_str, strlen(test_cb_str), 0);
-    tcp_recv(tpcb, TcpClientCallback);
-    return ERR_OK;
-}
-
-void ua_set_ip(void *param)
-{
-    struct tcp_pcb *tpcb = NULL;
-    err_t err;
-
-    ua_print("ua: [%s] start test\n", __func__);
-
-    ua_ip_init();
-
-    tpcb = tcp_new();
-    if (tpcb == NULL)
-    {
-        ua_print("ua: [%s] tcp pcb null\n", __func__);
-        return;
-    }
-
-    ua_print("ua: [%s] tcp bind port %d\n", __func__, TCP_LOCAL_PORT);
-
-    /* bind local port and ip addresss*/
-    err = tcp_bind(tpcb, IP_ADDR_ANY, TCP_LOCAL_PORT);
-
-    if (err != ERR_OK)
-    {
-        memp_free(MEMP_TCP_PCB, tpcb);
-        ua_print("ua: [%s] can not bind pcb\n", __func__);
-        return;
-    }
-
-    ua_print("ua: [%s] start tcp...\n", __func__);
-}
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-                 UaSetIp, ua_set_ip, ua_set_ip);
-
-void TestUaConnect(int argc, char *argv[])
-{
+    struct netif net;
     UA_StatusCode retval;
-
-    char ua_msg[128];
-    int len;
-    if (argc >= 1)
-    {
-        memset(ua_msg, 0, 128);
-        strncpy(ua_msg, argv[1], (len = strlen(argv[1])));
-        ua_print("ua: [%s] start\n", __func__);
-    }
-
-    ua_set_ip(NULL);
 
     UA_Client *client = UA_Client_new();
 
@@ -222,16 +71,96 @@ void TestUaConnect(int argc, char *argv[])
     UA_ClientConfig *config = UA_Client_getConfig(client);
     UA_ClientConfig_setDefault(config);
 
+
+    ua_print("cfg ------>\n");
+
     retval = UA_Client_connect(client, test_uri);
     if (retval != UA_STATUSCODE_GOOD)
     {
-        ua_print("ua: [%s] ret %x\n", __func__, retval);
-        UA_Client_delete(client);
-        return;
+        ua_print("tcp: tcp client closed\r\n");
+        tcp_recved(tpcb, p->tot_len);
+        return tcp_close(tpcb);
     }
-    ua_print("ua: [%s] start Ua Test!\n", __func__);
+
+    return ERR_OK;
+}
+
+void test_ua_connect_thr(void *arg)
+{
+    ETH_BSP_Config();
+    lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_gw);
+    test_ua_connect(NULL);
+}
+
+void test_sh_ua_connect(void)
+{
+    int result = 0;
+    pthread_t th_id;
+    pthread_attr_t attr;
+
+    sys_thread_new("ua test", test_ua_connect_thr, NULL, 4096, 15);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-                 UaConnect, TestUaConnect, TestUaConnect);
+                 UaConnect, test_sh_ua_connect, Test Opc UA connection);
+
+void *test_ua_get_server_info(void *param)
+{
+    UA_Client *client = UA_Client_new();
+
+    ua_print("ua: [%s] start ...\n", __func__);
+
+    if (client == NULL)
+    {
+        ua_print("ua: [%s] tcp client null\n", __func__);
+        return NULL;
+    }
+
+    UA_ClientConfig *config = UA_Client_getConfig(client);
+    UA_ClientConfig_setDefault(config);
+
+    UA_StatusCode retval = UA_Client_connect(client, OPC_SERVER);
+    if(retval != UA_STATUSCODE_GOOD) {
+        ua_print("ua: [%s] connect failed %d\n", __func__, retval);
+        UA_Client_delete(client);
+        return NULL;
+    }
+
+    ua_print("ua: [%s] connect ok!\n", __func__);
+
+    while(1)
+    {
+        ua_read_time(client);
+        ua_get_server_info(client);
+    }
+    /* Clean up */
+//    UA_Client_disconnect(client);
+//    UA_Client_delete(client); /* Disconnects the client internally */
+}
+
+void *test_ua_get_server_info_thr(void *arg)
+{
+    ETH_BSP_Config();
+    lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_gw);
+    test_ua_get_server_info(NULL);
+}
+
+void *test_sh_ua_get_server_info(void *param)
+{
+    int result = 0;
+    pthread_attr_t attr;
+
+    attr.schedparam.sched_priority = 15;
+    attr.stacksize = 4096;
+
+    result = pthread_create(&ua_demo_id, &attr, test_ua_get_server_info_thr, NULL);
+    if (0 == result) {
+        lw_print("test_ua_get_server_info %d successfully!\n", __func__, ua_demo_id);
+    } else {
+        lw_print("test_ua_get_server_info failed! error code is %d\n", __func__, result);
+    }
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
+                 UaGetInfo, test_sh_ua_get_server_info, Get information from OpcUA server);
 

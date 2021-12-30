@@ -51,21 +51,20 @@
 */
 
 #include "udp_echo.h"
-
+#include <transform.h>
 #include "lwip/opt.h"
 
 #if LWIP_SOCKET
 #include <lwip/sockets.h>
-
 #include "lwip/sys.h"
-#include "lwip/api.h"
-#include <xs_ktask.h>
 
 #ifdef BOARD_CORTEX_M7_EVB
 #define LWIP_UDP_TASK_STACK 4096
 #else
 #define LWIP_UDP_TASK_STACK 2048
 #endif
+
+#define LWIP_UDP_TASK_PRIO 25
 
 #define RECV_DATA         (1024)
 
@@ -137,6 +136,7 @@ __exit:
 
 static void UdpEchoThreadClient(void *arg)
 {
+  int cnt = 5;
   KPrintf("UdpEchoThreadClient start.\n");
 
   int sock_udp_send_once = -1;
@@ -159,10 +159,10 @@ static void UdpEchoThreadClient(void *arg)
     goto __exit;
   }
 
-  KPrintf("UDP connect sucess, start to send.\n");
+  KPrintf("UDP connect success, start to send.\n");
   KPrintf("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
 
-  while (1)
+  while (cnt --)
   {
     KPrintf("Lwip client is running.\n");
 
@@ -175,6 +175,7 @@ static void UdpEchoThreadClient(void *arg)
 
     MdelayKTask(1000);
   }
+  return;
 
 __exit:
   if (sock_udp_send_once >= 0) closesocket(sock_udp_send_once);
@@ -186,9 +187,9 @@ void
 UdpEchoInit(void)
 {
 #ifdef SET_AS_SERVER
-    sys_thread_new("UdpEchoThreadServer", UdpEchoThreadServer, NULL, LWIP_UDP_TASK_STACK, 4);
+    sys_thread_new("UdpEchoThreadServer", UdpEchoThreadServer, NULL, LWIP_UDP_TASK_STACK, LWIP_UDP_TASK_PRIO);
 #else
-    sys_thread_new("UdpEchoThreadClient", UdpEchoThreadClient, NULL, LWIP_UDP_TASK_STACK, 4);
+    sys_thread_new("UdpEchoThreadClient", UdpEchoThreadClient, NULL, LWIP_UDP_TASK_STACK, LWIP_UDP_TASK_PRIO);
 #endif
 }
 
