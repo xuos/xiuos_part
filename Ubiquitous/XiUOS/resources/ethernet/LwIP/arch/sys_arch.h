@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2017 Simon Goldschmidt
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without modification, 
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -49,8 +49,13 @@
 * @date 2021-05-29
 */
 
+#ifndef __SYS_ARCH__
+#define __SYS_ATCH__
+
 #include <lwip/opt.h>
 #include <lwip/arch.h>
+#include <lwip/netif.h>
+
 #include "tcpip.h"
 
 #include <xs_base.h>
@@ -58,19 +63,19 @@
 /* USER CODE BEGIN 0 */
 // #define SET_AS_SERVER 1 /* define this terminal is udp server or not*/
 
-#define LOCAL_PORT_SERVER                 5001
-#define TARGET_PORT_CLIENT                LOCAL_PORT_SERVER
+#define LOCAL_PORT_SERVER           4840
+#define TARGET_PORT_CLIENT          LOCAL_PORT_SERVER
 
 /*Static IP ADDRESS: IP_ADDR0.IP_ADDR1.IP_ADDR2.IP_ADDR3 */
-#define IP_ADDR0_SERVER                    192
-#define IP_ADDR1_SERVER                    168
-#define IP_ADDR2_SERVER                      0
-#define IP_ADDR3_SERVER                    166
+#define IP_ADDR0_SERVER             192
+#define IP_ADDR1_SERVER             168
+#define IP_ADDR2_SERVER             250
+#define IP_ADDR3_SERVER             252
 
-#define IP_ADDR0_ClIENT                    192
-#define IP_ADDR1_ClIENT                    168
-#define IP_ADDR2_ClIENT                    250
-#define IP_ADDR3_ClIENT                    253
+#define IP_ADDR0_ClIENT             192
+#define IP_ADDR1_ClIENT             168
+#define IP_ADDR2_ClIENT             250
+#define IP_ADDR3_ClIENT             253
 
 /*NETMASK*/
 #define NETMASK_ADDR0               255
@@ -82,7 +87,7 @@
 #define GW_ADDR0                    192
 #define GW_ADDR1                    168
 #define GW_ADDR2                    250
-#define GW_ADDR3                    252
+#define GW_ADDR3                    5
 /* USER CODE END 0 */
 
 #define SYS_MBOX_NULL  0
@@ -98,5 +103,12 @@ typedef x_base sys_prot_t;
 
 #define MS_PER_SYSTICK_F407 1000/TICK_PER_SECOND
 
-void TcpIpInit(void);
+extern char lwip_ipaddr[];
+extern char lwip_netmask[];
+extern char lwip_gwaddr[];
 
+void TcpIpInit(void);
+void lwip_config_net(char *ip, char *mask, char *gw);
+void lwip_config_tcp(char *ip, char *mask, char *gw);
+
+#endif

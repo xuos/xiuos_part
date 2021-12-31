@@ -212,13 +212,13 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 #define DEFAULT_TCP_RECVMBOX_SIZE       10
 #define DEFAULT_ACCEPTMBOX_SIZE         10
 
-#define DEFAULT_THREAD_PRIO             25
+#define DEFAULT_THREAD_PRIO             20
 #define DEFAULT_THREAD_STACKSIZE        1024
 
 #define TCPIP_THREAD_NAME               "tcp"
-#define TCPIP_THREAD_STACKSIZE          4096
-#define TCPIP_MBOX_SIZE                 8
-#define TCPIP_THREAD_PRIO               25
+#define TCPIP_THREAD_STACKSIZE          8192
+#define TCPIP_MBOX_SIZE                 10
+#define TCPIP_THREAD_PRIO               15
 
 //#define IPERF_SERVER_THREAD_NAME            "iperf_server"
 //#define IPERF_SERVER_THREAD_STACKSIZE        1024
@@ -236,13 +236,24 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 
 #define LWIP_IPV4                       1
 #define LWIP_RAW                        1
+#define LWIP_DNS                        1
+
+#if LWIP_DNS
+#define LWIP_RAND rand
+#endif
+
+#ifndef nfds_t
+typedef unsigned int nfds_t;
+#endif
 
 #define FSL_FEATURE_PHYKSZ8081_USE_RMII50M_MODE
 
 #define MEMP_LIB_MALLOC                 1
 #define MEMP_MEM_MALLOC                 1
 
-#define lw_print KPrintf
+#define lw_print //KPrintf
+#define lw_trace() //KPrintf("lw: [%s][%d] passed!\n", __func__, __LINE__)
+#define lw_error() //KPrintf("lw: [%s][%d] failed!\n", __func__, __LINE__)
 
 #endif /* __LWIPOPTS_H__ */
 

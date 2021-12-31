@@ -57,15 +57,16 @@
 #include "lwip/init.h"
 #include "lwip/netif.h"
 #include "lwip/sio.h"
-#include "ethernetif.h"
-
-#if !NO_SYS
-#include "sys_arch.h"
-#endif
 #include <lwip/stats.h>
 #include <lwip/debug.h>
 #include <lwip/sys.h>
 #include "lwip/dhcp.h"
+#include "tcpip_priv.h"
+
+#if !NO_SYS
+#include "sys_arch.h"
+#endif
+
 #include <string.h>
 #include <xs_ktask.h>
 #include <xs_ktick.h>
@@ -74,10 +75,20 @@
 #include <xs_mutex.h>
 #include <xs_ktask.h>
 #include <xs_msg.h>
-#include <ethernetif.h>
+
+#include "board.h"
+#include "ethernet.h"
+#include "enet_ethernetif.h"
+#include <transform.h>
+
+/* MAC address configuration. */
+#define configMAC_ADDR { 0x02, 0x12, 0x13, 0x10, 0x15, 0x11}
+
+char lwip_ipaddr[] = {192, 168, 250, 253};
+char lwip_netmask[] = {255, 255, 255, 0};
+char lwip_gwaddr[] = {192, 168, 250, 252};
 
 int errno;
-
 
 x_ticks_t lwip_sys_now;
 
@@ -87,8 +98,8 @@ struct sys_timeouts {
 
 struct timeoutlist
 {
-	struct sys_timeouts timeouts;
-	int32 pid;
+  struct sys_timeouts timeouts;
+  int32 pid;
 };
 
 #define SYS_THREAD_MAX 4
@@ -114,40 +125,40 @@ sys_now(void)
 void
 sys_init(void)
 {
-	int i;
-	for(i = 0; i < SYS_THREAD_MAX; i++)
-	{
-		s_timeoutlist[i].pid = 0;
-		s_timeoutlist[i].timeouts.next = NULL;
-	}
-	s_nextthread = 0;
+  int i;
+  for(i = 0; i < SYS_THREAD_MAX; i++)
+  {
+    s_timeoutlist[i].pid = 0;
+    s_timeoutlist[i].timeouts.next = NULL;
+  }
+  s_nextthread = 0;
 }
 
 struct sys_timeouts *sys_arch_timeouts(void)
 {
-	int i;
-	int32 pid;
-	struct timeoutlist *tl;
-	pid = (int32)GetKTaskDescriptor()->id.id;
-	for(i = 0; i < s_nextthread; i++)
-	{
-		tl = &(s_timeoutlist[i]);
-		if(tl->pid == pid)
-		{
-			return &(tl->timeouts);
-		}
-	}
-	return NULL;
+  int i;
+  int32 pid;
+  struct timeoutlist *tl;
+  pid = (int32)GetKTaskDescriptor()->id.id;
+  for(i = 0; i < s_nextthread; i++)
+  {
+    tl = &(s_timeoutlist[i]);
+    if(tl->pid == pid)
+    {
+      return &(tl->timeouts);
+    }
+  }
+  return NULL;
 }
 
 sys_prot_t sys_arch_protect(void)
 {
-	return CriticalAreaLock();
+  return CriticalAreaLock();
 }
 
 void sys_arch_unprotect(sys_prot_t pval)
 {
-	CriticalAreaUnLock(pval);
+  CriticalAreaUnLock(pval);
 }
 
 #if !NO_SYS
@@ -158,10 +169,10 @@ sys_sem_new(sys_sem_t *sem, u8_t count)
   *sem = KSemaphoreCreate((uint16)count);
 
 #if SYS_STATS
-	++lwip_stats.sys.sem.used;
- 	if (lwip_stats.sys.sem.max < lwip_stats.sys.sem.used) {
-		lwip_stats.sys.sem.max = lwip_stats.sys.sem.used;
-	}
+  ++lwip_stats.sys.sem.used;
+   if (lwip_stats.sys.sem.max < lwip_stats.sys.sem.used) {
+    lwip_stats.sys.sem.max = lwip_stats.sys.sem.used;
+  }
 #endif /* SYS_STATS */
 
   if(*sem >= 0)
@@ -287,11 +298,15 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
       ++lwip_stats.sys.mbox.used;
       if (lwip_stats.sys.mbox.max < lwip_stats.sys.mbox.used) {
          lwip_stats.sys.mbox.max = lwip_stats.sys.mbox.used;
-	  }
+    }
 #endif /* SYS_STATS */
-	if(*mbox < 0)
+  if(*mbox < 0)
+  {
+    lw_print("lw: [%s] alloc %d mbox %p failed\n", __func__, size, mbox);
     return ERR_MEM;
+  }
 
+  lw_print("lw: [%s] alloc %d mbox %p ok!\n", __func__, size, mbox);
   return ERR_OK;
 }
 
@@ -370,9 +385,6 @@ struct netif gnetif;
 ip4_addr_t ipaddr;
 ip4_addr_t netmask;
 ip4_addr_t gw;
-uint8_t IP_ADDRESS[4];
-uint8_t NETMASK_ADDRESS[4];
-uint8_t GATEWAY_ADDRESS[4];
 
 void TcpIpInit(void)
 {
@@ -397,7 +409,7 @@ void TcpIpInit(void)
   /* USER CODE END 0 */
   /* Initilialize the LwIP stack without RTOS */
   /* add the network interface (IPv4/IPv6) without RTOS */
-  netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, &ethernetif_init, &tcpip_input);
+  netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, &ethernetif0_init, &tcpip_input);
 
   /* Registers the default network interface */
   netif_set_default(&gnetif);
@@ -438,5 +450,133 @@ void TcpIpInit(void)
         (((gnetif.ip_addr.addr)&0x0000ff00)>>8),  \
         (((gnetif.ip_addr.addr)&0x00ff0000)>>16), \
         ((gnetif.ip_addr.addr)&0xff000000)>>24);
+}
+
+// lwip input thread to get network packet
+void lwip_input_thread(void *param)
+{
+  struct netif *net = param;
+
+  while (1)
+  {
+    /* Poll the driver, get any outstanding frames */
+    ethernetif_input(net);
+    sys_check_timeouts(); /* Handle all system timeouts for all core protocols */
+//    DelayKTask(1);
+  }
+}
+
+void lwip_config_input(struct netif *net)
+{
+  pthread_t th_id = 0;
+
+  th_id = sys_thread_new("eth_input", lwip_input_thread, net, 4096, 15);
+
+  if (th_id >= 0) {
+    lw_print("%s %d successfully!\n", __func__, th_id);
+  } else {
+    lw_print("%s failed!\n", __func__);
+  }
+}
+
+static int lwip_init_flag = 0;
+
+void lwip_config_net(char *ip, char *mask, char *gw)
+{
+#if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
+  mem_range_t non_dma_memory[] = NON_DMA_MEMORY_ARRAY;
+#endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
+  ip4_addr_t net_ipaddr, net_netmask, net_gw;
+  ethernetif_config_t cfg = {
+    .phyAddress = BOARD_ENET0_PHY_ADDRESS,
+    .clockName  = kCLOCK_CoreSysClk,
+    .macAddress = configMAC_ADDR,
+#if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
+    .non_dma_memory = non_dma_memory,
+#endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
+  };
+
+  if(lwip_init_flag)
+  {
+    lw_print("lw: [%s] already ...\n", __func__);
+    return;
+  }
+  lwip_init_flag = 1;
+
+  lw_print("lw: [%s] start ...\n", __func__);
+
+  IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
+  IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
+  IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
+
+  lwip_init();
+
+  netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, &cfg, ethernetif0_init,
+        ethernet_input);
+  netif_set_default(&gnetif);
+  netif_set_up(&gnetif);
+
+  lw_print("\r\n************************************************\r\n");
+  lw_print(" Network Configuration\r\n");
+  lw_print("************************************************\r\n");
+  lw_print(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
+       ((u8_t *)&net_ipaddr)[2], ((u8_t *)&net_ipaddr)[3]);
+  lw_print(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
+       ((u8_t *)&net_netmask)[2], ((u8_t *)&net_netmask)[3]);
+  lw_print(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
+       ((u8_t *)&net_gw)[2], ((u8_t *)&net_gw)[3]);
+  lw_print("************************************************\r\n");
+
+  lwip_config_input(&gnetif);
+}
+
+void lwip_config_tcp(char *ip, char *mask, char *gw)
+{
+#if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
+  mem_range_t non_dma_memory[] = NON_DMA_MEMORY_ARRAY;
+#endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
+  ip4_addr_t net_ipaddr, net_netmask, net_gw;
+  ethernetif_config_t cfg = {
+    .phyAddress = BOARD_ENET0_PHY_ADDRESS,
+    .clockName  = kCLOCK_CoreSysClk,
+    .macAddress = configMAC_ADDR,
+#if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
+    .non_dma_memory = non_dma_memory,
+#endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
+  };
+
+  if(lwip_init_flag)
+  {
+    lw_print("lw: [%s] already ...\n", __func__);
+    return;
+  }
+  lwip_init_flag = 1;
+
+  tcpip_init(NULL, NULL);
+
+  lw_print("lw: [%s] start ...\n", __func__);
+
+  IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
+  IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
+  IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
+
+  netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, &cfg, ethernetif0_init,
+        tcpip_input);
+
+  netif_set_default(&gnetif);
+  netif_set_up(&gnetif);
+
+  lw_print("\r\n************************************************\r\n");
+  lw_print(" Network Configuration\r\n");
+  lw_print("************************************************\r\n");
+  lw_print(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
+       ((u8_t *)&net_ipaddr)[2], ((u8_t *)&net_ipaddr)[3]);
+  lw_print(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
+       ((u8_t *)&net_netmask)[2], ((u8_t *)&net_netmask)[3]);
+  lw_print(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
+       ((u8_t *)&net_gw)[2], ((u8_t *)&net_gw)[3]);
+  lw_print("************************************************\r\n");
+
+  lwip_config_input(&gnetif);
 }
 

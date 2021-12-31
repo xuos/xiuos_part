@@ -469,8 +469,6 @@ static err_t enet_send_frame(struct ethernetif *ethernetif, unsigned char *data,
             {
 #ifdef FSL_RTOS_XIUOS
 //                KSemaphoreObtain(ethernetif->enetSemaphore, portMAX_DELAY);
-                lw_trace();
-
 #else
                 xEventGroupWaitBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag, pdTRUE, (BaseType_t) false,
                                     portMAX_DELAY);
@@ -478,7 +476,6 @@ static err_t enet_send_frame(struct ethernetif *ethernetif, unsigned char *data,
             }
 
         } while (result == kStatus_ENET_TxFrameBusy);
-        lw_trace();
 
         return ERR_OK;
     }

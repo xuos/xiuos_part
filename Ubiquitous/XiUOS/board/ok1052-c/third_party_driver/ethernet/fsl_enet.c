@@ -1563,7 +1563,6 @@ status_t ENET_SendFrame(ENET_Type *base, enet_handle_t *handle, const uint8_t *d
     curBuffDescrip = handle->txBdCurrent[0];
     if (curBuffDescrip->control & ENET_BUFFDESCRIPTOR_TX_READY_MASK)
     {
-        lw_trace();
         return kStatus_ENET_TxFrameBusy;
     }
 #ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
@@ -1616,7 +1615,6 @@ status_t ENET_SendFrame(ENET_Type *base, enet_handle_t *handle, const uint8_t *d
         /* Active the transmit buffer descriptor. */
         ENET_ActiveSend(base, 0);
 
-//    lw_trace();
         return kStatus_Success;
     }
     else
@@ -1624,8 +1622,6 @@ status_t ENET_SendFrame(ENET_Type *base, enet_handle_t *handle, const uint8_t *d
         /* One frame requires more than one transmit buffers. */
         do
         {
-            lw_trace();
-
 #ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
             /* For enable the timestamp. */
             if (isPtpEventMessage)
