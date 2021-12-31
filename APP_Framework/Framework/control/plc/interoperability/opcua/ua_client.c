@@ -269,7 +269,7 @@ void ua_add_nodes(UA_Client *client)
 
 }
 
-int ua_run_test(UA_Client *client)
+int ua_get_server_info(UA_Client *client)
 {
 	UA_StatusCode retval;
 

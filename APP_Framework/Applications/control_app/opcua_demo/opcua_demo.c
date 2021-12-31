@@ -72,17 +72,13 @@ static void test_ua_connect(void *arg)
     UA_ClientConfig_setDefault(config);
 
 
-    ua_print("cfg ------>\n");
-
     retval = UA_Client_connect(client, test_uri);
     if (retval != UA_STATUSCODE_GOOD)
     {
-        ua_print("tcp: tcp client closed\r\n");
-        tcp_recved(tpcb, p->tot_len);
-        return tcp_close(tpcb);
+        ua_print("ua: [%s] connect failed\n", __func__);
     }
 
-    return ERR_OK;
+    return;
 }
 
 void test_ua_connect_thr(void *arg)
