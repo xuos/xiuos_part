@@ -51,6 +51,35 @@ static void *ReadTask(void *parameter)
  * @param sdev - sensor device pointer
  * @return success: 1 , failure: other
  */
+#ifdef ADD_NUTTX_FETURES
+static int SensorDeviceOpen(struct SensorDevice *sdev)
+{
+    int result = 0;
+    pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
+
+    result = PrivMutexCreate(&buff_lock, NULL);
+    if (result != 0){
+      printf("SensorDeviceOpen:mutex create failed, status=%d\n", result);
+    }
+
+    sdev->fd = PrivOpen(SENSOR_DEVICE_D124_DEV, O_RDWR);
+    if (sdev->fd < 0) {
+        printf("SensorDeviceOpen:open %s error\n", SENSOR_DEVICE_D124_DEV);
+        return -1;
+    }
+
+    attr.priority = 20;
+    attr.stacksize = 2048;
+
+    result = PrivTaskCreate(&active_task_id, &attr, &ReadTask, sdev);
+    if (result != 0){
+      printf("SensorDeviceOpen:task create failed, status=%d\n", result);
+    }
+    PrivTaskStartup(&active_task_id);
+
+    return result;
+}
+#else
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     int result = 0;
@@ -90,6 +119,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
 
     return result;
 }
+#endif
 
 /**
  * @description: Close D124 sensor device

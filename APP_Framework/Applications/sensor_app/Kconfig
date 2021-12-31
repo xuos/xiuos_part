@@ -65,6 +65,26 @@ menu "sensor app"
                     default n
                 endif
 
+            menuconfig APPLICATION_SENSOR_PM2_5
+                bool "Using sensor PM2.5 apps"
+                default n
+
+                if APPLICATION_SENSOR_PM2_5
+                    config APPLICATION_SENSOR_PM2_5_PS5308
+                    bool "Using sensor PS5308 apps"
+                    default n
+                endif
+
+            menuconfig APPLICATION_SENSOR_PM10
+                bool "Using sensor PM10 apps"
+                default n
+
+                if APPLICATION_SENSOR_PM10
+                    config APPLICATION_SENSOR_PM10_PS5308
+                    bool "Using sensor PS5308 apps"
+                    default n
+                endif
+
             menuconfig APPLICATION_SENSOR_VOICE
                 bool "Using sensor voice apps"
                 default n
@@ -72,16 +92,6 @@ menu "sensor app"
                 if APPLICATION_SENSOR_VOICE
                     config APPLICATION_SENSOR_VOICE_D124
                     bool "Using sensor D124 apps"
-                    default n
-                endif
-
-            menuconfig APPLICATION_SENSOR_HUMIDITY
-                bool "Using sensor humidity apps"
-                default n
-
-                if APPLICATION_SENSOR_HUMIDITY
-                    config APPLICATION_SENSOR_HUMIDITY_HS300X
-                    bool "Using sensor HS300x apps"
                     default n
                 endif
 
@@ -93,7 +103,26 @@ menu "sensor app"
                     config APPLICATION_SENSOR_TEMPERATURE_HS300X
                     bool "Using sensor HS300x apps"
                     default n
+                    
+                    if ADD_NUTTX_FETURES
+                    endif
+
                 endif
+
+            menuconfig APPLICATION_SENSOR_HUMIDITY
+                bool "Using sensor humidity apps"
+                default n
+
+                if APPLICATION_SENSOR_HUMIDITY
+                    config APPLICATION_SENSOR_HUMIDITY_HS300X
+                    bool "Using sensor HS300x apps"
+                    default n
+
+                    if ADD_NUTTX_FETURES
+                    endif
+
+                endif
+
         endif
 
 endmenu
