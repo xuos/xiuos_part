@@ -19,7 +19,8 @@ void simple_CSV_read()
     fin = open(CSV_PATH, O_RDONLY);
     if (!fin) {
         printf("Error open file %s", CSV_PATH);
-        exit(-1);
+        // exit(-1);
+        return;
     }
     read(fin, buffer, sizeof(buffer));
     close(fin);
