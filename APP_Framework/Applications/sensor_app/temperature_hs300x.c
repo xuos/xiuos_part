@@ -18,7 +18,10 @@
  * @date 2021.04.23
  */
 
-#include <user_api.h>
+#ifdef ADD_XIUOS_FETURES
+# include <user_api.h>
+#endif
+
 #include <sensor.h>
 
 /**
@@ -43,4 +46,3 @@ void TempHs300x(void)
 
     SensorQuantityClose(temp);
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, TempHs300x, TempHs300x, TempHs300x function);

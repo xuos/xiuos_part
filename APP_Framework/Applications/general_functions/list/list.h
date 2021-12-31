@@ -22,7 +22,9 @@
 #ifndef __LIST_H__
 #define __LIST_H__
 
-#include "libc.h"
+#include <errno.h>
+#include <stdarg.h>
+#include <fcntl.h>
 #include<stddef.h>
 #ifdef __cplusplus
 extern "C" {

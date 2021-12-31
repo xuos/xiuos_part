@@ -34,6 +34,11 @@ config SENSOR_ZG09
                 endif
 
                 if ADD_NUTTX_FETURES
+                       config SENSOR_DEVICE_ZG09_DEV
+                               string "CO2 device name"
+                               default "/dev/ttyS1"
+                               ---help---
+                                   If USART1 is selected, then fill in /dev/ttyS1 here.
 
                 endif
 

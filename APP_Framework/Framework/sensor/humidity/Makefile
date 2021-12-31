@@ -1,4 +1,4 @@
-ifeq ($(CONFIG_SENSOR_HS300X),y)
+ifeq ($(CONFIG_SENSOR_HS300X_HUMIDITY),y)
 	SRC_DIR += hs300x_humi
 endif
 
