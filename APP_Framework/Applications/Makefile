@@ -2,6 +2,12 @@ SRC_DIR := general_functions app_test
 
 SRC_FILES := main.c framework_init.c 
 
+ifeq ($(CONFIG_LIB_LV),y)
+SRC_FILES += lv_init.c
+
+SRC_DIR += lv_app
+endif
+
 ifeq ($(CONFIG_APPLICATION_OTA),y)
 	SRC_DIR += ota
 endif

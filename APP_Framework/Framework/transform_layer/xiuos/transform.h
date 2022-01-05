@@ -138,6 +138,7 @@ enum IoctlDriverType
     SPI_TYPE,
     I2C_TYPE,
     PIN_TYPE,
+    LCD_TYPE,
     DEFAULT_TYPE,
 };
 
@@ -146,6 +147,32 @@ struct PrivIoctlCfg
     enum IoctlDriverType ioctl_driver_type;
     void *args;
 };
+
+typedef struct 
+{
+    uint16 x_pos;
+    uint16 y_pos;
+    uint16 width;
+    uint16 height;
+    uint8 font_size;
+    uint8 *addr;
+    uint16 font_color;
+    uint16 back_color;
+}LcdStringParam;
+
+typedef struct 
+{
+    uint16 x_pos;
+    uint16 y_pos;
+    uint16 pixel_color;
+}LcdPixelParam;
+
+typedef struct 
+{
+    char type; // 0:write string;1:write dot
+    LcdStringParam string_info;
+    LcdPixelParam pixel_info; 
+}LcdWriteParam;
 
 /**********************mutex**************************/
 

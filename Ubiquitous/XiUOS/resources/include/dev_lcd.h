@@ -63,6 +63,20 @@ typedef struct
     uint16 back_color;
 }LcdStringParam;
 
+typedef struct 
+{
+    uint16 x_pos;
+    uint16 y_pos;
+    uint16 pixel_color;
+}LcdPixelParam;
+
+typedef struct 
+{
+    char type;
+    LcdStringParam string_info;
+    LcdPixelParam pixel_info; 
+}LcdWriteParam;
+
 struct  LcdDevDone
 {
     uint32 (*open) (void *dev);
