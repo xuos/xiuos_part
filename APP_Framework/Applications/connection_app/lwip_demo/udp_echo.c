@@ -68,7 +68,7 @@
 
 #define RECV_DATA         (1024)
 
-char* send_msg = "\n\nThis one is UDP pkg. Congratulations on you.\n\n";
+char* udp_send_msg = "\n\nThis one is UDP pkg. Congratulations on you.\n\n";
 
 static void UdpEchoThreadServer(void *arg)
 {
@@ -150,7 +150,7 @@ static void UdpEchoThreadClient(void *arg)
   struct sockaddr_in udp_sock;
   udp_sock.sin_family = AF_INET;
   udp_sock.sin_port = htons(TARGET_PORT_CLIENT);
-  udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(IP_ADDR0_SERVER,IP_ADDR1_SERVER,IP_ADDR2_SERVER,IP_ADDR3_SERVER));
+  udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_target[0],udp_target[1],udp_target[2],udp_target[3]));
   memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
   if (connect(sock_udp_send_once, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
@@ -166,12 +166,12 @@ static void UdpEchoThreadClient(void *arg)
   {
     KPrintf("Lwip client is running.\n");
 
-    sendto(sock_udp_send_once,send_msg,
-     strlen(send_msg),0,
+    sendto(sock_udp_send_once,udp_send_msg,
+     strlen(udp_send_msg),0,
      (struct sockaddr*)&udp_sock,
      sizeof(struct sockaddr));
 
-    KPrintf("Send UDP msg: %s ", send_msg);
+    lw_pr_info("Send UDP msg: %s ", udp_send_msg);
 
     MdelayKTask(1000);
   }

@@ -82,10 +82,6 @@ static void *lwip_ping_test(void *param)
 void lwip_ping_thread(int argc, char *argv[])
 {
     int result = 0;
-    pthread_t ping_demo_id = 0;
-    pthread_attr_t attr;
-    attr.schedparam.sched_priority = 15;
-    attr.stacksize = 4096;
 
     if(argc >= 4)
     {
@@ -102,15 +98,13 @@ void lwip_ping_thread(int argc, char *argv[])
 
     lw_print("lw: [%s] argc %d\n", __func__, argc);
 
-    result = PrivTaskCreate(&ping_demo_id, &attr, lwip_ping_test, NULL);
-    if (0 == result) {
-        lw_print("lwip_setip_test %d successfully!\n", ping_demo_id);
-    } else {
-        lw_print("lwip_setip_test failed! error code is %d\n", result);
-    }
+    IP4_ADDR(&ping_addr, lwip_gwaddr[0], lwip_gwaddr[1], lwip_gwaddr[2], lwip_gwaddr[3]);
+    ETH_BSP_Config();
+    lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    ping_init(&ping_addr);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     ping, lwip_ping_thread, lwip_ping_thread);
+     ping, lwip_ping_thread, ping [IP] 5 times);
 
 #endif

@@ -40,6 +40,7 @@
  ******************************************************************************/
 
 static struct udp_pcb *udpecho_raw_pcb;
+char udp_target[] = {192, 168, 250, 252};
 
 /*******************************************************************************
  * Code
@@ -52,11 +53,17 @@ static void *lwip_udp_test(void* param)
     UdpEchoInit();
 }
 
-void lwip_udp_thread(void)
+void lwip_udp_thread(int argc, char *argv[])
 {
     int result = 0;
     pthread_t th_id;
     pthread_attr_t attr;
+
+    if(argc == 2)
+    {
+        lw_print("lw: [%s] gw %s\n", __func__, argv[1]);
+        sscanf(argv[1], "%d.%d.%d.%d", &udp_target[0], &udp_target[1], &udp_target[2], &udp_target[3]);
+    }
 
     attr.schedparam.sched_priority = UDP_TASK_PRIO;
     attr.stacksize = UDP_TASK_STACK_SIZE;
@@ -69,7 +76,7 @@ void lwip_udp_thread(void)
     }
 }
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
      LwUdpEcho, lwip_udp_thread, UDP send echo);
 
 static void

@@ -516,16 +516,16 @@ void lwip_config_net(char *ip, char *mask, char *gw)
   netif_set_default(&gnetif);
   netif_set_up(&gnetif);
 
-  lw_print("\r\n************************************************\r\n");
-  lw_print(" Network Configuration\r\n");
-  lw_print("************************************************\r\n");
-  lw_print(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
+  lw_pr_info("\r\n************************************************\r\n");
+  lw_pr_info(" Network Configuration\r\n");
+  lw_pr_info("************************************************\r\n");
+  lw_pr_info(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
        ((u8_t *)&net_ipaddr)[2], ((u8_t *)&net_ipaddr)[3]);
-  lw_print(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
+  lw_pr_info(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
        ((u8_t *)&net_netmask)[2], ((u8_t *)&net_netmask)[3]);
-  lw_print(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
+  lw_pr_info(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
        ((u8_t *)&net_gw)[2], ((u8_t *)&net_gw)[3]);
-  lw_print("************************************************\r\n");
+  lw_pr_info("************************************************\r\n");
 
   lwip_config_input(&gnetif);
 }

@@ -107,7 +107,7 @@ a lot of data that needs to be copied, this should be set high. */
 #define TCP_SND_QUEUELEN        (8* TCP_SND_BUF/TCP_MSS)
 
 /* TCP receive window. */
-#define TCP_WND                 16000//(12*TCP_MSS)
+#define TCP_WND                 (12*TCP_MSS)
 
 
 /* ---------- ICMP options ---------- */
@@ -254,7 +254,7 @@ typedef unsigned int nfds_t;
 #define lw_print //KPrintf
 #define lw_trace() //KPrintf("lw: [%s][%d] passed!\n", __func__, __LINE__)
 #define lw_error() //KPrintf("lw: [%s][%d] failed!\n", __func__, __LINE__)
-
+#define lw_pr_info KPrintf
 #endif /* __LWIPOPTS_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

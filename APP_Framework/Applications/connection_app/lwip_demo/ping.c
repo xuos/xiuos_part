@@ -69,12 +69,12 @@
 
 /** ping receive timeout - in milliseconds */
 #ifndef PING_RCV_TIMEO
-#define PING_RCV_TIMEO 1000
+#define PING_RCV_TIMEO 2000
 #endif
 
 /** ping delay - in milliseconds */
 #ifndef PING_DELAY
-#define PING_DELAY     3000
+#define PING_DELAY     1000
 #endif
 
 /** ping identifier - must fit on a u16_t */
@@ -275,7 +275,7 @@ ping_thread(void *arg)
   lw_print("lw: [%s] ping start!\n", __func__);
 
   ret = lwip_setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-  LWIP_ASSERT("setting receive timeout failed", ret == 0);
+  LWIP_ASSERT("setting receive timeout failed", ret != 0);
   LWIP_UNUSED_ARG(ret);
 
   while (cnt --) {
@@ -363,13 +363,21 @@ ping_send(struct raw_pcb *raw, const ip_addr_t *addr)
 static void
 ping_timeout(void *arg)
 {
+  static int cnt = 3;
   struct raw_pcb *pcb = (struct raw_pcb*)arg;
 
   LWIP_ASSERT("ping_timeout: no pcb given!", pcb != NULL);
 
   ping_send(pcb, ping_target);
 
-  sys_timeout(PING_DELAY, ping_timeout, pcb);
+  if(cnt -- > 0)
+  {
+    sys_timeout(PING_DELAY, ping_timeout, pcb);
+  }
+  else
+  {
+    cnt = 3;
+  }
 }
 
 static void

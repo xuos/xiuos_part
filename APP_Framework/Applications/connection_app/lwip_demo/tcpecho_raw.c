@@ -287,8 +287,7 @@ tcpecho_raw_init(void)
   tcpecho_raw_pcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
   if (tcpecho_raw_pcb != NULL) {
     err_t err;
-//tst by wly
-    err = tcp_bind(tcpecho_raw_pcb, IP_ANY_TYPE, 4840);
+    err = tcp_bind(tcpecho_raw_pcb, IP_ANY_TYPE, LWIP_TEST_TCP_PORT);
     if (err == ERR_OK) {
       tcpecho_raw_pcb = tcp_listen(tcpecho_raw_pcb);
       tcp_accept(tcpecho_raw_pcb, tcpecho_raw_accept);
