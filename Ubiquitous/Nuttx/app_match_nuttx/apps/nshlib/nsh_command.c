@@ -580,6 +580,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
 #endif
 
+#if defined(CONFIG_APPLICATION_SENSOR_IAQ) && !defined(CONFIG_NSH_DISABLE_TB600B_IAQ10)
+  { "iaq10",       cmd_Iaq10,       1, 1, "[get air quality data with sensor Tb600bIaq10.]" },
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_CO2_ZG09) && !defined(CONFIG_NSH_DISABLE_CO2ZG09)
   { "zg09",       cmd_Co2Zg09,       1, 1, "[get co2 concentration with sensor ZG09.]" },
 #endif

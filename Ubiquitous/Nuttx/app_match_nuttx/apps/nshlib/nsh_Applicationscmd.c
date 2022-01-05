@@ -53,6 +53,21 @@
 extern int FrameworkInit(void);
 
 /****************************************************************************
+ * Name: cmd_Iaq10
+ ****************************************************************************/
+
+#if defined(CONFIG_APPLICATION_SENSOR_IAQ) && !defined(CONFIG_NSH_DISABLE_TB600B_IAQ10)
+extern void IaqTb600bIaq10(void);
+int cmd_Iaq10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    IaqTb600bIaq10();
+    return 0;
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_Co2Zg09
  ****************************************************************************/
 

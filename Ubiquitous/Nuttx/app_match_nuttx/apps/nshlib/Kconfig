@@ -588,6 +588,10 @@ config NSH_DISABLE_XD
 	default y if DEFAULT_SMALL
 	default n if !DEFAULT_SMALL
 
+config NSH_DISABLE_TB600B_IAQ10
+	bool "Disable the air quality function of the sensor TB600B-IAQ-10"
+	default n
+
 config NSH_DISABLE_CO2ZG09
 	bool "Disable the co2 function of the sensor zg09"
 	default n

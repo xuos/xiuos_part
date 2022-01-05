@@ -1403,6 +1403,10 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
                     FAR void *arg);
 #endif
 
+#if defined(CONFIG_APPLICATION_SENSOR_IAQ) && !defined(CONFIG_NSH_DISABLE_TB600B_IAQ10)
+  int cmd_Iaq10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_CO2_ZG09) && !defined(CONFIG_NSH_DISABLE_CO2ZG09)
   int cmd_Co2Zg09(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif

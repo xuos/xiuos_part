@@ -34,6 +34,11 @@ config SENSOR_TB600B_IAQ10
                 endif
 
                 if ADD_NUTTX_FETURES
+                        config SENSOR_DEVICE_TB600B_IAQ10_DEV
+                                string "tb600b iaq10 device uart path"
+                                default "/dev/ttyS1"
+                               ---help---
+                                   If USART1 is selected, then fill in /dev/ttyS1 here.
 
                 endif
 
