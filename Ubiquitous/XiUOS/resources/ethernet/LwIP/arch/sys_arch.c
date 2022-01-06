@@ -93,6 +93,8 @@ int is_lwip_test = 0; //for lwip input thread
 
 x_ticks_t lwip_sys_now;
 
+static int lwip_init_flag = 0;
+
 struct sys_timeouts {
   struct sys_timeo *next;
 };
@@ -318,7 +320,7 @@ void sys_mbox_free(sys_mbox_t *mbox)
 
 int sys_mbox_valid(sys_mbox_t *mbox)
 {
-  if (*mbox < SYS_MBOX_NULL)
+  if (*mbox <= SYS_MBOX_NULL)
     return 0;
   else
     return 1;
@@ -471,10 +473,6 @@ void lwip_config_input(struct netif *net)
 {
   pthread_t th_id = 0;
 
-  //neglect create input thread for test
-  if(is_lwip_test)
-    return;
-
   th_id = sys_thread_new("eth_input", lwip_input_thread, net, 4096, 15);
 
   if (th_id >= 0) {
@@ -483,8 +481,6 @@ void lwip_config_input(struct netif *net)
     lw_print("%s failed!\n", __func__);
   }
 }
-
-static int lwip_init_flag = 0;
 
 void lwip_config_net(char *ip, char *mask, char *gw)
 {
@@ -521,17 +517,19 @@ void lwip_config_net(char *ip, char *mask, char *gw)
   netif_set_default(&gnetif);
   netif_set_up(&gnetif);
 
-  lw_pr_info("\r\n************************************************\r\n");
-  lw_pr_info(" Network Configuration\r\n");
-  lw_pr_info("************************************************\r\n");
-  lw_pr_info(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
-       ((u8_t *)&net_ipaddr)[2], ((u8_t *)&net_ipaddr)[3]);
-  lw_pr_info(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
-       ((u8_t *)&net_netmask)[2], ((u8_t *)&net_netmask)[3]);
-  lw_pr_info(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
-       ((u8_t *)&net_gw)[2], ((u8_t *)&net_gw)[3]);
-  lw_pr_info("************************************************\r\n");
-
+  if(is_lwip_test)
+  {
+    lw_pr_info("\r\n************************************************\r\n");
+    lw_pr_info(" Network Configuration\r\n");
+    lw_pr_info("************************************************\r\n");
+    lw_pr_info(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
+         ((u8_t *)&net_ipaddr)[2], ((u8_t *)&net_ipaddr)[3]);
+    lw_pr_info(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
+         ((u8_t *)&net_netmask)[2], ((u8_t *)&net_netmask)[3]);
+    lw_pr_info(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
+         ((u8_t *)&net_gw)[2], ((u8_t *)&net_gw)[3]);
+    lw_pr_info("************************************************\r\n");
+  }
   lwip_config_input(&gnetif);
 }
 

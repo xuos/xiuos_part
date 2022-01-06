@@ -34,36 +34,6 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-/* IP address configuration. */
-#define configIP_ADDR0 192
-#define configIP_ADDR1 168
-#define configIP_ADDR2 0
-#define configIP_ADDR3 102
-
-/* Netmask configuration. */
-#define configNET_MASK0 255
-#define configNET_MASK1 255
-#define configNET_MASK2 255
-#define configNET_MASK3 0
-
-/* Gateway address configuration. */
-#define configGW_ADDR0 192
-#define configGW_ADDR1 168
-#define configGW_ADDR2 0
-#define configGW_ADDR3 100
-
-/* MAC address configuration. */
-#define configMAC_ADDR                     \
-    {                                      \
-        0x02, 0x12, 0x13, 0x10, 0x15, 0x11 \
-    }
-
-/* Address of PHY interface. */
-#define EXAMPLE_PHY_ADDRESS BOARD_ENET0_PHY_ADDRESS
-
-/* System clock name. */
-#define EXAMPLE_CLOCK_NAME kCLOCK_CoreSysClk
-
 
 /*******************************************************************************
  * Prototypes
@@ -155,31 +125,10 @@ int print_dhcp_state(struct netif *netif)
 void lwip_dhcp_test(void)
 {
     static int flag = 0;
-    struct netif fsl_netif0;
-    ip4_addr_t fsl_netif0_ipaddr, fsl_netif0_netmask, fsl_netif0_gw;
-    ethernetif_config_t fsl_enet_config0 = {
-        .phyAddress = EXAMPLE_PHY_ADDRESS,
-        .clockName  = EXAMPLE_CLOCK_NAME,
-        .macAddress = configMAC_ADDR,
-    };
     char ip_addr[4] = {0, 0, 0, 0};
 
     ETH_BSP_Config();
 
-//    IP4_ADDR(&fsl_netif0_ipaddr, 0U, 0U, 0U, 0U);
-//    IP4_ADDR(&fsl_netif0_netmask, 0U, 0U, 0U, 0U);
-//    IP4_ADDR(&fsl_netif0_gw, 0U, 0U, 0U, 0U);
-
-//    if(flag == 0)
-//    {
-//        lwip_init();
-//        netif_add(&fsl_netif0, &fsl_netif0_ipaddr, &fsl_netif0_netmask, &fsl_netif0_gw, &fsl_enet_config0,
-//            ethernetif0_init, ethernet_input);
-//        netif_set_default(&fsl_netif0);
-//        flag = 1;
-//    }
-
-//    netif_set_up(&fsl_netif0);
     lwip_config_net(ip_addr, ip_addr, ip_addr);
     is_lwip_test = 1;
 
@@ -200,6 +149,15 @@ void lwip_dhcp_test(void)
         /* Print DHCP progress */
         if(print_dhcp_state(&gnetif))
         {
+            sscanf(ipaddr_ntoa(&gnetif.ip_addr), "%d.%d.%d.%d", &lwip_ipaddr[0], &lwip_ipaddr[1],
+                &lwip_ipaddr[2], &lwip_ipaddr[3]);
+
+            sscanf(ipaddr_ntoa(&gnetif.netmask), "%d.%d.%d.%d", &lwip_netmask[0], &lwip_netmask[1],
+                &lwip_netmask[2], &lwip_netmask[3]);
+
+            sscanf(ipaddr_ntoa(&gnetif.gw), "%d.%d.%d.%d", &lwip_gwaddr[0], &lwip_gwaddr[1],
+                &lwip_gwaddr[2], &lwip_gwaddr[3]);
+
             break;
         }
     }
@@ -209,6 +167,6 @@ void lwip_dhcp_test(void)
 
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     DHCPTest, lwip_dhcp_test, DHCP_Test);
+     getip, lwip_dhcp_test, DHCP_Test);
 
 #endif

@@ -92,7 +92,7 @@
 #define GW_ADDR3                    5
 /* USER CODE END 0 */
 
-#define SYS_MBOX_NULL  0
+#define SYS_MBOX_NULL  -1
 #define SYS_SEM_NULL   0
 #define SYS_MRTEX_NULL SYS_SEM_NULL
 

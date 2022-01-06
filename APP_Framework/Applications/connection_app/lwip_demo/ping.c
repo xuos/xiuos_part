@@ -38,6 +38,7 @@
  *
  */
 
+#include <xs_ktask.h>
 #include "lwip/opt.h"
 
 #if LWIP_RAW /* don't build if not configured for use in lwipopts.h */
@@ -52,6 +53,8 @@
 #include "lwip/timeouts.h"
 #include "lwip/inet_chksum.h"
 #include "lwip/prot/ip4.h"
+#include "lwip/netdb.h"
+#include "lwip/prot/ip.h"
 
 #if PING_USE_SOCKETS
 #include "lwip/sockets.h"
@@ -245,7 +248,7 @@ ping_thread(void *arg)
 {
   int s;
   int ret;
-  int cnt = 5;
+  int cnt = TEST_LWIP_TIMES;
 
 #if LWIP_SO_SNDRCVTIMEO_NONSTANDARD
   int timeout = PING_RCV_TIMEO;
@@ -295,6 +298,7 @@ ping_thread(void *arg)
     }
     sys_msleep(PING_DELAY);
   }
+  lwip_close(s);
 }
 
 #else /* PING_USE_SOCKETS */
@@ -414,5 +418,127 @@ ping_init(const ip_addr_t* ping_addr)
   ping_raw_init();
 #endif /* PING_USE_SOCKETS */
 }
+
+int  lwip_ping_send(int s, ip_addr_t *addr, int size)
+{
+    int err;
+    struct icmp_echo_hdr *iecho;
+    struct sockaddr_in to;
+    int ping_size = sizeof(struct icmp_echo_hdr) + size;
+    LWIP_ASSERT("ping_size is too big", ping_size <= 0xffff);
+
+    iecho = malloc(ping_size);
+    if (iecho == NULL)
+    {
+        return ERR_MEM;
+    }
+
+    ping_prepare_echo(iecho, (u16_t) ping_size);
+
+    to.sin_len = sizeof(to);
+    to.sin_family = AF_INET;
+#if LWIP_IPV4 && LWIP_IPV6
+    to.sin_addr.s_addr = addr->u_addr.ip4.addr;
+#elif LWIP_IPV4
+    to.sin_addr.s_addr = addr->addr;
+#elif LWIP_IPV6
+#error Not supported IPv6.
+#endif
+
+    err = lwip_sendto(s, iecho, ping_size, 0, (struct sockaddr*) &to, sizeof(to));
+    free(iecho);
+
+    return (err == ping_size ? ERR_OK : ERR_VAL);
+}
+
+int lwip_ping_recv(int s, int *ttl)
+{
+    char buf[64];
+    int fromlen = sizeof(struct sockaddr_in), len;
+    struct sockaddr_in from;
+    struct ip_hdr *iphdr;
+    struct icmp_echo_hdr *iecho;
+
+    while ((len = lwip_recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr*) &from, (socklen_t*) &fromlen)) > 0)
+    {
+        if (len >= (int)(sizeof(struct ip_hdr) + sizeof(struct icmp_echo_hdr)))
+        {
+            iphdr = (struct ip_hdr *) buf;
+            iecho = (struct icmp_echo_hdr *) (buf + (IPH_HL(iphdr) * 4));
+            if ((iecho->id == PING_ID) && (iecho->seqno == htons(ping_seq_num)))
+            {
+                *ttl = iphdr->_ttl;
+                return len;
+            }
+        }
+    }
+
+    return len;
+}
+
+int get_url_ip(char* url)
+{
+#if LWIP_VERSION_MAJOR >= 2U
+    struct timeval timeout = { PING_RCV_TIMEO / TICK_PER_SECOND, PING_RCV_TIMEO % TICK_PER_SECOND };
+#else
+    int timeout = PING_RCV_TIMEO * 1000UL / TICK_PER_SECOND;
+#endif
+    int cnt = TEST_LWIP_TIMES;
+
+    int s, ttl, recv_len;
+    ip_addr_t target_addr;
+    struct addrinfo hint, *res = NULL;
+    struct sockaddr_in *h = NULL;
+    struct in_addr ina;
+
+    memset(&hint, 0, sizeof(hint));
+    /* convert URL to IP */
+    if (lwip_getaddrinfo(url, NULL, &hint, &res) != 0)
+    {
+        lw_pr_info("ping: unknown host %s\n", url);
+        return -1;
+    }
+    memcpy(&h, &res->ai_addr, sizeof(struct sockaddr_in *));
+    memcpy(&ina, &h->sin_addr, sizeof(ina));
+    lwip_freeaddrinfo(res);
+    if (inet_aton(inet_ntoa(ina), &target_addr) == 0)
+    {
+        lw_pr_info("ping: unknown host %s\n", url);
+        return -2;
+    }
+    /* new a socket */
+    if ((s = lwip_socket(AF_INET, SOCK_RAW, IP_PROTO_ICMP)) < 0)
+    {
+        lw_pr_info("ping: create socket failed\n");
+        return -3;
+    }
+
+    lwip_setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+    while (cnt --)
+    {
+        if (ping_send(s, &target_addr) == ERR_OK)
+        {
+#ifdef LWIP_DEBUG
+            ping_time = sys_now();
+#endif /* LWIP_DEBUG */
+            if ((recv_len = lwip_ping_recv(s, &ttl)) >= 0)
+            {
+                lw_pr_info("%d bytes from %s icmp_seq=%d ttl=%d time=%d ms\n", recv_len, inet_ntoa(ina), cnt,
+                ttl, sys_now() - ping_time);
+            }
+            else
+            {
+                lw_pr_info("From %s icmp_seq=%d timeout\n", inet_ntoa(ina), cnt);
+            }
+        }
+
+        sys_msleep(PING_DELAY);
+    }
+
+    lwip_close(s);
+    return 0;
+}
+
 
 #endif /* LWIP_RAW */

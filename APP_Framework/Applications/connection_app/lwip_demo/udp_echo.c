@@ -176,10 +176,12 @@ static void UdpEchoThreadClient(void *arg)
 
     MdelayKTask(1000);
   }
-  return;
 
 __exit:
-  if (sock_udp_send_once >= 0) closesocket(sock_udp_send_once);
+  if (sock_udp_send_once >= 0)
+  {
+    closesocket(sock_udp_send_once);
+  }
 
   return;
 }

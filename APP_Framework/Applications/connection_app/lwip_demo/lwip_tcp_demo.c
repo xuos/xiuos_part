@@ -86,10 +86,9 @@ static void lwip_tcp_send_thread(void *arg)
     MdelayKTask(1000);
   }
 
-  return;
-
 __exit:
-  if (sock_tcp_send_once >= 0) closesocket(sock_tcp_send_once);
+  if (sock_tcp_send_once >= 0)
+    closesocket(sock_tcp_send_once);
 
   return;
 }

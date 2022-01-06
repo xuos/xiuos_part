@@ -119,10 +119,9 @@ void lwip_getip_thread(int argc, char *argv[])
     lw_pr_info(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&lwip_gwaddr)[0], ((u8_t *)&lwip_gwaddr)[1],
          ((u8_t *)&lwip_gwaddr)[2], ((u8_t *)&lwip_gwaddr)[3]);
     lw_pr_info("************************************************\r\n");
-
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     getip, lwip_getip_thread, GetIp [IP] [Netmask] [Gateway]);
+     showip, lwip_getip_thread, GetIp [IP] [Netmask] [Gateway]);
 
 #endif

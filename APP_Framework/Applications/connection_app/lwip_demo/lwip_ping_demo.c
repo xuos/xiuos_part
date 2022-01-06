@@ -107,4 +107,18 @@ void lwip_ping_thread(int argc, char *argv[])
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
      ping, lwip_ping_thread, ping [IP] 3 times);
 
+int lwip_dns_test(int argc, char **argv)
+{
+    if (argc <= 1)
+    {
+        lw_pr_info("Please input: ping <host address>\n");
+        return 0;
+    }
+
+    get_url_ip(argv[1]);
+    return 0;
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(2),
+     dns, lwip_dns_test, dns [url]);
+
 #endif
