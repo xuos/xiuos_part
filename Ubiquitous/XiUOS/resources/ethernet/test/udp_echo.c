@@ -73,7 +73,7 @@ char* udp_send_msg = "\n\nThis one is UDP pkg. Congratulations on you.\n\n";
 
 static void UdpEchoThreadServer(void *arg)
 {
-  KPrintf("UdpEchoThreadServer start.\n");
+  lw_print("UdpEchoThreadServer start.\n");
 
   int sock = -1;
   char *recv_data;
@@ -86,14 +86,14 @@ static void UdpEchoThreadServer(void *arg)
     recv_data = (char *)malloc(RECV_DATA);
     if (recv_data == NULL)
     {
-        KPrintf("No memory\n");
-        goto __exit;
+      lw_print("No memory\n");
+      goto __exit;
     }
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
     {
-      KPrintf("Socket error\n");
+      lw_print("Socket error\n");
       goto __exit;
     }
 
@@ -104,12 +104,12 @@ static void UdpEchoThreadServer(void *arg)
 
     if (bind(sock, (struct sockaddr *)&udp_addr, sizeof(struct sockaddr)) == -1)
     {
-      KPrintf("Unable to bind\n");
+      lw_print("Unable to bind\n");
       goto __exit;
     }
 
-    KPrintf("UDP bind sucess, start to receive.\n");
-    KPrintf("\n\nLocal Port:%d\n\n", LOCAL_PORT_SERVER);
+    lw_print("UDP bind sucess, start to receive.\n");
+    lw_print("\n\nLocal Port:%d\n\n", LOCAL_PORT_SERVER);
 
     while(1)
     {
@@ -119,9 +119,9 @@ static void UdpEchoThreadServer(void *arg)
                              (struct sockaddr*)&seraddr,
                              &addrlen);
 
-      KPrintf("Receive from : %s\n",inet_ntoa(seraddr.sin_addr));
+      lw_print("Receive from : %s\n",inet_ntoa(seraddr.sin_addr));
 
-      KPrintf("Recevce data : %s\n\n",recv_data);
+      lw_print("Recevce data : %s\n\n",recv_data);
 
       sendto(sock,recv_data,
              recv_data_len,0,
@@ -138,13 +138,13 @@ __exit:
 static void UdpEchoThreadClient(void *arg)
 {
   int cnt = TEST_LWIP_TIMES;
-  KPrintf("UdpEchoThreadClient start.\n");
+  lw_print("UdpEchoThreadClient start.\n");
 
   int sock_udp_send_once = -1;
   sock_udp_send_once = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock_udp_send_once < 0)
   {
-    KPrintf("Socket error\n");
+    lw_print("Socket error\n");
     goto __exit;
   }
 
@@ -156,21 +156,21 @@ static void UdpEchoThreadClient(void *arg)
 
   if (connect(sock_udp_send_once, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
   {
-    KPrintf("Unable to connect\n");
+    lw_print("Unable to connect\n");
     goto __exit;
   }
 
-  KPrintf("UDP connect success, start to send.\n");
-  KPrintf("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
+  lw_print("UDP connect success, start to send.\n");
+  lw_print("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
 
   while (cnt --)
   {
     lw_print("UDP Client is running.\n");
 
-    sendto(sock_udp_send_once,udp_send_msg,
-     strlen(udp_send_msg),0,
-     (struct sockaddr*)&udp_sock,
-     sizeof(struct sockaddr));
+    sendto(sock_udp_send_once, udp_send_msg,
+         strlen(udp_send_msg), 0,
+         (struct sockaddr*)&udp_sock,
+         sizeof(struct sockaddr));
 
     lw_pr_info("Send UDP msg: %s ", udp_send_msg);
 

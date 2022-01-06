@@ -1,7 +1,7 @@
 SRC_DIR :=
 
 ifeq ($(CONFIG_RESOURCES_LWIP),y)
-	SRC_DIR += lwip_demo
+	SRC_DIR += socket_demo
 endif
 
 include $(KERNEL_ROOT)/compiler.mk
