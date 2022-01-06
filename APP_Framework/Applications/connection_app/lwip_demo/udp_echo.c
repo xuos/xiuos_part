@@ -53,6 +53,7 @@
 #include "udp_echo.h"
 #include <transform.h>
 #include "lwip/opt.h"
+#include "sys_arch.h"
 
 #if LWIP_SOCKET
 #include <lwip/sockets.h>
@@ -136,7 +137,7 @@ __exit:
 
 static void UdpEchoThreadClient(void *arg)
 {
-  int cnt = 5;
+  int cnt = TEST_LWIP_TIMES;
   KPrintf("UdpEchoThreadClient start.\n");
 
   int sock_udp_send_once = -1;
@@ -164,7 +165,7 @@ static void UdpEchoThreadClient(void *arg)
 
   while (cnt --)
   {
-    KPrintf("Lwip client is running.\n");
+    lw_print("UDP Client is running.\n");
 
     sendto(sock_udp_send_once,udp_send_msg,
      strlen(udp_send_msg),0,

@@ -363,7 +363,7 @@ ping_send(struct raw_pcb *raw, const ip_addr_t *addr)
 static void
 ping_timeout(void *arg)
 {
-  static int cnt = 3;
+  static int cnt = TEST_LWIP_TIMES;
   struct raw_pcb *pcb = (struct raw_pcb*)arg;
 
   LWIP_ASSERT("ping_timeout: no pcb given!", pcb != NULL);
@@ -376,7 +376,7 @@ ping_timeout(void *arg)
   }
   else
   {
-    cnt = 3;
+    cnt = TEST_LWIP_TIMES;
   }
 }
 

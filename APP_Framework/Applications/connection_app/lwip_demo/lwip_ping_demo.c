@@ -105,6 +105,6 @@ void lwip_ping_thread(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     ping, lwip_ping_thread, ping [IP] 5 times);
+     ping, lwip_ping_thread, ping [IP] 3 times);
 
 #endif

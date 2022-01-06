@@ -66,6 +66,8 @@
 #define LOCAL_PORT_SERVER           4840
 #define TARGET_PORT_CLIENT          LOCAL_PORT_SERVER
 
+#define TEST_LWIP_TIMES             3
+
 /*Static IP ADDRESS: IP_ADDR0.IP_ADDR1.IP_ADDR2.IP_ADDR3 */
 #define IP_ADDR0_SERVER             192
 #define IP_ADDR1_SERVER             168
@@ -106,6 +108,8 @@ typedef x_base sys_prot_t;
 extern char lwip_ipaddr[];
 extern char lwip_netmask[];
 extern char lwip_gwaddr[];
+extern int is_lwip_test;
+extern struct netif gnetif;
 
 void TcpIpInit(void);
 void lwip_config_net(char *ip, char *mask, char *gw);

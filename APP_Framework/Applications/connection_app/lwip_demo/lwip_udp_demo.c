@@ -77,7 +77,7 @@ void lwip_udp_thread(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     LwUdpEcho, lwip_udp_thread, UDP send echo);
+     UDPSend, lwip_udp_thread, UDP send echo);
 
 static void
 udpecho_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
@@ -118,5 +118,5 @@ void lwip_udp_server(void)
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     LwUdpServer, lwip_udp_server, UDP server echo);
+     UDPRecv, lwip_udp_server, UDP server echo);
 

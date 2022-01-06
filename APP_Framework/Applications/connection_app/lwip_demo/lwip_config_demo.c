@@ -104,7 +104,7 @@ void lwip_setip_thread(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     SetIp, lwip_setip_thread, SetIp [IP] [Netmask] [Gateway]);
+     setip, lwip_setip_thread, SetIp [IP] [Netmask] [Gateway]);
 
 
 void lwip_getip_thread(int argc, char *argv[])
@@ -123,6 +123,6 @@ void lwip_getip_thread(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     GetIp, lwip_getip_thread, GetIp [IP] [Netmask] [Gateway]);
+     getip, lwip_getip_thread, GetIp [IP] [Netmask] [Gateway]);
 
 #endif

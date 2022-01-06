@@ -46,7 +46,7 @@ char* tcp_send_msg = "\n\nThis one is TCP pkg. Congratulations on you.\n\n";
 
 static void lwip_tcp_send_thread(void *arg)
 {
-  int cnt = 5;
+  int cnt = TEST_LWIP_TIMES;
   lw_print("lwip_tcp_send_thread start.\n");
 
   int sock_tcp_send_once = -1;
@@ -85,6 +85,7 @@ static void lwip_tcp_send_thread(void *arg)
 
     MdelayKTask(1000);
   }
+
   return;
 
 __exit:
@@ -114,7 +115,7 @@ void lwip_tcp_client_run(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     LwTcpClient, lwip_tcp_client_run, TCP Client);
+     TCPSend, lwip_tcp_client_run, TCP Client);
 
 
 void lwip_tcp_server_run(void)
@@ -125,5 +126,5 @@ void lwip_tcp_server_run(void)
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     LwTcpServer, lwip_tcp_server_run, TCP server);
+     TCPRecv, lwip_tcp_server_run, TCP Server);
 

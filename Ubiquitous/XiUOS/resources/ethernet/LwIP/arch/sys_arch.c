@@ -89,6 +89,7 @@ char lwip_netmask[] = {255, 255, 255, 0};
 char lwip_gwaddr[] = {192, 168, 250, 252};
 
 int errno;
+int is_lwip_test = 0; //for lwip input thread
 
 x_ticks_t lwip_sys_now;
 
@@ -442,7 +443,7 @@ void TcpIpInit(void)
     KPrintf("lwip dhcp init fail...\n\n");
   while(ip_addr_cmp(&(gnetif.ip_addr),&ipaddr))
   {
-    vTaskDelay(1);
+    DelayKTask(1);
   }
 #endif
   KPrintf("\n\nIP:%d.%d.%d.%d\n\n",  \
@@ -469,6 +470,10 @@ void lwip_input_thread(void *param)
 void lwip_config_input(struct netif *net)
 {
   pthread_t th_id = 0;
+
+  //neglect create input thread for test
+  if(is_lwip_test)
+    return;
 
   th_id = sys_thread_new("eth_input", lwip_input_thread, net, 4096, 15);
 
