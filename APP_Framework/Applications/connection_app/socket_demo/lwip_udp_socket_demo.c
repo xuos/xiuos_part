@@ -11,7 +11,7 @@
 */
 
 /**
-* @file lwip_udp_demo.c
+* @file lwip_udp_socket_demo.c
 * @brief One UDP demo based on LwIP
 * @version 1.0
 * @author AIIT XUOS Lab
@@ -49,8 +49,6 @@ char udp_socket_ip[] = {192, 168, 250, 252};
 #define LWIP_UDP_TASK_STACK 4096
 #define LWIP_UDP_TASK_PRIO 25
 #define UDP_BUF_SIZE 1024
-
-char* udp_socket_str = "\n\nThis one is UDP pkg. Congratulations on you.\n\n";
 
 static void udp_recv_demo(void *arg)
 {
@@ -138,10 +136,13 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
 static void udp_send_demo(void *arg)
 {
     int cnt = TEST_LWIP_TIMES;
+    char send_str[128];
 
     lw_print("udp_send_demo start.\n");
 
     int socket_fd = -1;
+    memset(send_str, 0, sizeof(send_str));
+
     socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_fd < 0)
     {
@@ -166,13 +167,9 @@ static void udp_send_demo(void *arg)
 
     while (cnt --)
     {
-        sendto(socket_fd, udp_socket_str,
-        strlen(udp_socket_str), 0,
-        (struct sockaddr*)&udp_sock,
-        sizeof(struct sockaddr));
-
-        lw_pr_info("Send UDP msg: %s ", udp_socket_str);
-
+        snprintf(send_str, sizeof(send_str), "UDP test package times %d\r\n", cnt);
+        sendto(socket_fd, send_str, strlen(send_str), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
+        lw_pr_info("Send UDP msg: %s ", send_str);
         MdelayKTask(1000);
     }
 

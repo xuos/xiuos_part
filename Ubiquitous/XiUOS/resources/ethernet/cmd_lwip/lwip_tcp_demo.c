@@ -38,7 +38,9 @@
  ******************************************************************************/
 
 char tcp_target[] = {192, 168, 250, 252};
-char* tcp_send_msg = "\n\nThis one is TCP pkg. Congratulations on you.\n\n";
+#define MSG_SIZE 128
+// this is for test in shell, in fact, shell restrict the length of input string, which is less then 128
+char tcp_send_msg[MSG_SIZE] = {0};
 
 /*******************************************************************************
  * Code
@@ -46,78 +48,69 @@ char* tcp_send_msg = "\n\nThis one is TCP pkg. Congratulations on you.\n\n";
 
 static void lwip_tcp_send_thread(void *arg)
 {
-  int cnt = TEST_LWIP_TIMES;
-  lw_print("lwip_tcp_send_thread start.\n");
+    lw_print("lwip_tcp_send_thread start.\n");
 
-  int sock_tcp_send_once = -1;
-  sock_tcp_send_once = socket(AF_INET, SOCK_STREAM, 0);
-  if (sock_tcp_send_once < 0)
-  {
-    lw_print("Socket error\n");
-    goto __exit;
-  }
+    int fd = -1;
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0)
+    {
+        lw_print("Socket error\n");
+        return;
+    }
 
-  struct sockaddr_in tcp_sock;
-  tcp_sock.sin_family = AF_INET;
-  tcp_sock.sin_port = htons(TARGET_PORT_CLIENT);
-  tcp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(tcp_target[0],tcp_target[1],tcp_target[2],tcp_target[3]));
-  memset(&(tcp_sock.sin_zero), 0, sizeof(tcp_sock.sin_zero));
+    struct sockaddr_in tcp_sock;
+    tcp_sock.sin_family = AF_INET;
+    tcp_sock.sin_port = htons(TARGET_PORT_CLIENT);
+    tcp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(tcp_target[0], tcp_target[1], tcp_target[2], tcp_target[3]));
+    memset(&(tcp_sock.sin_zero), 0, sizeof(tcp_sock.sin_zero));
 
-  if (connect(sock_tcp_send_once, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr)))
-  {
-    lw_print("Unable to connect\n");
-    goto __exit;
-  }
+    if (connect(fd, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr)))
+    {
+        lw_print("Unable to connect\n");
+        goto __exit;
+    }
 
-  lw_print("tcp connect success, start to send.\n");
-  lw_print("\n\nTarget Port:%d\n\n", tcp_sock.sin_port);
+    lw_print("tcp connect success, start to send.\n");
+    lw_print("\n\nTarget Port:%d\n\n", tcp_sock.sin_port);
 
-  while (cnt --)
-  {
-    lw_print("Lwip client is running.\n");
-
-    sendto(sock_tcp_send_once,tcp_send_msg,
-     strlen(tcp_send_msg),0,
-     (struct sockaddr*)&tcp_sock,
-     sizeof(struct sockaddr));
+    sendto(fd, tcp_send_msg, strlen(tcp_send_msg), 0, (struct sockaddr*)&tcp_sock, sizeof(struct sockaddr));
 
     lw_print("Send tcp msg: %s ", tcp_send_msg);
 
-    MdelayKTask(1000);
-  }
-
 __exit:
-  if (sock_tcp_send_once >= 0)
-    closesocket(sock_tcp_send_once);
+    if (fd >= 0)
+        closesocket(fd);
 
-  return;
+    return;
 }
 
-void
-lwip_tcp_send_init(void)
+void lwip_tcp_send_run(int argc, char *argv[])
 {
-    sys_thread_new("tcp send", lwip_tcp_send_thread, NULL, 4096, 25);
-}
-
-
-void lwip_tcp_client_run(int argc, char *argv[])
-{
-    if(argc == 2)
+    memset(tcp_send_msg, 0, MSG_SIZE);
+    if(argc >= 2)
     {
-        lw_print("lw: [%s] gw %s\n", __func__, argv[1]);
-        sscanf(argv[1], "%d.%d.%d.%d", &tcp_target[0], &tcp_target[1], &tcp_target[2], &tcp_target[3]);
+        strncpy(tcp_send_msg, argv[1], strlen(argv[1]));
+    }
+    else
+    {
+        strncpy(tcp_send_msg, "hello world", strlen("hello world"));
+    }
+    strcat(tcp_send_msg, "\r\n");
+
+    if(argc >= 3)
+    {
+        sscanf(argv[2], "%d.%d.%d.%d", &tcp_target[0], &tcp_target[1], &tcp_target[2], &tcp_target[3]);
     }
 
     ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    lwip_tcp_send_init();
+    sys_thread_new("tcp send", lwip_tcp_send_thread, NULL, 4096, 25);
 }
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     TCPSend, lwip_tcp_client_run, TCP Client);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
+     TCPSend, lwip_tcp_send_run, TCP Send message);
 
-
-void lwip_tcp_server_run(void)
+void lwip_tcp_recv_run(void)
 {
     ETH_BSP_Config();
     lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
@@ -125,5 +118,5 @@ void lwip_tcp_server_run(void)
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     TCPRecv, lwip_tcp_server_run, TCP Server);
+    TCPRecv, lwip_tcp_recv_run, TCP Recv message);
 

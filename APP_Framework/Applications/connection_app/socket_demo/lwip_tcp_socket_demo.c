@@ -37,7 +37,6 @@
  ******************************************************************************/
 
 char tcp_socket_ip[] = {192, 168, 250, 252};
-char* tcp_socket_str = "\n\nThis one is TCP pkg. Congratulations on you.\n\n";
 
 #define TCP_BUF_SIZE 1024
 
@@ -127,10 +126,12 @@ static void tcp_send_demo(void *arg)
 {
     int cnt = TEST_LWIP_TIMES;
     lw_print("tcp_send_demo start.\n");
+    int fd = -1;
+    char send_msg[128];
 
-    int sock_tcp_send_once = -1;
-    sock_tcp_send_once = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock_tcp_send_once < 0)
+    memset(send_msg, 0, sizeof(send_msg));
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0)
     {
         lw_print("Socket error\n");
         goto __exit;
@@ -142,7 +143,7 @@ static void tcp_send_demo(void *arg)
     tcp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(tcp_socket_ip[0],tcp_socket_ip[1],tcp_socket_ip[2],tcp_socket_ip[3]));
     memset(&(tcp_sock.sin_zero), 0, sizeof(tcp_sock.sin_zero));
 
-    if (connect(sock_tcp_send_once, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr)))
+    if (connect(fd, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr)))
     {
         lw_print("Unable to connect\n");
         goto __exit;
@@ -154,20 +155,15 @@ static void tcp_send_demo(void *arg)
     while (cnt --)
     {
         lw_print("Lwip client is running.\n");
-
-        sendto(sock_tcp_send_once,tcp_socket_str,
-            strlen(tcp_socket_str),0,
-            (struct sockaddr*)&tcp_sock,
-            sizeof(struct sockaddr));
-
-        lw_print("Send tcp msg: %s ", tcp_socket_str);
-
+        snprintf(send_msg, sizeof(send_msg), "TCP test package times %d\r\n", cnt);
+        sendto(fd, send_msg, strlen(send_msg), 0, (struct sockaddr*)&tcp_sock, sizeof(struct sockaddr));
+        lw_print("Send tcp msg: %s ", send_msg);
         MdelayKTask(1000);
     }
 
 __exit:
-    if (sock_tcp_send_once >= 0)
-        closesocket(sock_tcp_send_once);
+    if (fd >= 0)
+        closesocket(fd);
 
     return;
 }

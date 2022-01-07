@@ -45,6 +45,7 @@
 #include "lwip/stats.h"
 #include "lwip/tcp.h"
 #include "tcpecho_raw.h"
+#include <string.h>
 
 #if LWIP_TCP && LWIP_CALLBACK_API
 
@@ -95,42 +96,6 @@ tcpecho_raw_close(struct tcp_pcb *tpcb, struct tcpecho_raw_state *es)
 }
 
 static void
-tcpecho_raw_send(struct tcp_pcb *tpcb, struct tcpecho_raw_state *es)
-{
-  struct pbuf *ptr;
-  err_t wr_err = ERR_OK;
-
-  while ((wr_err == ERR_OK) &&
-         (es->p != NULL) &&
-         (es->p->len <= tcp_sndbuf(tpcb))) {
-    ptr = es->p;
-
-    /* enqueue data for transmission */
-    wr_err = tcp_write(tpcb, ptr->payload, ptr->len, 1);
-    if (wr_err == ERR_OK) {
-      u16_t plen;
-
-      plen = ptr->len;
-      /* continue with next pbuf in chain (if any) */
-      es->p = ptr->next;
-      if(es->p != NULL) {
-        /* new reference! */
-        pbuf_ref(es->p);
-      }
-      /* chop first pbuf from chain */
-      pbuf_free(ptr);
-      /* we can read more data now */
-      tcp_recved(tpcb, plen);
-    } else if(wr_err == ERR_MEM) {
-      /* we are low on memory, try later / harder, defer to poll */
-      es->p = ptr;
-    } else {
-      /* other problem ?? */
-    }
-  }
-}
-
-static void
 tcpecho_raw_error(void *arg, err_t err)
 {
   struct tcpecho_raw_state *es;
@@ -140,6 +105,51 @@ tcpecho_raw_error(void *arg, err_t err)
   es = (struct tcpecho_raw_state *)arg;
 
   tcpecho_raw_free(es);
+}
+
+
+char* recved_msg;
+static void record_msg(struct tcp_pcb *tpcb, struct tcpecho_raw_state* es){
+  if(es==NULL||es->p==NULL||es->p->len==0){
+    recved_msg = NULL;
+  }
+  int new_size = es->p->len+1;
+  char* temp = recved_msg;
+  if(temp!=NULL){
+    new_size += strlen(temp);
+    lw_print("temp: %s\r\n", recved_msg);
+  }
+  recved_msg = malloc(new_size);
+  memset(recved_msg, 0, new_size);
+  if(temp!=NULL){
+    memcpy(recved_msg,temp,strlen(temp));
+  }
+  memcpy(recved_msg+new_size-es->p->len-1, es->p->payload, es->p->len);
+  free(temp);
+  if(((char*)es->p->payload)[es->p->len-1]=='\n'){
+    if(strlen(recved_msg)<80){
+      lw_pr_info("Received: %s\n", recved_msg);
+    }else{
+      lw_pr_info("Received a string of length %d\n", strlen(recved_msg));
+    }
+    struct pbuf* reply_pbuf = pbuf_alloc(PBUF_TRANSPORT, 20, PBUF_RAM); // only reply received message length
+    sprintf(reply_pbuf->payload,"%d\n\0",strlen(recved_msg));
+    reply_pbuf->len = strlen(reply_pbuf->payload);
+    reply_pbuf->tot_len = strlen(reply_pbuf->payload);
+    reply_pbuf->next = NULL;
+
+    tcp_write(tpcb, reply_pbuf->payload, reply_pbuf->len, 1);
+    tcp_recved(tpcb, reply_pbuf->len);
+
+    pbuf_free(reply_pbuf);
+    free(recved_msg);
+    recved_msg = NULL;
+  }
+  es->p = es->p->next;
+  if(es->p != NULL) {
+    /* new reference! */
+    pbuf_ref(es->p);
+  }
 }
 
 static err_t
@@ -152,7 +162,7 @@ tcpecho_raw_poll(void *arg, struct tcp_pcb *tpcb)
   if (es != NULL) {
     if (es->p != NULL) {
       /* there is a remaining pbuf (chain)  */
-      tcpecho_raw_send(tpcb, es);
+      record_msg(tpcb, es);
     } else {
       /* no remaining pbuf (chain)  */
       if(es->state == ES_CLOSING) {
@@ -177,16 +187,10 @@ tcpecho_raw_sent(void *arg, struct tcp_pcb *tpcb, u16_t len)
 
   es = (struct tcpecho_raw_state *)arg;
   es->retries = 0;
-
-  if(es->p != NULL) {
-    /* still got pbufs to send */
-    tcp_sent(tpcb, tcpecho_raw_sent);
-    tcpecho_raw_send(tpcb, es);
-  } else {
-    /* no more pbufs to send */
-    if(es->state == ES_CLOSING) {
-      tcpecho_raw_close(tpcb, es);
-    }
+  es->p = NULL;
+  // the sent reply from server never have successors
+  if(es->state == ES_CLOSING) {
+    tcpecho_raw_close(tpcb, es);
   }
   return ERR_OK;
 }
@@ -207,7 +211,7 @@ tcpecho_raw_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
       tcpecho_raw_close(tpcb, es);
     } else {
       /* we're not done yet */
-      tcpecho_raw_send(tpcb, es);
+      record_msg(tpcb, es);
     }
     ret_err = ERR_OK;
   } else if(err != ERR_OK) {
@@ -222,13 +226,13 @@ tcpecho_raw_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
     es->state = ES_RECEIVED;
     /* store reference to incoming pbuf (chain) */
     es->p = p;
-    tcpecho_raw_send(tpcb, es);
+    record_msg(tpcb, es);
     ret_err = ERR_OK;
   } else if (es->state == ES_RECEIVED) {
     /* read some more data */
     if(es->p == NULL) {
       es->p = p;
-      tcpecho_raw_send(tpcb, es);
+      record_msg(tpcb, es);
     } else {
       struct pbuf *ptr;
 
@@ -251,6 +255,7 @@ tcpecho_raw_accept(void *arg, struct tcp_pcb *newpcb, err_t err)
 {
   err_t ret_err;
   struct tcpecho_raw_state *es;
+  recved_msg = NULL;
 
   LWIP_UNUSED_ARG(arg);
   if ((err != ERR_OK) || (newpcb == NULL)) {
