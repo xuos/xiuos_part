@@ -18,7 +18,9 @@
  * @date 2021.12.10
  */
 
-#include <user_api.h>
+#ifdef ADD_XIUOS_FETURES
+# include <user_api.h>
+#endif
 #include <sensor.h>
 
 /**

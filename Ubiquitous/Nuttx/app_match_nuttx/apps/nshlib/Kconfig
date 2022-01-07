@@ -588,32 +588,48 @@ config NSH_DISABLE_XD
 	default y if DEFAULT_SMALL
 	default n if !DEFAULT_SMALL
 
+config NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS
+	bool "Disable the sensor tb600b_wq_hcho1os."
+	default n
+
+config NSH_DISABLE_TB600B_TVOC10
+	bool "Disable the sensor tb600b_tvoc10."
+	default n
+
+config NSH_DISABLE_TB600B_IAQ10
+	bool "Disable the sensor tb600b_iaq10."
+	default n
+
+config NSH_DISABLE_CH4_AS830
+	bool "Disable the sensor ch4_as830."
+	default n
+
 config NSH_DISABLE_CO2ZG09
-	bool "Disable the co2 function of the sensor zg09"
+	bool "Disable the sensor zg09."
 	default n
 
 config NSH_DISABLE_PM1_0PS5308
-	bool "Disable the pm1.0 function of the sensor ps5308"
+	bool "Disable the pm1.0 function of the sensor ps5308."
 	default n
 
 config NSH_DISABLE_PM2_5PS5308
-	bool "Disable the pm2.5 function of the sensor ps5308"
+	bool "Disable the pm2.5 function of the sensor ps5308."
 	default n
 
 config NSH_DISABLE_PM10PS5308
-	bool "Disable the pm10 function of the sensor ps5308"
+	bool "Disable the pm10 function of the sensor ps5308."
 	default n
 
 config NSH_DISABLE_VOICED124
-	bool "Disable the voice function of the sensor d124"
+	bool "Disable the sensor d124."
 	default n
 
 config NSH_DISABLE_TEMPHS300X
-	bool "Disable the temperature function of the sensor Hs300x"
+	bool "Disable the temperature function of the sensor Hs300x."
 	default n
 
 config NSH_DISABLE_HUMIHS300X
-	bool "Disable the humidity function of the sensor Hs300x"
+	bool "Disable the humidity function of the sensor Hs300x."
 	default n
 
 endmenu

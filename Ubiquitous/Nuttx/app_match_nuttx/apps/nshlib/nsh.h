@@ -1403,6 +1403,22 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
                     FAR void *arg);
 #endif
 
+#if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
+  int cmd_Hcho1os(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_APPLICATION_SENSOR_TVOC_TB600B_TVOC10) && !defined(CONFIG_NSH_DISABLE_TB600B_TVOC10)
+  int cmd_Tvoc10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_APPLICATION_SENSOR_IAQ_TB600B_IAQ10) && !defined(CONFIG_NSH_DISABLE_TB600B_IAQ10)
+  int cmd_Iaq10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_APPLICATION_SENSOR_CH4_AS830) && !defined(CONFIG_NSH_DISABLE_CH4_AS830)
+  int cmd_As830(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_CO2_ZG09) && !defined(CONFIG_NSH_DISABLE_CO2ZG09)
   int cmd_Co2Zg09(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
