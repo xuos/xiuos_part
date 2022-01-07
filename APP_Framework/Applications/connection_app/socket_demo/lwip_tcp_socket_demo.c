@@ -48,7 +48,7 @@ static void tcp_recv_demo(void *arg)
 {
     lw_print("tcp_recv_demo start.\n");
 
-    int socket_fd = -1;
+    int fd = -1;
     char *recv_buf;
     struct sockaddr_in tcp_addr, server_addr;
     int recv_len;
@@ -63,8 +63,8 @@ static void tcp_recv_demo(void *arg)
             goto __exit;
         }
 
-        socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (socket_fd < 0)
+        fd = socket(AF_INET, SOCK_STREAM, 0);
+        if (fd < 0)
         {
             lw_print("Socket error\n");
             goto __exit;
@@ -75,7 +75,7 @@ static void tcp_recv_demo(void *arg)
         tcp_addr.sin_port = htons(LOCAL_PORT_SERVER);
         memset(&(tcp_addr.sin_zero), 0, sizeof(tcp_addr.sin_zero));
 
-        if (bind(socket_fd, (struct sockaddr *)&tcp_addr, sizeof(struct sockaddr)) == -1)
+        if (bind(fd, (struct sockaddr *)&tcp_addr, sizeof(struct sockaddr)) == -1)
         {
             lw_print("Unable to bind\n");
             goto __exit;
@@ -87,15 +87,15 @@ static void tcp_recv_demo(void *arg)
         while(1)
         {
             memset(recv_buf, 0, TCP_BUF_SIZE);
-            recv_len = recvfrom(socket_fd, recv_buf, TCP_BUF_SIZE, 0, (struct sockaddr *)&server_addr, &addr_len);
-            lw_print("Receive from : %s\n", inet_ntoa(server_addr.sin_addr));
-            lw_print("Receive data : %s\n\n", recv_buf);
-            sendto(socket_fd, recv_buf, recv_len, 0, (struct sockaddr*)&server_addr, addr_len);
+            recv_len = recvfrom(fd, recv_buf, TCP_BUF_SIZE, 0, (struct sockaddr *)&server_addr, &addr_len);
+            lw_pr_info("Receive from : %s\n", inet_ntoa(server_addr.sin_addr));
+            lw_pr_info("Receive data : %s\n\n", recv_buf);
+            sendto(fd, recv_buf, recv_len, 0, (struct sockaddr*)&server_addr, addr_len);
         }
 
     __exit:
-        if (socket_fd >= 0)
-            closesocket(socket_fd);
+        if (fd >= 0)
+            closesocket(fd);
 
         if (recv_buf)
             free(recv_buf);
@@ -116,11 +116,11 @@ void tcp_socket_recv_run(int argc, char *argv[])
 
     ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("tcp_recv_demo", tcp_recv_demo, NULL, 4096, 25);
+    sys_thread_new("tcp_recv_demo", tcp_recv_demo, NULL, 4096, 15);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     TcpSocketRecv, tcp_socket_recv_run, TCP recv echo);
+     TCPSocketRecv, tcp_socket_recv_run, TCP recv echo);
 
 static void tcp_send_demo(void *arg)
 {

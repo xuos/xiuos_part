@@ -500,6 +500,16 @@ void lwip_config_net(char *ip, char *mask, char *gw)
   if(lwip_init_flag)
   {
     lw_print("lw: [%s] already ...\n", __func__);
+
+    IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
+    IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
+    IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
+
+    netif_set_down(&gnetif);
+    netif_set_gw(&gnetif, &net_gw);
+    netif_set_netmask(&gnetif, &net_netmask);
+    netif_set_ipaddr(&gnetif, &net_ipaddr);
+    netif_set_up(&gnetif);
     return;
   }
   lwip_init_flag = 1;

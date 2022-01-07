@@ -49,6 +49,8 @@
 
 #if LWIP_TCP && LWIP_CALLBACK_API
 
+#define MAX_TESTED_TCP_SEND_SIZE (56000) 
+
 static struct tcp_pcb *tcpecho_raw_pcb;
 
 enum tcpecho_raw_states
@@ -107,50 +109,70 @@ tcpecho_raw_error(void *arg, err_t err)
   tcpecho_raw_free(es);
 }
 
-
+#define SHELL_TCP_LENGTH 80
 char* recved_msg;
+int recved_msg_length;
+// compute received message length until '\n'
 static void record_msg(struct tcp_pcb *tpcb, struct tcpecho_raw_state* es){
-  if(es==NULL||es->p==NULL||es->p->len==0){
-    recved_msg = NULL;
+  struct pbuf* ptr = es->p;
+  int plen = ptr->len;
+  if(es==NULL||ptr==NULL||plen==0){
+    if(recved_msg){
+      free(recved_msg);
+      recved_msg = NULL;
+    }
+    recved_msg_length = 0;
   }
-  int new_size = es->p->len+1;
+  int new_size = plen+1;
   char* temp = recved_msg;
   if(temp!=NULL){
     new_size += strlen(temp);
-    lw_print("temp: %s\r\n", recved_msg);
   }
   recved_msg = malloc(new_size);
   memset(recved_msg, 0, new_size);
   if(temp!=NULL){
     memcpy(recved_msg,temp,strlen(temp));
   }
-  memcpy(recved_msg+new_size-es->p->len-1, es->p->payload, es->p->len);
+  memcpy(recved_msg+new_size-plen-1, ptr->payload, plen);
   free(temp);
-  if(((char*)es->p->payload)[es->p->len-1]=='\n'){
-    if(strlen(recved_msg)<80){
-      lw_pr_info("Received: %s\n", recved_msg);
+  recved_msg_length += plen;
+  if(recved_msg_length>=SHELL_TCP_LENGTH){
+    if(recved_msg){
+      free(recved_msg);
+      recved_msg = NULL;
+    }
+  }
+  if(((char*)ptr->payload)[plen-1]=='\n'){
+    if(recved_msg_length>MAX_TESTED_TCP_SEND_SIZE){
+      KPrintf("Recved_msg_length is larger than %d, which may lead to unexpected exceptions.\n",MAX_TESTED_TCP_SEND_SIZE);
+    }
+    if(recved_msg_length<SHELL_TCP_LENGTH){
+      KPrintf("Received: %s\n", recved_msg);
+      KPrintf("Received: %s\n", recved_msg);
     }else{
-      lw_pr_info("Received a string of length %d\n", strlen(recved_msg));
+      KPrintf("Received a string of length %d\n", recved_msg_length);
     }
     struct pbuf* reply_pbuf = pbuf_alloc(PBUF_TRANSPORT, 20, PBUF_RAM); // only reply received message length
-    sprintf(reply_pbuf->payload,"%d\n\0",strlen(recved_msg));
+    sprintf(reply_pbuf->payload,"%d\n\0",recved_msg_length);
     reply_pbuf->len = strlen(reply_pbuf->payload);
     reply_pbuf->tot_len = strlen(reply_pbuf->payload);
     reply_pbuf->next = NULL;
-
+  
     tcp_write(tpcb, reply_pbuf->payload, reply_pbuf->len, 1);
-    tcp_recved(tpcb, reply_pbuf->len);
-
+  
     pbuf_free(reply_pbuf);
     free(recved_msg);
     recved_msg = NULL;
+    recved_msg_length = 0;
   }
-  es->p = es->p->next;
+  es->p = ptr->next;
   if(es->p != NULL) {
     /* new reference! */
     pbuf_ref(es->p);
   }
-}
+  pbuf_free(ptr);
+  tcp_recved(tpcb, plen);
+} 
 
 static err_t
 tcpecho_raw_poll(void *arg, struct tcp_pcb *tpcb)
@@ -256,6 +278,7 @@ tcpecho_raw_accept(void *arg, struct tcp_pcb *newpcb, err_t err)
   err_t ret_err;
   struct tcpecho_raw_state *es;
   recved_msg = NULL;
+  recved_msg_length = 0;
 
   LWIP_UNUSED_ARG(arg);
   if ((err != ERR_OK) || (newpcb == NULL)) {
