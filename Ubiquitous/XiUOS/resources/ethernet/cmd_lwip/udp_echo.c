@@ -163,19 +163,12 @@ static void UdpEchoThreadClient(void *arg)
   lw_print("UDP connect success, start to send.\n");
   lw_print("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
 
-  while (cnt --)
-  {
-    lw_print("UDP Client is running.\n");
+  sendto(sock_udp_send_once, udp_send_msg,
+       strlen(udp_send_msg), 0,
+       (struct sockaddr*)&udp_sock,
+       sizeof(struct sockaddr));
 
-    sendto(sock_udp_send_once, udp_send_msg,
-         strlen(udp_send_msg), 0,
-         (struct sockaddr*)&udp_sock,
-         sizeof(struct sockaddr));
-
-    lw_pr_info("Send UDP msg: %s ", udp_send_msg);
-
-    MdelayKTask(1000);
-  }
+  lw_pr_info("Send UDP msg: %s ", udp_send_msg);
 
 __exit:
   if (sock_udp_send_once >= 0)
