@@ -53,10 +53,25 @@
 extern int FrameworkInit(void);
 
 /****************************************************************************
+ * Name: cmd_Hcho1os
+ ****************************************************************************/
+
+#if defined(CONFIG_APPLICATION_SENSOR_TVOC_TB600B_TVOC10) && !defined(CONFIG_NSH_DISABLE_TB600B_TVOC10)
+extern void HchoTb600bHcho1os(void);
+int cmd_Hcho1os(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    HchoTb600bHcho1os();
+    return 0;
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_Tvoc10
  ****************************************************************************/
 
-#if defined(CONFIG_APPLICATION_SENSOR_TVOC_TB600B_TVOC10) && !defined(CONFIG_NSH_DISABLE_TVOC_10)
+#if defined(CONFIG_APPLICATION_SENSOR_TVOC_TB600B_TVOC10) && !defined(CONFIG_NSH_DISABLE_TB600B_TVOC10)
 extern void TvocTb600bTvoc10(void);
 int cmd_Tvoc10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
