@@ -76,19 +76,19 @@ static void ZombieKTaskEntry(void *parameter)
             SuspendKTask(zombie_recycle);
             CriticalAreaUnLock(lock);
             DO_KTASK_ASSIGN;
-        }  
+        }
     }
 }
 
 void ZombieTaskRecycleInit(void)
 {
     InitDoubleLinkList(&KTaskZombie);
-    
+
     zombie_recycle = KTaskCreate("ZombieRecycleKTask",
                          ZombieKTaskEntry,
                          NONE,
                          ZOMBIE_KTASK_STACKSIZE,
-                         KTASK_LOWEST_PRIORITY + 1);
+                         KTASK_PRIORITY_MAX - 1);
 
     StartupKTask(zombie_recycle);
 }
