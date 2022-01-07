@@ -121,7 +121,7 @@ static void UdpSocketThreadServer(void *arg)
 
             lw_print("Receive from : %s\n",inet_ntoa(seraddr.sin_addr));
 
-            lw_print("Recevce data : %s\n\n",recv_data);
+            lw_print("Receive data : %s\n\n",recv_data);
 
             sendto(sock,recv_data,
             recv_data_len,0,

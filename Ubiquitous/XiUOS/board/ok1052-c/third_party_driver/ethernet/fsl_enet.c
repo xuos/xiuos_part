@@ -32,6 +32,7 @@
 #endif /* FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL */
 
 #include "lwipopts.h"
+#include <xs_isr.h>
 
 /*******************************************************************************
  * Definitions
@@ -3384,7 +3385,8 @@ void ENET_1588_Timer_IRQHandler(void)
 #endif
 }
 
-void ENET_DriverIRQHandler(void)
+//void ENET_DriverIRQHandler(void)
+void ENET_DriverIRQHandler(int vector, void *param)
 {
     ENET_CommonFrame0IRQHandler(ENET);
 /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
@@ -3398,6 +3400,8 @@ void ENET_DriverIRQHandler(void)
     __DSB();
 #endif
 }
+
+DECLARE_HW_IRQ(ENET_IRQn, ENET_DriverIRQHandler, NONE);
 
 #endif
 

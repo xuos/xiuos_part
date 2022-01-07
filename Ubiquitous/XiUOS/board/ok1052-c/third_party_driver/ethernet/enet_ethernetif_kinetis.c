@@ -70,7 +70,6 @@
 #include "lwip/igmp.h"
 #include "lwip/mld6.h"
 
-//
 //#define USE_RTOS 1
 //#define FSL_RTOS_FREE_RTOS
 //#define FSL_RTOS_XIUOS

@@ -71,14 +71,15 @@ static void test_ua_connect(void *arg)
     UA_ClientConfig *config = UA_Client_getConfig(client);
     UA_ClientConfig_setDefault(config);
 
-
     retval = UA_Client_connect(client, test_uri);
     if (retval != UA_STATUSCODE_GOOD)
     {
-        ua_print("ua: [%s] connect failed\n", __func__);
+        ua_print("ua: [%s] ret %x\n", __func__, retval);
     }
 
-    return;
+    ua_print("ua: [%s] start Ua Test!\n", __func__);
+    UA_Client_disconnect(client);
+    UA_Client_delete(client);
 }
 
 void test_ua_connect_thr(void *arg)
@@ -93,7 +94,6 @@ void test_sh_ua_connect(void)
     int result = 0;
     pthread_t th_id;
     pthread_attr_t attr;
-
     sys_thread_new("ua test", test_ua_connect_thr, NULL, 4096, 15);
 }
 
@@ -117,21 +117,19 @@ void *test_ua_get_server_info(void *param)
 
     UA_StatusCode retval = UA_Client_connect(client, OPC_SERVER);
     if(retval != UA_STATUSCODE_GOOD) {
-        ua_print("ua: [%s] connect failed %d\n", __func__, retval);
+        ua_print("ua: [%s] connect failed %#x\n", __func__, retval);
         UA_Client_delete(client);
         return NULL;
     }
 
     ua_print("ua: [%s] connect ok!\n", __func__);
 
-    while(1)
-    {
-        ua_read_time(client);
-        ua_get_server_info(client);
-    }
+    ua_read_time(client);
+    ua_get_server_info(client);
+
     /* Clean up */
-//    UA_Client_disconnect(client);
-//    UA_Client_delete(client); /* Disconnects the client internally */
+    UA_Client_disconnect(client);
+    UA_Client_delete(client); /* Disconnects the client internally */
 }
 
 void *test_ua_get_server_info_thr(void *arg)
