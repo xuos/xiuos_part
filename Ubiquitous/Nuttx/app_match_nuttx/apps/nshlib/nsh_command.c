@@ -580,12 +580,20 @@ static const struct cmdmap_s g_cmdmap[] =
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
 #endif
 
-#if defined(CONFIG_APPLICATION_SENSOR_IAQ) && !defined(CONFIG_NSH_DISABLE_TB600B_IAQ10)
+#if defined(CONFIG_APPLICATION_SENSOR_TVOC_TB600B_TVOC10) && !defined(CONFIG_NSH_DISABLE_TVOC_10)
+  { "tvoc10",       cmd_Tvoc10,       1, 1, "[get the concentration of tvoc with sensor tb600b_tvoc10.]" },
+#endif
+
+#if defined(CONFIG_APPLICATION_SENSOR_IAQ_TB600B_IAQ10) && !defined(CONFIG_NSH_DISABLE_TB600B_IAQ10)
   { "iaq10",       cmd_Iaq10,       1, 1, "[get air quality data with sensor Tb600bIaq10.]" },
 #endif
 
+#if defined(CONFIG_APPLICATION_SENSOR_CH4_AS830) && !defined(CONFIG_NSH_DISABLE_CH4_AS830)
+  { "as830",       cmd_As830,       1, 1, "[get the concentration of CH4 with sensor ch4_as830.]" },
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_CO2_ZG09) && !defined(CONFIG_NSH_DISABLE_CO2ZG09)
-  { "zg09",       cmd_Co2Zg09,       1, 1, "[get co2 concentration with sensor ZG09.]" },
+  { "zg09",       cmd_Co2Zg09,       1, 1, "[get the concentration of co2  with sensor ZG09.]" },
 #endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_PM1_0_PS5308) && !defined(CONFIG_NSH_DISABLE_PM1_0PS5308)
@@ -593,7 +601,7 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_PM2_5_PS5308) && !defined(CONFIG_NSH_DISABLE_PM2_5PS5308)
-  { "pm2.5",       cmd_Pm25Ps5308,       1, 1, "[get pm2.5with sensor Ps5308.]" },
+  { "pm2.5",       cmd_Pm25Ps5308,       1, 1, "[get pm2.5 with sensor Ps5308.]" },
 #endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_PM10_PS5308) && !defined(CONFIG_NSH_DISABLE_PM10PS5308)

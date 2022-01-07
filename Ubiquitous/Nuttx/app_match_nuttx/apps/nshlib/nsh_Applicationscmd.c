@@ -53,6 +53,22 @@
 extern int FrameworkInit(void);
 
 /****************************************************************************
+ * Name: cmd_Tvoc10
+ ****************************************************************************/
+
+#if defined(CONFIG_APPLICATION_SENSOR_TVOC_TB600B_TVOC10) && !defined(CONFIG_NSH_DISABLE_TVOC_10)
+extern void TvocTb600bTvoc10(void);
+int cmd_Tvoc10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    TvocTb600bTvoc10();
+    return 0;
+}
+#endif
+
+
+/****************************************************************************
  * Name: cmd_Iaq10
  ****************************************************************************/
 
@@ -63,6 +79,21 @@ int cmd_Iaq10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     printf("Hello, world!\n");
     FrameworkInit();
     IaqTb600bIaq10();
+    return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_As830
+ ****************************************************************************/
+
+#if defined(CONFIG_APPLICATION_SENSOR_CH4_AS830) && !defined(CONFIG_NSH_DISABLE_CH4_AS830)
+extern void Ch4As830(void);
+int cmd_As830(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    Ch4As830();
     return 0;
 }
 #endif

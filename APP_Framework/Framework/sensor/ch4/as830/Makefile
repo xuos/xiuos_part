@@ -1,3 +1,11 @@
-SRC_FILES := as830.c
+include $(KERNEL_ROOT)/.config
+ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
+    include $(APPDIR)/Make.defs
+    CSRCS += as830.c
+    include $(APPDIR)/Application.mk
+endif
 
-include $(KERNEL_ROOT)/compiler.mk
+ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
+    SRC_FILES := as830.c
+    include $(KERNEL_ROOT)/compiler.mk
+endif
