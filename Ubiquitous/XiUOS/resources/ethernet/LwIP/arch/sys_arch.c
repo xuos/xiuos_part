@@ -81,9 +81,6 @@
 #include "enet_ethernetif.h"
 #include <transform.h>
 
-/* MAC address configuration. */
-#define configMAC_ADDR { 0x02, 0x12, 0x13, 0x10, 0x15, 0x11}
-
 char lwip_ipaddr[] = {192, 168, 250, 253};
 char lwip_netmask[] = {255, 255, 255, 0};
 char lwip_gwaddr[] = {192, 168, 250, 252};

@@ -90,6 +90,10 @@
 #define GW_ADDR1                    168
 #define GW_ADDR2                    250
 #define GW_ADDR3                    5
+
+/* MAC address configuration. */
+#define configMAC_ADDR { 0x02, 0x12, 0x13, 0x10, 0x15, 0x11}
+
 /* USER CODE END 0 */
 
 #define SYS_MBOX_NULL  -1

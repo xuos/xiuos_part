@@ -68096,6 +68096,9 @@ void
 UA_Log_Stdout_log(void *context, UA_LogLevel level, UA_LogCategory category,
                   const char *msg, va_list args) {
 
+    char str[120];
+    memset(str, 0, sizeof(str));
+
     /* Assume that context is casted to UA_LogLevel */
     /* TODO we may later change this to a struct with bitfields to filter on category */
     if ( context != NULL && (UA_LogLevel)(uintptr_t)context > level )
@@ -68115,8 +68118,8 @@ UA_Log_Stdout_log(void *context, UA_LogLevel level, UA_LogCategory category,
 
     KPrintf("%s/%s" ANSI_COLOR_RESET "\t",
             logLevelNames[level], logCategoryNames[category]);
-
-    KPrintf(msg, args);
+    vsnprintf(str, sizeof(str) - 1, msg, args);
+    KPrintf(msg, str);
     KPrintf("\n");
 
     // printf("\n");
@@ -70191,7 +70194,7 @@ UA_Client * UA_Client_new() {
 
 UA_StatusCode
 UA_ClientConfig_setDefault(UA_ClientConfig *config) {
-    config->timeout = 5000;
+    config->timeout = 20000;
     config->secureChannelLifeTime = 10 * 60 * 1000; /* 10 minutes */
 
     if(!config->logger.log) {
@@ -70656,13 +70659,15 @@ UA_Log_Syslog_withLevel(UA_LogLevel minlevel) {
 #define configTICK_RATE_HZ TICK_PER_SECOND
 #define xTaskGetTickCount CurrentTicksGain
 
-#define  EHOSTUNREACH   113  /* No route to host */
-#define  EINPROGRESS    115  /* Operation now in progress */
 #define  EADDRINUSE      98  /* Address already in use */
-#define  EALREADY       114  /* Operation already in progress */
+#define  ECONNABORTED   103  /* Software caused connection abort */
+
 #define  EISCONN        106  /* Transport endpoint is already connected */
 #define  ENOTCONN       107  /* Transport endpoint is not connected */
-#define  ECONNABORTED   103  /* Software caused connection abort */
+
+#define  EHOSTUNREACH   113  /* No route to host */
+#define  EALREADY       114  /* Operation already in progress */
+#define  EINPROGRESS    115  /* Operation now in progress */
 
 #ifdef UA_ARCHITECTURE_FREERTOSLWIP_POSIX_CLOCK
 

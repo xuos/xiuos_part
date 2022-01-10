@@ -107,8 +107,10 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
      setip, lwip_setip_thread, SetIp [IP] [Netmask] [Gateway]);
 
 
-void lwip_getip_thread(int argc, char *argv[])
+void lwip_showip_thread(int argc, char *argv[])
 {
+    char mac_addr[] = configMAC_ADDR;
+
     lw_pr_info("\r\n************************************************\r\n");
     lw_pr_info(" Network Configuration\r\n");
     lw_pr_info("************************************************\r\n");
@@ -118,10 +120,12 @@ void lwip_getip_thread(int argc, char *argv[])
          ((u8_t *)&lwip_netmask)[2], ((u8_t *)&lwip_netmask)[3]);
     lw_pr_info(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&lwip_gwaddr)[0], ((u8_t *)&lwip_gwaddr)[1],
          ((u8_t *)&lwip_gwaddr)[2], ((u8_t *)&lwip_gwaddr)[3]);
+    lw_pr_info(" MAC Address    : %x:%x:%x:%x:%x:%x\r\n", mac_addr[0], mac_addr[1], mac_addr[2],
+        mac_addr[3], mac_addr[4], mac_addr[5]);
     lw_pr_info("************************************************\r\n");
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     showip, lwip_getip_thread, GetIp [IP] [Netmask] [Gateway]);
+     showip, lwip_showip_thread, GetIp [IP] [Netmask] [Gateway]);
 
 #endif
