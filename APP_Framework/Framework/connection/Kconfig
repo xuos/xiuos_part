@@ -8,6 +8,27 @@ if SUPPORT_CONNECTION_FRAMEWORK
         bool "Using connection framework debug log function"
         default y
 
+        menuconfig CONNECTION_INDUSTRIAL_ETHERNET
+                bool "Using industrial ethernet"
+                default n
+        if CONNECTION_INDUSTRIAL_ETHERNET
+        source "$APP_DIR/Framework/connection/industrial_ethernet/Kconfig"
+        endif
+
+        menuconfig CONNECTION_INDUSTRIAL_FIELDBUS
+                bool "Using industrial fieldbus"
+                default n
+        if CONNECTION_INDUSTRIAL_FIELDBUS
+        source "$APP_DIR/Framework/connection/industrial_fieldbus/Kconfig"
+        endif
+
+        menuconfig CONNECTION_INDUSTRIAL_WLAN
+                bool "Using industrial wlan"
+                default n
+        if CONNECTION_INDUSTRIAL_WLAN
+        source "$APP_DIR/Framework/connection/industrial_wlan/Kconfig"
+        endif
+
         menuconfig CONNECTION_ADAPTER_LORA
                 bool "Using lora adapter device"
                 default n

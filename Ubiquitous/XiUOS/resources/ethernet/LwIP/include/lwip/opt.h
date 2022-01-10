@@ -888,7 +888,7 @@
  * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
  */
 #if !defined LWIP_RAW || defined __DOXYGEN__
-#define LWIP_RAW                        0
+#define LWIP_RAW                        1
 #endif
 
 /**
@@ -1601,7 +1601,7 @@
 #endif
 
 /**
- * LWIP_NETIF_EXT_STATUS_CALLBACK==1: Support an extended callback function 
+ * LWIP_NETIF_EXT_STATUS_CALLBACK==1: Support an extended callback function
  * for several netif related event that supports multiple subscribers.
  * @see netif_ext_status_callback
  */
@@ -1754,7 +1754,7 @@
  * sys_thread_new() when the thread is created.
  */
 #if !defined TCPIP_THREAD_STACKSIZE || defined __DOXYGEN__
-#define TCPIP_THREAD_STACKSIZE          0
+#define TCPIP_THREAD_STACKSIZE          4096
 #endif
 
 /**
@@ -1763,7 +1763,7 @@
  * sys_thread_new() when the thread is created.
  */
 #if !defined TCPIP_THREAD_PRIO || defined __DOXYGEN__
-#define TCPIP_THREAD_PRIO               1
+#define TCPIP_THREAD_PRIO               25
 #endif
 
 /**
@@ -1772,7 +1772,7 @@
  * sys_mbox_new() when tcpip_init is called.
  */
 #if !defined TCPIP_MBOX_SIZE || defined __DOXYGEN__
-#define TCPIP_MBOX_SIZE                 0
+#define TCPIP_MBOX_SIZE                 10
 #endif
 
 /**
@@ -1821,7 +1821,7 @@
  * sys_thread_new() when the thread is created.
  */
 #if !defined DEFAULT_THREAD_STACKSIZE || defined __DOXYGEN__
-#define DEFAULT_THREAD_STACKSIZE        0
+#define DEFAULT_THREAD_STACKSIZE        4096
 #endif
 
 /**
@@ -1830,7 +1830,7 @@
  * sys_thread_new() when the thread is created.
  */
 #if !defined DEFAULT_THREAD_PRIO || defined __DOXYGEN__
-#define DEFAULT_THREAD_PRIO             1
+#define DEFAULT_THREAD_PRIO             25
 #endif
 
 /**
@@ -1839,7 +1839,7 @@
  * to sys_mbox_new() when the recvmbox is created.
  */
 #if !defined DEFAULT_RAW_RECVMBOX_SIZE || defined __DOXYGEN__
-#define DEFAULT_RAW_RECVMBOX_SIZE       0
+#define DEFAULT_RAW_RECVMBOX_SIZE       10
 #endif
 
 /**
@@ -1848,7 +1848,7 @@
  * to sys_mbox_new() when the recvmbox is created.
  */
 #if !defined DEFAULT_UDP_RECVMBOX_SIZE || defined __DOXYGEN__
-#define DEFAULT_UDP_RECVMBOX_SIZE       0
+#define DEFAULT_UDP_RECVMBOX_SIZE       10
 #endif
 
 /**
@@ -1857,7 +1857,7 @@
  * to sys_mbox_new() when the recvmbox is created.
  */
 #if !defined DEFAULT_TCP_RECVMBOX_SIZE || defined __DOXYGEN__
-#define DEFAULT_TCP_RECVMBOX_SIZE       0
+#define DEFAULT_TCP_RECVMBOX_SIZE       10
 #endif
 
 /**
@@ -1866,7 +1866,7 @@
  * sys_mbox_new() when the acceptmbox is created.
  */
 #if !defined DEFAULT_ACCEPTMBOX_SIZE || defined __DOXYGEN__
-#define DEFAULT_ACCEPTMBOX_SIZE         0
+#define DEFAULT_ACCEPTMBOX_SIZE         10
 #endif
 /**
  * @}
@@ -2389,7 +2389,7 @@
  * All addresses that have a scope according to the default policy (link-local
  * unicast addresses, interface-local and link-local multicast addresses) should
  * now have a zone set on them before being passed to the core API, although
- * lwIP will currently attempt to select a zone on the caller's behalf when 
+ * lwIP will currently attempt to select a zone on the caller's behalf when
  * necessary. Applications that directly assign IPv6 addresses to interfaces
  * (which is NOT recommended) must now ensure that link-local addresses carry
  * the netif's zone. See the new ip6_zone.h header file for more information and
@@ -3027,8 +3027,8 @@
  * - src: source eth address
  * - dst: destination eth address
  * - eth_type: ethernet type to packet to be sent\n
- * 
- * 
+ *
+ *
  * Return values:
  * - &lt;0: Packet shall not contain VLAN header.
  * - 0 &lt;= return value &lt;= 0xFFFF: Packet shall contain VLAN header. Return value is prio_vid in host byte order.
