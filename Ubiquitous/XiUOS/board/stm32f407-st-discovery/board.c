@@ -48,6 +48,7 @@ extern int Stm32HwI2cInit(void);
 extern int Stm32HwUsartInit();
 extern int Stm32HwRtcInit();
 extern int HwSdioInit();
+extern int Stm32HwAdcInit(void);
 
 static void ClockConfiguration()
 {
@@ -132,7 +133,10 @@ struct InitSequenceDesc _board_init[] =
 	{ "hw rtc", Stm32HwRtcInit},
 #endif
 #ifdef BSP_USING_SDIO
-    {"hw sdcard init",HwSdioInit},
+    {"hw sdcard init", HwSdioInit},
+#endif
+#ifdef BSP_USING_ADC
+    {"hw adc init", Stm32HwAdcInit},
 #endif
 	{ " NONE ",NONE },
 };

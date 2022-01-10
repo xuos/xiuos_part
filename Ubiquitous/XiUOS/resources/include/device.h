@@ -94,4 +94,9 @@ HardwareDevType ObtainConsole(void);
 #include <dev_hwtimer.h>
 #endif
 
+#ifdef RESOURCES_ADC
+#include <bus_adc.h>
+#include <dev_adc.h>
+#endif
+
 #endif

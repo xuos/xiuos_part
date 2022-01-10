@@ -8,5 +8,15 @@ menu "test app"
                 bool "Config test spi flash"
                 default n
 
+            menuconfig USER_TEST_ADC
+                bool "Config test adc"
+                default n
+                if USER_TEST_ADC
+                    if ADD_XIUOS_FETURES
+                        config ADC_DEV_DRIVER
+                            string "Set ADC dev path"
+                            default "/dev/adc1_dev"
+                    endif
+                endif
         endif
 endmenu

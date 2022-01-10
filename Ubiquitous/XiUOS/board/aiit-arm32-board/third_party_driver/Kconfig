@@ -94,8 +94,13 @@ if BSP_USING_UART
 source "$BSP_DIR/third_party_driver/uart/Kconfig"
 endif
 
-
-
+menuconfig BSP_USING_ADC
+bool "Using ADC device"
+default n
+select RESOURCES_ADC
+if BSP_USING_ADC
+source "$BSP_DIR/third_party_driver/adc/Kconfig"
+endif
 
 menuconfig BSP_USING_CAN
 bool "Using CAN device"

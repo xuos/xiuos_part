@@ -1,6 +1,10 @@
 
 SRC_DIR := common 
 
+ifeq ($(CONFIG_BSP_USING_ADC),y)
+  SRC_DIR += adc
+endif
+
 ifeq ($(CONFIG_BSP_USING_CAN),y)
   SRC_DIR += can
 endif

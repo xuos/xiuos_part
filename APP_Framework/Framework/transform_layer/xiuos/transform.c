@@ -154,6 +154,9 @@ int PrivIoctl(int fd, int cmd, void *args)
     case I2C_TYPE:
         ret = ioctl(fd, cmd, ioctl_cfg->args);
         break;
+    case ADC_TYPE:
+        ret = ioctl(fd, cmd, ioctl_cfg->args);
+        break;
     default:
         break;
     }

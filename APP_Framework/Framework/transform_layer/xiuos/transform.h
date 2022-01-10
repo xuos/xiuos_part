@@ -138,6 +138,7 @@ enum IoctlDriverType
     SPI_TYPE,
     I2C_TYPE,
     PIN_TYPE,
+    ADC_TYPE,
     DEFAULT_TYPE,
 };
 
