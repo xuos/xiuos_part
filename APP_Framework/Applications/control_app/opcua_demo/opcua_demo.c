@@ -102,7 +102,7 @@ void *test_ua_get_server_info(void *param)
 {
     UA_Client *client = UA_Client_new();
 
-    ua_print("ua: [%s] start ...\n", __func__);
+    ua_pr_info("ua: [%s] start ...\n", __func__);
 
     if (client == NULL)
     {
@@ -121,12 +121,15 @@ void *test_ua_get_server_info(void *param)
     }
 
     ua_print("ua: [%s] connect ok!\n", __func__);
-    ua_print("--- start read time ---\n", __func__);
+    ua_pr_info("--- start read time ---\n", __func__);
 
     ua_read_time(client);
 
-    ua_print("--- get server info ---\n", __func__);
-    ua_get_server_info(client);
+    ua_pr_info("--- get server info ---\n", __func__);
+    ua_browser_objects(client);
+
+    /* Same thing, this time using the node iterator... */
+    ua_browser_nodes(client);
 
     /* Clean up */
     UA_Client_disconnect(client);
