@@ -12,9 +12,7 @@
 
 #include "open62541.h"
 #include <stdlib.h>
-
-#define OPC_SERVER "opc.tcp://192.168.250.5:4840"
-#define ua_print printf
+#include "ua_api.h"
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
 static void handler_TheAnswerChanged(UA_Client *client, UA_UInt32 subId, void *subContext,

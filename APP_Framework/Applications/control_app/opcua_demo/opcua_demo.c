@@ -28,8 +28,6 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-//#define ua_print KPrintf
-#define ua_trace() KPrintf("ua: [%s] %d pass!\n", __func__, __LINE__)
 
 #define TCP_LOCAL_PORT 4840
 
@@ -123,8 +121,11 @@ void *test_ua_get_server_info(void *param)
     }
 
     ua_print("ua: [%s] connect ok!\n", __func__);
+    ua_print("--- start read time ---\n", __func__);
 
     ua_read_time(client);
+
+    ua_print("--- get server info ---\n", __func__);
     ua_get_server_info(client);
 
     /* Clean up */
