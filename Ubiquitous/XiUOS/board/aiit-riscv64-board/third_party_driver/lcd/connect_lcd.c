@@ -239,6 +239,14 @@ static void DrvLcdSetPixel(uint16_t x, uint16_t y, uint16_t color)
     DrvLcdDataHalfWord(&color, 1);
 }
 
+static void DrvLcdSetPixelDot(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,void* color)
+{
+    uint32 size = 0;
+    size = (x2- x1 + 1)*(y2 - y1 + 1);
+    DrvLcdSetArea(x1, y1, x2, y2);
+    DrvLcdDataHalfWord(color, size);
+}
+
 void LcdShowChar(uint16 x,uint16 y,uint8 num,uint8 size,uint16 color,uint16 back_color)
 {  							  
     uint8 temp,t1,t;
@@ -460,7 +468,7 @@ static uint32 LcdWrite(void *dev, struct BusBlockWriteParam *write_param)
          return  -ERROR;
      }
     LcdWriteParam * show = (LcdWriteParam *)write_param->buffer;
-    KPrintf("DEBUG TYPE %d X:%d Y:%d color %d\n",show->pixel_info.x_pos, show->pixel_info.y_pos, show->pixel_info.pixel_color);
+    // KPrintf("DEBUG TYPE %d X1:%d X2:%d Y1:%d Y2:%d\n",show->type,show->pixel_info.x_startpos, show->pixel_info.x_endpos,show->pixel_info.y_startpos, show->pixel_info.y_endpos);
     if(0 == show->type) //output string
     {
         LcdShowString(show->string_info.x_pos,show->string_info.y_pos,show->string_info.width,show->string_info.height,show->string_info.font_size,show->string_info.addr,show->string_info.font_color,show->string_info.back_color);
@@ -468,7 +476,8 @@ static uint32 LcdWrite(void *dev, struct BusBlockWriteParam *write_param)
     } 
     else if(1 == show->type)   //output dot
     {
-        DrvLcdSetPixel(show->pixel_info.x_pos, show->pixel_info.y_pos, show->pixel_info.pixel_color);
+        // DrvLcdSetPixel(show->pixel_info.x_pos, show->pixel_info.y_pos, show->pixel_info.pixel_color);
+        DrvLcdSetPixelDot(show->pixel_info.x_startpos,show->pixel_info.y_startpos, show->pixel_info.x_endpos, show->pixel_info.y_endpos,show->pixel_info.pixel_color);
         return  EOK;
     } 
     else 

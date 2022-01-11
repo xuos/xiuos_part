@@ -12,11 +12,21 @@
 #include "lv_demo_calendar.h"
 #include <transform.h>
 
+extern void lv_example_chart_2(void);
+extern void lv_example_img_1(void);
+extern void lv_example_img_2(void);
+extern void lv_example_img_3(void);
+extern void lv_example_img_4(void);
+extern void lv_example_line_1(void);
+extern void lv_example_aoteman(void);
 void* lvgl_thread(void *parameter)
 {
     /* display demo; you may replace with your LVGL application at here */
-    lv_demo_calendar();
-
+    // lv_demo_calendar();
+    // lv_example_img_1();
+    // lv_example_chart_2();
+    // lv_example_line_1();
+    lv_example_aoteman();
     /* handle the tasks of LVGL */
     while(1)
     {
@@ -29,7 +39,7 @@ pthread_t lvgl_task;
 static int lvgl_demo_init(void)
 {
     pthread_attr_t attr;
-    attr.schedparam.sched_priority = 20;
+    attr.schedparam.sched_priority = 25;
     attr.stacksize = 4096;
 
     PrivTaskCreate(&lvgl_task, &attr, lvgl_thread, NULL);

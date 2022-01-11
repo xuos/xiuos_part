@@ -240,8 +240,8 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow
 endif
 
 ifeq ($(CONFIG_LIB_LV),y)
-KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lvgl_new #
-KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lvgl_new/examples/porting #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lvgl #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lvgl/examples/porting #
 
 endif
 

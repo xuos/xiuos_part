@@ -18,7 +18,7 @@ static void event_handler(lv_event_t * e)
 void lv_demo_calendar(void)
 {
     lv_obj_t  * calendar = lv_calendar_create(lv_scr_act());
-    lv_obj_set_size(calendar, 240, 240);
+    lv_obj_set_size(calendar, 320, 240);
     lv_obj_align(calendar, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_event_cb(calendar, event_handler, LV_EVENT_ALL, NULL);
 
@@ -35,7 +35,7 @@ void lv_demo_calendar(void)
     highlighted_days[1].month = 02;
     highlighted_days[1].day = 11;
 
-    highlighted_days[2].year = 2022;
+    highlighted_days[2].year = 2021;
     highlighted_days[2].month = 02;
     highlighted_days[2].day = 22;
 
@@ -46,5 +46,5 @@ void lv_demo_calendar(void)
 #elif LV_USE_CALENDAR_HEADER_ARROW
     lv_calendar_header_arrow_create(calendar);
 #endif
-    lv_calendar_set_showed_date(calendar, 2021, 10);
+    // lv_calendar_set_showed_date(calendar, 2021, 10);
 }
