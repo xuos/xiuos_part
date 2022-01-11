@@ -4,21 +4,16 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
     include $(APPDIR)/Make.defs
     CSRCS += framework_init.c
     include $(APPDIR)/Application.mk
-
-ifeq ($(CONFIG_LIB_LV),y)
-SRC_FILES += lv_init.c
-
-SRC_DIR += lv_app
 endif
 
-ifeq ($(CONFIG_APPLICATION_OTA),y)
-	SRC_DIR += ota
-endif
 
 ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
     SRC_DIR := general_functions app_test 
 
     SRC_FILES := main.c framework_init.c 
+    ifeq ($(CONFIG_LIB_LV),y)
+        SRC_DIR += lv_app
+    endif
 
     ifeq ($(CONFIG_APPLICATION_OTA),y)
         SRC_DIR += ota
