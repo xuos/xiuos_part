@@ -1,3 +1,13 @@
-SRC_FILES := hs300x_humi.c
+include $(KERNEL_ROOT)/.config
+ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
+    include $(APPDIR)/Make.defs
+    CSRCS += hs300x_humi.c
+    include $(APPDIR)/Application.mk
 
-include $(KERNEL_ROOT)/compiler.mk
+endif
+
+ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
+    SRC_FILES := hs300x_humi.c
+    include $(KERNEL_ROOT)/compiler.mk
+
+endif

@@ -28,6 +28,8 @@ extern int D124VoiceInit(void);
 extern int Hs300xTemperatureInit(void);
 extern int Hs300xHumidityInit(void);
 extern int Ps5308Pm1_0Init(void);
+extern int Ps5308Pm2_5Init(void);
+extern int Ps5308Pm10Init(void);
 extern int Zg09Co2Init(void);
 extern int As830Ch4Init(void);
 extern int Tb600bIaq10IaqInit(void);
@@ -88,6 +90,12 @@ static struct InitDesc sensor_desc[] =
 #ifdef SENSOR_PS5308
 #ifdef SENSOR_QUANTITY_PS5308_PM1_0
 	{ "ps5308_pm1_0", Ps5308Pm1_0Init },
+#endif
+#ifdef SENSOR_QUANTITY_PS5308_PM2_5
+	{ "ps5308_pm2_5", Ps5308Pm2_5Init },
+#endif
+#ifdef SENSOR_QUANTITY_PS5308_PM10
+	{ "ps5308_pm10", Ps5308Pm10Init },
 #endif
 #endif
 
@@ -192,7 +200,7 @@ static int ConnectionDeviceFrameworkInit(struct InitDesc sub_desc[])
  * This function will init system framework
  * 
  */
-int FrameworkInit()
+int FrameworkInit(void)
 {
 #ifdef SUPPORT_SENSOR_FRAMEWORK
 	SensorDeviceFrameworkInit(framework);

@@ -151,12 +151,9 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     if (sdev->done->open != NULL)
         result = sdev->done->open(sdev);
 
-    if (result == 0) {
+    if (result >= 0) {
         printf("Device %s open success.\n", sdev->name);
     }else{
-        if (sdev->fd)
-            PrivClose(sdev->fd);
-
         printf("Device %s open failed(%d).\n", sdev->name, result);
         memset(sdev, 0, sizeof(struct SensorDevice));
     }
@@ -173,13 +170,13 @@ static int SensorDeviceClose(struct SensorDevice *sdev)
 {
     int result = 0;
 
-    if (sdev->fd)
+    if (sdev->fd >= 0)
         PrivClose(sdev->fd);
 
     if (sdev->done->close != NULL)
         result = sdev->done->close(sdev);
 
-    if (result == 0)
+    if (result >= 0)
         printf("%s successfully closed.\n", sdev->name);
     else
         printf("Closed %s failure.\n", sdev->name);
@@ -276,7 +273,7 @@ int SensorQuantityOpen(struct SensorQuantity *quant)
 
     if (sdev->ref_cnt == 0) {
         ret = SensorDeviceOpen(sdev);
-        if (ret != 0) {
+        if (ret < 0) {
             printf("%s: open sensor device failed\n", __func__);
             return ret;
         }

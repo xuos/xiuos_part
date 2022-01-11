@@ -1,5 +1,17 @@
 SRC_FILES := adapter.c adapter_agent.c
 
+ifeq ($(CONFIG_CONNECTION_INDUSTRIAL_ETHERNET),y)
+	SRC_DIR += industrial_ethernet
+endif
+
+ifeq ($(CONFIG_CONNECTION_INDUSTRIAL_FIELDBUS),y)
+	SRC_DIR += industrial_fieldbus
+endif
+
+ifeq ($(CONFIG_CONNECTION_INDUSTRIAL_WLAN),y)
+	SRC_DIR += industrial_wlan
+endif
+
 ifeq ($(CONFIG_CONNECTION_ADAPTER_LORA),y)
 	SRC_DIR += lora
 endif

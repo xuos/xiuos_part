@@ -5,9 +5,7 @@ menu "knowing app"
         
     if APPLICATION_KNOWING
         source "$APP_DIR/Applications/knowing_app/mnist/Kconfig" 
-        source "$APP_DIR/Applications/knowing_app/face_detect/Kconfig" 
-        source "$APP_DIR/Applications/knowing_app/instrusion_detect/Kconfig" 
-        source "$APP_DIR/Applications/knowing_app/helmet_detect/Kconfig" 
+        source "$APP_DIR/Applications/knowing_app/k210_detect_entry/Kconfig" 
         source "$APP_DIR/Applications/knowing_app/iris_ml_demo/Kconfig" 
         source "$APP_DIR/Applications/knowing_app/k210_fft_test/Kconfig" 
         source "$APP_DIR/Applications/knowing_app/image_processing/Kconfig" 

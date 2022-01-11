@@ -17,11 +17,17 @@
 
 #define ARCH_MAX_IRQ_NUM (256)
 
-#define ARCH_IRQ_NUM_OFFSET 0
+//#define ARCH_IRQ_NUM_OFFSET 0
 
-#define SYSTICK_IRQN       15
-#define UART1_IRQn         36
-#define UART2_IRQn         37
+//#define SYSTICK_IRQN       15
+//#define UART1_IRQn         36
+//#define UART2_IRQn         37
+
+#define ARCH_IRQ_NUM_OFFSET 16
+
+#define SYSTICK_IRQN       -1
+#define UART1_IRQn         20
+#define UART2_IRQn         21
 
 int32 ArchEnableHwIrq(uint32 irq_num);
 int32 ArchDisableHwIrq(uint32 irq_num);
