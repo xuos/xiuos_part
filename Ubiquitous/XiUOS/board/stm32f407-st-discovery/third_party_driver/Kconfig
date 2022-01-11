@@ -14,6 +14,14 @@ if BSP_USING_CAN
 source "$BSP_DIR/third_party_driver/can/Kconfig"
 endif
 
+menuconfig BSP_USING_DAC
+bool "Using DAC device"
+default n
+select RESOURCES_DAC
+if BSP_USING_DAC
+source "$BSP_DIR/third_party_driver/dac/Kconfig"
+endif
+
 menuconfig BSP_USING_DMA
 bool "Using DMA device"
 default y

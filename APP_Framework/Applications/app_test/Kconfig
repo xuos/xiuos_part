@@ -18,5 +18,16 @@ menu "test app"
                             default "/dev/adc1_dev"
                     endif
                 endif
+
+            menuconfig USER_TEST_DAC
+                bool "Config test dac"
+                default n
+                if USER_TEST_DAC
+                    if ADD_XIUOS_FETURES
+                        config DAC_DEV_DRIVER
+                            string "Set DAC dev path"
+                            default "/dev/dac_dev"
+                    endif
+                endif
         endif
 endmenu

@@ -53,6 +53,7 @@ enum BusType_e
     TYPE_RTC_BUS,
     TYPE_SERIAL_BUS,
     TYPE_ADC_BUS,
+    TYPE_DAC_BUS,
     TYPE_BUS_END,
 };
 
@@ -78,6 +79,7 @@ enum DevType
     TYPE_RTC_DEV,
     TYPE_SERIAL_DEV,
     TYPE_ADC_DEV,
+    TYPE_DAC_DEV,
     TYPE_DEV_END,
 };
 
@@ -103,6 +105,7 @@ enum DriverType_e
     TYPE_RTC_DRV,
     TYPE_SERIAL_DRV,
     TYPE_ADC_DRV,
+    TYPE_DAC_DRV,
     TYPE_DRV_END,
 };
 

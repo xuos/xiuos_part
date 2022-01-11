@@ -383,6 +383,7 @@ static char *const bus_type_str[] =
     "RTC_BUS",
     "SERIAL_BUS",
     "ADC_BUS",
+    "DAC_BUS",
     "Unknown"
 };
 

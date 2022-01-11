@@ -240,6 +240,15 @@ static uint32 Stm32AdcOpen(void *dev)
     return EOK;
 }
 
+static uint32 Stm32AdcClose(void *dev)
+{
+    struct AdcHardwareDevice *adc_dev = (struct AdcHardwareDevice *)dev;
+    
+    ADC_DeInit();
+
+    return EOK;
+}
+
 static uint32 Stm32AdcRead(void *dev, struct BusBlockReadParam *read_param)
 {
     struct AdcHardwareDevice *adc_dev = (struct AdcHardwareDevice *)dev;
@@ -288,7 +297,7 @@ static uint32 Stm32AdcDrvConfigure(void *drv, struct BusConfigureInfo *configure
 static const struct AdcDevDone dev_done =
 {
     Stm32AdcOpen,
-    NONE,
+    Stm32AdcClose,
     NONE,
     Stm32AdcRead,
 };
@@ -419,4 +428,6 @@ int Stm32HwAdcInit(void)
         return ERROR;
     }
 #endif 
+
+    return ret;
 }

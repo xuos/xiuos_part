@@ -139,6 +139,7 @@ enum IoctlDriverType
     I2C_TYPE,
     PIN_TYPE,
     ADC_TYPE,
+    DAC_TYPE,
     DEFAULT_TYPE,
 };
 

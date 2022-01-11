@@ -52,7 +52,9 @@ void test_adc()
 
     printf("adc sample %u value integer %u decimal %u\n", adc_sample, (uint16)adc_value, adc_value_decimal);
 
+    PrivClose(adc_fd);
+
     return;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
-                                                test_adc, test_adc, read 3.3 voltage data from adc);
+// SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+//                                                 test_adc, test_adc, read 3.3 voltage data from adc);

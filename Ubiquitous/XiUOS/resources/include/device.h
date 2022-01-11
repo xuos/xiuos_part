@@ -99,4 +99,9 @@ HardwareDevType ObtainConsole(void);
 #include <dev_adc.h>
 #endif
 
+#ifdef RESOURCES_DAC
+#include <bus_dac.h>
+#include <dev_dac.h>
+#endif
+
 #endif

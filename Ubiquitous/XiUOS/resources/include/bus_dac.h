@@ -11,15 +11,15 @@
 */
 
 /**
-* @file bus_adc.h
-* @brief define adc bus and drv function using bus driver framework
-* @version 1.1 
+* @file bus_dac.h
+* @brief define dac bus and drv function using bus driver framework
+* @version 2.0 
 * @author AIIT XUOS Lab
-* @date 2021-12-28
+* @date 2022-1-11
 */
 
-#ifndef BUS_ADC_H
-#define BUS_ADC_H
+#ifndef BUS_DAC_H
+#define BUS_DAC_H
 
 #include <bus.h>
 
@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-struct AdcDriver
+struct DacDriver
 {
     struct Driver driver;
     uint32 (*configure) (void *drv, struct BusConfigureInfo *configure_info);
@@ -35,30 +35,30 @@ struct AdcDriver
     void *private_data;
 };
 
-struct AdcBus
+struct DacBus
 {
     struct Bus bus;
 
     void *private_data;
 };
 
-/*Register the ADC bus*/
-int AdcBusInit(struct AdcBus *adc_bus, const char *bus_name);
+/*Register the DAC bus*/
+int DacBusInit(struct DacBus *dac_bus, const char *bus_name);
 
-/*Register the ADC driver*/
-int AdcDriverInit(struct AdcDriver *adc_driver, const char *driver_name);
+/*Register the DAC driver*/
+int DacDriverInit(struct DacDriver *dac_driver, const char *driver_name);
 
-/*Release the ADC device*/
-int AdcReleaseBus(struct AdcBus *adc_bus);
+/*Release the DAC device*/
+int DacReleaseBus(struct DacBus *dac_bus);
 
-/*Register the ADC driver to the ADC bus*/
-int AdcDriverAttachToBus(const char *drv_name, const char *bus_name);
+/*Register the DAC driver to the DAC bus*/
+int DacDriverAttachToBus(const char *drv_name, const char *bus_name);
 
 /*Register the driver, manage with the double linklist*/
-int AdcDriverRegister(struct Driver *driver);
+int DacDriverRegister(struct Driver *driver);
 
 /*Find the register driver*/
-DriverType AdcDriverFind(const char *drv_name, enum DriverType_e drv_type);
+DriverType DacDriverFind(const char *drv_name, enum DriverType_e drv_type);
 
 #ifdef __cplusplus
 }

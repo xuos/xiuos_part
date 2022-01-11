@@ -60,4 +60,8 @@ ifeq ($(CONFIG_BSP_USING_ADC),y)
   SRC_DIR += adc
 endif
 
+ifeq ($(CONFIG_BSP_USING_DAC),y)
+  SRC_DIR += dac
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

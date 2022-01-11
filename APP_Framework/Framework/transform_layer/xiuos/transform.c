@@ -155,6 +155,7 @@ int PrivIoctl(int fd, int cmd, void *args)
         ret = ioctl(fd, cmd, ioctl_cfg->args);
         break;
     case ADC_TYPE:
+    case DAC_TYPE:
         ret = ioctl(fd, cmd, ioctl_cfg->args);
         break;
     default:
