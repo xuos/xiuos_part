@@ -53,7 +53,7 @@ char udp_send_msg[] = "\n\nThis one is UDP pkg. Congratulations on you.\n\n";
 
 static void lwip_udp_send(void *arg)
 {
-    int cnt = TEST_LWIP_TIMES;
+    int cnt = LWIP_DEMO_TIMES;
 
     lw_print("udp_send_demo start.\n");
 
@@ -67,7 +67,7 @@ static void lwip_udp_send(void *arg)
 
     struct sockaddr_in udp_sock;
     udp_sock.sin_family = AF_INET;
-    udp_sock.sin_port = htons(TARGET_PORT_CLIENT);
+    udp_sock.sin_port = htons(LWIP_TARGET_PORT);
     udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_target[0],udp_target[1],udp_target[2],udp_target[3]));
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
@@ -170,7 +170,7 @@ void udpecho_raw_init(void)
         return;
     }
 
-    err = udp_bind(udpecho_raw_pcb, IP_ANY_TYPE, LOCAL_PORT_SERVER);
+    err = udp_bind(udpecho_raw_pcb, IP_ANY_TYPE, LWIP_LOCAL_PORT);
     if (err == ERR_OK)
     {
         udp_recv(udpecho_raw_pcb, udpecho_raw_recv, NULL);

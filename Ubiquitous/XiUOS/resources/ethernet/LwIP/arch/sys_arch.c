@@ -85,11 +85,9 @@ char lwip_ipaddr[] = {192, 168, 250, 253};
 char lwip_netmask[] = {255, 255, 255, 0};
 char lwip_gwaddr[] = {192, 168, 250, 252};
 
-int errno;
 int is_lwip_test = 0; //for lwip input thread
 
 x_ticks_t lwip_sys_now;
-
 static int lwip_init_flag = 0;
 
 struct sys_timeouts {
@@ -386,7 +384,7 @@ ip4_addr_t ipaddr;
 ip4_addr_t netmask;
 ip4_addr_t gw;
 
-void TcpIpInit(void)
+void lwip_tcp_init(void)
 {
   tcpip_init(NULL, NULL);
 
@@ -397,14 +395,9 @@ void TcpIpInit(void)
   ip_addr_set_zero_ip4(&netmask);
   ip_addr_set_zero_ip4(&gw);
 #else
-  #ifdef SET_AS_SERVER
-  IP4_ADDR(&ipaddr,IP_ADDR0_SERVER,IP_ADDR1_SERVER,IP_ADDR2_SERVER,IP_ADDR3_SERVER);
-  #else
-  IP4_ADDR(&ipaddr,IP_ADDR0_ClIENT,IP_ADDR1_ClIENT,IP_ADDR2_ClIENT,IP_ADDR3_ClIENT);
-  #endif
-
-  IP4_ADDR(&netmask,NETMASK_ADDR0,NETMASK_ADDR1,NETMASK_ADDR2,NETMASK_ADDR3);
-  IP4_ADDR(&gw,GW_ADDR0,GW_ADDR1,GW_ADDR2,GW_ADDR3);
+  IP4_ADDR(&ipaddr, lwip_ipaddr[0], lwip_ipaddr[1], lwip_ipaddr[2], lwip_ipaddr[3]);
+  IP4_ADDR(&netmask, lwip_netmask[0], lwip_netmask[1], lwip_netmask[2], lwip_netmask[3]);
+  IP4_ADDR(&gw, lwip_gwaddr[0], lwip_gwaddr[1], lwip_gwaddr[2], lwip_gwaddr[3]);
 #endif /* USE_DHCP */
   /* USER CODE END 0 */
   /* Initilialize the LwIP stack without RTOS */
@@ -417,13 +410,13 @@ void TcpIpInit(void)
   if (netif_is_link_up(&gnetif))
   {
     /* When the netif is fully configured this function must be called */
-    KPrintf("TcpIpInit : netif_set_up\n");
+    KPrintf("%s : netif_set_up\n", __func__);
     netif_set_up(&gnetif);
   }
   else
   {
     /* When the netif link is down this function must be called */
-    KPrintf("TcpIpInit : netif_set_down\n");
+    KPrintf("%s : netif_set_down\n", __func__);
     netif_set_down(&gnetif);
   }
 
@@ -459,10 +452,14 @@ void lwip_input_thread(void *param)
 
   while (1)
   {
-    /* Poll the driver, get any outstanding frames */
-    ethernetif_input(net);
-    sys_check_timeouts(); /* Handle all system timeouts for all core protocols */
-//    DelayKTask(1);
+#ifdef FSL_RTOS_XIUOS
+    if (lwip_obtain_semaphore(net) == EOK)
+#endif
+    {
+        /* Poll the driver, get any outstanding frames */
+        ethernetif_input(net);
+        sys_check_timeouts(); /* Handle all system timeouts for all core protocols */
+    }
   }
 }
 
@@ -502,6 +499,7 @@ void lwip_config_net(char *ip, char *mask, char *gw)
     IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
     IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
 
+    // update ip addr
     netif_set_down(&gnetif);
     netif_set_gw(&gnetif, &net_gw);
     netif_set_netmask(&gnetif, &net_netmask);

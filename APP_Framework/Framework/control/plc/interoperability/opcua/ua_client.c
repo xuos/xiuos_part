@@ -66,24 +66,34 @@ void ua_browser_objects(UA_Client *client)
 {
     /* Browse some objects */
     ua_pr_info("Browsing nodes in objects folder:\n");
+
     UA_BrowseRequest bReq;
     UA_BrowseRequest_init(&bReq);
+
     bReq.requestedMaxReferencesPerNode = 0;
     bReq.nodesToBrowse = UA_BrowseDescription_new();
     bReq.nodesToBrowseSize = 1;
     bReq.nodesToBrowse[0].nodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER); /* browse objects folder */
     bReq.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_ALL; /* return everything */
+
     UA_BrowseResponse bResp = UA_Client_Service_browse(client, bReq);
+
     ua_pr_info("%-9s %-16s %-16s %-16s\n", "NAMESPACE", "NODEID", "BROWSE NAME", "DISPLAY NAME");
-    for(size_t i = 0; i < bResp.resultsSize; ++i) {
-        for(size_t j = 0; j < bResp.results[i].referencesSize; ++j) {
+
+    for(size_t i = 0; i < bResp.resultsSize; ++i)
+    {
+        for(size_t j = 0; j < bResp.results[i].referencesSize; ++j)
+        {
             UA_ReferenceDescription *ref = &(bResp.results[i].references[j]);
-            if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_NUMERIC) {
+            if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_NUMERIC)
+            {
                 ua_pr_info("%-9d %-16d %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
                        ref->nodeId.nodeId.identifier.numeric, (int)ref->browseName.name.length,
                        ref->browseName.name.data, (int)ref->displayName.text.length,
                        ref->displayName.text.data);
-            } else if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_STRING) {
+            }
+            else if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_STRING)
+            {
                 ua_pr_info("%-9d %-16.*s %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
                        (int)ref->nodeId.nodeId.identifier.string.length,
                        ref->nodeId.nodeId.identifier.string.data,
@@ -164,7 +174,8 @@ void ua_read_attr(UA_Client *client)
     wReq.nodesToWrite[0].value.value.data = &value;
     UA_WriteResponse wResp = UA_Client_Service_write(client, wReq);
     if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD)
-            ua_print("the new value is: %i\n", value);
+        ua_print("the new value is: %i\n", value);
+
     UA_WriteRequest_clear(&wReq);
     UA_WriteResponse_clear(&wResp);
 
@@ -188,11 +199,14 @@ void ua_call_remote(UA_Client *client)
     UA_Variant *output;
     UA_StatusCode retval = UA_Client_call(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER),
                             UA_NODEID_NUMERIC(1, 62541), 1, &input, &outputSize, &output);
-    if(retval == UA_STATUSCODE_GOOD) {
+    if(retval == UA_STATUSCODE_GOOD)
+    {
         ua_print("Method call was successful, and %lu returned values available.\n",
                (unsigned long)outputSize);
         UA_Array_delete(output, outputSize, &UA_TYPES[UA_TYPES_VARIANT]);
-    } else {
+    }
+    else
+    {
         ua_print("Method call was unsuccessful, and %x returned values available.\n", retval);
     }
     UA_Variant_clear(&input);
@@ -270,23 +284,6 @@ void ua_add_nodes(UA_Client *client)
 
 int ua_get_server_info(UA_Client *client)
 {
-    UA_StatusCode retval;
-
-    /* Listing endpoints */
-//    retval = ua_get_points(client);
-//    if(retval != UA_STATUSCODE_GOOD) {
-//        UA_Client_delete(client);
-//        return EXIT_FAILURE;
-//    }
-//
-//    /* Connect to a server */
-//    /* anonymous connect would be: retval = UA_Client_connect(client, "opc.tcp://localhost:4840"); */
-//    retval = UA_Client_connect(client, OPC_SERVER);
-//    if(retval != UA_STATUSCODE_GOOD) {
-//        UA_Client_delete(client);
-//        return EXIT_FAILURE;
-//    }
-
     ua_browser_objects(client);
 
     /* Same thing, this time using the node iterator... */

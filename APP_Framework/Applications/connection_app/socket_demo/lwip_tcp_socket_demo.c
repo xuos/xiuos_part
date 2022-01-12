@@ -72,7 +72,7 @@ static void tcp_recv_demo(void *arg)
 
         tcp_addr.sin_family = AF_INET;
         tcp_addr.sin_addr.s_addr = INADDR_ANY;
-        tcp_addr.sin_port = htons(LOCAL_PORT_SERVER);
+        tcp_addr.sin_port = htons(LWIP_LOCAL_PORT);
         memset(&(tcp_addr.sin_zero), 0, sizeof(tcp_addr.sin_zero));
 
         if (bind(fd, (struct sockaddr *)&tcp_addr, sizeof(struct sockaddr)) == -1)
@@ -82,7 +82,7 @@ static void tcp_recv_demo(void *arg)
         }
 
         lw_print("tcp bind sucess, start to receive.\n");
-        lw_print("\n\nLocal Port:%d\n\n", LOCAL_PORT_SERVER);
+        lw_print("\n\nLocal Port:%d\n\n", LWIP_LOCAL_PORT);
 
         while(1)
         {
@@ -124,7 +124,7 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
 
 static void tcp_send_demo(void *arg)
 {
-    int cnt = TEST_LWIP_TIMES;
+    int cnt = LWIP_DEMO_TIMES;
     lw_print("tcp_send_demo start.\n");
     int fd = -1;
     char send_msg[128];
@@ -139,7 +139,7 @@ static void tcp_send_demo(void *arg)
 
     struct sockaddr_in tcp_sock;
     tcp_sock.sin_family = AF_INET;
-    tcp_sock.sin_port = htons(TARGET_PORT_CLIENT);
+    tcp_sock.sin_port = htons(LWIP_TARGET_PORT);
     tcp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(tcp_socket_ip[0],tcp_socket_ip[1],tcp_socket_ip[2],tcp_socket_ip[3]));
     memset(&(tcp_sock.sin_zero), 0, sizeof(tcp_sock.sin_zero));
 

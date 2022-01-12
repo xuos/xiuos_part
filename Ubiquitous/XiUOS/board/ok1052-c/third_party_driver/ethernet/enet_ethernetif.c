@@ -216,7 +216,7 @@ void ethernetif_input(struct netif *netif)
         /* pass all packets to ethernet_input, which decides what packets it supports */
         if ((ret = netif->input(p, netif)) != ERR_OK)
         {
-//            LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
+            LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
             lw_print("lw: [%s] ret %d p %p\n", __func__, ret, p);
             pbuf_free(p);
             p = NULL;

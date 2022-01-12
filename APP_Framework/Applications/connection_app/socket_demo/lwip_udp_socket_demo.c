@@ -78,7 +78,7 @@ static void udp_recv_demo(void *arg)
 
         udp_addr.sin_family = AF_INET;
         udp_addr.sin_addr.s_addr = INADDR_ANY;
-        udp_addr.sin_port = htons(LOCAL_PORT_SERVER);
+        udp_addr.sin_port = htons(LWIP_LOCAL_PORT);
         memset(&(udp_addr.sin_zero), 0, sizeof(udp_addr.sin_zero));
 
         if (bind(socket_fd, (struct sockaddr *)&udp_addr, sizeof(struct sockaddr)) == -1)
@@ -88,7 +88,7 @@ static void udp_recv_demo(void *arg)
         }
 
         lw_print("UDP bind sucess, start to receive.\n");
-        lw_print("\n\nLocal Port:%d\n\n", LOCAL_PORT_SERVER);
+        lw_print("\n\nLocal Port:%d\n\n", LWIP_LOCAL_PORT);
 
         while(1)
         {
@@ -135,7 +135,7 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
 
 static void udp_send_demo(void *arg)
 {
-    int cnt = TEST_LWIP_TIMES;
+    int cnt = LWIP_DEMO_TIMES;
     char send_str[128];
 
     lw_print("udp_send_demo start.\n");
@@ -152,7 +152,7 @@ static void udp_send_demo(void *arg)
 
     struct sockaddr_in udp_sock;
     udp_sock.sin_family = AF_INET;
-    udp_sock.sin_port = htons(TARGET_PORT_CLIENT);
+    udp_sock.sin_port = htons(LWIP_TARGET_PORT);
     udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_target[0],udp_target[1],udp_target[2],udp_target[3]));
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 

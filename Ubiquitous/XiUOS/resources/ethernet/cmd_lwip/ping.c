@@ -248,7 +248,7 @@ ping_thread(void *arg)
 {
   int s;
   int ret;
-  int cnt = TEST_LWIP_TIMES;
+  int cnt = LWIP_DEMO_TIMES;
 
 #if LWIP_SO_SNDRCVTIMEO_NONSTANDARD
   int timeout = PING_RCV_TIMEO;
@@ -367,7 +367,7 @@ ping_send(struct raw_pcb *raw, const ip_addr_t *addr)
 static void
 ping_timeout(void *arg)
 {
-  static int cnt = TEST_LWIP_TIMES;
+  static int cnt = LWIP_DEMO_TIMES;
   struct raw_pcb *pcb = (struct raw_pcb*)arg;
 
   LWIP_ASSERT("ping_timeout: no pcb given!", pcb != NULL);
@@ -380,7 +380,7 @@ ping_timeout(void *arg)
   }
   else
   {
-    cnt = TEST_LWIP_TIMES;
+    cnt = LWIP_DEMO_TIMES;
   }
 }
 
@@ -483,7 +483,7 @@ int get_url_ip(char* url)
 #else
     int timeout = PING_RCV_TIMEO * 1000UL / TICK_PER_SECOND;
 #endif
-    int cnt = TEST_LWIP_TIMES;
+    int cnt = LWIP_DEMO_TIMES;
 
     int s, ttl, recv_len;
     ip_addr_t target_addr;

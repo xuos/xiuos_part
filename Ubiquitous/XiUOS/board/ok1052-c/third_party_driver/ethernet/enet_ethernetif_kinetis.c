@@ -118,6 +118,8 @@ typedef struct EventGroupDef_t
 
 struct EventGroupDef_t;
 typedef struct EventGroupDef_t   * EventGroupHandle_t;
+#else
+int lwip_sempahore;
 #endif
 
 #endif
@@ -129,8 +131,6 @@ typedef struct EventGroupDef_t   * EventGroupHandle_t;
 #include "fsl_phy.h"
 
 #include "sys_arch.h"
-
-
 
 /*******************************************************************************
  * Definitions
@@ -166,6 +166,13 @@ struct ethernetif
  * Code
  ******************************************************************************/
 #if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
+
+int32 lwip_obtain_semaphore(struct netif *netif)
+{
+    struct ethernetif *ethernetif = netif->state;
+    return (KSemaphoreObtain(ethernetif->enetSemaphore, WAITING_FOREVER) == EOK);
+}
+
 #if FSL_FEATURE_ENET_QUEUE > 1
 static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, uint32_t ringId, enet_event_t event, void *param)
 #else
@@ -176,21 +183,18 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
     struct ethernetif *ethernetif = netif->state;
     BaseType_t xResult;
 
-
-    lw_print("lw: [%s] input event %#x \n", __func__, event);
-
     switch (event)
     {
         case kENET_RxEvent:
             ethernetif_input(netif);
             break;
         case kENET_TxEvent:
-        {
-            portBASE_TYPE taskToWake = pdFALSE;
-
 #ifdef FSL_RTOS_XIUOS
 
 #else
+        {
+            portBASE_TYPE taskToWake = pdFALSE;
+
 #ifdef __CA7_REV
             if (SystemGetIRQNestingLevel())
 #else
@@ -207,14 +211,15 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
             {
                 xEventGroupSetBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag);
             }
-#endif
         }
+#endif
         break;
         default:
             break;
     }
 
-    KSemaphoreAbandon(ethernetif->enetSemaphore);
+//    KSemaphoreAbandon(ethernetif->enetSemaphore);
+    KSemaphoreAbandon(lwip_sempahore);
 }
 #endif
 
@@ -315,7 +320,7 @@ err_t ethernetif_mld_mac_filter(struct netif *netif, const ip6_addr_t *group,
 //
 //  for( ;; )
 //  {
-//    if (KSemaphoreObtain( s_xSemaphore, WAITING_FOREVER)==EOK)
+//    if (KSemaphoreObtain( lwip_sempahore, WAITING_FOREVER)==EOK)
 //    {
 //      p = low_level_input( s_pxNetIf );
 //
@@ -392,6 +397,7 @@ void ethernetif_enet_init(struct netif *netif, struct ethernetif *ethernetif,
     {
         ethernetif->enetSemaphore = KSemaphoreCreate(0);
     }
+//    lwip_sempahore = KSemaphoreCreate(0);
 #else
     ethernetif->enetTransmitAccessEvent = xEventGroupCreate();
 #endif
@@ -458,7 +464,7 @@ static err_t enet_send_frame(struct ethernetif *ethernetif, unsigned char *data,
     {
         status_t result;
 
-    lw_print("lw: [%s] len %d\n", __func__, length);
+        lw_print("lw: [%s] len %d\n", __func__, length);
 
         do
         {
@@ -467,7 +473,8 @@ static err_t enet_send_frame(struct ethernetif *ethernetif, unsigned char *data,
             if (result == kStatus_ENET_TxFrameBusy)
             {
 #ifdef FSL_RTOS_XIUOS
-//                KSemaphoreObtain(ethernetif->enetSemaphore, portMAX_DELAY);
+                KSemaphoreObtain(ethernetif->enetSemaphore, portMAX_DELAY);
+//                KSemaphoreObtain(lwip_sempahore, portMAX_DELAY);
 #else
                 xEventGroupWaitBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag, pdTRUE, (BaseType_t) false,
                                     portMAX_DELAY);
@@ -582,11 +589,10 @@ struct pbuf *ethernetif_linkinput(struct netif *netif)
             if (status == kStatus_ENET_RxFrameError)
             {
 #if 0 && defined(FSL_FEATURE_SOC_ENET_COUNT) && (FSL_FEATURE_SOC_ENET_COUNT > 0) /* Error statisctics */
-        enet_data_error_stats_t eErrStatic;
-        /* Get the error information of the received g_frame. */
-        ENET_GetRxErrBeforeReadFrame(&ethernetif->handle, &eErrStatic);
+                enet_data_error_stats_t eErrStatic;
+                /* Get the error information of the received g_frame. */
+                ENET_GetRxErrBeforeReadFrame(&ethernetif->handle, &eErrStatic);
 #endif
-
                 /* Update the receive buffer. */
                 ENET_ReadFrame(ethernetif->base, &ethernetif->handle, NULL, 0U);
 
