@@ -1642,14 +1642,12 @@ void shellTask(void *param)
     /* One input key from the the keyboard/uart may consist of mutliple characters (e.g., arrow keys). */
     char data[KEY_LENGTH];
     int i;
-    int data_len;
+    char data_len;
 
     while(RET_TRUE)
     {
-        if (shell->read && shell->read(data) == 0) {
-            //   KPrintf("in 1741 the char is:                    '%c' and ascii code is %d.\n\n",data,data);
-            // KPrintf("the buffer is:'%s'\n\n",shell->parser.);
-            data_len = strlen(data);
+        if (shell->read) {
+            data_len = shell->read(data);
             for (i = 0; i < data_len; i++) {
                 shellHandler(shell, data[i]);
             }
