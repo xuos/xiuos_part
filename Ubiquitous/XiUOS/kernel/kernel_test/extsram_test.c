@@ -13,7 +13,7 @@
 // /* sram size */
 // #define SRAM_SIZE            ((uint32_t)0x00100000)
 /* sram size */
-#define SRAM_SIZE            ((uint32_t)0x008000)
+#define SRAM_SIZE            ((uint32_t)0x2000000)
 
 int sram_test(void)
 {

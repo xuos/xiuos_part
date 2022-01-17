@@ -5,7 +5,7 @@
 #define EXAMPLE_SEMC SEMC
 #define EXAMPLE_SEMC_START_ADDRESS (0x80000000U)
 #define EXAMPLE_SEMC_CLK_FREQ CLOCK_GetFreq(kCLOCK_SemcClk)
-#define SEMC_SRAM_SIZE (32 * 1024)
+#define SEMC_SRAM_SIZE (32 * 1024 * 1024)
 
 status_t BOARD_InitSEMC(void)
 {
