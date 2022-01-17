@@ -1222,7 +1222,7 @@ void ShowBuddy(void)
     	};
 	}
     
-    KPrintf("\nlist memory information\n\n");
+    KPrintf("\n\033[41;1mlist extern memory information\033[0m\n");
 #ifdef MEM_EXTERN_SRAM
 	for(i = 0; i < EXTSRAM_MAX_NUM; i++) {
 		if(NONE != ExtByteManager[i].done){
@@ -1230,14 +1230,16 @@ void ShowBuddy(void)
 			for(int lev = 0; lev < MEM_LINKNRS; lev++) {
 			KPrintf("\n %s level [%d],memory size[2^%d] \n",__func__, lev,lev +6);
 				for (debug = & ExtByteManager[i].dynamic_buddy_manager.mm_freenode_list[lev];  ; ) {
-					if(debug->size > 0)
-						KPrintf("	[current  node %x,next node %x, size %u, flag %x]\n",debug, debug->next,debug->size,debug->flag);
-					else
-						KPrintf("	[listhead node %x,next node %x]\n",debug, debug->next);
 					if(debug->next)
+					{
 						debug = debug->next;
 
-					if(debug->size == 0)
+						if(debug->size > 0)
+							KPrintf("	[current  node %x,next node %x, size %u, flag %x]\n",debug, debug->next,debug->size,debug->flag);
+						else
+							KPrintf(" \n");
+					}	
+					if(debug->size == 0 || NONE == debug->next)
 						break;
 				}
 			}
