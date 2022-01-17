@@ -105,10 +105,6 @@ static u32_t ping_time;
 static struct raw_pcb *ping_pcb;
 #endif /* PING_USE_SOCKETS */
 
-#define PING_THREAD_STACKSIZE 4096
-#define PING_THREAD_PRIO 15
-
-
 /** Prepare a echo ICMP request */
 static void
 ping_prepare_echo( struct icmp_echo_hdr *iecho, u16_t len)
@@ -268,7 +264,7 @@ ping_thread(void *arg)
     s = lwip_socket(AF_INET6, SOCK_RAW, IP6_NEXTH_ICMP6);
   }
 #else
-  s = lwip_socket(AF_INET,  SOCK_RAW, IP_PROTO_ICMP);
+  s = lwip_socket(AF_INET, SOCK_RAW, IP_PROTO_ICMP);
 #endif
   if (s < 0) {
     lw_print("lw: [%s] ping failed %d!\n", __func__, s);
@@ -412,7 +408,7 @@ ping_init(const ip_addr_t* ping_addr)
   ping_target = ping_addr;
 
 #if PING_USE_SOCKETS
-  th = sys_thread_new("ping_thread", ping_thread, NULL, PING_THREAD_STACKSIZE, PING_THREAD_PRIO);
+  th = sys_thread_new("ping_thread", ping_thread, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
   lw_print("lw: [%s] new thread %d addr %#x\n", __func__, th, (*ping_addr).addr);
 #else /* PING_USE_SOCKETS */
   ping_raw_init();
@@ -476,6 +472,7 @@ int lwip_ping_recv(int s, int *ttl)
     return len;
 }
 
+#if (LWIP_DHCP) && (PING_USE_SOCKETS)
 int get_url_ip(char* url)
 {
 #if LWIP_VERSION_MAJOR >= 2U
@@ -539,6 +536,6 @@ int get_url_ip(char* url)
     lwip_close(s);
     return 0;
 }
-
+#endif
 
 #endif /* LWIP_RAW */

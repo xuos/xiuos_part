@@ -84,11 +84,9 @@
 char lwip_ipaddr[] = {192, 168, 250, 253};
 char lwip_netmask[] = {255, 255, 255, 0};
 char lwip_gwaddr[] = {192, 168, 250, 252};
-
-int is_lwip_test = 0; //for lwip input thread
+char lwip_flag = 0;
 
 x_ticks_t lwip_sys_now;
-static int lwip_init_flag = 0;
 
 struct sys_timeouts {
   struct sys_timeo *next;
@@ -491,7 +489,7 @@ void lwip_config_net(char *ip, char *mask, char *gw)
 #endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
   };
 
-  if(lwip_init_flag)
+  if(chk_lwip_bit(LWIP_INIT_FLAG))
   {
     lw_print("lw: [%s] already ...\n", __func__);
 
@@ -507,7 +505,7 @@ void lwip_config_net(char *ip, char *mask, char *gw)
     netif_set_up(&gnetif);
     return;
   }
-  lwip_init_flag = 1;
+  set_lwip_bit(LWIP_INIT_FLAG);
 
   lw_print("lw: [%s] start ...\n", __func__);
 
@@ -522,7 +520,7 @@ void lwip_config_net(char *ip, char *mask, char *gw)
   netif_set_default(&gnetif);
   netif_set_up(&gnetif);
 
-  if(is_lwip_test)
+  if(chk_lwip_bit(LWIP_PRINT_FLAG))
   {
     lw_pr_info("\r\n************************************************\r\n");
     lw_pr_info(" Network Configuration\r\n");
@@ -553,12 +551,13 @@ void lwip_config_tcp(char *ip, char *mask, char *gw)
 #endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
   };
 
-  if(lwip_init_flag)
+  if(chk_lwip_bit(LWIP_INIT_FLAG))
   {
     lw_print("lw: [%s] already ...\n", __func__);
     return;
   }
-  lwip_init_flag = 1;
+
+  set_lwip_bit(LWIP_INIT_FLAG);
 
   tcpip_init(NULL, NULL);
 

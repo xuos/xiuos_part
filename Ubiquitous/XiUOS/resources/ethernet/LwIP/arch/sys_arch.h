@@ -66,7 +66,7 @@
 
 #define LWIP_DEMO_TIMES             3
 #define LWIP_TASK_STACK_SIZE        4096
-#define LWIP_TASK_PRIO              15
+#define LWIP_DEMO_TASK_PRIO         20
 
 /* MAC address configuration. */
 #define configMAC_ADDR {0x02, 0x12, 0x13, 0x10, 0x15, 0x11}
@@ -82,16 +82,23 @@ typedef int32 sys_mbox_t;
 typedef int32 sys_thread_t;
 typedef x_base sys_prot_t;
 
-#define MS_PER_SYSTICK_F407 1000/TICK_PER_SECOND
+#define MS_PER_SYSTICK_F407 (1000 / TICK_PER_SECOND)
 
 //debug rtos with IRQ
 //#define FSL_RTOS_XIUOS
 
+extern char lwip_flag;
+
+#define LWIP_INIT_FLAG (1 << 0)
+#define LWIP_PRINT_FLAG (1 << 1)
+
+#define set_lwip_bit(__bit) lwip_flag |= (__bit)
+#define clr_lwip_bit(__bit) lwip_flag &= ~(__bit)
+#define chk_lwip_bit(__bit) ((lwip_flag & (__bit)) == (__bit))
+
 extern char lwip_ipaddr[];
 extern char lwip_netmask[];
 extern char lwip_gwaddr[];
-extern int is_lwip_test;
-extern int lwip_sempahore;
 extern struct netif gnetif;
 
 void lwip_tcp_init(void);

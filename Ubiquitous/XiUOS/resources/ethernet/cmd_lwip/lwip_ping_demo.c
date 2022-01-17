@@ -101,11 +101,13 @@ void lwip_ping_thread(int argc, char *argv[])
                 return;
             }
         }
+#if (LWIP_DHCP) && (PING_USE_SOCKETS)
         else
         {
             get_url_ip(argv[1]);
             return;
         }
+#endif
     }
 
     lw_print("lw: [%s] argc %d\n", __func__, argc);
