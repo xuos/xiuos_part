@@ -15,10 +15,16 @@
 #include "open62541.h"
 
 #define OPC_SERVER "opc.tcp://192.168.250.5:4840"
-#define ua_print printf
+
+#define ua_print //printf
+#define ua_trace() //printf("ua: [%s] line %d checked!\n", __func__, __LINE__)
+#define ua_pr_info KPrintf
+#define ua_debug
 
 int ua_server_connect(void);
 int ua_get_server_info(UA_Client *client);
+void ua_browser_objects(UA_Client *client);
+void ua_browser_nodes(UA_Client *client);
 void ua_read_time(UA_Client *client);
 int16 ua_test(void);
 

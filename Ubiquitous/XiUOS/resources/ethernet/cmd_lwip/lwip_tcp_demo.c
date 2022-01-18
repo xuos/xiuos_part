@@ -29,6 +29,8 @@
  * Definitions
  ******************************************************************************/
 
+#define MSG_SIZE 128
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -37,10 +39,9 @@
  * Variables
  ******************************************************************************/
 
-char tcp_target[] = {192, 168, 250, 252};
-#define MSG_SIZE 128
 // this is for test in shell, in fact, shell restrict the length of input string, which is less then 128
 char tcp_send_msg[MSG_SIZE] = {0};
+char tcp_target[] = {192, 168, 250, 252};
 
 /*******************************************************************************
  * Code
@@ -60,7 +61,7 @@ static void lwip_tcp_send_thread(void *arg)
 
     struct sockaddr_in tcp_sock;
     tcp_sock.sin_family = AF_INET;
-    tcp_sock.sin_port = htons(TARGET_PORT_CLIENT);
+    tcp_sock.sin_port = htons(LWIP_TARGET_PORT);
     tcp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(tcp_target[0], tcp_target[1], tcp_target[2], tcp_target[3]));
     memset(&(tcp_sock.sin_zero), 0, sizeof(tcp_sock.sin_zero));
 
@@ -104,7 +105,7 @@ void lwip_tcp_send_run(int argc, char *argv[])
 
     ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("tcp send", lwip_tcp_send_thread, NULL, 4096, 25);
+    sys_thread_new("tcp send", lwip_tcp_send_thread, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),

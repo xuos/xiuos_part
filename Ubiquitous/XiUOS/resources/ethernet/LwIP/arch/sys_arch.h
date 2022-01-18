@@ -60,38 +60,18 @@
 
 #include <xs_base.h>
 
-/* USER CODE BEGIN 0 */
-// #define SET_AS_SERVER 1 /* define this terminal is udp server or not*/
+/* LWIP task parameter */
+#define LWIP_LOCAL_PORT             4840
+#define LWIP_TARGET_PORT            LWIP_LOCAL_PORT
 
-#define LOCAL_PORT_SERVER           4840
-#define TARGET_PORT_CLIENT          LOCAL_PORT_SERVER
+#define LWIP_DEMO_TIMES             3
+#define LWIP_TASK_STACK_SIZE        4096
+#define LWIP_DEMO_TASK_PRIO         20
 
-#define TEST_LWIP_TIMES             3
+/* MAC address configuration. */
+#define configMAC_ADDR {0x02, 0x12, 0x13, 0x10, 0x15, 0x11}
 
-/*Static IP ADDRESS: IP_ADDR0.IP_ADDR1.IP_ADDR2.IP_ADDR3 */
-#define IP_ADDR0_SERVER             192
-#define IP_ADDR1_SERVER             168
-#define IP_ADDR2_SERVER             250
-#define IP_ADDR3_SERVER             252
-
-#define IP_ADDR0_ClIENT             192
-#define IP_ADDR1_ClIENT             168
-#define IP_ADDR2_ClIENT             250
-#define IP_ADDR3_ClIENT             253
-
-/*NETMASK*/
-#define NETMASK_ADDR0               255
-#define NETMASK_ADDR1               255
-#define NETMASK_ADDR2               255
-#define NETMASK_ADDR3                 0
-
-/*Gateway Address*/
-#define GW_ADDR0                    192
-#define GW_ADDR1                    168
-#define GW_ADDR2                    250
-#define GW_ADDR3                    5
 /* USER CODE END 0 */
-
 #define SYS_MBOX_NULL  -1
 #define SYS_SEM_NULL   0
 #define SYS_MRTEX_NULL SYS_SEM_NULL
@@ -100,18 +80,28 @@ typedef int32 sys_sem_t;
 typedef int32 sys_mutex_t;
 typedef int32 sys_mbox_t;
 typedef int32 sys_thread_t;
-
 typedef x_base sys_prot_t;
 
-#define MS_PER_SYSTICK_F407 1000/TICK_PER_SECOND
+#define MS_PER_SYSTICK_F407 (1000 / TICK_PER_SECOND)
+
+//debug rtos with IRQ
+//#define FSL_RTOS_XIUOS
+
+extern char lwip_flag;
+
+#define LWIP_INIT_FLAG (1 << 0)
+#define LWIP_PRINT_FLAG (1 << 1)
+
+#define set_lwip_bit(__bit) lwip_flag |= (__bit)
+#define clr_lwip_bit(__bit) lwip_flag &= ~(__bit)
+#define chk_lwip_bit(__bit) ((lwip_flag & (__bit)) == (__bit))
 
 extern char lwip_ipaddr[];
 extern char lwip_netmask[];
 extern char lwip_gwaddr[];
-extern int is_lwip_test;
 extern struct netif gnetif;
 
-void TcpIpInit(void);
+void lwip_tcp_init(void);
 void lwip_config_net(char *ip, char *mask, char *gw);
 void lwip_config_tcp(char *ip, char *mask, char *gw);
 

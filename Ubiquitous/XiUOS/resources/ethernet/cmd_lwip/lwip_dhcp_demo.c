@@ -133,7 +133,7 @@ void lwip_dhcp_test(void)
     ETH_BSP_Config();
 
     lwip_config_net(ip_addr, ip_addr, ip_addr);
-    is_lwip_test = 1;
+    set_lwip_bit(LWIP_PRINT_FLAG);
 
     dhcp_start(&gnetif);
 
@@ -167,7 +167,7 @@ void lwip_dhcp_test(void)
         }
     }
 
-    is_lwip_test = 0;
+    clr_lwip_bit(LWIP_PRINT_FLAG);
 }
 
 

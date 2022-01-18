@@ -1490,6 +1490,9 @@ static void ENET_UpdateReadBuffers(ENET_Type *base, enet_handle_t *handle, uint3
     assert(handle);
     assert(ringId < FSL_FEATURE_ENET_QUEUE);
 
+
+//    lw_print("lw: [%s] base %p handle %p ring %d\n", __func__, base, handle, ringId);
+
     /* Clears status. */
     handle->rxBdCurrent[ringId]->control &= ENET_BUFFDESCRIPTOR_RX_WRAP_MASK;
     /* Sets the receive buffer descriptor with the empty flag. */
