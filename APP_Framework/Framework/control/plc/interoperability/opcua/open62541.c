@@ -46,9 +46,7 @@
 #endif
 
 #include "open62541.h"
-
-#define ua_print KPrintf
-#define ua_trace() KPrintf("ua: [%s] line %d checked!\n", __func__, __LINE__)
+#include "ua_api.h"
 
 #if LWIP_DNS
 
@@ -7147,6 +7145,8 @@ encodeWithExchangeBuffer(const void *ptr, const UA_DataType *type, Ctx *ctx) {
         ctx->pos = oldpos; /* Set to the last known good position and exchange */
         ret = exchangeBuffer(ctx);
         UA_CHECK_STATUS(ret, return ret);
+
+        ua_print("ua: [%s] exchange kind %d ret %d\n", __func__, type->typeKind, ret);
         ret = encodeBinaryJumpTable[type->typeKind](ptr, type, ctx);
     }
     return ret;
@@ -7493,6 +7493,11 @@ Array_encodeBinary(const void *src, size_t length, const UA_DataType *type, Ctx 
             ret = Array_encodeBinaryComplex((uintptr_t)src, length, type, ctx);
     }
     UA_assert(ret != UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED);
+
+    //tst by wly
+    ua_debug("ua: [%s] src %p len %d %d type %p <%d> <%d> %p ret %d\n", __func__,
+        src, length, signed_length, *type, type->typeKind, type->overlayable, ctx, ret);
+
     return ret;
 }
 
@@ -8335,6 +8340,26 @@ encodeBinaryStruct(const void *src, const UA_DataType *type, Ctx *ctx) {
         const UA_DataType *mt = m->memberType;
         ptr += m->padding;
 
+        if(mt->typeKind > UA_DATATYPEKINDS)
+        {
+            ua_debug("ua: [%s] %d type %d %p ptr %p failed\n", __func__, i, mt->typeKind, m->memberType, ptr);
+            return ret;
+        }
+
+        ua_debug("ua: [%s] >  %d < %d mt %p %d %d dep %d msg %p %p:<%x> <%d> isArry %d ret %d\n", __func__,
+            i,
+            type->membersSize,
+            mt,
+            mt->typeKind,
+            mt->memSize,
+            ctx->depth,
+            ptr,
+            src,
+            ((UA_TcpMessageHeader *)src)->messageTypeAndChunkType,
+            ((UA_TcpMessageHeader *)src)->messageSize,
+            m->isArray,
+            ret);
+
         /* Array. Buffer-exchange is done inside Array_encodeBinary if required. */
         if(m->isArray) {
             const size_t length = *((const size_t*)ptr);
@@ -8348,6 +8373,21 @@ encodeBinaryStruct(const void *src, const UA_DataType *type, Ctx *ctx) {
         /* Scalar */
         ret = encodeWithExchangeBuffer((const void*)ptr, mt, ctx);
         UA_assert(ret != UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED);
+
+        ua_debug("ua: [%s] >> %d < %d mt %p %d %d dep %d msg %p %p:<%x> <%d> isArry %d ret %d\n", __func__,
+            i,
+            type->membersSize,
+            mt,
+            mt->typeKind,
+            mt->memSize,
+            ctx->depth,
+            ptr,
+            src,
+            ((UA_TcpMessageHeader *)src)->messageTypeAndChunkType,
+            ((UA_TcpMessageHeader *)src)->messageSize,
+            m->isArray,
+            ret);
+
         ptr += mt->memSize;
     }
 
@@ -8584,19 +8624,69 @@ decodeBinaryStructure(void *dst, const UA_DataType *type, Ctx *ctx) {
         const UA_DataType *mt = m->memberType;
         ptr += m->padding;
 
+        if(mt->typeKind >= UA_DATATYPEKINDS)
+        {
+            ua_debug("ua: [%s] fail %d < %d mt %p %d %d dep %d msg %p %p:<%x> <%d>\n", __func__,
+                i,
+                membersSize,
+                mt,
+                mt->typeKind,
+                mt->memSize,
+                ctx->depth,
+                ptr,
+                dst,
+                ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
+                ((UA_TcpMessageHeader *)dst)->messageSize);
+
+            return ret;
+        }
+
+        ua_debug("ua: [%s] >  %d < %d mt %p %d %d dep %d msg %p %p:<%x> <%d> isArry %d ret %d\n", __func__,
+            i,
+            membersSize,
+            mt,
+            mt->typeKind,
+            mt->memSize,
+            ctx->depth,
+            ptr,
+            dst,
+            ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
+            ((UA_TcpMessageHeader *)dst)->messageSize,
+            m->isArray,
+            ret);
+
         /* Array */
         if(m->isArray) {
             size_t *length = (size_t*)ptr;
             ptr += sizeof(size_t);
             ret = Array_decodeBinary((void *UA_RESTRICT *UA_RESTRICT)ptr, length, mt , ctx);
             ptr += sizeof(void*);
+            ua_debug("ua: [%s] %d ret %d ptr %p len %d\n", __func__, i, ret, ptr, length);
             continue;
         }
 
         /* Scalar */
         ret = decodeBinaryJumpTable[mt->typeKind]((void *UA_RESTRICT)ptr, mt, ctx);
         ptr += mt->memSize;
+
+        ua_debug("ua: [%s] >> %d < %d dep %d msg %p %p:<%x> <%d> ret %d\n", __func__,
+            i,
+            membersSize,
+            ctx->depth,
+            ptr,
+            dst,
+            ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
+            ((UA_TcpMessageHeader *)dst)->messageSize,
+            ret);
     }
+
+    ua_debug("ua: [%s] >>> dep %d msg %p %p:<%x> <%d> ret %d\n", __func__,
+        ctx->depth,
+        ptr,
+        dst,
+        ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
+        ((UA_TcpMessageHeader *)dst)->messageSize,
+        ret);
 
     ctx->depth--;
     return ret;
@@ -8739,7 +8829,17 @@ UA_decodeBinaryInternal(const UA_ByteString *src, size_t *offset,
 
     /* Decode */
     memset(dst, 0, type->memSize); /* Initialize the value */
+
+    ua_debug("ua: [%s] t %d mem %d len %d off %d pos %d end %d dst %p type %x size %x\n", __func__,
+        type->typeKind, type->memSize, src->length, *offset, *ctx.pos, *ctx.end,
+        dst, ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
+        ((UA_TcpMessageHeader *)dst)->messageSize);
+
     status ret = decodeBinaryJumpTable[type->typeKind](dst, type, &ctx);
+
+    ua_debug("ua: [%s] -> t %d dst %p type %x size %x ret %d\n", __func__,
+        type->typeKind, dst, ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
+        ((UA_TcpMessageHeader *)dst)->messageSize, ret);
 
     if(UA_LIKELY(ret == UA_STATUSCODE_GOOD)) {
         /* Set the new offset */
@@ -8748,7 +8848,16 @@ UA_decodeBinaryInternal(const UA_ByteString *src, size_t *offset,
         /* Clean up */
         UA_clear(dst, type);
         memset(dst, 0, type->memSize);
+
+        ua_debug("ua: [%s] => t %d dst %p type %x size %x\n", __func__,
+            type->typeKind, dst, ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
+            ((UA_TcpMessageHeader *)dst)->messageSize);
     }
+
+    ua_debug("ua: [%s] #> off %d %p %p t %d dst %p type %x size %x\n", __func__, *offset,
+        ctx.pos, src->data,
+        type->typeKind, dst, ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
+        ((UA_TcpMessageHeader *)dst)->messageSize);
     return ret;
 }
 
@@ -18516,6 +18625,12 @@ processChunks(UA_SecureChannel *channel, void *application,
             channel->decryptedChunksCount > channel->config.localMaxChunkCount) ||
            (channel->config.localMaxMessageSize != 0 &&
             channel->decryptedChunksLength > channel->config.localMaxMessageSize)) {
+            ua_print("ua: [%s] count %d max %d len %d mess %d\n",
+                channel->decryptedChunksCount,
+                channel->config.localMaxChunkCount,
+                channel->decryptedChunksLength,
+                channel->config.localMaxMessageSize
+                );
             return UA_STATUSCODE_BADTCPMESSAGETOOLARGE;
         }
 
@@ -18552,6 +18667,10 @@ extractCompleteChunk(UA_SecureChannel *channel, const UA_ByteString *buffer,
     UA_StatusCode res =
         UA_decodeBinaryInternal(buffer, &initial_offset, &hdr,
                                 &UA_TRANSPORT[UA_TRANSPORT_TCPMESSAGEHEADER], NULL);
+
+    ua_debug("ua: [%s] res %d buf %p offset %d hdr %d size %d\n", __func__, res, buffer, *offset,
+        hdr.messageTypeAndChunkType, hdr.messageSize);
+
     UA_assert(res == UA_STATUSCODE_GOOD);
     (void)res; /* pacify compilers if assert is ignored */
     UA_MessageType msgType = (UA_MessageType)
@@ -18563,7 +18682,10 @@ extractCompleteChunk(UA_SecureChannel *channel, const UA_ByteString *buffer,
     if(hdr.messageSize < UA_SECURECHANNEL_MESSAGE_MIN_LENGTH)
         return UA_STATUSCODE_BADTCPMESSAGETYPEINVALID;
     if(hdr.messageSize > channel->config.recvBufferSize)
+    {
+        ua_debug("lw: [%s] msg size %d rec %d\n", __func__, hdr.messageSize, channel->config.recvBufferSize);
         return UA_STATUSCODE_BADTCPMESSAGETOOLARGE;
+    }
 
     /* Incomplete chunk */
     if(hdr.messageSize > remaining) {
@@ -44134,6 +44256,8 @@ UA_Client_run_iterate(UA_Client *client, UA_UInt32 timeout) {
        client->sessionState < UA_SESSIONSTATE_ACTIVATED) {
         retval = connectIterate(client, timeout);
         notifyClientState(client);
+        lw_print("lw: [%s] ret %d timeout %d state %d ch %d\n", __func__, retval, timeout,
+            client->sessionState, client->channel.state);
         return retval;
     }
 
@@ -45075,13 +45199,13 @@ connectIterate(UA_Client *client, UA_UInt32 timeout) {
         return UA_STATUSCODE_BADCONNECTIONCLOSED;
     }
 
+    ua_debug("ua: [%s] conn %d state %d handle %p\n",  __func__, client->connectStatus,
+        client->connection.state, client->connection.handle);
+
     /* The connection is closed. Reset the SecureChannel and open a new TCP
      * connection */
     if(client->connection.state == UA_CONNECTIONSTATE_CLOSED)
         return initConnect(client);
-
-    ua_print("ua: [%s] state %d %d handle %p\n",  __func__, client->connectStatus,
-        client->connection.state, client->connection.handle);
 
     /* Poll the connection status */
     if(client->connection.state == UA_CONNECTIONSTATE_OPENING) {
@@ -45089,7 +45213,7 @@ connectIterate(UA_Client *client, UA_UInt32 timeout) {
             client->config.pollConnectionFunc(&client->connection, timeout,
                                               &client->config.logger);
 
-        ua_print("ua: [%s] exit conn %x %d time %d handle %p\n",  __func__,
+        ua_debug("ua: [%s] exit conn %x %d time %d handle %p\n",  __func__,
             client->connectStatus,
             client->connection.state, timeout, client->connection.handle);
 
@@ -45175,6 +45299,7 @@ connectIterate(UA_Client *client, UA_UInt32 timeout) {
         break;
     }
 
+    lw_print("lw: [%s] sess %d conn %d\n", __func__, client->sessionState, client->connectStatus);
     return client->connectStatus;
 }
 
@@ -45285,6 +45410,8 @@ static UA_StatusCode
 connectSync(UA_Client *client) {
     UA_DateTime now = UA_DateTime_nowMonotonic();
     UA_DateTime maxDate = now + ((UA_DateTime)client->config.timeout * UA_DATETIME_MSEC);
+
+    ua_print("ua; [%s] time %d\n", __func__, (UA_DateTime)client->config.timeout);
 
     UA_StatusCode retval = initConnect(client);
     if(retval != UA_STATUSCODE_GOOD)
@@ -68096,6 +68223,9 @@ void
 UA_Log_Stdout_log(void *context, UA_LogLevel level, UA_LogCategory category,
                   const char *msg, va_list args) {
 
+    char str[120];
+    memset(str, 0, sizeof(str));
+
     /* Assume that context is casted to UA_LogLevel */
     /* TODO we may later change this to a struct with bitfields to filter on category */
     if ( context != NULL && (UA_LogLevel)(uintptr_t)context > level )
@@ -68115,8 +68245,8 @@ UA_Log_Stdout_log(void *context, UA_LogLevel level, UA_LogCategory category,
 
     KPrintf("%s/%s" ANSI_COLOR_RESET "\t",
             logLevelNames[level], logCategoryNames[category]);
-
-    KPrintf(msg, args);
+    vsnprintf(str, sizeof(str) - 1, msg, args);
+    KPrintf(msg, str);
     KPrintf("\n");
 
     // printf("\n");
@@ -70191,7 +70321,7 @@ UA_Client * UA_Client_new() {
 
 UA_StatusCode
 UA_ClientConfig_setDefault(UA_ClientConfig *config) {
-    config->timeout = 5000;
+    config->timeout = 20000;
     config->secureChannelLifeTime = 10 * 60 * 1000; /* 10 minutes */
 
     if(!config->logger.log) {
@@ -70656,13 +70786,15 @@ UA_Log_Syslog_withLevel(UA_LogLevel minlevel) {
 #define configTICK_RATE_HZ TICK_PER_SECOND
 #define xTaskGetTickCount CurrentTicksGain
 
-#define  EHOSTUNREACH   113  /* No route to host */
-#define  EINPROGRESS    115  /* Operation now in progress */
 #define  EADDRINUSE      98  /* Address already in use */
-#define  EALREADY       114  /* Operation already in progress */
+#define  ECONNABORTED   103  /* Software caused connection abort */
+
 #define  EISCONN        106  /* Transport endpoint is already connected */
 #define  ENOTCONN       107  /* Transport endpoint is not connected */
-#define  ECONNABORTED   103  /* Software caused connection abort */
+
+#define  EHOSTUNREACH   113  /* No route to host */
+#define  EALREADY       114  /* Operation already in progress */
+#define  EINPROGRESS    115  /* Operation now in progress */
 
 #ifdef UA_ARCHITECTURE_FREERTOSLWIP_POSIX_CLOCK
 

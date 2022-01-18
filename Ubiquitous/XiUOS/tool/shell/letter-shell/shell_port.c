@@ -46,13 +46,17 @@ void userShellWrite(char data)
  */
 signed char userShellRead(char *data)
 {
+    char read_length = 0;
     struct BusBlockReadParam read_param;
+    read_param.read_length = 0;
     read_param.size = 1;
     read_param.buffer = data;
 
     BusDevReadData(console, &read_param);
 
-    return 0;
+    read_length = (char)read_param.read_length;
+
+    return read_length;
 }
 
 #ifdef SHELL_ENABLE_FILESYSTEM
@@ -107,7 +111,7 @@ int userShellInit(void)
 
     /*Open the serial device in interrupt receiving and polling sending mode */
     struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)console->private_data;
-    serial_dev_param->serial_set_mode = SIGN_OPER_INT_RX;
+    serial_dev_param->serial_set_mode = 0;
     serial_dev_param->serial_stream_mode = SIGN_OPER_STREAM;
     BusDevOpen(console);
     

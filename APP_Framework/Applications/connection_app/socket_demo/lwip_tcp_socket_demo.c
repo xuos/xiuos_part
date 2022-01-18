@@ -38,7 +38,7 @@
 
 char tcp_socket_ip[] = {192, 168, 250, 252};
 
-#define TCP_BUF_SIZE 1024
+#define TCP_DEMO_BUF_SIZE 65535
 
 /*******************************************************************************
  * Code
@@ -46,17 +46,15 @@ char tcp_socket_ip[] = {192, 168, 250, 252};
 
 static void tcp_recv_demo(void *arg)
 {
-    lw_print("tcp_recv_demo start.\n");
-
-    int fd = -1;
-    char *recv_buf;
-    struct sockaddr_in tcp_addr, server_addr;
+    int fd = -1, clientfd;
     int recv_len;
+    char *recv_buf;
+    struct sockaddr_in tcp_addr;
     socklen_t addr_len;
 
     while(1)
     {
-        recv_buf = (char *)malloc(TCP_BUF_SIZE);
+        recv_buf = (char *)malloc(TCP_DEMO_BUF_SIZE);
         if (recv_buf == NULL)
         {
             lw_print("No memory\n");
@@ -72,7 +70,7 @@ static void tcp_recv_demo(void *arg)
 
         tcp_addr.sin_family = AF_INET;
         tcp_addr.sin_addr.s_addr = INADDR_ANY;
-        tcp_addr.sin_port = htons(LOCAL_PORT_SERVER);
+        tcp_addr.sin_port = htons(LWIP_LOCAL_PORT);
         memset(&(tcp_addr.sin_zero), 0, sizeof(tcp_addr.sin_zero));
 
         if (bind(fd, (struct sockaddr *)&tcp_addr, sizeof(struct sockaddr)) == -1)
@@ -81,16 +79,30 @@ static void tcp_recv_demo(void *arg)
             goto __exit;
         }
 
-        lw_print("tcp bind sucess, start to receive.\n");
-        lw_print("\n\nLocal Port:%d\n\n", LOCAL_PORT_SERVER);
+        lw_print("tcp bind success, start to receive.\n");
+        lw_print("\n\nLocal Port:%d\n\n", LWIP_LOCAL_PORT);
+
+        // setup socket fd as listening mode
+        if (listen(fd, 5) != 0 )
+        {
+            lw_print("Unable to listen\n");
+            goto __exit;
+        }
+
+        // accept client connection
+        clientfd = accept(fd, (struct sockaddr *)&tcp_addr, (socklen_t*)&addr_len);
+        lw_print("client %s connected\n", inet_ntoa(tcp_addr.sin_addr));
 
         while(1)
         {
-            memset(recv_buf, 0, TCP_BUF_SIZE);
-            recv_len = recvfrom(fd, recv_buf, TCP_BUF_SIZE, 0, (struct sockaddr *)&server_addr, &addr_len);
-            lw_pr_info("Receive from : %s\n", inet_ntoa(server_addr.sin_addr));
-            lw_pr_info("Receive data : %s\n\n", recv_buf);
-            sendto(fd, recv_buf, recv_len, 0, (struct sockaddr*)&server_addr, addr_len);
+            memset(recv_buf, 0, TCP_DEMO_BUF_SIZE);
+            recv_len = recvfrom(clientfd, recv_buf, TCP_DEMO_BUF_SIZE, 0, (struct sockaddr *)&tcp_addr, &addr_len);
+            if(recv_len > 0)
+            {
+                lw_pr_info("Receive from : %s\n", inet_ntoa(tcp_addr.sin_addr));
+                lw_pr_info("Receive data : %d - %s\n\n", recv_len, recv_buf);
+            }
+            sendto(clientfd, recv_buf, recv_len, 0, (struct sockaddr*)&tcp_addr, addr_len);
         }
 
     __exit:
@@ -116,7 +128,7 @@ void tcp_socket_recv_run(int argc, char *argv[])
 
     ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("tcp_recv_demo", tcp_recv_demo, NULL, 4096, 15);
+    sys_thread_new("tcp_recv_demo", tcp_recv_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
@@ -124,10 +136,11 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
 
 static void tcp_send_demo(void *arg)
 {
-    int cnt = TEST_LWIP_TIMES;
-    lw_print("tcp_send_demo start.\n");
+    int cnt = LWIP_DEMO_TIMES;
     int fd = -1;
     char send_msg[128];
+
+    lw_print("%s start\n", __func__);
 
     memset(send_msg, 0, sizeof(send_msg));
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -139,8 +152,8 @@ static void tcp_send_demo(void *arg)
 
     struct sockaddr_in tcp_sock;
     tcp_sock.sin_family = AF_INET;
-    tcp_sock.sin_port = htons(TARGET_PORT_CLIENT);
-    tcp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(tcp_socket_ip[0],tcp_socket_ip[1],tcp_socket_ip[2],tcp_socket_ip[3]));
+    tcp_sock.sin_port = htons(LWIP_TARGET_PORT);
+    tcp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(tcp_socket_ip[0], tcp_socket_ip[1], tcp_socket_ip[2], tcp_socket_ip[3]));
     memset(&(tcp_sock.sin_zero), 0, sizeof(tcp_sock.sin_zero));
 
     if (connect(fd, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr)))
@@ -150,14 +163,14 @@ static void tcp_send_demo(void *arg)
     }
 
     lw_print("tcp connect success, start to send.\n");
-    lw_print("\n\nTarget Port:%d\n\n", tcp_sock.sin_port);
+    lw_pr_info("\n\nTarget Port:%d\n\n", tcp_sock.sin_port);
 
     while (cnt --)
     {
         lw_print("Lwip client is running.\n");
         snprintf(send_msg, sizeof(send_msg), "TCP test package times %d\r\n", cnt);
         sendto(fd, send_msg, strlen(send_msg), 0, (struct sockaddr*)&tcp_sock, sizeof(struct sockaddr));
-        lw_print("Send tcp msg: %s ", send_msg);
+        lw_pr_info("Send tcp msg: %s ", send_msg);
         MdelayKTask(1000);
     }
 
@@ -178,8 +191,8 @@ void tcp_socket_send_run(int argc, char *argv[])
     }
 
     ETH_BSP_Config();
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("tcp socket", tcp_send_demo, NULL, 4096, 25);
+    lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
+    sys_thread_new("tcp socket", tcp_send_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),

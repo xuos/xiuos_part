@@ -303,6 +303,7 @@ static inline int SerialDevDMARead(struct SerialHardwareDevice *serial_dev, stru
                 serial_dev->serial_fifo.serial_rx->serial_rx_buffer, read_dma_length + serial_dev->serial_fifo.serial_rx->serial_recv_num - serial_cfg->data_cfg.serial_buffer_size);
         }
         SerialDmaRxSetRecvLength(serial_dev, read_dma_length);
+        read_param->read_length = read_dma_length;
         CriticalAreaUnLock(lock);
         return EOK;
     } else {

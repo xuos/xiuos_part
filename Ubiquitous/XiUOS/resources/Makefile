@@ -57,4 +57,12 @@ ifeq ($(CONFIG_RESOURCES_WDT),y)
 	SRC_DIR += watchdog
 endif
 
+ifeq ($(CONFIG_RESOURCES_ADC),y)
+	SRC_DIR += adc
+endif
+
+ifeq ($(CONFIG_RESOURCES_DAC),y)
+	SRC_DIR += dac
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

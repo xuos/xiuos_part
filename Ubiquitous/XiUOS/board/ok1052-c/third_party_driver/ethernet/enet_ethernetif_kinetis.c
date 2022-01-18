@@ -58,6 +58,7 @@
  * @date 2021.11.11
  */
 
+#include "sys_arch.h"
 #include "lwip/opt.h"
 #include "lwip/def.h"
 #include "lwip/mem.h"
@@ -70,9 +71,10 @@
 #include "lwip/igmp.h"
 #include "lwip/mld6.h"
 
-//#define USE_RTOS 1
-//#define FSL_RTOS_FREE_RTOS
-//#define FSL_RTOS_XIUOS
+#ifdef FSL_RTOS_XIUOS
+#define USE_RTOS 1
+#define FSL_RTOS_FREE_RTOS
+#endif
 
 #if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
 
@@ -130,8 +132,6 @@ typedef struct EventGroupDef_t   * EventGroupHandle_t;
 
 #include "sys_arch.h"
 
-
-
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -166,6 +166,13 @@ struct ethernetif
  * Code
  ******************************************************************************/
 #if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
+
+int32 lwip_obtain_semaphore(struct netif *netif)
+{
+    struct ethernetif *ethernetif = netif->state;
+    return (KSemaphoreObtain(ethernetif->enetSemaphore, WAITING_FOREVER) == EOK);
+}
+
 #if FSL_FEATURE_ENET_QUEUE > 1
 static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, uint32_t ringId, enet_event_t event, void *param)
 #else
@@ -176,21 +183,16 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
     struct ethernetif *ethernetif = netif->state;
     BaseType_t xResult;
 
-
-    lw_print("lw: [%s] input event %#x \n", __func__, event);
-
     switch (event)
     {
         case kENET_RxEvent:
             ethernetif_input(netif);
             break;
         case kENET_TxEvent:
+#ifndef FSL_RTOS_XIUOS
         {
             portBASE_TYPE taskToWake = pdFALSE;
 
-#ifdef FSL_RTOS_XIUOS
-
-#else
 #ifdef __CA7_REV
             if (SystemGetIRQNestingLevel())
 #else
@@ -207,8 +209,8 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
             {
                 xEventGroupSetBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag);
             }
-#endif
         }
+#endif
         break;
         default:
             break;
@@ -297,56 +299,6 @@ err_t ethernetif_mld_mac_filter(struct netif *netif, const ip6_addr_t *group,
     return result;
 }
 #endif
-
-#define netifINTERFACE_TASK_STACK_SIZE ( 4096 )
-
-/**
- * This function is the ethernetif_input task, it is processed when a packet
- * is ready to be read from the interface. It uses the function low_level_input()
- * that should handle the actual reception of bytes from the network
- * interface. Then the type of the received packet is determined and
- * the appropriate input function is called.
- *
- * @param netif the lwip network interface structure for this ethernetif
- */
-//void eth_input( void * pvParameters )
-//{
-//  struct pbuf *p;
-//
-//  for( ;; )
-//  {
-//    if (KSemaphoreObtain( s_xSemaphore, WAITING_FOREVER)==EOK)
-//    {
-//      p = low_level_input( s_pxNetIf );
-//
-//      if (ERR_OK != s_pxNetIf->input( p, s_pxNetIf))
-//      {
-//        KPrintf("netif input return not OK ! \n");
-//        pbuf_free(p);
-//        p=NULL;
-//      }
-//    }
-//  }
-//}
-//
-//void low_level_init()
-//{
-//    /* create the task that handles the ETH_MAC */
-//    uint32 thr_id = KTaskCreate((signed char*) "eth_input",
-//                          eth_input,
-//                          NULL,
-//                          netifINTERFACE_TASK_STACK_SIZE,
-//                          15);
-//    if (thr_id >= 0)
-//    {
-//        StartupKTask(thr_id);
-//    }
-//    else
-//    {
-//        KPrintf("Eth create failed !");
-//    }
-//}
-
 
 /**
  * Initializes ENET driver.
@@ -458,7 +410,7 @@ static err_t enet_send_frame(struct ethernetif *ethernetif, unsigned char *data,
     {
         status_t result;
 
-    lw_print("lw: [%s] len %d\n", __func__, length);
+        lw_print("lw: [%s] len %d\n", __func__, length);
 
         do
         {
@@ -467,7 +419,7 @@ static err_t enet_send_frame(struct ethernetif *ethernetif, unsigned char *data,
             if (result == kStatus_ENET_TxFrameBusy)
             {
 #ifdef FSL_RTOS_XIUOS
-//                KSemaphoreObtain(ethernetif->enetSemaphore, portMAX_DELAY);
+                KSemaphoreObtain(ethernetif->enetSemaphore, portMAX_DELAY);
 #else
                 xEventGroupWaitBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag, pdTRUE, (BaseType_t) false,
                                     portMAX_DELAY);
@@ -582,11 +534,10 @@ struct pbuf *ethernetif_linkinput(struct netif *netif)
             if (status == kStatus_ENET_RxFrameError)
             {
 #if 0 && defined(FSL_FEATURE_SOC_ENET_COUNT) && (FSL_FEATURE_SOC_ENET_COUNT > 0) /* Error statisctics */
-        enet_data_error_stats_t eErrStatic;
-        /* Get the error information of the received g_frame. */
-        ENET_GetRxErrBeforeReadFrame(&ethernetif->handle, &eErrStatic);
+                enet_data_error_stats_t eErrStatic;
+                /* Get the error information of the received g_frame. */
+                ENET_GetRxErrBeforeReadFrame(&ethernetif->handle, &eErrStatic);
 #endif
-
                 /* Update the receive buffer. */
                 ENET_ReadFrame(ethernetif->base, &ethernetif->handle, NULL, 0U);
 

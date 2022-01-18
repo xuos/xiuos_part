@@ -48,6 +48,8 @@ extern int Stm32HwTouchBusInit(void);
 extern int Stm32HwCanBusInit(void);
 extern int HwSdioInit();
 extern int HwSramInit(void);
+extern int Stm32HwAdcInit(void);
+extern int Stm32HwDacInit(void);
 
 static void ClockConfiguration()
 {
@@ -146,6 +148,12 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_EXTMEM
     { "hw extern sram", HwSramInit },
+#endif
+#ifdef BSP_USING_ADC
+    {"hw adc init", Stm32HwAdcInit},
+#endif
+#ifdef BSP_USING_DAC
+    {"hw dac init", Stm32HwDacInit},
 #endif
 	{ " NONE ",NONE },
 };

@@ -12,9 +12,7 @@
 
 #include "open62541.h"
 #include <stdlib.h>
-
-#define OPC_SERVER "opc.tcp://192.168.250.5:4840"
-#define ua_print printf
+#include "ua_api.h"
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
 static void handler_TheAnswerChanged(UA_Client *client, UA_UInt32 subId, void *subContext,
@@ -32,7 +30,7 @@ static UA_StatusCode nodeIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId
     }
 
     UA_NodeId *parent = (UA_NodeId *)handle;
-    ua_print("%d, %d --- %d ---> NodeId %d, %d\n",
+    ua_pr_info("%d, %d --- %d ---> NodeId %d, %d\n",
            parent->namespaceIndex, parent->identifier.numeric,
            referenceTypeId.identifier.numeric, childId.namespaceIndex,
            childId.identifier.numeric);
@@ -61,32 +59,42 @@ int ua_get_points(UA_Client *client)
                endpointArray[i].endpointUrl.data);
     }
     UA_Array_delete(endpointArray,endpointArraySize, &UA_TYPES[UA_TYPES_ENDPOINTDESCRIPTION]);
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 void ua_browser_objects(UA_Client *client)
 {
     /* Browse some objects */
-    ua_print("Browsing nodes in objects folder:\n");
+    ua_pr_info("Browsing nodes in objects folder:\n");
+
     UA_BrowseRequest bReq;
     UA_BrowseRequest_init(&bReq);
+
     bReq.requestedMaxReferencesPerNode = 0;
     bReq.nodesToBrowse = UA_BrowseDescription_new();
     bReq.nodesToBrowseSize = 1;
     bReq.nodesToBrowse[0].nodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER); /* browse objects folder */
     bReq.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_ALL; /* return everything */
+
     UA_BrowseResponse bResp = UA_Client_Service_browse(client, bReq);
-    ua_print("%-9s %-16s %-16s %-16s\n", "NAMESPACE", "NODEID", "BROWSE NAME", "DISPLAY NAME");
-    for(size_t i = 0; i < bResp.resultsSize; ++i) {
-        for(size_t j = 0; j < bResp.results[i].referencesSize; ++j) {
+
+    ua_pr_info("%-9s %-16s %-16s %-16s\n", "NAMESPACE", "NODEID", "BROWSE NAME", "DISPLAY NAME");
+
+    for(size_t i = 0; i < bResp.resultsSize; ++i)
+    {
+        for(size_t j = 0; j < bResp.results[i].referencesSize; ++j)
+        {
             UA_ReferenceDescription *ref = &(bResp.results[i].references[j]);
-            if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_NUMERIC) {
-                ua_print("%-9d %-16d %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
+            if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_NUMERIC)
+            {
+                ua_pr_info("%-9d %-16d %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
                        ref->nodeId.nodeId.identifier.numeric, (int)ref->browseName.name.length,
                        ref->browseName.name.data, (int)ref->displayName.text.length,
                        ref->displayName.text.data);
-            } else if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_STRING) {
-                ua_print("%-9d %-16.*s %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
+            }
+            else if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_STRING)
+            {
+                ua_pr_info("%-9d %-16.*s %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
                        (int)ref->nodeId.nodeId.identifier.string.length,
                        ref->nodeId.nodeId.identifier.string.data,
                        (int)ref->browseName.name.length, ref->browseName.name.data,
@@ -95,6 +103,7 @@ void ua_browser_objects(UA_Client *client)
             /* TODO: distinguish further types */
         }
     }
+    ua_pr_info("\n");
     UA_BrowseRequest_clear(&bReq);
     UA_BrowseResponse_clear(&bResp);
 }
@@ -133,7 +142,7 @@ UA_UInt32 ua_start_sub(UA_Client *client)
 
     /* The first publish request should return the initial value of the variable */
     UA_Client_run_iterate(client, 1000);
-	return subId;
+    return subId;
 }
 
 void ua_read_attr(UA_Client *client)
@@ -165,7 +174,8 @@ void ua_read_attr(UA_Client *client)
     wReq.nodesToWrite[0].value.value.data = &value;
     UA_WriteResponse wResp = UA_Client_Service_write(client, wReq);
     if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD)
-            ua_print("the new value is: %i\n", value);
+        ua_print("the new value is: %i\n", value);
+
     UA_WriteRequest_clear(&wReq);
     UA_WriteResponse_clear(&wResp);
 
@@ -189,11 +199,14 @@ void ua_call_remote(UA_Client *client)
     UA_Variant *output;
     UA_StatusCode retval = UA_Client_call(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER),
                             UA_NODEID_NUMERIC(1, 62541), 1, &input, &outputSize, &output);
-    if(retval == UA_STATUSCODE_GOOD) {
+    if(retval == UA_STATUSCODE_GOOD)
+    {
         ua_print("Method call was successful, and %lu returned values available.\n",
                (unsigned long)outputSize);
         UA_Array_delete(output, outputSize, &UA_TYPES[UA_TYPES_VARIANT]);
-    } else {
+    }
+    else
+    {
         ua_print("Method call was unsuccessful, and %x returned values available.\n", retval);
     }
     UA_Variant_clear(&input);
@@ -271,33 +284,16 @@ void ua_add_nodes(UA_Client *client)
 
 int ua_get_server_info(UA_Client *client)
 {
-	UA_StatusCode retval;
-
-	/* Listing endpoints */
-	retval = ua_get_points(client);
-	if(retval != UA_STATUSCODE_GOOD) {
-		UA_Client_delete(client);
-		return EXIT_FAILURE;
-	}
-
-    /* Connect to a server */
-    /* anonymous connect would be: retval = UA_Client_connect(client, "opc.tcp://localhost:4840"); */
-	retval = UA_Client_connect(client, OPC_SERVER);
-    if(retval != UA_STATUSCODE_GOOD) {
-        UA_Client_delete(client);
-        return EXIT_FAILURE;
-    }
-
-	ua_browser_objects(client);
+    ua_browser_objects(client);
 
     /* Same thing, this time using the node iterator... */
-	ua_browser_nodes(client);
+    ua_browser_nodes(client);
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
-	UA_Int32 subId = ua_start_sub(client);
+    UA_Int32 subId = ua_start_sub(client);
 #endif
 
-	ua_read_attr(client);
+    ua_read_attr(client);
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
     /* Take another look at the.answer */
@@ -308,11 +304,11 @@ int ua_get_server_info(UA_Client *client)
 #endif
 
 #ifdef UA_ENABLE_METHODCALLS
-	ua_call_remote(client);
+    ua_call_remote(client);
 #endif
 
 #ifdef UA_ENABLE_NODEMANAGEMENT
-	ua_add_nodes(client);
+    ua_add_nodes(client);
 #endif
 
     return EXIT_SUCCESS;

@@ -151,3 +151,15 @@ if BSP_USING_WDT
         bool "Using Watch Dog bus drivers"
         default n
 endif
+
+if BSP_USING_ADC
+    config RESOURCES_ADC
+        bool "Using ADC bus drivers"
+        default n
+endif
+
+if BSP_USING_DAC
+    config RESOURCES_DAC
+        bool "Using DAC bus drivers"
+        default n
+endif

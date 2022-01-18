@@ -195,6 +195,8 @@ void ethernetif_input( struct netif *netif);
 
 void ETH_BSP_Config(void);
 
+int32 lwip_obtain_semaphore(struct netif *netif);
+
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */

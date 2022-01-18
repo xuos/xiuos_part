@@ -801,30 +801,30 @@ err_t ethernetif_linkoutput(struct netif *netif, struct pbuf *p)
         }
     }
 
-	if (copy)
+    if (copy)
     {
         /* Pbuf needs to be copied. */
 
         p_copy = pbuf_alloc(PBUF_RAW, (uint16_t) p->tot_len, PBUF_POOL);
-		if (p_copy == NULL)
+        if (p_copy == NULL)
         {
-			return ERR_MEM;
-		}
+            return ERR_MEM;
+        }
 
-		dst = (uint8_t *) p_copy->payload;
-		for (q = p; q != NULL; q = q->next)
+        dst = (uint8_t *) p_copy->payload;
+        for (q = p; q != NULL; q = q->next)
         {
             LWIP_ASSERT("Copied bytes would exceed p->tot_len",
                     (q->len + dst - (uint8_t *) p_copy->payload) <= p->tot_len);
             memcpy(dst, (uint8_t *)q->payload, q->len);
-			dst += q->len;
-		}
+            dst += q->len;
+        }
         LWIP_ASSERT("Copied bytes != p->tot_len",
                     (dst - (uint8_t *) p_copy->payload) == p->tot_len);
-		p_copy->len = p_copy->tot_len = p->tot_len;
+        p_copy->len = p_copy->tot_len = p->tot_len;
 
-		p = p_copy;
-	}
+        p = p_copy;
+    }
     else
     {
         /*

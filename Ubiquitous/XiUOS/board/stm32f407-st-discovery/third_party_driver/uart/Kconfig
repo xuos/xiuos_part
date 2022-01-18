@@ -9,8 +9,11 @@ menuconfig BSP_USING_USART1
             string "serial bus 1 driver name"
             default "usart1_drv"
         config SERIAL_1_DEVICE_NAME_0
-                string "serial bus 1 device 0 name"
-                default "usart1_dev1"   
+            string "serial bus 1 device 0 name"
+            default "usart1_dev1"   
+        config USART1_USING_DMA
+            bool "usart1 using DMA"
+            default n
     endif
 
 menuconfig BSP_USING_USART2
@@ -24,8 +27,11 @@ menuconfig BSP_USING_USART2
             string "serial bus 2 driver name"
             default "usart2_drv"
         config SERIAL_2_DEVICE_NAME_0
-                string "serial bus 2 device 0 name"
-                default "usart2_dev2"   
+            string "serial bus 2 device 0 name"
+            default "usart2_dev2"   
+        config USART2_USING_DMA
+            bool "usart2 using DMA"
+            default n
     endif
 
 menuconfig BSP_USING_USART3
@@ -39,8 +45,11 @@ menuconfig BSP_USING_USART3
             string "serial bus 3 driver name"
             default "usart3_drv"
         config SERIAL_3_DEVICE_NAME_0
-                string "serial bus 3 device 0 name"
-                default "usart3_dev3"   
+            string "serial bus 3 device 0 name"
+            default "usart3_dev3"   
+        config USART3_USING_DMA
+            bool "usart3 using DMA"
+            default n
     endif
 
 menuconfig BSP_USING_UART4
@@ -54,8 +63,11 @@ menuconfig BSP_USING_UART4
             string "serial bus 4 driver name"
             default "uart4_drv"
         config SERIAL_4_DEVICE_NAME_0
-                string "serial bus 4 device 0 name"
-                default "uart4_dev4"   
+            string "serial bus 4 device 0 name"
+            default "uart4_dev4"  
+        config USART4_USING_DMA
+            bool "usart4 using DMA"
+            default n 
     endif
 
 menuconfig BSP_USING_UART5
@@ -69,6 +81,9 @@ menuconfig BSP_USING_UART5
             string "serial bus 5 driver name"
             default "uart5_drv"
         config SERIAL_5_DEVICE_NAME_0
-                string "serial bus 5 device 0 name"
-                default "uart5_dev5"   
+            string "serial bus 5 device 0 name"
+            default "uart5_dev5"   
+        config USART5_USING_DMA
+            bool "usart5 using DMA"
+            default n
     endif

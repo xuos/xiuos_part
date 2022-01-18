@@ -164,6 +164,10 @@ int PrivIoctl(int fd, int cmd, void *args)
     case LCD_TYPE:
         ret = PrivLcdIoctl(fd, cmd, ioctl_cfg->args);
         break;
+    case ADC_TYPE:
+    case DAC_TYPE:
+        ret = ioctl(fd, cmd, ioctl_cfg->args);
+        break;
     default:
         break;
     }
