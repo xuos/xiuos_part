@@ -7,6 +7,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+/**
+ * @file lwip_dhcp_demo.c
+ * @brief Demo for DHCP function
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2021.12.15
+ */
+
 /*******************************************************************************
  * Includes
  ******************************************************************************/

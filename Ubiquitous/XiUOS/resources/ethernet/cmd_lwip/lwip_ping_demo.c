@@ -1,13 +1,4 @@
 /*
- * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
-/*
  * Copyright (c) 2021 AIIT XUOS Lab
  * XiUOS is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -26,7 +17,6 @@
  * @author AIIT XUOS Lab
  * @date 2021.12.15
  */
-
 
 /*******************************************************************************
  * Includes

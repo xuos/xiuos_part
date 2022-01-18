@@ -8,4 +8,8 @@ ifeq ($(CONFIG_BSP_USING_LWIP),y)
   SRC_DIR += ethernet
 endif
 
+ifeq ($(CONFIG_BSP_USING_I2C),y)
+  SRC_DIR += i2c
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

@@ -11,7 +11,7 @@
 */
 
 /**
-* @file tcp_echo_socket_demo.c
+* @file lwip_udp_demo.c
 * @brief One UDP demo based on LwIP
 * @version 1.0
 * @author AIIT XUOS Lab

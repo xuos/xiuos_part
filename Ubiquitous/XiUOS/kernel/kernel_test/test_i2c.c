@@ -13,7 +13,7 @@
 /**
 * @file test_i2c.c
 * @brief support to test i2c function
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-24
 */
@@ -24,15 +24,15 @@
 
 /*********************************************************************************************************************************************************/
 /*
- * function：I2C device sample support reading temperature and humidity sensor data and printfing on the terminal
- * shell cmd：i2c_HS3000_sample i2c1
- * shell cmd param：i2c device name,if null means default i2c device name
+ * function: I2C device sample support reading temperature and humidity sensor data and printfing on the terminal
+ * shell cmd: i2c_HS3000_sample i2c1
+ * shell cmd param: i2c device name,if null means default i2c device name
 */
 
-#define HS_I2C_BUS_NAME     I2C_BUS_NAME_1           /* I2C bus name */
-#define HS_I2C_DEV_NAME     I2C_1_DEVICE_NAME_0/* I2C device name */
-#define HS_I2C_DRV_NAME     I2C_DRV_NAME_1           /* I2C driver name */
-#define ADDR                                  0x44                                      /* slave address */
+#define HS_I2C_BUS_NAME     I2C_BUS_NAME_1      /* I2C bus name */
+#define HS_I2C_DEV_NAME     I2C_1_DEVICE_NAME_0 /* I2C device name */
+#define HS_I2C_DRV_NAME     I2C_DRV_NAME_1      /* I2C driver name */
+#define ADDR                0x44                /* slave address */
 
 static struct Bus *i2c_bus = NONE;     /* I2C bus handle */
 
@@ -55,7 +55,7 @@ static x_err_t WriteReg(struct HardwareDev *dev)
         return EOK;
     }
     else{
-        return -ERROR; 
+        return -ERROR;
     }
 }
 
@@ -89,7 +89,7 @@ static void ReadTempHumi(float *cur_temp, float *cur_humi)
     if(EOK != ret){
         KPrintf("ReadTempHumi ReadRegs failed\n");
     }
- 
+
     *cur_humi = ((temp[0] <<8 | temp[1] )& 0x3fff ) * 100.0 / ( (1 << 14) - 1);                  /* humidity data */
 
     *cur_temp = ((temp[2]  << 8 | temp[3]) >> 2) * 165.0 /( (1 << 14) - 1) -  40.0;     /* temperature data */
@@ -113,7 +113,7 @@ static void HS3000Init(const char *bus_name, const char *dev_name, const char  *
         KPrintf("i2c match drv %s  %p dev %s %p error\n", drv_name, i2c_bus->owner_driver, dev_name, i2c_bus->owner_haldev);
     }
     else{
-        KPrintf("HS3000Init successfully!write %p read %p\n", 
+        KPrintf("HS3000Init successfully!write %p read %p\n",
             i2c_bus->owner_haldev->dev_done->write,
             i2c_bus->owner_haldev->dev_done->read);
     }
@@ -144,15 +144,15 @@ void TskHs300xTest()
 {
     memset(&g_hs300x_data, 0, sizeof(Hs300xDataType));
     KPrintf("Tsk create successfully!\n");
-    
+
     while(1)
     {
         Hs300xRead(&g_hs300x_data);
 
-        KPrintf("HS300X:I2C humidity:%d.%d temperature:%d.%d\n", 
-            g_hs300x_data.humi_high, 
-            g_hs300x_data.humi_low, 
-            g_hs300x_data.temp_high, 
+        KPrintf("HS300X:I2C humidity:%d.%d temperature:%d.%d\n",
+            g_hs300x_data.humi_high,
+            g_hs300x_data.humi_low,
+            g_hs300x_data.temp_high,
             g_hs300x_data.temp_low);
 
         MdelayKTask(1000);
@@ -167,12 +167,14 @@ void Hs300xI2cTest(void)
     MdelayKTask(1000);
 
     x_err_t flag;
-    int32 Tsk_hs300x = KTaskCreate("Tsk_hs300x", TskHs300xTest, NONE, 2048, 10); 
-	flag = StartupKTask(Tsk_hs300x);
+    int32 Tsk_hs300x = KTaskCreate("Tsk_hs300x", TskHs300xTest, NONE, 2048, 10);
+    flag = StartupKTask(Tsk_hs300x);
     if (EOK != flag){
-		KPrintf("Hs300xI2cTest StartupKTask failed!\n");
-		return;
-	}
+        KPrintf("Hs300xI2cTest StartupKTask failed!\n");
+        return;
+    }
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),
                                                 Hs300xI2cTest, Hs300xI2cTest, Test the HS300X using I2C);
+
+

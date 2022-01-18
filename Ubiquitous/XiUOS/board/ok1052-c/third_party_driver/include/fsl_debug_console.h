@@ -23,7 +23,7 @@
 #define _FSL_DEBUGCONSOLE_H_
 
 #include "fsl_common.h"
-//#include "serial_manager.h"
+#include "serial_manager.h"
 
 /*!
  * @addtogroup debugconsole

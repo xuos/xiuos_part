@@ -2,6 +2,7 @@ menuconfig BSP_USING_LPUART
 bool "Using UART device"
 default y
 select RESOURCES_SERIAL
+
 if BSP_USING_LPUART
 source "$BSP_DIR/third_party_driver/uart/Kconfig"
 endif
@@ -10,3 +11,12 @@ menuconfig BSP_USING_LWIP
 bool "Using LwIP device"
 default n
 select RESOURCES_LWIP
+
+menuconfig BSP_USING_I2C
+bool "Using I2C device"
+default y
+select RESOURCES_I2C
+
+if BSP_USING_I2C
+source "$BSP_DIR/third_party_driver/i2c/Kconfig"
+endif

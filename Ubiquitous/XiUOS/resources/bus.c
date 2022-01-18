@@ -12,8 +12,7 @@
 
 /**
 * @file bus.c
-* @brief 1、support bus driver framework；2、provide bus API。
-* @version 1.0 
+* @brief Support bus driver framework provide bus API version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-24
 */
@@ -71,7 +70,7 @@ static int BusMatchDrvDev(struct Driver  *driver, struct HardwareDev *device)
 * @param dev - dev pointer
 * @param drv_name - drv name
 * @param configure_info - BusConfigureInfo pointer
-* @return successful：EOK，failed：ERROR
+* @return successful:EOK,failed:ERROR
 */
 int DeviceObtainBus(struct Bus *bus, struct HardwareDev *dev, const char *drv_name, struct BusConfigureInfo *configure_info)
 {
@@ -88,7 +87,7 @@ int DeviceObtainBus(struct Bus *bus, struct HardwareDev *dev, const char *drv_na
 
     if(bus->owner_haldev != dev) {
         struct Driver *drv = BusFindDriver(bus, drv_name);
-        
+
         configure_info->configure_cmd = OPE_CFG;
         drv->configure(drv, configure_info);
 
@@ -104,7 +103,7 @@ int DeviceObtainBus(struct Bus *bus, struct HardwareDev *dev, const char *drv_na
 /**
 * @Description: support to register bus pointer with linklist
 * @param bus - bus pointer
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 int BusRegister(struct Bus *bus)
 {
@@ -125,7 +124,7 @@ int BusRegister(struct Bus *bus)
 /**
 * @Description: support to release bus pointer in linklist
 * @param bus - bus pointer
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 int BusRelease(struct Bus *bus)
 {
@@ -147,7 +146,7 @@ int BusRelease(struct Bus *bus)
 /**
 * @Description: support to unregister bus pointer and delete its linklist node
 * @param bus - bus pointer
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 int BusUnregister(struct Bus *bus)
 {
@@ -164,7 +163,7 @@ int BusUnregister(struct Bus *bus)
 * @Description: support to register driver pointer to bus pointer
 * @param bus - bus pointer
 * @param driver - driver pointer
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 int DriverRegisterToBus(struct Bus *bus, struct Driver *driver)
 {
@@ -183,12 +182,12 @@ int DriverRegisterToBus(struct Bus *bus, struct Driver *driver)
 * @Description: support to register dev pointer to bus pointer
 * @param bus - bus pointer
 * @param device - device pointer
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 int DeviceRegisterToBus(struct Bus *bus, struct HardwareDev *device)
 {
     NULL_PARAM_CHECK(bus);
-    NULL_PARAM_CHECK(device); 
+    NULL_PARAM_CHECK(device);
 
     device->owner_bus = bus;
     bus->haldev_cnt++;
@@ -202,7 +201,7 @@ int DeviceRegisterToBus(struct Bus *bus, struct HardwareDev *device)
 * @Description: support to delete driver pointer from bus pointer
 * @param bus - bus pointer
 * @param driver - driver pointer
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 int DriverDeleteFromBus(struct Bus *bus, struct Driver *driver)
 {
@@ -222,12 +221,12 @@ int DriverDeleteFromBus(struct Bus *bus, struct Driver *driver)
 * @Description: support to delete dev pointer from bus pointer
 * @param bus - bus pointer
 * @param device - device pointer
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 int DeviceDeleteFromBus(struct Bus *bus, struct HardwareDev *device)
 {
     NULL_PARAM_CHECK(bus);
-    NULL_PARAM_CHECK(device); 
+    NULL_PARAM_CHECK(device);
 
     bus->haldev_cnt--;
 
@@ -241,7 +240,7 @@ int DeviceDeleteFromBus(struct Bus *bus, struct HardwareDev *device)
 /**
 * @Description: support to find bus pointer by bus name
 * @param bus_name - bus name
-* @return successful：bus pointer，failed：NONE
+* @return successful:bus pointer,failed:NONE
 */
 BusType BusFind(const char *bus_name)
 {
@@ -266,7 +265,7 @@ BusType BusFind(const char *bus_name)
 * @Description: support to find driver pointer of certain bus by driver name
 * @param bus - bus pointer
 * @param driver_name - driver name
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 DriverType BusFindDriver(struct Bus *bus, const char *driver_name)
 {
@@ -292,7 +291,7 @@ DriverType BusFindDriver(struct Bus *bus, const char *driver_name)
 * @Description: support to find device pointer of certain bus by device name
 * @param bus - bus pointer
 * @param device_name - device name
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 HardwareDevType BusFindDevice(struct Bus *bus, const char *device_name)
 {
@@ -319,7 +318,7 @@ HardwareDevType BusFindDevice(struct Bus *bus, const char *device_name)
 * @Description: support to set dev receive function callback
 * @param dev - dev pointer
 * @param dev_recv_callback - callback function
-* @return successful：EOK，failed：ERROR
+* @return successful:EOK,failed:ERROR
 */
 uint32 BusDevRecvCallback(struct HardwareDev *dev, int (*dev_recv_callback) (void *dev, x_size_t length))
 {
@@ -333,7 +332,7 @@ uint32 BusDevRecvCallback(struct HardwareDev *dev, int (*dev_recv_callback) (voi
 /**
 * @Description: support to open dev
 * @param dev - dev pointer
-* @return successful：EOK，failed：ERROR
+* @return successful:EOK,failed:ERROR
 */
 uint32 BusDevOpen(struct HardwareDev *dev)
 {
@@ -355,7 +354,7 @@ uint32 BusDevOpen(struct HardwareDev *dev)
 /**
 * @Description: support to close dev
 * @param dev - dev pointer
-* @return successful：EOK，failed：ERROR
+* @return successful:EOK,failed:ERROR
 */
 uint32 BusDevClose(struct HardwareDev *dev)
 {
@@ -378,12 +377,12 @@ uint32 BusDevClose(struct HardwareDev *dev)
 * @Description: support to write data to dev
 * @param dev - dev pointer
 * @param write_param - BusBlockWriteParam
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 uint32 BusDevWriteData(struct HardwareDev *dev, struct BusBlockWriteParam *write_param)
 {
     NULL_PARAM_CHECK(dev);
-    
+
     if (dev->dev_done->write) {
         return dev->dev_done->write(dev, write_param);
     }
@@ -395,12 +394,12 @@ uint32 BusDevWriteData(struct HardwareDev *dev, struct BusBlockWriteParam *write
 * @Description: support to read data from dev
 * @param dev - dev pointer
 * @param read_param - BusBlockReadParam
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 uint32 BusDevReadData(struct HardwareDev *dev, struct BusBlockReadParam *read_param)
 {
     NULL_PARAM_CHECK(dev);
-    
+
     if (dev->dev_done->read) {
         return dev->dev_done->read(dev, read_param);
     }
@@ -412,7 +411,7 @@ uint32 BusDevReadData(struct HardwareDev *dev, struct BusBlockReadParam *read_pa
 * @Description: support to configure drv, include OPE_CFG and OPE_INT
 * @param drv - drv pointer
 * @param configure_info - BusConfigureInfo
-* @return successful：EOK，failed：NONE
+* @return successful:EOK,failed:NONE
 */
 uint32 BusDrvConfigure(struct Driver *drv, struct BusConfigureInfo *configure_info)
 {
@@ -430,4 +429,4 @@ uint32 BusDrvConfigure(struct Driver *drv, struct BusConfigureInfo *configure_in
     }
 
     return ret;
-} 
+}
