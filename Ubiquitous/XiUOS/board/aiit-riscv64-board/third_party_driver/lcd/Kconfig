@@ -1,14 +1,14 @@
 
 if BSP_USING_LCD
-    config LCD_BUS_NAME_1
-        string "lcd bus 1 name"
-        default "lcd1"
-    config LCD_DRV_NAME_1
-        string "lcd bus 1 driver name"
-        default "lcd1drv"
-    config LCD_1_DEVICE_NAME_0
-            string "lcd bus 1 device 0 name"
-            default "lcd10"   
+    config LCD_BUS_NAME
+        string "lcd bus name"
+        default "lcd"
+    config LCD_DRV_NAME
+        string "lcd bus driver name"
+        default "lcd_drv"
+    config LCD_DEVICE_NAME
+            string "lcd bus device name"
+            default "lcd_dev"   
     config BSP_LCD_CS_PIN
         int "CS pin number of 8080 interface"
         default 40

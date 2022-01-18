@@ -93,7 +93,7 @@ int EnableLcd(const char *bus_name, const char *driver_name, const char *device_
  */
 void  TestLcd(void)
 {
-    EnableLcd(LCD_BUS_NAME_1,LCD_DRV_NAME_1,LCD_1_DEVICE_NAME_0);
+    EnableLcd(LCD_BUS_NAME,LCD_DRV_NAME,LCD_DEVICE_NAME);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),TestLcd, TestLcd, Test LCD  );

@@ -32,11 +32,11 @@ Modification: add aiit-riscv64-board lcd configure and operation function
 #include <xiuos.h>
 
 #define GRAPHIC_CTRL_RECT_UPDATE                      0
-#define GRAPHIC_CTRL_POWERON                              1
-#define GRAPHIC_CTRL_POWEROFF                            2
-#define GRAPHIC_CTRL_GET_INFO                               3
-#define GRAPHIC_CTRL_SET_MODE                             4
-#define GRAPHIC_CTRL_GET_EXT                                  5
+#define GRAPHIC_CTRL_POWERON                          1
+#define GRAPHIC_CTRL_POWEROFF                         2
+#define GRAPHIC_CTRL_GET_INFO                         3
+#define GRAPHIC_CTRL_SET_MODE                         4
+#define GRAPHIC_CTRL_GET_EXT                          5
 
 enum
 {

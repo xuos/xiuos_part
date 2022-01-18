@@ -137,7 +137,7 @@ typedef enum _lcd_dir
 
 typedef struct Lcd8080Device
 {
-     struct LcdBus lcd_bus;
+    struct LcdBus lcd_bus;
     struct DeviceLcdInfo lcd_info;
     int spi_channel;
     int cs;
@@ -145,46 +145,46 @@ typedef struct Lcd8080Device
     int dma_channel;
 } * Lcd8080DeviceType;
 
-Lcd8080DeviceType lcd ;
+Lcd8080DeviceType aiit_lcd ;
 
 static void DrvLcdCmd(uint8 cmd)
 {
-    gpiohs_set_pin(lcd->dc_pin, GPIO_PV_LOW);
-    spi_init(lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 8, 0);
-    spi_init_non_standard(lcd->spi_channel/*spi num*/, 8 /*instrction length*/, 0 /*address length*/, 0 /*wait cycles*/,
+    gpiohs_set_pin(aiit_lcd->dc_pin, GPIO_PV_LOW);
+    spi_init(aiit_lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 8, 0);
+    spi_init_non_standard(aiit_lcd->spi_channel/*spi num*/, 8 /*instrction length*/, 0 /*address length*/, 0 /*wait cycles*/,
                           SPI_AITM_AS_FRAME_FORMAT /*spi address trans mode*/);
-    spi_send_data_normal_dma(lcd->dma_channel, lcd->spi_channel, lcd->cs, &cmd, 1, SPI_TRANS_CHAR);
+    spi_send_data_normal_dma(aiit_lcd->dma_channel, aiit_lcd->spi_channel, aiit_lcd->cs, &cmd, 1, SPI_TRANS_CHAR);
 }
 
 static void DrvLcdDataByte(uint8 *data_buf, uint32 length)
 {
-    gpiohs_set_pin(lcd->dc_pin, GPIO_PV_HIGH);
-    spi_init(lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 8, 0);
-    spi_init_non_standard(lcd->spi_channel, 8 /*instrction length*/, 0 /*address length*/, 0 /*wait cycles*/,
+    gpiohs_set_pin(aiit_lcd->dc_pin, GPIO_PV_HIGH);
+    spi_init(aiit_lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 8, 0);
+    spi_init_non_standard(aiit_lcd->spi_channel, 8 /*instrction length*/, 0 /*address length*/, 0 /*wait cycles*/,
                           SPI_AITM_AS_FRAME_FORMAT /*spi address trans mode*/);
-    spi_send_data_normal_dma(lcd->dma_channel, lcd->spi_channel, lcd->cs, data_buf, length, SPI_TRANS_CHAR);
+    spi_send_data_normal_dma(aiit_lcd->dma_channel, aiit_lcd->spi_channel, aiit_lcd->cs, data_buf, length, SPI_TRANS_CHAR);
 }
 
 static void DrvLcdDataHalfWord(uint16 *data_buf, uint32 length)
 {
-    gpiohs_set_pin(lcd->dc_pin, GPIO_PV_HIGH);
-    spi_init(lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 16, 0);
-    spi_init_non_standard(lcd->spi_channel, 16 /*instrction length*/, 0 /*address length*/, 0 /*wait cycles*/,
+    gpiohs_set_pin(aiit_lcd->dc_pin, GPIO_PV_HIGH);
+    spi_init(aiit_lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 16, 0);
+    spi_init_non_standard(aiit_lcd->spi_channel, 16 /*instrction length*/, 0 /*address length*/, 0 /*wait cycles*/,
                           SPI_AITM_AS_FRAME_FORMAT /*spi address trans mode*/);
-    spi_send_data_normal_dma(lcd->dma_channel, lcd->spi_channel, lcd->cs, data_buf, length, SPI_TRANS_SHORT);
+    spi_send_data_normal_dma(aiit_lcd->dma_channel, aiit_lcd->spi_channel, aiit_lcd->cs, data_buf, length, SPI_TRANS_SHORT);
 }
 
 static void DrvLcdDataWord(uint32 *data_buf, uint32 length)
 {
-    gpiohs_set_pin(lcd->dc_pin, GPIO_PV_HIGH);
+    gpiohs_set_pin(aiit_lcd->dc_pin, GPIO_PV_HIGH);
  /*spi  num      Polarity and phase mode   Multi-line mode    Data bit width    little endian  */
-    spi_init(lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 32, 0);
+    spi_init(aiit_lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 32, 0);
 
 /*  spi num      instrction length    address length     wait cycles    spi address trans mode*/
-    spi_init_non_standard(lcd->spi_channel, 0 , 32, 0 ,SPI_AITM_AS_FRAME_FORMAT );
+    spi_init_non_standard(aiit_lcd->spi_channel, 0 , 32, 0 ,SPI_AITM_AS_FRAME_FORMAT );
 
     /*dma  channel     spi num   chip_selete   tx_buff   tx_len    spi_trans_data_width */
-    spi_send_data_normal_dma(lcd->dma_channel, lcd->spi_channel, lcd->cs, data_buf, length, SPI_TRANS_INT);
+    spi_send_data_normal_dma(aiit_lcd->dma_channel, aiit_lcd->spi_channel, aiit_lcd->cs, data_buf, length, SPI_TRANS_INT);
 }
 
 static void DrvLcdHwInit(Lcd8080DeviceType lcd)
@@ -201,11 +201,11 @@ static void DrvLcdSetDirection(lcd_dir_t dir)
     dir |= 0x08;
 #endif
     if (dir & DIR_XY_MASK) {
-        lcd->lcd_info.width = 320;
-        lcd->lcd_info.height = 240;
+        aiit_lcd->lcd_info.width = 320;
+        aiit_lcd->lcd_info.height = 240;
     } else {
-        lcd->lcd_info.width = 240;
-        lcd->lcd_info.height = 320;
+        aiit_lcd->lcd_info.width = 240;
+        aiit_lcd->lcd_info.height = 320;
     }
 
     DrvLcdCmd(MEMORY_ACCESS_CTL);
@@ -239,6 +239,14 @@ static void DrvLcdSetPixel(uint16_t x, uint16_t y, uint16_t color)
     DrvLcdDataHalfWord(&color, 1);
 }
 
+static void DrvLcdSetPixelDot(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,void* color)
+{
+    uint32 size = 0;
+    size = (x2- x1 + 1)*(y2 - y1 + 1);
+    DrvLcdSetArea(x1, y1, x2, y2);
+    DrvLcdDataHalfWord(color, size);
+}
+
 void LcdShowChar(uint16 x,uint16 y,uint8 num,uint8 size,uint16 color,uint16 back_color)
 {  							  
     uint8 temp,t1,t;
@@ -265,12 +273,12 @@ void LcdShowChar(uint16 x,uint16 y,uint8 num,uint8 size,uint16 color,uint16 back
 
 			temp<<=1;
 			y++;
-			if(y>=lcd->lcd_info.height)
+			if(y>=aiit_lcd->lcd_info.height)
                 return;	
 			if ((y-y0) == size) {
 				y=y0;
 				x++;
-				if(x>=lcd->lcd_info.width)
+				if(x>=aiit_lcd->lcd_info.width)
                     return;	
 				break;
 			}
@@ -305,29 +313,29 @@ void DrvLcdClear(uint16 color)
 {
     uint32 data = ((uint32)color << 16) | (uint32)color;
 
-    DrvLcdSetArea(0, 0, lcd->lcd_info.width - 1, lcd->lcd_info.height - 1);
-    gpiohs_set_pin(lcd->dc_pin, GPIO_PV_HIGH);
-    spi_init(lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 32, 0);
-    spi_init_non_standard(lcd->spi_channel,
+    DrvLcdSetArea(0, 0, aiit_lcd->lcd_info.width - 1, aiit_lcd->lcd_info.height - 1);
+    gpiohs_set_pin(aiit_lcd->dc_pin, GPIO_PV_HIGH);
+    spi_init(aiit_lcd->spi_channel, SPI_WORK_MODE_0, SPI_FF_OCTAL, 32, 0);
+    spi_init_non_standard(aiit_lcd->spi_channel,
                                                           0                         /*instrction length*/, 
                                                           32                       /*address length   */, 
                                                           0                         /*wait cycles            */,
                                                          SPI_AITM_AS_FRAME_FORMAT );
-    spi_fill_data_dma(lcd->dma_channel, lcd->spi_channel, lcd->cs, (const uint32_t *)&data, lcd->lcd_info.width * lcd->lcd_info.height / 2);
+    spi_fill_data_dma(aiit_lcd->dma_channel, aiit_lcd->spi_channel, aiit_lcd->cs, (const uint32_t *)&data, aiit_lcd->lcd_info.width * aiit_lcd->lcd_info.height / 2);
 }
 
 static void DrvLcdRectUpdate(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height)
 {
     static uint16 * rect_buffer = NONE;
     if (!rect_buffer) {
-        rect_buffer = x_malloc(lcd->lcd_info.height * lcd->lcd_info.width * (lcd->lcd_info.bits_per_pixel / 8));
+        rect_buffer = x_malloc(aiit_lcd->lcd_info.height * aiit_lcd->lcd_info.width * (aiit_lcd->lcd_info.bits_per_pixel / 8));
         if (!rect_buffer) {
             return;
         }
     }
-    if (x1 == 0 && y1 == 0 && width == lcd->lcd_info.width && height == lcd->lcd_info.height) {
+    if (x1 == 0 && y1 == 0 && width == aiit_lcd->lcd_info.width && height == aiit_lcd->lcd_info.height) {
         DrvLcdSetArea(x1, y1, x1 + width - 1, y1 + height - 1);
-        DrvLcdDataWord((uint32 *)lcd->lcd_info.framebuffer, width * height / (lcd->lcd_info.bits_per_pixel / 8));
+        DrvLcdDataWord((uint32 *)aiit_lcd->lcd_info.framebuffer, width * height / (aiit_lcd->lcd_info.bits_per_pixel / 8));
     } else {
         DrvLcdSetArea(x1, y1, x1 + width - 1, y1 + height - 1);
         DrvLcdDataWord((uint32 *)rect_buffer, width * height / 2);
@@ -337,13 +345,14 @@ static void DrvLcdRectUpdate(uint16_t x1, uint16_t y1, uint16_t width, uint16_t 
 x_err_t DrvLcdInit(Lcd8080DeviceType dev)
 {
     x_err_t ret = EOK;
-    lcd = (Lcd8080DeviceType)dev;
+    aiit_lcd = (Lcd8080DeviceType)dev;
     uint8 data = 0;
 
-    if (!lcd) {
-        return ERROR;
+    if (!aiit_lcd)
+    {
+        return -ERROR;
     }
-    DrvLcdHwInit(lcd);
+    DrvLcdHwInit(aiit_lcd);
     /* reset LCD */
     DrvLcdCmd(SOFTWARE_RESET);
     MdelayKTask(100);
@@ -360,8 +369,8 @@ x_err_t DrvLcdInit(Lcd8080DeviceType dev)
     /* set direction */
     DrvLcdSetDirection(DIR_YX_RLUD);
 
-    lcd->lcd_info.framebuffer = x_malloc(lcd->lcd_info.height * lcd->lcd_info.width * (lcd->lcd_info.bits_per_pixel / 8));
-    CHECK(lcd->lcd_info.framebuffer);
+    aiit_lcd->lcd_info.framebuffer = x_malloc(aiit_lcd->lcd_info.height * aiit_lcd->lcd_info.width * (aiit_lcd->lcd_info.bits_per_pixel / 8));
+    CHECK(aiit_lcd->lcd_info.framebuffer);
 
     /*display on*/
     DrvLcdCmd(DISPALY_ON);
@@ -369,18 +378,18 @@ x_err_t DrvLcdInit(Lcd8080DeviceType dev)
     return ret;
 }
 
-static x_err_t drv_lcd_control(Lcd8080DeviceType dev, int cmd, void *args)
+static uint32 drv_lcd_control(void* drv, struct BusConfigureInfo *configure_info)
 {
     x_err_t ret = EOK;
-    Lcd8080DeviceType lcd = (Lcd8080DeviceType)dev;
-    x_base level;
-    struct DeviceRectInfo* rect_info = (struct DeviceRectInfo*)args;
+    struct LcdDriver *lcddrv = (struct LcdDriver *)drv;
 
-    NULL_PARAM_CHECK(dev);
+    struct DeviceRectInfo* rect_info;
+    NULL_PARAM_CHECK(drv);
 
-    switch (cmd)
+    switch (configure_info->configure_cmd)
     {
         case GRAPHIC_CTRL_RECT_UPDATE: 
+            rect_info = (struct DeviceRectInfo*)configure_info->private_data;
             if(!rect_info)
             {
                 SYS_ERR("GRAPHIC_CTRL_RECT_UPDATE error args");
@@ -400,7 +409,7 @@ static x_err_t drv_lcd_control(Lcd8080DeviceType dev, int cmd, void *args)
             break;
 
         case GRAPHIC_CTRL_GET_INFO:
-            *(struct DeviceLcdInfo *)args = lcd->lcd_info;
+            *(struct DeviceLcdInfo *)configure_info->private_data = aiit_lcd->lcd_info;
             break;
 
         case GRAPHIC_CTRL_SET_MODE:
@@ -410,7 +419,7 @@ static x_err_t drv_lcd_control(Lcd8080DeviceType dev, int cmd, void *args)
             ret = -ENONESYS;
             break;
         default:
-            SYS_ERR("drv_lcd_control cmd: %d", cmd);
+            SYS_ERR("drv_lcd_control cmd: %d", configure_info->configure_cmd);
             break;
     }
 
@@ -456,20 +465,34 @@ void HandTest(unsigned short *x_pos, unsigned short *y_pos)
 static uint32 LcdWrite(void *dev, struct BusBlockWriteParam *write_param)
 {
     if (write_param  == NONE) {
-         return  ERROR;
+         return  -ERROR;
      }
-
-    LcdStringParam  * show = (LcdStringParam *)write_param->buffer;
-    
-    if (0==write_param->pos) {         //output string
-        LcdShowString(show->x_pos,show->y_pos,show->width,show->height,show->font_size,show->addr,show->font_color,show->back_color);
-        return   EOK;   
-    } else if (1==write_param->pos) {  //output dot
-        DrvLcdSetPixel(show->x_pos, show->y_pos, show->font_color);
-        return   EOK;
-    } else {
-        return ERROR;
+    LcdWriteParam * show = (LcdWriteParam *)write_param->buffer;
+    // KPrintf("DEBUG TYPE %d X1:%d X2:%d Y1:%d Y2:%d\n",show->type,show->pixel_info.x_startpos, show->pixel_info.x_endpos,show->pixel_info.y_startpos, show->pixel_info.y_endpos);
+    if(0 == show->type) //output string
+    {
+        LcdShowString(show->string_info.x_pos,show->string_info.y_pos,show->string_info.width,show->string_info.height,show->string_info.font_size,show->string_info.addr,show->string_info.font_color,show->string_info.back_color);
+        return  EOK;   
+    } 
+    else if(1 == show->type)   //output dot
+    {
+        // DrvLcdSetPixel(show->pixel_info.x_pos, show->pixel_info.y_pos, show->pixel_info.pixel_color);
+        DrvLcdSetPixelDot(show->pixel_info.x_startpos,show->pixel_info.y_startpos, show->pixel_info.x_endpos, show->pixel_info.y_endpos,show->pixel_info.pixel_color);
+        return  EOK;
+    } 
+    else 
+    {
+        return -ERROR;
     }
+    // if (0==write_param->pos) {         //output string
+    //     LcdShowString(show->x_pos,show->y_pos,show->width,show->height,show->font_size,show->addr,show->font_color,show->back_color);
+    //     return  EOK;   
+    // } else if (1==write_param->pos) {  //output dot
+    //     DrvLcdSetPixel(show->x_pos, show->y_pos, show->font_color);
+    //     return  EOK;
+    // } else {
+    //     return -ERROR;
+    // }
 }
 
 uint32 DrvLcdClearDone(void * dev, struct BusConfigureInfo *configure_info)
@@ -488,55 +511,49 @@ const struct LcdDevDone lcd_dev_done  =
     .read  = NONE
 };
 
-static int BoardLcdBusInit(struct LcdBus * lcd_bus, struct LcdDriver * lcd_driver)
+static int BoardLcdBusInit(struct LcdBus * lcd_bus, struct LcdDriver * lcd_driver,const char *bus_name, const char *drv_name)
 {
     x_err_t ret = EOK;
 
     /*Init the lcd bus */
-    ret = LcdBusInit( lcd_bus, LCD_BUS_NAME_1);
+    ret = LcdBusInit( lcd_bus, bus_name);
     if (EOK != ret) {
         KPrintf("Board_lcd_init LcdBusInit error %d\n", ret);
-        return ERROR;
+        return -ERROR;
     }
 
-    lcd_driver->configure = DrvLcdClearDone;
     /*Init the lcd driver*/
-    ret = LcdDriverInit( lcd_driver, LCD_DRV_NAME_1);
+    ret = LcdDriverInit( lcd_driver, drv_name);
     if (EOK != ret) {
         KPrintf("Board_LCD_init LcdDriverInit error %d\n", ret);
-        return ERROR;
+        return -ERROR;
     }
 
     /*Attach the lcd driver to the lcd bus*/
-    ret = LcdDriverAttachToBus(LCD_DRV_NAME_1, LCD_BUS_NAME_1);
+    ret = LcdDriverAttachToBus(drv_name, bus_name);
     if (EOK != ret) {
         KPrintf("Board_LCD_init LcdDriverAttachToBus error %d\n", ret);
-        return ERROR;
+        return -ERROR;
     } 
 
     return ret;
 }
 
 /*Attach the lcd device to the lcd bus*/
-static int BoardLcdDevBend(void)
+static int BoardLcdDevBend(struct LcdHardwareDevice *lcd_device, void *param, const char *bus_name, const char *dev_name)
 {
     x_err_t ret = EOK;
 
-    static struct LcdHardwareDevice lcd_device;      
-    memset(&lcd_device, 0, sizeof(struct LcdHardwareDevice));
-
-    lcd_device.dev_done = &(lcd_dev_done);
-
-    ret = LcdDeviceRegister(&lcd_device, NONE, LCD_1_DEVICE_NAME_0);
+    ret = LcdDeviceRegister(lcd_device, NONE, dev_name);
     if (EOK != ret) {
-        KPrintf("Board_LCD_init LcdDeviceInit device %s error %d\n", LCD_1_DEVICE_NAME_0, ret);
-        return ERROR;
+        KPrintf("Board_LCD_init LcdDeviceInit device %s error %d\n", dev_name, ret);
+        return -ERROR;
     }  
 
-    ret = LcdDeviceAttachToBus(LCD_1_DEVICE_NAME_0, LCD_BUS_NAME_1);
+    ret = LcdDeviceAttachToBus(dev_name, bus_name);
     if (EOK != ret) {
-        KPrintf("Board_LCD_init LcdDeviceAttachToBus device %s error %d\n", LCD_1_DEVICE_NAME_0, ret);
-        return ERROR;
+        KPrintf("Board_LCD_init LcdDeviceAttachToBus device %s error %d\n", dev_name, ret);
+        return -ERROR;
     }  
 
     return  ret;
@@ -549,44 +566,59 @@ int HwLcdInit(void)
     static struct LcdDriver lcd_driver;
     memset(&lcd_driver, 0, sizeof(struct LcdDriver));
 
-    Lcd8080DeviceType  lcd_dev = (Lcd8080DeviceType  )malloc(sizeof(  struct Lcd8080Device));
-    memset(lcd_dev, 0, sizeof(struct Lcd8080Device));
-
-    if (!lcd_dev) {
-        return -1;
+    Lcd8080DeviceType  lcd_dev = (Lcd8080DeviceType  )x_malloc(sizeof(  struct Lcd8080Device));
+    if (!lcd_dev) 
+    {
+        return -ERROR;
     }
 
-    FpioaSetFunction(41,FUNC_GPIOHS9);       //DC    order  /  data
-    FpioaSetFunction(47,FUNC_GPIOHS10);   //BL
-    FpioaSetFunction(40,FUNC_SPI0_SS0);      //chip  select
-    FpioaSetFunction(38,FUNC_SPI0_SCLK);   //clk
+    memset(lcd_dev, 0, sizeof(struct Lcd8080Device));
 
-    lcd_dev->cs                                               = SPI_CHIP_SELECT_0;
-    lcd_dev->dc_pin                                     =  9;  
-    lcd_dev->dma_channel                       = DMAC_CHANNEL0;
-    lcd_dev->spi_channel                          = SPI_DEVICE_0;
-    lcd_dev->lcd_info.bits_per_pixel    = 16;
-    lcd_dev->lcd_info.pixel_format       =  PIXEL_FORMAT_BGR565;
+    FpioaSetFunction(BSP_LCD_DC_PIN, FUNC_GPIOHS9);    //DC order/data
+    FpioaSetFunction(BSP_LCD_BL_PIN, FUNC_GPIOHS10);   //BL
+    FpioaSetFunction(BSP_LCD_CS_PIN, FUNC_SPI0_SS0);   //chip  select
+    FpioaSetFunction(BSP_LCD_WR_PIN, FUNC_SPI0_SCLK);  //clk
+
+    lcd_dev->cs                       = SPI_CHIP_SELECT_0;
+    lcd_dev->dc_pin                   =  9;  
+    lcd_dev->dma_channel              = DMAC_CHANNEL0;
+    lcd_dev->spi_channel              = SPI_DEVICE_0;
+    lcd_dev->lcd_info.bits_per_pixel  = 16;
+    lcd_dev->lcd_info.pixel_format    = PIXEL_FORMAT_BGR565;
 
     sysctl_set_power_mode(SYSCTL_POWER_BANK6, SYSCTL_POWER_V18);
     sysctl_set_power_mode(SYSCTL_POWER_BANK7, SYSCTL_POWER_V18);
 
-    sysctl_set_spi0_dvp_data(1);                                                                 //open  the lcd  interface  with spi0
-    ret = BoardLcdBusInit(&lcd_dev->lcd_bus, &lcd_driver);  //init  lcd bus
-    if (EOK != ret) {
+    sysctl_set_spi0_dvp_data(1); //open  the lcd  interface  with spi0
+
+    lcd_driver.configure = &drv_lcd_control;
+
+    ret = BoardLcdBusInit(&lcd_dev->lcd_bus, &lcd_driver, LCD_BUS_NAME, LCD_DRV_NAME);  //init  lcd bus
+    if (EOK != ret)
+    {
         KPrintf("Board_lcd_Init error ret %u\n", ret);
-        return ERROR;
+        x_free(lcd_dev);
+        return -ERROR;
     }
 
-    ret = BoardLcdDevBend();                                          //init  lcd device
-    if (EOK != ret) {
+    static struct LcdHardwareDevice lcd_device;      
+    memset(&lcd_device, 0, sizeof(struct LcdHardwareDevice));
+
+    lcd_device.dev_done = &(lcd_dev_done);
+
+    ret = BoardLcdDevBend(&lcd_device, NONE, LCD_BUS_NAME, LCD_DEVICE_NAME);                             //init  lcd device
+    if (EOK != ret)
+    {
         KPrintf("BoardLcdDevBend error ret %u\n", ret);
-        return ERROR;
+        x_free(lcd_dev);
+        return -ERROR;
     }
 
     gpiohs_set_drive_mode(10, GPIO_DM_OUTPUT);
-    gpiohs_set_pin(10, GPIO_PV_HIGH);                                        
+    gpiohs_set_pin(10, GPIO_PV_HIGH);   
+
     KPrintf("LCD driver inited ...\r\n");
+
     DrvLcdInit(lcd_dev);
 
     return ret;

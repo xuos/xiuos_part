@@ -24,7 +24,7 @@ void __attribute__((naked)) SwitchKTaskContextExit()
     asm volatile ("mv a0, sp");
     asm volatile ("jal RestoreMstatus");
 #else
-    asm volatile ("li    t0, 0x00001800");
+    asm volatile ("li    t0, 0x00007800");
     asm volatile ("csrw  mstatus, t0");
     asm volatile (LoadDS " a0,   2 * " RegLengthS "(sp)");
     asm volatile ("csrs mstatus, a0");

@@ -29,6 +29,14 @@
 #include "board.h"
 #include "pin_mux.h"
 
+
+#ifdef BSP_USING_SEMC
+extern status_t BOARD_InitSEMC(void);
+#ifdef BSP_USING_EXTSRAM
+extern int ExtSramInit(void);
+#endif
+#endif
+
 #if defined(SDK_I2C_BASED_COMPONENT_USED) && SDK_I2C_BASED_COMPONENT_USED
 #include "fsl_lpi2c.h"
 #endif /* SDK_I2C_BASED_COMPONENT_USED */
@@ -607,6 +615,23 @@ void InitBoardHardware()
 #endif
 
     InitBoardMemory((void *)HEAP_BEGIN, (void *)HEAP_END);
+#ifdef BSP_USING_SEMC
+    CLOCK_InitSysPfd(kCLOCK_Pfd2, 29);
+    /* Set semc clock to 163.86 MHz */
+    CLOCK_SetMux(kCLOCK_SemcMux, 1);
+    CLOCK_SetDiv(kCLOCK_SemcDiv, 1);
+
+    if (BOARD_InitSEMC() != kStatus_Success)
+    {
+        KPrintf("\r\n SEMC Init Failed\r\n");
+    }
+#ifdef MEM_EXTERN_SRAM
+    else
+    {
+        ExtSramInit();
+    }
+#endif
+#endif
 
 #ifdef BSP_USING_LWIP
     ETH_BSP_Config();
@@ -616,5 +641,7 @@ void InitBoardHardware()
     Imrt1052HwUartInit();
 #endif
     InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
+
+
 }
 

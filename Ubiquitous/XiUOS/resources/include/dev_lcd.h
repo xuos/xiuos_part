@@ -57,11 +57,27 @@ typedef struct
     uint16 y_pos;
     uint16 width;
     uint16 height;
-    uint8 font_size;
-    uint8 *addr;
+    uint8  font_size;
+    uint8  *addr;
     uint16 font_color;
     uint16 back_color;
 }LcdStringParam;
+
+typedef struct 
+{
+    uint16 x_startpos;
+    uint16 x_endpos;
+    uint16 y_startpos;
+    uint16 y_endpos;
+    void* pixel_color;
+}LcdPixelParam;
+
+typedef struct 
+{
+    char type;
+    LcdPixelParam pixel_info;
+    LcdStringParam string_info;
+}LcdWriteParam;
 
 struct  LcdDevDone
 {

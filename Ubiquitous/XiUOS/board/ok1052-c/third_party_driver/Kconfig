@@ -1,12 +1,20 @@
 menuconfig BSP_USING_LPUART
-bool "Using UART device"
-default y
-select RESOURCES_SERIAL
-if BSP_USING_LPUART
-source "$BSP_DIR/third_party_driver/uart/Kconfig"
-endif
+    bool "Using UART device"
+    default y
+    select RESOURCES_SERIAL
+    if BSP_USING_LPUART
+        source "$BSP_DIR/third_party_driver/uart/Kconfig"
+    endif
 
 menuconfig BSP_USING_LWIP
-bool "Using LwIP device"
-default n
-select RESOURCES_LWIP
+    bool "Using LwIP device"
+    default n
+    select RESOURCES_LWIP
+
+menuconfig BSP_USING_SEMC
+    bool "Using SEMC device"
+    default y
+
+    if BSP_USING_SEMC
+        source "$BSP_DIR/third_party_driver/semc/Kconfig"
+    endif
