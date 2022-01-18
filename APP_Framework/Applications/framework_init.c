@@ -36,6 +36,8 @@ extern int Tb600bIaq10IaqInit(void);
 extern int Tb600bTvoc10TvocInit(void);
 extern int Tb600bWqHcho1osInit(void);
 
+extern int lv_port_init(void);
+
 typedef int (*InitFunc)(void);
 struct InitDesc
 {
@@ -206,6 +208,10 @@ int FrameworkInit(void)
 
 #ifdef SUPPORT_CONNECTION_FRAMEWORK
 	ConnectionDeviceFrameworkInit(framework);
+#endif
+
+#ifdef LIB_LV
+	lv_port_init();
 #endif
 
     return 0;

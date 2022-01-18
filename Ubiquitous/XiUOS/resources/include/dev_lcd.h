@@ -57,8 +57,8 @@ typedef struct
     uint16 y_pos;
     uint16 width;
     uint16 height;
-    uint8 font_size;
-    uint8 *addr;
+    uint8  font_size;
+    uint8  *addr;
     uint16 font_color;
     uint16 back_color;
 }LcdStringParam;

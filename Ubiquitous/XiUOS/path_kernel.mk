@@ -250,6 +250,11 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/ruy #
 endif
 
+ifeq ($(CONFIG_LIB_LV),y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lvgl #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lvgl/examples/porting #
+endif
+
 ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/interoperability/opcua #
