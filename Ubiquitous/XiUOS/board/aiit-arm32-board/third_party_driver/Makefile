@@ -4,7 +4,6 @@ ifeq ($(CONFIG_BSP_USING_CH438),y)
   SRC_DIR += ch438
 endif
 
-
 ifeq ($(CONFIG_BSP_USING_EXTMEM),y)
   SRC_DIR += extmem
 endif
@@ -55,6 +54,14 @@ endif
 
 ifeq ($(CONFIG_BSP_USING_CAN),y)
   SRC_DIR += can
+endif
+
+ifeq ($(CONFIG_BSP_USING_ADC),y)
+  SRC_DIR += adc
+endif
+
+ifeq ($(CONFIG_BSP_USING_DAC),y)
+  SRC_DIR += dac
 endif
 
 include $(KERNEL_ROOT)/compiler.mk

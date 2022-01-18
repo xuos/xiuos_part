@@ -280,7 +280,7 @@ static uint32 Stm32SerialInit(struct SerialDriver *serial_drv, struct BusConfigu
         USART_InitStructure.USART_WordLength = USART_WordLength_9b;
     }
 
-    if (serial_cfg->data_cfg.serial_stop_bits == STOP_BITS_1){
+    if (serial_cfg->data_cfg.serial_stop_bits == STOP_BITS_1) {
         USART_InitStructure.USART_StopBits = USART_StopBits_1;
     } else if (serial_cfg->data_cfg.serial_stop_bits == STOP_BITS_2) {
         USART_InitStructure.USART_StopBits = USART_StopBits_2;
@@ -323,7 +323,7 @@ static uint32 Stm32SerialConfigure(struct SerialDriver *serial_drv, int serial_o
             USART_ITConfig(serial_hw_cfg->uart_device, USART_IT_RXNE, ENABLE);
             break;
         case OPER_CONFIG :
-            if (SIGN_OPER_DMA_RX == serial_dev_param->serial_set_mode){
+            if (SIGN_OPER_DMA_RX == serial_dev_param->serial_set_mode) {
                 DMAConfiguration(serial_dev, serial_hw_cfg->uart_device);
             }
     }
@@ -378,8 +378,16 @@ static void DmaRxDoneIsr(struct Stm32Usart *serial, struct SerialDriver *serial_
     if (DMA_GetFlagStatus(dma->RxStream, dma->RxFlag) != RESET) {
         x_base level = CriticalAreaLock();
 
-        x_size_t recv_len = dma->SettingRecvLen - dma->LastRecvIndex;
-        dma->LastRecvIndex = 0;
+        x_size_t recv_len;
+
+        x_size_t recv_total_index = dma->SettingRecvLen - DMA_GetCurrDataCounter(dma->RxStream);
+        if (0 != recv_total_index) {
+            recv_len = recv_total_index - dma->LastRecvIndex;
+        } else {
+            recv_len = dma->SettingRecvLen - dma->LastRecvIndex;
+        }
+        dma->LastRecvIndex = recv_total_index;
+
         CriticalAreaUnLock(level);
 
         if (recv_len) SerialSetIsr(serial_dev, SERIAL_EVENT_RX_DMADONE | (recv_len << 8));
@@ -397,15 +405,14 @@ static void UartIsr(struct Stm32Usart *serial, struct SerialDriver *serial_drv, 
     if (USART_GetITStatus(serial_hw_cfg->uart_device, USART_IT_RXNE) != RESET) {
         SerialSetIsr(serial_dev, SERIAL_EVENT_RX_IND);
         USART_ClearITPendingBit(serial_hw_cfg->uart_device, USART_IT_RXNE);
-    }
-    if (USART_GetITStatus(serial_hw_cfg->uart_device, USART_IT_IDLE) != RESET) {
+    } else if (USART_GetITStatus(serial_hw_cfg->uart_device, USART_IT_IDLE) != RESET) {
         DmaUartRxIdleIsr(serial_dev, dma, serial_hw_cfg->uart_device);
-    }
-    if (USART_GetITStatus(serial_hw_cfg->uart_device, USART_IT_TC) != RESET) {
+    } else if (USART_GetITStatus(serial_hw_cfg->uart_device, USART_IT_TC) != RESET) {
         USART_ClearITPendingBit(serial_hw_cfg->uart_device, USART_IT_TC);
-    }
-    if (USART_GetFlagStatus(serial_hw_cfg->uart_device, USART_FLAG_ORE) == SET) {
-        USART_ReceiveData(serial_hw_cfg->uart_device);
+    } else {
+        if (USART_GetFlagStatus(serial_hw_cfg->uart_device, USART_FLAG_ORE) == SET) {
+            USART_ReceiveData(serial_hw_cfg->uart_device);
+        }
     }
 }
 
@@ -673,6 +680,9 @@ int Stm32HwUsartInit(void)
     serial_driver_1.private_data = (void *)&serial_cfg_1;
 
     serial_dev_param_1.serial_work_mode = SIGN_OPER_INT_RX;
+#ifdef USART1_USING_DMA
+    serial_dev_param_1.serial_work_mode = SIGN_OPER_DMA_RX;
+#endif
     serial_device_1.haldev.private_data = (void *)&serial_dev_param_1;
 
     NVIC_Configuration(serial_hw_cfg_1.irq);
@@ -714,6 +724,9 @@ int Stm32HwUsartInit(void)
     serial_driver_2.private_data = (void *)&serial_cfg_2;
 
     serial_dev_param_2.serial_work_mode = SIGN_OPER_INT_RX;
+#ifdef USART2_USING_DMA
+    serial_dev_param_2.serial_work_mode = SIGN_OPER_DMA_RX;
+#endif
     serial_device_2.haldev.private_data = (void *)&serial_dev_param_2;
 
     NVIC_Configuration(serial_hw_cfg_2.irq);
@@ -755,6 +768,9 @@ int Stm32HwUsartInit(void)
     serial_driver_3.private_data = (void *)&serial_cfg_3;
 
     serial_dev_param_3.serial_work_mode = SIGN_OPER_INT_RX;
+#ifdef USART3_USING_DMA
+    serial_dev_param_3.serial_work_mode = SIGN_OPER_DMA_RX;
+#endif
     serial_device_3.haldev.private_data = (void *)&serial_dev_param_3;
 
     NVIC_Configuration(serial_hw_cfg_3.irq);
@@ -796,6 +812,9 @@ int Stm32HwUsartInit(void)
     serial_driver_4.private_data = (void *)&serial_cfg_4;
 
     serial_dev_param_4.serial_work_mode = SIGN_OPER_INT_RX;
+#ifdef USART4_USING_DMA
+    serial_dev_param_4.serial_work_mode = SIGN_OPER_DMA_RX;
+#endif
     serial_device_4.haldev.private_data = (void *)&serial_dev_param_4;
 
     NVIC_Configuration(serial_hw_cfg_4.irq);
@@ -837,6 +856,9 @@ int Stm32HwUsartInit(void)
     serial_driver_5.private_data = (void *)&serial_cfg_5;
 
     serial_dev_param_5.serial_work_mode = SIGN_OPER_INT_RX;
+#ifdef USART5_USING_DMA
+    serial_dev_param_5.serial_work_mode = SIGN_OPER_DMA_RX;
+#endif
     serial_device_5.haldev.private_data = (void *)&serial_dev_param_5;
 
     NVIC_Configuration(serial_hw_cfg_5.irq);
