@@ -11,15 +11,15 @@
 */
  
 /**
-* @file connect_fsmc.h
-* @brief declare stm32f407zgt6-board fsmc function
+* @file connect_extmem.h
+* @brief declare aiit-arm32-board extmem fsmc function
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2021-05-28
 */
 
-#ifndef CONNECT_FSMC_H
-#define CONNECT_FSMC_H
+#ifndef CONNECT_EXTMEM_H
+#define CONNECT_EXTMEM_H
 
 #include <xsconfig.h>
 

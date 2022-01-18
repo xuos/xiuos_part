@@ -30,26 +30,26 @@ extern "C" {
 /*set the pen color*/
 #define WHITE         	 0xFFFF
 #define BLACK         	 0x0000  
-#define BLUE         	   0x001F  
-#define BRED               0xF81F
-#define GRED 			   0xFFE0
+#define BLUE         	 0x001F  
+#define BRED             0xF81F
+#define GRED 			 0xFFE0
 #define GBLUE			 0x07FF
-#define RED           	     0xF800
-#define MAGENTA      0xF81F
+#define RED           	 0xF800
+#define MAGENTA          0xF81F
 #define GREEN            0x07E0
-#define CYAN               0x7FFF
-#define YELLOW         0xFFE0
-#define BROWN 		   0xBC40    
+#define CYAN             0x7FFF
+#define YELLOW           0xFFE0
+#define BROWN 		     0xBC40    
 #define BRRED 	   		 0xFC07      
-#define GRAY               0x8430      
+#define GRAY             0x8430      
 
 #define DARKBLUE      	 0x01CF//Navy blue 
 #define LIGHTBLUE      	 0x7D7C//Light blue 
-#define GRAYBLUE          0x5458//Gray blue 
-#define LIGHTGREEN     0x841F 
-#define LGRAY 			        0xC618
+#define GRAYBLUE         0x5458//Gray blue 
+#define LIGHTGREEN       0x841F 
+#define LGRAY 	         0xC618
 #define LGRAYBLUE        0xA651
-#define LBBLUE                0x2B12
+#define LBBLUE           0x2B12
 
 typedef struct 
 {
@@ -63,7 +63,23 @@ typedef struct
     uint16 back_color;
 }LcdStringParam;
 
-struct  LcdDevDone
+typedef struct 
+{
+    uint16 x_startpos;
+    uint16 x_endpos;
+    uint16 y_startpos;
+    uint16 y_endpos;
+    void *pixel_color;
+}LcdPixelParam;
+
+typedef struct 
+{
+    char type;//0: string; 1 : dot
+    LcdPixelParam pixel_info;
+    LcdStringParam string_info;
+}LcdWriteParam;
+
+struct LcdDevDone
 {
     uint32 (*open) (void *dev);
     uint32 (*close) (void *dev);
@@ -71,11 +87,11 @@ struct  LcdDevDone
     uint32 (*read) (void *dev, struct BusBlockReadParam *read_param);
 };
 
-struct  LcdHardwareDevice
+struct LcdHardwareDevice
 {
     struct HardwareDev haldev;
 
-    const struct  LcdDevDone *dev_done;
+    const struct LcdDevDone *dev_done;
     
     void *private_data;
 };

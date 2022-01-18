@@ -31,9 +31,28 @@
   ******************************************************************************
   */
 
+/**
+* @file: hardware_fsmc.c
+* @brief: support hardware fsmc for lcd、extmem functiong
+* @version: 2.0
+* @author:  AIIT XUOS Lab
+* @date:    2022/1/12
+*/
+
+/*************************************************
+File name: hardware_fsmc.c
+Description: support hardware fsmc for lcd、extmem function
+Others: 
+History: 
+1. Date: 2022-1-12
+Author: AIIT XUOS Lab
+Modification: 
+1. rename stm32f4xx_fsmc.c for XiUOS
+*************************************************/
+
 /* Includes ------------------------------------------------------------------*/
-#include "hardware_fsmc.h"
-#include "hardware_rcc.h"
+#include <hardware_fsmc.h>
+#include <hardware_rcc.h>
 #include <stm32_assert_template.h>
 
 /** @addtogroup STM32F4xx_StdPeriph_Driver

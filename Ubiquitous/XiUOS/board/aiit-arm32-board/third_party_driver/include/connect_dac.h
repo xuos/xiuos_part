@@ -12,7 +12,7 @@
  
 /**
 * @file connect_dac.h
-* @brief define stm32f407-st-discovery adc function and struct
+* @brief define aiit-arm32-board adc function and struct
 * @version 2.0
 * @author AIIT XUOS Lab
 * @date 2022-1-10

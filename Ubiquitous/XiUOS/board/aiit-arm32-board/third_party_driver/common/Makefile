@@ -1,5 +1,5 @@
 SRC_FILES := misc.c  hardware_rcc.c hardware_exti.c \
-	hardware_it.c hardware_pwr.c hardware_syscfg.c \
+	hardware_it.c hardware_pwr.c hardware_syscfg.c hardware_fsmc.c\
 	
 
 ifeq ($(CONFIG_BSP_USING_DMA),y)

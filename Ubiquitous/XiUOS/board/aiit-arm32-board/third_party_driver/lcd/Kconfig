@@ -1,1 +1,11 @@
-
+if BSP_USING_LCD
+    config LCD_BUS_NAME
+        string "lcd bus name"
+        default "lcd"
+    config LCD_DRV_NAME
+        string "lcd bus driver name"
+        default "lcd_drv"
+    config LCD_DEVICE_NAME
+        string "lcd bus device name"
+        default "lcd_dev"   
+endif

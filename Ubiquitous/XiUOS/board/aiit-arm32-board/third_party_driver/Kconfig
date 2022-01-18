@@ -40,7 +40,6 @@ menuconfig BSP_USING_LCD
 bool "Using LCD device"
 default n
 select RESOURCES_LCD
-select BSP_USING_SPI1
 if BSP_USING_LCD
 source "$BSP_DIR/third_party_driver/lcd/Kconfig"
 endif
