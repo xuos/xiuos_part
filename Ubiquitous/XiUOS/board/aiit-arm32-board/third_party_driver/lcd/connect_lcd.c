@@ -32,6 +32,31 @@ Modification:
 #include <hardware_gpio.h>
 #include <hardware_rcc.h>
 
+static int Stm32LcdUdelay(uint32 us)
+{
+    uint32 ticks;
+    uint32 told, tnow, tcnt = 0;
+    uint32 reload = SysTick->LOAD;
+
+    ticks = us * reload / (1000000 / TICK_PER_SECOND);
+    told = SysTick->VAL;
+    while (1) {
+        tnow = SysTick->VAL;
+        if (tnow != told) {
+            if (tnow < told) {
+                tcnt += told - tnow;
+            } else {
+                tcnt += reload - tnow + told;
+            }
+            told = tnow;
+            if (tcnt >= ticks) {
+                return 0;
+                break;
+            }
+        }
+    }
+}
+
 static void HwFsmcInit()
 {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -163,7 +188,7 @@ static uint16_t LcdReadData(LCD_TypeDef *LCD)
 static uint16_t LcdReadReg(LCD_TypeDef *LCD, uint16_t cmd)
 {
 	LcdWriteCmd(LCD, cmd);
-    MdelayKTask(1);
+    Stm32LcdUdelay(1000);
     return LcdReadData(LCD);
 }
 
@@ -300,36 +325,8 @@ static void LcdScanDirection(struct Stm32HwLcd *hw_lcd, uint8_t scan_direction)
 {
     uint16_t cmd = 0;
     uint16_t temp;
-    uint8_t scan_direction_reverse;
 
     switch (scan_direction) {
-        case 0:
-            scan_direction_reverse = 6;
-            break;
-        case 1:
-            scan_direction_reverse = 7;
-            break;
-        case 2:
-            scan_direction_reverse = 4;
-            break;
-        case 3:
-            scan_direction_reverse = 5;
-            break;
-        case 4:
-            scan_direction_reverse = 1;
-            break;
-        case 5:
-            scan_direction_reverse = 0;
-            break;
-        case 6:
-            scan_direction_reverse = 3;
-            break;
-        case 7:
-            scan_direction_reverse = 2;
-            break;
-    }
-
-    switch (scan_direction_reverse) {
         case L2R_U2D:
             cmd |= (0 << 7) | (0 << 6) | (0 << 5);
             break;
@@ -502,7 +499,7 @@ static void HwLcdInit(struct Stm32HwLcd *hw_lcd)
 		LcdWriteData(hw_lcd->LCD, 0x00);
 		LcdWriteData(hw_lcd->LCD, 0xef);	 
 		LcdWriteCmd(hw_lcd->LCD, SLEEP_OFF);//Exit Sleep
-		MdelayKTask(120);
+		Stm32LcdUdelay(120000);
 		LcdWriteCmd(hw_lcd->LCD, DISPALY_ON);//display on	
 
         LcdDisplayDirection(hw_lcd);
@@ -647,7 +644,11 @@ int Stm32HwLcdInit(void)
         return ERROR;
     }
 
+    Stm32LcdUdelay(5000000);
+
     HwFsmcInit();
+
+    Stm32LcdUdelay(20000);
 
     HwLcdInit(&hw_lcd);
 #endif

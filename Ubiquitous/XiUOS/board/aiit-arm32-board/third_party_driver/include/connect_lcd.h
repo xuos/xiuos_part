@@ -121,7 +121,7 @@ extern "C" {
 #define D2U_L2R  6 
 #define D2U_R2L  7 	 
 
-#define DFT_SCAN_DIR  L2R_U2D  //default scan direction
+#define DFT_SCAN_DIR  U2D_R2L  //default scan direction
 
 #define FSMC_BANK1_NORSRAM4_START_ADDRESS 0x6C000000
 #define FSMC_BANK1_NORSRAM4_DATA_WIDTH 16
