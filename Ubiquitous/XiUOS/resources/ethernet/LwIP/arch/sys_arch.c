@@ -69,7 +69,6 @@
 #include "board.h"
 #include "ethernet.h"
 #include "enet_ethernetif.h"
-#include <transform.h>
 
 char lwip_ipaddr[] = {192, 168, 250, 253};
 char lwip_netmask[] = {255, 255, 255, 0};
@@ -453,9 +452,10 @@ void lwip_input_thread(void *param)
 
 void lwip_config_input(struct netif *net)
 {
-  pthread_t th_id = 0;
+  sys_thread_t th_id = 0;
 
-  th_id = sys_thread_new("eth_input", lwip_input_thread, net, 4096, 15);
+  th_id = sys_thread_new("eth_input", lwip_input_thread, net, LWIP_TASK_STACK_SIZE,
+    LWIP_DEMO_TASK_PRIO);
 
   if (th_id >= 0) {
     lw_print("%s %d successfully!\n", __func__, th_id);

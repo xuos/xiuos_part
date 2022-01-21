@@ -36,7 +36,7 @@
 #include "fsl_debug_console.h"
 
 #include "fsl_lpi2c.h"
-#include "i2c_RTC_RX8010.h"
+#include "i2c_rtc_rx8010.h"
 
 #include "pin_mux.h"
 #include "clock_config.h"
@@ -95,6 +95,9 @@
 
 #define BCD_DATA_LEN     20
 
+// change BIN format to BCD format
+#define TO_BCD(_n) (((_n / 10) << 4) | (_n % 10))
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -131,12 +134,6 @@ uint8_t bcd2bin(uint8_t data)
     }
 
     return ret;
-}
-
-// change BIN format to BCD format
-uint8_t bin2bcd(uint8_t dataH, uint8_t dataL)
-{
-    return (dataH << 4) | dataL;
 }
 
 // 8010 initialization
@@ -202,91 +199,29 @@ int rx8010_init(void)
     return err;
 }
 
-
 // check format and get BCD format date like 2018-06-21 16:29:30
 int get_bcd_date(uint8_t* date, uint8_t* bcd_date)
 {
-    uint8_t tempBuff[BCD_DATA_LEN] = {0};
-    uint8_t temp = 0;
-    int j = 0;
+    int i;
+    int temp_date[6];
 
-    if(( date[0] != '2')
-        ||(date[1] != '0')
-        ||(date[4] != '-')
-        ||(date[7] != '-')
-        ||(date[10] != ' ')
-        ||(date[13] != ':')
-        ||(date[16] != ':'))
+    if(sscanf(date, "20%2d-%2d-%2d %2d:%2d:%2d",
+        &temp_date[5],
+        &temp_date[4],
+        &temp_date[3],
+        &temp_date[2],
+        &temp_date[1],
+        &temp_date[0]) == EOF)
     {
+        rtc_print("i2c %s failed\n", __func__);
         return -1;
     }
 
-    for(int i = 0; i < BCD_DATA_LEN - 1; i++)
+    for(i = 0; i < 6; i++)
     {
-        if((date[i] >= '0') && (date[i] <= '9'))
-        {
-            tempBuff[j] = date[i] - '0';
-            j++;
-        }
+       bcd_date[i] = TO_BCD(temp_date[i]);
     }
 
-    if(j != 14)
-    {
-        return -1;
-    }
-
-    // year
-    bcd_date[5] = bin2bcd(tempBuff[2], tempBuff[3]);
-
-    // month
-    temp = tempBuff[4] * 10 + tempBuff[5];
-
-    if((temp < 1) || (temp > 12))
-    {
-        return -1;
-    }
-
-    bcd_date[4] = bin2bcd(tempBuff[4], tempBuff[5]);
-
-    // day
-    temp = tempBuff[6] * 10 + tempBuff[7];
-
-    if((temp < 1)||(temp > 31))
-    {
-        return -1;
-    }
-
-    bcd_date[3] = bin2bcd(tempBuff[6], tempBuff[7]);
-
-    // hour
-    temp = tempBuff[8] * 10 + tempBuff[9];
-
-    if((temp < 1)||(temp > 24))
-    {
-        return -1;
-    }
-
-    bcd_date[2] = bin2bcd(tempBuff[8], tempBuff[9]);
-
-    // minute
-    temp = tempBuff[10] * 10 + tempBuff[11];
-
-    if((temp < 1)||(temp > 59))
-    {
-        return -1;
-    }
-
-    bcd_date[1] = bin2bcd(tempBuff[10], tempBuff[11]);
-
-    // second
-    temp = tempBuff[12] * 10 + tempBuff[13];
-
-    if(( temp < 1)||(temp > 59))
-    {
-        return -1;
-    }
-
-    bcd_date[0] = bin2bcd(tempBuff[12], tempBuff[13]);
     return 0;
 }
 
@@ -330,7 +265,7 @@ int rx8010_get_time(void)
     dateRsul[5] = bcd2bin(date[RX8010_MONTH - RX8010_SEC] & 0x1f);
     dateRsul[6] = bcd2bin(date[RX8010_YEAR - RX8010_SEC]);
     dateRsul[3] = date[RX8010_WDAY - RX8010_SEC] & 0x7f;
-    rtc_print("\r\n Read datetime from RX8010:    20%d%d-%d%d-%d%d  %d%d:%d%d:%d%d   \r\n",
+    rtc_print("RX8010 Time: 20%d%d-%d%d-%d%d %d%d:%d%d:%d%d\r\n",
             dateRsul[6]/10, dateRsul[6]%10, dateRsul[5]/10, dateRsul[5]%10, dateRsul[4]/10, dateRsul[4]%10,
             dateRsul[2]/10, dateRsul[2]%10, dateRsul[1]/10, dateRsul[1]%10, dateRsul[0]/10, dateRsul[0]%10);
     return 0;
@@ -344,13 +279,15 @@ void test_rtc_rx8010(int argc, char *argv[])
 
     if(argc == 2)
     {
-        rx8010_set_time(argv[1]);
+        if(rx8010_set_time(argv[1]) == 0)
+        {
+            rx8010_get_time();
+        }
     }
     else
     {
         rx8010_get_time();
     }
-
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)| SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)| SHELL_CMD_PARAM_NUM(3),

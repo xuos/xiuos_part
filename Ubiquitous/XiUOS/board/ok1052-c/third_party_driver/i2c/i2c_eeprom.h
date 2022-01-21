@@ -1,4 +1,3 @@
-
 #ifndef __I2C_EEPROM_H_
 #define __I2C_EEPROM_H_
 
@@ -21,5 +20,8 @@
 void I2C_EEPROM_Init ( void );
 status_t I2C_EEPROM_Write ( LPI2C_Type* base,uint32_t subAdd,uint8_t* dataBuff,uint16_t dataLen );
 uint32_t I2C_EEPROM_Read ( LPI2C_Type* base,uint32_t subAdd,uint8_t* dataBuff, uint16_t dataLen );
+
+int eeprom_read(uint8_t *dat);
+int eeprom_write(uint8_t *dat);
 
 #endif

@@ -36,7 +36,6 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 
-#include <transform.h>
 #include <sys_arch.h>
 #include "connect_ethernet.h"
 
@@ -60,14 +59,6 @@ ip4_addr_t ping_addr;
 /*******************************************************************************
  * Code
  ******************************************************************************/
-
-static void *lwip_ping_test(void *param)
-{
-    IP4_ADDR(&ping_addr, lwip_gwaddr[0], lwip_gwaddr[1], lwip_gwaddr[2], lwip_gwaddr[3]);
-    ETH_BSP_Config();
-    lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    ping_init(&ping_addr);
-}
 
 void lwip_ping_thread(int argc, char *argv[])
 {

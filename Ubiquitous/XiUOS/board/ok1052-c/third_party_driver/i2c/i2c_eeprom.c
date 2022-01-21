@@ -32,23 +32,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * @file i2c_RTC_RX8010.c
- * @brief I2C RTC drivers
- * @version 1.0
- * @author AIIT XUOS Lab
- * @date 2022.1.18
- */
-
 #include "fsl_common.h"
-#include "fsl_debug_console.h"
 #include "fsl_lpi2c.h"
-#include "i2c_RTC_RX8010.h"
-
+#include "i2c_eeprom.h"
 
 /////////////////////////////EEPROM INIT/////////////////////////////////////////
 
-void I2C_Init()
+void I2C_EEPROM_Init()
 {
     lpi2c_master_config_t masterConfig = {0};
     /*
@@ -62,18 +52,16 @@ void I2C_Init()
     * masterConfig.sclGlitchFilterWidth_ns = 0;
     */
     LPI2C_MasterGetDefaultConfig(&masterConfig);
-
     /* Change the default baudrate configuration */
-    masterConfig.baudRate_Hz = I2C_BAUDRATE;
-
+    masterConfig.baudRate_Hz = I2C_EEPROM_BAUDRATE;
     /* Initialize the LPI2C master peripheral */
-    LPI2C_MasterInit(I2C_BASE, &masterConfig, I2C_CLOCK_FREQ);
+    LPI2C_MasterInit(I2C_EEPROM_BASE, &masterConfig, I2C_EEPROM_CLOCK_FREQ);
 }
 
 //struct _lpi2c_master_transfer
 //{
 //    uint32_t
-//    flags; /*!< Bit mask of options for the transfer. See enumeration #_lpi2c_master_transfer_flags for available
+//        flags; /*!< Bit mask of options for the transfer. See enumeration #_lpi2c_master_transfer_flags for available
 //                  options. Set to 0 or #kLPI2C_TransferDefaultFlag for normal transfers. */
 //    uint16_t slaveAddress;       /*!< The 7-bit slave address. */
 //    lpi2c_direction_t direction; /*!< Either #kLPI2C_Read or #kLPI2C_Write. */
@@ -83,41 +71,36 @@ void I2C_Init()
 //    size_t dataSize;             /*!< Number of bytes to transfer. */
 //};
 
-status_t I2C_Write(LPI2C_Type *base,uint32_t subAdd,uint8_t *dataBuff,uint16_t dataLen)
+status_t I2C_EEPROM_Write(LPI2C_Type* base, uint32_t subAdd, uint8_t* dataBuff, uint16_t dataLen)
 {
-   // lpi2c_master_transfer_t *xfer = &(handle->xfer);
+    // lpi2c_master_transfer_t *xfer = &(handle->xfer);
     lpi2c_master_transfer_t xfer;
     status_t status;
-
-    xfer.slaveAddress = 0x32;  ////RX8010 SLEVEADDRESS 7BIT
+    xfer.slaveAddress =(0xA0 >> 1);
     xfer.direction = kLPI2C_Write;
     xfer.subaddress = subAdd;
     xfer.subaddressSize = 0x01;
     xfer.data = dataBuff;
     xfer.dataSize = dataLen;
     xfer.flags = kLPI2C_TransferDefaultFlag;
-
     status = LPI2C_MasterTransferBlocking(base, &xfer);
-
     return status;
 }
 
-uint32_t I2C_Read(LPI2C_Type *base,uint32_t subAdd,uint8_t* dataBuffer, uint16_t dataLen)
+uint32_t I2C_EEPROM_Read(LPI2C_Type* base, uint32_t subAdd, uint8_t* dataBuffer, uint16_t dataLen)
 {
     lpi2c_master_transfer_t masterXfer = {0};
     status_t reVal = kStatus_Fail;
-
-    masterXfer.slaveAddress = 0x32;
+    masterXfer.slaveAddress =(0XA0>>1);
     masterXfer.direction = kLPI2C_Read;
     masterXfer.subaddress = subAdd;
     masterXfer.subaddressSize = 0x01;
     masterXfer.data = dataBuffer;
     masterXfer.dataSize = dataLen;
     masterXfer.flags = kLPI2C_TransferDefaultFlag;
-
     reVal = LPI2C_MasterTransferBlocking(base, &masterXfer);
 
-    if (reVal != kStatus_Success)
+    if(reVal != kStatus_Success)
     {
         return 1;
     }
