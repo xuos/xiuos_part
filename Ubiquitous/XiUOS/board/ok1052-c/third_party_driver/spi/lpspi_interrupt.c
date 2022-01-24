@@ -56,8 +56,8 @@
 #define TRANSFER_SIZE (512U)        /*! Transfer dataSize .*/
 #define TRANSFER_BAUDRATE (500000U) /*! Transfer baudrate - 500k */
 
-
 #define spi_print KPrintf
+#define spi_trace() KPrintf("lw: [%s][%d] passed!\n", __func__, __LINE__)
 
 /*******************************************************************************
  * Prototypes
@@ -233,45 +233,10 @@ void EXAMPLE_LPSPI_MASTER_IRQHandler(int vector, void *param)
 
 DECLARE_HW_IRQ(EXAMPLE_LPSPI_MASTER_IRQN, EXAMPLE_LPSPI_MASTER_IRQHandler, NONE);
 
-/*!
- * @brief Main function
- */
-int test_spi(void)
+void lpspi_config_init(void)
 {
-    /*Set clock source for LPSPI*/
-    CLOCK_SetMux(kCLOCK_LpspiMux, EXAMPLE_LPSPI_CLOCK_SOURCE_SELECT);
-    CLOCK_SetDiv(kCLOCK_LpspiDiv, EXAMPLE_LPSPI_CLOCK_SOURCE_DIVIDER);
-
-    spi_print("LPSPI functional interrupt example start.\r\n");
-    spi_print("This example use one lpspi instance as master and another as slave on one board.\r\n");
-    spi_print("Master uses interrupt way and slave uses interrupt way.\r\n");
-    spi_print(
-        "Note that some LPSPI instances interrupt is in INTMUX ,"
-        "you should set the intmux when you porting this example accordingly \r\n");
-
-    spi_print("Please make sure you make the correct line connection. Basically, the connection is: \r\n");
-    spi_print("LPSPI_master -- LPSPI_slave   \r\n");
-    spi_print("   CLK      --    CLK  \r\n");
-    spi_print("   PCS      --    PCS \r\n");
-    spi_print("   SOUT     --    SIN  \r\n");
-    spi_print("   SIN      --    SOUT \r\n");
-
-    uint32_t errorCount;
-    uint32_t i;
     lpspi_master_config_t masterConfig;
     lpspi_slave_config_t slaveConfig;
-    uint32_t whichPcs;
-    uint8_t txWatermark;
-
-    /*Set up the transfer data*/
-    for (i = 0; i < TRANSFER_SIZE; i++)
-    {
-        masterTxData[i] = i % 256;
-        masterRxData[i] = 0;
-
-        slaveTxData[i] = ~masterTxData[i];
-        slaveRxData[i] = 0;
-    }
 
     /*Master config*/
     masterConfig.baudRate     = TRANSFER_BAUDRATE;
@@ -305,6 +270,48 @@ int test_spi(void)
     slaveConfig.dataOutConfig = kLpspiDataOutRetained;
 
     LPSPI_SlaveInit(EXAMPLE_LPSPI_SLAVE_BASEADDR, &slaveConfig);
+
+}
+
+/*!
+ * @brief Main function
+ */
+int test_spi(void)
+{
+    /*Set clock source for LPSPI*/
+    CLOCK_SetMux(kCLOCK_LpspiMux, EXAMPLE_LPSPI_CLOCK_SOURCE_SELECT);
+    CLOCK_SetDiv(kCLOCK_LpspiDiv, EXAMPLE_LPSPI_CLOCK_SOURCE_DIVIDER);
+
+    spi_print("LPSPI functional interrupt example start.\r\n");
+    spi_print("This example use one lpspi instance as master and another as slave on one board.\r\n");
+    spi_print("Master uses interrupt way and slave uses interrupt way.\r\n");
+    spi_print(
+        "Note that some LPSPI instances interrupt is in INTMUX ,"
+        "you should set the intmux when you porting this example accordingly \r\n");
+
+    spi_print("Please make sure you make the correct line connection. Basically, the connection is: \r\n");
+    spi_print("LPSPI_master -- LPSPI_slave   \r\n");
+    spi_print("   CLK      --    CLK  \r\n");
+    spi_print("   PCS      --    PCS \r\n");
+    spi_print("   SOUT     --    SIN  \r\n");
+    spi_print("   SIN      --    SOUT \r\n");
+
+    uint32_t errorCount;
+    uint32_t i;
+    uint32_t whichPcs;
+    uint8_t txWatermark;
+
+    /*Set up the transfer data*/
+    for (i = 0; i < TRANSFER_SIZE; i++)
+    {
+        masterTxData[i] = i % 256;
+        masterRxData[i] = 0;
+
+        slaveTxData[i] = ~masterTxData[i];
+        slaveRxData[i] = 0;
+    }
+
+    lpspi_config_init();
 
     /******************Set up slave first ******************/
     isSlaveTransferCompleted = false;
@@ -352,6 +359,9 @@ int test_spi(void)
     while (LPSPI_GetTxFifoCount(EXAMPLE_LPSPI_SLAVE_BASEADDR) != 0)
     {
     }
+
+    spi_trace();
+
     /*Fill up the TX data in FIFO */
     while (LPSPI_GetTxFifoCount(EXAMPLE_LPSPI_SLAVE_BASEADDR) < g_slaveFifoSize)
     {
@@ -364,6 +374,8 @@ int test_spi(void)
             break;
         }
     }
+    spi_trace();
+
     LPSPI_EnableInterrupts(EXAMPLE_LPSPI_SLAVE_BASEADDR, kLPSPI_RxInterruptEnable);
 
     /******************Set up master transfer******************/
@@ -412,6 +424,9 @@ int test_spi(void)
     while (LPSPI_GetTxFifoCount(EXAMPLE_LPSPI_MASTER_BASEADDR) != 0)
     {
     }
+
+    spi_trace();
+
     /*Fill up the TX data in FIFO */
     while ((LPSPI_GetTxFifoCount(EXAMPLE_LPSPI_MASTER_BASEADDR) < g_masterFifoSize) &&
            (masterTxCount - masterRxCount < g_masterFifoSize))
@@ -420,17 +435,23 @@ int test_spi(void)
         LPSPI_WriteData(EXAMPLE_LPSPI_MASTER_BASEADDR, masterTxData[masterTxCount]);
         ++masterTxCount;
 
+        spi_trace();
+
         if (masterTxCount == TRANSFER_SIZE)
         {
             break;
         }
     }
+    spi_trace();
+
     LPSPI_EnableInterrupts(EXAMPLE_LPSPI_MASTER_BASEADDR, kLPSPI_RxInterruptEnable);
 
     /******************Wait for master and slave transfer completed.******************/
     while ((!isSlaveTransferCompleted) || (!isMasterTransferCompleted))
     {
     }
+
+    spi_trace();
 
     errorCount = 0;
     for (i = 0; i < TRANSFER_SIZE; i++)
@@ -462,6 +483,8 @@ int test_spi(void)
     while (1)
     {
     }
+    spi_trace();
+
 }
 
 SHELL_EXPORT_CMD (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),

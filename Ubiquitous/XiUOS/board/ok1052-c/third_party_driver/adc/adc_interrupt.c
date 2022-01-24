@@ -110,8 +110,6 @@ int test_adc(void)
     adc_config_t adcConfigStrcut;
     adc_channel_config_t adcChannelConfigStruct;
 
-//    TestAdcInit();
-
     EnableIRQ(DEMO_ADC_IRQn);
 
     adc_print("\r\nADC interrupt Example.\r\n");
@@ -169,9 +167,7 @@ int test_adc(void)
             for each command.
            */
         ADC_SetChannelConfig(DEMO_ADC_BASE, DEMO_ADC_CHANNEL_GROUP, &adcChannelConfigStruct);
-        while (g_AdcConversionDoneFlag == false)
-        {
-        }
+        while (g_AdcConversionDoneFlag == false);
         adc_print("ADC Value: %d\r\n", g_AdcConversionValue);
         adc_print("ADC Interrupt Counter: %d\r\n", g_AdcInterruptCounter);
     }

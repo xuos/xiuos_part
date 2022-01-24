@@ -107,7 +107,7 @@ struct PinDevIrq
 struct PinParam
 {
     int cmd;//< cmd:GPIO_CONFIG_MODE/GPIO_IRQ_REGISTER/GPIO_IRQ_FREE/GPIO_IRQ_DISABLE/GPIO_IRQ_ENABLE
-    long  pin;//< pin number
+    long pin;//< pin number
     int mode;//< pin mode: input/output
     struct PinDevIrq irq_set;//< pin irq set
     uint64 arg;
@@ -169,9 +169,6 @@ int PrivMutexCreate(pthread_mutex_t *p_mutex, const pthread_mutexattr_t *attr);
 int PrivMutexDelete(pthread_mutex_t *p_mutex);
 int PrivMutexObtain(pthread_mutex_t *p_mutex);
 int PrivMutexAbandon(pthread_mutex_t *p_mutex);
-
-
-
 
 /*********************semaphore**********************/
 

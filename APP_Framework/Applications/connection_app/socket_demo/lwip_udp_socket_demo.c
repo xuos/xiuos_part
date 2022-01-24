@@ -39,6 +39,7 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+
 extern char udp_target[];
 static struct udp_pcb *udpecho_raw_pcb;
 char udp_socket_ip[] = {192, 168, 250, 252};
@@ -59,14 +60,14 @@ static void udp_recv_demo(void *arg)
     while(1)
     {
         recv_buf = (char *)malloc(UDP_BUF_SIZE);
-        if (recv_buf == NULL)
+        if(recv_buf == NULL)
         {
             lw_print("No memory\n");
             goto __exit;
         }
 
         socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
-        if (socket_fd < 0)
+        if(socket_fd < 0)
         {
             lw_print("Socket error\n");
             goto __exit;
@@ -77,7 +78,7 @@ static void udp_recv_demo(void *arg)
         udp_addr.sin_port = htons(LWIP_LOCAL_PORT);
         memset(&(udp_addr.sin_zero), 0, sizeof(udp_addr.sin_zero));
 
-        if (bind(socket_fd, (struct sockaddr *)&udp_addr, sizeof(struct sockaddr)) == -1)
+        if(bind(socket_fd, (struct sockaddr *)&udp_addr, sizeof(struct sockaddr)) == -1)
         {
             lw_print("Unable to bind\n");
             goto __exit;
@@ -96,11 +97,15 @@ static void udp_recv_demo(void *arg)
         }
 
     __exit:
-        if (socket_fd >= 0)
+        if(socket_fd >= 0)
+        {
             closesocket(socket_fd);
+        }
 
-        if (recv_buf)
+        if(recv_buf)
+        {
             free(recv_buf);
+        }
     }
 }
 
@@ -135,7 +140,7 @@ static void udp_send_demo(void *arg)
     memset(send_str, 0, sizeof(send_str));
 
     socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (socket_fd < 0)
+    if(socket_fd < 0)
     {
         lw_print("Socket error\n");
         goto __exit;
@@ -144,10 +149,10 @@ static void udp_send_demo(void *arg)
     struct sockaddr_in udp_sock;
     udp_sock.sin_family = AF_INET;
     udp_sock.sin_port = htons(LWIP_TARGET_PORT);
-    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_target[0],udp_target[1],udp_target[2],udp_target[3]));
+    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_target[0], udp_target[1], udp_target[2], udp_target[3]));
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
-    if (connect(socket_fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
+    if(connect(socket_fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
     {
         lw_print("Unable to connect\n");
         goto __exit;
@@ -165,7 +170,7 @@ static void udp_send_demo(void *arg)
     }
 
 __exit:
-    if (socket_fd >= 0)
+    if(socket_fd >= 0)
     {
         closesocket(socket_fd);
     }
