@@ -240,7 +240,7 @@ uint8_t UserGetTaskPriority(int32_t id);
 #endif
 
 #define UserPrintf               KPrintf
-#define printf                   KPrintf
+
 
 #endif
 
