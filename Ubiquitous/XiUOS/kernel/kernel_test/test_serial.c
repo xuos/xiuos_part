@@ -66,11 +66,13 @@ static void TestSerialRecvTask(void *parameter)
         read_param.buffer = &recv_data;
         read_param.read_length = 0;
         
+        KPrintf("ready to read data\n");
         BusDevReadData(bus_device, &read_param);
         for (i = 0; i < read_param.read_length; i ++) {
             KPrintf("TestSerialRecvTask i %d char 0x%x\n", i, recv_data);
         }
 
+        KPrintf("send data %c\n", recv_data);
         write_param.buffer = &recv_data;
         write_param.size = 1;
         BusDevWriteData(bus_device, &write_param);
@@ -141,7 +143,8 @@ static int SerialBusCheck(const char *bus_name, const char *driver_name, const c
     bus->match(bus_driver, bus_device);
 
     /*step 3: open bus_device, configure struct SerialDevParam if necessary*/
-    serial_dev_param->serial_set_mode = SIGN_OPER_INT_RX;
+    serial_dev_param->serial_set_mode = 0;
+    serial_dev_param->serial_work_mode = SIGN_OPER_DMA_RX;//SIGN_OPER_INT_RX;
     serial_dev_param->serial_stream_mode = SIGN_OPER_STREAM;
     BusDevOpen(bus_device);
     KPrintf("BusDevOpen done\n");

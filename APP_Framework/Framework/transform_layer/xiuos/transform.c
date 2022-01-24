@@ -138,6 +138,13 @@ static int PrivPinIoctl(int fd, int cmd, void *args)
     return ioctl(fd, cmd, pin_cfg);
 }
 
+static int PrivLcdIoctl(int fd, int cmd, void *args)
+{
+    struct DeviceLcdInfo *lcd_cfg = (struct DeviceLcdInfo *)args;
+
+    return ioctl(fd, cmd, lcd_cfg);
+}
+
 int PrivIoctl(int fd, int cmd, void *args)
 {
     int ret;
@@ -152,6 +159,13 @@ int PrivIoctl(int fd, int cmd, void *args)
         ret = PrivPinIoctl(fd, cmd, ioctl_cfg->args);
         break;
     case I2C_TYPE:
+        ret = ioctl(fd, cmd, ioctl_cfg->args);
+        break;
+    case LCD_TYPE:
+        ret = PrivLcdIoctl(fd, cmd, ioctl_cfg->args);
+        break;
+    case ADC_TYPE:
+    case DAC_TYPE:
         ret = ioctl(fd, cmd, ioctl_cfg->args);
         break;
     default:

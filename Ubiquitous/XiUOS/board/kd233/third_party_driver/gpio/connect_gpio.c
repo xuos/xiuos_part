@@ -303,13 +303,13 @@ int HwGpioInit(void)
     ret = PinDriverInit(&drv, PIN_DRIVER_NAME, NONE);
     if (ret != EOK) {
         KPrintf("pin driver init error %d\n", ret);
-        return ERROR;
+        return -ERROR;
     }
 
     ret = PinDriverAttachToBus(PIN_DRIVER_NAME, PIN_BUS_NAME);
     if (ret != EOK) {
         KPrintf("pin driver attach error %d\n", ret);
-        return ERROR;
+        return -ERROR;
     }
 
     static struct PinHardwareDevice dev;
@@ -318,13 +318,13 @@ int HwGpioInit(void)
     ret = PinDeviceRegister(&dev, NONE, PIN_DEVICE_NAME);
     if (ret != EOK) {
         KPrintf("pin device register error %d\n", ret);
-        return ERROR;
+        return -ERROR;
     }
 
     ret = PinDeviceAttachToBus(PIN_DEVICE_NAME, PIN_BUS_NAME);
     if (ret != EOK) {
         KPrintf("pin device register error %d\n", ret);
-        return ERROR;
+        return -ERROR;
     }
 
     return ret;

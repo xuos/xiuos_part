@@ -20,4 +20,8 @@ ifeq ($(CONFIG_BSP_USING_SPI),y)
   SRC_DIR += spi
 endif
 
+ifeq ($(CONFIG_BSP_USING_SEMC),y)
+  SRC_DIR += semc
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

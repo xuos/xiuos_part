@@ -138,6 +138,9 @@ enum IoctlDriverType
     SPI_TYPE,
     I2C_TYPE,
     PIN_TYPE,
+    LCD_TYPE,
+    ADC_TYPE,
+    DAC_TYPE,
     DEFAULT_TYPE,
 };
 
@@ -147,6 +150,38 @@ struct PrivIoctlCfg
     void *args;
 };
 
+typedef struct 
+{
+    uint16 x_pos;
+    uint16 y_pos;
+    uint16 width;
+    uint16 height;
+    uint8  font_size;
+    uint8 *addr;
+    uint16 font_color;
+    uint16 back_color;
+}LcdStringParam;
+
+typedef struct 
+{
+    uint16 x_startpos;
+    uint16 x_endpos;
+    uint16 y_startpos;
+    uint16 y_endpos;
+    void* pixel_color;
+}LcdPixelParam;
+
+typedef struct 
+{
+    char type; // 0:write string;1:write dot
+    LcdPixelParam pixel_info;
+    LcdStringParam string_info;
+}LcdWriteParam;
+
+#define PRIV_SYSTICK_GET (CurrentTicksGain())
+#define PRIV_LCD_DEV "/dev/lcd_dev"
+#define MY_DISP_HOR_RES BSP_LCD_Y_MAX
+#define MY_DISP_VER_RES BSP_LCD_X_MAX
 /**********************mutex**************************/
 
 int PrivMutexCreate(pthread_mutex_t *p_mutex, const pthread_mutexattr_t *attr);

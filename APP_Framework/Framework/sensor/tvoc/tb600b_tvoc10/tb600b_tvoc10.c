@@ -35,6 +35,18 @@ static struct SensorProductInfo info =
  * @param sdev - sensor device pointer
  * @return success: 1 , failure: other
  */
+#ifdef ADD_NUTTX_FETURES
+static int SensorDeviceOpen(struct SensorDevice *sdev)
+{
+    sdev->fd = PrivOpen(SENSOR_DEVICE_TB600B_TVOC10_DEV, O_RDWR);
+    if (sdev->fd < 0) {
+        printf("open %s error\n", SENSOR_DEVICE_TB600B_TVOC10_DEV);
+        return -1;
+    }
+
+    return sdev->fd;
+}
+#else
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     int result = 0;
@@ -65,6 +77,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
 
     return result;
 }
+#endif
 
 /**
  * @description: Read sensor device

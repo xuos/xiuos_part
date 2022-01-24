@@ -5,8 +5,8 @@ menu "APP_Framework"
         option env="SRC_APP_DIR"
         default "."
 
-source "$APP_DIR/Applications/Kconfig"
 source "$APP_DIR/Framework/Kconfig"
+source "$APP_DIR/Applications/Kconfig"
 source "$APP_DIR/lib/Kconfig"
 
 

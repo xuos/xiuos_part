@@ -851,7 +851,7 @@ typedef void * lv_obj_user_data_t;
 #ifdef CONFIG_USE_LV_CALENDAR
 #define LV_USE_CALENDAR      CONFIG_USE_LV_CALENDAR
 #else
-#define LV_USE_CALENDAR      0
+#define LV_USE_CALENDAR      1
 #endif
 
 /* Canvas (dependencies: lv_img) */
