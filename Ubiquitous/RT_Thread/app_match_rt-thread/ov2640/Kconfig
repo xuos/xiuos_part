@@ -20,19 +20,19 @@ if DRV_USING_OV2640
         	bool "RGB565 mode"
     endchoice
 	config OV2640_X_RESOLUTION_IMAGE_OUTSIZE
-        int " X direction resolution of outputimage"
+        int "X direction resolution of outputimage"
         default 240
 	config OV2640_Y_RESOLUTION_IMAGE_OUTSIZE
-		int " Y direction resolution of outputimage"
+		int "Y direction resolution of outputimage"
 		default 240
 
 	config OV2640_X_IMAGE_WINDOWS_SIZE
-		int " X direction WINDOWS SIZE"
+		int "X direction WINDOWS SIZE"
 		default 400
 		comment "the value must be greater than OV2640_X_RESOLUTION_IMAGE_OUTSIZE"
 	
 	config OV2640_Y_IMAGE_WINDOWS_SIZE
-		int " Y direction WINDOWS SIZE"
+		int "Y direction WINDOWS SIZE"
 		default 400
 		comment "the value must be greater than OV2640_Y_RESOLUTION_IMAGE_OUTSIZE"
 endif
