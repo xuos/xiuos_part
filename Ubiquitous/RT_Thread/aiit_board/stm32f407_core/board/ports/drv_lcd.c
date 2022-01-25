@@ -12,7 +12,7 @@
 #include <board.h>
 #include "drv_lcd.h"
 #include "string.h"
-
+#include "font.h"
 //#define DRV_DEBUG
 #define LOG_TAG "drv.lcd"
 #include <drv_log.h>
@@ -508,6 +508,75 @@ void lcd_fill_array(rt_uint16_t x_start, rt_uint16_t y_start, rt_uint16_t x_end,
         }
         cycle_y++;
     }
+}
+
+//LCD的画笔颜色和背景色	   
+rt_uint16_t POINT_COLOR=RED;		//画笔颜色
+rt_uint16_t BACK_COLOR =WHITE;  	//背景色 
+/**
+ * @description: 
+ * @param {rt_uint16_t} x_start
+ * @param {rt_uint16_t} y_start
+ * @param {rt_uint8_t} num   show char  
+ * @param {rt_uint8_t} size   12/16/24/32
+ * @param {rt_uint32_t} color
+ * @return {*}
+ */
+void lcd_show_char(rt_uint16_t x, rt_uint16_t y, rt_uint8_t num, rt_uint8_t size, rt_uint16_t color)
+{
+    rt_uint8_t temp,t1,t;
+	rt_uint16_t y0=y;
+	rt_uint8_t csize=(size/8+((size%8)?1:0))*(size/2);		//得到字体一个字符对应点阵集所占的字节数
+ 	num=num-' ';//得到偏移后的值（ASCII字库是从空格开始取模，所以-' '就是对应字符的字库）
+	for(t=0;t<csize;t++)
+	{   
+		if(size==12)temp=asc2_1206[num][t]; 	 	//调用1206字体
+		else if(size==16)temp=asc2_1608[num][t];	//调用1608字体
+		else if(size==24)temp=asc2_2412[num][t];	//调用2412字体
+		else if(size==32)temp=asc2_3216[num][t];	//调用3216字体
+		else return;								//没有的字库
+		for(t1=0;t1<8;t1++)
+		{			    
+			if(temp&0x80)
+            {
+                LCD_Fast_DrawPoint((&color),x,y);
+            }
+            else if (1)
+            {
+                LCD_Fast_DrawPoint((&lcddev.backcolor),x,y);
+            }
+			temp<<=1;
+			y++;
+			if(y>=lcddev.height)return;		//超区域了
+			if((y-y0)==size)
+			{
+				y=y0;
+				x++;
+				if(x>=lcddev.width)return;	//超区域了
+				break;
+			}
+		}  	 
+	}  	    	   	 	  
+}
+
+//显示字符串
+//x,y:起点坐标
+//width,height:区域大小  
+//size:字体大小
+//*p:字符串起始地址	
+void lcd_show_string(rt_uint16_t x,rt_uint16_t y,rt_uint16_t width,rt_uint16_t height,rt_uint8_t size,rt_uint8_t *p,rt_uint16_t color)
+{
+    rt_uint8_t x0=x;
+	width+=x;
+	height+=y;
+    while((*p<='~')&&(*p>=' '))//判断是不是非法字符!
+    {       
+        if(x>=width){x=x0;y+=size;}
+        if(y>=height)break;//退出
+        lcd_show_char(x,y,*p,size,color);
+        x+=size/2;
+        p++;
+    }  
 }
 
 static rt_err_t drv_lcd_init(struct rt_device *device)
@@ -1870,6 +1939,8 @@ static rt_err_t drv_lcd_init(struct rt_device *device)
     }
     LCD_Display_Dir(0); //默认为竖屏
     rt_pin_write(LCD_BL, PIN_HIGH);
+    lcddev.pointcolor = RED;
+    lcddev.backcolor =  WHITE;
     LCD_Clear(0xffff);
     return RT_EOK;
 }
@@ -1981,4 +2052,23 @@ void lcd_fill(int argc, void **argv)
     }
 }
 MSH_CMD_EXPORT(lcd_fill, lcd fill test for mcu lcd);
+
+
+
+  //Show_Str(30,280,200,25,"          ",16,0);
+  //Show_Str(30,280,200,25,detection_label[top_ind],16,0);
+void lcd_showstring_test(int argc, void **argv)
+{
+    char tmp[50] = "hello aiit board stm32";
+
+    if(argc == 1)
+    {
+        lcd_show_string(30,260,240,16,16,tmp,RED);
+        return;
+    }
+    memset(tmp,0,50);
+    memcpy(tmp,argv[1],50);
+    lcd_show_string(30,250,240,16,16,tmp,RED);
+}
+MSH_CMD_EXPORT(lcd_showstring_test, lcd show string test);
 #endif
