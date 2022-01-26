@@ -12,4 +12,8 @@ ifeq ($(CONFIG_BSP_USING_SEMC),y)
   SRC_DIR += semc
 endif
 
+ifeq ($(CONFIG_BSP_USING_SDIO),y)
+  SRC_DIR += sdio
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

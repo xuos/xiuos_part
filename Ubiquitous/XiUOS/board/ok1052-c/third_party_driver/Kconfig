@@ -13,8 +13,15 @@ menuconfig BSP_USING_LWIP
 
 menuconfig BSP_USING_SEMC
     bool "Using SEMC device"
-    default y
-
+    default n
     if BSP_USING_SEMC
         source "$BSP_DIR/third_party_driver/semc/Kconfig"
+    endif
+
+menuconfig BSP_USING_SDIO
+    bool "Using SD card device"
+    default y
+    select RESOURCES_SDIO
+    if BSP_USING_SDIO
+        source "$BSP_DIR/third_party_driver/sdio/Kconfig"
     endif

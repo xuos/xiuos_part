@@ -5,18 +5,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-/*
- * Copyright (c) 2021 AIIT XUOS Lab
- * XiUOS is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- *        http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
-
 /**
  * @file board.c
  * @brief relative configure for ok1052-c
@@ -25,10 +13,25 @@
  * @date 2021.11.11
  */
 
+/*************************************************
+File name: board.c
+Description: support imxrt1052-board init function
+Others: take SDK_2.6.1_MIMXRT1052xxxxB for references
+History: 
+1. Date: 2022-01-25
+Author: AIIT XUOS Lab
+Modification: 
+1. support imxrt1052-board MPU、clock、memory init
+2. support imxrt1052-board uart、semc、sdio driver init
+*************************************************/
+
 #include "fsl_common.h"
 #include "board.h"
 #include "pin_mux.h"
 
+#ifdef BSP_USING_SDIO
+extern int Imrt1052HwSdioInit(void);
+#endif
 
 #ifdef BSP_USING_SEMC
 extern status_t BOARD_InitSEMC(void);
@@ -640,8 +643,12 @@ void InitBoardHardware()
 #ifdef BSP_USING_LPUART
     Imrt1052HwUartInit();
 #endif
+
     InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
 
+#ifdef BSP_USING_SDIO
+    Imrt1052HwSdioInit();
+#endif
 
 }
 
