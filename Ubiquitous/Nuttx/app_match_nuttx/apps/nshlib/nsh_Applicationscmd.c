@@ -56,7 +56,7 @@ extern int FrameworkInit(void);
  * Name: cmd_Hcho1os
  ****************************************************************************/
 
-#if defined(CONFIG_APPLICATION_SENSOR_TVOC_TB600B_TVOC10) && !defined(CONFIG_NSH_DISABLE_TB600B_TVOC10)
+#if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
 extern void HchoTb600bHcho1os(void);
 int cmd_Hcho1os(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
