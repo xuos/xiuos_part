@@ -21,9 +21,7 @@
 #include "bus_lcd.h"
 #include "dev_lcd.h"
 
-uint16 color  = RED;
-
-char *addr  ="LCD Testing ";
+static char *addr = "LCD Testing";
 
 /**
  * @description: Enable LCD function
@@ -31,13 +29,12 @@ char *addr  ="LCD Testing ";
  * @param driver_name - LCD driver name
  * @param device_name - LCD device name
  */
-int EnableLcd(const char *bus_name, const char *driver_name, const char *device_name)
+static int EnableLcd(const char *bus_name, const char *driver_name, const char *device_name)
 {
     struct Bus *bus;
     struct Driver *driver, *bus_driver;
     struct HardwareDev *device;
     struct HardwareDev *bus_device;
-
 
     if (bus_name) {
         KPrintf("##test find bus %s\n", bus_name);
@@ -59,41 +56,33 @@ int EnableLcd(const char *bus_name, const char *driver_name, const char *device_
         KPrintf("##test device %p bus_device %p##\n", device, bus_device);
     }
 
-    LcdStringParam   str;
-    str.x_pos  = 60  ;
-    str.y_pos  = 40;
-    str.width  =  250;
-    str.height = 24;
-    str.font_size = 24;
-    str.addr  =  addr;
-    str.font_color = WHITE;
-    str.back_color  =  RED;
+    LcdWriteParam lcd_write_param;
+    lcd_write_param.type = 0;
+    lcd_write_param.string_info.x_pos = 60;
+    lcd_write_param.string_info.y_pos = 40;
+    lcd_write_param.string_info.width = 250;
+    lcd_write_param.string_info.height = 24;
+    lcd_write_param.string_info.font_size = 24;
+    lcd_write_param.string_info.addr = addr;
+    lcd_write_param.string_info.font_color = WHITE;
+    lcd_write_param.string_info.back_color = RED;
 
     struct BusBlockWriteParam write_param;
-    memset(&write_param,0,sizeof(struct BusBlockWriteParam ));
+    memset(&write_param, 0, sizeof(struct BusBlockWriteParam ));
 
-    struct  BusConfigureInfo  pdata = {RED,NONE};
-
-    write_param.pos  = 0;
-    write_param.buffer = &str ;
+    write_param.buffer = &lcd_write_param;
 
     while (1) {
-     
-        BusDrvConfigure(bus_driver, &pdata );
+        BusDevWriteData(device, &write_param);
         MdelayKTask(1000);
-
-        BusDevWriteData(device,&write_param);
-        MdelayKTask(1000);
-
     }
 }
 
 /**
  * @description: LCD test function
  */
-void  TestLcd(void)
+void TestLcd(void)
 {
-    EnableLcd(LCD_BUS_NAME,LCD_DRV_NAME,LCD_DEVICE_NAME);
+    EnableLcd(LCD_BUS_NAME, LCD_DRV_NAME, LCD_DEVICE_NAME);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),TestLcd, TestLcd, Test LCD  );
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),TestLcd, TestLcd, Test LCD);

@@ -11,14 +11,14 @@
 */
 
 /**
-* @file connect_fsmc.c
+* @file connect_extmem.c
 * @brief support extern memory by fsmc
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-28
 */
 
-#include "connect_fsmc.h"
+#include "connect_extmem.h"
 #include "hardware_fsmc.h"
 #include "hardware_gpio.h"
 #include "hardware_rcc.h"

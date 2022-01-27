@@ -1,4 +1,4 @@
-SRC_FILES := hardware_fsmc.c
+SRC_FILES := connect_lcd.c
 
 
 include $(KERNEL_ROOT)/compiler.mk

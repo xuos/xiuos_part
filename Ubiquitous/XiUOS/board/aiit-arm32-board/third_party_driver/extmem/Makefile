@@ -1,3 +1,3 @@
-SRC_FILES := hardware_fsmc.c connect_fsmc.c
+SRC_FILES := connect_extmem.c
 
 include $(KERNEL_ROOT)/compiler.mk
