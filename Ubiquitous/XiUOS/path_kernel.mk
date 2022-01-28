@@ -87,6 +87,15 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rv32m1_vega)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(KERNEL_ROOT)/arch/risc-v/rv32m1_vega \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(KERNEL_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/hifive1-rev-B)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver \

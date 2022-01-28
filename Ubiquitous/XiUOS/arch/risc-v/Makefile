@@ -24,4 +24,8 @@ ifeq ($(CONFIG_BOARD_GD32VF103RVSTAR),y)
 SRC_DIR +=gd32vf103_rvstar
 endif
 
+ifeq ($(CONFIG_BOARD_RV32M1_VEGA),y)
+SRC_DIR +=rv32m1_vega
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

@@ -214,6 +214,7 @@ x_err_t LinklistResume(DoubleLinklistType *list);
 x_err_t LinklistResumeAll(DoubleLinklistType *list);
 void HwSendIpi(int ipi_vector, unsigned int cpu_mask);
 void KTaskIdDelete(int32 id);
+struct TaskDescriptor *GetTaskWithIdnodeInfo(int32 id);
 
 #ifdef __cplusplus
  }

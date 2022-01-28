@@ -34,7 +34,7 @@
 #ifdef TASK_ISOLATION
 #include <xs_isolation.h>
 #endif
-extern inline struct TaskDescriptor *GetTaskWithIdnodeInfo(int32 id);
+
 #ifdef SEPARATE_COMPILE
 extern long ShowTask(void);
 extern void ShowMemory(void);
