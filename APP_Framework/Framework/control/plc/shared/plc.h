@@ -18,6 +18,7 @@
  * @date 2021.12.15
  */
 
+#include "bus.h"
 #include "xs_klist.h"
 
 #define IP_ADDR_SIZE 32
@@ -56,11 +57,11 @@ struct PlcDevice;
 
 // operation API
 struct PlcOps {
-   int (*open)(struct PlcDevice *pdev); // open and connect PLC device
-   void (*close)(struct PlcDevice*pdev); // close and disconnect PLC device
-   int (*read)(struct PlcDevice* pdev, void *buf, size_t len); // read data from PLC
-   int (*write)(struct PlcDevice* pdev, const void *buf, size_t len); // write data from PLC
-   int (*ioctl)(struct PlcDevice* pdev, int cmd, void *arg); // send control command to PLC
+   int (*open)(void *dev); // open and connect PLC device
+   void (*close)(void* dev); // close and disconnect PLC device
+   int (*read)(void* dev, void *buf, size_t len); // read data from PLC
+   int (*write)(void* dev, const void *buf, size_t len); // write data from PLC
+   int (*ioctl)(void* dev, int cmd, void *arg); // send control command to PLC
 };
 
 enum PlcCtlType {
@@ -105,16 +106,18 @@ enum PlcTransType
 //communication interface
 struct PlcInterface
 {
-    enum PlcIndHybridNet net;
-    enum PlcTransType trans;
     char ip_addr[IP_ADDR_SIZE];
     char attrib;
 };
 
 // identify PLC device
 struct PlcDevice {
-    const char name[PLC_NAME_SIZE]; /* name of the  device */
+    char name[PLC_NAME_SIZE]; /* name of the  device */
     enum PlcCtlType type; /* PLC Control Type */
+    enum DevState state;
+    enum PlcIndHybridNet net;
+    enum PlcTransType trans;
+
     struct PlcInfo info;/* Plc info, such as vendor name and model name */
     union PlcCfg cfg;
     struct PlcOps ops; /* filesystem-like APIs for data transferring */

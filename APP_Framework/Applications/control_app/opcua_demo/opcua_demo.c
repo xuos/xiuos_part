@@ -202,7 +202,7 @@ void *test_sh_ua_get_info(int argc, char *argv[])
 
     ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
-    sys_thread_new("ua object", test_ua_browser_objects, NULL, 4096, 15);
+    sys_thread_new("ua object", test_ua_get_info, NULL, 4096, 15);
     return NULL;
 }
 

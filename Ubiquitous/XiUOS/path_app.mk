@@ -26,6 +26,7 @@ endif
 ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/interoperability/opcua #
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework\lib\cJSON
 endif
 
 ifeq ($(CONFIG_CRYPTO), y)

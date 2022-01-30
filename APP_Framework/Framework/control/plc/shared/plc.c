@@ -18,40 +18,168 @@
  * @date 2021.12.15
  */
 
-#include "../interoperability/opcua/open62541.h"
+#include "open62541.h"
+#include "ua_api.h"
 #include "plc.h"
+#include "plc_bus.h"
+#include "plc_dev.h"
 
 
 struct PlcDevice plc_device;
 
-// open and connect PLC device
-void plc_open(struct PlcDevice *pdev)
+static DoubleLinklistType plcdev_list;
+
+int PlcDevConfigure(struct HardwareDev *dev, uint8 plc_chip_select, uint8 plc_cs_release);
+
+
+/*Create the plc device linklist*/
+static void PlcDeviceLinkInit()
 {
+    InitDoubleLinkList(&plcdev_list);
 }
 
-// close and disconnect PLC device
-void plc_close(struct PlcDevice *pdev)
+static int PlcDeviceOpen(void *dev)
 {
+    NULL_PARAM_CHECK(dev);
+
+    struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
+
+    if(plc_dev->net == PLC_IND_ENET_OPCUA)
+    {
+        return ua_open(dev);
+    }
+
+    return EOK;
 }
 
-// read data from PLC
-void plc_read(struct PlcDevice *pdev, void *buf, size_t len)
+static void PlcDeviceClose(void *dev)
 {
+    NULL_PARAM_CHECK(dev);
+
+    struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
+
+    if(plc_dev->net == PLC_IND_ENET_OPCUA)
+    {
+        ua_close(dev);
+    }
 }
 
-// write data from PLC
-void plc_write(struct PlcDevice *pdev, const void *buf, size_t len)
+static int PlcDeviceWrite(void *dev, const void *buf, size_t len)
 {
+    NULL_PARAM_CHECK(dev);
+    NULL_PARAM_CHECK(write_param);
+
+    int ret;
+    struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
+
+    if(plc_dev->net == PLC_IND_ENET_OPCUA)
+    {
+        ret = ua_write(dev, buf, len);
+    }
+
+    return ret;
 }
 
-// send control command to PLC
-void plc_ioctl(struct PlcDevice *pdev, int cmd, void *arg)
+static int PlcDeviceRead(void *dev, void *buf, size_t len)
 {
+    NULL_PARAM_CHECK(dev);
+    NULL_PARAM_CHECK(read_param);
+
+    int ret;
+    struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
+
+    if(plc_dev->net == PLC_IND_ENET_OPCUA)
+    {
+        ret = ua_read(dev, buf, len);
+    }
+
+    return ret;
 }
 
-
-void plc_init(struct PlcDevice *plc_dev)
+static const struct PlcOps plc_done =
 {
+    .open = PlcDeviceOpen,
+    .close = PlcDeviceClose,
+    .write = PlcDeviceWrite,
+    .read = PlcDeviceRead,
+};
+
+struct PlcDevice *PlcDevFind(const char *dev_name, enum DevType dev_type)
+{
+    NULL_PARAM_CHECK(dev_name);
+
+    struct PlcDevice *device = NONE;
+
+    DoubleLinklistType *node = NONE;
+    DoubleLinklistType *head = &plcdev_list;
+
+    for (node = head->node_next; node != head; node = node->node_next) {
+        device = SYS_DOUBLE_LINKLIST_ENTRY(node, struct PlcDevice, link);
+        if ((!strcmp(device->name, dev_name)) && (dev_type == device->type)) {
+            return device;
+        }
+    }
+
+    KPrintf("PlcDevFind cannot find the %s device.return NULL\n", dev_name);
+    return NONE;
 }
 
+int PlcDevRegister(struct PlcDevice *plc_device, void *plc_param, const char *device_name)
+{
+    NULL_PARAM_CHECK(plc_device);
+    NULL_PARAM_CHECK(device_name);
+
+    x_err_t ret = EOK;
+    static x_bool dev_link_flag = RET_FALSE;
+
+    if (!dev_link_flag) {
+        PlcDeviceLinkInit();
+        dev_link_flag = RET_TRUE;
+    }
+
+    if (DEV_INSTALL != plc_device->state) {
+        strncpy(plc_device->name, device_name, strlen(device_name));
+        DoubleLinkListInsertNodeAfter(&plcdev_list, &(plc_device->link));
+        plc_device->state = DEV_INSTALL;
+    } else {
+        KPrintf("PlcDevRegister device has been register state%u\n", plc_device->type);
+    }
+
+    return ret;
+}
+
+int PlcDeviceAttachToBus(const char *dev_name, const char *bus_name)
+{
+    NULL_PARAM_CHECK(dev_name);
+    NULL_PARAM_CHECK(bus_name);
+
+    x_err_t ret = EOK;
+
+    struct Bus *bus;
+    struct HardwareDev *device;
+
+    bus = BusFind(bus_name);
+    if (NONE == bus) {
+        KPrintf("PlcDeviceAttachToBus find plc bus error!name %s\n", bus_name);
+        return ERROR;
+    }
+
+    if (TYPE_PLC_BUS == bus->bus_type) {
+        device = PlcHardwareDevFind(dev_name, TYPE_PLC_DEV);
+        if (NONE == device) {
+            KPrintf("PlcDeviceAttachToBus find plc device error!name %s\n", dev_name);
+            return ERROR;
+        }
+
+        if (TYPE_PLC_DEV == device->dev_type) {
+            ret = DeviceRegisterToBus(bus, device);
+            if (EOK != ret) {
+                KPrintf("PlcDeviceAttachToBus DeviceRegisterToBus error %u\n", ret);
+                return ERROR;
+            }
+        }
+    }
+
+    return EOK;
+}
 
