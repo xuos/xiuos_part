@@ -46,8 +46,8 @@ void k210_detect(char *json_file_path)
         printf("open ov2640 fail !!");
         return;
     }
-    _ioctl_set_dvp_reso set_dvp_reso = {detect_params.sensor_output_size[1], detect_params.sensor_output_size[0]};
-    ioctl(g_fd, IOCTRL_CAMERA_SET_DVP_RESO, &set_dvp_reso);
+    _ioctl_set_reso set_dvp_reso = {detect_params.sensor_output_size[1], detect_params.sensor_output_size[0]};
+    ioctl(g_fd, IOCTRL_CAMERA_OUT_SIZE_RESO, &set_dvp_reso);
     showbuffer =
         (unsigned char *)rt_malloc_align(detect_params.sensor_output_size[0] * detect_params.sensor_output_size[1] * 2, 64);
     if (NULL == showbuffer) {

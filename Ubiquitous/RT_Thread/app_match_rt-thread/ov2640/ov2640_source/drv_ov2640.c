@@ -672,7 +672,11 @@ const rt_uint8_t ov2640_jpeg_reg_tbl[][2]=
 const rt_uint8_t ov2640_rgb565_reg_tbl[][2]=
 {
     {0xFF, 0x00},
+    #ifdef SOC_FAMILY_STM32
+    {0xDA, 0x09},
+    #elif defined BOARD_K210_EVB
     {0xDA, 0x08},
+    #endif
     {0xD7, 0x03},
     {0xDF, 0x02},
     {0x33, 0xa0},
@@ -1467,7 +1471,7 @@ static rt_err_t rt_ov2640_control(rt_device_t dev, int cmd, void *args)
 {
     RT_ASSERT(dev != RT_NULL);
     rt_err_t ret = RT_EOK;
-    if(cmd < IOCTRL_CAMERA_SET_DVP_RESO || cmd > IOCTRL_CAMERA_SET_EXPOSURE)
+    if(cmd < IOCTRL_CAMERA_OUT_SIZE_RESO || cmd > IOCTRL_CAMERA_SET_EXPOSURE)
     {
         LOG_E("CMD value should be 22 ~29");
         return RT_ERROR;
@@ -1475,23 +1479,24 @@ static rt_err_t rt_ov2640_control(rt_device_t dev, int cmd, void *args)
 
     int value = 0;
     _ioctl_shoot_para shoot_para = {0};
-     #ifdef  BOARD_K210_EVB
-    _ioctl_set_dvp_reso set_dvp_reso = {0};
-    #endif
+    _ioctl_set_reso set_dvp_reso = {0};
+
     if(IOCTRL_CAMERA_START_SHOT == cmd)
     {
         shoot_para = *((_ioctl_shoot_para*)args);
         ret = rt_ov2640_start_shoot(shoot_para.pdata,shoot_para.length);
         return ret;
     }
-    #ifdef  BOARD_K210_EVB
-    else if(IOCTRL_CAMERA_SET_DVP_RESO == cmd)
+    else if(IOCTRL_CAMERA_OUT_SIZE_RESO == cmd)
     {
-        set_dvp_reso =*((_ioctl_set_dvp_reso*)args);
+        set_dvp_reso =*((_ioctl_set_reso*)args);
+        #ifdef BOARD_K210_EVB
         dvp_set_image_size(set_dvp_reso.width, set_dvp_reso.height);
+        #elif defined SOC_FAMILY_STM32
+        ov2640_set_image_size(set_dvp_reso.width, set_dvp_reso.height);
+        #endif
         return RT_EOK;
     }
-    #endif
     else
     {
         value = *((int*)args);
@@ -1617,18 +1622,22 @@ static rt_err_t rt_ov2640_init(rt_device_t dev)
             sccb_write_reg(i2c_bus, ov2640_svga_init_reg_tbl[i][0], ov2640_svga_init_reg_tbl[i][1]);
         }
     }
-    ov2640_rgb565_mode();
     ov2640_set_light_mode(0);
     ov2640_set_color_saturation(0);
     ov2640_set_brightness(2);
     ov2640_set_contrast(1);
+    #ifdef OV2640_RGB565_MODE
+    ov2640_rgb565_mode();
+    #elif defined OV2640_JPEG_MODE
+    ov2640_jpeg_mode();
+    #endif
     #ifdef SOC_FAMILY_STM32
      LOG_I("set ov2640 jpeg mode on stm32 board");
-    ov2640_jpeg_mode();
-    ov2640_set_image_window_size(0, 0, jpeg_img_size_tbl[g_ov2640_reso_level][0],jpeg_img_size_tbl[g_ov2640_reso_level][1]);	
-    ov2640_set_image_out_size(jpeg_img_size_tbl[g_ov2640_reso_level][0], jpeg_img_size_tbl[g_ov2640_reso_level][1]);
-    LOG_I("set image resolution is %d * %d ",jpeg_img_size_tbl[g_ov2640_reso_level][0],jpeg_img_size_tbl[g_ov2640_reso_level][1]);
+    ov2640_set_image_out_size(OV2640_X_RESOLUTION_IMAGE_OUTSIZE,OV2640_Y_RESOLUTION_IMAGE_OUTSIZE);
+    ov2640_set_image_window_size(0, 0,OV2640_X_IMAGE_WINDOWS_SIZE,OV2640_Y_IMAGE_WINDOWS_SIZE);	
+    LOG_I("set image resolution is %d * %d ",OV2640_X_RESOLUTION_IMAGE_OUTSIZE,OV2640_Y_RESOLUTION_IMAGE_OUTSIZE);
     #elif defined BOARD_K210_EVB
+    ov2640_rgb565_mode();
     ov2640_set_image_window_size(0, 0, jpeg_img_size_tbl[5][0],jpeg_img_size_tbl[5][1]);	
     ov2640_set_image_out_size(jpeg_img_size_tbl[2][0], jpeg_img_size_tbl[2][1]);
     LOG_I("set ov2640 rgb565 mode on K210 board and set reselotion QVGA 320,240");

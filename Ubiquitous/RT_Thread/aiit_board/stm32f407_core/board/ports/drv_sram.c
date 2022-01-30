@@ -161,7 +161,7 @@ MSH_CMD_EXPORT(sram_test, sram test);
 static void sram_test2(void)
 {
     char *p =NULL;
-	p = rt_malloc(1024*1000);
+	p = rt_malloc(1024*800);
 	if(p == NULL)
 	{
 		LOG_E("apply for 1MB memory fail ~!!!");

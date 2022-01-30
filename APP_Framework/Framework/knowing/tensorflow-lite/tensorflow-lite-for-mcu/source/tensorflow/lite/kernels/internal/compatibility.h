@@ -76,6 +76,7 @@ limitations under the License.
 #define TFLITE_CHECK_LT(x, y) ((x) < (y)) ? (void)0 : TFLITE_ABORT
 #endif
 
+/*
 #ifndef TF_LITE_STATIC_MEMORY
 // TODO(b/162019032): Consider removing these type-aliases.
 using int8 = std::int8_t;
@@ -85,6 +86,7 @@ using uint16 = std::uint16_t;
 using int32 = std::int32_t;
 using uint32 = std::uint32_t;
 #endif  // !defined(TF_LITE_STATIC_MEMORY)
+*/
 
 // TFLITE_DEPRECATED()
 //
