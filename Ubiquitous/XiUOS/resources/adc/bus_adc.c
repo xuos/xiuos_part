@@ -13,13 +13,15 @@
 /**
 * @file bus_adc.c
 * @brief register adc bus function using bus driver framework
-* @version 1.1 
+* @version 1.1
 * @author AIIT XUOS Lab
 * @date 2021-12-28
 */
 
 #include <bus_adc.h>
 #include <dev_adc.h>
+
+#if 0
 
 /*Register the ADC BUS*/
 int AdcBusInit(struct AdcBus *adc_bus, const char *bus_name)
@@ -42,7 +44,7 @@ int AdcBusInit(struct AdcBus *adc_bus, const char *bus_name)
             return ret;
         }
     } else {
-        KPrintf("AdcBusInit BusRegister bus has been register state%u\n", adc_bus->bus.bus_state);        
+        KPrintf("AdcBusInit BusRegister bus has been register state%u\n", adc_bus->bus.bus_state);
     }
 
     return ret;
@@ -89,7 +91,7 @@ int AdcReleaseBus(struct AdcBus *adc_bus)
 int AdcDriverAttachToBus(const char *drv_name, const char *bus_name)
 {
     NULL_PARAM_CHECK(drv_name);
-    NULL_PARAM_CHECK(bus_name);    
+    NULL_PARAM_CHECK(bus_name);
 
     x_err_t ret = EOK;
 
@@ -120,3 +122,4 @@ int AdcDriverAttachToBus(const char *drv_name, const char *bus_name)
 
     return ret;
 }
+#endif

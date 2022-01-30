@@ -50,11 +50,11 @@ int UserPrintInfo(unsigned long i);
 
 struct utask
 {
-	char        name[NAME_NUM_MAX];         
-    void        *func_entry;                
-    void        *func_param;     
-    int32_t     stack_size;  
-    uint8_t     prio; 
+	char        name[NAME_NUM_MAX];
+    void        *func_entry;
+    void        *func_param;
+    int32_t     stack_size;
+    uint8_t     prio;
 };
 typedef struct utask UtaskType;
 
@@ -109,7 +109,7 @@ typedef int32 EventIdType;
 EventIdType UserEventCreate(uint8_t flag);
 void UserEventDelete(EventIdType event);
 x_err_t UserEventTrigger(EventIdType event, uint32_t set);
-x_err_t UserEventProcess(EventIdType event, uint32_t set, uint8_t option, 
+x_err_t UserEventProcess(EventIdType event, uint32_t set, uint8_t option,
                          int32_t   wait_time, uint32_t *Recved);
 x_err_t UserEventReinit(EventIdType event);
 #endif
@@ -162,7 +162,7 @@ int statfs(const char *path, struct statfs *buf);
 
 int Userprintf(const char *fmt, ...);
 
-#define printf      Userprintf    
+#define printf      Userprintf
 
 #else
 
@@ -172,11 +172,11 @@ int Userprintf(const char *fmt, ...);
 
 struct utask
 {
-	char        name[NAME_NUM_MAX];         
-    void        *func_entry;                
-    void        *func_param;     
-    int32_t     stack_size;  
-    uint8_t     prio; 
+	char        name[NAME_NUM_MAX];
+    void        *func_entry;
+    void        *func_param;
+    int32_t     stack_size;
+    uint8_t     prio;
 };
 typedef struct utask UtaskType;
 int32_t UserTaskCreate(UtaskType utask);

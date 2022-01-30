@@ -23,10 +23,14 @@
 #include "sys_arch.h"
 #include "lwip/udp.h"
 #include "lwip/opt.h"
+#include <lwip/sockets.h>
+#include "lwip/sys.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+
+#define UDP_BUF_SIZE 65536
 
 /*******************************************************************************
  * Prototypes
@@ -35,6 +39,7 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+
 extern char udp_target[];
 static struct udp_pcb *udpecho_raw_pcb;
 char udp_socket_ip[] = {192, 168, 250, 252};
@@ -42,14 +47,6 @@ char udp_socket_ip[] = {192, 168, 250, 252};
 /*******************************************************************************
  * Code
  ******************************************************************************/
-
-#include <lwip/sockets.h>
-#include "lwip/sys.h"
-
-#define LWIP_UDP_TASK_STACK 4096
-#define LWIP_UDP_TASK_PRIO 25
-#define UDP_BUF_SIZE 1024
-
 static void udp_recv_demo(void *arg)
 {
     lw_print("udp_recv_demo start.\n");
@@ -63,14 +60,14 @@ static void udp_recv_demo(void *arg)
     while(1)
     {
         recv_buf = (char *)malloc(UDP_BUF_SIZE);
-        if (recv_buf == NULL)
+        if(recv_buf == NULL)
         {
             lw_print("No memory\n");
             goto __exit;
         }
 
         socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
-        if (socket_fd < 0)
+        if(socket_fd < 0)
         {
             lw_print("Socket error\n");
             goto __exit;
@@ -81,7 +78,7 @@ static void udp_recv_demo(void *arg)
         udp_addr.sin_port = htons(LWIP_LOCAL_PORT);
         memset(&(udp_addr.sin_zero), 0, sizeof(udp_addr.sin_zero));
 
-        if (bind(socket_fd, (struct sockaddr *)&udp_addr, sizeof(struct sockaddr)) == -1)
+        if(bind(socket_fd, (struct sockaddr *)&udp_addr, sizeof(struct sockaddr)) == -1)
         {
             lw_print("Unable to bind\n");
             goto __exit;
@@ -94,25 +91,22 @@ static void udp_recv_demo(void *arg)
         {
             memset(recv_buf, 0, UDP_BUF_SIZE);
             recv_len = recvfrom(socket_fd, recv_buf, UDP_BUF_SIZE, 0, (struct sockaddr *)&server_addr, &addr_len);
-            lw_print("Receive from : %s\n", inet_ntoa(server_addr.sin_addr));
-            lw_print("Receive data : %s\n\n", recv_buf);
+            lw_pr_info("Receive from : %s\n", inet_ntoa(server_addr.sin_addr));
+            lw_pr_info("Receive data : %s\n\n", recv_buf);
             sendto(socket_fd, recv_buf, recv_len, 0, (struct sockaddr*)&server_addr, addr_len);
         }
 
     __exit:
-        if (socket_fd >= 0)
+        if(socket_fd >= 0)
+        {
             closesocket(socket_fd);
+        }
 
-        if (recv_buf)
+        if(recv_buf)
+        {
             free(recv_buf);
+        }
     }
-}
-
-static void udp_recv_demo_thread(void* param)
-{
-    ETH_BSP_Config();
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("udp_recv_demo", udp_recv_demo, NULL, LWIP_UDP_TASK_STACK, LWIP_UDP_TASK_PRIO);
 }
 
 void udp_socket_recv_run(int argc, char *argv[])
@@ -127,7 +121,9 @@ void udp_socket_recv_run(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3]);
     }
 
-    sys_thread_new("udp socket send", udp_recv_demo_thread, NULL, 4096, 15);
+    ETH_BSP_Config();
+    lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    sys_thread_new("udp_recv_demo", udp_recv_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
@@ -144,7 +140,7 @@ static void udp_send_demo(void *arg)
     memset(send_str, 0, sizeof(send_str));
 
     socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (socket_fd < 0)
+    if(socket_fd < 0)
     {
         lw_print("Socket error\n");
         goto __exit;
@@ -153,10 +149,10 @@ static void udp_send_demo(void *arg)
     struct sockaddr_in udp_sock;
     udp_sock.sin_family = AF_INET;
     udp_sock.sin_port = htons(LWIP_TARGET_PORT);
-    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_target[0],udp_target[1],udp_target[2],udp_target[3]));
+    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_target[0], udp_target[1], udp_target[2], udp_target[3]));
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
-    if (connect(socket_fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
+    if(connect(socket_fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
     {
         lw_print("Unable to connect\n");
         goto __exit;
@@ -174,19 +170,12 @@ static void udp_send_demo(void *arg)
     }
 
 __exit:
-    if (socket_fd >= 0)
+    if(socket_fd >= 0)
     {
         closesocket(socket_fd);
     }
 
     return;
-}
-
-static void udp_send_demo_thread(void* param)
-{
-    ETH_BSP_Config();
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("udp_send_demo", udp_send_demo, NULL, LWIP_UDP_TASK_STACK, LWIP_UDP_TASK_PRIO);
 }
 
 void udp_socket_send_run(int argc, char *argv[])
@@ -201,7 +190,9 @@ void udp_socket_send_run(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3]);
     }
 
-    sys_thread_new("udp socket send", udp_send_demo_thread, NULL, 4096, 15);
+    ETH_BSP_Config();
+    lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    sys_thread_new("udp_send_demo", udp_send_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),

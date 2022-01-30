@@ -11,13 +11,12 @@
 */
 
 /**
-* @file tcp_echo_socket_demo.c
+* @file lwip_udp_demo.c
 * @brief One UDP demo based on LwIP
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-29
 */
-#include <transform.h>
 #include <xiuos.h>
 #include "board.h"
 #include "sys_arch.h"
@@ -95,8 +94,7 @@ __exit:
 void *lwip_udp_send_run(int argc, char *argv[])
 {
     int result = 0;
-    pthread_t th_id;
-    pthread_attr_t attr;
+    sys_thread_t th_id;
 
     memset(udp_send_msg, 0, sizeof(udp_send_msg));
 
@@ -118,7 +116,7 @@ void *lwip_udp_send_run(int argc, char *argv[])
 
     ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("udp socket send", lwip_udp_send, NULL, 4096, 25);
+    sys_thread_new("udp socket send", lwip_udp_send, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),

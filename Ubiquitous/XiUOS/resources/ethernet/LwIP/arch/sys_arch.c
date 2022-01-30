@@ -29,17 +29,6 @@
  * Author: Simon Goldschmidt
  *
  */
-/*
-* Copyright (c) 2020 AIIT XUOS Lab
-* XiUOS is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*        http://license.coscl.org.cn/MulanPSL2
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-* See the Mulan PSL v2 for more details.
-*/
 
 /**
 * @file sys_arch.c
@@ -48,6 +37,7 @@
 * @author AIIT XUOS Lab
 * @date 2021-05-29
 */
+
 #include "debug.h"
 
 #include <lwip/opt.h>
@@ -79,7 +69,6 @@
 #include "board.h"
 #include "ethernet.h"
 #include "enet_ethernetif.h"
-#include <transform.h>
 
 char lwip_ipaddr[] = {192, 168, 250, 253};
 char lwip_netmask[] = {255, 255, 255, 0};
@@ -463,9 +452,10 @@ void lwip_input_thread(void *param)
 
 void lwip_config_input(struct netif *net)
 {
-  pthread_t th_id = 0;
+  sys_thread_t th_id = 0;
 
-  th_id = sys_thread_new("eth_input", lwip_input_thread, net, 4096, 15);
+  th_id = sys_thread_new("eth_input", lwip_input_thread, net, LWIP_TASK_STACK_SIZE,
+    LWIP_DEMO_TASK_PRIO);
 
   if (th_id >= 0) {
     lw_print("%s %d successfully!\n", __func__, th_id);

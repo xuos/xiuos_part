@@ -15,8 +15,11 @@
  * @brief plc relative definition and structure
  * @version 1.0
  * @author AIIT XUOS Lab
- * @date 2021.12.15
+ * @date 2022-01-24
  */
+
+#ifndef __PLC_H_
+#define __PLC_H_
 
 #include "bus.h"
 #include "xs_klist.h"
@@ -78,7 +81,7 @@ enum PlcCtlType {
 
 enum PlcIndHybridNet
 {
-    //PLC Field Bus
+    // PLC Field Bus
     PLC_IND_FIELD_MODBUS_485,
     PLC_IND_FIELD_PROFIBUS,
     PLC_IND_FIELD_CANOPEN,
@@ -92,7 +95,7 @@ enum PlcIndHybridNet
     PLC_IND_ENET_SERCOS,
     PLC_IND_ENET_OPCUA,
 
-    //PLC wireless net
+    // PLC wireless net
     PLC_IND_WIRELESS
 };
 
@@ -112,7 +115,7 @@ struct PlcInterface
 
 // identify PLC device
 struct PlcDevice {
-    char name[PLC_NAME_SIZE]; /* name of the  device */
+    char name[PLC_NAME_SIZE]; /* name of the device */
     enum PlcCtlType type; /* PLC Control Type */
     enum DevState state;
     enum PlcIndHybridNet net;
@@ -125,3 +128,4 @@ struct PlcDevice {
     DoubleLinklistType link;/* link list node */
 };
 
+#endif

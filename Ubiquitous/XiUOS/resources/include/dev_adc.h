@@ -13,7 +13,7 @@
 /**
 * @file dev_adc.h
 * @brief define adc dev function using bus driver framework
-* @version 1.1 
+* @version 1.1
 * @author AIIT XUOS Lab
 * @date 2021-12-28
 */

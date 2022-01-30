@@ -1,13 +1,4 @@
 /*
- * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
-/*
  * Copyright (c) 2021 AIIT XUOS Lab
  * XiUOS is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -79,8 +70,8 @@ void lwip_setip_thread(int argc, char *argv[])
     pthread_t th_id;
     pthread_attr_t attr;
 
-    attr.schedparam.sched_priority = 15;
-    attr.stacksize = 4096;
+    attr.schedparam.sched_priority = LWIP_DEMO_TASK_PRIO;
+    attr.stacksize = LWIP_TASK_STACK_SIZE;
 
     if(argc >= 4)
     {

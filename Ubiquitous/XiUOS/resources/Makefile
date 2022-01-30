@@ -1,8 +1,12 @@
 SRC_DIR :=
-SRC_FILES +=  bus.c
+SRC_FILES += bus.c
 
 ifeq ($(CONFIG_KERNEL_DEVICE),y)
 	SRC_FILES += device.c
+endif
+
+ifeq ($(CONFIG_RESOURCES_ADC),y)
+	SRC_DIR += adc
 endif
 
 ifeq ($(CONFIG_RESOURCES_CAN),y)

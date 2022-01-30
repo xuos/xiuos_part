@@ -11,44 +11,44 @@
 */
 
 /**
-* @file plc_dev.h
+* @file dev_plc.h
 * @brief define plc dev function using bus driver framework
 * @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-04-24
+* @date 2022-01-24
 */
 
-#ifndef __PLC_DEV_H_
-#define __PLC_DEV_H_
+#ifndef DEV_PLC_H
+#define DEV_PLC_H
 
 #include <bus.h>
 
-#ifdef __cplusplus
+#ifdef __cpluspluss
 extern "C" {
 #endif
 
-#define PLC_MAX_CLOCK            40000000
+#define PLC_MAX_CLOCK       40000000
 #define plc_device_max_num  4
 
-#define PLC_LINE_CPHA     (1<<0)
-#define PLC_LINE_CPOL     (1<<1)
+#define PLC_LINE_CPHA      (1 << 0)
+#define PLC_LINE_CPOL      (1 << 1)
 
-#define PLC_LSB       (0<<2)
-#define PLC_MSB      (1<<2)
+#define PLC_LSB            (0 << 2)
+#define PLC_MSB            (1 << 2)
 
-#define PLC_MASTER           (0<<3)
-#define DEV_PLC_SLAVE    (1<<3)
+#define PLC_MASTER         (0 << 3)
+#define DEV_PLC_SLAVE      (1 << 3)
 
-#define PLC_MODE_0             (0 | 0)
-#define PLC_MODE_1             (0 | PLC_LINE_CPHA)
-#define PLC_MODE_2             (PLC_LINE_CPOL | 0)
-#define PLC_MODE_3             (PLC_LINE_CPOL | PLC_LINE_CPHA)
-#define PLC_MODE_MASK    (PLC_LINE_CPHA | PLC_LINE_CPOL | PLC_MSB)
+#define PLC_MODE_0         (0 | 0)
+#define PLC_MODE_1         (0 | PLC_LINE_CPHA)
+#define PLC_MODE_2         (PLC_LINE_CPOL | 0)
+#define PLC_MODE_3         (PLC_LINE_CPOL | PLC_LINE_CPHA)
+#define PLC_MODE_MASK      (PLC_LINE_CPHA | PLC_LINE_CPOL | PLC_MSB)
 
-#define PLC_CS_HIGH  (1<<4)
-#define PLC_NO_CS      (1<<5)
-#define PLC_3WIRE        (1<<6)
-#define PLC_READY        (1<<7)
+#define PLC_CS_HIGH        (1 << 4)
+#define PLC_NO_CS          (1 << 5)
+#define PLC_3WIRE          (1 << 6)
+#define PLC_READY          (1 << 7)
 
 struct PlcDataStandard
 {
@@ -70,7 +70,7 @@ struct PlcMasterParam
     uint8 plc_work_mode;//CPOL CPHA
     uint8 plc_frame_format;//frame format
     uint8 plc_data_bit_width;//bit width
-    uint8 plc_data_endian;//little endian：0，big endian：1
+    uint8 plc_data_endian;//little endian 0 : big endian 1
     uint32 plc_maxfrequency;//work frequency
 };
 

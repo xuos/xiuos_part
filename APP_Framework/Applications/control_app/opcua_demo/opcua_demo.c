@@ -31,6 +31,8 @@
 
 #define TCP_LOCAL_PORT 4840
 #define UA_URL_SIZE 100
+#define UA_STACK_SIZE 4096
+#define UA_TASK_PRIO 25
 
 /*******************************************************************************
  * Prototypes
@@ -91,7 +93,7 @@ void test_sh_ua_connect(void)
     int result = 0;
     pthread_t th_id;
     pthread_attr_t attr;
-    sys_thread_new("ua test", test_ua_connect_thr, NULL, 4096, 15);
+    sys_thread_new("ua test", test_ua_connect_thr, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
@@ -148,7 +150,7 @@ void *test_sh_ua_brower_objects(int argc, char *argv[])
 
     ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
-    sys_thread_new("ua object", test_ua_browser_objects, NULL, 4096, 15);
+    sys_thread_new("ua object", test_ua_browser_objects, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
     return NULL;
 }
 
@@ -202,7 +204,7 @@ void *test_sh_ua_get_info(int argc, char *argv[])
 
     ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
-    sys_thread_new("ua object", test_ua_get_info, NULL, 4096, 15);
+    sys_thread_new("ua object", test_ua_browser_objects, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
     return NULL;
 }
 

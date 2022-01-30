@@ -11,13 +11,14 @@
 */
 
 /**
-* @file plc_drv.c
+* @file drv_plc.c
 * @brief register plc drv function using bus driver framework
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-04-24
+* @date 2022-01-24
 */
 
+#include "transform.h"
 #include "plc_bus.h"
 #include "plc_dev.h"
 
@@ -32,7 +33,7 @@ static void PlcDrvLinkInit()
 DriverType PlcDriverFind(const char *drv_name, enum DriverType_e drv_type)
 {
     NULL_PARAM_CHECK(drv_name);
-    
+
     struct Driver *driver = NONE;
 
     DoubleLinklistType *node = NONE;
@@ -65,3 +66,4 @@ int PlcDriverRegister(struct Driver *driver)
 
     return ret;
 }
+

@@ -13,9 +13,9 @@
 /**
 * @file plc_bus.h
 * @brief define plc bus and drv function using bus driver framework
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-04-24
+* @date 2022-01-24
 */
 
 #ifndef __PLC_BUS_H_
@@ -30,14 +30,12 @@ extern "C" {
 struct PlcDriver
 {
     struct Driver driver;
-
     uint32 (*configure) (void *drv, struct BusConfigureInfo *configure_info);
 };
 
 struct PlcBus
 {
     struct Bus bus;
-
     void *private_data;
 };
 

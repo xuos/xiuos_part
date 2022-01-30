@@ -15,7 +15,7 @@
 * @brief register plc dev function using bus driver framework
 * @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-04-24
+* @date 2022-01-24
 */
 
 #include "plc_bus.h"
@@ -38,6 +38,7 @@ static uint32 PlcHardwareDevOpen(void *dev)
     return EOK;
 }
 
+
 static uint32 PlcHardwareDevClose(void *dev)
 {
     NULL_PARAM_CHECK(dev);
@@ -46,6 +47,7 @@ static uint32 PlcHardwareDevClose(void *dev)
 
     return EOK;
 }
+
 
 static uint32 PlcHardwareDevWrite(void *dev, struct BusBlockWriteParam *write_param)
 {
@@ -84,12 +86,13 @@ static uint32 PlcHardwareDevRead(void *dev, struct BusBlockReadParam *read_param
     NULL_PARAM_CHECK(read_param);
 
     int ret;
+
     struct PlcHardwareDevice *plc_dev = (struct PlcHardwareDevice *)dev;
+
     struct PlcDataStandard *plc_msg;
 
     plc_msg = (struct PlcDataStandard *)x_malloc(sizeof(struct PlcDataStandard));
     if (NONE == plc_msg) {
-        KPrintf("PlcHardwareDevRead x_malloc msg error\n");
         x_free(plc_msg);
         return ERROR;
     }
@@ -214,7 +217,7 @@ int PlcHardwareDevConfigureCs(struct HardwareDev *dev, uint8 plc_chip_select, ui
     struct PlcDataStandard *msg;
 
     msg = (struct PlcDataStandard *)x_malloc(sizeof(struct PlcDataStandard));
-    if (NONE == msg) {
+    if (NONE == msg){
         KPrintf("PlcHardwareDevConfigureCs x_malloc msg error\n");
         x_free(msg);
         return ERROR;
@@ -228,8 +231,10 @@ int PlcHardwareDevConfigureCs(struct HardwareDev *dev, uint8 plc_chip_select, ui
     msg->plc_chip_select = plc_chip_select;
     msg->plc_cs_release = plc_cs_release;
 
+
     ret = plc_dev->plc_dev_done->dev_write(plc_dev, msg);
 
     x_free(msg);
     return ret;
 }
+

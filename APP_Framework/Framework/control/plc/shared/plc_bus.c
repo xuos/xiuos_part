@@ -11,11 +11,11 @@
 */
 
 /**
-* @file plc_bus.c
+* @file bus_plc.c
 * @brief register plc bus function using bus driver framework
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-04-24
+* @date 2022-01-24
 */
 
 #include "plc_bus.h"
@@ -30,7 +30,6 @@ int PlcBusInit(struct PlcBus *plc_bus, const char *bus_name)
 
     if (BUS_INSTALL != plc_bus->bus.bus_state) {
         strncpy(plc_bus->bus.bus_name, bus_name, NAME_NUM_MAX);
-
         plc_bus->bus.bus_type = TYPE_PLC_BUS;
         plc_bus->bus.bus_state = BUS_INSTALL;
         plc_bus->bus.private_data = plc_bus->private_data;
@@ -41,7 +40,7 @@ int PlcBusInit(struct PlcBus *plc_bus, const char *bus_name)
             return ret;
         }
     } else {
-        KPrintf("PlcBusInit BusRegister bus has been register state%u\n", plc_bus->bus.bus_state);        
+        KPrintf("PlcBusInit BusRegister bus has been register state%u\n", plc_bus->bus.bus_state);
     }
 
     return ret;
@@ -85,7 +84,7 @@ int PlcDriverAttachToBus(const char *drv_name, const char *bus_name)
 {
     NULL_PARAM_CHECK(drv_name);
     NULL_PARAM_CHECK(bus_name);
-    
+
     x_err_t ret = EOK;
 
     struct Bus *bus;
@@ -103,6 +102,7 @@ int PlcDriverAttachToBus(const char *drv_name, const char *bus_name)
             KPrintf("PlcDriverAttachToBus find plc driver error!name %s\n", drv_name);
             return ERROR;
         }
+
 
         if (TYPE_PLC_DRV == driver->driver_type) {
             ret = DriverRegisterToBus(bus, driver);

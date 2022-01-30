@@ -63,8 +63,6 @@
 
 /* Exported functions ------------------------------------------------------- */
 
-void enet_delay(void);
-
 #ifdef __cplusplus
 }
 #endif

@@ -28,6 +28,8 @@
  * Definitions
  ******************************************************************************/
 
+#define TCP_DEMO_BUF_SIZE 65535
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -37,8 +39,6 @@
  ******************************************************************************/
 
 char tcp_socket_ip[] = {192, 168, 250, 252};
-
-#define TCP_DEMO_BUF_SIZE 65535
 
 /*******************************************************************************
  * Code
@@ -80,7 +80,7 @@ static void tcp_recv_demo(void *arg)
         }
 
         lw_print("tcp bind success, start to receive.\n");
-        lw_print("\n\nLocal Port:%d\n\n", LWIP_LOCAL_PORT);
+        lw_pr_info("\n\nLocal Port:%d\n\n", LWIP_LOCAL_PORT);
 
         // setup socket fd as listening mode
         if (listen(fd, 5) != 0 )
@@ -91,7 +91,7 @@ static void tcp_recv_demo(void *arg)
 
         // accept client connection
         clientfd = accept(fd, (struct sockaddr *)&tcp_addr, (socklen_t*)&addr_len);
-        lw_print("client %s connected\n", inet_ntoa(tcp_addr.sin_addr));
+        lw_pr_info("client %s connected\n", inet_ntoa(tcp_addr.sin_addr));
 
         while(1)
         {
@@ -163,7 +163,7 @@ static void tcp_send_demo(void *arg)
     }
 
     lw_print("tcp connect success, start to send.\n");
-    lw_pr_info("\n\nTarget Port:%d\n\n", tcp_sock.sin_port);
+    lw_pr_info("\n\nTarget Port:%d\n\n", LWIP_TARGET_PORT);
 
     while (cnt --)
     {
