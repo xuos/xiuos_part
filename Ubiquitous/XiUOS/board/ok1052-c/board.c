@@ -40,6 +40,24 @@ extern int ExtSramInit(void);
 #endif
 #endif
 
+#if defined(FS_VFS) && defined(MOUNT_SDCARD)
+#include <iot-vfs.h>
+
+/**
+ * @description: Mount SD card
+ * @return 0
+ */
+int MountSDCard(void)
+{
+    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, FSTYPE_FATFS, "/") == 0)
+        KPrintf("sd card mount to '/'");
+    else
+        KPrintf("sd card mount to '/' failed!");
+    
+    return 0;
+}
+#endif
+
 #if defined(SDK_I2C_BASED_COMPONENT_USED) && SDK_I2C_BASED_COMPONENT_USED
 #include "fsl_lpi2c.h"
 #endif /* SDK_I2C_BASED_COMPONENT_USED */
@@ -624,13 +642,11 @@ void InitBoardHardware()
     CLOCK_SetMux(kCLOCK_SemcMux, 1);
     CLOCK_SetDiv(kCLOCK_SemcDiv, 1);
 
-    if (BOARD_InitSEMC() != kStatus_Success)
-    {
+    if (BOARD_InitSEMC() != kStatus_Success) {
         KPrintf("\r\n SEMC Init Failed\r\n");
     }
 #ifdef MEM_EXTERN_SRAM
-    else
-    {
+    else {
         ExtSramInit();
     }
 #endif

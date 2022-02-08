@@ -188,16 +188,12 @@ static uint32 SdioConfigure(void *drv, struct BusConfigureInfo *configure_info)
     NULL_PARAM_CHECK(configure_info);
 
     if (configure_info->configure_cmd == OPER_BLK_GETGEOME) {
-        // NULL_PARAM_CHECK(configure_info->private_data);
-        // struct DeviceBlockArrange *args = (struct DeviceBlockArrange *)configure_info->private_data;
-        // //SD_GetCardInfo(&SDCardInfo);
+        NULL_PARAM_CHECK(configure_info->private_data);
+        struct DeviceBlockArrange *args = (struct DeviceBlockArrange *)configure_info->private_data;
 
-        // // args->size_perbank = SDCardInfo.CardBlockSize;
-        // // args->block_size = SDCardInfo.CardBlockSize;
-        // // if(SDCardInfo.CardType == SDIO_HIGH_CAPACITY_SD_CARD)
-        // //     args->bank_num = (SDCardInfo.SD_csd.DeviceSize + 1)  * 1024;
-        // // else
-        // //     args->bank_num = SDCardInfo.CardCapacity;
+        args->size_perbank = g_sd.blockSize;
+        args->block_size = g_sd.blockSize;
+        args->bank_num = g_sd.blockCount;
     }
 
     return EOK;
@@ -230,37 +226,18 @@ static uint32 SdioClose(void *dev)
 static uint32 SdioRead(void *dev, struct BusBlockReadParam *read_param)
 {
     uint8 ret = EOK;
+    uint32 sector = read_param->pos;
+    uint32 block_num = read_param->size;
+    uint8 *read_buffer = (uint8 *)read_param->buffer;
 
     KSemaphoreObtain(sd_lock, WAITING_FOREVER);
 
-    // if (((uint32)read_param->buffer & 0x03) != 0) {
-    //     uint64_t sector;
-    //     uint8_t* temp;
+    if (kStatus_Success != SD_ReadBlocks(&g_sd, read_buffer, sector, block_num)) {
+        KPrintf("Read multiple data blocks failed.\r\n");
+        return 0;
+    }
 
-    //     sector = (uint64_t)read_param->pos * SDCARD_SECTOR_SIZE;
-    //     temp = (uint8_t*)read_param->buffer;
-
-    //     for (uint8 i = 0; i < read_param->size; i++) {
-    //         ret = SD_ReadBlock((uint8_t *)SDBuffer, sector, 1);
-    //         if(ret != SD_OK) {
-    //             KPrintf("read failed: %d, buffer 0x%08x\n", ret, temp);
-    //             return 0;
-    //         }
-
-    //         memcpy(temp, SDBuffer, SDCARD_SECTOR_SIZE);
-
-    //         sector += SDCARD_SECTOR_SIZE;
-    //         temp += SDCARD_SECTOR_SIZE;
-    //     }
-    // } else {
-    //     ret = SD_ReadBlock((uint8_t *)read_param->buffer, (uint64_t)read_param->pos * SDCARD_SECTOR_SIZE, read_param->size);
-    //     if (ret != SD_OK) {
-    //         KPrintf("read failed: %d, buffer 0x%08x\n", ret, (uint8_t *)read_param->buffer);
-    //         return 0;
-    //     }
-    // }
-
-    // KSemaphoreAbandon(sd_lock);
+    KSemaphoreAbandon(sd_lock);
 
     return read_param->size;
 }
@@ -268,35 +245,16 @@ static uint32 SdioRead(void *dev, struct BusBlockReadParam *read_param)
 static uint32 SdioWrite(void *dev, struct BusBlockWriteParam *write_param)
 {
     uint8 ret = EOK;
+    uint32 sector = write_param->pos;
+    uint32 block_num = write_param->size;
+    const uint8 *write_buffer = (uint8 *)write_param->buffer;
 
-    // KSemaphoreObtain(sd_lock, WAITING_FOREVER);
+    KSemaphoreObtain(sd_lock, WAITING_FOREVER);
 
-    // if (((uint32)write_param->buffer & 0x03) != 0) {
-    //     uint64_t sector;
-    //     uint8_t* temp;
-
-    //     sector = (uint64_t)write_param->pos * SDCARD_SECTOR_SIZE;
-    //     temp = (uint8_t*)write_param->buffer;
-
-    //     for (uint8 i = 0; i < write_param->size; i++) {
-    //         memcpy(SDBuffer, temp, SDCARD_SECTOR_SIZE);
-
-    //         ret = SD_WriteBlock((uint8_t *)SDBuffer, sector, 1);
-    //         if(ret != SD_OK) {
-    //             KPrintf("write failed: %d, buffer 0x%08x\n", ret, temp);
-    //             return 0;
-    //         }
-
-    //         sector += SDCARD_SECTOR_SIZE;
-    //         temp += SDCARD_SECTOR_SIZE;
-    //     }
-    // } else {
-    //     ret = SD_WriteBlock((uint8_t *)write_param->buffer, (uint64_t)write_param->pos * SDCARD_SECTOR_SIZE, write_param->size);
-    //     if (ret != SD_OK) {
-    //         KPrintf("write failed: %d, buffer 0x%08x\n", ret, (uint8_t *)write_param->buffer);
-    //         return 0;
-    //     }
-    // }
+    if (kStatus_Success != SD_WriteBlocks(&g_sd, write_buffer, sector, block_num)) {
+        KPrintf("Write multiple data blocks failed.\r\n");
+        return 0;
+    }
 
     KSemaphoreAbandon(sd_lock);
 
