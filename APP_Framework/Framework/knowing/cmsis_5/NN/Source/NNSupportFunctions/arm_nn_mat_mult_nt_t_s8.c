@@ -27,7 +27,8 @@
  * Target Processor:  Cortex-M
  *
  * -------------------------------------------------------------------- */
-
+#include <inttypes.h>
+#include "../../../Core/Include/cmsis_gcc.h"
 #include "arm_nnsupportfunctions.h"
 
 /**
