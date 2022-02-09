@@ -20,7 +20,7 @@ menuconfig BSP_USING_SEMC
 
 menuconfig BSP_USING_SDIO
     bool "Using SD card device"
-    default y
+    default n
     select RESOURCES_SDIO
     if BSP_USING_SDIO
         source "$BSP_DIR/third_party_driver/sdio/Kconfig"
