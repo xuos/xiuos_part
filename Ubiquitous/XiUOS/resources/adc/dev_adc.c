@@ -29,7 +29,6 @@ static void AdcDeviceLinkInit()
     InitDoubleLinkList(&adcdev_linklist);
 }
 
-#if 0
 /*Find the register ADC device*/
 HardwareDevType AdcDeviceFind(const char *dev_name, enum DevType dev_type)
 {
@@ -118,5 +117,4 @@ int AdcDeviceAttachToBus(const char *dev_name, const char *bus_name)
 
     return EOK;
 }
-#endif
 

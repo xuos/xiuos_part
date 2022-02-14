@@ -29,7 +29,6 @@ static void AdcDrvLinkInit()
     InitDoubleLinkList(&adcdrv_linklist);
 }
 
-#if 0
 /*Find the regiter driver*/
 DriverType AdcDriverFind(const char *drv_name, enum DriverType_e drv_type)
 {
@@ -68,4 +67,4 @@ int AdcDriverRegister(struct Driver *driver)
 
     return ret;
 }
-#endif
+

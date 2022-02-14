@@ -21,8 +21,6 @@
 #include <bus_adc.h>
 #include <dev_adc.h>
 
-#if 0
-
 /*Register the ADC BUS*/
 int AdcBusInit(struct AdcBus *adc_bus, const char *bus_name)
 {
@@ -122,4 +120,4 @@ int AdcDriverAttachToBus(const char *drv_name, const char *bus_name)
 
     return ret;
 }
-#endif
+
