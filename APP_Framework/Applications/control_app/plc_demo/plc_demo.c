@@ -19,32 +19,19 @@
  */
 
 #include "open62541.h"
-#include "plc.h"
 #include "ua_api.h"
 #include "sys_arch.h"
 #include "plc_bus.h"
 #include "plc_dev.h"
 
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
+#define PLC_BUS_NAME "PLC"
+#define PLC_DRV_NAME "OPCUA"
+#define PLC_DEV_NAME "PLC_1"
 
-#define PLC_BUS_NAME "plc bus"
-#define PLC_DRV_NAME "plc driver"
 #define PLC_BUF_LEN 1000
 
 #define PLC_STACK_SIZE  4096
 #define PLC_TASK_PRIO   15
-
-#define plc_print KPrintf
-
-/*******************************************************************************
- * Prototypes
- ******************************************************************************/
-
-/*******************************************************************************
- * Variables
- ******************************************************************************/
 
 struct PlcBus plc_demo_bus;
 struct PlcDriver plc_demo_drv;
@@ -52,10 +39,7 @@ struct PlcDevice plc_demo_dev;
 
 char plc_demo_ip[] = {192, 168, 250, 5};
 
-/*******************************************************************************
- * Code
- ******************************************************************************/
-
+/******************************************************************************/
 
 void PlcTestInit(void)
 {
@@ -63,10 +47,13 @@ void PlcTestInit(void)
 
     PlcBusInit(&plc_demo_bus, PLC_BUS_NAME);
     PlcDriverInit(&plc_demo_drv, PLC_DRV_NAME);
+    PlcDriverAttachToBus(PLC_DRV_NAME, PLC_BUS_NAME);
 
     // register plc device
     plc_demo_dev.state = DEV_INIT;
-    PlcDevRegister(&plc_demo_dev, NULL, "plc test device");
+    PlcDevRegister(&plc_demo_dev, NULL, PLC_DEV_NAME);
+
+    PlcDeviceAttachToBus(PLC_DEV_NAME, PLC_BUS_NAME);
 }
 
 void PlcReadUATask(void *arg)

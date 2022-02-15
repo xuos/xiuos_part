@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
+* Copyright (c) 2021 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
@@ -11,136 +11,117 @@
 */
 
 /**
-* @file plc_dev.c
-* @brief register plc dev function using bus driver framework
-* @version 1.0
-* @author AIIT XUOS Lab
-* @date 2022-01-24
-*/
+ * @file plc.c
+ * @brief plc relative activities
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2021.12.15
+ */
 
+#include "ua_api.h"
 #include "plc_bus.h"
 #include "plc_dev.h"
 
-static DoubleLinklistType plcdev_linklist;
+static DoubleLinklistType plcdev_list;
+
+/******************************************************************************/
 
 /*Create the plc device linklist*/
-static void PlcHardwareDevLinkInit()
+static void PlcDeviceLinkInit()
 {
-    InitDoubleLinkList(&plcdev_linklist);
+    InitDoubleLinkList(&plcdev_list);
 }
 
-static uint32 PlcHardwareDevOpen(void *dev)
+static int PlcDeviceOpen(void *dev)
 {
     NULL_PARAM_CHECK(dev);
 
-    PlcHardwareDevConfigureCs(dev, 1, 0);
+    struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
+
+    if(plc_dev->net == PLC_IND_ENET_OPCUA)
+    {
+        return ua_open(plc_dev->priv_data);
+    }
 
     return EOK;
 }
 
-
-static uint32 PlcHardwareDevClose(void *dev)
+static void PlcDeviceClose(void *dev)
 {
     NULL_PARAM_CHECK(dev);
 
-    PlcHardwareDevConfigureCs(dev, 0, 1);
+    struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
 
-    return EOK;
+    if(plc_dev->net == PLC_IND_ENET_OPCUA)
+    {
+        ua_close(plc_dev->priv_data);
+    }
 }
 
-
-static uint32 PlcHardwareDevWrite(void *dev, struct BusBlockWriteParam *write_param)
+static int PlcDeviceWrite(void *dev, const void *buf, size_t len)
 {
     NULL_PARAM_CHECK(dev);
-    NULL_PARAM_CHECK(write_param);
+    NULL_PARAM_CHECK(buf);
 
     int ret;
-    struct PlcHardwareDevice *plc_dev = (struct PlcHardwareDevice *)dev;
-    struct PlcDataStandard *plc_msg;
+    struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
 
-    plc_msg = (struct PlcDataStandard *)x_malloc(sizeof(struct PlcDataStandard));
-    if (NONE == plc_msg) {
-        KPrintf("PlcHardwareDevWrite x_malloc msg error\n");
-        x_free(plc_msg);
-        return ERROR;
+    if(plc_dev->net == PLC_IND_ENET_OPCUA)
+    {
+        ret = ua_write(plc_dev->priv_data, buf, len);
     }
-
-    //memset(plc_msg, 0, sizeof(struct PlcDataStandard));
-
-    plc_msg->tx_buff = (uint8 *)write_param->buffer;
-    plc_msg->rx_buff = NONE;
-    plc_msg->length = write_param->size;
-    plc_msg->plc_chip_select = 0;
-    plc_msg->plc_cs_release = 0;
-    plc_msg->next = NONE;
-
-    ret = plc_dev->plc_dev_done->dev_write(plc_dev, plc_msg);
-    x_free(plc_msg);
 
     return ret;
 }
 
-static uint32 PlcHardwareDevRead(void *dev, struct BusBlockReadParam *read_param)
+static int PlcDeviceRead(void *dev, void *buf, size_t len)
 {
     NULL_PARAM_CHECK(dev);
-    NULL_PARAM_CHECK(read_param);
+    NULL_PARAM_CHECK(buf);
 
     int ret;
+    struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
 
-    struct PlcHardwareDevice *plc_dev = (struct PlcHardwareDevice *)dev;
-
-    struct PlcDataStandard *plc_msg;
-
-    plc_msg = (struct PlcDataStandard *)x_malloc(sizeof(struct PlcDataStandard));
-    if (NONE == plc_msg) {
-        x_free(plc_msg);
-        return ERROR;
+    if(plc_dev->net == PLC_IND_ENET_OPCUA)
+    {
+        ret = ua_read(plc_dev->priv_data, buf, len);
     }
-
-    //memset(plc_msg, 0, sizeof(struct PlcDataStandard));
-
-    plc_msg->tx_buff = NONE;
-    plc_msg->rx_buff = (uint8 *)read_param->buffer;
-    plc_msg->length = read_param->size;
-    plc_msg->plc_chip_select = 0;
-    plc_msg->plc_cs_release = 0;
-    plc_msg->next = NONE;
-
-    ret = plc_dev->plc_dev_done->dev_read(plc_dev, plc_msg);
-    x_free(plc_msg);
 
     return ret;
 }
 
-static const struct HalDevDone dev_done =
+static struct PlcOps plc_done =
 {
-    .open = PlcHardwareDevOpen,
-    .close = PlcHardwareDevClose,
-    .write = PlcHardwareDevWrite,
-    .read = PlcHardwareDevRead,
+    .open = PlcDeviceOpen,
+    .close = PlcDeviceClose,
+    .write = PlcDeviceWrite,
+    .read = PlcDeviceRead,
 };
 
-HardwareDevType PlcHardwareDevFind(const char *dev_name, enum DevType dev_type)
+/* find PLC device with device name */
+struct HardwareDev *PlcDevFind(const char *dev_name)
 {
     NULL_PARAM_CHECK(dev_name);
 
-    struct HardwareDev *device = NONE;
+    struct PlcDevice *device = NONE;
+    struct HardwareDev *haldev = NONE;
 
     DoubleLinklistType *node = NONE;
-    DoubleLinklistType *head = &plcdev_linklist;
+    DoubleLinklistType *head = &plcdev_list;
 
     for (node = head->node_next; node != head; node = node->node_next) {
-        device = SYS_DOUBLE_LINKLIST_ENTRY(node, struct HardwareDev, dev_link);
-        if ((!strcmp(device->dev_name, dev_name)) && (dev_type == device->dev_type)) {
-            return device;
+        device = SYS_DOUBLE_LINKLIST_ENTRY(node, struct PlcDevice, link);
+        if (!strcmp(device->name, dev_name)) {
+            haldev = &device->haldev;
+            return haldev;
         }
     }
 
-    KPrintf("PlcHardwareDevFind cannot find the %s device.return NULL\n", dev_name);
+    plc_print("plc: [%s] cannot find the %s device\n", __func__, dev_name);
     return NONE;
 }
 
-int PlcHardwareDevRegister(struct PlcHardwareDevice *plc_device, void *plc_param, const char *device_name)
+int PlcDevRegister(struct PlcDevice *plc_device, void *plc_param, const char *device_name)
 {
     NULL_PARAM_CHECK(plc_device);
     NULL_PARAM_CHECK(device_name);
@@ -149,31 +130,28 @@ int PlcHardwareDevRegister(struct PlcHardwareDevice *plc_device, void *plc_param
     static x_bool dev_link_flag = RET_FALSE;
 
     if (!dev_link_flag) {
-        PlcHardwareDevLinkInit();
+        PlcDeviceLinkInit();
         dev_link_flag = RET_TRUE;
     }
 
-    if (DEV_INSTALL != plc_device->haldev.dev_state) {
+    if (DEV_INSTALL != plc_device->state) {
         strncpy(plc_device->haldev.dev_name, device_name, NAME_NUM_MAX);
         plc_device->haldev.dev_type = TYPE_PLC_DEV;
         plc_device->haldev.dev_state = DEV_INSTALL;
 
-        //only plc bus dev need to register dev_done
-        if (RET_TRUE != plc_device->plc_dev_flag) {
-            plc_device->haldev.dev_done = &dev_done;
-        }
+        strncpy(plc_device->name, device_name, strlen(device_name));
+        plc_device->ops = &plc_done;
 
-        plc_device->haldev.private_data = plc_param;
-
-        DoubleLinkListInsertNodeAfter(&plcdev_linklist, &(plc_device->haldev.dev_link));
+        DoubleLinkListInsertNodeAfter(&plcdev_list, &(plc_device->link));
+        plc_device->state = DEV_INSTALL;
     } else {
-        KPrintf("PlcHardwareDevRegister device has been register state%u\n", plc_device->haldev.dev_state);
+        KPrintf("PlcDevRegister device has been register state%u\n", plc_device->type);
     }
 
     return ret;
 }
 
-int PlcHardwareDevAttachToBus(const char *dev_name, const char *bus_name)
+int PlcDeviceAttachToBus(const char *dev_name, const char *bus_name)
 {
     NULL_PARAM_CHECK(dev_name);
     NULL_PARAM_CHECK(bus_name);
@@ -185,55 +163,26 @@ int PlcHardwareDevAttachToBus(const char *dev_name, const char *bus_name)
 
     bus = BusFind(bus_name);
     if (NONE == bus) {
-        KPrintf("PlcHardwareDevAttachToBus find plc bus error!name %s\n", bus_name);
+        KPrintf("PlcDeviceAttachToBus find plc bus error!name %s\n", bus_name);
         return ERROR;
     }
 
     if (TYPE_PLC_BUS == bus->bus_type) {
-        device = PlcHardwareDevFind(dev_name, TYPE_PLC_DEV);
+        device = PlcDevFind(dev_name);
         if (NONE == device) {
-            KPrintf("PlcHardwareDevAttachToBus find plc device error!name %s\n", dev_name);
+            KPrintf("PlcDeviceAttachToBus find plc device error!name %s\n", dev_name);
             return ERROR;
         }
 
         if (TYPE_PLC_DEV == device->dev_type) {
             ret = DeviceRegisterToBus(bus, device);
             if (EOK != ret) {
-                KPrintf("PlcHardwareDevAttachToBus DeviceRegisterToBus error %u\n", ret);
+                KPrintf("PlcDeviceAttachToBus DeviceRegisterToBus error %u\n", ret);
                 return ERROR;
             }
         }
     }
 
     return EOK;
-}
-
-int PlcHardwareDevConfigureCs(struct HardwareDev *dev, uint8 plc_chip_select, uint8 plc_cs_release)
-{
-    NULL_PARAM_CHECK(dev);
-
-    int ret;
-    struct PlcHardwareDevice *plc_dev = (struct PlcHardwareDevice *)dev;
-    struct PlcDataStandard *msg;
-
-    msg = (struct PlcDataStandard *)x_malloc(sizeof(struct PlcDataStandard));
-    if (NONE == msg){
-        KPrintf("PlcHardwareDevConfigureCs x_malloc msg error\n");
-        x_free(msg);
-        return ERROR;
-    }
-
-    //memset(msg, 0, sizeof(struct PlcDataStandard));
-    msg->length = 0;
-    msg->rx_buff = NONE;
-    msg->tx_buff = NONE;
-    msg->next = NONE;
-    msg->plc_chip_select = plc_chip_select;
-    msg->plc_cs_release = plc_cs_release;
-
-    ret = plc_dev->plc_dev_done->dev_write(plc_dev, msg);
-
-    x_free(msg);
-    return ret;
 }
 

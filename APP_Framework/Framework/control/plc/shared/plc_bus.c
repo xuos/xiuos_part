@@ -21,6 +21,8 @@
 #include "plc_bus.h"
 #include "plc_dev.h"
 
+/******************************************************************************/
+
 int PlcBusInit(struct PlcBus *plc_bus, const char *bus_name)
 {
     NULL_PARAM_CHECK(plc_bus);

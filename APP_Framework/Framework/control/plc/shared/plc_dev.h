@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
+* Copyright (c) 2021 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
@@ -11,129 +11,139 @@
 */
 
 /**
-* @file dev_plc.h
-* @brief define plc dev function using bus driver framework
-* @version 1.0
-* @author AIIT XUOS Lab
-* @date 2022-01-24
-*/
+ * @file plc_dev.h
+ * @brief plc relative definition and structure
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-01-24
+ */
 
-#ifndef DEV_PLC_H
-#define DEV_PLC_H
+#ifndef __PLC_DEV_H_
+#define __PLC_DEV_H_
 
-#include <bus.h>
+#include "bus.h"
+#include "xs_klist.h"
 
-#ifdef __cpluspluss
-extern "C" {
-#endif
+#undef open
+#undef close
+#undef read
+#undef write
 
-#define PLC_MAX_CLOCK       40000000
-#define plc_device_max_num  4
+#define IP_ADDR_SIZE 32
+#define PLC_NAME_SIZE 32
 
-#define PLC_LINE_CPHA      (1 << 0)
-#define PLC_LINE_CPOL      (1 << 1)
-
-#define PLC_LSB            (0 << 2)
-#define PLC_MSB            (1 << 2)
-
-#define PLC_MASTER         (0 << 3)
-#define DEV_PLC_SLAVE      (1 << 3)
-
-#define PLC_MODE_0         (0 | 0)
-#define PLC_MODE_1         (0 | PLC_LINE_CPHA)
-#define PLC_MODE_2         (PLC_LINE_CPOL | 0)
-#define PLC_MODE_3         (PLC_LINE_CPOL | PLC_LINE_CPHA)
-#define PLC_MODE_MASK      (PLC_LINE_CPHA | PLC_LINE_CPOL | PLC_MSB)
-
-#define PLC_CS_HIGH        (1 << 4)
-#define PLC_NO_CS          (1 << 5)
-#define PLC_3WIRE          (1 << 6)
-#define PLC_READY          (1 << 7)
-
-struct PlcDataStandard
-{
-    uint8 plc_chip_select;
-    uint8 plc_cs_release;
-
-    const uint8 *tx_buff;
-    uint32 tx_len;
-
-    uint8 *rx_buff;
-    uint32 rx_len;
-
-    uint32 length;
-    struct PlcDataStandard *next;
+// PLC device information
+struct PlcInfo {
+    uint32_t ability;      // PLC ability
+    uint32_t id;           // PLC Device ID
+    uint32_t soft_version; // software version
+    uint32_t hard_version; // hardware version
+    uint32_t date;         // manufact date
+    const char *vendor;    // vendor
+    const char *model;     // product model
 };
 
-struct PlcMasterParam
-{
-    uint8 plc_work_mode;//CPOL CPHA
-    uint8 plc_frame_format;//frame format
-    uint8 plc_data_bit_width;//bit width
-    uint8 plc_data_endian;//little endian 0 : big endian 1
-    uint32 plc_maxfrequency;//work frequency
+enum PlcSerialType {
+    PLC_SERIAL_232,
+    PLC_SERIAL_485,
+    PLC_SERIAL_CAN
 };
 
-struct PlcDmaParam
-{
-    uint8 plc_master_id;
-    uint8 plc_dmac_txchannel;
-    uint8 plc_dmac_rxchannel;
+union PlcCfg {
+    struct {
+        char ip_addr[IP_ADDR_SIZE];
+        uint32_t ip_port;
+    } PlcIpCfg;
+    struct {
+        enum PlcSerialType serial_type;
+        char station_id;
+        char serial_port;
+    } PlcSerialCfg;
 };
 
-struct PlcSlaveParam
-{
-    uint8 plc_slave_id;
-    uint8 plc_cs_gpio_pin;
-    uint8 plc_cs_select_id;
+struct PlcDevice;
+
+// operation API
+struct PlcOps {
+   int (*open)(void *dev); // open and connect PLC device
+   void (*close)(void* dev); // close and disconnect PLC device
+   int (*read)(void* dev, void *buf, size_t len); // read data from PLC
+   int (*write)(void* dev, const void *buf, size_t len); // write data from PLC
+   int (*ioctl)(void* dev, int cmd, void *arg); // send control command to PLC
 };
 
-typedef struct
-{
-    struct PlcDmaParam *plc_dma_param;
-
-    struct PlcSlaveParam *plc_slave_param;
-
-    struct PlcMasterParam *plc_master_param;
-
-}PlcDeviceParam;
-
-struct PlcHardwareDevice;
-
-struct PlcDevDone
-{
-    uint32 (*dev_open) (struct PlcHardwareDevice *dev);
-    uint32 (*dev_close) (struct PlcHardwareDevice *dev);
-    uint32 (*dev_write) (struct PlcHardwareDevice *dev, struct PlcDataStandard *msg);
-    uint32 (*dev_read) (struct PlcHardwareDevice *dev, struct PlcDataStandard *msg);
+enum PlcCtlType {
+    PLC_CTRL_TYPE_HSC,
+    PLC_CTRL_TYPE_PID,
+    PLC_CTRL_TYPE_PHASING
 };
 
-struct PlcHardwareDevice
+
+#define PLC_ABILITY_HSC     ((uint32_t)(1 << PLC_CTRL_TYPE_HSC))
+#define PLC_ABILITY_PID     ((uint32_t)(1 << PLC_CTRL_TYPE_PID))
+#define PLC_ABILITY_PHASING ((uint32_t)(1 << PLC_CTRL_TYPE_PHASING))
+
+
+enum PlcIndHybridNet
 {
-    struct HardwareDev haldev;
-    PlcDeviceParam plc_param;
+    // PLC Field Bus
+    PLC_IND_FIELD_MODBUS_485,
+    PLC_IND_FIELD_PROFIBUS,
+    PLC_IND_FIELD_CANOPEN,
+    PLC_IND_FIELD_DEVICENET,
+    PLC_IND_FIELD_CONTROLNET,
 
-    x_bool plc_dev_flag;
+    // PLC ETHERNET
+    PLC_IND_ENET_ETHERNET_IP,
+    PLC_IND_ENET_PROFINET,
+    PLC_IND_ENET_ETHERCAT,
+    PLC_IND_ENET_SERCOS,
+    PLC_IND_ENET_OPCUA,
 
-    const struct PlcDevDone *plc_dev_done;
-
-    void *private_data;
+    // PLC wireless net
+    PLC_IND_WIRELESS
 };
 
-/*Register the plc device*/
-int PlcHardwareDevRegister(struct PlcHardwareDevice *plc_device, void *plc_param, const char *device_name);
+enum PlcTransType
+{
+    PLC_TRANS_TCP,
+    PLC_TRANS_UDP,
+    PLC_TRANS_SERIAL
+};
 
-/*Register the plc device to the plc bus*/
-int PlcHardwareDeviceAttachToBus(const char *dev_name, const char *bus_name);
+//communication interface
+struct PlcInterface
+{
+    char ip_addr[IP_ADDR_SIZE];
+    char attrib;
+};
 
-/*Find the register plc device*/
-HardwareDevType PlcHardwareDevFind(const char *dev_name, enum DevType dev_type);
+// identify PLC device
+struct PlcDevice {
+    struct HardwareDev haldev; /* hardware device driver for bus */
+    char name[PLC_NAME_SIZE]; /* name of the device */
+    enum PlcCtlType type; /* PLC Control Type */
+    enum DevState state;
+    enum PlcIndHybridNet net;
+    enum PlcTransType trans;
 
-/*Configure the cs pin of plc dev*/
-int PlcHardwareDevConfigureCs(struct HardwareDev *dev, uint8 plc_chip_select, uint8 plc_cs_release);
+    struct PlcInfo info;/* Plc info, such as vendor name and model name */
+    union PlcCfg cfg;
+    struct PlcOps *ops; /* filesystem-like APIs for data transferring */
+    struct PlcInterface interface; /* protocols used for transferring data from program to plc */
 
-#ifdef __cplusplus
-}
-#endif
+    void *priv_data; /* private data for different PLC*/
+    DoubleLinklistType link;/* link list node */
+};
+
+
+#define plc_print KPrintf
+
+/******************************************************************************/
+
+int PlcDevRegister(struct PlcDevice *plc_device, void *plc_param, const char *device_name);
+int PlcDeviceAttachToBus(const char *dev_name, const char *bus_name);
+
+/******************************************************************************/
 
 #endif
