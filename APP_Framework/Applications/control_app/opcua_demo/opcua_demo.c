@@ -48,7 +48,7 @@ char test_ua_ip[] = {192, 168, 250, 5};
  * Code
  ******************************************************************************/
 
-static void test_ua_connect(void *arg)
+static void UaConnectTestTask(void *arg)
 {
     struct netif net;
     UA_StatusCode retval;
@@ -85,16 +85,16 @@ static void test_ua_connect(void *arg)
     UA_Client_delete(client);
 }
 
-void test_sh_ua_connect(void *arg)
+void UaConnectTest(void *arg)
 {
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
-    sys_thread_new("ua test", test_ua_connect, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
+    sys_thread_new("ua test", UaConnectTestTask, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-                 UaConnect, test_sh_ua_connect, Test Opc UA connection);
+                 UaConnect, UaConnectTest, Test Opc UA connection);
 
-void test_ua_browser_objects(void *param)
+void UaBrowserObjectsTestTask(void *param)
 {
     UA_Client *client = UA_Client_new();
 
@@ -129,7 +129,7 @@ void test_ua_browser_objects(void *param)
     UA_Client_delete(client); /* Disconnects the client internally */
 }
 
-void *test_sh_ua_brower_objects(int argc, char *argv[])
+void *UaBrowserObjectsTest(int argc, char *argv[])
 {
     if(argc == 2)
     {
@@ -144,14 +144,14 @@ void *test_sh_ua_brower_objects(int argc, char *argv[])
     }
 
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
-    sys_thread_new("ua object", test_ua_browser_objects, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
+    sys_thread_new("ua object", UaBrowserObjectsTestTask, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
     return NULL;
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 UaObj, test_sh_ua_brower_objects, UaObj [IP]);
+                 UaObj, UaBrowserObjectsTest, UaObj [IP]);
 
-void test_ua_get_info(void *param)
+void UaGetInfoTestTask(void *param)
 {
     UA_Client *client = UA_Client_new();
 
@@ -182,7 +182,7 @@ void test_ua_get_info(void *param)
     UA_Client_delete(client); /* Disconnects the client internally */
 }
 
-void *test_sh_ua_get_info(int argc, char *argv[])
+void *UaGetInfoTest(int argc, char *argv[])
 {
     if(argc == 2)
     {
@@ -197,10 +197,10 @@ void *test_sh_ua_get_info(int argc, char *argv[])
     }
 
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
-    sys_thread_new("ua info", test_ua_get_info, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
+    sys_thread_new("ua info", UaGetInfoTestTask, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
     return NULL;
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 UaInfo, test_sh_ua_get_info, UaInfo [IP]);
+                 UaInfo, UaGetInfoTest, UaInfo [IP]);
 

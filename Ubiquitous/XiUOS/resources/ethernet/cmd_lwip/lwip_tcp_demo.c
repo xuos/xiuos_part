@@ -46,9 +46,9 @@ char tcp_target[] = {192, 168, 250, 252};
  * Code
  ******************************************************************************/
 
-static void lwip_tcp_send_thread(void *arg)
+static void LwipTcpSendTask(void *arg)
 {
-    lw_print("lwip_tcp_send_thread start.\n");
+    lw_print("LwipTcpSendTask start.\n");
 
     int fd = -1;
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -84,7 +84,7 @@ __exit:
     return;
 }
 
-void lwip_tcp_send_run(int argc, char *argv[])
+void LwipTcpSendTest(int argc, char *argv[])
 {
     memset(tcp_send_msg, 0, MSG_SIZE);
     if(argc >= 2)
@@ -103,18 +103,18 @@ void lwip_tcp_send_run(int argc, char *argv[])
     }
 
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("tcp send", lwip_tcp_send_thread, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    sys_thread_new("tcp send", LwipTcpSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     TCPSend, lwip_tcp_send_run, TCP Send message);
+     TCPSend, LwipTcpSendTest, TCP Send message);
 
-void lwip_tcp_recv_run(void)
+void LwipTcpRecvTest(void)
 {
     lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     tcpecho_raw_init();
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-    TCPRecv, lwip_tcp_recv_run, TCP Recv message);
+    TCPRecv, LwipTcpRecvTest, TCP Recv message);
 

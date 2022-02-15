@@ -40,7 +40,6 @@
 #include <transform.h>
 #include <sys_arch.h>
 #include "connect_ethernet.h"
-#include "lwip_demo.h"
 
 /*******************************************************************************
  * Definitions
@@ -58,12 +57,12 @@
  * Code
  ******************************************************************************/
 
-static void *lwip_config_test(void *param)
+static void *LwipSetIPTask(void *param)
 {
     lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 }
 
-void lwip_setip_thread(int argc, char *argv[])
+void LwipSetIPTest(int argc, char *argv[])
 {
     int result = 0;
     pthread_t th_id;
@@ -85,19 +84,19 @@ void lwip_setip_thread(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &lwip_ipaddr[0], &lwip_ipaddr[1], &lwip_ipaddr[2], &lwip_ipaddr[3]);
     }
 
-    result = pthread_create(&th_id, &attr, lwip_config_test, NULL);
+    result = pthread_create(&th_id, &attr, LwipSetIPTask, NULL);
     if (0 == result) {
-        lw_print("lwip_config_test %d successfully!\n", th_id);
+        lw_print("lw: [%s] thread %d successfully!\n", __func__, th_id);
     } else {
-        lw_print("lwip_config_test failed! error code is %d\n", result);
+        lw_print("lw: [%s] failed! error code is %d\n", __func__, result);
     }
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     setip, lwip_setip_thread, SetIp [IP] [Netmask] [Gateway]);
+     setip, LwipSetIPTest, SetIp [IP] [Netmask] [Gateway]);
 
 
-void lwip_showip_thread(int argc, char *argv[])
+void LwipShowIPTask(int argc, char *argv[])
 {
     char mac_addr[] = configMAC_ADDR;
 
@@ -116,6 +115,6 @@ void lwip_showip_thread(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     showip, lwip_showip_thread, GetIp [IP] [Netmask] [Gateway]);
+     showip, LwipShowIPTask, GetIp [IP] [Netmask] [Gateway]);
 
 #endif

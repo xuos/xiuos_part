@@ -47,9 +47,9 @@ char udp_socket_ip[] = {192, 168, 250, 252};
 /*******************************************************************************
  * Code
  ******************************************************************************/
-static void udp_recv_demo(void *arg)
+static void UdpSocketRecvTask(void *arg)
 {
-    lw_print("udp_recv_demo start.\n");
+    lw_print("UdpSocketRecvTask start.\n");
 
     int socket_fd = -1;
     char *recv_buf;
@@ -109,7 +109,7 @@ static void udp_recv_demo(void *arg)
     }
 }
 
-void udp_socket_recv_run(int argc, char *argv[])
+void UdpSocketRecvTask(int argc, char *argv[])
 {
     int result = 0;
     pthread_t th_id;
@@ -122,18 +122,18 @@ void udp_socket_recv_run(int argc, char *argv[])
     }
 
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("udp_recv_demo", udp_recv_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    sys_thread_new("UdpSocketRecvTask", UdpSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     UDPSocketRecv, udp_socket_recv_run, UDP recv echo);
+     UDPSocketRecv, UdpSocketRecvTask, UDP recv echo);
 
-static void udp_send_demo(void *arg)
+static void UdpSocketSendTask(void *arg)
 {
     int cnt = LWIP_DEMO_TIMES;
     char send_str[128];
 
-    lw_print("udp_send_demo start.\n");
+    lw_print("UdpSocketSendTask start.\n");
 
     int socket_fd = -1;
     memset(send_str, 0, sizeof(send_str));
@@ -177,7 +177,7 @@ __exit:
     return;
 }
 
-void udp_socket_send_run(int argc, char *argv[])
+void UdpSocketSendTest(int argc, char *argv[])
 {
     int result = 0;
     pthread_t th_id;
@@ -190,9 +190,9 @@ void udp_socket_send_run(int argc, char *argv[])
     }
 
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("udp_send_demo", udp_send_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    sys_thread_new("UdpSocketSendTask", UdpSocketSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     UDPSocketSend, udp_socket_send_run, UDP send echo);
+     UDPSocketSend, UdpSocketSendTest, UDP send echo);
 

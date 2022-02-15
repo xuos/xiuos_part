@@ -62,7 +62,7 @@
  *
  * @param netif network interface structure
  */
-int print_dhcp_state(struct netif *netif)
+int LwipPrintDHCP(struct netif *netif)
 {
     static u8_t dhcp_last_state = DHCP_STATE_OFF;
     struct dhcp *dhcp           = netif_dhcp_data(netif);
@@ -132,7 +132,7 @@ int print_dhcp_state(struct netif *netif)
 /*!
  * @brief Main function.
  */
-void lwip_dhcp_test(void)
+void LwipDHCPTest(void)
 {
     u32_t dhcp_time;
     static int flag = 0;
@@ -158,7 +158,7 @@ void lwip_dhcp_test(void)
         sys_check_timeouts();
 
         /* Print DHCP progress */
-        if(print_dhcp_state(&gnetif))
+        if(LwipPrintDHCP(&gnetif))
         {
             sscanf(ipaddr_ntoa(&gnetif.ip_addr), "%d.%d.%d.%d", &lwip_ipaddr[0], &lwip_ipaddr[1],
                 &lwip_ipaddr[2], &lwip_ipaddr[3]);
@@ -178,6 +178,6 @@ void lwip_dhcp_test(void)
 
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     getdynip, lwip_dhcp_test, DHCP_Test);
+     getdynip, LwipDHCPTest, DHCP_Test);
 
 #endif

@@ -60,7 +60,7 @@ ip4_addr_t ping_addr;
  * Code
  ******************************************************************************/
 
-void lwip_ping_thread(int argc, char *argv[])
+void LwipPingTest(int argc, char *argv[])
 {
     int result = 0;
 
@@ -99,6 +99,6 @@ void lwip_ping_thread(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     ping, lwip_ping_thread, ping [IP] 3 times);
+     ping, LwipPingTest, ping [IP] 3 times);
 
 #endif

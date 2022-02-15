@@ -50,7 +50,7 @@ char udp_send_msg[] = "\n\nThis one is UDP pkg. Congratulations on you.\n\n";
  * Code
  ******************************************************************************/
 
-static void lwip_udp_send(void *arg)
+static void LwipUDPSendTask(void *arg)
 {
     int cnt = LWIP_DEMO_TIMES;
 
@@ -91,7 +91,7 @@ __exit:
     return;
 }
 
-void *lwip_udp_send_run(int argc, char *argv[])
+void *LwipUdpSendTest(int argc, char *argv[])
 {
     int result = 0;
     sys_thread_t th_id;
@@ -115,13 +115,13 @@ void *lwip_udp_send_run(int argc, char *argv[])
     lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_target[0], udp_target[1], udp_target[2], udp_target[3]);
 
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("udp socket send", lwip_udp_send, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    sys_thread_new("udp socket send", LwipUDPSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     UDPSend, lwip_udp_send_run, UDP send echo);
+     UDPSend, LwipUdpSendTest, UDP send echo);
 
-static void udpecho_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
+static void LwipUdpRecvTask(void *arg, struct udp_pcb *upcb, struct pbuf *p,
                  const ip_addr_t *addr, u16_t port)
 {
     int udp_len;
@@ -156,10 +156,11 @@ static void udpecho_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
     pbuf_free(udp_buf);
 }
 
-void udpecho_raw_init(void)
+void LwipUdpRecvTest(void)
 {
     err_t err;
-    lw_print("udpecho_raw_init\r\n");
+
+    lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 
     udpecho_raw_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
     if (udpecho_raw_pcb == NULL)
@@ -170,16 +171,10 @@ void udpecho_raw_init(void)
     err = udp_bind(udpecho_raw_pcb, IP_ANY_TYPE, LWIP_LOCAL_PORT);
     if (err == ERR_OK)
     {
-        udp_recv(udpecho_raw_pcb, udpecho_raw_recv, NULL);
+        udp_recv(udpecho_raw_pcb, LwipUdpRecvTask, NULL);
     }
 }
 
-void lwip_udp_server(void)
-{
-    lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    udpecho_raw_init();
-}
-
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     UDPRecv, lwip_udp_server, UDP server echo);
+     UDPRecv, LwipUdpRecvTest, UDP server echo);
 

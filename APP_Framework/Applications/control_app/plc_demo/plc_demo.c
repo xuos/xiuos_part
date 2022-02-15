@@ -69,7 +69,7 @@ void PlcTestInit(void)
     PlcDevRegister(&plc_demo_dev, NULL, "plc test device");
 }
 
-void PlcTestRead(void *arg)
+void PlcReadUATask(void *arg)
 {
     int ret = 0;
     struct PlcOps *ops = NULL;
@@ -101,11 +101,11 @@ void PlcTestRead(void *arg)
     ops->close(&plc_demo_dev);
 }
 
-void PlcTestTask(int argc, char *argv[])
+void PlcReadTest(int argc, char *argv[])
 {
-    sys_thread_new("plc read", PlcTestRead, NULL, PLC_STACK_SIZE, PLC_TASK_PRIO);
+    sys_thread_new("plc read", PlcReadUATask, NULL, PLC_STACK_SIZE, PLC_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     plc, PlcTestTask, test PLC);
+     plc, PlcReadTest, test PLC);
 
