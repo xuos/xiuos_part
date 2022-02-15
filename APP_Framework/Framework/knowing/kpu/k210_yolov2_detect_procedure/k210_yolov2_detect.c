@@ -199,6 +199,8 @@ static void *thread_detect_entry(void *parameter)
         /* display result */
 
         for (int cnt = 0; cnt < detect_info.obj_number; cnt++) {
+            detect_info.obj[cnt].y1 += (detect_params.sensor_output_size[0] - detect_params.net_input_size[0])/2;
+            detect_info.obj[cnt].y2 += (detect_params.sensor_output_size[0] - detect_params.net_input_size[0])/2;
             draw_edge((uint32_t *)showbuffer, &detect_info, cnt, 0xF800, (uint16_t)detect_params.sensor_output_size[1],
                       (uint16_t)detect_params.sensor_output_size[0]);
             printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", cnt, detect_info.obj[cnt].x1, detect_info.obj[cnt].y1,
