@@ -94,7 +94,6 @@ void lwip_ping_thread(int argc, char *argv[])
     lw_print("lw: [%s] argc %d\n", __func__, argc);
 
     IP4_ADDR(&ping_addr, lwip_gwaddr[0], lwip_gwaddr[1], lwip_gwaddr[2], lwip_gwaddr[3]);
-    ETH_BSP_Config();
     lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     ping_init(&ping_addr);
 }

@@ -121,7 +121,6 @@ void udp_socket_recv_run(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3]);
     }
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     sys_thread_new("udp_recv_demo", udp_recv_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
@@ -190,7 +189,6 @@ void udp_socket_send_run(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3]);
     }
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     sys_thread_new("udp_send_demo", udp_send_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }

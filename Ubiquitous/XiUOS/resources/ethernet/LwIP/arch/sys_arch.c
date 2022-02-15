@@ -454,8 +454,7 @@ void lwip_config_input(struct netif *net)
 {
   sys_thread_t th_id = 0;
 
-  th_id = sys_thread_new("eth_input", lwip_input_thread, net, LWIP_TASK_STACK_SIZE,
-    LWIP_DEMO_TASK_PRIO);
+  th_id = sys_thread_new("eth_input", lwip_input_thread, net, LWIP_TASK_STACK_SIZE, 15);
 
   if (th_id >= 0) {
     lw_print("%s %d successfully!\n", __func__, th_id);
@@ -478,6 +477,8 @@ void lwip_config_net(char *ip, char *mask, char *gw)
     .non_dma_memory = non_dma_memory,
 #endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
   };
+
+  ETH_BSP_Config();
 
   if(chk_lwip_bit(LWIP_INIT_FLAG))
   {
@@ -540,6 +541,8 @@ void lwip_config_tcp(char *ip, char *mask, char *gw)
     .non_dma_memory = non_dma_memory,
 #endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */
   };
+
+  ETH_BSP_Config();
 
   if(chk_lwip_bit(LWIP_INIT_FLAG))
   {

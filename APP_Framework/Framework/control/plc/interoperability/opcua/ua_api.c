@@ -15,25 +15,29 @@
 #include "ua_api.h"
 
 
-#define UA_DEV_IP_LEN 128
-#define UA_NODE_LEN 50
-
-typedef struct _ua_dev_t
-{
-    char ua_remote_ip[UA_DEV_IP_LEN];
-    char ua_node[UA_NODE_LEN];
-    UA_Client *client;
-}ua_dev_t;
-
-
 int ua_open(void *dev)
 {
     ua_dev_t *pdev = (ua_dev_t *)dev;
 
     pdev->client = UA_Client_new();
+
+    ua_pr_info("ua: [%s] start ...\n", __func__);
+
+    if (pdev->client == NULL)
+    {
+        ua_print("ua: [%s] tcp client null\n", __func__);
+        return EEMPTY;
+    }
+
+    UA_ClientConfig *config = UA_Client_getConfig(pdev->client);
+    UA_ClientConfig_setDefault(config);
+
+    ua_pr_info("ua: [%s] %d %s\n", __func__, strlen(pdev->ua_remote_ip), pdev->ua_remote_ip);
+
     UA_StatusCode retval = UA_Client_connect(pdev->client, pdev->ua_remote_ip);
     if(retval != UA_STATUSCODE_GOOD) {
-        UA_Client_delete(pdev->client);
+//        UA_Client_delete(pdev->client);
+        ua_pr_info("ua: [%s] deleted ret %x!\n", __func__, retval);
         return (int)retval;
     }
     return EOK;

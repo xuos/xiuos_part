@@ -102,7 +102,6 @@ void lwip_tcp_send_run(int argc, char *argv[])
         sscanf(argv[2], "%d.%d.%d.%d", &tcp_target[0], &tcp_target[1], &tcp_target[2], &tcp_target[3]);
     }
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     sys_thread_new("tcp send", lwip_tcp_send_thread, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
@@ -112,7 +111,6 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
 
 void lwip_tcp_recv_run(void)
 {
-    ETH_BSP_Config();
     lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     tcpecho_raw_init();
 }

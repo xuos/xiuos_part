@@ -14,10 +14,20 @@
 
 #include "open62541.h"
 
+#define UA_DEV_IP_LEN 128
+#define UA_NODE_LEN 50
+
+typedef struct _ua_dev_t
+{
+    char ua_remote_ip[UA_DEV_IP_LEN];
+    char ua_node[UA_NODE_LEN];
+    UA_Client *client;
+}ua_dev_t;
+
 #define OPC_SERVER "opc.tcp://192.168.250.5:4840"
 
-#define ua_print //printf
-#define ua_trace() //printf("ua: [%s] line %d checked!\n", __func__, __LINE__)
+#define ua_print //KPrintf
+#define ua_trace() //KPrintf("ua: [%s] line %d checked!\n", __func__, __LINE__)
 #define ua_pr_info KPrintf
 #define ua_debug
 

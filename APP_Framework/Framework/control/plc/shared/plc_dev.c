@@ -231,7 +231,6 @@ int PlcHardwareDevConfigureCs(struct HardwareDev *dev, uint8 plc_chip_select, ui
     msg->plc_chip_select = plc_chip_select;
     msg->plc_cs_release = plc_cs_release;
 
-
     ret = plc_dev->plc_dev_done->dev_write(plc_dev, msg);
 
     x_free(msg);

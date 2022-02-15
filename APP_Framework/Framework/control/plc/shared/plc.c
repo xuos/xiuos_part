@@ -25,13 +25,6 @@
 #include "plc_bus.h"
 #include "plc_dev.h"
 
-#define PLC_BUS_NAME "plc bus"
-#define PLC_DRV_NAME "plc driver"
-
-struct PlcDevice plc_device;
-struct PlcBus plc_bus;
-struct PlcDriver plc_drv;
-
 
 static DoubleLinklistType plcdev_list;
 
@@ -52,7 +45,7 @@ static int PlcDeviceOpen(void *dev)
 
     if(plc_dev->net == PLC_IND_ENET_OPCUA)
     {
-        return ua_open(dev);
+        return ua_open(plc_dev->priv_data);
     }
 
     return EOK;
@@ -66,21 +59,21 @@ static void PlcDeviceClose(void *dev)
 
     if(plc_dev->net == PLC_IND_ENET_OPCUA)
     {
-        ua_close(dev);
+        ua_close(plc_dev->priv_data);
     }
 }
 
 static int PlcDeviceWrite(void *dev, const void *buf, size_t len)
 {
     NULL_PARAM_CHECK(dev);
-    NULL_PARAM_CHECK(write_param);
+    NULL_PARAM_CHECK(buf);
 
     int ret;
     struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
 
     if(plc_dev->net == PLC_IND_ENET_OPCUA)
     {
-        ret = ua_write(dev, buf, len);
+        ret = ua_write(plc_dev->priv_data, buf, len);
     }
 
     return ret;
@@ -89,20 +82,20 @@ static int PlcDeviceWrite(void *dev, const void *buf, size_t len)
 static int PlcDeviceRead(void *dev, void *buf, size_t len)
 {
     NULL_PARAM_CHECK(dev);
-    NULL_PARAM_CHECK(read_param);
+    NULL_PARAM_CHECK(buf);
 
     int ret;
     struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
 
     if(plc_dev->net == PLC_IND_ENET_OPCUA)
     {
-        ret = ua_read(dev, buf, len);
+        ret = ua_read(plc_dev->priv_data, buf, len);
     }
 
     return ret;
 }
 
-static const struct PlcOps plc_done =
+static struct PlcOps plc_done =
 {
     .open = PlcDeviceOpen,
     .close = PlcDeviceClose,
@@ -145,6 +138,7 @@ int PlcDevRegister(struct PlcDevice *plc_device, void *plc_param, const char *de
 
     if (DEV_INSTALL != plc_device->state) {
         strncpy(plc_device->name, device_name, strlen(device_name));
+        plc_device->ops = &plc_done;
         DoubleLinkListInsertNodeAfter(&plcdev_list, &(plc_device->link));
         plc_device->state = DEV_INSTALL;
     } else {
@@ -188,18 +182,4 @@ int PlcDeviceAttachToBus(const char *dev_name, const char *bus_name)
 
     return EOK;
 }
-
-void PlcTestInit(void)
-{
-    PlcBusInit(&plc_bus, PLC_BUS_NAME);
-    PlcDriverInit(&plc_drv, PLC_DRV_NAME);
-}
-
-void test_plc_bus(int argc, char *argv[])
-{
-    PlcTestInit();
-}
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     plc, test_plc_bus, test PLC);
 

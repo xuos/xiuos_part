@@ -30,9 +30,9 @@
  ******************************************************************************/
 
 #define TCP_LOCAL_PORT 4840
-#define UA_URL_SIZE 100
-#define UA_STACK_SIZE 4096
-#define UA_TASK_PRIO 25
+#define UA_URL_SIZE    100
+#define UA_STACK_SIZE  4096
+#define UA_TASK_PRIO   15
 
 /*******************************************************************************
  * Prototypes
@@ -67,33 +67,28 @@ static void test_ua_connect(void *arg)
     UA_ClientConfig *config = UA_Client_getConfig(client);
     UA_ClientConfig_setDefault(config);
 
-    snprintf(ua_uri, UA_URL_SIZE, "opc.tcp://%d.%d.%d.%d:4840",
+    snprintf(ua_uri, sizeof(ua_uri), "opc.tcp://%d.%d.%d.%d:4840",
         test_ua_ip[0], test_ua_ip[1], test_ua_ip[2], test_ua_ip[3]);
 
-    retval = UA_Client_connect(client, ua_uri);
+    ua_pr_info("ua uri: %d %s\n", strlen(ua_uri), ua_uri);
+
+    retval = UA_Client_connect(client,ua_uri);
     if (retval != UA_STATUSCODE_GOOD)
     {
-        ua_print("ua: [%s] ret %x\n", __func__, retval);
+        ua_pr_info("ua: [%s] connected failed %x\n", __func__, retval);
+        UA_Client_delete(client);
+        return;
     }
 
-    ua_print("ua: [%s] start Ua Test!\n", __func__);
+    ua_pr_info("ua: [%s] connected ok!\n", __func__);
     UA_Client_disconnect(client);
     UA_Client_delete(client);
 }
 
-void test_ua_connect_thr(void *arg)
+void test_sh_ua_connect(void *arg)
 {
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
-    test_ua_connect(NULL);
-}
-
-void test_sh_ua_connect(void)
-{
-    int result = 0;
-    pthread_t th_id;
-    pthread_attr_t attr;
-    sys_thread_new("ua test", test_ua_connect_thr, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
+    sys_thread_new("ua test", test_ua_connect, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
@@ -148,7 +143,6 @@ void *test_sh_ua_brower_objects(int argc, char *argv[])
         }
     }
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
     sys_thread_new("ua object", test_ua_browser_objects, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
     return NULL;
@@ -202,9 +196,8 @@ void *test_sh_ua_get_info(int argc, char *argv[])
         }
     }
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
-    sys_thread_new("ua object", test_ua_browser_objects, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
+    sys_thread_new("ua info", test_ua_get_info, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
     return NULL;
 }
 

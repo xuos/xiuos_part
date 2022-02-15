@@ -60,7 +60,6 @@
 
 static void *lwip_config_test(void *param)
 {
-    ETH_BSP_Config();
     lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 }
 

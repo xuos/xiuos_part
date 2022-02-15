@@ -138,8 +138,6 @@ void lwip_dhcp_test(void)
     static int flag = 0;
     char ip_addr[4] = {0, 0, 0, 0};
 
-    ETH_BSP_Config();
-
     lwip_config_net(ip_addr, ip_addr, ip_addr);
     set_lwip_bit(LWIP_PRINT_FLAG);
 

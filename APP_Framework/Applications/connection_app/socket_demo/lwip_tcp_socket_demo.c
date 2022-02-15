@@ -126,7 +126,6 @@ void tcp_socket_recv_run(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &tcp_socket_ip[0], &tcp_socket_ip[1], &tcp_socket_ip[2], &tcp_socket_ip[3]);
     }
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     sys_thread_new("tcp_recv_demo", tcp_recv_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
@@ -190,7 +189,6 @@ void tcp_socket_send_run(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &tcp_socket_ip[0], &tcp_socket_ip[1], &tcp_socket_ip[2], &tcp_socket_ip[3]);
     }
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
     sys_thread_new("tcp socket", tcp_send_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }

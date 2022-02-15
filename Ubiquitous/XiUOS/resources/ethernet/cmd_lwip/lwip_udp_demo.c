@@ -114,7 +114,6 @@ void *lwip_udp_send_run(int argc, char *argv[])
     }
     lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_target[0], udp_target[1], udp_target[2], udp_target[3]);
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     sys_thread_new("udp socket send", lwip_udp_send, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
@@ -177,8 +176,6 @@ void udpecho_raw_init(void)
 
 void lwip_udp_server(void)
 {
-    lw_print("lwip_udp_server\r\n");
-    ETH_BSP_Config();
     lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     udpecho_raw_init();
 }

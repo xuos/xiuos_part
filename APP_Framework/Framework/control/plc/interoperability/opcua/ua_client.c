@@ -149,19 +149,19 @@ void ua_read_attr(UA_Client *client)
 {
     /* Read attribute */
     UA_Int32 value = 0;
-    ua_print("\nReading the value of node (1, \"the.answer\"):\n");
+    ua_pr_info("\nReading the value of node (1, \"the.answer\"):\n");
     UA_Variant *val = UA_Variant_new();
     UA_StatusCode retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(1, "the.answer"), val);
     if(retval == UA_STATUSCODE_GOOD && UA_Variant_isScalar(val) &&
        val->type == &UA_TYPES[UA_TYPES_INT32]) {
             value = *(UA_Int32*)val->data;
-            ua_print("the value is: %i\n", value);
+            ua_pr_info("the value is: %i\n", value);
     }
     UA_Variant_delete(val);
 
     /* Write node attribute */
     value++;
-    ua_print("\nWriting a value of node (1, \"the.answer\"):\n");
+    ua_pr_info("\nWriting a value of node (1, \"the.answer\"):\n");
     UA_WriteRequest wReq;
     UA_WriteRequest_init(&wReq);
     wReq.nodesToWrite = UA_WriteValue_new();
@@ -174,7 +174,7 @@ void ua_read_attr(UA_Client *client)
     wReq.nodesToWrite[0].value.value.data = &value;
     UA_WriteResponse wResp = UA_Client_Service_write(client, wReq);
     if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD)
-        ua_print("the new value is: %i\n", value);
+        ua_pr_info("the new value is: %i\n", value);
 
     UA_WriteRequest_clear(&wReq);
     UA_WriteResponse_clear(&wResp);
@@ -297,7 +297,7 @@ int ua_get_server_info(UA_Client *client)
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
     /* Take another look at the.answer */
-    UA_Client_run_iterate(client, 100);
+    UA_Client_run_iterate(client, 10000);
     /* Delete the subscription */
     if(UA_Client_Subscriptions_deleteSingle(client, subId) == UA_STATUSCODE_GOOD)
         ua_print("Subscription removed\n");

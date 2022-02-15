@@ -58,6 +58,11 @@ union PlcCfg {
 
 struct PlcDevice;
 
+#undef open
+#undef close
+#undef read
+#undef write
+
 // operation API
 struct PlcOps {
    int (*open)(void *dev); // open and connect PLC device
@@ -123,9 +128,13 @@ struct PlcDevice {
 
     struct PlcInfo info;/* Plc info, such as vendor name and model name */
     union PlcCfg cfg;
-    struct PlcOps ops; /* filesystem-like APIs for data transferring */
+    struct PlcOps *ops; /* filesystem-like APIs for data transferring */
     struct PlcInterface interface; /* protocols used for transferring data from program to plc */
+
+    void *priv_data;
     DoubleLinklistType link;/* link list node */
 };
+
+int PlcDevRegister(struct PlcDevice *plc_device, void *plc_param, const char *device_name);
 
 #endif
