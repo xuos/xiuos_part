@@ -1,3 +1,3 @@
-SRC_FILES := fsl_adc.c adc_interrupt.c
+SRC_FILES := fsl_adc.c connect_adc.c
 
 include $(KERNEL_ROOT)/compiler.mk

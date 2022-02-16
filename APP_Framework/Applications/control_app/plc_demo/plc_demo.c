@@ -81,8 +81,6 @@ void PlcReadUATask(void *arg)
     if(EOK != ret)
     {
         plc_print("plc: [%s] read failed\n", __func__);
-        free(plc_demo_dev.priv_data);
-        return;
     }
     free(plc_demo_dev.priv_data);
     ops->close(&plc_demo_dev);
@@ -94,5 +92,5 @@ void PlcReadTest(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     plc, PlcReadTest, test PLC);
+     plc, PlcReadTest, Read PLC);
 

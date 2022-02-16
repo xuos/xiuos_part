@@ -34,6 +34,7 @@ extern int ExtSramInit(void);
 
 #include <connect_ethernet.h>
 #include <connect_uart.h>
+#include <connect_adc.h>
 
 #define NVIC_PRIORITYGROUP_0         0x00000007U /*!< 0 bits for pre-emption priority
                                                       4 bits for subpriority */
@@ -628,6 +629,11 @@ void InitBoardHardware()
 #ifdef BSP_USING_LPUART
     Imrt1052HwUartInit();
 #endif
+
+#ifdef BSP_USING_ADC
+    Imrt1052HwAdcInit();
+#endif
+
     InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
 
 
