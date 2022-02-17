@@ -23,7 +23,7 @@
 // this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
+.extern Rv32m1VgeaStart
 #define EXCEPTION_STACK_SIZE 0x58
 
     .text
@@ -98,7 +98,7 @@ Reset_Handler:
     # Enable global interrupt. */
     # csrsi mstatus, 8
 
-    jal entry
+    jal Rv32m1VgeaStart
     ebreak
 
     .size Reset_Handler, . - Reset_Handler

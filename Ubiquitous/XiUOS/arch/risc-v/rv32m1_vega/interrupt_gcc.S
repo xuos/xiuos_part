@@ -20,7 +20,7 @@ IRQ_Handler:
     mv  fp, sp
 
     /* switch to interrupt stack */
-    la    sp, __stack
+    # la    sp, __stack
 
     /* interrupt handle */
 

@@ -74,7 +74,9 @@ void TickAndTaskTimesliceUpdate(void)
     RoundRobinTaskTimesliceUpdate(task);
 #elif defined (SCHED_POLICY_RR_REMAINSLICE)
     task = GetKTaskDescriptor();
-    RoundRobinRemainTaskTimesliceUpdate(task);
+    if(task){
+        RoundRobinRemainTaskTimesliceUpdate(task);
+    }
 #endif
     CheckTaskDelay();
 #ifdef KERNEL_SOFTTIMER

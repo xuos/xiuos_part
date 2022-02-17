@@ -125,8 +125,8 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
         break;
     }
 
-    config.enableTx = 0;
-    config.enableRx = 0;
+    config.enableTx = 1;
+    config.enableRx = 1;
 
     CLOCK_SetIpSrc(kCLOCK_Lpuart0, kCLOCK_IpSrcFircAsync);
 
