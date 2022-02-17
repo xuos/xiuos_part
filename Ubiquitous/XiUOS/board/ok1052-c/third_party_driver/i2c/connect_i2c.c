@@ -1,32 +1,34 @@
 /*
- * Copyright (c) 2020 RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Change Logs:
- * Date           Author        Notes
- * 2012-04-25     weety         first version
- */
+* Copyright (c) 2022 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
 
 /**
 * @file connect_i2c.c
-* @brief support stm32f407-st-discovery-board i2c function and register to bus framework
+* @brief support ok1052-c-board i2c function and register to bus framework
 * @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-04-25
+* @date 2022-1-25
 */
 
 /*************************************************
 File name: connect_i2c.c
-Description: support stm32f407-st-discovery-board i2c configure and i2c bus register function
+Description: support ok1052-c-board i2c configure and i2c bus register function
 Others: take RT-Thread v4.0.2/components/drivers/i2c/i2c-bit-ops.c for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
 History:
-1. Date: 2021-04-25
+1. Date: 2022-1-25
 Author: AIIT XUOS Lab
 Modification:
-1. support stm32f407-st-discovery-board i2c bit configure, write and read
-2. support stm32f407-st-discovery-board i2c bus device and driver register
+1. support ok1052-c-board i2c bit configure, write and read
+2. support ok1052-c-board i2c bus device and driver register
 *************************************************/
 
 #include <board.h>

@@ -10,7 +10,7 @@
 
 /**
 * @file connect_flash_spi.c
-* @brief support stm32f407-st-discovery-board spi flash function and register to bus framework
+* @brief support ok1052-c-board spi flash function and register to bus framework
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-25
@@ -18,15 +18,15 @@
 
 /*************************************************
 File name: connect_flash_spi.c
-Description: support stm32f407-st-discovery-board spi flash bus register function
+Description: support ok1052-c-board spi flash bus register function
 Others: take RT-Thread v4.0.2/bsp/stm32/stm32f407-atk-explorer/board/ports/spi-flash-init.c
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
 History:
 1. Date: 2021-04-25
 Author: AIIT XUOS Lab
 Modification:
-1. support stm32f407-st-discovery-board spi flash register to spi bus
-2. support stm32f407-st-discovery-board spi flash init
+1. support ok1052-c-board spi flash register to spi bus
+2. support ok1052-c-board spi flash init
 *************************************************/
 
 //#include "connect_spi.h"

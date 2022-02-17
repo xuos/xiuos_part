@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
+* Copyright (c) 2022 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
@@ -36,14 +36,6 @@
 #define ADC2_CHANNEL_GROUP 0U
 
 #define adc_print KPrintf
-
-#define ADC1_BUS_NAME "adc1"
-#define ADC1_DRV_NAME "adc1_drv"
-#define ADC1_DEV_NAME "adc1_dev"
-
-#define ADC2_BUS_NAME "adc2"
-#define ADC2_DRV_NAME "adc2_drv"
-#define ADC2_DEV_NAME "adc2_dev"
 
 volatile bool adc1_flag;
 volatile uint32_t adc1_val;
@@ -92,7 +84,7 @@ uint32 Imrt1052AdcOpen(void *dev)
     adc_config_t adc_cfg;
 
 #ifdef BSP_USING_ADC1
-    if (0 == strncmp(adc_dev->haldev.dev_name, ADC1_DEV_NAME, NAME_NUM_MAX)) {
+    if (0 == strncmp(adc_dev->haldev.dev_name, ADC_1_DEVICE_NAME_0, NAME_NUM_MAX)) {
         EnableIRQ(ADC1_IRQn);
         ADC_GetDefaultConfig(&adc_cfg);
         ADC_Init(ADC1, &adc_cfg);
@@ -112,7 +104,7 @@ uint32 Imrt1052AdcOpen(void *dev)
 #endif
 
 #ifdef BSP_USING_ADC2
-    if (0 == strncmp(adc_dev->haldev.dev_name, ADC2_DEV_NAME, NAME_NUM_MAX)) {
+    if (0 == strncmp(adc_dev->haldev.dev_name, ADC_2_DEVICE_NAME_0, NAME_NUM_MAX)) {
         EnableIRQ(ADC2_IRQn);
         ADC_GetDefaultConfig(&adc_cfg);
         ADC_Init(ADC2, &adc_cfg);
@@ -145,7 +137,7 @@ uint32 Imrt1052AdcRead(void *dev, struct BusBlockReadParam *read_param)
     adc_channel_config_t ch_cfg;
 
 #ifdef BSP_USING_ADC1
-    if (0 == strncmp(adc_dev->haldev.dev_name, ADC1_DEV_NAME, NAME_NUM_MAX)) {
+    if (0 == strncmp(adc_dev->haldev.dev_name, ADC_1_DEVICE_NAME_0, NAME_NUM_MAX)) {
         /* Configure the user channel and interrupt. */
         ch_cfg.channelNumber = ADC1_USER_CHANNEL;
         ch_cfg.enableInterruptOnConversionCompleted = true;
@@ -160,7 +152,7 @@ uint32 Imrt1052AdcRead(void *dev, struct BusBlockReadParam *read_param)
 #endif
 
 #ifdef BSP_USING_ADC2
-    if (0 == strncmp(adc_dev->haldev.dev_name, ADC2_DEV_NAME, NAME_NUM_MAX)) {
+    if (0 == strncmp(adc_dev->haldev.dev_name, ADC_2_DEVICE_NAME_0, NAME_NUM_MAX)) {
         /* Configure the user channel and interrupt. */
         ch_cfg.channelNumber = ADC2_USER_CHANNEL;
         ch_cfg.enableInterruptOnConversionCompleted = true;
@@ -226,18 +218,18 @@ int Imrt1052HwAdcInit(void)
 
     adc1_drv.configure = Imrt1052AdcDrvConfigure;
 
-    ret = AdcBusInit(&adc1_bus, ADC1_BUS_NAME);
+    ret = AdcBusInit(&adc1_bus, ADC_BUS_NAME_1);
     if (ret != EOK) {
         KPrintf("ADC1 bus init error %d\n", ret);
         return ERROR;
     }
 
-    ret = AdcDriverInit(&adc1_drv, ADC1_DRV_NAME);
+    ret = AdcDriverInit(&adc1_drv, ADC_DRV_NAME_1);
     if (ret != EOK) {
         KPrintf("ADC1 driver init error %d\n", ret);
         return ERROR;
     }
-    ret = AdcDriverAttachToBus(ADC1_DRV_NAME, ADC1_BUS_NAME);
+    ret = AdcDriverAttachToBus(ADC_DRV_NAME_1, ADC_BUS_NAME_1);
     if (ret != EOK) {
         KPrintf("ADC1 driver attach error %d\n", ret);
         return ERROR;
@@ -245,13 +237,13 @@ int Imrt1052HwAdcInit(void)
 
     adc1_dev.adc_dev_done = &dev_done;
 
-    ret = AdcDeviceRegister(&adc1_dev, (void *)&adc1_cfg, ADC1_DEV_NAME);
+    ret = AdcDeviceRegister(&adc1_dev, (void *)&adc1_cfg, ADC_1_DEVICE_NAME_0);
     if (ret != EOK) {
         KPrintf("ADC1 device register error %d\n", ret);
         return ERROR;
     }
 
-    ret = AdcDeviceAttachToBus(ADC1_DEV_NAME, ADC1_BUS_NAME);
+    ret = AdcDeviceAttachToBus(ADC_1_DEVICE_NAME_0, ADC_BUS_NAME_1);
     if (ret != EOK) {
         KPrintf("ADC1 device register error %d\n", ret);
         return ERROR;
@@ -266,18 +258,18 @@ int Imrt1052HwAdcInit(void)
 
     adc2_drv.configure = Imrt1052AdcDrvConfigure;
 
-    ret = AdcBusInit(&adc2_bus, ADC2_BUS_NAME);
+    ret = AdcBusInit(&adc2_bus, ADC_BUS_NAME_2);
     if (ret != EOK) {
         KPrintf("ADC2 bus init error %d\n", ret);
         return ERROR;
     }
 
-    ret = AdcDriverInit(&adc2_drv, ADC2_DRV_NAME);
+    ret = AdcDriverInit(&adc2_drv, ADC_DRV_NAME_2);
     if (ret != EOK) {
         KPrintf("ADC2 driver init error %d\n", ret);
         return ERROR;
     }
-    ret = AdcDriverAttachToBus(ADC2_DRV_NAME, ADC2_BUS_NAME);
+    ret = AdcDriverAttachToBus(ADC_DRV_NAME_2, ADC_BUS_NAME_2);
     if (ret != EOK) {
         KPrintf("ADC2 driver attach error %d\n", ret);
         return ERROR;
@@ -285,13 +277,13 @@ int Imrt1052HwAdcInit(void)
 
     adc2_dev.adc_dev_done = &dev_done;
 
-    ret = AdcDeviceRegister(&adc2_dev, (void *)&adc2_cfg, ADC2_DEV_NAME);
+    ret = AdcDeviceRegister(&adc2_dev, (void *)&adc2_cfg, ADC_2_DEVICE_NAME_0);
     if (ret != EOK) {
         KPrintf("ADC2 device register error %d\n", ret);
         return ERROR;
     }
 
-    ret = AdcDeviceAttachToBus(ADC2_DEV_NAME, ADC2_BUS_NAME);
+    ret = AdcDeviceAttachToBus(ADC_2_DEVICE_NAME_0, ADC_BUS_NAME_2);
     if (ret != EOK) {
         KPrintf("ADC2 device register error %d\n", ret);
         return ERROR;
