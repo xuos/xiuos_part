@@ -11,27 +11,26 @@
 */
  
 /**
-* @file connect_dac.h
-* @brief define aiit-arm32-board adc function and struct
-* @version 2.0
+* @file connect_extmem.h
+* @brief declare aiit-arm32-board extmem fsmc function
+* @version 1.0 
 * @author AIIT XUOS Lab
-* @date 2022-1-10
+* @date 2021-05-28
 */
 
-#ifndef CONNECT_DAC_H
-#define CONNECT_DAC_H
+#ifndef CONNECT_EXTMEM_H
+#define CONNECT_EXTMEM_H
 
-#include <device.h>
-#include <hardware_dac.h>
-#include <hardware_rcc.h>
-#include <hardware_gpio.h>
+#include <xsconfig.h>
 
-struct Stm32HwDac 
-{
-    DAC_TypeDef *DACx;
-    uint16 digital_data;
-};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int Stm32HwDacInit(void);
+int HwSramInit(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

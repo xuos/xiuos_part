@@ -32,6 +32,16 @@ menu "Onboard Peripheral Drivers"
         select BSP_USING_EXT_FMC_IO
         select BSP_USING_FMC
         default n
+    
+    config BSP_USING_MCU_LCD
+        bool "Enable ATK LCD"
+        select BSP_USING_SRAM
+        default n
+        if BSP_USING_MCU_LCD
+            config BSP_USING_MCU_LCD_TEST
+                bool "Enable lcd fill test"
+                default y
+        endif
 
     config BSP_USING_SPI_FLASH
         bool "Enable SPI FLASH (W25Q128 spi2)"
