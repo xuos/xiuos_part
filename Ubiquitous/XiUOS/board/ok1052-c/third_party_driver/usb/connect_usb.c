@@ -36,7 +36,7 @@ extern usb_host_msd_command_instance_t g_MsdCommandInstance;
 usb_host_handle g_HostHandle;
 
 extern usb_status_t USB_HostMsdReadApi(usb_host_msd_command_instance_t *msdCommandInstance, uint8_t *buffer, uint32_t pos, uint32_t block_size, uint32_t block_num);
-extern usb_status_t USB_HostMsdWriteApi(usb_host_msd_command_instance_t *msdCommandInstance, uint8_t *buffer, uint32_t pos, uint32_t block_size, uint32_t block_num);
+extern usb_status_t USB_HostMsdWriteApi(usb_host_msd_command_instance_t *msdCommandInstance, const uint8_t *buffer, uint32_t pos, uint32_t block_size, uint32_t block_num);
 
 //USB HOST ISR
 void UsbOtg2IrqHandler(int irqn, void *arg)
@@ -177,7 +177,7 @@ static uint32 UsbHostWrite(void *dev, struct BusBlockWriteParam *write_param)
 {
     usb_status_t status;
 
-    status = USB_HostMsdWriteApi(&g_MsdCommandInstance, (uint8 *)write_param->buffer, write_param->pos, USB_SINGLE_BLOCK_SIZE, write_param->size);
+    status = USB_HostMsdWriteApi(&g_MsdCommandInstance, (const uint8 *)write_param->buffer, write_param->pos, USB_SINGLE_BLOCK_SIZE, write_param->size);
     if (kStatus_USB_Success == status) {
         return write_param->size;
     }

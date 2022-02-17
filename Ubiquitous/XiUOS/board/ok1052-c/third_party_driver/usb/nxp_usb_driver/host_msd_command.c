@@ -485,50 +485,86 @@ static void USB_HostMsdCommandTest(usb_host_msd_command_instance_t *msdCommandIn
 
 usb_status_t USB_HostMsdReadApi(usb_host_msd_command_instance_t *msdCommandInstance, uint8_t *buffer, uint32_t pos, uint32_t block_size, uint32_t block_num)
 {
+    usb_status_t status, ret = kStatus_USB_Error;
+    uint32_t retry = 2;
+
     if (msdCommandInstance->deviceState == kStatus_DEV_Attached) {
-        usb_status_t status;
         ufiIng = 1;
-        status = USB_HostMsdRead10(msdCommandInstance->classHandle, 0, pos, buffer, block_size, block_num, USB_HostMsdUfiCallback, msdCommandInstance);
-        if (status != kStatus_USB_Success) {
-            usb_echo("UsbHostRead error\r\n");
-            return kStatus_USB_Error;
-        }
 
-        while (ufiIng) {
-            USB_HostControllerTaskFunction(g_HostHandle);
-        }
+        while (retry--) {
+            status = USB_HostMsdRead10(msdCommandInstance->classHandle, 0, pos, buffer, (uint32_t)(block_size * block_num), block_num, USB_HostMsdUfiCallback, msdCommandInstance);
+            if (status != kStatus_USB_Success) {
+                usb_echo("UsbHostRead error\r\n");
+                ret = kStatus_USB_Error;
+            } else {
+                while (ufiIng) {
+                    USB_HostControllerTaskFunction(g_HostHandle);
+                }
 
-        if (ufiStatus == kStatus_USB_Success){
-            return kStatus_USB_Success;
+                if (ufiStatus == kStatus_USB_Success) {
+                    ret = kStatus_USB_Success;
+                    break;
+                } else {
+                    ret = kStatus_USB_Error;
+                }
+            }
         }
     }
 
-    return kStatus_USB_Error;
+    return ret;
 }
 
-usb_status_t USB_HostMsdWriteApi(usb_host_msd_command_instance_t *msdCommandInstance, uint8_t *buffer, uint32_t pos, uint32_t block_size, uint32_t block_num)
+usb_status_t USB_HostMsdWriteApi(usb_host_msd_command_instance_t *msdCommandInstance, const uint8_t *buffer, uint32_t pos, uint32_t block_size, uint32_t block_num)
 {
-    if (msdCommandInstance->deviceState == kStatus_DEV_Attached) {
-        usb_status_t status;
+    usb_status_t fatfs_code = kStatus_USB_Error;
+    usb_status_t status = kStatus_USB_Success;
+    uint32_t retry = 2;
+    const uint8_t *transferBuf;
+    uint32_t sectorCount;
+    uint32_t sectorIndex;
+
+    if (!block_num)
+    {
+        return kStatus_USB_Error;
+    }
+
+    transferBuf = buffer;
+    sectorCount = block_num;
+    sectorIndex = pos;
+
+    while (retry--)
+    {
         ufiIng = 1;
-        status = USB_HostMsdWrite10(msdCommandInstance->classHandle, 0, pos, buffer, block_size, block_num, USB_HostMsdUfiCallback, msdCommandInstance);
-        if (status != kStatus_USB_Success) {
-            usb_echo("UsbHostWrite error\r\n");
+        if (msdCommandInstance == NULL)
+        {
             return kStatus_USB_Error;
         }
-
-        while (ufiIng) {
-            USB_HostControllerTaskFunction(g_HostHandle);
+        status = USB_HostMsdWrite10(msdCommandInstance->classHandle, 0, sectorIndex, (uint8_t *)transferBuf,
+                                    (uint32_t)(block_size * sectorCount), sectorCount, USB_HostMsdUfiCallback, NULL);
+        if (status != kStatus_USB_Success)
+        {
+            fatfs_code = kStatus_USB_Error;
         }
-
-        if (ufiStatus == kStatus_USB_Success) {
-            return kStatus_USB_Success;
+        else
+        {
+            while (ufiIng)
+            {
+                USB_HostControllerTaskFunction(g_HostHandle);
+            }
+            if (ufiStatus == kStatus_USB_Success)
+            {
+                fatfs_code = kStatus_USB_Success;
+                break;
+            }
+            else
+            {
+                fatfs_code = kStatus_USB_Busy;
+            }
         }
     }
 
-    return kStatus_USB_Error;
+    return fatfs_code;
 }
-
 
 void USB_HostMsdTask(void *arg)
 {
