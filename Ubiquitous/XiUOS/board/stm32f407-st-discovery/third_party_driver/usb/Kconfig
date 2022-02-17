@@ -1,4 +1,4 @@
-config BSP_USING_USBH
+config BSP_USING_STM32_USBH
     bool "Using usb host"
     default y
         config USB_BUS_NAME

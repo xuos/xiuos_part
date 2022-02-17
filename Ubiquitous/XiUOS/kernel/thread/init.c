@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <board.h>
 
-#ifdef BSP_USING_USBH
+#ifdef BSP_USING_USB
 #include "connect_usb.h"
 #endif
 
@@ -123,9 +123,12 @@ struct InitSequenceDesc env_init[] =
 };
 struct InitSequenceDesc communication_init[] = 
 {
-#ifdef BSP_USING_USBH
+#ifdef BSP_USING_STM32_USBH
     { "STM32USBHostRegister", STM32USBHostRegister },
 	{ "hw usb", Stm32HwUsbInit },
+#endif
+#ifdef BSP_USING_NXP_USBH
+	{ "nxp hw usb", Imrt1052HwUsbHostInit },
 #endif
 	{ " NONE ", NONE },
 };

@@ -30,7 +30,7 @@ Modification:
 *************************************************/
 
 #include <xiuos.h>
-#include <usb_host.h>
+#include <stm32_usb_host.h>
 
 #define USB_THREAD_STACK_SIZE    4096
 

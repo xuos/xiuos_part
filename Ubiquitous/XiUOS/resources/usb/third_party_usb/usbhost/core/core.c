@@ -30,7 +30,7 @@ Modification:
 *************************************************/
 
 #include <xiuos.h>
-#include <usb_host.h>
+#include <stm32_usb_host.h>
 
 static struct uinstance dev[USB_MAX_DEVICE];
 

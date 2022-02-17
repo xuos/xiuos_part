@@ -9,7 +9,7 @@
  */
 
 /**
-* @file usb_host.h
+* @file stm32_usb_host.h
 * @brief define usb host function and struct
 * @version 1.0 
 * @author AIIT XUOS Lab
@@ -17,7 +17,7 @@
 */
 
 /*************************************************
-File name: usb_host.h
+File name: stm32_usb_host.h
 Description: define usb host function and struct
 Others: take RT-Thread v4.0.2/components/drivers/include/drivers/usb_host.h for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
@@ -34,7 +34,7 @@ Modification:
 
 #include <xiuos.h>
 
-#include <usb_common.h>
+#include <stm32_usb_common.h>
 
 #ifdef __cplusplus
 extern "C" {
