@@ -1,6 +1,6 @@
 menuconfig USING_CMSIS_5_DEMOAPP
         bool "CMSIS-5 demo app"
-        depends on USING_USING_CMSIS_5_NN
+        depends on USING_CMSIS_5_NN
         default n
 
     if USING_CMSIS_5_DEMOAPP
