@@ -1,12 +1,10 @@
-/*
- * Copyright (c) 2006-2018, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Change Logs:
- * Date           Author       Notes
- * 2018/10/02     Bernard      The first version
- */
+/**
+* @file interrupt_gcc.S
+* @brief support vega interrupt
+* @version 1.0 
+* @author AIIT XUOS Lab
+* @date 2022-02-16
+*/
 
 #include "boot.h"
 

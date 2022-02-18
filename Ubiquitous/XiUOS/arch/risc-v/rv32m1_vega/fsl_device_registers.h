@@ -7,6 +7,25 @@
  *
  */
 
+/**
+* @file fsl_device_registers.h
+* @brief support fsl device
+* @version 1.0 
+* @author AIIT XUOS Lab
+* @date 2022-02-16
+*/
+
+/*************************************************
+File name: fsl_device_registers.h
+Description: support fsl device
+Others: take for references
+                https://github.com/open-isa-org/open-isa.org
+History: 
+1. Date: 2022-02-16
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
+
 #ifndef __FSL_DEVICE_REGISTERS_H__
 #define __FSL_DEVICE_REGISTERS_H__
 

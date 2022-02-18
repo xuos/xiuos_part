@@ -4,7 +4,16 @@
  * 
  * SPDX-License-Identifier: BSD-3-Clause
  */
- 
+/*************************************************
+File name: clock_config
+Description: 
+Others: take for references
+                https://github.com/open-isa-org/open-isa.org
+History: 
+1. Date: 2022-02-16
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
 #ifndef _CLOCK_CONFIG_H_
 #define _CLOCK_CONFIG_H_
 

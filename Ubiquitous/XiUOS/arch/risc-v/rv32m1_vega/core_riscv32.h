@@ -30,6 +30,24 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE.
    ---------------------------------------------------------------------------*/
+/**
+* @file core_riscv32.h
+* @brief support interrupt 
+* @version 1.0 
+* @author AIIT XUOS Lab
+* @date 2022-02-16
+*/
+
+/*************************************************
+File name: core_riscv32.h
+Description: support gap8 interrupt and startup
+Others: take for references
+                https://github.com/open-isa-org/open-isa.org
+History: 
+1. Date: 2022-02-16
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
 
 #ifndef __CORE_RISCV32_H__
 #define __CORE_RISCV32_H__

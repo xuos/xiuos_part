@@ -16,6 +16,17 @@ processor_version: 0.0.0
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
+/*************************************************
+File name: pin_mux
+Description: 
+Others: take for references
+                https://github.com/open-isa-org/open-isa.org
+History: 
+1. Date: 2022-02-16
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
+
 #include "fsl_common.h"
 #include "fsl_port.h"
 #include "pin_mux.h"

@@ -12,10 +12,10 @@
 
 /**
 * @file connect_usart.c
-* @brief supportrvstar-board uart function and register to bus framework
-* @version 1.1
+* @brief support vega-board uart function and register to bus framework
+* @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-12-03
+* @date 2022-02-16
 */
 
 #include <xiuos.h>

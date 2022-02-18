@@ -1,10 +1,10 @@
 
 /**
 * @file board.c
-* @brief support rvstar init configure and start-up
+* @brief support vega init configure and start-up
 * @version 1.0 
 * @author AIIT XUOS Lab
-* @date 2021-09-02
+* @date 2022-02-16
 */
 
 #include <board.h>

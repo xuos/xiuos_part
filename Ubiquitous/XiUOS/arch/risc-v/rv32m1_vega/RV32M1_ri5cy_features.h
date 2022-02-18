@@ -21,6 +21,16 @@
 ** ###################################################################
 */
 
+/*************************************************
+File name: RV32M1_ri5cy_features.h
+Description: support ri5cy
+Others: take for references
+                https://github.com/open-isa-org/open-isa.org
+History: 
+1. Date: 2022-02-16
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
 #ifndef _RV32M1_ri5cy_FEATURES_H_
 #define _RV32M1_ri5cy_FEATURES_H_
 

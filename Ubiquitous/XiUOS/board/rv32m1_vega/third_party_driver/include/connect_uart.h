@@ -12,10 +12,10 @@
 
 /**
 * @file connect_uart.h
-* @brief define rvstar uart function 
-* @version 1.1
+* @brief define vega uart function 
+* @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-12-03
+* @date 2022-02-16
 */
 
 #ifndef CONNECT_UART_H

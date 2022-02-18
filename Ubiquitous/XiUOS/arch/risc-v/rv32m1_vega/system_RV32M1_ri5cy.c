@@ -45,6 +45,17 @@
  * (PLL) that is part of the microcontroller device.
  */
 
+/*************************************************
+File name: RV32M1_ri5cy 
+Description: 
+Others: take for references
+                https://github.com/open-isa-org/open-isa.org
+History: 
+1. Date: 2022-02-16
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
+
 #include <stdint.h>
 #include "fsl_device_registers.h"
 #include "fsl_common.h"

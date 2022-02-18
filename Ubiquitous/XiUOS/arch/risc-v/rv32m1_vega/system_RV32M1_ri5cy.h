@@ -43,7 +43,16 @@
  * the system frequency. It configures the device and initializes the oscillator
  * (PLL) that is part of the microcontroller device.
  */
-
+/*************************************************
+File name: RV32M1_ri5cy 
+Description: 
+Others: take for references
+                https://github.com/open-isa-org/open-isa.org
+History: 
+1. Date: 2022-02-16
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
 #ifndef _SYSTEM_RV32M1_ri5cy_H_
 #define _SYSTEM_RV32M1_ri5cy_H_             /**< Symbol preventing repeated inclusion */
 

@@ -20,10 +20,10 @@
 
 /*************************************************
 File name: board.h
-Description: define rvstar-board init configure and start-up function
+Description: define vega-board init configure and start-up function
 Others: 
 History: 
-1. Date: 2021-09-02
+1. Date: 2022-02-16
 Author: AIIT XUOS Lab
 Modification: 
 1. define rvstar-board InitBoardHardware

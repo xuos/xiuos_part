@@ -33,6 +33,17 @@ processor_version: 0.0.0
 board: RV32M1_VEGA
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 
+/*************************************************
+File name: clock_config
+Description: 
+Others: take for references
+                https://github.com/open-isa-org/open-isa.org
+History: 
+1. Date: 2022-02-16
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
+
 #include "fsl_msmc.h"
 #include "clock_config.h"
 

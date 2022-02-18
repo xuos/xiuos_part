@@ -1,6 +1,6 @@
 /**
 * @file interrupt.c
-* @brief support gap8 interrupt enable and disable
+* @brief support interrupt
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2021-09-02

@@ -45,6 +45,17 @@
  * (PLL) that is part of the microcontroller device.
  */
 
+/*************************************************
+File name: RV32M1_zero_riscy
+Description: 
+Others: take for references
+                https://github.com/open-isa-org/open-isa.org
+History: 
+1. Date: 2022-02-16
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
+
 #ifndef _SYSTEM_RV32M1_zero_riscy_H_
 #define _SYSTEM_RV32M1_zero_riscy_H_        /**< Symbol preventing repeated inclusion */
 
