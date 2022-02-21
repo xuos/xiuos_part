@@ -10,4 +10,5 @@ if SUPPORT_KNOWING_FRAMEWORK
         source "$APP_DIR/Framework/knowing/image_processing/Kconfig"
         source "$APP_DIR/Framework/knowing/cmsis_5/Kconfig"
         source "$APP_DIR/Framework/knowing/kpu/Kconfig"
+        source "$APP_DIR/Framework/knowing/nnom/Kconfig"
 endif
