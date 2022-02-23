@@ -11,1021 +11,593 @@
 */
 
 /**
- * @file connect_adc.c
- * @brief Demo for ADC function
+ * @file connect_spi.c
+ * @brief Demo for SPI function
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2022.1.18
  */
 
-#include "stm32f4xx.h"
-#include "connect_spi.h"
 #include "board.h"
-#include "misc.h"
-#include "hardware_spi.h"
-#include "hardware_dma.h"
-#include "hardware_gpio.h"
-#include "hardware_rcc.h"
+#include "connect_spi.h"
+#include "fsl_lpspi.h"
+#include "pin_mux.h"
 
-#include <device.h>
-#include <xs_klist.h>
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
 
-/* SPI GPIO define */
-#ifdef BSP_USING_SPI1
-#define SPI1_GPIO_NSS       GPIO_Pin_4
-#define SPI1_NSS_PIN_SOURCE GPIO_PinSource4
-#define SPI1_GPIO_SCK       GPIO_Pin_5
-#define SPI1_SCK_PIN_SOURCE GPIO_PinSource5
-#define SPI1_GPIO_MISO       GPIO_Pin_6
-#define SPI1_MISO_PIN_SOURCE GPIO_PinSource6
-#define SPI1_GPIO_MOSI       GPIO_Pin_7
-#define SPI1_MOSI_PIN_SOURCE GPIO_PinSource7
-#define SPI1_GPIO          GPIOA
-#define SPI1_GPIO_RCC      RCC_AHB1Periph_GPIOA
-#define RCC_APBPeriph_SPI1 RCC_APB2Periph_SPI1
+#define SPI_PCS_FOR_INIT (kLPSPI_Pcs0)
+
+/* Select USB1 PLL PFD0 (720 MHz) as lpspi clock source */
+#define SPI_CLOCK_SOURCE_SELECT (1U)
+
+/* Clock divider for master lpspi clock source */
+#define SPI_CLOCK_SOURCE_DIVIDER (7U)
+
+#define SPI_CLOCK_FREQ (CLOCK_GetFreq(kCLOCK_Usb1PllPfd0Clk) / (SPI_CLOCK_SOURCE_DIVIDER + 1U))
+
+#define TRANSFER_SIZE (512U)        /*! Transfer dataSize .*/
+#define TRANSFER_BAUDRATE (500000U) /*! Transfer baudrate - 500k */
+
+#define spi_print KPrintf
+#define spi_trace() KPrintf("lw: [%s][%d] passed!\n", __func__, __LINE__)
+
+typedef struct __spi_transfer_t
+{
+    uint32_t size;
+    volatile uint32_t cnt;
+    uint8_t water;
+    uint8_t fifo;
+    volatile bool completed;
+    uint8_t buf[TRANSFER_SIZE];
+}spi_transfer_t;
+
+#if defined(BSP_USING_SPI1)
+struct Stm32Spi spi1;
+spi_transfer_t spi1_rx_data;
+spi_transfer_t spi1_tx_data;
 #endif
 
-#ifdef BSP_USING_SPI2
-#define SPI2_GPIO_NSS       GPIO_Pin_6
-#define SPI2_NSS_PIN_SOURCE GPIO_PinSource6
-#define SPI2_GPIO_SCK       GPIO_Pin_13
-#define SPI2_SCK_PIN_SOURCE GPIO_PinSource13
-#define SPI2_GPIO_MISO       GPIO_Pin_2
-#define SPI2_MISO_PIN_SOURCE GPIO_PinSource2
-#define SPI2_GPIO_MOSI       GPIO_Pin_3
-#define SPI2_MOSI_PIN_SOURCE GPIO_PinSource3
-#define SPI2_GPIO          GPIOC
-#define SPI2_SCK            GPIOB
-#define SPI2_GPIO_RCC      RCC_AHB1Periph_GPIOC
-#define SPI2_GPIO_RCC_SCK   RCC_AHB1Periph_GPIOB
-#define RCC_APBPeriph_SPI2 RCC_APB1Periph_SPI2
+#if defined(BSP_USING_SPI2)
+struct Stm32Spi spi2;
+spi_transfer_t spi2_rx_data;
+spi_transfer_t spi2_tx_data;
 #endif
 
-#ifdef BSP_USING_SPI3
-#define SPI3_GPIO_NSS       GPIO_Pin_15
-#define SPI3_NSS_PIN_SOURCE GPIO_PinSource15
-#define SPI3_GPIO_SCK       GPIO_Pin_10
-#define SPI3_SCK_PIN_SOURCE GPIO_PinSource10
-#define SPI3_GPIO_MISO       GPIO_Pin_11
-#define SPI3_MISO_PIN_SOURCE GPIO_PinSource11
-#define SPI3_GPIO_MOSI       GPIO_Pin_12
-#define SPI3_MOSI_PIN_SOURCE GPIO_PinSource12
-#define SPI3_GPIO          GPIOC
-#define SPI3_NSS            GPIOA
-#define SPI3_GPIO_RCC      RCC_AHB1Periph_GPIOC
-#define SPI3_GPIO_RCC_NSS   RCC_AHB1Periph_GPIOA
-#define RCC_APBPeriph_SPI3 RCC_APB2Periph_SPI3
+#if defined(BSP_USING_SPI3)
+struct Stm32Spi spi3;
+spi_transfer_t spi3_rx_data;
+spi_transfer_t spi3_tx_data;
 #endif
 
-/**
- * This function                        SPI device initialization
- *
- * @param spi_drv                  SPI device structure   pointer
- *
- *  @param cfg                        SPI device operating mode configuration structure   pointer
- *
- *  @return                                 if   successful   return  EOK
- */
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
 
-static x_err_t Stm32SpiInit(struct Stm32Spi *spi_drv, struct SpiMasterParam *cfg)
+void LPSPI1_IRQHandler(int vector, void *param)
 {
-    NULL_PARAM_CHECK(spi_drv);
-    NULL_PARAM_CHECK(cfg);
+    LPSPI_Type *spi_base = LPSPI1;
+    int rx_size = spi1_rx_data.size < TRANSFER_SIZE ? spi1_rx_data.size : TRANSFER_SIZE;
+    int tx_size = spi1_tx_data.size < TRANSFER_SIZE ? spi1_tx_data.size : TRANSFER_SIZE;
 
-    SPI_InitTypeDef *spi_init = &spi_drv->init;
-
-    if (cfg->spi_work_mode & DEV_SPI_SLAVE){
-        spi_init->SPI_Mode = SPI_Mode_Slave;
-    }
-    else{
-        spi_init->SPI_Mode = SPI_Mode_Master;
-    }
-
-    if (cfg->spi_work_mode & SPI_3WIRE){
-        spi_init->SPI_Direction = SPI_Direction_1Line_Rx;
-    }
-    else{
-        spi_init->SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-    }
-
-    if (cfg->spi_data_bit_width == 8){
-        spi_init->SPI_DataSize = SPI_DataSize_8b;
-    }
-    else if (cfg->spi_data_bit_width == 16){
-        spi_init->SPI_DataSize = SPI_DataSize_16b;
-    }
-    else{
-        return EPIO;
-    }
-
-    if (cfg->spi_work_mode & SPI_LINE_CPHA){
-        spi_init->SPI_CPHA = SPI_CPHA_2Edge;
-    }
-    else {
-        spi_init->SPI_CPHA = SPI_CPHA_1Edge;
-    }
-
-    if (cfg->spi_work_mode & SPI_LINE_CPOL) {
-        spi_init->SPI_CPOL = SPI_CPOL_High;
-    }
-    else{
-        spi_init->SPI_CPOL = SPI_CPOL_Low;
-    }
-
-    if (cfg->spi_work_mode & SPI_NO_CS) {
-        spi_init->SPI_NSS = SPI_NSS_Soft;
-    }
-    else{
-        spi_init->SPI_NSS = SPI_NSS_Soft;
-    }
-
-    uint32_t SPI_APB_CLOCK;
-
-    SPI_APB_CLOCK = system_core_clock>>apb_presc_table[(RCC->CFGR & RCC_CFGR_PPRE2)>> 13U];
-
-    if (cfg->spi_maxfrequency >= SPI_APB_CLOCK / 2){
-        spi_init->SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
-    }
-    else if (cfg->spi_maxfrequency >= SPI_APB_CLOCK / 4){
-        spi_init->SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
-    }
-    else if (cfg->spi_maxfrequency >= SPI_APB_CLOCK / 8){
-        spi_init->SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
-    }
-    else if (cfg->spi_maxfrequency >= SPI_APB_CLOCK / 16){
-        spi_init->SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
-    }
-    else if (cfg->spi_maxfrequency >= SPI_APB_CLOCK / 32){
-        spi_init->SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;
-    }
-    else if (cfg->spi_maxfrequency >= SPI_APB_CLOCK / 64){
-        spi_init->SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
-    }
-    else if (cfg->spi_maxfrequency >= SPI_APB_CLOCK / 128) {
-        spi_init->SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_128;
-    }
-    else {
-        /* min prescaler 256 */
-        spi_init->SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
-    }
-    RCC_ClocksTypeDef RCC_ClocksStatus;
-    RCC_GetClocksFreq(&RCC_ClocksStatus);
-
-    if (cfg->spi_work_mode & SPI_MSB){
-        spi_init->SPI_FirstBit = SPI_FirstBit_MSB;       /*Highest bit transmit first*/
-    }
-    else{
-        spi_init->SPI_FirstBit = SPI_FirstBit_LSB;          /*lowest bit transmit first*/
-    }
-
-    spi_init->SPI_CRCPolynomial = 7;
-
-    SPI_Init(spi_drv->instance, spi_init);
-
-    SPI_Cmd(spi_drv->instance, ENABLE);
-
-    uint32_t prioritygroup = 0x00U;
-    /* DMA configuration */
-    if (spi_drv->spi_dma_flag & SPI_USING_RX_DMA_FLAG){
-        DMA_Init(spi_drv->dma.dma_rx.instance, &spi_drv->dma.dma_rx.init);
-
-        prioritygroup = NVIC_GetPriorityGrouping();
-
-        NVIC_SetPriority(spi_drv->dma.dma_rx.dma_irq, NVIC_EncodePriority(prioritygroup, 0, 0));
-
-        NVIC_EnableIRQ(spi_drv->dma.dma_rx.dma_irq);
-    }
-
-    if (spi_drv->spi_dma_flag & SPI_USING_TX_DMA_FLAG){
-        DMA_Init(spi_drv->dma.dma_tx.instance, &spi_drv->dma.dma_tx.init);
-
-        prioritygroup = NVIC_GetPriorityGrouping();
-
-        NVIC_SetPriority(spi_drv->dma.dma_tx.dma_irq, NVIC_EncodePriority(prioritygroup, 0, 1));
-
-        NVIC_EnableIRQ(spi_drv->dma.dma_tx.dma_irq);
-    }
-
-    spi_drv->instance->CR1 |= SPI_CR1_SPE;
-
-    return EOK;
-}
-
-static void DmaSpiConfig(struct SpiBus *spi_bus, uint32_t setting_len, void *rx_base_addr, void *tx_base_addr)
-{
-    struct Stm32Spi *spi = (struct Stm32Spi *)spi_bus->private_data;
-    uint32 tmpreg = 0x00U;
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    if(spi->spi_dma_flag & SPI_USING_RX_DMA_FLAG)
+    if (spi1_rx_data.cnt < rx_size)
     {
-      spi->dma.dma_rx.setting_len = setting_len;
-      DMA_DeInit(spi->dma.dma_rx.instance);
-      while(DMA_GetCmdStatus(spi->dma.dma_rx.instance) != DISABLE);
-      spi->dma.dma_rx.init.DMA_Channel = spi->dma.dma_rx.channel;
-      spi->dma.dma_rx.init.DMA_PeripheralBaseAddr = (uint32_t)&(spi->instance->DR);
-      spi->dma.dma_rx.init.DMA_Memory0BaseAddr = (uint32_t)rx_base_addr;
-      spi->dma.dma_rx.init.DMA_DIR = DMA_DIR_PeripheralToMemory;
-      spi->dma.dma_rx.init.DMA_BufferSize = spi->dma.dma_rx.setting_len;
-      spi->dma.dma_rx.init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-      spi->dma.dma_rx.init.DMA_MemoryInc = DMA_MemoryInc_Enable;
-      spi->dma.dma_rx.init.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-      spi->dma.dma_rx.init.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-      spi->dma.dma_rx.init.DMA_Mode = DMA_Mode_Normal;
-      spi->dma.dma_rx.init.DMA_Priority = DMA_Priority_High;
-      spi->dma.dma_rx.init.DMA_FIFOMode = DMA_FIFOMode_Disable;
-      spi->dma.dma_rx.init.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
-      spi->dma.dma_rx.init.DMA_MemoryBurst = DMA_MemoryBurst_INC4;
-      spi->dma.dma_rx.init.DMA_PeripheralBurst = DMA_PeripheralBurst_INC4;
-      DMA_Init(spi->dma.dma_rx.instance, &spi->dma.dma_rx.init);
-      DMA_ITConfig(spi->dma.dma_rx.instance, DMA_IT_TC, ENABLE);
-
-      RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
-      RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
-
-      DMA_Cmd(spi->dma.dma_rx.instance, ENABLE);
-
-      NVIC_InitStructure.NVIC_IRQChannel = spi->dma.dma_rx.dma_irq;
-      NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-      NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-      NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-      NVIC_Init(&NVIC_InitStructure);
-
-      tmpreg = 0x00U;
-      RCC->AHB1ENR |= spi->dma.dma_rx.dma_rcc;
-      tmpreg = RCC->AHB1ENR & spi->dma.dma_rx.dma_rcc;
-      (void)tmpreg;
-    }
-
-    if(spi->spi_dma_flag & SPI_USING_TX_DMA_FLAG)
-    {
-      spi->dma.dma_tx.setting_len = setting_len;
-      DMA_DeInit(spi->dma.dma_tx.instance);
-      while(DMA_GetCmdStatus(spi->dma.dma_tx.instance) != DISABLE);
-      spi->dma.dma_tx.init.DMA_PeripheralBaseAddr = (uint32_t)&(spi->instance->DR);
-      spi->dma.dma_tx.init.DMA_Memory0BaseAddr = (uint32_t)tx_base_addr;
-      spi->dma.dma_tx.init.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-      spi->dma.dma_tx.init.DMA_BufferSize = spi->dma.dma_tx.setting_len;
-      spi->dma.dma_tx.init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-      spi->dma.dma_tx.init.DMA_MemoryInc = DMA_MemoryInc_Enable;
-      spi->dma.dma_tx.init.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-      spi->dma.dma_tx.init.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-      spi->dma.dma_tx.init.DMA_Mode = DMA_Mode_Normal;
-      spi->dma.dma_tx.init.DMA_Priority = DMA_Priority_Low;
-      spi->dma.dma_tx.init.DMA_FIFOMode = DMA_FIFOMode_Disable;
-      spi->dma.dma_tx.init.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
-      spi->dma.dma_tx.init.DMA_MemoryBurst = DMA_MemoryBurst_INC4;
-      spi->dma.dma_tx.init.DMA_PeripheralBurst = DMA_PeripheralBurst_INC4;
-      DMA_Init(spi->dma.dma_tx.instance, &spi->dma.dma_tx.init);
-      DMA_ITConfig(spi->dma.dma_tx.instance, DMA_IT_TC, ENABLE);
-
-      RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
-      RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
-
-      DMA_Cmd(spi->dma.dma_tx.instance, ENABLE);
-
-      NVIC_InitStructure.NVIC_IRQChannel = spi->dma.dma_tx.dma_irq;
-      NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-      NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-      NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-      NVIC_Init(&NVIC_InitStructure);
-
-      tmpreg = 0x00U;
-      RCC->AHB1ENR |= spi->dma.dma_rx.dma_rcc;
-      tmpreg = RCC->AHB1ENR & spi->dma.dma_rx.dma_rcc;
-      (void)tmpreg;
-    }
-}
-
-
-static void DmaRxDoneIsr(struct SpiBus *spi_bus)
-{
-    struct Stm32Spi *spi = (struct Stm32Spi *) spi_bus->bus.private_data;
-    x_size_t recv_len;
-    x_base level;
-
-    if (DMA_GetFlagStatus(spi->dma.dma_rx.instance, spi->spi_dma_flag) != RESET)
-    {
-        level = CriticalAreaLock();
-
-        recv_len = spi->dma.dma_rx.setting_len - spi->dma.dma_rx.last_index;
-        spi->dma.dma_rx.last_index = 0;
-        CriticalAreaUnLock(level);
-        DMA_ClearFlag(spi->dma.dma_rx.instance, spi->spi_dma_flag);
-    }
-}
-
-
-static void DmaTxDoneIsr(struct SpiBus *spi_bus)
-{
-    struct Stm32Spi *spi = (struct Stm32Spi *) spi_bus->bus.private_data;
-    x_size_t send_len;
-    x_base level;
-
-    if (DMA_GetFlagStatus(spi->dma.dma_tx.instance, spi->spi_dma_flag) != RESET)
-    {
-        level = CriticalAreaLock();
-
-        send_len = spi->dma.dma_tx.setting_len - spi->dma.dma_tx.last_index;
-        spi->dma.dma_tx.last_index = 0;
-        CriticalAreaUnLock(level);
-        DMA_ClearFlag(spi->dma.dma_tx.instance, spi->spi_dma_flag);
-    }
-}
-
-
-static int SpiWaitUntilTimeout(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint32_t flag, uint32_t state, uint32_t time_out, uint32_t tick_start)
-{
-  while((((spi_instance->SR & flag) == (flag)) ? SET : RESET) != state)
-  {
-    if(time_out != 0xFFFFFFFFU)
-    {
-      if((time_out == 0U) || ((CurrentTicksGain() * 1000 / TICK_PER_SECOND-tick_start) >= time_out))
-      {
-        spi_instance->CR2 &= (~(SPI_IT_TXE | SPI_IT_RXNE | SPI_IT_ERR));
-
-        if((spi_init.SPI_Mode == SPI_Mode_Master)&&((spi_init.SPI_Direction == SPI_Direction_1Line_Rx)||(spi_init.SPI_Direction == SPI_Direction_2Lines_RxOnly))) {
-          /* Disable SPI peripheral */
-          spi_instance->CR1 &= (~SPI_CR1_SPE);
-        }
-
-        return 3;
-      }
-    }
-  }
-  return 0;
-}
-/**
- * This function                                   SPI sends data through DMA
- *
- * @param spi_init                           SPI Init structure
- *
- *  @param spi_instance                SPI control handle
- *
- *  @param dma_init                        DMA Init structure
- *
- *  @param dma_instance             DMA Controller
- *
- *  @param p_data                              Send data buffer address
- *
- * @param size                                   Amount of data sent
- *
- * @return                                            if   successful   return  EOK
- */
-int SpiTransmitDma(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, DMA_InitTypeDef dma_init, DMA_Stream_TypeDef *dma_instance, uint8_t *p_data, uint16_t size)
-{
-  int errorcode = 0;
-  __IO uint16_t              tx_xfer_count;
-  uint8_t                    *p_txbuff_ptr;
-  uint16_t                   tx_xfer_size;
-
-  if((p_data == NONE) || (size == 0)){
-    errorcode = 1;
-    goto error;
-  }
-
-  tx_xfer_count = size;
-  p_txbuff_ptr  = (uint8_t *)p_data;
-  tx_xfer_size  = size;
-
-  /* Configure communication direction : 1Line */
-  if(spi_init.SPI_Direction == SPI_Direction_1Line_Rx){
-    spi_instance->CR1 |= SPI_CR1_BIDIOE;
-  }
-
-  /* Clear DBM bit */
-  dma_instance->CR &= (uint32_t)(~DMA_SxCR_DBM);
-
-  /* Configure DMA Stream data length */
-  dma_instance->NDTR = tx_xfer_count;
-
-  /* Memory to Peripheral */
-  if((dma_init.DMA_DIR) == DMA_DIR_MemoryToPeripheral)
-  {
-    /* Configure DMA Stream destination address */
-    dma_instance->PAR = spi_instance->DR;
-
-    /* Configure DMA Stream source address */
-    dma_instance->M0AR = *p_txbuff_ptr;
-  }
-  /* Peripheral to Memory */
-  else
-  {
-    /* Configure DMA Stream source address */
-    dma_instance->PAR = *p_txbuff_ptr;
-
-    /* Configure DMA Stream destination address */
-    dma_instance->M0AR = spi_instance->DR;
-  }
-
-    /* Enable Common interrupts*/
-    dma_instance->CR  |= DMA_IT_TC | DMA_IT_TE | DMA_IT_DME | DMA_IT_HT;
-    dma_instance->FCR |= DMA_IT_FE;
-    dma_instance->CR |=  DMA_SxCR_EN;
-
-  /* Check if the SPI is already enabled */
-  if((spi_instance->CR1 &SPI_CR1_SPE) != SPI_CR1_SPE){
-    /* Enable SPI peripheral */
-    spi_instance->CR1 |=  SPI_CR1_SPE;
-  }
-
-  /* Enable the SPI Error Interrupt Bit */
-  spi_instance->CR2 |= SPI_CR2_ERRIE;
-
-  /* Enable Tx DMA Request */
-  spi_instance->CR2 |=SPI_CR2_TXDMAEN;
-
-error :
-  return errorcode;
-}
-/**
- * This function                             SPI carries out duplex communication through DMA
- *
- * @param spi_init                       SPI Init structure
- *
- *  @param spi_instance            SPI control handle
- *
- * @param dmarx_init                DMA Init structure---Rx
- *
- * @param dmarx_instance     DMA Controller
- *
- * @param dmatx_init                DMA Init structure---Tx
- *
- * @param dmatx_instance     DMA Controller
- *
- * @param p_txdata                      Send data buffer address
- *
- * @param p_rxdata                     Receive data buffer address
- *
- * @param size                              Amount of data
- *
- * @return                                        if   successful   return  EOK
- */
-int SpiTransmitreceiveDma(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, DMA_InitTypeDef dmarx_init, DMA_Stream_TypeDef *dmarx_instance, DMA_InitTypeDef dmatx_init, DMA_Stream_TypeDef *dmatx_instance, uint8_t *p_txdata, uint8_t *p_rxdata, uint16_t size)
-{
-  uint32_t tmp = 0U;
-  int errorcode = 0;
-  __IO uint16_t              tx_xfer_count;
-  __IO uint16_t              rx_xfer_count;
-  uint8_t                    *p_txbuff_ptr;
-  uint8_t                    *p_rxbuff_ptr;
-  uint16_t                   tx_xfer_size;
-  uint16_t                   rx_xfer_size;
-
-  tmp = spi_init.SPI_Mode;
-  if(!((tmp == SPI_Mode_Master) && (spi_init.SPI_Direction == SPI_Direction_2Lines_FullDuplex)))
-  {
-    errorcode = 2;
-    goto error;
-  }
-
-  if((p_txdata == NONE ) || (p_rxdata == NONE ) || (size == 0))
-  {
-    errorcode = 1;
-    goto error;
-  }
-
-  /* Set the transaction information */
-  p_txbuff_ptr  = (uint8_t*)p_txdata;
-  tx_xfer_size  = size;
-  tx_xfer_count = size;
-  p_rxbuff_ptr  = (uint8_t*)p_rxdata;
-  rx_xfer_size  = size;
-  rx_xfer_count = size;
-
-  /* Clear DBM bit */
-  dmarx_instance->CR &= (uint32_t)(~DMA_SxCR_DBM);
-
-  /* Configure DMA Stream data length */
-  dmarx_instance->NDTR = rx_xfer_count;
-
-  /* Memory to Peripheral */
-  if((dmarx_init.DMA_DIR) == DMA_DIR_MemoryToPeripheral)
-  {
-    /* Configure DMA Stream destination address */
-    dmarx_instance->PAR = spi_instance->DR;
-
-    /* Configure DMA Stream source address */
-    dmarx_instance->M0AR = *p_rxbuff_ptr;
-  }
-  /* Peripheral to Memory */
-  else
-  {
-    /* Configure DMA Stream source address */
-    dmarx_instance->PAR = *p_rxbuff_ptr;
-
-    /* Configure DMA Stream destination address */
-    dmarx_instance->M0AR = spi_instance->DR;
-  }
-
-  /* Enable Common interrupts*/
-  dmarx_instance->CR  |= DMA_IT_TC | DMA_IT_TE | DMA_IT_DME | DMA_IT_HT;
-  dmarx_instance->FCR |= DMA_IT_FE;
-  dmarx_instance->CR |=  DMA_SxCR_EN;
-
-  /* Enable Rx DMA Request */
-  spi_instance->CR2 |= SPI_CR2_RXDMAEN;
-
-  /* Clear DBM bit */
-  dmatx_instance->CR &= (uint32_t)(~DMA_SxCR_DBM);
-
-  /* Configure DMA Stream data length */
-  dmatx_instance->NDTR = tx_xfer_count;
-
-  /* Memory to Peripheral */
-  if((dmatx_init.DMA_DIR) == DMA_DIR_MemoryToPeripheral)
-  {
-    /* Configure DMA Stream destination address */
-    dmatx_instance->PAR = spi_instance->DR;
-
-    /* Configure DMA Stream source address */
-    dmatx_instance->M0AR = *p_txbuff_ptr;
-  }
-  /* Peripheral to Memory */
-  else{
-    /* Configure DMA Stream source address */
-    dmatx_instance->PAR = *p_txbuff_ptr;
-
-    /* Configure DMA Stream destination address */
-    dmatx_instance->M0AR = spi_instance->DR;
-  }
-
-  /* Enable Common interrupts*/
-  dmatx_instance->CR  |= DMA_IT_TC | DMA_IT_TE | DMA_IT_DME | DMA_IT_HT;
-  dmatx_instance->FCR |= DMA_IT_FE;
-  dmatx_instance->CR |=  DMA_SxCR_EN;
-
-  /* Check if the SPI is already enabled */
-  if((spi_instance->CR1 &SPI_CR1_SPE) != SPI_CR1_SPE){
-    /* Enable SPI peripheral */
-    spi_instance->CR1 |= SPI_CR1_SPE;
-  }
-  /* Enable the SPI Error Interrupt Bit */
-  spi_instance->CR2 |= SPI_CR2_ERRIE;
-
-  /* Enable Tx DMA Request */
-  spi_instance->CR2 |= SPI_CR2_TXDMAEN;
-
-error :
-  return errorcode;
-}
-/**
- * This function                             SPI receives data through DMA
- *
- * @param spi_init                       SPI Init structure
- *
- *  @param spi_instance            SPI control handle
- *
- * @param dmarx_init                DMA Init structure---Rx
- *
- * @param dmarx_instance     DMA Controller
- *
- * @param dmatx_init                DMA Init structure---Tx
- *
- * @param dmatx_instance     DMA Controller
- *
- * @param p_data                         Receive data buffer address
- *
- * @param size                             Amount of data
- *
- * @return                                        if   successful   return  EOK
- */
-int SpiReceiveDma(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, DMA_InitTypeDef dmarx_init, DMA_Stream_TypeDef *dmarx_instance, DMA_InitTypeDef dmatx_init, DMA_Stream_TypeDef *dmatx_instance, uint8_t *p_data, uint16_t size)
-{
-  int errorcode = 0;
-  __IO uint16_t              rx_xfer_count;
-  uint8_t                    *p_rxbuff_ptr;
-  uint16_t                   rx_xfer_size;
-
-  if((spi_init.SPI_Direction == SPI_Direction_2Lines_FullDuplex)&&(spi_init.SPI_Mode == SPI_Mode_Master)) {
-     /* Call transmit-receive function to send Dummy data on Tx line and generate clock on CLK line */
-     return SpiTransmitreceiveDma(spi_init, spi_instance, dmarx_init, dmarx_instance, dmatx_init, dmatx_instance, p_data, p_data, size);
-  }
-
-  if((p_data == NONE) || (size == 0))
-  {
-    errorcode = 1;
-    goto error;
-  }
-
-  rx_xfer_count = size;
-  rx_xfer_size  = size;
-  p_rxbuff_ptr  = (uint8_t *)p_data;
-
-  /* Configure communication direction : 1Line */
-  if(spi_init.SPI_Direction == SPI_Direction_1Line_Rx) {
-    spi_instance->CR1 &= (~SPI_CR1_BIDIOE);
-  }
-  /* Clear DBM bit */
-  dmarx_instance->CR &= (uint32_t)(~DMA_SxCR_DBM);
-
-  /* Configure DMA Stream data length */
-  dmarx_instance->NDTR = rx_xfer_count;
-
-  /* Memory to Peripheral */
-  if((dmarx_init.DMA_DIR) == DMA_DIR_MemoryToPeripheral){
-    /* Configure DMA Stream destination address */
-    dmarx_instance->PAR = spi_instance->DR;
-    /* Configure DMA Stream source address */
-    dmarx_instance->M0AR = *p_rxbuff_ptr;
-  }
-  /* Peripheral to Memory */
-  else
-  {
-    /* Configure DMA Stream source address */
-    dmarx_instance->PAR = *p_rxbuff_ptr;
-
-    /* Configure DMA Stream destination address */
-    dmarx_instance->M0AR = spi_instance->DR;
-  }
-
-    /* Enable Common interrupts*/
-    dmarx_instance->CR  |= DMA_IT_TC | DMA_IT_TE | DMA_IT_DME | DMA_IT_HT;
-    dmarx_instance->FCR |= DMA_IT_FE;
-    dmarx_instance->CR |=  DMA_SxCR_EN;
-
-  /* Check if the SPI is already enabled */
-  if((spi_instance->CR1 &SPI_CR1_SPE) != SPI_CR1_SPE){
-    /* Enable SPI peripheral */
-    spi_instance->CR1 |= SPI_CR1_SPE;
-  }
-
-  /* Enable the SPI Error Interrupt Bit */
-  spi_instance->CR2 |= SPI_CR2_ERRIE;
-
-  /* Enable Rx DMA Request */
-  spi_instance->CR2 |= SPI_CR2_RXDMAEN;
-
-error:
-  return errorcode;
-}
-/**
- * This function                             SPI receives data
- *
- * @param spi_init                       SPI Init structure
- *
- *  @param spi_instance            SPI control handle
- *
- * @param p_data                         Transmit data buffer address
- *
- * @param size                             Amount of data
- *
- * @param Timeout                    waiting time
- *
- * @return                                        if   successful   return  EOK
- */
-int SpiTransmit(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint8_t *p_data, uint16_t size, uint32_t Timeout)
-{
-  uint32_t tickstart = 0U;
-  int errorcode = 0;
-  __IO uint16_t              tx_xfer_count;
-  __IO uint32_t SPITimeout;
-
-  /* Init tickstart for timeout management*/
-  tickstart = CurrentTicksGain() * 1000 / TICK_PER_SECOND;
-
-  if((p_data == NONE ) || (size == 0)){
-    errorcode = 1;
-    goto error;
-  }
-
-  tx_xfer_count = size;
-
-  /* Configure communication direction : 1Line */
-  if(spi_init.SPI_Direction == SPI_Direction_1Line_Rx){
-    spi_instance->CR1 |= SPI_CR1_BIDIOE;
-  }
-
-  /* Check if the SPI is already enabled */
-  if((spi_instance->CR1 & SPI_CR1_SPE) != SPI_CR1_SPE){
-    /* Enable SPI peripheral */
-    spi_instance->CR1 |=  SPI_CR1_SPE;
-  }
-
-  /* Transmit data in 16 Bit mode */
-  if(spi_init.SPI_DataSize == SPI_DataSize_16b)
-  {
-    if((spi_init.SPI_Mode == SPI_Mode_Slave) || (tx_xfer_count == 0x01)){
-      spi_instance->DR = *((uint16_t *)p_data);
-
-      p_data += sizeof(uint16_t);
-      tx_xfer_count--;
-    }
-    /* Transmit data in 16 Bit mode */
-    while (tx_xfer_count > 0U)
-    {
-      SPITimeout = 0x1000;
-      /* Wait until TXE flag is set to send data */
-      while (SPI_I2S_GetFlagStatus(spi_instance, SPI_I2S_FLAG_TXE) == RESET)
-      {
-        if((SPITimeout--) == 0) {
-          KPrintf("spi time out\n");
-          errorcode = 3;
-          goto error;
-        }
-      }
-      /* Write to the data register and write the data to be written into the transmit buffer */
-      spi_instance->DR = *((uint16_t *)p_data);
-
-      p_data += sizeof(uint16_t);
-      tx_xfer_count--;
-    }
-  }
-  /* Transmit data in 8 Bit mode */
-  else
-  {
-    if((spi_init.SPI_Mode == SPI_Mode_Slave) || (tx_xfer_count == 0x01U)){
-      *((__IO uint8_t*)&spi_instance->DR) = (*p_data);
-
-      p_data += sizeof(uint8_t);
-      tx_xfer_count--;
-    }
-
-    while(tx_xfer_count > 0)
-    {
-      SPITimeout = 0x1000;
-
-      /* Wait for the send buffer to be empty, TXE event*/
-      while (SPI_I2S_GetFlagStatus(spi_instance, SPI_I2S_FLAG_TXE) == RESET)
-      {
-        if((SPITimeout--) == 0){
-          KPrintf("spi time out\n");
-          errorcode = 3;
-          goto error;
-        }
-      }
-
-      /* Write to the data register and write the data to be written into the transmit buffer*/
-      *((__IO uint8_t*)&spi_instance->DR) = (*p_data);
-
-      p_data += sizeof(uint8_t);
-      tx_xfer_count--;
-    }
-}
-
-  /* Wait until TXE flag */
-  if(SpiWaitUntilTimeout(spi_init, spi_instance, SPI_FLAG_TXE, SET, Timeout, tickstart) != 0){
-    errorcode = 3;
-    goto error;
-  }
-
-  /* Check Busy flag */
-  if(SpiWaitUntilTimeout(spi_init, spi_instance, SPI_FLAG_BSY, RESET, Timeout, tickstart) != 0){
-    errorcode = 1;
-    goto error;
-  }
-
-error:
-  return errorcode;
-}
-/**
- * This function                             SPI Transmit   and  receive
- *
- * @param spi_init                       SPI Init structure
- *
- *  @param spi_instance            SPI control handle
- *
- * @param p_txdata                      Transmit data buffer address
- *
- * @param p_rxdata                     receive data buffer address
- *
-  * @param size                              Amount of data
- *
- * @param Timeout                      waiting time
- *
- * @return                                        if   successful   return  EOK
- */
-int SpiTransmitreceive(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint8_t *p_txdata, uint8_t *p_rxdata, uint16_t size, uint32_t Timeout)
-{
-  uint32_t tmp = 0U;
-
-  uint32_t tickstart = 0U;
-  /* Variable used to alternate Rx and Tx during transfer */
-  uint32_t txallowed = 1U;
-  int errorcode = 0;
-  __IO uint16_t              tx_xfer_count;
-  __IO uint16_t              rx_xfer_count;
-
-  /* Init tickstart for timeout management*/
-  tickstart = CurrentTicksGain() * 1000 / TICK_PER_SECOND;
-
-  tmp  = spi_init.SPI_Mode;
-
-  if(!((tmp == SPI_Mode_Master) && (spi_init.SPI_Direction == SPI_Direction_2Lines_FullDuplex))){
-    errorcode = 2;
-    goto error;
-  }
-
-  if((p_txdata == NONE) || (p_rxdata == NONE) || (size == 0)){
-    errorcode = 1;
-    goto error;
-  }
-
-  tx_xfer_count = size;
-  rx_xfer_count = size;
-
-  /* Check if the SPI is already enabled */
-  if((spi_instance->CR1 &SPI_CR1_SPE) != SPI_CR1_SPE) {
-    /* Enable SPI peripheral */
-    spi_instance->CR1 |=  SPI_CR1_SPE;
-  }
-
-  /* Transmit and Receive data in 16 Bit mode */
-  if(spi_init.SPI_DataSize == SPI_DataSize_16b)
-  {
-    if((spi_init.SPI_Mode == SPI_Mode_Slave) || (tx_xfer_count == 0x01U)) {
-      SPI_I2S_ReceiveData(spi_instance);
-      spi_instance->DR = *((uint16_t *)p_txdata);
-
-      p_txdata += sizeof(uint16_t);
-      tx_xfer_count--;
-    }
-    while ((tx_xfer_count > 0U) || (rx_xfer_count > 0U))
-    {
-      /* Check TXE flag */
-      if(txallowed && (tx_xfer_count > 0U) && (SPI_I2S_GetFlagStatus(spi_instance, SPI_I2S_FLAG_TXE) == SET)) {
-        SPI_I2S_ReceiveData(spi_instance);
-        spi_instance->DR = *((uint16_t *)p_txdata);
-        p_txdata += sizeof(uint16_t);
-        tx_xfer_count--;
-        /* Next Data is a reception (Rx). Tx not allowed */
-        txallowed = 0U;
-      }
-
-      /* Check RXNE flag */
-      if((rx_xfer_count > 0U) && (SPI_I2S_GetFlagStatus(spi_instance, SPI_I2S_FLAG_RXNE) == SET))
-      {
-        *((uint16_t *)p_rxdata) = spi_instance->DR;
-        p_rxdata += sizeof(uint16_t);
-        rx_xfer_count--;
-        /* Next Data is a Transmission (Tx). Tx is allowed */
-        txallowed = 1U;
-      }
-      if((Timeout != 0xFFFFFFFFU) && ((CurrentTicksGain() * 1000 / TICK_PER_SECOND-tickstart) >=  Timeout)){
-        errorcode = 3;
-        goto error;
-      }
-    }
-  }
-  /* Transmit and Receive data in 8 Bit mode */
-  else
-  {
-    if((spi_init.SPI_Mode == SPI_Mode_Slave) || (tx_xfer_count == 0x01U))
-    {
-      SPI_I2S_ReceiveData(spi_instance);
-      *((__IO uint8_t*)&spi_instance->DR) = (*p_txdata);
-
-      p_txdata += sizeof(uint8_t);
-      tx_xfer_count--;
-    }
-    while((tx_xfer_count > 0U) || (rx_xfer_count > 0U))
-    {
-      /* Wait for the send buffer to be empty, TXE event */
-      if (txallowed && (tx_xfer_count > 0U) && (SPI_I2S_GetFlagStatus(spi_instance, SPI_I2S_FLAG_TXE) == SET))
-      {
-        /* Write to the data register and write the data to be written into the transmit buffer */
-        SPI_I2S_ReceiveData(spi_instance);
-        *((__IO uint8_t*)&spi_instance->DR) = (*p_txdata);
-
-        p_txdata += sizeof(uint8_t);
-        tx_xfer_count--;
-        txallowed = 0U;
-      }
-
-      if ((rx_xfer_count > 0U) && SPI_I2S_GetFlagStatus(spi_instance, SPI_I2S_FLAG_RXNE) == SET)
-      {
-        *(uint8_t *)p_rxdata = spi_instance->DR;
-
-        p_rxdata += sizeof(uint8_t);
-        rx_xfer_count--;
-        txallowed = 1U;
-      }
-      if((Timeout != 0xFFFFFFFFU) && ((CurrentTicksGain() * 1000 / TICK_PER_SECOND-tickstart) >=  Timeout)) {
-        errorcode = 3;
-        goto error;
-      }
-    }
-  }
-
-    /* Wait until TXE flag */
-    if(SpiWaitUntilTimeout(spi_init, spi_instance, SPI_FLAG_TXE, SET, Timeout, tickstart) != 0){
-        errorcode = 3;
-        goto error;
-    }
-
-    /* Check Busy flag */
-    if(SpiWaitUntilTimeout(spi_init, spi_instance, SPI_FLAG_BSY, RESET, Timeout, tickstart) != 0){
-        errorcode = 1;
-        goto error;
-    }
-
-error :
-    return errorcode;
-}
-/**
- * This function                             SPI   receive  data
- *
- * @param spi_init                       SPI Init structure
- *
- *  @param spi_instance            SPI control handle
- *
- * @param p_data                          data buffer address
- *
-  * @param size                              Amount of data
- *
- * @param Timeout                      waiting time
- *
- * @return                                        if   successful   return  EOK
- */
-int SpiReceive(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint8_t *p_data, uint16_t size, uint32_t Timeout)
-{
-  uint32_t tickstart = 0U;
-  int errorcode = 0;
-  __IO uint16_t              rx_xfer_count;
-  __IO uint32_t             SPITimeout;
-
-  if((spi_init.SPI_Mode == SPI_Mode_Master) && (spi_init.SPI_Direction == SPI_Direction_2Lines_FullDuplex)) {
-     /* Call transmit-receive function to send Dummy data on Tx line and generate clock on CLK line */
-    return SpiTransmitreceive(spi_init, spi_instance,p_data,p_data,size,Timeout);
-  }
-
-  /* Init tickstart for timeout management*/
-  tickstart = CurrentTicksGain() * 1000 / TICK_PER_SECOND;
-
-  if((p_data == NONE ) || (size == 0)){
-    errorcode = 1;
-    goto error;
-  }
-
-  rx_xfer_count = size;
-
-  /* Configure communication direction: 1Line */
-  if(spi_init.SPI_Direction == SPI_Direction_1Line_Rx){
-    spi_instance->CR1 &= (~SPI_CR1_BIDIOE);
-  }
-
-  /* Check if the SPI is already enabled */
-  if((spi_instance->CR1 & SPI_CR1_SPE) != SPI_CR1_SPE){
-    /* Enable SPI peripheral */
-    spi_instance->CR1 |=  SPI_CR1_SPE;
-  }
-
-    /* Receive data in 8 Bit mode */
-  if(spi_init.SPI_DataSize == SPI_DataSize_8b)
-  {
-    /* Transfer loop */
-    while(rx_xfer_count > 0U)
-    {
-        SPITimeout = 0x1000;
-
-        /* Wait for the send buffer to be empty, TXE event*/
-        while (SPI_I2S_GetFlagStatus(spi_instance, SPI_I2S_FLAG_RXNE) == RESET)
+        /* First, disable the interrupts to avoid potentially triggering another interrupt
+         * while reading out the RX FIFO as more data may be coming into the RX FIFO. We'll
+         * re-enable the interrupts on the LPSPI state after reading out the FIFO.
+         */
+        LPSPI_DisableInterrupts(spi_base, kLPSPI_RxInterruptEnable);
+
+        while (LPSPI_GetRxFifoCount(spi_base))
         {
-          if((SPITimeout--) == 0){
-            KPrintf("spi time out\n");
-            errorcode = 3;
-            goto error;
-          }
+            /*Read out the data*/
+            spi1_rx_data.buf[spi1_rx_data.cnt] = LPSPI_ReadData(spi_base);
+            spi1_rx_data.cnt++;
+
+            if (spi1_rx_data.cnt == rx_size)
+            {
+                break;
+            }
         }
 
-        *(uint8_t *)p_data = spi_instance->DR;
-
-        p_data += sizeof(uint8_t);
-        rx_xfer_count--;
+        /* Re-enable the interrupts only if rxCount indicates there is more data to receive,
+         * else we may get a spurious interrupt.
+         * */
+        if (spi1_rx_data.cnt < rx_size)
+        {
+            /* Set the TDF and RDF interrupt enables simultaneously to avoid race conditions */
+            LPSPI_EnableInterrupts(spi_base, kLPSPI_RxInterruptEnable);
+        }
     }
-  }
-  else
-  {
-    /* Transfer loop */
-    while(rx_xfer_count > 0U)
+
+    /*Update rxWatermark. There isn't RX interrupt for the last datas if the RX count is not greater than rxWatermark.*/
+    if ((rx_size - spi1_rx_data.cnt) <= spi1_rx_data.water)
     {
-      SPITimeout = 0x1000;
-      /* Check the RXNE flag */
-      while (SPI_I2S_GetFlagStatus(spi_instance, SPI_I2S_FLAG_RXNE) == RESET)
-      {
-        if((SPITimeout--) == 0)
-          {
-            KPrintf("spi time out\n");
-            errorcode = 3;
-            goto error;
-          }
-      }
-      *((uint16_t*)p_data) = spi_instance->DR;
-      p_data += sizeof(uint16_t);
-      rx_xfer_count--;
+        spi_base->FCR =
+            (spi_base->FCR & (~LPSPI_FCR_RXWATER_MASK)) |
+            LPSPI_FCR_RXWATER(((rx_size - spi1_rx_data.cnt) > 1) ? ((rx_size - spi1_rx_data.cnt) - 1U) : (0U));
     }
-  }
 
-  /* Check the end of the transaction */
-  if((spi_init.SPI_Mode == SPI_Mode_Master)&&((spi_init.SPI_Direction == SPI_Direction_1Line_Rx)||(spi_init.SPI_Direction == SPI_Direction_2Lines_RxOnly)))
-  {
-    /* Disable SPI peripheral */
-    spi_instance->CR1 &= (~SPI_CR1_SPE);
-  }
+    if (spi1_tx_data.cnt < tx_size)
+    {
+        while ((LPSPI_GetTxFifoCount(spi_base) < spi1_tx_data.fifo) &&
+               (spi1_tx_data.cnt - spi1_rx_data.cnt < spi1_tx_data.fifo))
+        {
+            /*Write the word to TX register*/
+            LPSPI_WriteData(spi_base, spi1_tx_data.buf[spi1_tx_data.cnt]);
+            spi1_tx_data.cnt++;
 
-error :
-  return errorcode;
+            if (spi1_tx_data.cnt == tx_size)
+            {
+                spi1_tx_data.completed = true;
+                /* Complete the transfer and disable the interrupts */
+                LPSPI_DisableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+                break;
+            }
+        }
+    }
+
+    /* Check if we're done with this transfer.*/
+    if ((spi1_tx_data.cnt == tx_size) && (spi1_rx_data.cnt == tx_size))
+    {
+        spi1_tx_data.completed = true;
+        /* Complete the transfer and disable the interrupts */
+        LPSPI_DisableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+    }
+/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+  exception return operation might vector to incorrect interrupt */
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
 }
+
+DECLARE_HW_IRQ(LPSPI1_IRQn, LPSPI1_IRQHandler, NONE);
+
+void LPSPI2_IRQHandler(int vector, void *param)
+{
+    LPSPI_Type *spi_base = LPSPI2;
+    int rx_size = spi2_rx_data.size < TRANSFER_SIZE ? spi2_rx_data.size : TRANSFER_SIZE;
+    int tx_size = spi2_tx_data.size < TRANSFER_SIZE ? spi2_tx_data.size : TRANSFER_SIZE;
+
+    if (spi2_rx_data.cnt < rx_size)
+    {
+        /* First, disable the interrupts to avoid potentially triggering another interrupt
+         * while reading out the RX FIFO as more data may be coming into the RX FIFO. We'll
+         * re-enable the interrupts on the LPSPI state after reading out the FIFO.
+         */
+        LPSPI_DisableInterrupts(spi_base, kLPSPI_RxInterruptEnable);
+
+        while (LPSPI_GetRxFifoCount(spi_base))
+        {
+            /*Read out the data*/
+            spi2_rx_data.buf[spi2_rx_data.cnt] = LPSPI_ReadData(spi_base);
+            spi2_rx_data.cnt++;
+
+            if (spi2_rx_data.cnt == rx_size)
+            {
+                break;
+            }
+        }
+
+        /* Re-enable the interrupts only if rxCount indicates there is more data to receive,
+         * else we may get a spurious interrupt.
+         * */
+        if (spi2_rx_data.cnt < rx_size)
+        {
+            /* Set the TDF and RDF interrupt enables simultaneously to avoid race conditions */
+            LPSPI_EnableInterrupts(spi_base, kLPSPI_RxInterruptEnable);
+        }
+    }
+
+    /*Update rxWatermark. There isn't RX interrupt for the last datas if the RX count is not greater than rxWatermark.*/
+    if ((rx_size - spi2_rx_data.cnt) <= spi2_rx_data.water)
+    {
+        spi_base->FCR =
+            (spi_base->FCR & (~LPSPI_FCR_RXWATER_MASK)) |
+            LPSPI_FCR_RXWATER(((rx_size - spi2_rx_data.cnt) > 1) ? ((rx_size - spi2_rx_data.cnt) - 1U) : (0U));
+    }
+
+    if (spi2_tx_data.cnt < tx_size)
+    {
+        while ((LPSPI_GetTxFifoCount(spi_base) < spi2_tx_data.fifo) &&
+               (spi2_tx_data.cnt - spi2_rx_data.cnt < spi2_tx_data.fifo))
+        {
+            /*Write the word to TX register*/
+            LPSPI_WriteData(spi_base, spi2_tx_data.buf[spi2_tx_data.cnt]);
+            spi2_tx_data.cnt++;
+
+            if (spi2_tx_data.cnt == tx_size)
+            {
+                spi2_tx_data.completed = true;
+                /* Complete the transfer and disable the interrupts */
+                LPSPI_DisableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+                break;
+            }
+        }
+    }
+
+    /* Check if we're done with this transfer.*/
+    if ((spi2_tx_data.cnt == tx_size) && (spi2_rx_data.cnt == tx_size))
+    {
+        spi2_tx_data.completed = true;
+        /* Complete the transfer and disable the interrupts */
+        LPSPI_DisableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+    }
+/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+  exception return operation might vector to incorrect interrupt */
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
+}
+
+DECLARE_HW_IRQ(LPSPI2_IRQn, LPSPI2_IRQHandler, NONE);
+
+void LPSPI3_IRQHandler(int vector, void *param)
+{
+    LPSPI_Type *spi_base = LPSPI3;
+    int rx_size = spi3_rx_data.size < TRANSFER_SIZE ? spi3_rx_data.size : TRANSFER_SIZE;
+    int tx_size = spi3_tx_data.size < TRANSFER_SIZE ? spi3_tx_data.size : TRANSFER_SIZE;
+
+    if (spi3_rx_data.cnt < rx_size)
+    {
+        /* First, disable the interrupts to avoid potentially triggering another interrupt
+         * while reading out the RX FIFO as more data may be coming into the RX FIFO. We'll
+         * re-enable the interrupts on the LPSPI state after reading out the FIFO.
+         */
+        LPSPI_DisableInterrupts(spi_base, kLPSPI_RxInterruptEnable);
+
+        while (LPSPI_GetRxFifoCount(spi_base))
+        {
+            /*Read out the data*/
+            spi3_rx_data.buf[spi3_rx_data.cnt] = LPSPI_ReadData(spi_base);
+            spi3_rx_data.cnt++;
+
+            if (spi3_rx_data.cnt == rx_size)
+            {
+                break;
+            }
+        }
+
+        /* Re-enable the interrupts only if rxCount indicates there is more data to receive,
+         * else we may get a spurious interrupt.
+         * */
+        if (spi3_rx_data.cnt < rx_size)
+        {
+            /* Set the TDF and RDF interrupt enables simultaneously to avoid race conditions */
+            LPSPI_EnableInterrupts(spi_base, kLPSPI_RxInterruptEnable);
+        }
+    }
+
+    /*Update rxWatermark. There isn't RX interrupt for the last datas if the RX count is not greater than rxWatermark.*/
+    if ((rx_size - spi3_rx_data.cnt) <= spi3_rx_data.water)
+    {
+        spi_base->FCR =
+            (spi_base->FCR & (~LPSPI_FCR_RXWATER_MASK)) |
+            LPSPI_FCR_RXWATER(((rx_size - spi3_rx_data.cnt) > 1) ? ((rx_size - spi3_rx_data.cnt) - 1U) : (0U));
+    }
+
+    if (spi3_tx_data.cnt < tx_size)
+    {
+        while ((LPSPI_GetTxFifoCount(spi_base) < spi3_tx_data.fifo) &&
+               (spi3_tx_data.cnt - spi3_rx_data.cnt < spi3_tx_data.fifo))
+        {
+            /*Write the word to TX register*/
+            LPSPI_WriteData(spi_base, spi3_tx_data.buf[spi3_tx_data.cnt]);
+            spi3_tx_data.cnt++;
+
+            if (spi3_tx_data.cnt == tx_size)
+            {
+                spi3_tx_data.completed = true;
+                /* Complete the transfer and disable the interrupts */
+                LPSPI_DisableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+                break;
+            }
+        }
+    }
+
+    /* Check if we're done with this transfer.*/
+    if ((spi3_tx_data.cnt == tx_size) && (spi3_rx_data.cnt == tx_size))
+    {
+        spi3_tx_data.completed = true;
+        /* Complete the transfer and disable the interrupts */
+        LPSPI_DisableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+    }
+/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+  exception return operation might vector to incorrect interrupt */
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
+}
+
+DECLARE_HW_IRQ(LPSPI3_IRQn, LPSPI3_IRQHandler, NONE);
+
+void SpiMasterInit(LPSPI_Type *base)
+{
+    lpspi_master_config_t cfg;
+
+    /*Master config*/
+    cfg.baudRate     = TRANSFER_BAUDRATE;
+    cfg.bitsPerFrame = 8;
+    cfg.cpol         = kLPSPI_ClockPolarityActiveHigh;
+    cfg.cpha         = kLPSPI_ClockPhaseFirstEdge;
+    cfg.direction    = kLPSPI_MsbFirst;
+
+    cfg.pcsToSckDelayInNanoSec        = 1000000000 / cfg.baudRate;
+    cfg.lastSckToPcsDelayInNanoSec    = 1000000000 / cfg.baudRate;
+    cfg.betweenTransferDelayInNanoSec = 1000000000 / cfg.baudRate;
+
+    cfg.whichPcs           = SPI_PCS_FOR_INIT;
+    cfg.pcsActiveHighOrLow = kLPSPI_PcsActiveLow;
+
+    cfg.pinCfg        = kLPSPI_SdiInSdoOut;
+    cfg.dataOutConfig = kLpspiDataOutRetained;
+
+    LPSPI_MasterInit(base, &cfg, SPI_CLOCK_FREQ);
+}
+
+void SpiSlaveInit(LPSPI_Type *base)
+{
+    lpspi_slave_config_t cfg;
+
+    /*Slave config*/
+    cfg.bitsPerFrame = 8;
+    cfg.cpol         = kLPSPI_ClockPolarityActiveHigh;
+    cfg.cpha         = kLPSPI_ClockPhaseFirstEdge;
+    cfg.direction    = kLPSPI_MsbFirst;
+
+    cfg.whichPcs           = SPI_PCS_FOR_INIT;
+    cfg.pcsActiveHighOrLow = kLPSPI_PcsActiveLow;
+
+    cfg.pinCfg        = kLPSPI_SdiInSdoOut;
+    cfg.dataOutConfig = kLpspiDataOutRetained;
+
+    LPSPI_SlaveInit(base, &cfg);
+}
+
+int SpiHwParamInit(struct Stm32HwSpi *spi_param)
+{
+    LPSPI_Type *spi_base = spi_param->base;
+    uint32_t whichPcs = kLPSPI_Pcs0;
+    uint8_t fifo_size, tx_water, rx_water;
+
+    /*The TX and RX FIFO sizes are always the same*/
+    fifo_size = LPSPI_GetRxFifoSize(spi_base);
+
+    /*Set the RX and TX watermarks to reduce the ISR times.*/
+    if (fifo_size > 1)
+    {
+        tx_water = 1;
+        rx_water = fifo_size - 2;
+    }
+    else
+    {
+        tx_water = 0;
+        rx_water = 0;
+    }
+
+    LPSPI_SetFifoWatermarks(spi_base, tx_water, rx_water);
+
+    LPSPI_Enable(spi_base, false);
+    spi_base->CFGR1 &= (~LPSPI_CFGR1_NOSTALL_MASK);
+    LPSPI_Enable(spi_base, true);
+
+    /*Flush FIFO , clear status , disable all the inerrupts.*/
+    LPSPI_FlushFifo(spi_base, true, true);
+    LPSPI_ClearStatusFlags(spi_base, kLPSPI_AllStatusFlag);
+    LPSPI_DisableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+
+    spi_base->TCR =
+        (spi_base->TCR &
+         ~(LPSPI_TCR_CONT_MASK | LPSPI_TCR_CONTC_MASK | LPSPI_TCR_RXMSK_MASK | LPSPI_TCR_PCS_MASK)) |
+        LPSPI_TCR_CONT(0) | LPSPI_TCR_CONTC(0) | LPSPI_TCR_RXMSK(0) | LPSPI_TCR_TXMSK(0) | LPSPI_TCR_PCS(whichPcs);
+
+    /* Enable the NVIC for LPSPI peripheral. Note that below code is useless if the LPSPI interrupt is in INTMUX ,
+     * and you should also enable the INTMUX interupt in your application.
+     */
+    EnableIRQ(spi_param->irq);
+    LPSPI_EnableInterrupts(spi_base, kLPSPI_RxInterruptEnable);
+}
+
+int SpiReadData(struct Stm32HwSpi *spi_param, uint8_t *buf, int len)
+{
+    int fifo_size;
+    int timeout = 50; // wait for read SPI data
+    LPSPI_Type *spi_base = spi_param->base;
+
+    BOARD_InitSPIPins();
+
+    /*Set clock source for LPSPI*/
+    CLOCK_SetMux(kCLOCK_LpspiMux, SPI_CLOCK_SOURCE_SELECT);
+    CLOCK_SetDiv(kCLOCK_LpspiDiv, SPI_CLOCK_SOURCE_DIVIDER);
+
+    uint32_t errorCount;
+    uint32_t i;
+    uint32_t whichPcs;
+    uint8_t txWatermark;
+
+    BOARD_InitSPIPins();
+
+    /*Set clock source for LPSPI*/
+    CLOCK_SetMux(kCLOCK_LpspiMux, SPI_CLOCK_SOURCE_SELECT);
+    CLOCK_SetDiv(kCLOCK_LpspiDiv, SPI_CLOCK_SOURCE_DIVIDER);
+
+    /*Set up the transfer data*/
+    for (i = 0; i < TRANSFER_SIZE; i++)
+    {
+        spi1_rx_data.buf[i] = 0;
+    }
+
+    SpiSlaveInit(spi_base);
+
+    /******************Set up slave first ******************/
+    spi1_rx_data.completed = false;
+    spi1_rx_data.cnt = 0;
+    spi1_rx_data.size = len;
+    whichPcs = SPI_PCS_FOR_INIT;
+
+    /*The TX and RX FIFO sizes are always the same*/
+    spi1_rx_data.fifo = LPSPI_GetRxFifoSize(spi_base);
+
+    /*Set the RX and TX watermarks to reduce the ISR times.*/
+    if (spi1_rx_data.fifo > 1)
+    {
+        txWatermark        = 1;
+        spi1_rx_data.water = spi1_rx_data.fifo - 2;
+    }
+    else
+    {
+        txWatermark        = 0;
+        spi1_rx_data.water = 0;
+    }
+
+    LPSPI_SetFifoWatermarks(spi_base, txWatermark, spi1_rx_data.water);
+
+    LPSPI_Enable(spi_base, false);
+    spi_base->CFGR1 &= (~LPSPI_CFGR1_NOSTALL_MASK);
+    LPSPI_Enable(spi_base, true);
+
+    /*Flush FIFO , clear status , disable all the interrupts.*/
+    LPSPI_FlushFifo(spi_base, true, true);
+    LPSPI_ClearStatusFlags(spi_base, kLPSPI_AllStatusFlag);
+    LPSPI_DisableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+
+    spi_base->TCR =
+        (spi_base->TCR &
+         ~(LPSPI_TCR_CONT_MASK | LPSPI_TCR_CONTC_MASK | LPSPI_TCR_RXMSK_MASK | LPSPI_TCR_PCS_MASK)) |
+        LPSPI_TCR_CONT(0) | LPSPI_TCR_CONTC(0) | LPSPI_TCR_RXMSK(0) | LPSPI_TCR_TXMSK(0) | LPSPI_TCR_PCS(whichPcs);
+
+    /* Enable the NVIC for LPSPI peripheral. Note that below code is useless if the LPSPI interrupt is in INTMUX ,
+     * and you should also enable the INTMUX interrupt in your application.
+     */
+    EnableIRQ(spi_param->irq);
+    LPSPI_EnableInterrupts(spi_base, kLPSPI_RxInterruptEnable);
+
+    /******************Wait for slave transfer completed.******************/
+    while((spi1_rx_data.cnt < (len - 1)) && (timeout--))
+    {
+        MdelayKTask(100);
+    }
+
+    if(buf && (len <= TRANSFER_SIZE))
+    {
+        memcpy(buf, spi1_rx_data.buf, len);
+    }
+
+    LPSPI_Deinit(spi_base);
+}
+
+void SpiReadTest(void *arg)
+{
+    uint32_t i;
+    uint8_t test_buf[32] = {0};
+    struct Stm32HwSpi spi_param;
+    spi_param.base = LPSPI1;
+    spi_param.irq = LPSPI1_IRQn;
+
+    SpiReadData(&spi_param, test_buf, 32);
+
+    for(i = 0; i < sizeof(test_buf) ;i ++)
+    {
+        spi_print("%d - %x\n", i, test_buf[i]);
+    }
+}
+
+SHELL_EXPORT_CMD (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
+                   spiread, SpiReadTest, SPI Read);
+
+void SpiWriteData(struct Stm32HwSpi *spi_param, const uint8_t *buf, uint16_t len)
+{
+    uint32_t errorCount;
+    uint32_t i;
+    uint32_t whichPcs;
+    uint8_t txWatermark;
+    LPSPI_Type *spi_base = spi_param->base;
+    int timeout = 1000; // wait for write SPI data
+
+    BOARD_InitSPIPins();
+
+    /*Set clock source for LPSPI*/
+    CLOCK_SetMux(kCLOCK_LpspiMux, SPI_CLOCK_SOURCE_SELECT);
+    CLOCK_SetDiv(kCLOCK_LpspiDiv, SPI_CLOCK_SOURCE_DIVIDER);
+    /*Set up the transfer data*/
+    memcpy(spi1_tx_data.buf, buf, len);
+
+    SpiMasterInit(spi_base);
+
+    spi1_rx_data.size = len;
+    spi1_tx_data.size = len;
+    spi1_tx_data.completed = false;
+    spi1_tx_data.cnt = 0;
+    spi1_rx_data.cnt = 0;
+    whichPcs = SPI_PCS_FOR_INIT;
+
+    /*The TX and RX FIFO sizes are always the same*/
+    spi1_tx_data.fifo = LPSPI_GetRxFifoSize(spi_base);
+
+    /*Set the RX and TX watermarks to reduce the ISR times.*/
+    if (spi1_tx_data.fifo > 1)
+    {
+        txWatermark         = 1;
+        spi1_rx_data.water = spi1_tx_data.fifo - 2;
+    }
+    else
+    {
+        txWatermark         = 0;
+        spi1_rx_data.water = 0;
+    }
+
+    LPSPI_SetFifoWatermarks(spi_base, txWatermark, spi1_rx_data.water);
+
+    LPSPI_Enable(spi_base, false);
+    spi_base->CFGR1 &= (~LPSPI_CFGR1_NOSTALL_MASK);
+    LPSPI_Enable(spi_base, true);
+
+    /*Flush FIFO , clear status , disable all the inerrupts.*/
+    LPSPI_FlushFifo(spi_base, true, true);
+    LPSPI_ClearStatusFlags(spi_base, kLPSPI_AllStatusFlag);
+    LPSPI_DisableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+
+    spi_base->TCR =
+        (spi_base->TCR &
+         ~(LPSPI_TCR_CONT_MASK | LPSPI_TCR_CONTC_MASK | LPSPI_TCR_RXMSK_MASK | LPSPI_TCR_PCS_MASK)) |
+        LPSPI_TCR_CONT(0) | LPSPI_TCR_CONTC(0) | LPSPI_TCR_RXMSK(0) | LPSPI_TCR_TXMSK(0) | LPSPI_TCR_PCS(whichPcs);
+
+    /* Enable the NVIC for LPSPI peripheral. Note that below code is useless if the LPSPI interrupt is in INTMUX ,
+     * and you should also enable the INTMUX interupt in your application.
+     */
+    EnableIRQ(spi_param->irq);
+    LPSPI_EnableInterrupts(spi_base, kLPSPI_AllInterruptEnable);
+
+    while((spi1_tx_data.cnt < (spi1_tx_data.size - 1)) && (timeout--))
+    {
+        MdelayKTask(10);
+    }
+
+    spi_print("SPI: master rx %d tx %d size %d completed s %d m %d!\r\n", spi1_rx_data.cnt,
+        spi1_tx_data.cnt, spi1_tx_data.size, spi1_rx_data.completed, spi1_tx_data.completed);
+
+    LPSPI_Deinit(spi_base);
+}
+
+void SpiWriteTest(void *arg)
+{
+    uint32_t i;
+    uint8_t test_buf[100] = {0};
+    struct Stm32HwSpi spi_param;
+    spi_param.base = LPSPI1;
+    spi_param.irq = LPSPI1_IRQn;
+
+    for(i = 0; i < sizeof(test_buf) ;i ++)
+    {
+        test_buf[i] = i;
+    }
+
+    SpiWriteData(&spi_param, test_buf, 100);
+}
+
+SHELL_EXPORT_CMD (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
+                   spiwrite, SpiWriteTest, SPI Write );
 
 /**
  * This function                             SPI write data
@@ -1041,57 +613,43 @@ static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDat
     int state;
     x_size_t message_length, already_send_length;
     uint16 send_length;
-    const uint8 *WriteBuf;
+    const uint8 *write_buf;
 
     NULL_PARAM_CHECK(spi_dev);
     NULL_PARAM_CHECK(spi_datacfg);
 
     struct Stm32Spi *StmSpi = CONTAINER_OF(spi_dev->haldev.owner_bus, struct Stm32Spi, spi_bus);
-    SPI_TypeDef *spi_instance = StmSpi->instance;
-    SPI_InitTypeDef *spi_init = &StmSpi->init;
-    struct Stm32HwSpiCs *cs = (struct Stm32HwSpiCs *)spi_dev->private_data;
+    struct Stm32HwSpi *StmCfg = (struct Stm32HwSpi *) spi_dev->haldev.private_data;
 
-  while(NONE != spi_datacfg) {
-    if(spi_datacfg->spi_chip_select) {
-        GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_RESET);
+    while(NONE != spi_datacfg) {
+
+      message_length = spi_datacfg->length;
+      write_buf = spi_datacfg->tx_buff;
+      while (message_length) {
+          if (message_length > 65535){
+              send_length = 65535;
+              message_length = message_length - 65535;
+          } else {
+              send_length = message_length;
+              message_length = 0;
+          }
+
+          /* calculate the start address */
+          already_send_length = spi_datacfg->length - send_length - message_length;
+          write_buf = (uint8 *)spi_datacfg->tx_buff + already_send_length;
+
+          if (spi_datacfg->tx_buff) {
+              SpiWriteData(StmCfg, spi_datacfg->tx_buff, send_length);
+          }
+
+          if (state != 0) {
+              KPrintf("spi write error : %d\n", state);
+              spi_datacfg->length = 0;
+          }
+      }
+
+      spi_datacfg = spi_datacfg->next;
     }
-
-    message_length = spi_datacfg->length;
-    WriteBuf = spi_datacfg->tx_buff;
-    while (message_length) {
-        if (message_length > 65535){
-            send_length = 65535;
-            message_length = message_length - 65535;
-        } else {
-            send_length = message_length;
-            message_length = 0;
-        }
-
-        /* calculate the start address */
-        already_send_length = spi_datacfg->length - send_length - message_length;
-        WriteBuf = (uint8 *)spi_datacfg->tx_buff + already_send_length;
-
-        /* start once data exchange in DMA mode */
-        if (spi_datacfg->tx_buff) {
-            if (StmSpi->spi_dma_flag & SPI_USING_TX_DMA_FLAG) {
-                state = SpiTransmitDma(*spi_init, spi_instance, StmSpi->dma.dma_tx.init, StmSpi->dma.dma_tx.instance, (uint8_t *)WriteBuf, send_length);
-            } else {
-                state = SpiTransmit(*spi_init, spi_instance, (uint8_t *)WriteBuf, send_length, 1000);
-            }
-        }
-
-        if (state != 0) {
-            KPrintf("spi write error : %d\n", state);
-            spi_datacfg->length = 0;
-        }
-    }
-
-    if (spi_datacfg->spi_cs_release) {
-        GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_SET);
-    }
-
-    spi_datacfg = spi_datacfg->next;
-  }
 
     return EOK;
 }
@@ -1110,61 +668,61 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
     int state;
     x_size_t message_length, already_send_length;
     uint16 read_length, spi_read_length = 0;
-    const uint8 *ReadBuf;
+    uint8 *read_buf;
 
     NULL_PARAM_CHECK(spi_dev);
     NULL_PARAM_CHECK(spi_datacfg);
 
     struct Stm32Spi *StmSpi = CONTAINER_OF(spi_dev->haldev.owner_bus, struct Stm32Spi, spi_bus);
-    SPI_TypeDef *spi_instance = StmSpi->instance;
-    SPI_InitTypeDef *spi_init = &StmSpi->init;
-    struct Stm32HwSpiCs *cs = (struct Stm32HwSpiCs *)spi_dev->private_data;
+    struct Stm32HwSpi *StmCfg = (struct Stm32HwSpi *) spi_dev->haldev.private_data;
 
-  while (NONE != spi_datacfg) {
-    if (spi_datacfg->spi_chip_select) {
-        GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_RESET);
-    }
-
-    message_length = spi_datacfg->length;
-    ReadBuf = spi_datacfg->rx_buff;
-    while (message_length) {
-        if (message_length > 65535) {
-            read_length = 65535;
-            message_length = message_length - 65535;
-        } else {
-            read_length = message_length;
-            message_length = 0;
-        }
-
-        /* calculate the start address */
-        already_send_length = spi_datacfg->length - read_length - message_length;
-        ReadBuf = (uint8 *)spi_datacfg->rx_buff + already_send_length;
-
-        /* start once data exchange in DMA mode */
-        if (spi_datacfg->rx_buff) {
-            //memset((uint8_t *)ReadBuf, 0xff, read_length);
-            if (StmSpi->spi_dma_flag & SPI_USING_RX_DMA_FLAG) {
-                state = SpiReceiveDma(*spi_init, spi_instance, StmSpi->dma.dma_rx.init, StmSpi->dma.dma_rx.instance, StmSpi->dma.dma_tx.init, StmSpi->dma.dma_tx.instance, (uint8_t *)ReadBuf, read_length);
+    while (NONE != spi_datacfg) {
+        message_length = spi_datacfg->length;
+        read_buf = spi_datacfg->rx_buff;
+        while (message_length) {
+            if (message_length > 65535) {
+                read_length = 65535;
+                message_length = message_length - 65535;
             } else {
-                state = SpiReceive(*spi_init, spi_instance, (uint8_t *)ReadBuf, read_length, 1000);
+                read_length = message_length;
+                message_length = 0;
+            }
+
+            /* calculate the start address */
+            already_send_length = spi_datacfg->length - read_length - message_length;
+            read_buf = (uint8 *)spi_datacfg->rx_buff + already_send_length;
+
+            if (spi_datacfg->rx_buff) {
+                memset(read_buf, 0xff, read_length);
+                SpiReadData(StmCfg, read_buf, read_length);
+            }
+
+            if (state != 0) {
+                KPrintf("spi read error : %d\n", state);
+                spi_datacfg->length = 0;
             }
         }
 
-        if (state != 0) {
-            KPrintf("spi read error : %d\n", state);
-            spi_datacfg->length = 0;
-        }
+        spi_read_length += spi_datacfg->length;
+        spi_datacfg = spi_datacfg->next;
     }
-
-    if (spi_datacfg->spi_cs_release) {
-        GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_SET);
-    }
-
-    spi_read_length += spi_datacfg->length;
-    spi_datacfg = spi_datacfg->next;
-  }
 
     return spi_read_length;
+}
+
+/*manage the spi device operations*/
+static const struct SpiDevDone spi_dev_done =
+{
+  .dev_open = NONE,
+  .dev_close = NONE,
+  .dev_write = Stm32SpiWriteData,
+  .dev_read = Stm32SpiReadData,
+};
+
+static x_err_t Stm32SpiInit(struct Stm32Spi *spi_drv, struct SpiMasterParam *cfg)
+{
+    NULL_PARAM_CHECK(spi_drv);
+    NULL_PARAM_CHECK(cfg);
 }
 
 /**
@@ -1233,161 +791,9 @@ static uint32 Stm32SpiDrvConfigure(void *drv, struct BusConfigureInfo *configure
     return ret;
 }
 
-/*manage the spi device operations*/
-static const struct SpiDevDone spi_dev_done =
-{
-  .dev_open = NONE,
-  .dev_close = NONE,
-  .dev_write = Stm32SpiWriteData,
-  .dev_read = Stm32SpiReadData,
-};
-
-#if defined(BSP_USING_SPI1)
-struct Stm32Spi spi1;
-#if defined(BSP_SPI1_TX_USING_DMA)
-void DMA2_Stream3_IRQHandler(int irq_num, void *arg)
-{
-    DmaTxDoneIsr(&spi1.spi_bus);
-}
-DECLARE_HW_IRQ(DMA2_Stream3_IRQn, DMA2_Stream3_IRQHandler, NONE);
-#endif
-
-#if defined(BSP_SPI1_RX_USING_DMA)
-void DMA2_Stream0_IRQHandler(int irq_num, void *arg)
-{
-    DmaRxDoneIsr(&spi1.spi_bus);
-}
-DECLARE_HW_IRQ(DMA2_Stream0_IRQn, DMA2_Stream0_IRQHandler, NONE);
-#endif
-#endif
-
-#if defined(BSP_USING_SPI2)
-struct Stm32Spi spi2;
-#if defined(BSP_SPI2_TX_USING_DMA)
-void DMA1_Stream4_IRQHandler(int irq_num, void *arg)
-{
-    DmaTxDoneIsr(&spi2.spi_bus);
-}
-DECLARE_HW_IRQ(DMA1_Stream4_IRQn, DMA1_Stream4_IRQHandler, NONE);
-#endif
-
-#if defined(BSP_SPI2_RX_USING_DMA)
-void DMA1_Stream3_IRQHandler(int irq_num, void *arg)
-{
-    DmaTxDoneIsr(&spi2.spi_bus);
-}
-DECLARE_HW_IRQ(DMA1_Stream3_IRQn, DMA1_Stream3_IRQHandler, NONE);
-#endif
-#endif
-
-#if defined(BSP_USING_SPI3)
-struct Stm32Spi spi3;
-#if defined(BSP_SPI3_TX_USING_DMA)
-void DMA1_Stream7_IRQHandler(int irq_num, void *arg)
-{
-    DmaTxDoneIsr(&spi3.spi_bus);
-}
-DECLARE_HW_IRQ(DMA1_Stream7_IRQn, DMA1_Stream7_IRQHandler, NONE);
-#endif
-
-#if defined(BSP_SPI3_RX_USING_DMA)
-/**
- * This function                 DMA2  Stream2  Interrupt service function
- *
- * @return                            none
- */
-void DMA1_Stream2_IRQHandler(int irq_num, void *arg)
-{
-    DmaRxDoneIsr(&spi3.spi_bus);
-}
-DECLARE_HW_IRQ(DMA1_Stream2_IRQn, DMA1_Stream2_IRQHandler, NONE);
-#endif
-#endif
 
 /**
- * This function                 RCC clock configuration function
- *
- * @return                            none
- */
-static void RCCConfiguration(void)
-{
-#ifdef BSP_USING_SPI1
-    RCC_AHB1PeriphClockCmd(SPI1_GPIO_RCC, ENABLE);
-
-    RCC_APB2PeriphClockCmd(RCC_APBPeriph_SPI1, ENABLE);
-#endif
-
-#ifdef BSP_USING_SPI2
-    RCC_AHB1PeriphClockCmd(SPI2_GPIO_RCC | SPI2_GPIO_RCC_SCK, ENABLE);
-
-    RCC_APB1PeriphClockCmd(RCC_APBPeriph_SPI2, ENABLE);
-#endif
-
-#ifdef BSP_USING_SPI3
-    RCC_AHB1PeriphClockCmd(SPI3_GPIO_RCC | SPI3_GPIO_RCC_NSS, ENABLE);
-
-    RCC_APB2PeriphClockCmd(RCC_APBPeriph_SPI3, ENABLE);
-#endif
-}
-/**
- * This function                   GPIO  Configuration      function
- *
- * @return                            none
- */
-static void GPIOConfiguration(void)
-{
-    GPIO_InitTypeDef gpio_initstructure;
-
-    gpio_initstructure.GPIO_Mode  = GPIO_Mode_AF;                 /*  Reuse function */
-    gpio_initstructure.GPIO_OType = GPIO_OType_PP;             /*    Multiplex push-pull*/
-    gpio_initstructure.GPIO_PuPd  = GPIO_PuPd_UP;               /*   pull  up */
-    gpio_initstructure.GPIO_Speed = GPIO_Speed_2MHz;      /*    Level reversal speed  */
-
-#ifdef BSP_USING_SPI1
-    gpio_initstructure.GPIO_Pin = SPI1_GPIO_NSS | SPI1_GPIO_SCK | SPI1_GPIO_MISO | SPI1_GPIO_MOSI;
-     /* Connect alternate function */
-    GPIO_PinAFConfig(SPI1_GPIO, SPI1_NSS_PIN_SOURCE, GPIO_AF_SPI1);
-    GPIO_PinAFConfig(SPI1_GPIO, SPI1_SCK_PIN_SOURCE, GPIO_AF_SPI1);
-    GPIO_PinAFConfig(SPI1_GPIO, SPI1_MISO_PIN_SOURCE, GPIO_AF_SPI1);
-    GPIO_PinAFConfig(SPI1_GPIO, SPI1_MOSI_PIN_SOURCE, GPIO_AF_SPI1);
-
-    GPIO_Init(SPI1_GPIO, &gpio_initstructure);                                                              /*SPI pin initialization*/
-#endif
-
-#ifdef BSP_USING_SPI2
-    gpio_initstructure.GPIO_Pin = SPI2_GPIO_SCK;
-    /* Connect alternate function */
-    GPIO_PinAFConfig(SPI2_SCK, SPI2_SCK_PIN_SOURCE, GPIO_AF_SPI2);
-
-    GPIO_Init(SPI2_SCK, &gpio_initstructure);
-
-    gpio_initstructure.GPIO_Pin = SPI2_GPIO_NSS | SPI2_GPIO_MISO | SPI2_GPIO_MOSI;
-    /* Connect alternate function */
-    GPIO_PinAFConfig(SPI2_GPIO, SPI2_NSS_PIN_SOURCE, GPIO_AF_SPI2);
-    GPIO_PinAFConfig(SPI2_GPIO, SPI2_MISO_PIN_SOURCE, GPIO_AF_SPI2);
-    GPIO_PinAFConfig(SPI2_GPIO, SPI2_MOSI_PIN_SOURCE, GPIO_AF_SPI2);
-
-    GPIO_Init(SPI2_GPIO, &gpio_initstructure);
-#endif
-
-#ifdef BSP_USING_SPI3
-    gpio_initstructure.GPIO_Pin = SPI3_GPIO_NSS;
-    /* Connect alternate function */
-    GPIO_PinAFConfig(SPI3_NSS, SPI3_NSS_PIN_SOURCE, GPIO_AF_SPI3);
-
-    GPIO_Init(SPI3_NSS, &gpio_initstructure);
-
-    gpio_initstructure.GPIO_Pin = SPI3_GPIO_SCK | SPI3_GPIO_MISO | SPI3_GPIO_MOSI;
-    GPIO_PinAFConfig(SPI3_GPIO, SPI3_SCK_PIN_SOURCE, GPIO_AF_SPI3);
-    GPIO_PinAFConfig(SPI3_GPIO, SPI3_MISO_PIN_SOURCE, GPIO_AF_SPI3);
-    GPIO_PinAFConfig(SPI3_GPIO, SPI3_MOSI_PIN_SOURCE, GPIO_AF_SPI3);
-
-    GPIO_Init(SPI3_GPIO, &gpio_initstructure);
-#endif
-}
-
-/**
- * This function                                   Init the spi bus 、spi driver and attach to the bus
+ * This function                                   Init the spi bus spi driver and attach to the bus
  *
  * @param  spi_bus                           Spi bus info pointer
  *
@@ -1423,7 +829,6 @@ static int BoardSpiBusInit(struct Stm32Spi *stm32spi_bus, struct SpiDriver *spi_
     return ret;
 }
 
-
 /**
  * This function                    SPI bus initialization
  *
@@ -1434,15 +839,11 @@ static int Stm32HwSpiBusInit(void)
     x_err_t ret = EOK;
     struct Stm32Spi *StmSpiBus;
 
-    RCCConfiguration();
-    GPIOConfiguration();
-
 #ifdef BSP_USING_SPI1
     StmSpiBus = &spi1;
-    StmSpiBus->instance = SPI1;
-    StmSpiBus->bus_name = SPI_BUS_NAME_1;
+    StmSpiBus->instance = LPSPI1;
+    StmSpiBus->bus_name = SPI_1_BUS_NAME;
     StmSpiBus->spi_bus.private_data = &spi1;
-    DmaSpiConfig(&StmSpiBus->spi_bus, 0, NONE, NONE);
 
     static struct SpiDriver spi_driver_1;
     memset(&spi_driver_1, 0, sizeof(struct SpiDriver));
@@ -1451,17 +852,35 @@ static int Stm32HwSpiBusInit(void)
 
     ret = BoardSpiBusInit(StmSpiBus, &spi_driver_1, SPI_1_DRV_NAME);
     if (EOK != ret) {
-      KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
-      return ERROR;
+        KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
+        return ERROR;
+    }
+
+    static struct SpiHardwareDevice spi1_dev;
+    static struct Stm32HwSpi spi1_cfg;
+
+    spi1_cfg.base = StmSpiBus->instance;
+    spi1_cfg.irq = LPSPI1_IRQn;
+    spi1_dev.spi_dev_done = &spi_dev_done;
+
+    ret = SpiDeviceRegister(&spi1_dev, (void *)&spi1_cfg, SPI_1_DEV_NAME_0);
+    if (ret != EOK) {
+        KPrintf("ADC1 device register error %d\n", ret);
+        return ERROR;
+    }
+
+    ret = SpiDeviceAttachToBus(SPI_1_DEV_NAME_0, SPI_1_BUS_NAME);
+    if (ret != EOK) {
+        KPrintf("ADC1 device register error %d\n", ret);
+        return ERROR;
     }
 #endif
 
 #ifdef BSP_USING_SPI2
     StmSpiBus = &spi2;
-    StmSpiBus->instance = SPI2;
-    StmSpiBus->bus_name = SPI_BUS_NAME_2;
+    StmSpiBus->instance = LPSPI2;
+    StmSpiBus->bus_name = SPI_2_BUS_NAME;
     StmSpiBus->spi_bus.private_data = &spi2;
-    DmaSpiConfig(&StmSpiBus->spi_bus, 0, NONE, NONE);
 
     static struct SpiDriver spi_driver_2;
     memset(&spi_driver_2, 0, sizeof(struct SpiDriver));
@@ -1470,17 +889,35 @@ static int Stm32HwSpiBusInit(void)
 
     ret = BoardSpiBusInit(StmSpiBus, &spi_driver_2, SPI_2_DRV_NAME);
     if (EOK != ret) {
-      KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
-      return ERROR;
+        KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
+        return ERROR;
+    }
+
+    static struct SpiHardwareDevice spi2_dev;
+    static struct Stm32HwSpi spi2_cfg;
+
+    spi2_cfg.base = StmSpiBus->instance;
+    spi2_cfg.irq = LPSPI2_IRQn;
+    spi2_dev.spi_dev_done = &spi_dev_done;
+
+    ret = SpiDeviceRegister(&spi2_dev, (void *)&spi2_cfg, SPI_2_DEV_NAME_0);
+    if (ret != EOK) {
+        KPrintf("ADC1 device register error %d\n", ret);
+        return ERROR;
+    }
+
+    ret = SpiDeviceAttachToBus(SPI_2_DEV_NAME_0, SPI_2_BUS_NAME);
+    if (ret != EOK) {
+        KPrintf("ADC1 device register error %d\n", ret);
+        return ERROR;
     }
 #endif
 
 #ifdef BSP_USING_SPI3
     StmSpiBus = &spi3;
-    StmSpiBus->instance = SPI3;
-    StmSpiBus->bus_name = SPI_BUS_NAME_3;
+    StmSpiBus->instance = LPSPI3;
+    StmSpiBus->bus_name = SPI_3_BUS_NAME;
     StmSpiBus->spi_bus.private_data = &spi3;
-    DmaSpiConfig(&StmSpiBus->spi_bus, 0, NONE, NONE);
 
     static struct SpiDriver spi_driver_3;
     memset(&spi_driver_3, 0, sizeof(struct SpiDriver));
@@ -1489,10 +926,30 @@ static int Stm32HwSpiBusInit(void)
 
     ret = BoardSpiBusInit(StmSpiBus, &spi_driver_3, SPI_3_DRV_NAME);
     if (EOK != ret) {
-      KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
-      return ERROR;
+        KPrintf("Board_Spi_Init spi_bus_init %s error ret %u\n", StmSpiBus->bus_name, ret);
+        return ERROR;
+    }
+
+    static struct SpiHardwareDevice spi3_dev;
+    static struct Stm32HwSpi spi3_cfg;
+
+    spi3_cfg.base = StmSpiBus->instance;
+    spi3_cfg.irq = LPSPI3_IRQn;
+    spi3_dev.spi_dev_done = &spi_dev_done;
+
+    ret = SpiDeviceRegister(&spi3_dev, (void *)&spi3_cfg, SPI_3_DEV_NAME_0);
+    if (ret != EOK) {
+        KPrintf("ADC1 device register error %d\n", ret);
+        return ERROR;
+    }
+
+    ret = SpiDeviceAttachToBus(SPI_3_DEV_NAME_0, SPI_3_BUS_NAME);
+    if (ret != EOK) {
+        KPrintf("ADC1 device register error %d\n", ret);
+        return ERROR;
     }
 #endif
+
     return EOK;
 }
 
@@ -1509,39 +966,22 @@ static int Stm32HwSpiBusInit(void)
  *
  * @return                                               EOK
  */
-x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name, GPIO_TypeDef *cs_gpiox, uint16_t cs_gpio_pin)
-
+x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name)
 {
     NULL_PARAM_CHECK(bus_name);
     NULL_PARAM_CHECK(device_name);
 
     x_err_t result;
     struct SpiHardwareDevice *spi_device;
-    struct Stm32HwSpiCs *cs_pin_param;
     static SpiDeviceParam spi_dev_param;
     memset(&spi_dev_param, 0, sizeof(SpiDeviceParam));
-
-    /* initialize the cs pin && select the slave*/
-    GPIO_InitTypeDef GPIO_Initure;
-    GPIO_Initure.GPIO_Pin = cs_gpio_pin;
-    GPIO_Initure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_Initure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Initure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(cs_gpiox, &GPIO_Initure);
-    GPIO_WriteBit(cs_gpiox, cs_gpio_pin, Bit_SET);
 
     /* attach the device to spi bus*/
     spi_device = (struct SpiHardwareDevice *)x_malloc(sizeof(struct SpiHardwareDevice));
     CHECK(spi_device);
     memset(spi_device, 0, sizeof(struct SpiHardwareDevice));
-    cs_pin_param = (struct Stm32HwSpiCs *)x_malloc(sizeof(struct Stm32HwSpiCs));
-    CHECK(cs_pin_param);
-    memset(cs_pin_param, 0, sizeof(struct Stm32HwSpiCs));
-    cs_pin_param->GPIOx = cs_gpiox;
-    cs_pin_param->GPIO_Pin = cs_gpio_pin;
 
     spi_device->spi_dev_done = &spi_dev_done;
-    spi_device->private_data = (void *)cs_pin_param;
 
     result = SpiDeviceRegister(spi_device, (void *)&spi_dev_param, device_name);
     if (result != EOK) {
@@ -1559,65 +999,12 @@ x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name, GPIO_Ty
 }
 
 /**
- * This function                   Get DMA information
- *
- * @return                              none
- */
-static void Stm32GetDmaInfo(void)
-{
-#ifdef BSP_SPI1_RX_USING_DMA                                            /*SPI1 uses DMA receive enable*/
-    spi1.spi_dma_flag |= SPI_USING_RX_DMA_FLAG;
-    spi1.dma.dma_rx.instance = DMA2_Stream0;
-    spi1.dma.dma_rx.dma_rcc = RCC_AHB1ENR_DMA2EN;
-    spi1.dma.dma_rx.channel = DMA_Channel_3;
-    spi1.dma.dma_rx.dma_irq = DMA2_Stream0_IRQn;
-#endif
-#ifdef BSP_SPI1_TX_USING_DMA                                      /*SPI1 uses DMA    send   enable*/
-    spi1.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
-    spi1.dma.dma_tx.instance = DMA2_Stream3;
-    spi1.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA2EN;
-    spi1.dma.dma_tx.channel = DMA_Channel_3;
-    spi1.dma.dma_tx.dma_irq = DMA2_Stream3_IRQn;
-#endif
-
-#ifdef BSP_SPI2_RX_USING_DMA                                                      /*SPI2  uses DMA receive enable*/
-    spi2.spi_dma_flag |= SPI_USING_RX_DMA_FLAG;
-    spi2.dma.dma_rx.instance = DMA1_Stream3;                         /* DMA1 Data stream 3*/
-    spi2.dma.dma_rx.dma_rcc = RCC_AHB1ENR_DMA1EN;
-    spi2.dma.dma_rx.channel = DMA_Channel_0;
-    spi2.dma.dma_rx.dma_irq = DMA1_Stream3_IRQn;
-#endif
-#ifdef BSP_SPI2_TX_USING_DMA                                      /*SPI2 uses DMA send   enable*/
-    spi2.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
-    spi2.dma.dma_tx.instance = DMA1_Stream4;                      /* DMA1 Data stream 4*/
-    spi2.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA1EN;
-    spi2.dma.dma_tx.channel = DMA_Channel_0;
-    spi2.dma.dma_tx.dma_irq = DMA1_Stream4_IRQn;         /*Enable DMA interrupt line*/
-#endif
-
-#ifdef BSP_SPI3_RX_USING_DMA                                        /*SPI3 uses DMA receive enable*/
-    spi3.spi_dma_flag |= SPI_USING_RX_DMA_FLAG;
-    spi3.dma.dma_rx.instance = DMA1_Stream2;             /* DMA1 Data stream 2*/
-    spi3.dma.dma_rx.dma_rcc = RCC_AHB1ENR_DMA1EN;
-    spi3.dma.dma_rx.channel = DMA_Channel_0;
-    spi3.dma.dma_rx.dma_irq = DMA1_Stream2_IRQn;         /*Enable DMA interrupt line*/
-#endif
-#ifdef BSP_SPI3_TX_USING_DMA                                       /*SPI3 uses DMA send   enable*/
-    spi3.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
-    spi3.dma.dma_tx.instance = DMA1_Stream7;           /* DMA1 Data stream 7*/
-    spi3.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA1EN;
-    spi3.dma.dma_tx.channel = DMA_Channel_0;
-    spi3.dma.dma_tx.dma_irq = DMA1_Stream7_IRQn;       /*Enable DMA interrupt line*/
-#endif
-}
-
-/**
  * This function             hardware spi initialization
  *
  * @return                             EOK
  */
-int Stm32HwSpiInit(void)
+int Imrt1052HwSpiInit(void)
 {
-    Stm32GetDmaInfo();
     return Stm32HwSpiBusInit();
 }
+

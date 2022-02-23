@@ -44,6 +44,10 @@ menuconfig BSP_USING_SPI
     default y
     select RESOURCES_SPI
 
+    if BSP_USING_SPI
+        source "$BSP_DIR/third_party_driver/spi/Kconfig"
+    endif
+
 menuconfig BSP_USING_SEMC
     bool "Using SEMC device"
     default y

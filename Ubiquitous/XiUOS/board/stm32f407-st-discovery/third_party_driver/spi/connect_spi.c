@@ -16,7 +16,7 @@
 /**
 * @file connect_spi.c
 * @brief support stm32f407-st-discovery-board spi function and register to bus framework
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-25
 */
@@ -26,10 +26,10 @@ File name: connect_spi.c
 Description: support stm32f407-st-discovery-board spi configure and spi bus register function
 Others: take RT-Thread v4.0.2/bsp/stm32/libraries/HAL_Drivers/drv_spi.c for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
-History: 
+History:
 1. Date: 2021-04-25
 Author: AIIT XUOS Lab
-Modification: 
+Modification:
 1. support stm32f407-st-discovery-board spi configure, write and read
 2. support stm32f407-st-discovery-board spi bus device and driver register
 *************************************************/
@@ -97,9 +97,9 @@ Modification:
  * This function                        SPI device initialization
  *
  * @param spi_drv                  SPI device structure   pointer
- * 
+ *
  *  @param cfg                        SPI device operating mode configuration structure   pointer
- * 
+ *
  *  @return                                 if   successful   return  EOK
  */
 
@@ -204,7 +204,7 @@ static x_err_t Stm32SpiInit(struct Stm32Spi *spi_drv, struct SpiMasterParam *cfg
     /* DMA configuration */
     if (spi_drv->spi_dma_flag & SPI_USING_RX_DMA_FLAG){
         DMA_Init(spi_drv->dma.dma_rx.instance, &spi_drv->dma.dma_rx.init);
-        
+
         prioritygroup = NVIC_GetPriorityGrouping();
 
         NVIC_SetPriority(spi_drv->dma.dma_rx.dma_irq, NVIC_EncodePriority(prioritygroup, 0, 0));
@@ -236,7 +236,7 @@ static void DmaSpiConfig(struct SpiBus *spi_bus, uint32_t setting_len, void *rx_
     if(spi->spi_dma_flag & SPI_USING_RX_DMA_FLAG)
     {
       spi->dma.dma_rx.setting_len = setting_len;
-      DMA_DeInit(spi->dma.dma_rx.instance);  
+      DMA_DeInit(spi->dma.dma_rx.instance);
       while(DMA_GetCmdStatus(spi->dma.dma_rx.instance) != DISABLE);
       spi->dma.dma_rx.init.DMA_Channel = spi->dma.dma_rx.channel;
       spi->dma.dma_rx.init.DMA_PeripheralBaseAddr = (uint32_t)&(spi->instance->DR);
@@ -276,7 +276,7 @@ static void DmaSpiConfig(struct SpiBus *spi_bus, uint32_t setting_len, void *rx_
     if(spi->spi_dma_flag & SPI_USING_TX_DMA_FLAG)
     {
       spi->dma.dma_tx.setting_len = setting_len;
-      DMA_DeInit(spi->dma.dma_tx.instance);  
+      DMA_DeInit(spi->dma.dma_tx.instance);
       while(DMA_GetCmdStatus(spi->dma.dma_tx.instance) != DISABLE);
       spi->dma.dma_tx.init.DMA_PeripheralBaseAddr = (uint32_t)&(spi->instance->DR);
       spi->dma.dma_tx.init.DMA_Memory0BaseAddr = (uint32_t)tx_base_addr;
@@ -374,18 +374,18 @@ static int SpiWaitUntilTimeout(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instan
 /**
  * This function                                   SPI sends data through DMA
  *
- * @param spi_init                           SPI Init structure  
- * 
+ * @param spi_init                           SPI Init structure
+ *
  *  @param spi_instance                SPI control handle
- * 
+ *
  *  @param dma_init                        DMA Init structure
- * 
+ *
  *  @param dma_instance             DMA Controller
- * 
+ *
  *  @param p_data                              Send data buffer address
- * 
+ *
  * @param size                                   Amount of data sent
- * 
+ *
  * @return                                            if   successful   return  EOK
  */
 int SpiTransmitDma(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, DMA_InitTypeDef dma_init, DMA_Stream_TypeDef *dma_instance, uint8_t *p_data, uint16_t size)
@@ -457,24 +457,24 @@ error :
 /**
  * This function                             SPI carries out duplex communication through DMA
  *
- * @param spi_init                       SPI Init structure  
- * 
+ * @param spi_init                       SPI Init structure
+ *
  *  @param spi_instance            SPI control handle
- * 
+ *
  * @param dmarx_init                DMA Init structure---Rx
- * 
+ *
  * @param dmarx_instance     DMA Controller
- * 
+ *
  * @param dmatx_init                DMA Init structure---Tx
- * 
+ *
  * @param dmatx_instance     DMA Controller
- * 
+ *
  * @param p_txdata                      Send data buffer address
- * 
+ *
  * @param p_rxdata                     Receive data buffer address
- * 
- * @param size                              Amount of data 
- * 
+ *
+ * @param size                              Amount of data
+ *
  * @return                                        if   successful   return  EOK
  */
 int SpiTransmitreceiveDma(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, DMA_InitTypeDef dmarx_init, DMA_Stream_TypeDef *dmarx_instance, DMA_InitTypeDef dmatx_init, DMA_Stream_TypeDef *dmatx_instance, uint8_t *p_txdata, uint8_t *p_rxdata, uint16_t size)
@@ -588,22 +588,22 @@ error :
 /**
  * This function                             SPI receives data through DMA
  *
- * @param spi_init                       SPI Init structure  
- * 
+ * @param spi_init                       SPI Init structure
+ *
  *  @param spi_instance            SPI control handle
- * 
+ *
  * @param dmarx_init                DMA Init structure---Rx
- * 
+ *
  * @param dmarx_instance     DMA Controller
- * 
+ *
  * @param dmatx_init                DMA Init structure---Tx
- * 
+ *
  * @param dmatx_instance     DMA Controller
- * 
+ *
  * @param p_data                         Receive data buffer address
- * 
- * @param size                             Amount of data 
- * 
+ *
+ * @param size                             Amount of data
+ *
  * @return                                        if   successful   return  EOK
  */
 int SpiReceiveDma(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, DMA_InitTypeDef dmarx_init, DMA_Stream_TypeDef *dmarx_instance, DMA_InitTypeDef dmatx_init, DMA_Stream_TypeDef *dmatx_instance, uint8_t *p_data, uint16_t size)
@@ -676,18 +676,18 @@ error:
   return errorcode;
 }
 /**
- * This function                             SPI receives data 
+ * This function                             SPI receives data
  *
- * @param spi_init                       SPI Init structure  
- * 
+ * @param spi_init                       SPI Init structure
+ *
  *  @param spi_instance            SPI control handle
- * 
+ *
  * @param p_data                         Transmit data buffer address
- * 
- * @param size                             Amount of data 
- * 
+ *
+ * @param size                             Amount of data
+ *
  * @param Timeout                    waiting time
- * 
+ *
  * @return                                        if   successful   return  EOK
  */
 int SpiTransmit(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint8_t *p_data, uint16_t size, uint32_t Timeout)
@@ -784,7 +784,7 @@ int SpiTransmit(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint8_t *p_
     errorcode = 3;
     goto error;
   }
-  
+
   /* Check Busy flag */
   if(SpiWaitUntilTimeout(spi_init, spi_instance, SPI_FLAG_BSY, RESET, Timeout, tickstart) != 0){
     errorcode = 1;
@@ -797,18 +797,18 @@ error:
 /**
  * This function                             SPI Transmit   and  receive
  *
- * @param spi_init                       SPI Init structure  
- * 
+ * @param spi_init                       SPI Init structure
+ *
  *  @param spi_instance            SPI control handle
- * 
+ *
  * @param p_txdata                      Transmit data buffer address
- * 
+ *
  * @param p_rxdata                     receive data buffer address
- * 
-  * @param size                              Amount of data 
- * 
+ *
+  * @param size                              Amount of data
+ *
  * @param Timeout                      waiting time
- * 
+ *
  * @return                                        if   successful   return  EOK
  */
 int SpiTransmitreceive(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint8_t *p_txdata, uint8_t *p_rxdata, uint16_t size, uint32_t Timeout)
@@ -824,9 +824,9 @@ int SpiTransmitreceive(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint
 
   /* Init tickstart for timeout management*/
   tickstart = CurrentTicksGain() * 1000 / TICK_PER_SECOND;
-  
+
   tmp  = spi_init.SPI_Mode;
-  
+
   if(!((tmp == SPI_Mode_Master) && (spi_init.SPI_Direction == SPI_Direction_2Lines_FullDuplex))){
     errorcode = 2;
     goto error;
@@ -864,7 +864,7 @@ int SpiTransmitreceive(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint
         spi_instance->DR = *((uint16_t *)p_txdata);
         p_txdata += sizeof(uint16_t);
         tx_xfer_count--;
-        /* Next Data is a reception (Rx). Tx not allowed */ 
+        /* Next Data is a reception (Rx). Tx not allowed */
         txallowed = 0U;
       }
 
@@ -874,7 +874,7 @@ int SpiTransmitreceive(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint
         *((uint16_t *)p_rxdata) = spi_instance->DR;
         p_rxdata += sizeof(uint16_t);
         rx_xfer_count--;
-        /* Next Data is a Transmission (Tx). Tx is allowed */ 
+        /* Next Data is a Transmission (Tx). Tx is allowed */
         txallowed = 1U;
       }
       if((Timeout != 0xFFFFFFFFU) && ((CurrentTicksGain() * 1000 / TICK_PER_SECOND-tickstart) >=  Timeout)){
@@ -934,23 +934,23 @@ int SpiTransmitreceive(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint
         errorcode = 1;
         goto error;
     }
-  
+
 error :
     return errorcode;
 }
 /**
  * This function                             SPI   receive  data
  *
- * @param spi_init                       SPI Init structure  
- * 
+ * @param spi_init                       SPI Init structure
+ *
  *  @param spi_instance            SPI control handle
- * 
+ *
  * @param p_data                          data buffer address
- * 
-  * @param size                              Amount of data 
- * 
+ *
+  * @param size                              Amount of data
+ *
  * @param Timeout                      waiting time
- * 
+ *
  * @return                                        if   successful   return  EOK
  */
 int SpiReceive(SPI_InitTypeDef spi_init, SPI_TypeDef *spi_instance, uint8_t *p_data, uint16_t size, uint32_t Timeout)
@@ -1047,9 +1047,9 @@ error :
  * This function                             SPI write data
  *
  * @param spi_dev                             SPI device structure  handle
- * 
+ *
  *  @param spi_datacfg                    SPI device information structure  handle
- * 
+ *
  * @return                                      datacfg  length
  */
 static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStandard *spi_datacfg)
@@ -1067,7 +1067,7 @@ static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDat
     SPI_InitTypeDef *spi_init = &StmSpi->init;
     struct Stm32HwSpiCs *cs = (struct Stm32HwSpiCs *)spi_dev->private_data;
 
-  while(NONE != spi_datacfg) {    
+  while(NONE != spi_datacfg) {
     if(spi_datacfg->spi_chip_select) {
         GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_RESET);
     }
@@ -1086,7 +1086,7 @@ static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDat
         /* calculate the start address */
         already_send_length = spi_datacfg->length - send_length - message_length;
         WriteBuf = (uint8 *)spi_datacfg->tx_buff + already_send_length;
-        
+
         /* start once data exchange in DMA mode */
         if (spi_datacfg->tx_buff) {
             if (StmSpi->spi_dma_flag & SPI_USING_TX_DMA_FLAG) {
@@ -1105,7 +1105,7 @@ static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDat
     if (spi_datacfg->spi_cs_release) {
         GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_SET);
     }
-  
+
     spi_datacfg = spi_datacfg->next;
   }
 
@@ -1116,9 +1116,9 @@ static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDat
  * This function                             SPI read data
  *
  * @param spi_dev                             SPI device structure  handle
- * 
+ *
  *  @param spi_datacfg                    SPI device information structure  handle
- * 
+ *
  * @return                                      datacfg  length
  */
 static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStandard *spi_datacfg)
@@ -1136,7 +1136,7 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
     SPI_InitTypeDef *spi_init = &StmSpi->init;
     struct Stm32HwSpiCs *cs = (struct Stm32HwSpiCs *)spi_dev->private_data;
 
-  while (NONE != spi_datacfg) {    
+  while (NONE != spi_datacfg) {
     if (spi_datacfg->spi_chip_select) {
         GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_RESET);
     }
@@ -1155,7 +1155,7 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
         /* calculate the start address */
         already_send_length = spi_datacfg->length - read_length - message_length;
         ReadBuf = (uint8 *)spi_datacfg->rx_buff + already_send_length;
-        
+
         /* start once data exchange in DMA mode */
         if (spi_datacfg->rx_buff) {
             //memset((uint8_t *)ReadBuf, 0xff, read_length);
@@ -1175,7 +1175,7 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
     if (spi_datacfg->spi_cs_release) {
         GPIO_WriteBit(cs->GPIOx, cs->GPIO_Pin, Bit_SET);
     }
-  
+
     spi_read_length += spi_datacfg->length;
     spi_datacfg = spi_datacfg->next;
   }
@@ -1187,7 +1187,7 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
  * This function                                 SPI driver initialization function
  *
  * @param spi_drv                            SPI driver structure  handle
- * 
+ *
  * @return                                             if   successful   return  EOK
  */
 static uint32 SpiDrvInit(struct SpiDriver *spi_drv)
@@ -1205,9 +1205,9 @@ static uint32 SpiDrvInit(struct SpiDriver *spi_drv)
  * This function                                 SPI driver configuration param
  *
  * @param spi_drv                            SPI driver structure  handle
- * 
+ *
  *  @param spi_param                   SPI master param structure  handle
- * 
+ *
  * @return                                            if   successful   return  EOK
  */
 static uint32 SpiDrvConfigure(struct SpiDriver *spi_drv, struct SpiMasterParam *spi_param)
@@ -1218,7 +1218,7 @@ static uint32 SpiDrvConfigure(struct SpiDriver *spi_drv, struct SpiMasterParam *
     SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_drv->driver.private_data);
 
     dev_param->spi_master_param = spi_param;
-    dev_param->spi_master_param->spi_work_mode = dev_param->spi_master_param->spi_work_mode  & SPI_MODE_MASK;    
+    dev_param->spi_master_param->spi_work_mode = dev_param->spi_master_param->spi_work_mode  & SPI_MODE_MASK;
 
     return EOK;
 }
@@ -1321,7 +1321,7 @@ DECLARE_HW_IRQ(DMA1_Stream2_IRQn, DMA1_Stream2_IRQHandler, NONE);
 #endif
 
 /**
- * This function                 RCC clock configuration function  
+ * This function                 RCC clock configuration function
  *
  * @return                            none
  */
@@ -1329,25 +1329,25 @@ static void RCCConfiguration(void)
 {
 #ifdef BSP_USING_SPI1
     RCC_AHB1PeriphClockCmd(SPI1_GPIO_RCC, ENABLE);
-    
+
     RCC_APB2PeriphClockCmd(RCC_APBPeriph_SPI1, ENABLE);
 #endif
 
 #ifdef BSP_USING_SPI2
     RCC_AHB1PeriphClockCmd(SPI2_GPIO_RCC | SPI2_GPIO_RCC_SCK, ENABLE);
-    
+
     RCC_APB1PeriphClockCmd(RCC_APBPeriph_SPI2, ENABLE);
 #endif
 
 #ifdef BSP_USING_SPI3
     RCC_AHB1PeriphClockCmd(SPI3_GPIO_RCC | SPI3_GPIO_RCC_NSS, ENABLE);
-    
+
     RCC_APB2PeriphClockCmd(RCC_APBPeriph_SPI3, ENABLE);
 #endif
 }
 /**
- * This function                   GPIO  Configuration      function  
- * 
+ * This function                   GPIO  Configuration      function
+ *
  * @return                            none
  */
 static void GPIOConfiguration(void)
@@ -1366,7 +1366,7 @@ static void GPIOConfiguration(void)
     GPIO_PinAFConfig(SPI1_GPIO, SPI1_SCK_PIN_SOURCE, GPIO_AF_SPI1);
     GPIO_PinAFConfig(SPI1_GPIO, SPI1_MISO_PIN_SOURCE, GPIO_AF_SPI1);
     GPIO_PinAFConfig(SPI1_GPIO, SPI1_MOSI_PIN_SOURCE, GPIO_AF_SPI1);
-    
+
     GPIO_Init(SPI1_GPIO, &gpio_initstructure);                                                              /*SPI pin initialization*/
 #endif
 
@@ -1382,7 +1382,7 @@ static void GPIOConfiguration(void)
     GPIO_PinAFConfig(SPI2_GPIO, SPI2_NSS_PIN_SOURCE, GPIO_AF_SPI2);
     GPIO_PinAFConfig(SPI2_GPIO, SPI2_MISO_PIN_SOURCE, GPIO_AF_SPI2);
     GPIO_PinAFConfig(SPI2_GPIO, SPI2_MOSI_PIN_SOURCE, GPIO_AF_SPI2);
-    
+
     GPIO_Init(SPI2_GPIO, &gpio_initstructure);
 #endif
 
@@ -1397,18 +1397,18 @@ static void GPIOConfiguration(void)
     GPIO_PinAFConfig(SPI3_GPIO, SPI3_SCK_PIN_SOURCE, GPIO_AF_SPI3);
     GPIO_PinAFConfig(SPI3_GPIO, SPI3_MISO_PIN_SOURCE, GPIO_AF_SPI3);
     GPIO_PinAFConfig(SPI3_GPIO, SPI3_MOSI_PIN_SOURCE, GPIO_AF_SPI3);
-    
+
     GPIO_Init(SPI3_GPIO, &gpio_initstructure);
 #endif
 }
 
 /**
- * This function                                   Init the spi bus 、spi driver and attach to the bus          
+ * This function                                   Init the spi bus 、spi driver and attach to the bus
  *
  * @param  spi_bus                           Spi bus info pointer
- * 
+ *
  *  @param spi_driver                      Spi driver info pointer
- * 
+ *
  * @return                                               EOK
  */
 static int BoardSpiBusInit(struct Stm32Spi *stm32spi_bus, struct SpiDriver *spi_driver, char* drv_name)
@@ -1434,14 +1434,14 @@ static int BoardSpiBusInit(struct Stm32Spi *stm32spi_bus, struct SpiDriver *spi_
     if (EOK != ret) {
         KPrintf("Board_Spi_init SpiDriverAttachToBus error %d\n", ret);
         return ERROR;
-    } 
+    }
 
     return ret;
 }
 
 
 /**
- * This function                    SPI bus initialization            
+ * This function                    SPI bus initialization
  *
  * @return                              EOK
  */
@@ -1513,16 +1513,16 @@ static int Stm32HwSpiBusInit(void)
 }
 
 /**
- * This function                                   Mount the spi device to the bus           
+ * This function                                   Mount the spi device to the bus
  *
  * @param bus_name                         Bus   Name
- * 
+ *
  *  @param device_name                spi   device  name
- * 
+ *
  *  @param cs_gpiox                         GPIO pin configuration handle
- * 
+ *
  * @param cs_gpio_pin                    GPIO  number
- * 
+ *
  * @return                                               EOK
  */
 x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name, GPIO_TypeDef *cs_gpiox, uint16_t cs_gpio_pin)
@@ -1575,8 +1575,8 @@ x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name, GPIO_Ty
 }
 
 /**
- * This function                   Get DMA information            
- * 
+ * This function                   Get DMA information
+ *
  * @return                              none
  */
 static void Stm32GetDmaInfo(void)
@@ -1588,7 +1588,7 @@ static void Stm32GetDmaInfo(void)
     spi1.dma.dma_rx.channel = DMA_Channel_3;
     spi1.dma.dma_rx.dma_irq = DMA2_Stream0_IRQn;
 #endif
-#ifdef BSP_SPI1_TX_USING_DMA                                      /*SPI1 uses DMA    send   enable*/         
+#ifdef BSP_SPI1_TX_USING_DMA                                      /*SPI1 uses DMA    send   enable*/
     spi1.spi_dma_flag |= SPI_USING_TX_DMA_FLAG;
     spi1.dma.dma_tx.instance = DMA2_Stream3;
     spi1.dma.dma_tx.dma_rcc = RCC_AHB1ENR_DMA2EN;
@@ -1628,7 +1628,7 @@ static void Stm32GetDmaInfo(void)
 }
 
 /**
- * This function             hardware spi initialization             
+ * This function             hardware spi initialization
  *
  * @return                             EOK
  */
