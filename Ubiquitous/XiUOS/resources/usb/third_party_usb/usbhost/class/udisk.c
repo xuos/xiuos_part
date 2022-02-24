@@ -31,7 +31,7 @@ Modification:
 
 #include <xiuos.h>
 
-#include <usb_host.h>
+#include <stm32_usb_host.h>
 #include "mass.h"
 
 #if defined(FS_VFS)

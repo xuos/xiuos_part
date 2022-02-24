@@ -120,7 +120,7 @@ endif
 menuconfig BSP_USING_USB
 bool "Using USB device"
 default n
-select BSP_USING_USBH
+select BSP_USING_STM32_USBH
 select RESOURCES_USB
 select RESOURCES_USB_HOST
 select USBH_MSTORAGE

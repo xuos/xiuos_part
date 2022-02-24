@@ -53,7 +53,7 @@
 #include <bus_usb.h>
 #include <dev_usb.h>
 #ifdef RESOURCES_USB_HOST
-#include <usb_host.h>
+#include <stm32_usb_host.h>
 #endif
 #endif
 

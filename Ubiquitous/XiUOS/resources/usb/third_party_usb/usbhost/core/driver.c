@@ -31,7 +31,7 @@ Modification:
 
 #include <xiuos.h>
 #include <xs_klist.h>
-#include <usb_host.h>
+#include <stm32_usb_host.h>
 
 static DoubleLinklistType DriverList;
 

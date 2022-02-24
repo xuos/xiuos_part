@@ -29,6 +29,9 @@
 #define UART1_IRQn         20
 #define UART2_IRQn         21
 
+#define USB1_IRQn          113
+#define USB2_IRQn          112
+
 int32 ArchEnableHwIrq(uint32 irq_num);
 int32 ArchDisableHwIrq(uint32 irq_num);
 

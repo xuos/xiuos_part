@@ -11,7 +11,7 @@
  */
 
 /**
-* @file usb_common.h
+* @file stm32_usb_common.h
 * @brief define usb function and struct
 * @version 1.0 
 * @author AIIT XUOS Lab
@@ -19,7 +19,7 @@
 */
 
 /*************************************************
-File name: usb_common.h
+File name: stm32_usb_common.h
 Description: define usb function and common struct
 Others: take RT-Thread v4.0.2/components/drivers/include/drivers/usb_common.h for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
