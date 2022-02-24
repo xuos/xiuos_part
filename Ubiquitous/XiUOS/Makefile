@@ -9,6 +9,8 @@ support :=kd233 stm32f407-st-discovery maix-go stm32f407zgt6 aiit-riscv64-board 
 SRC_DIR:=
 
 export BOARD ?=kd233
+# This is the environment variable for kconfig-mconf
+export KCONFIG_CONFIG ?= .config
 
 ifeq ($(filter $(BOARD),$(support)),)
 $(warning "You should choose board like this:make BOARD=kd233")
@@ -25,11 +27,15 @@ MAKEFILES  =$(KERNEL_ROOT)/.config
 -include $(KERNEL_ROOT)/.config
 
 export BSP_ROOT ?= $(KERNEL_ROOT)/board/$(BOARD)
+export UBIQUITOUS_ROOT ?= ..
 include board/$(BOARD)/config.mk
 export BSP_BUILD_DIR := board/$(BOARD)
 export HOSTTOOLS_DIR ?= $(KERNEL_ROOT)/tool/hosttools
 export CONFIG2H_EXE ?= $(HOSTTOOLS_DIR)/xsconfig.sh
 
+export GEN_KSELECTOR_EXE ?= $(HOSTTOOLS_DIR)/generate_kselector.py
+export FEATURE2YAML_EXE ?= $(HOSTTOOLS_DIR)/kernel_selector.sh
+export KSELECTOR_EXE ?= $(HOSTTOOLS_DIR)/kernel_selector.py
 export CPPPATHS
 export SRC_APP_DIR := ../../APP_Framework
 export SRC_KERNEL_DIR := arch board lib fs kernel resources tool
@@ -74,6 +80,9 @@ COMPILE_ALL:
 
 
 show_info:
+	@echo "CONFIG_COMPILER_APP is :" $(CONFIG_COMPILER_APP)
+	@echo "CONFIG_COMPILER_KERNEL is :" $(CONFIG_COMPILER_KERNEL)
+	@echo "KERNELPATHS is :" $(KERNELPATHS)
 	@echo "TARGET is :" $(TARGET)
 	@echo "VPATH is :" $(VPATH)
 	@echo "BSP_ROOT is :" $(BSP_ROOT)
@@ -99,6 +108,24 @@ menuconfig:
 	@kconfig-mconf $(BSP_ROOT)/Kconfig
 	@$(CONFIG2H_EXE) .config
 	@cp $(KERNEL_ROOT)/.config $(BSP_ROOT)/.config
+
+kernel_selector:
+	$(eval KCONFIG_CONFIG := .selector)
+	@if [ -f "$(BSP_ROOT)/.selector" ]; then \
+		cp $(BSP_ROOT)/.selector $(KERNEL_ROOT)/.selector; \
+		else if [ -f "$(BSP_ROOT)/.defselector" ]; then \
+		cp $(BSP_ROOT)/.defselector $(KERNEL_ROOT)/.selector ;\
+	fi ;fi
+	@$(GEN_KSELECTOR_EXE)
+	@cp "$(UBIQUITOUS_ROOT)/Kselector_features_meta" $(UBIQUITOUS_ROOT)/Kselector_features
+	@cp "$(UBIQUITOUS_ROOT)/Kselector_params_meta" $(UBIQUITOUS_ROOT)/Kselector_params
+	@kconfig-mconf $(BSP_ROOT)/Kselector
+	@$(FEATURE2YAML_EXE) .selector
+	@if [ -f "$(BSP_ROOT)/requirement.yaml" ]; then \
+		cp $(BSP_ROOT)/requirement.yaml $(KERNEL_ROOT)/requirement.yaml; \
+	fi
+	@$(KSELECTOR_EXE)
+	@cp $(KERNEL_ROOT)/.selector $(BSP_ROOT)/.selector
 
 clean:
 	@echo Clean target and build_dir
