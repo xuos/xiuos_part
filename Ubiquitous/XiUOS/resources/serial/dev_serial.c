@@ -100,6 +100,7 @@ static inline int SerialDevIntWrite(struct SerialHardwareDevice *serial_dev, str
     struct SerialHwDevDone *hwdev_done = serial_dev->hwdev_done;
     const uint8 *write_data = (const uint8 *)write_param->buffer;
     x_size_t write_length = write_param->size;
+    x_size_t len_result = 0;
 
     while (write_length)
     {
@@ -109,12 +110,12 @@ static inline int SerialDevIntWrite(struct SerialHardwareDevice *serial_dev, str
         }
 
         KPrintf("SerialDevIntWrite data %d write_length %u\n", *(char *)write_data, write_length);
-
+        len_result++;
         write_data++; 
         write_length--;
     }
 
-    return EOK;
+    return len_result;
 }
 
 static inline int SerialDevIntRead(struct SerialHardwareDevice *serial_dev, struct BusBlockReadParam *read_param)
@@ -201,7 +202,7 @@ static inline int SerialDevDMAWrite(struct SerialHardwareDevice *serial_dev, str
         CriticalAreaUnLock(lock);
     }
 
-    return EOK;
+    return write_length;
 }
 
 static x_size_t SerialGetRxFifoLength(struct SerialHardwareDevice *serial_dev)
@@ -329,7 +330,7 @@ static inline int SerialDevPollingWrite(struct SerialHardwareDevice *serial_dev,
     struct SerialHwDevDone *hwdev_done = serial_dev->hwdev_done;
     const uint8 *write_data = (const uint8 *)write_param->buffer;
     x_size_t write_length = write_param->size;
-    
+    x_size_t len_result = 0;
     while (write_length)
     {
         if ((*write_data == '\n') && (SIGN_OPER_STREAM == serial_stream_mode)) {
@@ -337,12 +338,12 @@ static inline int SerialDevPollingWrite(struct SerialHardwareDevice *serial_dev,
         }
 
         hwdev_done->put_char(serial_dev, *write_data);
-
+        len_result++;
         ++write_data;
         --write_length;
     }
 
-    return EOK;
+    return len_result;
 }
 
 static inline int SerialDevPollingRead(struct SerialHardwareDevice *serial_dev, struct BusBlockReadParam *read_param)
@@ -604,7 +605,7 @@ static uint32 SerialDevWrite(void *dev, struct BusBlockWriteParam *write_param)
 
     if (serial_dev_param->serial_work_mode & SIGN_OPER_INT_TX) {
         ret = SerialDevIntWrite(serial_dev, write_param);
-        if (EOK != ret) {
+        if (ret < 0) {
             KPrintf("SerialDevIntWrite error %d\n", ret);
             return ERROR;
         }
@@ -612,7 +613,7 @@ static uint32 SerialDevWrite(void *dev, struct BusBlockWriteParam *write_param)
 #ifdef SERIAL_USING_DMA
     else if (serial_dev_param->serial_work_mode & SIGN_OPER_DMA_TX) {
         ret = SerialDevDMAWrite(serial_dev, write_param);
-        if (EOK != ret) {
+        if (ret < 0) {
             KPrintf("SerialDevDMAWrite error %d\n", ret);
             return ERROR;
         }
@@ -620,13 +621,13 @@ static uint32 SerialDevWrite(void *dev, struct BusBlockWriteParam *write_param)
 #endif        
     else {
         ret = SerialDevPollingWrite(serial_dev, write_param, serial_dev_param->serial_stream_mode);
-        if (EOK != ret) {
+        if (ret < 0) {
             KPrintf("SerialDevPollingWrite error %d\n", ret);
             return ERROR;
         }
     }
 
-    return EOK;
+    return ret;
 }
 
 static uint32 SerialDevRead(void *dev, struct BusBlockReadParam *read_param)

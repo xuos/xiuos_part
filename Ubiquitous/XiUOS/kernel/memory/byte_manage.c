@@ -1222,8 +1222,9 @@ void ShowBuddy(void)
     	};
 	}
     
-    KPrintf("\n\033[41;1mlist extern memory information\033[0m\n");
+    
 #ifdef MEM_EXTERN_SRAM
+	KPrintf("\n\033[41;1mlist extern memory information\033[0m\n");
 	for(i = 0; i < EXTSRAM_MAX_NUM; i++) {
 		if(NONE != ExtByteManager[i].done){
 			KPrintf("\nlist extern sram[%d] memory information\n\n",i);

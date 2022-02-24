@@ -158,7 +158,6 @@ int statfs(const char *path, struct statfs *buf);
 
 /* NOTE!!!: when cutting out file system, the 'printf' function can not output angthing */
 int Userprintf(const char *fmt, ...);
-#define printf      Userprintf 
 
 #endif
  
@@ -242,7 +241,6 @@ uint8_t UserGetTaskPriority(int32_t id);
 #endif
 
 #define UserPrintf               KPrintf
-#define printf                   KPrintf
 
 #endif
 
