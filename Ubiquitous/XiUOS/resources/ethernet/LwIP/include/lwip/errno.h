@@ -45,6 +45,10 @@ extern "C" {
 
 #ifdef LWIP_PROVIDE_ERRNO
 
+#ifndef ENOTSUP
+#define ENOTSUP EOPNOTSUPP
+#endif
+
 #define  EPERM            1  /* Operation not permitted */
 #define  ENOENT           2  /* No such file or directory */
 #define  ESRCH            3  /* No such process */
@@ -118,10 +122,10 @@ extern "C" {
 #define  ESRMNT          69  /* Srmount error */
 #define  ECOMM           70  /* Communication error on send */
 #define  EPROTO          71  /* Protocol error */
-// #define  EMULTIHOP       72  /* Multihop attempted */
+#define  EMULTIHOP       72  /* Multihop attempted */
 #define  EDOTDOT         73  /* RFS specific error */
-// #define  EBADMSG         74  /* Not a data message */
-// #define  EOVERFLOW       75  /* Value too large for defined data type */
+#define  EBADMSG         74  /* Not a data message */
+#define  EOVERFLOW       75  /* Value too large for defined data type */
 #define  ENOTUNIQ        76  /* Name not unique on network */
 #define  EBADFD          77  /* File descriptor in bad state */
 #define  EREMCHG         78  /* Remote address changed */
@@ -130,45 +134,45 @@ extern "C" {
 #define  ELIBSCN         81  /* .lib section in a.out corrupted */
 #define  ELIBMAX         82  /* Attempting to link in too many shared libraries */
 #define  ELIBEXEC        83  /* Cannot exec a shared library directly */
-// #define  EILSEQ          84  /* Illegal byte sequence */
+#define  EILSEQ          84  /* Illegal byte sequence */
 #define  ERESTART        85  /* Interrupted system call should be restarted */
 #define  ESTRPIPE        86  /* Streams pipe error */
 #define  EUSERS          87  /* Too many users */
-// #define  ENOTSOCK        88  /* Socket operation on non-socket */
-// #define  EDESTADDRREQ    89  /* Destination address required */
-// #define  EMSGSIZE        90  /* Message too long */
-// #define  EPROTOTYPE      91  /* Protocol wrong type for socket */
-// #define  ENOPROTOOPT     92  /* Protocol not available */
-// #define  EPROTONOSUPPORT 93  /* Protocol not supported */
+#define  ENOTSOCK        88  /* Socket operation on non-socket */
+#define  EDESTADDRREQ    89  /* Destination address required */
+#define  EMSGSIZE        90  /* Message too long */
+#define  EPROTOTYPE      91  /* Protocol wrong type for socket */
+#define  ENOPROTOOPT     92  /* Protocol not available */
+#define  EPROTONOSUPPORT 93  /* Protocol not supported */
 #define  ESOCKTNOSUPPORT 94  /* Socket type not supported */
 #define  EOPNOTSUPP      95  /* Operation not supported on transport endpoint */
 #define  EPFNOSUPPORT    96  /* Protocol family not supported */
-// #define  EAFNOSUPPORT    97  /* Address family not supported by protocol */
-// #define  EADDRINUSE      98  /* Address already in use */
-// #define  EADDRNOTAVAIL   99  /* Cannot assign requested address */
-// #define  ENETDOWN       100  /* Network is down */
-// #define  ENETUNREACH    101  /* Network is unreachable */
-// #define  ENETRESET      102  /* Network dropped connection because of reset */
-// #define  ECONNABORTED   103  /* Software caused connection abort */
+#define  EAFNOSUPPORT    97  /* Address family not supported by protocol */
+#define  EADDRINUSE      98  /* Address already in use */
+#define  EADDRNOTAVAIL   99  /* Cannot assign requested address */
+#define  ENETDOWN       100  /* Network is down */
+#define  ENETUNREACH    101  /* Network is unreachable */
+#define  ENETRESET      102  /* Network dropped connection because of reset */
+#define  ECONNABORTED   103  /* Software caused connection abort */
 #define  ECONNRESET     104  /* Connection reset by peer */
 #define  ENOBUFS        105  /* No buffer space available */
-// #define  EISCONN        106  /* Transport endpoint is already connected */
-// #define  ENOTCONN       107  /* Transport endpoint is not connected */
+#define  EISCONN        106  /* Transport endpoint is already connected */
+#define  ENOTCONN       107  /* Transport endpoint is not connected */
 #define  ESHUTDOWN      108  /* Cannot send after transport endpoint shutdown */
-// #define  ETOOMANYREFS   109  /* Too many references: cannot splice */
-// #define  ETIMEDOUT      110  /* Connection timed out */
+#define  ETOOMANYREFS   109  /* Too many references: cannot splice */
+#define  ETIMEDOUT      110  /* Connection timed out */
 #define  ECONNREFUSED   111  /* Connection refused */
-// #define  EHOSTDOWN      112  /* Host is down */
-// #define  EHOSTUNREACH   113  /* No route to host */
-// #define  EALREADY       114  /* Operation already in progress */
-// #define  EINPROGRESS    115  /* Operation now in progress */
-// #define  ESTALE         116  /* Stale NFS file handle */
+#define  EHOSTDOWN      112  /* Host is down */
+#define  EHOSTUNREACH   113  /* No route to host */
+#define  EALREADY       114  /* Operation already in progress */
+#define  EINPROGRESS    115  /* Operation now in progress */
+#define  ESTALE         116  /* Stale NFS file handle */
 #define  EUCLEAN        117  /* Structure needs cleaning */
 #define  ENOTNAM        118  /* Not a XENIX named type file */
 #define  ENAVAIL        119  /* No XENIX semaphores available */
 #define  EISNAM         120  /* Is a named type file */
 #define  EREMOTEIO      121  /* Remote I/O error */
-// #define  EDQUOT         122  /* Quota exceeded */
+#define  EDQUOT         122  /* Quota exceeded */
 
 #define  ENOMEDIUM      123  /* No medium found */
 #define  EMEDIUMTYPE    124  /* Wrong medium type */
