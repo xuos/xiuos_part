@@ -83,15 +83,15 @@ extern "C" {
 #define  EPIPE           32  /* Broken pipe */
 #define  EDOM            33  /* Math argument out of domain of func */
 #define  ERANGE          34  /* Math result not representable */
-// #define  EDEADLK         35  /* Resource deadlock would occur */
-// #define  ENAMETOOLONG    36  /* File name too long */
-// #define  ENOLCK          37  /* No record locks available */
-// #define  ENOSYS          38  /* Function not implemented */
-// #define  ENOTEMPTY       39  /* Directory not empty */
-// #define  ELOOP           40  /* Too many symbolic links encountered */
+#define  EDEADLK         35  /* Resource deadlock would occur */
+#define  ENAMETOOLONG    36  /* File name too long */
+#define  ENOLCK          37  /* No record locks available */
+#define  ENOSYS          38  /* Function not implemented */
+#define  ENOTEMPTY       39  /* Directory not empty */
+#define  ELOOP           40  /* Too many symbolic links encountered */
 #define  EWOULDBLOCK     EAGAIN  /* Operation would block */
-// #define  ENOMSG          42  /* No message of desired type */
-// #define  EIDRM           43  /* Identifier removed */
+#define  ENOMSG          42  /* No message of desired type */
+#define  EIDRM           43  /* Identifier removed */
 #define  ECHRNG          44  /* Channel number out of range */
 #define  EL2NSYNC        45  /* Level 2 not synchronized */
 #define  EL3HLT          46  /* Level 3 halted */
