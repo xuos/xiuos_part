@@ -62,6 +62,12 @@ if SUPPORT_CONNECTION_FRAMEWORK
                 default n
         if CONNECTION_ADAPTER_ETHERNET
         source "$APP_DIR/Framework/connection/ethernet/Kconfig"
+        config CONNECTION_ADAPTER_ETHERCAT
+                bool "Using ethercat on ethernet adapter device"
+                default n
+        if CONNECTION_ADAPTER_ETHERCAT
+        source "$APP_DIR/Framework/connection/ethercat/Kconfig"
+        endif
         endif
 
         menuconfig CONNECTION_ADAPTER_BLUETOOTH

@@ -258,6 +258,10 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/zigbee #
 endif
 
+ifeq ($(CONFIG_ADAPTER_HFA21_ETHERCAT), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/ethercat #
+endif
+
 ifeq ($(CONFIG_SUPPORT_KNOWING_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source #
