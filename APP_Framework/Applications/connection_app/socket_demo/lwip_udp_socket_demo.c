@@ -18,7 +18,7 @@
 * @date 2021-05-29
 */
 #include <transform.h>
-#include <xiuos.h>
+#include <xizi.h>
 #include "board.h"
 #include "sys_arch.h"
 #include "lwip/udp.h"

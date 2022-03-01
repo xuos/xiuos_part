@@ -42,7 +42,7 @@ Modification:
 1. support spi flash open, read and write function
 *************************************************/
 
-#include <xiuos.h>
+#include <xizi.h>
 #include <device.h>
 #include <flash_spi.h>
 #include <user_api.h>

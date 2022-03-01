@@ -12,7 +12,7 @@ config SENSOR_ZG09
                         string "zg09 quantity name"
                         default "co2_1"
                 
-                if ADD_XIUOS_FETURES
+                if ADD_XIZI_FETURES
                         config SENSOR_ZG09_DRIVER_EXTUART
                                 bool "Using extra uart to support zg09"
                                 default y

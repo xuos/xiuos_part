@@ -2,7 +2,7 @@ config ADAPTER_NBIOT_BC28
         string "BC28 adapter name"
         default "bc28"
 
-if ADD_XIUOS_FETURES
+if ADD_XIZI_FETURES
         config ADAPTER_BC28_RESETPIN
                 int "BC28 RESET pin number"
                 default "100"

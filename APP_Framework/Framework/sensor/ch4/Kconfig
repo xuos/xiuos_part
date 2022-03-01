@@ -12,7 +12,7 @@ config SENSOR_AS830
                         string "as830 quantity name"
                         default "ch4_1"
                 
-                if ADD_XIUOS_FETURES
+                if ADD_XIZI_FETURES
                         config SENSOR_AS830_DRIVER_EXTUART
                                 bool "Using extra uart to support as830"
                                 default y

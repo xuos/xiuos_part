@@ -6,7 +6,7 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
 endif
 
 
-ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
     SRC_FILES := tb600b_iaq10.c
     include $(KERNEL_ROOT)/compiler.mk
 endif
