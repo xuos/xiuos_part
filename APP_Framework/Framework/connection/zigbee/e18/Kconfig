@@ -17,7 +17,7 @@ choice
 endchoice
 
 
-if ADD_XIUOS_FETURES
+if ADD_XIZI_FETURES
 
         config ADAPTER_E18_DRIVER_EXTUART
                 bool "Using extra uart to support zigbee"

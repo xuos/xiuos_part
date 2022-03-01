@@ -12,7 +12,7 @@ config SENSOR_TB600B_TVOC10
                         string "tb600b tvoc10 quantity name"
                         default "tvoc_1"
                 
-                if ADD_XIUOS_FETURES
+                if ADD_XIZI_FETURES
                         config SENSOR_TB600B_TVOC10_DRIVER_EXTUART
                                 bool "Using extra uart to support tb600b tvoc10"
                                 default y
