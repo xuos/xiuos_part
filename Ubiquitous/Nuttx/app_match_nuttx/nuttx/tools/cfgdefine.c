@@ -335,7 +335,6 @@ void generate_definitions(FILE *stream)
                 {
                   printf("#define %s 1\n", varname);
                   printf("#define %s 1\n", &varname[7]);
-                  
                 }
 
               /* Or to '2' if it has the special value 'm' */
@@ -351,7 +350,7 @@ void generate_definitions(FILE *stream)
               else
                 {
                   printf("#define %s %s\n", varname, varval);
-                  printf("#define %s %s\n", &varname[7], varval);
+                  printf("#define %s %s\n", &varname[7], varval);                  
                 }
             }
         }

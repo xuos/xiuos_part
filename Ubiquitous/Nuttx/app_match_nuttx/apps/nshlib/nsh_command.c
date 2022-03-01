@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <assert.h>
 
 #ifdef CONFIG_NSH_BUILTIN_APPS
 #  include <nuttx/lib/builtin.h>
@@ -154,7 +155,7 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
 
 #ifndef CONFIG_NSH_DISABLE_DATE
-  { "date",     cmd_date,     1, 3, "[-s \"MMM DD HH:MM:SS YYYY\"]" },
+  { "date",     cmd_date,     1, 4, "[-s \"MMM DD HH:MM:SS YYYY\"] [-u]" },
 #endif
 
 #ifndef CONFIG_NSH_DISABLE_DD
@@ -260,7 +261,7 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
 
 #ifndef CONFIG_NSH_DISABLE_KILL
-  { "kill",     cmd_kill,     3, 3, "-<signal> <pid>" },
+  { "kill",     cmd_kill,     2, 3, "[-<signal>] <pid>" },
 #endif
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
@@ -434,7 +435,7 @@ static const struct cmdmap_s g_cmdmap[] =
 
 #ifdef NSH_HAVE_DIROPTS
 # ifndef CONFIG_NSH_DISABLE_RM
-  { "rm",       cmd_rm,       2, 2, "<file-path>" },
+  { "rm",       cmd_rm,       2, 3, "[-r] <file-path>" },
 # endif
 #endif
 
@@ -578,7 +579,6 @@ static const struct cmdmap_s g_cmdmap[] =
 
 #ifndef CONFIG_NSH_DISABLE_XD
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
-#endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
   { "hcho1os",       cmd_Hcho1os,       1, 1, "[get the concentration of formaldehyde with sensor tb600b_wq_hcho1os.]" },
@@ -624,6 +624,23 @@ static const struct cmdmap_s g_cmdmap[] =
   { "humi",       cmd_HumiHs300x,       1, 1, "[get humidity with sensor HS300x.]" },
 #endif
 
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_OPENZIGBEE)
+  { "openzigbee",       cmd_openzigbee,       1, 1, "[open the zigebee device.]" },
+#endif
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_SENDZIGBEE)
+  { "sendzigbee",       cmd_sendzigbee,       2, 2, "[sendzigbee <message>]" },
+#endif
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_RECVZIGBEE)
+  { "recvzigbee",       cmd_recvzigbee,       1, 1, "[receive message.]" },
+#endif
+
+#if defined(CONFIG_ADAPTER_SX1278) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
+  { "AdapterLoraTest",       cmd_AdapterLoraTest,       1, 1, "[Lora sx128 test.]" },
+#endif
+
+#endif
   { NULL,       NULL,         1, 1, NULL }
 };
 
