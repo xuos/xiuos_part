@@ -21,6 +21,7 @@ extern int AdapterNbiotInit(void);
 extern int AdapterBlueToothInit(void);
 extern int AdapterWifiInit(void);
 extern int AdapterEthernetInit(void);
+extern int AdapterEthercatInit(void);
 extern int AdapterZigbeeInit(void);
 extern int AdapterLoraInit(void);
 
@@ -141,6 +142,9 @@ static struct InitDesc connection_desc[] =
 #endif
 #ifdef CONNECTION_ADAPTER_ETHERNET
 	{ "ethernet adapter", AdapterEthernetInit},
+#endif
+#ifdef CONNECTION_ADAPTER_ETHERCAT
+	{ "ethercat adapter", AdapterEthercatInit},
 #endif
 #ifdef CONNECTION_ADAPTER_LORA
 	{ "lora adapter", AdapterLoraInit},
