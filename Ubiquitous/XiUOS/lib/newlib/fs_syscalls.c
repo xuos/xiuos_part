@@ -27,7 +27,9 @@ Modification: Use file system functions
 *************************************************/
 
 #include <reent.h>
+#ifndef LWIP_PROVIDE_ERRNO
 #include <sys/errno.h>
+#endif
 #include <stdio.h>
 
 #include <xiuos.h>

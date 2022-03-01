@@ -102,6 +102,11 @@ int PrivTaskDelay(int32_t ms)
     UserTaskDelay(ms);
 }
 
+uint32_t PrivGetTickTime()
+{
+    return CalculteTimeMsFromTick(CurrentTicksGain());
+}
+
 /*********************fs**************************/
 #ifdef FS_VFS
 /************************Driver Posix Transform***********************/
