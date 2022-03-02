@@ -101,7 +101,7 @@ int AdapterEthernetTest(void)
     
     const char *ip = "10.10.100.50";
     const char *port = "12345";
-    enum NetRoleType net_role = SERVER;//CLIENT
+    enum NetRoleType net_role = CLIENT;//SERVER
     enum IpType ip_type = IPV4;
     AdapterDeviceConnect(adapter, net_role, ip, port, ip_type);
 

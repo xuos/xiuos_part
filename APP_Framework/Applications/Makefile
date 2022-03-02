@@ -7,7 +7,7 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
 endif
 
 
-ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
     SRC_DIR := general_functions app_test 
 
     SRC_FILES := main.c framework_init.c 

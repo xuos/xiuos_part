@@ -12,7 +12,7 @@ menu "test app"
                 bool "Config test adc"
                 default n
                 if USER_TEST_ADC
-                    if ADD_XIUOS_FETURES
+                    if ADD_XIZI_FETURES
                         config ADC_DEV_DRIVER
                             string "Set ADC dev path"
                             default "/dev/adc1_dev"
@@ -23,7 +23,7 @@ menu "test app"
                 bool "Config test dac"
                 default n
                 if USER_TEST_DAC
-                    if ADD_XIUOS_FETURES
+                    if ADD_XIZI_FETURES
                         config DAC_DEV_DRIVER
                             string "Set DAC dev path"
                             default "/dev/dac_dev"

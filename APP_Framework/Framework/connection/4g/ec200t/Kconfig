@@ -2,7 +2,7 @@ config ADAPTER_4G_EC200T
         string "EC200T adapter name"
         default "ec200t"
 
-if ADD_XIUOS_FETURES
+if ADD_XIZI_FETURES
         config ADAPTER_EC200T_PWRKEY
                 int "EC200T PWRKEY pin number"
                 default "97"

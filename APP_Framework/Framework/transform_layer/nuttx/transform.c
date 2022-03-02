@@ -95,6 +95,12 @@ int PrivTaskDelay(int32_t ms)
     return usleep(ms);
 }
 
+uint32_t PrivGetTickTime(){
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+}
+
 /*********************fs**************************/
 
 /************************Driver Posix Transform***********************/

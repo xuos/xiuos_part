@@ -4,11 +4,11 @@ menuconfig USING_CMSIS_5
 
 if USING_CMSIS_5
 
-    menuconfig USING_USING_CMSIS_5_NN
+    menuconfig USING_CMSIS_5_NN
         bool "CMSIS-5 NN"
         default n
 
-    if USING_USING_CMSIS_5_NN
+    if USING_CMSIS_5_NN
     
         config USING_CMSIS_5_NN_ACTIVATION
             bool "CMSIS-5 NN ACTIVATION"

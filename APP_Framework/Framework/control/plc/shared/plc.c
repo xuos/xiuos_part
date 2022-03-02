@@ -17,8 +17,9 @@
  * @author AIIT XUOS Lab
  * @date 2021.12.15
  */
-
+#ifdef USING_CONTROL_PLC_OPCUA
 #include "../interoperability/opcua/open62541.h"
+#endif
 #include "plc.h"
 
 
