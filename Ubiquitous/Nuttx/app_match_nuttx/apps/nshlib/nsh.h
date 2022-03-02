@@ -462,8 +462,8 @@
 
 /* Make sure that the home directory is defined */
 
-#ifndef CONFIG_LIB_HOMEDIR
-# define CONFIG_LIB_HOMEDIR "/"
+#ifndef CONFIG_LIBC_HOMEDIR
+# define CONFIG_LIBC_HOMEDIR "/"
 #endif
 
 #undef NSH_HAVE_VARS
@@ -799,6 +799,11 @@ extern const char g_fmtsignalrecvd[];
  * Public Function Prototypes
  ****************************************************************************/
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
 /* Initialization */
 
 #ifdef CONFIG_NSH_ROMFSETC
@@ -830,14 +835,14 @@ int nsh_loginscript(FAR struct nsh_vtbl_s *vtbl);
 
 /* Architecture-specific initialization depends on boardctl(BOARDIOC_INIT) */
 
-#if defined(CONFIG_NSH_ARCHINIT) && !defined(CONFIG_LIB_BOARDCTL)
-#  warning CONFIG_NSH_ARCHINIT is set, but CONFIG_LIB_BOARDCTL is not
+#if defined(CONFIG_NSH_ARCHINIT) && !defined(CONFIG_BOARDCTL)
+#  warning CONFIG_NSH_ARCHINIT is set, but CONFIG_BOARDCTL is not
 #  undef CONFIG_NSH_ARCHINIT
 #endif
 
 /* The mkrd command depends on boardctl(BOARDIOC_MKRD) */
 
-#if !defined(CONFIG_LIB_BOARDCTL) || !defined(CONFIG_BOARDCTL_MKRD)
+#if !defined(CONFIG_BOARDCTL) || !defined(CONFIG_BOARDCTL_MKRD)
 #  undef CONFIG_NSH_DISABLE_MKRD
 #  define CONFIG_NSH_DISABLE_MKRD 1
 #endif
@@ -1445,6 +1450,27 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
 
 #if defined(CONFIG_APPLICATION_SENSOR_HUMIDITY_HS300X) && !defined(CONFIG_NSH_DISABLE_HUMIHS300X)
   int cmd_HumiHs300x(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_OPENZIGBEE)
+  int cmd_openzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_SENDZIGBEE)
+  int cmd_sendzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_RECVZIGBEE)
+  int cmd_recvzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_ADAPTER_SX1278) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
+  int cmd_AdapterLoraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __APPS_NSHLIB_NSH_H */

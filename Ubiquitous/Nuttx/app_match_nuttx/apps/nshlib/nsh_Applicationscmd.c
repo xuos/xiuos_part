@@ -217,3 +217,53 @@ int cmd_HumiHs300x(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     return 0;
 }
 #endif
+
+
+/****************************************************************************
+ * Name: cmd_openzigbee
+ ****************************************************************************/
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_OPENZIGBEE)
+extern int openzigbee(void);
+int cmd_openzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    openzigbee();
+    return 0;
+}
+#endif
+
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_SENDZIGBEE)
+extern int sendzigbee(int argc, char *argv[]);
+int cmd_sendzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    sendzigbee(argc,argv);
+    return 0;
+}
+#endif
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_RECVZIGBEE)
+extern int recvzigbee(void);
+int cmd_recvzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    recvzigbee();
+    return 0;
+}
+#endif
+
+#if defined(CONFIG_ADAPTER_SX1278) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
+extern int AdapterLoraTest(void);
+int cmd_AdapterLoraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    printf("Hello, world!\n");
+    FrameworkInit();
+    AdapterLoraTest();
+    return 0;
+}
+#endif
