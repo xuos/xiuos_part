@@ -7,3 +7,6 @@
 [submodule "Ubiquitous/Nuttx/apps"]
 	path = Ubiquitous/Nuttx/apps
 	url = https://gitlink.org.cn/wgzAIIT/incubator-nuttx-apps.git
+[submodule "Ubiquitous/Nuttx/nuttx"]
+	path = Ubiquitous/Nuttx/nuttx
+	url = https://gitlink.org.cn/wgzAIIT/incubator-nuttx.git
