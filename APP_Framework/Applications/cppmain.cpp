@@ -10,7 +10,7 @@
 * See the Mulan PSL v2 for more details.
 */
 
-#include <xiuos.h>
+#include <xizi.h>
 #include <stdio.h>
 #include <cstdlib>
 using namespace std;

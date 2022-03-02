@@ -123,28 +123,30 @@ extern "C" {
 #define OV2640_SENSOR_HISTO_LOW  0x61
 #define OV2640_SENSOR_HISTO_HIGH 0x62
 
-#ifdef BOARD_K210_EVB
-#define IOCTRL_CAMERA_SET_DVP_RESO     (21)     // set dev resolution
-#else
-#define IOCTRL_CAMERA_SET_DVP_RESO     (22)     // same as IOCTRL_CAMERA_START_SHOT
-#endif
 
-#define IOCTRL_CAMERA_START_SHOT       (22)     // start shoot
-#define IOCTRL_CAMERA_SET_RESO         (23)     //set resolution
-#define IOCTRL_CAMERA_SET_LIGHT        (24)     //set light mode
-#define IOCTRL_CAMERA_SET_COLOR        (25)     //set color saturation
-#define IOCTRL_CAMERA_SET_BRIGHTNESS   (26)     //set color brightness
-#define IOCTRL_CAMERA_SET_CONTRAST     (27)     //set contrast
-#define IOCTRL_CAMERA_SET_EFFECT       (28)     //set effect
-#define IOCTRL_CAMERA_SET_EXPOSURE     (29)     //set auto exposure
+#define IOCTRL_CAMERA_OUT_SIZE_RESO         (20)     // user set specific resolution outsize
+#define IOCTRL_CAMERA_SET_WINDOWS_SIZE      (21)     // user set specific windows outsize
+#define IOCTRL_CAMERA_START_SHOT            (22)     // start shoot
+#define IOCTRL_CAMERA_SET_RESO              (23)     //set common resolution eg :QQVGA 0 QCIF 1 QVGA  2 WQVGA 3 CIF   4 …………
+#define IOCTRL_CAMERA_SET_LIGHT             (24)     //set light mode
+#define IOCTRL_CAMERA_SET_COLOR             (25)     //set color saturation
+#define IOCTRL_CAMERA_SET_BRIGHTNESS        (26)     //set color brightness
+#define IOCTRL_CAMERA_SET_CONTRAST          (27)     //set contrast
+#define IOCTRL_CAMERA_SET_EFFECT            (28)     //set effect
+#define IOCTRL_CAMERA_SET_EXPOSURE          (29)     //set auto exposure
 
-#ifdef BOARD_K210_EVB
+
 typedef struct 
 {
     uint32_t width;         // width   The width  of image
     uint32_t height;        // height  The height of image
-}_ioctl_set_dvp_reso;
-#endif
+}_ioctl_set_reso;
+
+typedef struct 
+{
+    uint32_t width;         // width   The width  of image
+    uint32_t height;        // height  The height of image
+}_ioctl_ov2640_set_win_size;
 
 
 struct camera_device

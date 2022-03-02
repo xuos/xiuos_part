@@ -46,8 +46,8 @@ void k210_detect(char *json_file_path)
         printf("open ov2640 fail !!");
         return;
     }
-    _ioctl_set_dvp_reso set_dvp_reso = {detect_params.sensor_output_size[1], detect_params.sensor_output_size[0]};
-    ioctl(g_fd, IOCTRL_CAMERA_SET_DVP_RESO, &set_dvp_reso);
+    _ioctl_set_reso set_dvp_reso = {detect_params.sensor_output_size[1], detect_params.sensor_output_size[0]};
+    ioctl(g_fd, IOCTRL_CAMERA_OUT_SIZE_RESO, &set_dvp_reso);
     showbuffer =
         (unsigned char *)rt_malloc_align(detect_params.sensor_output_size[0] * detect_params.sensor_output_size[1] * 2, 64);
     if (NULL == showbuffer) {
@@ -199,6 +199,8 @@ static void *thread_detect_entry(void *parameter)
         /* display result */
 
         for (int cnt = 0; cnt < detect_info.obj_number; cnt++) {
+            detect_info.obj[cnt].y1 += (detect_params.sensor_output_size[0] - detect_params.net_input_size[0])/2;
+            detect_info.obj[cnt].y2 += (detect_params.sensor_output_size[0] - detect_params.net_input_size[0])/2;
             draw_edge((uint32_t *)showbuffer, &detect_info, cnt, 0xF800, (uint16_t)detect_params.sensor_output_size[1],
                       (uint16_t)detect_params.sensor_output_size[0]);
             printf("%d: (%d, %d, %d, %d) cls: %s conf: %f\t", cnt, detect_info.obj[cnt].x1, detect_info.obj[cnt].y1,

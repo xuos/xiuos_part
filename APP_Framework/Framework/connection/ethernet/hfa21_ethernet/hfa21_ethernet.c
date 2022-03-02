@@ -333,7 +333,7 @@ static int Hfa21EthernetConnect(struct Adapter *adapter, enum NetRoleType net_ro
 {
     int ret = 0;
     char hfa21_ethernet_cmd[128];
-    char net_role_string[6] = {0};
+    char net_role_string[7] = {0};
 
     /*Step1 : enter AT mode*/
     Hfa21EthernetInitAtCmd(adapter->agent);

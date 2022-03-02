@@ -23,7 +23,10 @@ if GetDepend(['BSP_USING_SDCARD']):
 
 if GetDepend(['BSP_USING_SRAM']):
     src += Glob('ports/drv_sram.c')
-    
+
+if GetDepend(['BSP_USING_MCU_LCD']):
+    src += Glob('ports/drv_lcd.c')
+
 if GetDepend(['BSP_USING_DCMI']):
     src += ['drv_dcmi.c']
     src += ['../../../../rt-thread/bsp/stm32/libraries/STM32F4xx_HAL/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dcmi.c']

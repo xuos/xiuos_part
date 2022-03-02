@@ -38,7 +38,7 @@ config SENSOR_PS5308
                                 default "pm10_1"
                     endif
 
-                if ADD_XIUOS_FETURES
+                if ADD_XIZI_FETURES
                         config SENSOR_PS5308_DRIVER_EXTUART
                                 bool "Using extra uart to support PS5308"
                                 default y

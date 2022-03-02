@@ -101,6 +101,11 @@ int PrivTaskDelay(int32_t ms)
      rt_thread_mdelay(ms);
 }
 
+uint32_t PrivGetTickTime()
+{
+    return rt_tick_get_millisecond();
+}
+
 /*********************fs**************************/
 
 /************************Driver Posix Transform***********************/

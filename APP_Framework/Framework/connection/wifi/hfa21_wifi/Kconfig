@@ -2,7 +2,7 @@ config ADAPTER_WIFI_HFA21
         string "HFA21 WIFI adapter name"
         default "hfa21_wifi"
 
-if ADD_XIUOS_FETURES
+if ADD_XIZI_FETURES
 
         config ADAPTER_HFA21_DRIVER_EXTUART
                 bool "Using extra uart to support wifi"

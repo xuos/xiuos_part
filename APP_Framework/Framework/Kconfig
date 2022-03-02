@@ -5,10 +5,10 @@ menu "Framework"
         default y
         choice
             prompt "select os features"
-            default ADD_XIUOS_FETURES
+            default ADD_XIZI_FETURES
 
-            config ADD_XIUOS_FETURES
-                bool "add xiuos fetures"
+            config ADD_XIZI_FETURES
+                bool "add xizi fetures"
             
             config ADD_NUTTX_FETURES
                 bool "add nuttx fetures"
