@@ -37,6 +37,19 @@ char *cmd_role_as_e = "AT+DEV=E"; /*set device type for end device*/
 char *cmd_role_as_r = "AT+DEV=R"; /*set device type for router*/
 char *cmd_set_ch = "AT+CH=11";    /*set channel as 11*/
 
+
+#ifdef ADD_NUTTX_FETURES
+static int E18UartOpen(struct Adapter *adapter)
+{
+    adapter->fd = PrivOpen(ADAPTER_E18_DRIVER, O_RDWR);
+    if (adapter->fd < 0) {
+        printf("E18UartSetUp get serial %s fd error\n", ADAPTER_E18_DRIVER);
+        return -1;
+    }
+
+    return adapter->fd;
+}
+#else
 static int E18UartOpen(struct Adapter *adapter)
 {
     if (NULL == adapter) {
@@ -78,6 +91,7 @@ static int E18UartOpen(struct Adapter *adapter)
     printf("Zigbee uart config ready\n");
     return 0;
 }
+#endif
 
 static int E18NetworkModeConfig(struct Adapter *adapter)
 {
@@ -204,7 +218,7 @@ static int E18Open(struct Adapter *adapter)
      /*step2: init AT agent*/
     if (!adapter->agent) {
         char *agent_name = "zigbee_device";
-        if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+        if (0 != InitATAgent(agent_name, adapter->fd, 512)) {
             printf("at agent init failed !\n");
             return -1;
         }
