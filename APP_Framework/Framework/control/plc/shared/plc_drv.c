@@ -19,30 +19,30 @@
 */
 
 #include "transform.h"
-#include "plc_bus.h"
+#include "plc_ch.h"
 #include "plc_dev.h"
 
-static DoubleLinklistType plcdrv_linklist;
+static DoublelistType plcdrv_linklist;
 
 /******************************************************************************/
 
 /*Create the driver linklist*/
 static void PlcDrvLinkInit()
 {
-    InitDoubleLinkList(&plcdrv_linklist);
+    AppInitDoubleList(&plcdrv_linklist);
 }
 
-DriverType PlcDriverFind(const char *drv_name, enum DriverType_e drv_type)
+ChDrvType PlcDriverFind(const char *drv_name, enum ChDrvType_e drv_type)
 {
-    NULL_PARAM_CHECK(drv_name);
+    CHECK_CH_PARAM(drv_name);
 
-    struct Driver *driver = NONE;
+    struct ChDrv *driver = NONE;
 
-    DoubleLinklistType *node = NONE;
-    DoubleLinklistType *head = &plcdrv_linklist;
+    DoublelistType *node = NONE;
+    DoublelistType *head = &plcdrv_linklist;
 
     for (node = head->node_next; node != head; node = node->node_next) {
-        driver = SYS_DOUBLE_LINKLIST_ENTRY(node, struct Driver, driver_link);
+        driver = DOUBLE_LIST_ENTRY(node, struct ChDrv, driver_link);
         if ((!strcmp(driver->drv_name, drv_name)) && (drv_type == driver->driver_type)) {
             return driver;
         }
@@ -52,19 +52,19 @@ DriverType PlcDriverFind(const char *drv_name, enum DriverType_e drv_type)
     return NONE;
 }
 
-int PlcDriverRegister(struct Driver *driver)
+int PlcDriverRegister(struct ChDrv *driver)
 {
-    NULL_PARAM_CHECK(driver);
+    CHECK_CH_PARAM(driver);
 
-    x_err_t ret = EOK;
-    static x_bool driver_link_flag = RET_FALSE;
+    int ret = EOK;
+    static uint8_t driver_link_flag = 0;
 
     if (!driver_link_flag) {
         PlcDrvLinkInit();
-        driver_link_flag = RET_TRUE;
+        driver_link_flag = 1;
     }
 
-    DoubleLinkListInsertNodeAfter(&plcdrv_linklist, &(driver->driver_link));
+    AppDoubleListInsertNodeAfter(&plcdrv_linklist, &(driver->driver_link));
 
     return ret;
 }

@@ -11,17 +11,17 @@
 */
 
 /**
-* @file plc_bus.h
+* @file plc_ch.h
 * @brief define plc bus and drv function using bus driver framework
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-01-24
 */
 
-#ifndef __PLC_BUS_H_
-#define __PLC_BUS_H_
+#ifndef __PLC_CH_H_
+#define __PLC_CH_H_
 
-#include "bus.h"
+#include "channel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,33 +29,33 @@ extern "C" {
 
 struct PlcDriver
 {
-    struct Driver driver;
-    uint32 (*configure) (void *drv, struct BusConfigureInfo *configure_info);
+    struct ChDrv driver;
+    uint32 (*configure) (void *drv, struct ChConfigInfo *cfg);
 };
 
-struct PlcBus
+struct PlcChannel
 {
-    struct Bus bus;
+    struct Channel ch;
     void *private_data;
 };
 
 /*Register the plc bus*/
-int PlcBusInit(struct PlcBus *plc_bus, const char *bus_name);
+int PlcChannelInit(struct PlcChannel *plc_ch, const char *ch_name);
 
 /*Register the plc driver*/
 int PlcDriverInit(struct PlcDriver *plc_driver, const char *driver_name);
 
 /*Release the plc device*/
-int PlcReleaseBus(struct PlcBus *plc_bus);
+int PlcReleaseChannel(struct PlcChannel *plc_ch);
 
 /*Register the plc driver to the plc bus*/
-int PlcDriverAttachToBus(const char *drv_name, const char *bus_name);
+int PlcDriverAttachToChannel(const char *drv_name, const char *ch_name);
 
 /*Register the driver, manage with the double linklist*/
-int PlcDriverRegister(struct Driver *driver);
+int PlcDriverRegister(struct ChDrv *driver);
 
 /*Find the register driver*/
-DriverType PlcDriverFind(const char *drv_name, enum DriverType_e drv_type);
+ChDrvType PlcDriverFind(const char *drv_name, enum ChDrvType_e drv_type);
 
 #ifdef __cplusplus
 }

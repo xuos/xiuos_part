@@ -21,8 +21,8 @@
 #ifndef __PLC_DEV_H_
 #define __PLC_DEV_H_
 
-#include "bus.h"
-#include "xs_klist.h"
+#include "list.h"
+#include "plc_ch.h"
 
 #undef open
 #undef close
@@ -33,15 +33,16 @@
 #define PLC_NAME_SIZE 32
 
 // PLC device information
-struct PlcInfo {
+typedef struct PlcInfo {
     uint32_t ability;      // PLC ability
     uint32_t id;           // PLC Device ID
     uint32_t soft_version; // software version
     uint32_t hard_version; // hardware version
     uint32_t date;         // manufact date
     const char *vendor;    // vendor
-    const char *model;     // product model
-};
+    const char *model;     // model
+    const char *product;   // product
+}PlcInfoType;
 
 enum PlcSerialType {
     PLC_SERIAL_232,
@@ -64,13 +65,13 @@ union PlcCfg {
 struct PlcDevice;
 
 // operation API
-struct PlcOps {
+typedef struct PlcOps {
    int (*open)(void *dev); // open and connect PLC device
    void (*close)(void* dev); // close and disconnect PLC device
    int (*read)(void* dev, void *buf, size_t len); // read data from PLC
    int (*write)(void* dev, const void *buf, size_t len); // write data from PLC
    int (*ioctl)(void* dev, int cmd, void *arg); // send control command to PLC
-};
+}PlcOpsType;
 
 enum PlcCtlType {
     PLC_CTRL_TYPE_HSC,
@@ -78,11 +79,9 @@ enum PlcCtlType {
     PLC_CTRL_TYPE_PHASING
 };
 
-
 #define PLC_ABILITY_HSC     ((uint32_t)(1 << PLC_CTRL_TYPE_HSC))
 #define PLC_ABILITY_PID     ((uint32_t)(1 << PLC_CTRL_TYPE_PID))
 #define PLC_ABILITY_PHASING ((uint32_t)(1 << PLC_CTRL_TYPE_PHASING))
-
 
 enum PlcIndHybridNet
 {
@@ -112,18 +111,19 @@ enum PlcTransType
 };
 
 //communication interface
-struct PlcInterface
+typedef struct PlcInterface
 {
     char ip_addr[IP_ADDR_SIZE];
     char attrib;
-};
+}PlcInterfaceType;
 
 // identify PLC device
-struct PlcDevice {
-    struct HardwareDev haldev; /* hardware device driver for bus */
+typedef struct PlcDevice {
+    struct ChDev haldev; /* hardware device driver for channel */
+    enum ChDevState_e state;
+
     char name[PLC_NAME_SIZE]; /* name of the device */
     enum PlcCtlType type; /* PLC Control Type */
-    enum DevState state;
     enum PlcIndHybridNet net;
     enum PlcTransType trans;
 
@@ -133,16 +133,20 @@ struct PlcDevice {
     struct PlcInterface interface; /* protocols used for transferring data from program to plc */
 
     void *priv_data; /* private data for different PLC*/
-    DoubleLinklistType link;/* link list node */
-};
+    DoublelistType link;/* link list node */
+}PlcDeviceType;
 
+typedef struct PlcCtrlParam {
+    void *node_id; // for node ID
+    int value;
+}PlcCtrlParamType;
 
 #define plc_print KPrintf
 
 /******************************************************************************/
 
 int PlcDevRegister(struct PlcDevice *plc_device, void *plc_param, const char *device_name);
-int PlcDeviceAttachToBus(const char *dev_name, const char *bus_name);
+int PlcDeviceAttachToChannel(const char *dev_name, const char *ch_name);
 
 /******************************************************************************/
 

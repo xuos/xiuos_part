@@ -19,22 +19,22 @@
  */
 
 #include "ua_api.h"
-#include "plc_bus.h"
+#include "plc_ch.h"
 #include "plc_dev.h"
 
-static DoubleLinklistType plcdev_list;
+DoublelistType plcdev_list;
 
 /******************************************************************************/
 
 /*Create the plc device linklist*/
 static void PlcDeviceLinkInit()
 {
-    InitDoubleLinkList(&plcdev_list);
+    AppInitDoubleList(&plcdev_list);
 }
 
 static int PlcDeviceOpen(void *dev)
 {
-    NULL_PARAM_CHECK(dev);
+    CHECK_CH_PARAM(dev);
 
     struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
 
@@ -48,7 +48,7 @@ static int PlcDeviceOpen(void *dev)
 
 static void PlcDeviceClose(void *dev)
 {
-    NULL_PARAM_CHECK(dev);
+    CHECK_CH_PARAM(dev);
 
     struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
 
@@ -60,8 +60,7 @@ static void PlcDeviceClose(void *dev)
 
 static int PlcDeviceWrite(void *dev, const void *buf, size_t len)
 {
-    NULL_PARAM_CHECK(dev);
-    NULL_PARAM_CHECK(buf);
+    CHECK_CH_PARAM(dev);
 
     int ret;
     struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
@@ -76,8 +75,8 @@ static int PlcDeviceWrite(void *dev, const void *buf, size_t len)
 
 static int PlcDeviceRead(void *dev, void *buf, size_t len)
 {
-    NULL_PARAM_CHECK(dev);
-    NULL_PARAM_CHECK(buf);
+    CHECK_CH_PARAM(dev);
+    CHECK_CH_PARAM(buf);
 
     int ret;
     struct PlcDevice *plc_dev = (struct PlcDevice *)dev;
@@ -99,18 +98,18 @@ static struct PlcOps plc_done =
 };
 
 /* find PLC device with device name */
-struct HardwareDev *PlcDevFind(const char *dev_name)
+struct ChDev *PlcDevFind(const char *dev_name)
 {
-    NULL_PARAM_CHECK(dev_name);
+    CHECK_CH_PARAM(dev_name);
 
     struct PlcDevice *device = NONE;
-    struct HardwareDev *haldev = NONE;
+    struct ChDev *haldev = NONE;
 
-    DoubleLinklistType *node = NONE;
-    DoubleLinklistType *head = &plcdev_list;
+    DoublelistType *node = NONE;
+    DoublelistType *head = &plcdev_list;
 
     for (node = head->node_next; node != head; node = node->node_next) {
-        device = SYS_DOUBLE_LINKLIST_ENTRY(node, struct PlcDevice, link);
+        device = DOUBLE_LIST_ENTRY(node, struct PlcDevice, link);
         if (!strcmp(device->name, dev_name)) {
             haldev = &device->haldev;
             return haldev;
@@ -123,61 +122,63 @@ struct HardwareDev *PlcDevFind(const char *dev_name)
 
 int PlcDevRegister(struct PlcDevice *plc_device, void *plc_param, const char *device_name)
 {
-    NULL_PARAM_CHECK(plc_device);
-    NULL_PARAM_CHECK(device_name);
+    CHECK_CH_PARAM(plc_device);
+    CHECK_CH_PARAM(device_name);
 
-    x_err_t ret = EOK;
-    static x_bool dev_link_flag = RET_FALSE;
+    int ret = EOK;
+    static uint8_t dev_link_flag = 0;
 
     if (!dev_link_flag) {
         PlcDeviceLinkInit();
-        dev_link_flag = RET_TRUE;
+        dev_link_flag = 1;
     }
 
-    if (DEV_INSTALL != plc_device->state) {
+    if (CHDEV_INSTALL != plc_device->state) {
         strncpy(plc_device->haldev.dev_name, device_name, NAME_NUM_MAX);
-        plc_device->haldev.dev_type = TYPE_PLC_DEV;
-        plc_device->haldev.dev_state = DEV_INSTALL;
+        plc_device->haldev.dev_type = CHDEV_PLC_TYPE;
+        plc_device->haldev.dev_state = CHDEV_INSTALL;
 
         strncpy(plc_device->name, device_name, strlen(device_name));
         plc_device->ops = &plc_done;
 
-        DoubleLinkListInsertNodeAfter(&plcdev_list, &(plc_device->link));
-        plc_device->state = DEV_INSTALL;
+        AppDoubleListInsertNodeAfter(&plcdev_list, &(plc_device->link));
+        plc_device->state = CHDEV_INSTALL;
+
     } else {
-        KPrintf("PlcDevRegister device has been register state%u\n", plc_device->type);
+        KPrintf("PlcDevRegister device %s has been register state%u\n", device_name, plc_device->state);
+        ret = ERROR;
     }
 
     return ret;
 }
 
-int PlcDeviceAttachToBus(const char *dev_name, const char *bus_name)
+int PlcDeviceAttachToChannel(const char *dev_name, const char *ch_name)
 {
-    NULL_PARAM_CHECK(dev_name);
-    NULL_PARAM_CHECK(bus_name);
+    CHECK_CH_PARAM(dev_name);
+    CHECK_CH_PARAM(ch_name);
 
-    x_err_t ret = EOK;
+    int ret = EOK;
 
-    struct Bus *bus;
-    struct HardwareDev *device;
+    struct Channel *ch;
+    struct ChDev *device;
 
-    bus = BusFind(bus_name);
-    if (NONE == bus) {
-        KPrintf("PlcDeviceAttachToBus find plc bus error!name %s\n", bus_name);
+    ch = ChannelFind(ch_name);
+    if (NONE == ch) {
+        KPrintf("PlcDeviceAttachToChannel find plc ch error!name %s\n", ch_name);
         return ERROR;
     }
 
-    if (TYPE_PLC_BUS == bus->bus_type) {
+    if (CH_PLC_TYPE == ch->ch_type) {
         device = PlcDevFind(dev_name);
         if (NONE == device) {
-            KPrintf("PlcDeviceAttachToBus find plc device error!name %s\n", dev_name);
+            KPrintf("PlcDeviceAttachToChannel find plc device %s error!\n", dev_name);
             return ERROR;
         }
 
-        if (TYPE_PLC_DEV == device->dev_type) {
-            ret = DeviceRegisterToBus(bus, device);
+        if (CHDEV_PLC_TYPE == device->dev_type) {
+            ret = DeviceRegisterToChannel(ch, device);
             if (EOK != ret) {
-                KPrintf("PlcDeviceAttachToBus DeviceRegisterToBus error %u\n", ret);
+                KPrintf("PlcDeviceAttachToChannel DeviceRegisterToChannel error %u\n", ret);
                 return ERROR;
             }
         }

@@ -44256,7 +44256,7 @@ UA_Client_run_iterate(UA_Client *client, UA_UInt32 timeout) {
        client->sessionState < UA_SESSIONSTATE_ACTIVATED) {
         retval = connectIterate(client, timeout);
         notifyClientState(client);
-        lw_print("lw: [%s] ret %d timeout %d state %d ch %d\n", __func__, retval, timeout,
+        ua_print("lw: [%s] ret %d timeout %d state %d ch %d\n", __func__, retval, timeout,
             client->sessionState, client->channel.state);
         return retval;
     }
@@ -45299,7 +45299,7 @@ connectIterate(UA_Client *client, UA_UInt32 timeout) {
         break;
     }
 
-    lw_print("lw: [%s] sess %d conn %d\n", __func__, client->sessionState, client->connectStatus);
+    ua_print("ua: [%s] sess %d conn %d\n", __func__, client->sessionState, client->connectStatus);
     return client->connectStatus;
 }
 
