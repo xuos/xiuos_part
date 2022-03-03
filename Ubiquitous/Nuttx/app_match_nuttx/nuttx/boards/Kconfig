@@ -665,6 +665,14 @@ config ARCH_BOARD_MAIX_BIT
 		This is the board configuration for the port of NuttX to the
 		Sipeed Maix Bit board. This board features the RISC-V K210
 
+config ARCH_BOARD_AIIT_RISCV64
+	bool "aiit riscv64 k210 board"
+	depends on ARCH_CHIP_K210
+	select ARCH_HAVE_LEDS if !K210_WITH_QEMU
+	---help---
+		This is the board configuration for the port of NuttX to the
+		aiit-riscv64 board. This board features the RISC-V K210
+
 config ARCH_BOARD_SMARTL_C906
 	bool "smartl evaluation board for C906"
 	depends on ARCH_CHIP_C906
@@ -2396,6 +2404,7 @@ config ARCH_BOARD
 	default "lpcxpresso-lpc54628"      if ARCH_BOARD_LPCXPRESSO_LPC54628
 	default "lx_cpu"                   if ARCH_BOARD_LX_CPU
 	default "maix-bit"                 if ARCH_BOARD_MAIX_BIT
+	default "aiit-riscv64-board"       if ARCH_BOARD_AIIT_RISCV64
 	default "smartl-c906"              if ARCH_BOARD_SMARTL_C906
 	default "icicle"                   if ARCH_BOARD_ICICLE_MPFS
 	default "maple"                    if ARCH_BOARD_MAPLE
@@ -3205,6 +3214,9 @@ source "boards/risc-v/fe310/hifive1-revb/Kconfig"
 endif
 if ARCH_BOARD_MAIX_BIT
 source "boards/risc-v/k210/maix-bit/Kconfig"
+endif
+if ARCH_BOARD_AIIT_RISCV64
+source "boards/risc-v/k210/aiit-riscv64-board/Kconfig"
 endif
 if ARCH_BOARD_SMARTL_C906
 source "boards/risc-v/c906/smartl-c906/Kconfig"
