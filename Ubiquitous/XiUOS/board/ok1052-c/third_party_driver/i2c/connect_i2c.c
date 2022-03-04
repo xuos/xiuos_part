@@ -10,30 +10,29 @@
 
 /**
 * @file connect_i2c.c
-* @brief support ok1052-c-board i2c function and register to bus framework
+* @brief support ok1052-c i2c function and register to bus framework
 * @version 1.0
 * @author AIIT XUOS Lab
-* @date 2022-1-25
+* @date 2022-03-01
 */
 
 /*************************************************
 File name: connect_i2c.c
-Description: support ok1052-c-board i2c configure and i2c bus register function
+Description: support ok1052-c i2c configure and i2c bus register function
 Others: take RT-Thread v4.0.2/components/drivers/i2c/i2c-bit-ops.c for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
 History:
-1. Date: 2022-1-25
+1. Date: 2022-03-01
 Author: AIIT XUOS Lab
 Modification:
-1. support ok1052-c-board i2c bit configure, write and read
-2. support ok1052-c-board i2c bus device and driver register
+1. support ok1052-c i2c bit configure, write and read
+2. support ok1052-c i2c bus device and driver register
 *************************************************/
 
 #include <board.h>
-#include "connect_i2c.h"
 #include "bus_serial.h"
-#include "i2c_rtc_rx8010.h"
-#include "i2c_eeprom.h"
+#include "connect_i2c.h"
+#include "fsl_lpi2c.h"
 
 #ifndef BSP_USING_I2C1
 #define BSP_USING_I2C1
@@ -41,27 +40,22 @@ Modification:
 
 static uint32 I2cWriteData(struct I2cHardwareDevice *i2c_dev, struct I2cDataStandard *msg)
 {
-    int32 ret;
-
-    if(i2c_dev->i2c_dev_addr == I2C_RTC_ADDR){
-        ret = rx8010_set_time(msg->buf);
-    } else if(i2c_dev->i2c_dev_addr == I2C_EEPROM_ADDR) {
-        ret = eeprom_write(msg->buf);
-    }
-
-    return ret;
+    status_t ret;
+    Stm32I2cType *param = (Stm32I2cType *)i2c_dev->haldev.private_data;
+    ret = I2cHardwareWrite(param->base, param->slave_addr, param->sub_addr, msg->buf, msg->len);
+    if(kStatus_Success == ret)
+        return 1;
+    return 0;
 }
 
 static uint32 I2cReadData(struct I2cHardwareDevice *i2c_dev, struct I2cDataStandard *msg)
 {
-    int32 ret;
-
-    if(i2c_dev->i2c_dev_addr == I2C_RTC_ADDR){
-        ret = rx8010_get_time();
-    } else if(i2c_dev->i2c_dev_addr == I2C_EEPROM_ADDR) {
-        ret = eeprom_read(msg->buf);
-    }
-    return ret;
+    status_t ret;
+    Stm32I2cType *param = (Stm32I2cType *)i2c_dev->haldev.private_data;
+    ret = I2cHardwareRead(param->base, i2c_dev->i2c_dev_addr, param->sub_addr, msg->buf, msg->len);
+    if(kStatus_Success == ret)
+        return 1;
+    return 0;
 }
 
 static uint32 I2cInit(struct I2cDriver *i2c_drv, struct BusConfigureInfo *configure_info)
@@ -75,7 +69,7 @@ static uint32 I2cInit(struct I2cDriver *i2c_drv, struct BusConfigureInfo *config
         return EOK;
     }
 
-    KPrintf("I2cInit need set i2c dev addr\n");
+    i2c_print("I2cInit need set i2c dev addr\n");
     return ERROR;
 }
 
@@ -117,7 +111,7 @@ static int BoardI2cBusInit(struct I2cBus *i2c_bus, struct I2cDriver *i2c_driver)
     i2c_bus->private_data = (void *)NULL;
     ret = I2cBusInit(i2c_bus, I2C_BUS_NAME_1);
     if (EOK != ret) {
-        KPrintf("board_i2c_init I2cBusInit error %d\n", ret);
+        i2c_print("BoardI2cBusInit I2cBusInit error %d\n", ret);
         return ERROR;
     }
 
@@ -125,14 +119,14 @@ static int BoardI2cBusInit(struct I2cBus *i2c_bus, struct I2cDriver *i2c_driver)
     i2c_driver->private_data = (void *)NULL;
     ret = I2cDriverInit(i2c_driver, I2C_DRV_NAME_1);
     if (EOK != ret) {
-        KPrintf("board_i2c_init I2cDriverInit error %d\n", ret);
+        i2c_print("BoardI2cBusInit I2cDriverInit error %d\n", ret);
         return ERROR;
     }
 
     /*Attach the i2c driver to the i2c bus*/
     ret = I2cDriverAttachToBus(I2C_DRV_NAME_1, I2C_BUS_NAME_1);
     if (EOK != ret) {
-        KPrintf("board_i2c_init I2cDriverAttachToBus error %d\n", ret);
+        i2c_print("BoardI2cBusInit I2cDriverAttachToBus error %d\n", ret);
         return ERROR;
     }
 
@@ -150,13 +144,13 @@ static int BoardI2cDevBend(void)
 
     ret = I2cDeviceRegister(&i2c_device0, NONE, I2C_1_DEVICE_NAME_0);
     if (EOK != ret) {
-        KPrintf("board_i2c_init I2cDeviceInit device %s error %d\n", I2C_1_DEVICE_NAME_0, ret);
+        i2c_print("BoardI2cDevBend I2cDeviceInit device %s error %d\n", I2C_1_DEVICE_NAME_0, ret);
         return ERROR;
     }
 
     ret = I2cDeviceAttachToBus(I2C_1_DEVICE_NAME_0, I2C_BUS_NAME_1);
     if (EOK != ret) {
-        KPrintf("board_i2c_init I2cDeviceAttachToBus device %s error %d\n", I2C_1_DEVICE_NAME_0, ret);
+        i2c_print("BoardI2cDevBend I2cDeviceAttachToBus device %s error %d\n", I2C_1_DEVICE_NAME_0, ret);
         return ERROR;
     }
 
@@ -185,13 +179,13 @@ int Stm32HwI2cInit(void)
 
     ret = BoardI2cBusInit(&i2c_bus, &i2c_driver);
     if (EOK != ret) {
-        KPrintf("board_i2c_Init error ret %u\n", ret);
+        i2c_print("board_i2c_Init error ret %u\n", ret);
         return ERROR;
     }
 
     ret = BoardI2cDevBend();
     if (EOK != ret) {
-        KPrintf("board_i2c_Init error ret %u\n", ret);
+        i2c_print("board_i2c_Init error ret %u\n", ret);
         return ERROR;
     }
 #endif

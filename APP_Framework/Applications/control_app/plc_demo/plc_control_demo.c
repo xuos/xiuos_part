@@ -26,24 +26,15 @@
 #include "plc_dev.h"
 #include "plc_demo.h"
 
+#define PLC_NS_FORMAT "n%d,%s"
+
 struct PlcChannel plc_demo_ch;
 struct PlcDriver plc_demo_drv;
 struct PlcDevice plc_demo_dev;
 
 PlcCtrlParamType plc_ctrl_param;
 
-char plc_demo_ip[] = {192, 168, 250, 2};
-
-#define TEST_STR_NID "ServiceInterfaces"
-#define PLC_NS_FORMAT "n%d,%s"
-
-UA_NodeId test_nodeid =
-{
-    4,
-    UA_NODEIDTYPE_NUMERIC,
-    5
-};
-
+UA_NodeId test_nodeid = {4, UA_NODEIDTYPE_NUMERIC, 5};
 
 /******************************************************************************/
 
@@ -54,7 +45,7 @@ void PlcDemoChannelDrvInit(void)
         return;
     init_flag = 1;
 
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, plc_demo_ip);
+    lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
     PlcChannelInit(&plc_demo_ch, PLC_CH_NAME);
     if(PlcDriverInit(&plc_demo_drv, PLC_DRV_NAME) == EOK)
     {
@@ -84,7 +75,7 @@ static void PlcCtrlDemoInit(void)
     }
     UaParamType* ua_ptr = plc_demo_dev.priv_data;
     memset(ua_ptr, 0, sizeof(UaParamType));
-    strcpy(ua_ptr->ua_remote_ip, OPC_SERVER);
+    strcpy(ua_ptr->ua_remote_ip, opc_server_url);
     ua_ptr->act = UA_ACT_ATTR;
     memcpy(&ua_ptr->ua_id, &test_nodeid, sizeof(test_nodeid));
 
@@ -166,8 +157,8 @@ void PlcWriteUATask(void* arg)
     struct PlcOps* ops = NULL;
     char buf[PLC_BUF_SIZE];
     memset(buf, 0, sizeof(buf));
-    PlcCtrlDemoInit();
 
+    PlcCtrlDemoInit();
     ops = plc_demo_dev.ops;
     ret = ops->open(&plc_demo_dev);
 

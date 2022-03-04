@@ -103,7 +103,7 @@ void UaBrowserObjectsTestTask(void* param)
 
     UA_ClientConfig* config = UA_Client_getConfig(client);
     UA_ClientConfig_setDefault(config);
-    UA_StatusCode retval = UA_Client_connect(client, OPC_SERVER);
+    UA_StatusCode retval = UA_Client_connect(client, opc_server_url);
 
     if(retval != UA_STATUSCODE_GOOD)
     {
@@ -157,7 +157,7 @@ void UaGetInfoTestTask(void* param)
 
     UA_ClientConfig* config = UA_Client_getConfig(client);
     UA_ClientConfig_setDefault(config);
-    UA_StatusCode retval = UA_Client_connect(client, OPC_SERVER);
+    UA_StatusCode retval = UA_Client_connect(client, opc_server_url);
 
     if(retval != UA_STATUSCODE_GOOD)
     {
@@ -209,7 +209,7 @@ void UaAddNodesTask(void* param)
 
     UA_ClientConfig* config = UA_Client_getConfig(client);
     UA_ClientConfig_setDefault(config);
-    UA_StatusCode retval = UA_Client_connect(client, OPC_SERVER);
+    UA_StatusCode retval = UA_Client_connect(client, opc_server_url);
 
     if(retval != UA_STATUSCODE_GOOD)
     {

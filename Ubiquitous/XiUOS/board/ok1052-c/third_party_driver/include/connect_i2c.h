@@ -28,6 +28,15 @@ extern "C" {
 #endif
 
 
+typedef struct Stm32I2c
+{
+    LPI2C_Type* base;
+    uint16_t slave_addr;
+    uint32_t sub_addr;
+}Stm32I2cType;
+
+#define i2c_print KPrintf
+
 int Stm32HwI2cInit(void);
 
 #ifdef __cplusplus

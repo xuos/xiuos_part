@@ -32,79 +32,63 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+* @file hardware_i2c.c
+* @brief ok1052-c i2c relative codes
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-01
+*/
+
 #include "fsl_common.h"
 #include "fsl_lpi2c.h"
-#include "i2c_eeprom.h"
 
-/////////////////////////////EEPROM INIT/////////////////////////////////////////
+#define I2C_BASE  LPI2C1
 
-void I2C_EEPROM_Init()
+/* Select USB1 PLL (480 MHz) as master lpi2c clock source */
+#define LPI2C_CLOCK_SOURCE_SELECT (0U)
+/* Clock divider for master lpi2c clock source */
+#define LPI2C_CLOCK_SOURCE_DIVIDER (5U)
+
+#define I2C_CLOCK_FREQ ((CLOCK_GetFreq(kCLOCK_Usb1PllClk) / 8) / (LPI2C_CLOCK_SOURCE_DIVIDER + 1U))
+#define I2C_BAUDRATE 100000U
+
+void I2cHardwareInit(void)
 {
     lpi2c_master_config_t masterConfig = {0};
-    /*
-    * masterConfig.debugEnable = false;
-    * masterConfig.ignoreAck = false;
-    * masterConfig.pinConfig = kLPI2C_2PinOpenDrain;
-    * masterConfig.baudRate_Hz = 100000U;
-    * masterConfig.busIdleTimeout_ns = 0;
-    * masterConfig.pinLowTimeout_ns = 0;
-    * masterConfig.sdaGlitchFilterWidth_ns = 0;
-    * masterConfig.sclGlitchFilterWidth_ns = 0;
-    */
+
     LPI2C_MasterGetDefaultConfig(&masterConfig);
+
     /* Change the default baudrate configuration */
-    masterConfig.baudRate_Hz = I2C_EEPROM_BAUDRATE;
+    masterConfig.baudRate_Hz = I2C_BAUDRATE;
+
     /* Initialize the LPI2C master peripheral */
-    LPI2C_MasterInit(I2C_EEPROM_BASE, &masterConfig, I2C_EEPROM_CLOCK_FREQ);
+    LPI2C_MasterInit(I2C_BASE, &masterConfig, I2C_CLOCK_FREQ);
 }
 
-//struct _lpi2c_master_transfer
-//{
-//    uint32_t
-//        flags; /*!< Bit mask of options for the transfer. See enumeration #_lpi2c_master_transfer_flags for available
-//                  options. Set to 0 or #kLPI2C_TransferDefaultFlag for normal transfers. */
-//    uint16_t slaveAddress;       /*!< The 7-bit slave address. */
-//    lpi2c_direction_t direction; /*!< Either #kLPI2C_Read or #kLPI2C_Write. */
-//    uint32_t subaddress;         /*!< Sub address. Transferred MSB first. */
-//    size_t subaddressSize;       /*!< Length of sub address to send in bytes. Maximum size is 4 bytes. */
-//    void *data;                  /*!< Pointer to data to transfer. */
-//    size_t dataSize;             /*!< Number of bytes to transfer. */
-//};
-
-status_t I2C_EEPROM_Write(LPI2C_Type* base, uint32_t subAdd, uint8_t* dataBuff, uint16_t dataLen)
+status_t I2cHardwareWrite(LPI2C_Type* base, uint16_t slave_addr, uint32_t subAdd, uint8_t* dataBuff, uint16_t dataLen)
 {
-    // lpi2c_master_transfer_t *xfer = &(handle->xfer);
     lpi2c_master_transfer_t xfer;
-    status_t status;
-    xfer.slaveAddress =(0xA0 >> 1);
+    xfer.slaveAddress = slave_addr;
     xfer.direction = kLPI2C_Write;
     xfer.subaddress = subAdd;
     xfer.subaddressSize = 0x01;
     xfer.data = dataBuff;
     xfer.dataSize = dataLen;
     xfer.flags = kLPI2C_TransferDefaultFlag;
-    status = LPI2C_MasterTransferBlocking(base, &xfer);
-    return status;
+    return LPI2C_MasterTransferBlocking(base, &xfer);
 }
 
-uint32_t I2C_EEPROM_Read(LPI2C_Type* base, uint32_t subAdd, uint8_t* dataBuffer, uint16_t dataLen)
+status_t I2cHardwareRead(LPI2C_Type* base, uint16_t slave_addr, uint32_t subAdd, uint8_t* dataBuffer, uint16_t dataLen)
 {
     lpi2c_master_transfer_t masterXfer = {0};
-    status_t reVal = kStatus_Fail;
-    masterXfer.slaveAddress =(0XA0>>1);
+    masterXfer.slaveAddress = slave_addr;
     masterXfer.direction = kLPI2C_Read;
     masterXfer.subaddress = subAdd;
     masterXfer.subaddressSize = 0x01;
     masterXfer.data = dataBuffer;
     masterXfer.dataSize = dataLen;
     masterXfer.flags = kLPI2C_TransferDefaultFlag;
-    reVal = LPI2C_MasterTransferBlocking(base, &masterXfer);
-
-    if(reVal != kStatus_Success)
-    {
-        return 1;
-    }
-
-    return 0;
+    return LPI2C_MasterTransferBlocking(base, &masterXfer);
 }
 

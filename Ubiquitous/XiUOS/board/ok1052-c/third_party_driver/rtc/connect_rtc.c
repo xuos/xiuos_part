@@ -32,23 +32,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+* @file connect_rtc.c
+* @brief ok1052-c rtc function and structure
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-01
+*/
+
+/*************************************************
+File name: connect_rtc.c
+Description: support ok1052-c rtc configure and spi bus register function
+
+History:
+1. Date: 2022-03-01
+Author: AIIT XUOS Lab
+Modification:
+1. change command for XUOS
+*************************************************/
+
 #include "board.h"
-#include "fsl_debug_console.h"
-
-#include "fsl_lpi2c.h"
-#include "i2c_rtc_rx8010.h"
-
 #include "pin_mux.h"
-#include "clock_config.h"
+#include "connect_rtc.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 #define EXAMPLE_DELAY_COUNT 8000000
-
-#undef GETCHAR
-#define GETCHAR getchar
-#undef PUTCHAR
-#define PUTCHAR putchar
 
 #define rtc_print KPrintf
 
@@ -137,32 +147,25 @@ uint8_t bcd2bin(uint8_t data)
 }
 
 // 8010 initialization
-int rx8010_init(void)
+int RtcInit(void)
 {
     uint8_t flag = 0;
     uint8_t data = 0;
     uint8_t ctrl[2];
     int need_clear = 0, err = 0;
-
-    err = I2C_Read(I2C_BASE, RX8010_FLAG, &flag, 1);
+    err = RtcI2cRead(I2C_RTC_BASE, RX8010_FLAG, &flag, 1);
     flag &= ~(RX8010_FLAG_VLF);
-
-    err = I2C_Write(I2C_BASE, RX8010_FLAG, &flag, 1);
+    err = RtcI2cWrite(I2C_RTC_BASE, RX8010_FLAG, &flag, 1);
     /* Initialize reserved registers as specified in datasheet */
-
     data = 0xD8;
-    err = I2C_Write(I2C_BASE, RX8010_RESV17, &data, 1);
-
+    err = RtcI2cWrite(I2C_RTC_BASE, RX8010_RESV17, &data, 1);
     data = 0x00;
-    err = I2C_Write(I2C_BASE, RX8010_RESV30, &data, 1);
-
+    err = RtcI2cWrite(I2C_RTC_BASE, RX8010_RESV30, &data, 1);
     data = 0x08;
-    err = I2C_Write(I2C_BASE, RX8010_RESV31, &data, 1);
-
+    err = RtcI2cWrite(I2C_RTC_BASE, RX8010_RESV31, &data, 1);
     data = 0x00;
-    err = I2C_Write(I2C_BASE, RX8010_IRQ, &data, 1);
-
-    err = I2C_Read(I2C_BASE, RX8010_FLAG, ctrl, 2);
+    err = RtcI2cWrite(I2C_RTC_BASE, RX8010_IRQ, &data, 1);
+    err = RtcI2cRead(I2C_RTC_BASE, RX8010_FLAG, ctrl, 2);
 
     if(ctrl[0] & RX8010_FLAG_VLF)
     {
@@ -188,7 +191,7 @@ int rx8010_init(void)
     if(need_clear)
     {
         ctrl[0] &= ~(RX8010_FLAG_AF | RX8010_FLAG_TF | RX8010_FLAG_UF);
-        err = I2C_Write(I2C_BASE, RX8010_FLAG, ctrl,1);
+        err = RtcI2cWrite(I2C_RTC_BASE, RX8010_FLAG, ctrl,1);
 
         if(!err)
         {
@@ -200,18 +203,18 @@ int rx8010_init(void)
 }
 
 // check format and get BCD format date like 2018-06-21 16:29:30
-int get_bcd_date(uint8_t* date, uint8_t* bcd_date)
+int RtcGetBcdDate(uint8_t* date, uint8_t* bcd_date)
 {
     int i;
     int temp_date[6];
 
     if(sscanf(date, "20%2d-%2d-%2d %2d:%2d:%2d",
-        &temp_date[5],
-        &temp_date[4],
-        &temp_date[3],
-        &temp_date[2],
-        &temp_date[1],
-        &temp_date[0]) == EOF)
+              &temp_date[5],
+              &temp_date[4],
+              &temp_date[3],
+              &temp_date[2],
+              &temp_date[1],
+              &temp_date[0]) == EOF)
     {
         rtc_print("i2c %s failed\n", __func__);
         return -1;
@@ -219,37 +222,37 @@ int get_bcd_date(uint8_t* date, uint8_t* bcd_date)
 
     for(i = 0; i < 6; i++)
     {
-       bcd_date[i] = TO_BCD(temp_date[i]);
+        bcd_date[i] = TO_BCD(temp_date[i]);
     }
 
     return 0;
 }
 
 // setup time
-int rx8010_set_time(uint8_t* asc_date)
+int RtcSetTime(uint8_t* asc_date)
 {
     uint8_t bcd_date[6];
     int ret, err;
 
-    if(get_bcd_date(asc_date, bcd_date))
+    if(RtcGetBcdDate(asc_date, bcd_date))
     {
         rtc_print("\r\n Date format error! \r\n");
         return -1;
     }
 
-    err = I2C_Write(I2C_BASE, RX8010_SEC, bcd_date, 3);
-    err |= I2C_Write(I2C_BASE, RX8010_MDAY, &bcd_date[3], 3);
+    err = RtcI2cWrite(I2C_RTC_BASE, RX8010_SEC, bcd_date, 3);
+    err |= RtcI2cWrite(I2C_RTC_BASE, RX8010_MDAY, &bcd_date[3], 3);
     return err;
 }
 
 // get rx8010 time
-int rx8010_get_time(void)
+int RtcGetTime(void)
 {
     uint8_t date[7];
     uint8_t dateRsul[7];
     uint8_t flagreg;
     int err;
-    err = I2C_Read(I2C_BASE, RX8010_FLAG, &flagreg, 1);
+    err = RtcI2cRead(I2C_RTC_BASE, RX8010_FLAG, &flagreg, 1);
 
     if(flagreg & RX8010_FLAG_VLF)
     {
@@ -257,7 +260,7 @@ int rx8010_get_time(void)
         return 1;
     }
 
-    err = I2C_Read(I2C_BASE, RX8010_SEC, date, 7);
+    err = RtcI2cRead(I2C_RTC_BASE, RX8010_SEC, date, 7);
     dateRsul[0] = bcd2bin(date[RX8010_SEC - RX8010_SEC] & 0x7f);
     dateRsul[1] = bcd2bin(date[RX8010_MIN - RX8010_SEC] & 0x7f);
     dateRsul[2] = bcd2bin(date[RX8010_HOUR - RX8010_SEC] & 0x3f);
@@ -266,30 +269,30 @@ int rx8010_get_time(void)
     dateRsul[6] = bcd2bin(date[RX8010_YEAR - RX8010_SEC]);
     dateRsul[3] = date[RX8010_WDAY - RX8010_SEC] & 0x7f;
     rtc_print("RX8010 Time: 20%d%d-%d%d-%d%d %d%d:%d%d:%d%d\r\n",
-            dateRsul[6]/10, dateRsul[6]%10, dateRsul[5]/10, dateRsul[5]%10, dateRsul[4]/10, dateRsul[4]%10,
-            dateRsul[2]/10, dateRsul[2]%10, dateRsul[1]/10, dateRsul[1]%10, dateRsul[0]/10, dateRsul[0]%10);
+              dateRsul[6]/10, dateRsul[6]%10, dateRsul[5]/10, dateRsul[5]%10, dateRsul[4]/10, dateRsul[4]%10,
+              dateRsul[2]/10, dateRsul[2]%10, dateRsul[1]/10, dateRsul[1]%10, dateRsul[0]/10, dateRsul[0]%10);
     return 0;
 }
 
-void test_rtc_rx8010(int argc, char *argv[])
+void RtcTestRx8010(int argc, char* argv[])
 {
     BOARD_InitI2C1Pins();
-    I2C_Init();
-    rx8010_init();
+    RtcI2cInit();
+    RtcInit();
 
     if(argc == 2)
     {
-        if(rx8010_set_time(argv[1]) == 0)
+        if(RtcSetTime(argv[1]) == 0)
         {
-            rx8010_get_time();
+            RtcGetTime();
         }
     }
     else
     {
-        rx8010_get_time();
+        RtcGetTime();
     }
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)| SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)| SHELL_CMD_PARAM_NUM(3),
-                   rtc, test_rtc_rx8010, i2c rtc "date time");
+                 rtc, RtcTestRx8010, i2c rtc "date time");
 

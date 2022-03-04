@@ -82,7 +82,7 @@ int ua_test_interact_server(UA_Client *client)
 int16 ua_test(void)
 {
     UA_Client *client = UA_Client_new();
-    UA_StatusCode retval = UA_Client_connect(client, OPC_SERVER);
+    UA_StatusCode retval = UA_Client_connect(client, opc_server_url);
     if(retval != UA_STATUSCODE_GOOD) {
         UA_Client_delete(client);
         return (int)retval;

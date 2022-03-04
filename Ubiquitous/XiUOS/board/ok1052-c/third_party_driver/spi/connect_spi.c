@@ -1,22 +1,39 @@
 /*
-* Copyright (c) 2022 AIIT XUOS Lab
-* XiUOS is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*        http://license.coscl.org.cn/MulanPSL2
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-* See the Mulan PSL v2 for more details.
-*/
+ * Copyright (c) 2020 RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2018-11-5      SummerGift   first version
+ * 2018-12-11     greedyhao    Porting for stm32f7xx
+ * 2019-01-03     zylx         modify DMA initialization and spixfer function
+ * 2020-01-15     whj4674672   Porting for stm32h7xx
+ * 2020-06-18     thread-liu   Porting for stm32mp1xx
+ * 2020-10-14     Dozingfiretruck   Porting for stm32wbxx
+ */
 
 /**
- * @file connect_spi.c
- * @brief Demo for SPI function
- * @version 1.0
- * @author AIIT XUOS Lab
- * @date 2022.1.18
- */
+* @file connect_spi.c
+* @brief support ok1052-c spi function and register to bus framework
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-01
+*/
+
+/*************************************************
+File name: connect_spi.c
+Description: support ok1052-c spi configure and spi bus register function
+Others: take RT-Thread v4.0.2/bsp/stm32/libraries/HAL_Drivers/drv_spi.c for references
+                https://github.com/RT-Thread/rt-thread/tree/v4.0.2
+History:
+1. Date: 2022-03-01
+Author: AIIT XUOS Lab
+Modification:
+1. support ok1052-c spi configure, write and read
+2. support ok1052-c spi bus device and driver register
+3. add ok1052-c spi test letter command
+*************************************************/
 
 #include "board.h"
 #include "connect_spi.h"
@@ -487,25 +504,6 @@ int SpiReadData(struct Stm32HwSpi *spi_param, uint8_t *buf, int len)
     LPSPI_Deinit(spi_base);
 }
 
-void SpiReadTest(void *arg)
-{
-    uint32_t i;
-    uint8_t test_buf[32] = {0};
-    struct Stm32HwSpi spi_param;
-    spi_param.base = LPSPI1;
-    spi_param.irq = LPSPI1_IRQn;
-
-    SpiReadData(&spi_param, test_buf, 32);
-
-    for(i = 0; i < sizeof(test_buf) ;i ++)
-    {
-        spi_print("%d - %x\n", i, test_buf[i]);
-    }
-}
-
-SHELL_EXPORT_CMD (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-                   spiread, SpiReadTest, SPI Read);
-
 void SpiWriteData(struct Stm32HwSpi *spi_param, const uint8_t *buf, uint16_t len)
 {
     uint32_t errorCount;
@@ -580,34 +578,6 @@ void SpiWriteData(struct Stm32HwSpi *spi_param, const uint8_t *buf, uint16_t len
     LPSPI_Deinit(spi_base);
 }
 
-void SpiWriteTest(void *arg)
-{
-    uint32_t i;
-    uint8_t test_buf[100] = {0};
-    struct Stm32HwSpi spi_param;
-    spi_param.base = LPSPI1;
-    spi_param.irq = LPSPI1_IRQn;
-
-    for(i = 0; i < sizeof(test_buf) ;i ++)
-    {
-        test_buf[i] = i;
-    }
-
-    SpiWriteData(&spi_param, test_buf, 100);
-}
-
-SHELL_EXPORT_CMD (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-                   spiwrite, SpiWriteTest, SPI Write );
-
-/**
- * This function                             SPI write data
- *
- * @param spi_dev                             SPI device structure  handle
- *
- *  @param spi_datacfg                    SPI device information structure  handle
- *
- * @return                                      datacfg  length
- */
 static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStandard *spi_datacfg)
 {
     int state;
@@ -654,15 +624,6 @@ static uint32 Stm32SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDat
     return EOK;
 }
 
-/**
- * This function                             SPI read data
- *
- * @param spi_dev                             SPI device structure  handle
- *
- *  @param spi_datacfg                    SPI device information structure  handle
- *
- * @return                                      datacfg  length
- */
 static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStandard *spi_datacfg)
 {
     int state;
@@ -710,7 +671,6 @@ static uint32 Stm32SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiData
     return spi_read_length;
 }
 
-/*manage the spi device operations*/
 static const struct SpiDevDone spi_dev_done =
 {
   .dev_open = NONE,
@@ -725,13 +685,6 @@ static x_err_t Stm32SpiInit(struct Stm32Spi *spi_drv, struct SpiMasterParam *cfg
     NULL_PARAM_CHECK(cfg);
 }
 
-/**
- * This function                                 SPI driver initialization function
- *
- * @param spi_drv                            SPI driver structure  handle
- *
- * @return                                             if   successful   return  EOK
- */
 static uint32 SpiDrvInit(struct SpiDriver *spi_drv)
 {
     NULL_PARAM_CHECK(spi_drv);
@@ -743,15 +696,6 @@ static uint32 SpiDrvInit(struct SpiDriver *spi_drv)
     return Stm32SpiInit(StmSpi, dev_param->spi_master_param);
 }
 
-/**
- * This function                                 SPI driver configuration param
- *
- * @param spi_drv                            SPI driver structure  handle
- *
- *  @param spi_param                   SPI master param structure  handle
- *
- * @return                                            if   successful   return  EOK
- */
 static uint32 SpiDrvConfigure(struct SpiDriver *spi_drv, struct SpiMasterParam *spi_param)
 {
     NULL_PARAM_CHECK(spi_drv);
@@ -791,16 +735,6 @@ static uint32 Stm32SpiDrvConfigure(void *drv, struct BusConfigureInfo *configure
     return ret;
 }
 
-
-/**
- * This function                                   Init the spi bus spi driver and attach to the bus
- *
- * @param  spi_bus                           Spi bus info pointer
- *
- *  @param spi_driver                      Spi driver info pointer
- *
- * @return                                               EOK
- */
 static int BoardSpiBusInit(struct Stm32Spi *stm32spi_bus, struct SpiDriver *spi_driver, char* drv_name)
 {
     x_err_t ret = EOK;
@@ -829,11 +763,6 @@ static int BoardSpiBusInit(struct Stm32Spi *stm32spi_bus, struct SpiDriver *spi_
     return ret;
 }
 
-/**
- * This function                    SPI bus initialization
- *
- * @return                              EOK
- */
 static int Stm32HwSpiBusInit(void)
 {
     x_err_t ret = EOK;
@@ -953,19 +882,6 @@ static int Stm32HwSpiBusInit(void)
     return EOK;
 }
 
-/**
- * This function                                   Mount the spi device to the bus
- *
- * @param bus_name                         Bus   Name
- *
- *  @param device_name                spi   device  name
- *
- *  @param cs_gpiox                         GPIO pin configuration handle
- *
- * @param cs_gpio_pin                    GPIO  number
- *
- * @return                                               EOK
- */
 x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name)
 {
     NULL_PARAM_CHECK(bus_name);
@@ -998,13 +914,46 @@ x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name)
     return result;
 }
 
-/**
- * This function             hardware spi initialization
- *
- * @return                             EOK
- */
 int Imrt1052HwSpiInit(void)
 {
     return Stm32HwSpiBusInit();
 }
+
+void SpiReadTest(void *arg)
+{
+    uint32_t i;
+    uint8_t test_buf[32] = {0};
+    struct Stm32HwSpi spi_param;
+    spi_param.base = LPSPI1;
+    spi_param.irq = LPSPI1_IRQn;
+
+    SpiReadData(&spi_param, test_buf, 32);
+
+    for(i = 0; i < sizeof(test_buf) ;i ++)
+    {
+        spi_print("%d - %x\n", i, test_buf[i]);
+    }
+}
+
+SHELL_EXPORT_CMD (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
+                   spiread, SpiReadTest, SPI Read);
+
+void SpiWriteTest(void *arg)
+{
+    uint32_t i;
+    uint8_t test_buf[100] = {0};
+    struct Stm32HwSpi spi_param;
+    spi_param.base = LPSPI1;
+    spi_param.irq = LPSPI1_IRQn;
+
+    for(i = 0; i < sizeof(test_buf) ;i ++)
+    {
+        test_buf[i] = i;
+    }
+
+    SpiWriteData(&spi_param, test_buf, 100);
+}
+
+SHELL_EXPORT_CMD (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
+                   spiwrite, SpiWriteTest, SPI Write );
 

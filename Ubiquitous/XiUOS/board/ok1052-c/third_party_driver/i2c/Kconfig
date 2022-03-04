@@ -9,3 +9,4 @@ if BSP_USING_I2C
         string "i2c bus 1 device 0 name"
         default "i2c1_dev0"
 endif
+

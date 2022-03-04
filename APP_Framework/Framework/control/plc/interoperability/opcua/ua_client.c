@@ -24,6 +24,8 @@
 
 #define UA_RESPONSE_TIMEOUT 10000
 
+const char *opc_server_url = {"opc.tcp://192.168.250.2:4840"};
+
 #ifdef UA_ENABLE_SUBSCRIPTIONS
 static void handler_TheAnswerChanged(UA_Client* client, UA_UInt32 subId, void* subContext,
                                      UA_UInt32 monId, void* monContext, UA_DataValue* value)
@@ -52,7 +54,7 @@ int ua_get_points(UA_Client* client)
     /* Listing endpoints */
     UA_EndpointDescription* endpointArray = NULL;
     size_t endpointArraySize = 0;
-    UA_StatusCode ret = UA_Client_getEndpoints(client, OPC_SERVER,
+    UA_StatusCode ret = UA_Client_getEndpoints(client, opc_server_url,
                                                   &endpointArraySize, &endpointArray);
 
     if(ret != UA_STATUSCODE_GOOD)

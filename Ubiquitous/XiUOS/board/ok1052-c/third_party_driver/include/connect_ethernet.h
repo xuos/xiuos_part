@@ -1,26 +1,5 @@
-/**
-  ******************************************************************************
-  * @file    connect_ethernet.h
-  * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    31-October-2011
-  * @brief   STM32F4x7 Ethernet hardware configuration.
-  ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
-  ******************************************************************************
-  */
-
- /*
-* Copyright (c) 2020 AIIT XUOS Lab
+/*
+* Copyright (c) 2021 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
@@ -39,35 +18,22 @@
 * @date 2021-12-7
 */
 
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __ETH_BSP_H
-#define __ETH_BSP_H
+#ifndef __CONNECT_ETHERNET_H_
+#define __CONNECT_ETHERNET_H_
 
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
-
-
-
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
-
-
-/* Exported macro ------------------------------------------------------------*/
 
 #ifndef sourceClock
 #define sourceClock CLOCK_GetFreq(kCLOCK_CoreSysClk)
 #endif
 
-/* Exported functions ------------------------------------------------------- */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __STM32F4x7_ETH_BSP_H */
+#endif
 
-
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

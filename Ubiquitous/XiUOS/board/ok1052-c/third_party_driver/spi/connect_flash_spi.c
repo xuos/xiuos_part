@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 RT-Thread Development Team
+ * Copyright (c) 2022 RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -13,7 +13,7 @@
 * @brief support ok1052-c-board spi flash function and register to bus framework
 * @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-04-25
+* @date 2022-03-01
 */
 
 /*************************************************
@@ -22,34 +22,18 @@ Description: support ok1052-c-board spi flash bus register function
 Others: take RT-Thread v4.0.2/bsp/stm32/stm32f407-atk-explorer/board/ports/spi-flash-init.c
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
 History:
-1. Date: 2021-04-25
+1. Date: 2022-03-01
 Author: AIIT XUOS Lab
 Modification:
-1. support ok1052-c-board spi flash register to spi bus
-2. support ok1052-c-board spi flash init
+1. for ok1052-c compilation
 *************************************************/
 
-//#include "connect_spi.h"
 #include "flash_spi.h"
 
 int FlashW25qxxSpiDeviceInit(void)
 {
 #ifdef BSP_USING_SPI1
 
-//    __IO uint32_t tmpreg = 0x00U;
-//    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
-//    tmpreg = RCC->AHB1ENR & RCC_AHB1ENR_GPIOBEN;
-//    (void)tmpreg;
-//
-//    if (EOK != HwSpiDeviceAttach(SPI_BUS_NAME_1, "spi1_dev0", GPIOB, GPIO_Pin_0)) {
-//        return ERROR;
-//    }
-//
-//    if (NONE == SpiFlashInit(SPI_BUS_NAME_1, "spi1_dev0", SPI_1_DRV_NAME, "spi1_W25Q64")) {
-//        return ERROR;
-//    }
-
 #endif
-
     return EOK;
 }

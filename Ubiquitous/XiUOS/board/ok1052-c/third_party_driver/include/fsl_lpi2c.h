@@ -5,6 +5,26 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+/**
+* @file fsl_lpi2c.h
+* @brief support ok1052-c i2c driver
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-01
+*/
+
+/*************************************************
+File name: fsl_lpi2c.h
+Description: support ok1052-c i2c driver
+
+History:
+1. Date: 2022-03-01
+Author: AIIT XUOS Lab
+Modification:
+1. add i2c hardware interface
+*************************************************/
+
 #ifndef _FSL_LPI2C_H_
 #define _FSL_LPI2C_H_
 
@@ -1258,6 +1278,11 @@ void LPI2C_SlaveTransferHandleIRQ(LPI2C_Type *base, lpi2c_slave_handle_t *handle
 /*@}*/
 
 /*! @} */
+
+void I2cHardwareInit(void);
+status_t I2cHardwareWrite(LPI2C_Type* base, uint16_t slave_addr, uint32_t sub_addr, uint8_t* buf, uint16_t size);
+status_t I2cHardwareRead(LPI2C_Type* base, uint16_t slave_addr, uint32_t sub_addr, uint8_t* buf, uint16_t size);
+
 
 #if defined(__cplusplus)
 }

@@ -41,12 +41,13 @@ typedef struct UaParam
     UA_Client *client;
 }UaParamType;
 
-#define OPC_SERVER "opc.tcp://192.168.250.2:4840"
-
 #define ua_print //KPrintf
 #define ua_trace() //KPrintf("ua: [%s] line %d checked!\n", __func__, __LINE__)
 #define ua_pr_info KPrintf
 #define ua_debug //KPrintf
+
+extern const char *opc_server_url;
+extern char test_ua_ip[];
 
 int ua_server_connect(void);
 void ua_browser_nodes(UA_Client *client);

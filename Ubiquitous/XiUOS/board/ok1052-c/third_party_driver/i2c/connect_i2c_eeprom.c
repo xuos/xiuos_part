@@ -32,71 +32,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+* @file connect_i2c_eeprom.h
+* @brief ok1052-c eeprom relative codes
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-01
+*/
+
 #include "board.h"
-#include "fsl_debug_console.h"
-#include "fsl_iomuxc.h"
-
-#include "fsl_gpio.h"
 #include "connect_i2c.h"
-
 #include "fsl_lpi2c.h"
-#include "i2c_eeprom.h"
-
 #include "pin_mux.h"
-#include "clock_config.h"
-#include <device.h>
-#include <bus.h>
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 
-#define i2c_print KPrintf
-
-#define EE_I2C_BUS_NAME     I2C_BUS_NAME_1      /* I2C bus name */
-#define EE_I2C_DEV_NAME     I2C_1_DEVICE_NAME_0 /* I2C device name */
-#define EE_I2C_DRV_NAME     I2C_DRV_NAME_1      /* I2C driver name */
-
-/*******************************************************************************
- * Prototypes
- ******************************************************************************/
-/*!
- * @brief delay a while.
- */
-void I2C_EEPROM_TEST(void);
-
-/*******************************************************************************
- * Variables
- ******************************************************************************/
+#define I2C_EEPROM_BASE  LPI2C1
+#define I2C_EEPROM_ADDR (0xA0 >> 1)
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-int eeprom_read(uint8_t *dat)
-{
-    uint32_t ret;
-    ret = I2C_EEPROM_Read(I2C_EEPROM_BASE, 0, dat, 8);
-    return ret;
-}
-
-
-int eeprom_write(uint8_t *dat)
-{
-    uint32_t ret;
-    ret = I2C_EEPROM_Write(I2C_EEPROM_BASE, 0, dat, 8);
-    return ret;
-}
-
-/*!
-* @brief I2C_EEPROM_TEST: Write and Read
- */
-
-void I2C_EEPROM_TEST(void)
+void I2cEEpromTestWrite(void)
 {
     uint8_t dat[8] = {0};
 
-    if(!I2C_EEPROM_Read(I2C_EEPROM_BASE, 0, dat, 8))
+    if(I2cHardwareRead(I2C_EEPROM_BASE, I2C_EEPROM_ADDR, 0, dat, 8) == kStatus_Success)
     {
         i2c_print("Read from EEPROM %d %d %d %d %d %d %d %d\r\n",
             dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6], dat[7]);
@@ -104,32 +68,32 @@ void I2C_EEPROM_TEST(void)
 
     for(uint8_t i = 0; i < 8; i++)
     {
-        dat[i] = 1;
+        dat[i] ++;
     }
 
-    if(!I2C_EEPROM_Write(I2C_EEPROM_BASE, 0, dat, 8))
+    if(I2cHardwareWrite(I2C_EEPROM_BASE, I2C_EEPROM_ADDR, 0, dat, 8) == kStatus_Success)
     {
         i2c_print("Write  to EEPROM %d %d %d %d %d %d %d %d\r\n",
             dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6], dat[7]);
     }
 
     memset(dat, 0, 8);
-    if(!I2C_EEPROM_Read(I2C_EEPROM_BASE, 0, dat, 8))
+    if(I2cHardwareRead(I2C_EEPROM_BASE, I2C_EEPROM_ADDR, 0, dat, 8) == kStatus_Success)
     {
         i2c_print("Read from EEPROM %d %d %d %d %d %d %d %d\r\n",
             dat[0], dat[1], dat[2], dat[3], dat[4], dat[5], dat[6], dat[7]);
     }
 }
 
-int test_eerpom(void)
+int I2cEEpromTest(void)
 {
     Stm32HwI2cInit();
     BOARD_InitI2C1Pins();
-    I2C_EEPROM_Init();
-    I2C_EEPROM_TEST();
+    I2cHardwareInit();
+    I2cEEpromTestWrite();
     return 0;
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)| SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)| SHELL_CMD_PARAM_NUM(0),
-                   eeprom, test_eerpom, i2c eeprom);
+                   eeprom, I2cEEpromTest, test i2c eeprom);
 
