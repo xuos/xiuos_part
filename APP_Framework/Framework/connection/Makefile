@@ -41,6 +41,10 @@ ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
         SRC_DIR += ethernet
     endif
 
+    ifeq ($(CONFIG_CONNECTION_ADAPTER_ETHERCAT),y)
+        SRC_DIR += ethercat
+    endif
+
     ifeq ($(CONFIG_CONNECTION_ADAPTER_BLUETOOTH),y)
         SRC_DIR += bluetooth
     endif
