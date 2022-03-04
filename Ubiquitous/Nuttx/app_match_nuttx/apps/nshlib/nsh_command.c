@@ -641,6 +641,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "AdapterLoraTest",       cmd_AdapterLoraTest,       1, 1, "[Lora sx128 test.]" },
 #endif
 
+#if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
+  { "fft",       cmd_fft,       1, 1, "[K210 fft function.]" },
+#endif
+
   { NULL,       NULL,         1, 1, NULL }
 };
 
