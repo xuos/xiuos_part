@@ -26,7 +26,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef ADD_XIUOS_FETURES
+#ifdef ADD_XIZI_FETURES
 # include <user_api.h>
 #endif
 
