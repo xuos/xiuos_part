@@ -11,6 +11,11 @@ menuconfig USING_CMSIS_5_DEMOAPP
             select IMAGE_PROCESSING_USING_TJPGD
             default n
 
+        config USING_CMSIS_5_NN_DEMOAPP_VEG_CLASSIFY
+            bool "Using CMSIS-5 NN demo app vegetable classify"
+            select USING_IMAGE_PROCESSING
+            select IMAGE_PROCESSING_USING_TJPGD
+            default n
     endif
 
 
