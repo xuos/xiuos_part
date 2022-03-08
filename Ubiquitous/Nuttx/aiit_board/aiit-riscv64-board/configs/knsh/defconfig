@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_STANDARD_SERIAL is not set
+CONFIG_ADD_NUTTX_FETURES=y
 CONFIG_ARCH="risc-v"
 CONFIG_ARCH_BOARD="aiit-riscv64-board"
 CONFIG_ARCH_BOARD_AIIT_RISCV64=y
