@@ -122,7 +122,26 @@ menu "sensor app"
                     endif
 
                 endif
+                
+            menuconfig APPLICATION_SENSOR_WINDDIRECTION
+                bool "Using sensor wind direction apps"
+                default n
 
+                if APPLICATION_SENSOR_WINDDIRECTION
+                    config APPLICATION_SENSOR_WINDDIRECTION_QS_FX
+                    bool "Using sensor QS-FX apps"
+                    default n
+                endif
+
+            menuconfig APPLICATION_SENSOR_WINDSPEED
+                bool "Using sensor wind speed apps"
+                default n
+
+                if APPLICATION_SENSOR_WINDSPEED
+                    config APPLICATION_SENSOR_WINDSPEED_QS_FS
+                    bool "Using sensor QS-FS apps"
+                    default n
+                endif
         endif
 
 endmenu

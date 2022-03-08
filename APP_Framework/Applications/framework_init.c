@@ -36,6 +36,8 @@ extern int As830Ch4Init(void);
 extern int Tb600bIaq10IaqInit(void);
 extern int Tb600bTvoc10TvocInit(void);
 extern int Tb600bWqHcho1osInit(void);
+extern int QsFxWindDirectionInit(void);
+extern int QsFsWindSpeedInit(void);
 
 extern int lv_port_init(void);
 
@@ -102,6 +104,14 @@ static struct InitDesc sensor_desc[] =
 
 #ifdef SENSOR_ZG09
 	{ "zg09_co2", Zg09Co2Init },
+#endif
+
+#ifdef SENSOR_QS_FX
+	{ "qs_fx_wind_direction", QsFxWindDirectionInit },
+#endif
+
+#ifdef SENSOR_QS_FS
+	{ "qs_fs_wind_speed", QsFsWindSpeedInit },
 #endif
 
 #ifdef SENSOR_AS830

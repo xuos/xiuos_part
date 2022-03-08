@@ -66,4 +66,18 @@ if SUPPORT_SENSOR_FRAMEWORK
         if SENSOR_HUMIDITY
         source "$APP_DIR/Framework/sensor/humidity/Kconfig"
         endif
+
+        menuconfig SENSOR_WINDSPEED
+                bool "Using wind speed sensor device"
+                default n
+        if SENSOR_WINDSPEED
+        source "$APP_DIR/Framework/sensor/windspeed/Kconfig"
+        endif
+
+        menuconfig SENSOR_WINDDIRECTION
+                bool "Using wind direction sensor device"
+                default n
+        if SENSOR_WINDDIRECTION
+        source "$APP_DIR/Framework/sensor/winddirection/Kconfig"
+        endif
 endif
