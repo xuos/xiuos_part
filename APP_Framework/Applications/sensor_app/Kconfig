@@ -53,6 +53,10 @@ menu "sensor app"
                     config APPLICATION_SENSOR_CO2_ZG09
                     bool "Using sensor ZG09 apps"
                     default n
+
+                    config APPLICATION_SENSOR_CO2_G8S
+                    bool "Using sensor G8S apps"
+                    default n
                 endif
 
             menuconfig APPLICATION_SENSOR_PM1_0
