@@ -82,6 +82,7 @@ Modification:
 
 void SystemInit(void)
 {
+    //cortex-m4 FPU register support
     SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));
 
     RCC->CR |= (uint32_t)0x00000001;

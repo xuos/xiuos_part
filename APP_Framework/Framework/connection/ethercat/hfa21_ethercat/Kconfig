@@ -3,6 +3,8 @@ config ADAPTER_ETHERCAT_HFA21
         default "hfa21_ethercat"
 
 config ADAPTER_ETHERCAT_HFA21_ROLE
+        bool "support ethercat role configure"
+        default y
         choice 
         prompt "EtherCAT adapter select net role type "
         default AS_ETHERCAT_SLAVE_ROLE
