@@ -34,17 +34,26 @@ static uint32 I2cDeviceWrite(void *dev, struct BusBlockWriteParam *write_param)
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(write_param);
 
+    uint32 ret;
+
     struct I2cHardwareDevice *i2c_dev = (struct I2cHardwareDevice *)dev;
     struct I2cDataStandard i2c_msg;
 
     i2c_msg.addr = i2c_dev->i2c_dev_addr;
     i2c_msg.flags = I2C_WR;
-    i2c_msg.buf    = write_param->buffer;
-    i2c_msg.len    = write_param->size;
+
+    i2c_msg.buf = (uint8 *)x_malloc(write_param->size);
+    memcpy(i2c_msg.buf, write_param->buffer, write_param->size);    
+
+    i2c_msg.len = write_param->size;
     i2c_msg.retries = 10;
     i2c_msg.next = NONE;
 
-    return i2c_dev->i2c_dev_done->dev_write(i2c_dev, &i2c_msg);
+    ret = i2c_dev->i2c_dev_done->dev_write(i2c_dev, &i2c_msg);
+
+    x_free(i2c_msg.buf);
+
+    return ret;
 }
 
 static uint32 I2cDeviceRead(void *dev, struct BusBlockReadParam *read_param)
@@ -53,16 +62,25 @@ static uint32 I2cDeviceRead(void *dev, struct BusBlockReadParam *read_param)
     NULL_PARAM_CHECK(read_param);
 
     struct I2cHardwareDevice *i2c_dev = (struct I2cHardwareDevice *)dev;
-    struct I2cDataStandard i2c_msg;
+    struct I2cDataStandard i2c_msg_write, i2c_msg_read;
 
-    i2c_msg.addr = i2c_dev->i2c_dev_addr;
-    i2c_msg.flags = I2C_RD;
-    i2c_msg.buf = read_param->buffer;
-    i2c_msg.len = read_param->size;
-    i2c_msg.retries = 10;
-    i2c_msg.next = NONE;
+    i2c_msg_write.addr = i2c_dev->i2c_dev_addr;
+    i2c_msg_write.flags = I2C_WR;
+    i2c_msg_write.buf = NONE;
+    i2c_msg_write.len = 0;
+    i2c_msg_write.retries = 10;
+    i2c_msg_write.next = NONE;
 
-    return i2c_dev->i2c_dev_done->dev_read(i2c_dev, &i2c_msg);
+    i2c_dev->i2c_dev_done->dev_write(i2c_dev, &i2c_msg_write);
+
+    i2c_msg_read.addr = i2c_dev->i2c_dev_addr;
+    i2c_msg_read.flags = I2C_RD;
+    i2c_msg_read.buf = read_param->buffer;
+    i2c_msg_read.len = read_param->size;
+    i2c_msg_read.retries = 10;
+    i2c_msg_read.next = NONE;
+
+    return i2c_dev->i2c_dev_done->dev_read(i2c_dev, &i2c_msg_read);
 }
 
 static const struct HalDevDone dev_done =

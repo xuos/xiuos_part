@@ -142,6 +142,16 @@ menu "sensor app"
                     bool "Using sensor QS-FS apps"
                     default n
                 endif
+
+            menuconfig APPLICATION_SENSOR_ALTITUDE
+                bool "Using sensor altitude apps"
+                default n
+
+                if APPLICATION_SENSOR_ALTITUDE
+                    config APPLICATION_SENSOR_ALTITUDE_BMP180
+                    bool "Using sensor BMP180 apps"
+                    default n
+                endif
         endif
 
 endmenu

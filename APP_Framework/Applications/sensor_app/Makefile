@@ -106,6 +106,10 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
         SRC_FILES += windspeed_qs_fs.c
     endif
 
+    ifeq ($(CONFIG_APPLICATION_SENSOR_ALTITUDE_BMP180), y)
+        SRC_FILES += altitude_bmp180.c
+    endif
+
     include $(KERNEL_ROOT)/compiler.mk
 
 endif

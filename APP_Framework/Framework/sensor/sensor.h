@@ -57,6 +57,7 @@ extern "C" {
 #define SENSOR_ABILITY_HCHO     ((uint32_t)(1 << SENSOR_QUANTITY_HCHO))
 #define SENSOR_ABILITY_WINDSPEED        ((uint32_t)(1 << SENSOR_QUANTITY_WINDSPEED))
 #define SENSOR_ABILITY_WINDDIRECTION    ((uint32_t)(1 << SENSOR_QUANTITY_WINDDIRECTION))
+#define SENSOR_ABILITY_ALTITUDE ((uint32_t)(1 << SENSOR_QUANTITY_ALTITUDE))
 
 struct SensorProductInfo {
     uint32_t ability;           /* Bitwise OR of sensor ability */
@@ -100,6 +101,7 @@ enum SensorQuantityType {
     SENSOR_QUANTITY_TVOC,
     SENSOR_QUANTITY_WINDSPEED,
     SENSOR_QUANTITY_WINDDIRECTION,
+    SENSOR_QUANTITY_ALTITUDE,
     /* ...... */
     SENSOR_QUANTITY_END,
 };
