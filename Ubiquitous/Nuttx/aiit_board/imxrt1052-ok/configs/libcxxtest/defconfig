@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+CONFIG_ADD_NUTTX_FETURES=y
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="imxrt1052-ok"
 CONFIG_ARCH_BOARD_IMXRT1052_OK=y
