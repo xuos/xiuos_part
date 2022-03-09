@@ -21,6 +21,7 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
+#include <nuttx/config.h>
 #include <nuttx/pthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/time.h>

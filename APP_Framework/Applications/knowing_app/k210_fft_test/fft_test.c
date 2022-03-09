@@ -71,7 +71,7 @@ void k210_fft_test(void)
         data_soft[i].real = data_hard[i].real;
         data_soft[i].imag = data_hard[i].imag;
     }
-    for (int i = 0; i < FFT_N / 2; ++i)
+    for (i = 0; i < FFT_N / 2; ++i)
     {
         input_data = (fft_data_t *)&buffer_input[i];
         input_data->R1 = data_hard[2 * i].real;
@@ -118,7 +118,7 @@ void k210_fft_test(void)
         printf("%3d : %f  %f\n", i, hard_angel[i] * 180 / PI, soft_angel[i] * 180 / PI);
     }
 
-    for (int i = 0; i < FFT_N / 2; ++i)
+    for (i = 0; i < FFT_N / 2; ++i)
     {
         input_data = (fft_data_t *)&buffer_input[i];
         input_data->R1 = data_hard[2 * i].real;
@@ -154,6 +154,24 @@ void k210_fft_test(void)
             cycle[FFT_SOFT][FFT_DIR_FORWARD]/(sysctl_clock_get_freq(SYSCTL_CLOCK_CPU)/1000000),
             cycle[FFT_SOFT][FFT_DIR_BACKWARD]/(sysctl_clock_get_freq(SYSCTL_CLOCK_CPU)/1000000));
 }
+
+#ifdef ADD_NUTTX_FETURES
+void nuttx_k210_fft_test(void)
+{
+    pthread_t thread;
+    int result;    
+    pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
+    attr.priority = 20;
+    attr.stacksize = 81920;
+    result = PrivTaskCreate(&thread, &attr, (void*)k210_fft_test, NULL);
+    if (result != 0)
+    {
+        printf("k210 fft test:task create failed, status=%d\n", result);
+        _exit(-1);
+    }
+}
+#endif
+
 #ifdef __RT_THREAD_H__
 MSH_CMD_EXPORT(k210_fft_test,k210 fft test );
 #endif
