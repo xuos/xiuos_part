@@ -205,6 +205,7 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch \
+	-I$(KERNEL_ROOT)/resources/include \
 	-I$(BSP_ROOT)/include #
 endif
 
@@ -291,6 +292,8 @@ endif
 ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/interoperability/opcua #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/shared #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON
 endif
 
 ifeq ($(CONFIG_CRYPTO), y)

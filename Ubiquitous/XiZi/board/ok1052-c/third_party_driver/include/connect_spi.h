@@ -21,7 +21,6 @@
 #ifndef CONNECT_SPI_H
 #define CONNECT_SPI_H
 
-#include <xiuos.h>
 #include <device.h>
 
 #ifdef __cplusplus
