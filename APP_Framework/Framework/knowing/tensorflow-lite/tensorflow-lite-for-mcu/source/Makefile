@@ -23,8 +23,8 @@ $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRCS)))
 
 LIBRARY_OBJS := $(filter-out tensorflow/lite/micro/examples/%, $(OBJS))
 
-CXXFLAGS += -std=c++11 -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-unwind-tables -ffunction-sections -fdata-sections -fmessage-length=0 -DTF_LITE_STATIC_MEMORY -DTF_LITE_DISABLE_X86_NEON -O3 -Werror -Wsign-compare -Wdouble-promotion -Wshadow -Wunused-variable -Wmissing-field-initializers -Wunused-function -Wswitch -Wvla -Wall -Wextra -Wstrict-aliasing -Wno-unused-parameter  -DCMSIS_NN -DTF_LITE_USE_CTIME -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/ruy
-CCFLAGS +=  -std=c11 -fno-unwind-tables -ffunction-sections -fdata-sections -fmessage-length=0 -DTF_LITE_STATIC_MEMORY -DTF_LITE_DISABLE_X86_NEON -O3 -Werror -Wsign-compare -Wdouble-promotion -Wshadow -Wunused-variable -Wmissing-field-initializers -Wunused-function -Wswitch -Wvla -Wall -Wextra -Wstrict-aliasing -Wno-unused-parameter  -DCMSIS_NN -DTF_LITE_USE_CTIME -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/ruy
+CXXFLAGS += -std=c++11 -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-unwind-tables -ffunction-sections -fdata-sections -fmessage-length=0 -DTF_LITE_DISABLE_X86_NEON -O3 -Werror -Wsign-compare -Wdouble-promotion -Wshadow -Wunused-variable -Wmissing-field-initializers -Wunused-function -Wswitch -Wvla -Wall -Wextra -Wstrict-aliasing -Wno-unused-parameter  -DCMSIS_NN -DTF_LITE_USE_CTIME -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/ruy
+CCFLAGS +=  -std=c11 -fno-unwind-tables -ffunction-sections -fdata-sections -fmessage-length=0 -DTF_LITE_DISABLE_X86_NEON -O3 -Werror -Wsign-compare -Wdouble-promotion -Wshadow -Wunused-variable -Wmissing-field-initializers -Wunused-function -Wswitch -Wvla -Wall -Wextra -Wstrict-aliasing -Wno-unused-parameter  -DCMSIS_NN -DTF_LITE_USE_CTIME -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/ruy
 
 LDFLAGS +=  -lm
 
