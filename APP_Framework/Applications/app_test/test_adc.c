@@ -31,7 +31,7 @@ void test_adc()
 
     adc_fd = PrivOpen(ADC_DEV_DRIVER, O_RDWR);
     if (adc_fd < 0) {
-        KPrintf("open adc fd error %d\n", adc_fd);
+        printf("open adc fd error %d\n", adc_fd);
         return;
     }
 
@@ -39,7 +39,7 @@ void test_adc()
     ioctl_cfg.ioctl_driver_type = ADC_TYPE;
     ioctl_cfg.args = &adc_channel;
     if (0 != PrivIoctl(adc_fd, OPE_CFG, &ioctl_cfg)) {
-        KPrintf("ioctl adc fd error %d\n", adc_fd);
+        printf("ioctl adc fd error %d\n", adc_fd);
         PrivClose(adc_fd);
         return;
     }

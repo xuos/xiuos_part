@@ -12,7 +12,7 @@ config SENSOR_HS300X_TEMPERATURE
                         string "HS300x quantity name"
                         default "temperature_1"
                 
-                if ADD_XIUOS_FETURES
+                if ADD_XIZI_FETURES
                         config SENSOR_DEVICE_HS300X_DEV
                                 string "HS300x device name"
                                 default "/dev/i2c1_dev0"

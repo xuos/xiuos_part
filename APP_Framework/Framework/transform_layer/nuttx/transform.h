@@ -21,6 +21,7 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
+#include <nuttx/config.h>
 #include <nuttx/pthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/time.h>
@@ -187,6 +188,7 @@ int PrivTaskStartup(pthread_t *thread);
 int PrivTaskDelete(pthread_t thread, int sig);
 void PrivTaskQuit(void *value_ptr);
 int PrivTaskDelay(int32_t ms);
+uint32_t PrivGetTickTime();
 
 /*********************driver*************************/
 

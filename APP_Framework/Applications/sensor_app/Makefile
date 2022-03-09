@@ -51,7 +51,7 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
 
 endif
 
-ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
     SRC_FILES := 
 
     ifeq ($(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS), y)
@@ -72,6 +72,10 @@ ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
 
     ifeq ($(CONFIG_APPLICATION_SENSOR_CO2_ZG09), y)
         SRC_FILES += co2_zg09.c
+    endif
+
+    ifeq ($(CONFIG_APPLICATION_SENSOR_CO2_G8S), y)
+        SRC_FILES += co2_g8s.c
     endif
 
     ifeq ($(CONFIG_APPLICATION_SENSOR_PM1_0_PS5308), y)
@@ -96,6 +100,18 @@ ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
 
     ifeq ($(CONFIG_APPLICATION_SENSOR_TEMPERATURE_HS300X), y)
         SRC_FILES += temperature_hs300x.c
+    endif
+
+    ifeq ($(CONFIG_APPLICATION_SENSOR_WINDDIRECTION_QS_FX), y)
+        SRC_FILES += winddirection_qs_fx.c
+    endif
+
+    ifeq ($(CONFIG_APPLICATION_SENSOR_WINDSPEED_QS_FS), y)
+        SRC_FILES += windspeed_qs_fs.c
+    endif
+
+    ifeq ($(CONFIG_APPLICATION_SENSOR_ALTITUDE_BMP180), y)
+        SRC_FILES += altitude_bmp180.c
     endif
 
     include $(KERNEL_ROOT)/compiler.mk

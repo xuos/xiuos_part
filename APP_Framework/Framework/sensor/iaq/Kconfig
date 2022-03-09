@@ -12,7 +12,7 @@ config SENSOR_TB600B_IAQ10
                         string "tb600b iaq10 quantity name"
                         default "iaq_1"
                 
-                if ADD_XIUOS_FETURES
+                if ADD_XIZI_FETURES
                         config SENSOR_TB600B_IAQ10_DRIVER_EXTUART
                                 bool "Using extra uart to support tb600b iaq10"
                                 default y

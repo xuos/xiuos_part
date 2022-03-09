@@ -46,6 +46,7 @@
 #include <ctype.h>
 #include <libgen.h>
 #include <errno.h>
+#include <debug.h>
 
 #include "nsh.h"
 #include "nsh_console.h"
@@ -60,10 +61,10 @@ extern int FrameworkInit(void);
 extern void HchoTb600bHcho1os(void);
 int cmd_Hcho1os(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     HchoTb600bHcho1os();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -75,10 +76,10 @@ int cmd_Hcho1os(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void TvocTb600bTvoc10(void);
 int cmd_Tvoc10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     TvocTb600bTvoc10();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -91,10 +92,10 @@ int cmd_Tvoc10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void IaqTb600bIaq10(void);
 int cmd_Iaq10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     IaqTb600bIaq10();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -106,10 +107,10 @@ int cmd_Iaq10(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void Ch4As830(void);
 int cmd_As830(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     Ch4As830();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -121,10 +122,10 @@ int cmd_As830(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void Co2Zg09(void);
 int cmd_Co2Zg09(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     Co2Zg09();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -136,10 +137,10 @@ int cmd_Co2Zg09(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void Pm10Ps5308(void);
 int cmd_Pm10Ps5308(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     Pm10Ps5308();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -151,10 +152,10 @@ int cmd_Pm10Ps5308(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void Pm25Ps5308(void);
 int cmd_Pm25Ps5308(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     Pm25Ps5308();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -166,10 +167,10 @@ int cmd_Pm25Ps5308(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void Pm100Ps5308(void);
 int cmd_Pm100Ps5308(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     Pm100Ps5308();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -181,10 +182,10 @@ int cmd_Pm100Ps5308(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void VoiceD124(void);
 int cmd_VoiceD124(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     VoiceD124();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -196,10 +197,10 @@ int cmd_VoiceD124(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void TempHs300x(void);
 int cmd_TempHs300x(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     TempHs300x();
-    return 0;
+    return OK;
 }
 #endif
 
@@ -211,9 +212,69 @@ int cmd_TempHs300x(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 extern void HumiHs300x(void);
 int cmd_HumiHs300x(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-    printf("Hello, world!\n");
+    nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     HumiHs300x();
-    return 0;
+    return OK;
+}
+#endif
+
+
+/****************************************************************************
+ * Name: cmd_openzigbee
+ ****************************************************************************/
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_OPENZIGBEE)
+extern int openzigbee(void);
+int cmd_openzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    openzigbee();
+    return OK;
+}
+#endif
+
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_SENDZIGBEE)
+extern int sendzigbee(int argc, char *argv[]);
+int cmd_sendzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    sendzigbee(argc,argv);
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_RECVZIGBEE)
+extern int recvzigbee(void);
+int cmd_recvzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    recvzigbee();
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_ADAPTER_SX1278) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
+extern int AdapterLoraTest(void);
+int cmd_AdapterLoraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    AdapterLoraTest();
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
+extern void nuttx_k210_fft_test(void);
+int cmd_fft(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, fft!\n");
+    nuttx_k210_fft_test();
+    return OK;
 }
 #endif

@@ -2,7 +2,23 @@
 
 如果期望该框架运行在Nuttx系统上，请阅读此文档，否则请跳过即可。
 
-## 1、感 - 传感器框架支持Nuttx
+## 1、下载nuttx及apps代码
+
+nuttx代码及apps代码以子仓的形式托管在xiuos\Ubiquitous\Nuttx下，apps和nuttx目录为空的，进行编译前需要下载该代码
+
+如果您的代码是用git的形式clone下来的，那么clone后，还需要执行如下操作：
+
+```shell
+cd xiuos
+git submodule
+git submodule init
+git submodule update Ubiquitous/Nuttx/apps
+git submodule update Ubiquitous/Nuttx/nuttx
+```
+
+执行完成后在Ubiquitous/Nuttx目录下，apps和nuttx的代码都被下载下来，当前的版本是nuttx-10.2.0版本。
+
+## 2、感 - 传感器框架支持Nuttx
 
 目前感框架下面的传感器有I2C和串口两种，使用两种方式的传感器在APP_Framework下的修改大同小异，这里以hs300x传感器测量温度为例，说明增加一款传感器适配Nuttx时APP_Framework目录下需要修改的文件：
 
@@ -189,7 +205,7 @@ CFLAGS := $(APPPATHS) $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCP
 
 其他架构的板卡，如K210，需要在nuttx/arch/risc-v/src/k210/k210_serial.c进行适配修改。
 
-## 2、硬件支持
+## 3、硬件支持
 
 目前Nuttx支持ARM和RISC-V两种架构的微处理器:
 
@@ -205,7 +221,7 @@ RISC-V架构系列的开发板有
 
 ​	
 
-## 3、开发环境
+## 4、开发环境
 
 ### 推荐使用：
 
@@ -245,7 +261,7 @@ mkdir kfrontends  && cd kfrontends
 git  clone https://git.trustie.net/xuos/kconfig-frontends.git
 ```
 
-## 4、编译及配置
+## 5、编译及配置
 
 #### 在Nuttx\app_match_nuttx目录下执行
 
@@ -268,6 +284,10 @@ sudo ./tools/configure.sh stm32f4discovery:kostest  (应用内核分开编译)
 ```shell
 sudo make  menuconfig
 ```
+
+##### 开启Nuttx Support CLOCK_MONOTONIC
+
+进入RTOS Features > Clocks and Timers，勾选上Support CLOCK_MONOTONIC
 
 ##### 使用I2C外设--以hs300x温度传感器为例说明配置过程：
 

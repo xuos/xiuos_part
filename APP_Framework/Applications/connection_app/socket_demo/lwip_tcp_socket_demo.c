@@ -19,7 +19,7 @@
 */
 
 #include <transform.h>
-#include <xiuos.h>
+#include <xizi.h>
 #include "board.h"
 #include "sys_arch.h"
 #include <lwip/sockets.h>

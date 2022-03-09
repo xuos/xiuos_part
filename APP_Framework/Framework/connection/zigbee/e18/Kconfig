@@ -17,7 +17,7 @@ choice
 endchoice
 
 
-if ADD_XIUOS_FETURES
+if ADD_XIZI_FETURES
 
         config ADAPTER_E18_DRIVER_EXTUART
                 bool "Using extra uart to support zigbee"
@@ -40,7 +40,11 @@ if ADD_XIUOS_FETURES
 endif
 
 if ADD_NUTTX_FETURES
-
+    config ADAPTER_E18_DRIVER
+            string "E18 device uart driver path"
+            default "/dev/ttyS1"
+           ---help---
+               If USART1 is selected, then fill in /dev/ttyS1 here.
 endif
 
 if ADD_RTTHREAD_FETURES

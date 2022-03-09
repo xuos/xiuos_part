@@ -8,7 +8,7 @@ CPPPATH = []
 
 CPPPATH += [os.path.join(cwd, 'Core/Include')]
 
-if GetDepend('USING_USING_CMSIS_5_NN'):
+if GetDepend('USING_CMSIS_5_NN'):
     CPPPATH += [os.path.join(cwd, 'DSP/Include')]
     CPPPATH += [os.path.join(cwd, 'NN/Include')]
     CPPDEFINES += ['__FPU_PRESENT=1']

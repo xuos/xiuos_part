@@ -2,7 +2,7 @@ config ADAPTER_BLUETOOTH_HC08
         string "HC08 adapter name"
         default "hc08"
 
-if ADD_XIUOS_FETURES
+if ADD_XIZI_FETURES
         config ADAPTER_HC08_RECV_BUFFER_SIZE
                 int "HC08 recv data buffer size"
                 default "128"

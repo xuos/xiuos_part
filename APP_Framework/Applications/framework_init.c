@@ -21,6 +21,7 @@ extern int AdapterNbiotInit(void);
 extern int AdapterBlueToothInit(void);
 extern int AdapterWifiInit(void);
 extern int AdapterEthernetInit(void);
+extern int AdapterEthercatInit(void);
 extern int AdapterZigbeeInit(void);
 extern int AdapterLoraInit(void);
 
@@ -35,6 +36,8 @@ extern int As830Ch4Init(void);
 extern int Tb600bIaq10IaqInit(void);
 extern int Tb600bTvoc10TvocInit(void);
 extern int Tb600bWqHcho1osInit(void);
+extern int QsFxWindDirectionInit(void);
+extern int QsFsWindSpeedInit(void);
 
 extern int lv_port_init(void);
 
@@ -103,6 +106,14 @@ static struct InitDesc sensor_desc[] =
 	{ "zg09_co2", Zg09Co2Init },
 #endif
 
+#ifdef SENSOR_QS_FX
+	{ "qs_fx_wind_direction", QsFxWindDirectionInit },
+#endif
+
+#ifdef SENSOR_QS_FS
+	{ "qs_fs_wind_speed", QsFsWindSpeedInit },
+#endif
+
 #ifdef SENSOR_AS830
 	{ "ch4_as830", As830Ch4Init },
 #endif
@@ -141,6 +152,9 @@ static struct InitDesc connection_desc[] =
 #endif
 #ifdef CONNECTION_ADAPTER_ETHERNET
 	{ "ethernet adapter", AdapterEthernetInit},
+#endif
+#ifdef CONNECTION_ADAPTER_ETHERCAT
+	{ "ethercat adapter", AdapterEthercatInit},
 #endif
 #ifdef CONNECTION_ADAPTER_LORA
 	{ "lora adapter", AdapterLoraInit},

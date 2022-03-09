@@ -6,7 +6,7 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
 
 endif
 
-ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
     SRC_FILES := sensor.c
 
     ifeq ($(CONFIG_SENSOR_HCHO),y)
@@ -43,6 +43,18 @@ ifeq ($(CONFIG_ADD_XIUOS_FETURES),y)
 
     ifeq ($(CONFIG_SENSOR_HUMIDITY),y)
         SRC_DIR += humidity
+    endif
+
+    ifeq ($(CONFIG_SENSOR_WINDSPEED),y)
+        SRC_DIR += windspeed
+    endif
+
+    ifeq ($(CONFIG_SENSOR_WINDDIRECTION),y)
+        SRC_DIR += winddirection
+    endif
+
+    ifeq ($(CONFIG_SENSOR_ALTITUDE),y)
+        SRC_DIR += altitude
     endif
 
     include $(KERNEL_ROOT)/compiler.mk

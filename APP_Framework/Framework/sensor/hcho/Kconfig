@@ -12,7 +12,7 @@ config SENSOR_TB600B_WQ_HCHO1OS
                         string "tb600b wq_hcho1os quantity name"
                         default "hcho_1"
                 
-                if ADD_XIUOS_FETURES
+                if ADD_XIZI_FETURES
                         config SENSOR_TB600B_WQ_HCHO1OS_DRIVER_EXTUART
                                 bool "Using extra uart to support tb600b wq_hcho1os"
                                 default y
