@@ -19,8 +19,8 @@
 */
 
 #include "transform.h"
-#include "plc_ch.h"
-#include "plc_dev.h"
+#include "plc_channel.h"
+#include "plc_device.h"
 
 static DoublelistType plcdrv_linklist;
 

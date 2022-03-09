@@ -21,6 +21,9 @@
 #ifndef __PLC_DEMO_H_
 #define __PLC_DEMO_H_
 
+#include "plc_channel.h"
+#include "plc_device.h"
+
 #define PLC_CH_NAME "PLC"
 #define PLC_DRV_NAME "OPCUA"
 

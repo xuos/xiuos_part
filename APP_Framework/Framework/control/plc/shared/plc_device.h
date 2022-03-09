@@ -22,7 +22,7 @@
 #define __PLC_DEV_H_
 
 #include "list.h"
-#include "plc_ch.h"
+#include "plc_channel.h"
 
 #undef open
 #undef close

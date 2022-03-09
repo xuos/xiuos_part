@@ -1,4 +1,4 @@
-SRC_FILES := plc_dev.c plc_ch.c plc_drv.c channel.c
+SRC_FILES := plc_device.c plc_channel.c plc_driver.c
 
 include $(KERNEL_ROOT)/compiler.mk
 

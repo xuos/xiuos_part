@@ -24,8 +24,6 @@
 #include "open62541.h"
 #include "ua_api.h"
 #include "sys_arch.h"
-#include "plc_ch.h"
-#include "plc_dev.h"
 #include "plc_demo.h"
 
 

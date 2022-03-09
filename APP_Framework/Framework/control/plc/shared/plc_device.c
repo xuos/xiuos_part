@@ -19,8 +19,8 @@
  */
 
 #include "ua_api.h"
-#include "plc_ch.h"
-#include "plc_dev.h"
+#include "plc_channel.h"
+#include "plc_device.h"
 
 DoublelistType plcdev_list;
 
