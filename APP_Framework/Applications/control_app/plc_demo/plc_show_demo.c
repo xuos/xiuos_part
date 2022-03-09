@@ -24,8 +24,6 @@
 #include "open62541.h"
 #include "ua_api.h"
 #include "sys_arch.h"
-#include "plc_ch.h"
-#include "plc_dev.h"
 #include "plc_demo.h"
 
 
@@ -58,6 +56,8 @@ static char* const channel_type_str[] =
 
 extern DoublelistType plcdev_list;
 extern DoublelistType ch_linklist;
+
+/**********************************************************************************************************************/
 
 void PlcShowTitle(const char* item_array[])
 {
@@ -94,6 +94,37 @@ static ChDrvType ShowChannelFindDriver(struct Channel* ch)
     return NONE;
 }
 
+static void PlcShowDemoInit(void)
+{
+    static uint8_t init_flag = 0;
+    int i;
+    PlcDemoChannelDrvInit();
+
+    for(i = 0; i < PLC_DEMO_NUM; i++)
+    {
+        // register plc device
+        plc_demo_array[i].state = CHDEV_INIT;
+        snprintf(plc_demo_array[i].name, PLC_NAME_SIZE, "PLC Demo %d", i);
+        plc_demo_array[i].info.vendor = plc_demo_param[i].vector;
+        plc_demo_array[i].info.model = plc_demo_param[i].model;
+        plc_demo_array[i].info.id = plc_demo_param[i].id;
+        plc_demo_array[i].info.product = plc_demo_param[i].product;
+        plc_demo_array[i].net = PLC_IND_ENET_OPCUA;
+    }
+
+    if(init_flag)
+        return;
+    init_flag = 1;
+
+    for(i = 0; i < PLC_DEMO_NUM; i++)
+    {
+        if(PlcDevRegister(&plc_demo_array[i], NULL, plc_demo_array[i].name) == EOK)
+        {
+            PlcDeviceAttachToChannel(plc_demo_array[i].name, PLC_CH_NAME);
+        }
+    }
+}
+
 void PlcShowChannel(void)
 {
     ChannelType ch;
@@ -103,6 +134,7 @@ void PlcShowChannel(void)
     DoublelistType* ch_node = NONE;
     DoublelistType* ch_head = &ch_linklist;
     const char* item_array[] = {"ch_type", "ch_name", "drv_name", "dev_name", "cnt"};
+    PlcShowDemoInit();
     PlcShowTitle(item_array);
     ch_node = ch_head->node_next;
 
@@ -183,37 +215,6 @@ void PlcShowChannel(void)
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
                  ShowChannel, PlcShowChannel, Show PLC information);
-
-static void PlcShowDemoInit(void)
-{
-    static uint8_t init_flag = 0;
-    int i;
-    PlcDemoChannelDrvInit();
-
-    for(i = 0; i < PLC_DEMO_NUM; i++)
-    {
-        // register plc device
-        plc_demo_array[i].state = CHDEV_INIT;
-        snprintf(plc_demo_array[i].name, PLC_NAME_SIZE, "PLC Demo %d", i);
-        plc_demo_array[i].info.vendor = plc_demo_param[i].vector;
-        plc_demo_array[i].info.model = plc_demo_param[i].model;
-        plc_demo_array[i].info.id = plc_demo_param[i].id;
-        plc_demo_array[i].info.product = plc_demo_param[i].product;
-        plc_demo_array[i].net = PLC_IND_ENET_OPCUA;
-    }
-
-    if(init_flag)
-        return;
-    init_flag = 1;
-
-    for(i = 0; i < PLC_DEMO_NUM; i++)
-    {
-        if(PlcDevRegister(&plc_demo_array[i], NULL, plc_demo_array[i].name) == EOK)
-        {
-            PlcDeviceAttachToChannel(plc_demo_array[i].name, PLC_CH_NAME);
-        }
-    }
-}
 
 void PlcShowDev(void)
 {

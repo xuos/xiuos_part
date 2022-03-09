@@ -52,15 +52,18 @@ Modification:
 *************************************************/
 
 #include "board.h"
+#include "bus_rtc.h"
 #include "pin_mux.h"
+#include "dev_rtc.h"
 #include "connect_rtc.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define EXAMPLE_DELAY_COUNT 8000000
 
 #define rtc_print KPrintf
+
+#define MAX_TIME_STR_SIZE 50
 
 ///////////RX8010///////////
 
@@ -246,50 +249,201 @@ int RtcSetTime(uint8_t* asc_date)
 }
 
 // get rx8010 time
-int RtcGetTime(void)
+int RtcGetTime(struct tm *ct)
 {
-    uint8_t date[7];
-    uint8_t dateRsul[7];
-    uint8_t flagreg;
+    uint8_t rtc_data[7];
+    uint8_t time_str[7];
+    uint8_t flag_reg;
     int err;
-    err = RtcI2cRead(I2C_RTC_BASE, RX8010_FLAG, &flagreg, 1);
+    err = RtcI2cRead(I2C_RTC_BASE, RX8010_FLAG, &flag_reg, 1);
 
-    if(flagreg & RX8010_FLAG_VLF)
+    if(flag_reg & RX8010_FLAG_VLF)
     {
         rtc_print("\r\n Frequency stop was detected\r\n");
         return 1;
     }
 
-    err = RtcI2cRead(I2C_RTC_BASE, RX8010_SEC, date, 7);
-    dateRsul[0] = bcd2bin(date[RX8010_SEC - RX8010_SEC] & 0x7f);
-    dateRsul[1] = bcd2bin(date[RX8010_MIN - RX8010_SEC] & 0x7f);
-    dateRsul[2] = bcd2bin(date[RX8010_HOUR - RX8010_SEC] & 0x3f);
-    dateRsul[4] = bcd2bin(date[RX8010_MDAY - RX8010_SEC] & 0x3f);
-    dateRsul[5] = bcd2bin(date[RX8010_MONTH - RX8010_SEC] & 0x1f);
-    dateRsul[6] = bcd2bin(date[RX8010_YEAR - RX8010_SEC]);
-    dateRsul[3] = date[RX8010_WDAY - RX8010_SEC] & 0x7f;
+    err = RtcI2cRead(I2C_RTC_BASE, RX8010_SEC, rtc_data, 7);
+    time_str[0] = bcd2bin(rtc_data[RX8010_SEC - RX8010_SEC] & 0x7f);
+    time_str[1] = bcd2bin(rtc_data[RX8010_MIN - RX8010_SEC] & 0x7f);
+    time_str[2] = bcd2bin(rtc_data[RX8010_HOUR - RX8010_SEC] & 0x3f);
+    time_str[4] = bcd2bin(rtc_data[RX8010_MDAY - RX8010_SEC] & 0x3f);
+    time_str[5] = bcd2bin(rtc_data[RX8010_MONTH - RX8010_SEC] & 0x1f);
+    time_str[6] = bcd2bin(rtc_data[RX8010_YEAR - RX8010_SEC]);
+    time_str[3] = rtc_data[RX8010_WDAY - RX8010_SEC] & 0x7f;
+
     rtc_print("RX8010 Time: 20%d%d-%d%d-%d%d %d%d:%d%d:%d%d\r\n",
-              dateRsul[6]/10, dateRsul[6]%10, dateRsul[5]/10, dateRsul[5]%10, dateRsul[4]/10, dateRsul[4]%10,
-              dateRsul[2]/10, dateRsul[2]%10, dateRsul[1]/10, dateRsul[1]%10, dateRsul[0]/10, dateRsul[0]%10);
+              time_str[6]/10, time_str[6]%10, time_str[5]/10, time_str[5]%10, time_str[4]/10, time_str[4]%10,
+              time_str[2]/10, time_str[2]%10, time_str[1]/10, time_str[1]%10, time_str[0]/10, time_str[0]%10);
+
+    ct->tm_year = time_str[6];
+    ct->tm_mon = time_str[5];
+    ct->tm_mday = time_str[4];
+    ct->tm_wday = time_str[3];
+    ct->tm_hour = time_str[2];
+    ct->tm_min = time_str[1];
+    ct->tm_sec = time_str[0];
     return 0;
 }
 
-void RtcTestRx8010(int argc, char* argv[])
+static int GetWeekDay(int year, int month, int day)
+{
+    if(month==1||month==2)
+    {
+        year -=1;
+        month +=12;
+    }
+
+    return (day+1+2*month+3*(month+1)/5+year+(year/4)-year/100+year/400)%7+1;
+}
+
+static uint32 RtcConfigure(void* drv, struct BusConfigureInfo* configure_info)
+{
+    NULL_PARAM_CHECK(drv);
+    struct RtcDriver* rtc_drv = (struct RtcDriver*)drv;
+    struct RtcDrvConfigureParam* drv_param = (struct RtcDrvConfigureParam*)configure_info->private_data;
+    int cmd = drv_param->rtc_operation_cmd;
+    time_t* time = drv_param->time;
+
+    switch(cmd)
+    {
+        case OPER_RTC_GET_TIME:
+        {
+            struct tm ct;
+            RtcGetTime(&ct);
+            *time = mktime(&ct);
+        }
+        break;
+
+        case OPER_RTC_SET_TIME:
+        {
+            char time_str[MAX_TIME_STR_SIZE] = {0};
+            struct tm *ct = localtime(time);
+            strftime(time_str, MAX_TIME_STR_SIZE, "%y-%m-%d %H:%M:%S", ct);
+            RtcSetTime(time_str);
+        }
+        break;
+    }
+
+    return EOK;
+}
+
+int RtcConfiguration(void)
 {
     BOARD_InitI2C1Pins();
     RtcI2cInit();
     RtcInit();
+    return 0;
+}
 
+/*manage the rtc device operations*/
+static const struct RtcDevDone dev_done =
+{
+    .open = NONE,
+    .close = NONE,
+    .write = NONE,
+    .read = NONE,
+};
+
+static int BoardRtcBusInit(struct RtcBus* rtc_bus, struct RtcDriver* rtc_driver)
+{
+    x_err_t ret = EOK;
+    /*Init the rtc bus */
+    ret = RtcBusInit(rtc_bus, RTC_BUS_NAME);
+
+    if(EOK != ret)
+    {
+        KPrintf("hw_rtc_init RtcBusInit error %d\n", ret);
+        return ERROR;
+    }
+
+    /*Init the rtc driver*/
+    ret = RtcDriverInit(rtc_driver, RTC_DRV_NAME);
+
+    if(EOK != ret)
+    {
+        KPrintf("hw_rtc_init RtcDriverInit error %d\n", ret);
+        return ERROR;
+    }
+
+    /*Attach the rtc driver to the rtc bus*/
+    ret = RtcDriverAttachToBus(RTC_DRV_NAME, RTC_BUS_NAME);
+
+    if(EOK != ret)
+    {
+        KPrintf("hw_rtc_init RtcDriverAttachToBus error %d\n", ret);
+        return ERROR;
+    }
+
+    return ret;
+}
+
+/*Attach the rtc device to the rtc bus*/
+static int BoardRtcDevBend(void)
+{
+    x_err_t ret = EOK;
+    static struct RtcHardwareDevice rtc_device;
+    memset(&rtc_device, 0, sizeof(struct RtcHardwareDevice));
+    rtc_device.dev_done = &(dev_done);
+    ret = RtcDeviceRegister(&rtc_device, NONE, RTC_DEVICE_NAME);
+
+    if(EOK != ret)
+    {
+        KPrintf("hw_rtc_init RtcDeviceInit device %s error %d\n", RTC_DEVICE_NAME, ret);
+        return ERROR;
+    }
+
+    ret = RtcDeviceAttachToBus(RTC_DEVICE_NAME, RTC_BUS_NAME);
+
+    if(EOK != ret)
+    {
+        KPrintf("hw_rtc_init RtcDeviceAttachToBus device %s error %d\n", RTC_DEVICE_NAME, ret);
+        return ERROR;
+    }
+
+    return  ret;
+}
+
+int Imrt1052HwRtcInit(void)
+{
+    x_err_t ret = EOK;
+    static struct RtcBus rtc_bus;
+    memset(&rtc_bus, 0, sizeof(struct RtcBus));
+    static struct RtcDriver rtc_driver;
+    memset(&rtc_driver, 0, sizeof(struct RtcDriver));
+    rtc_driver.configure = &(RtcConfigure);
+    ret = BoardRtcBusInit(&rtc_bus, &rtc_driver);
+
+    if(EOK != ret)
+    {
+        KPrintf("hw_rtc_init error ret %u\n", ret);
+        return ERROR;
+    }
+
+    ret = BoardRtcDevBend();
+
+    if(EOK != ret)
+    {
+        KPrintf("hw_rtc_init error ret %u\n", ret);
+        return ERROR;
+    }
+
+    RtcConfiguration();
+    return ret;
+}
+
+void RtcTestRx8010(int argc, char* argv[])
+{
     if(argc == 2)
     {
         if(RtcSetTime(argv[1]) == 0)
         {
-            RtcGetTime();
+            RtcGetTime(NULL);
         }
     }
     else
     {
-        RtcGetTime();
+        RtcGetTime(NULL);
     }
 }
 

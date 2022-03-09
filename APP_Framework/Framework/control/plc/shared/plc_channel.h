@@ -11,15 +11,15 @@
 */
 
 /**
-* @file channel.h
+* @file plc_channel.h
 * @brief define ch driver framework function and common API
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01
 */
 
-#ifndef __CHANNEL_H_
-#define __CHANNEL_H_
+#ifndef __PLC_CHANNEL_H_
+#define __PLC_CHANNEL_H_
 
 #include "list.h"
 
@@ -239,6 +239,37 @@ uint32 ChannelDrvConfigure(struct ChDrv *drv, struct ChConfigInfo *config);
 
 /*Obtain the ch using a certain dev*/
 int DeviceObtainChannel(struct Channel *ch, struct ChDev *dev, const char *drv_name, struct ChConfigInfo *config);
+
+
+struct PlcDriver
+{
+    struct ChDrv driver;
+    uint32 (*configure) (void *drv, struct ChConfigInfo *cfg);
+};
+
+struct PlcChannel
+{
+    struct Channel ch;
+    void *private_data;
+};
+
+/*Register the plc bus*/
+int PlcChannelInit(struct PlcChannel *plc_ch, const char *ch_name);
+
+/*Register the plc driver*/
+int PlcDriverInit(struct PlcDriver *plc_driver, const char *driver_name);
+
+/*Release the plc device*/
+int PlcReleaseChannel(struct PlcChannel *plc_ch);
+
+/*Register the plc driver to the plc bus*/
+int PlcDriverAttachToChannel(const char *drv_name, const char *ch_name);
+
+/*Register the driver, manage with the double linklist*/
+int PlcDriverRegister(struct ChDrv *driver);
+
+/*Find the register driver*/
+ChDrvType PlcDriverFind(const char *drv_name, enum ChDrvType_e drv_type);
 
 #ifdef __cplusplus
 }

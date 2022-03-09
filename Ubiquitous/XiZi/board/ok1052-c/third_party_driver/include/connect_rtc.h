@@ -31,8 +31,7 @@ void RtcI2cInit(void);
 status_t RtcI2cWrite(LPI2C_Type *base, uint32_t sub_addr, uint8_t *buf, uint16_t size);
 uint32_t RtcI2cRead(LPI2C_Type *base, uint32_t sub_addr, uint8_t *buf, uint16_t size);
 
-int RtcSetTime(uint8_t* asc_date);
-int RtcGetTime(void);
+int Imrt1052HwRtcInit(void);
 
 #endif
 
