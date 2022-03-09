@@ -883,12 +883,11 @@ void InitBoardMemory(void *start_phy_address, void *end_phy_address)
 	/* align begin and end addr to page */
 	ByteManager.dynamic_buddy_manager.dynamic_buddy_start = ALIGN_MEN_UP((x_ubase)start_phy_address, MM_PAGE_SIZE);
 	ByteManager.dynamic_buddy_manager.dynamic_buddy_end   = ALIGN_MEN_DOWN((x_ubase)end_phy_address, MM_PAGE_SIZE);
-    KPrintf("%s: 0x%x-0x%x \n",__func__,ByteManager.dynamic_buddy_manager.dynamic_buddy_start,ByteManager.dynamic_buddy_manager.dynamic_buddy_end);
+    //KPrintf("%s: 0x%x-0x%x \n",__func__,ByteManager.dynamic_buddy_manager.dynamic_buddy_start,ByteManager.dynamic_buddy_manager.dynamic_buddy_end);
 
     /* parameter detection */
 	if (ByteManager.dynamic_buddy_manager.dynamic_buddy_start >= ByteManager.dynamic_buddy_manager.dynamic_buddy_end) {
-		KPrintf("InitBoardMemory, wrong address[0x%x - 0x%x]\n",
-				(x_ubase)start_phy_address, (x_ubase)end_phy_address);
+		//KPrintf("InitBoardMemory, wrong address[0x%x - 0x%x]\n", (x_ubase)start_phy_address, (x_ubase)end_phy_address);
 		return;
 	}
 

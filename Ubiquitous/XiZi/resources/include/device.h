@@ -60,7 +60,7 @@
 #ifdef RESOURCES_SERIAL
 #include <bus_serial.h>
 #include <dev_serial.h>
-HardwareDevType InstallConsole(const char *bus_name, const char *drv_name, const char *dev_name);
+void InstallConsole(const char *bus_name, const char *drv_name, const char *dev_name);
 HardwareDevType ObtainConsole(void);
 #endif
 

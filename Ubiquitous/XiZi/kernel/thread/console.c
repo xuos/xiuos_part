@@ -45,7 +45,7 @@ HardwareDevType ObtainConsole(void)
  * @param name console device name 
  *
  */
-HardwareDevType InstallConsole(const char *bus_name, const char *drv_name, const char *dev_name)
+void InstallConsole(const char *bus_name, const char *drv_name, const char *dev_name)
 {
 #if defined(KERNEL_CONSOLE)
     BusType console_bus;
@@ -82,8 +82,6 @@ HardwareDevType InstallConsole(const char *bus_name, const char *drv_name, const
     } else {
         console = _console;
     }
-
-    return console;
 #endif
 }
 

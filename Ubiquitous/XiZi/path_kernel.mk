@@ -218,6 +218,19 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/nuvoton-m2354)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m23 \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/include/Drivers \
+	-I$(BSP_ROOT)/third_party_driver/include/Regs \
+	-I$(BSP_ROOT)/third_party_driver/include/NuUtils/inc \
+	-I$(BSP_ROOT)/third_party_driver/common/NuClockConfig \
+	-I$(BSP_ROOT)/third_party_driver/common/NuPinConfig \
+	-I$(KERNEL_ROOT)/include \
+	-I$(BSP_ROOT)/include #
+endif
+
 KERNELPATHS += -I$(KERNEL_ROOT)/arch \
             -I$(KERNEL_ROOT)/arch/risc-v/shared/kernel_service #
 

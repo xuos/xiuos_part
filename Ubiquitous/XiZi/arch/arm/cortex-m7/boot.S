@@ -19,7 +19,7 @@
 
 /**
 * @file boot.S
-* @brief Contex-M7 start function
+* @brief Cortex-M7 start function
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2021-05-28
