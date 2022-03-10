@@ -123,6 +123,7 @@
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
 #define RT_USING_PIN
+#define RT_USING_RTC
 #define RT_USING_SPI
 #define RT_USING_SPI_MSD
 #define RT_USING_SFUD
@@ -177,7 +178,7 @@
 /* protocol stack implement */
 
 #define SAL_USING_LWIP
-#define SAL_SOCKETS_NUM 16
+#define SAL_USING_POSIX
 
 /* Network interface device */
 
@@ -279,6 +280,9 @@
 
 /* Board extended module Drivers */
 
+/* MicroPython */
+
+
 /* More Drivers */
 
 #define PKG_USING_RW007
@@ -291,34 +295,18 @@
 #define RW007_INT_BUSY_PIN 87
 #define RW007_RST_PIN 88
 #define DRV_USING_OV2640
+#define OV2640_JPEG_MODE
+#define OV2640_X_RESOLUTION_IMAGE_OUTSIZE 240
+#define OV2640_Y_RESOLUTION_IMAGE_OUTSIZE 240
+#define OV2640_X_IMAGE_WINDOWS_SIZE 400
+
+/* the value must be greater than OV2640_X_RESOLUTION_IMAGE_OUTSIZE */
+
+#define OV2640_Y_IMAGE_WINDOWS_SIZE 400
+
+/* the value must be greater than OV2640_Y_RESOLUTION_IMAGE_OUTSIZE */
 
 /* APP_Framework */
-
-/* Applications */
-
-/* config stack size and priority of main task */
-
-#define MAIN_KTASK_STACK_SIZE 1024
-
-/* ota app  */
-
-
-/* test app */
-
-
-/* connection app */
-
-/* control app */
-
-
-/* knowing app */
-
-
-/* sensor app */
-
-#define APPLICATION_SENSOR
-#define APPLICATION_SENSOR_VOICE
-#define APPLICATION_SENSOR_VOICE_D124
 
 /* Framework */
 
@@ -335,6 +323,32 @@
 
 /* Security */
 
+
+/* Applications */
+
+/* config stack size and priority of main task */
+
+#define MAIN_KTASK_STACK_SIZE 1024
+
+/* ota app  */
+
+
+/* test app */
+
+
+/* connection app */
+
+
+/* control app */
+
+/* knowing app */
+
+
+/* sensor app */
+
+#define APPLICATION_SENSOR
+#define APPLICATION_SENSOR_VOICE
+#define APPLICATION_SENSOR_VOICE_D124
 
 /* lib */
 
