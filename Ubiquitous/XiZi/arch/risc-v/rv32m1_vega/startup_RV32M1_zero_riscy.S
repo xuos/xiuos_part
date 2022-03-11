@@ -33,7 +33,7 @@ History:
 Author: AIIT XUOS Lab
 Modification:  
 *************************************************/
-
+.extern Rv32m1VgeaStart
 #define EXCEPTION_STACK_SIZE 0x58
 
     .text
@@ -108,7 +108,7 @@ Reset_Handler:
     # Enable global interrupt. */
     csrsi mstatus, 8
 
-    jal main
+    jal Rv32m1VgeaStart
     ebreak
 
     .size Reset_Handler, . - Reset_Handler
