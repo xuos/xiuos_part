@@ -33,25 +33,28 @@ $ sudo apt install build-essential pkg-config
 $ sudo apt install gcc make libncurses5-dev openssl libssl-dev bison flex libelf-dev autoconf libtool gperf libc6-dev  git
 ```
 
-**XiUOS操作系统源码下载：** XiUOS [https://forgeplus.trustie.net/projects/xuos/xiuos](https://forgeplus.trustie.net/projects/xuos/xiuos)
+**XiUOS操作系统源码下载：** XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
 
 新建一个空文件夹并进入文件夹中，并下载源码，具体命令如下：
 
 ```c
 mkdir test  &&  cd test
-git clone https://git.trustie.net/xuos/xiuos.git
+git clone https://gitlink.org.cn/xuos/xiuos.git
 ```
 
-打开源码文件包可以看到以下目录：
-| 名称 | 说明 |
-| -- | -- |
-| application | 应用代码 |
-| board | 板级支持包 |
-| framework | 应用框架 |
-| fs | 文件系统 |
-| kernel | 内核源码 |
-| resources | 驱动文件 |
-| tool | 系统工具 |
+1、打开XiUOS源码文件包可以看到以下目录：
+| ------------- | ------- |
+| APP_Framework | 应用代码 |
+| Ubiquitous    | 板级支持包,支持NuttX、RT-Thread和XiZi内核 |
+2、打开XiZi内核源码文件包可以看到以下目录：
+| ------------- | --------|
+| arch          | 架构代码 |
+| board         | 板级支持包 |
+| fs            | 文件系统 |
+| kernel        | 内核源码 |
+| lib           | 第三方库源码 |
+| resources     | 驱动文件 |
+| tool          | 系统工具 |
 
 使用VScode打开代码，具体操作步骤为：在源码文件夹下打开系统终端，输入`code .`即可打开VScode开发环境，如下图所示：
 
@@ -59,12 +62,12 @@ git clone https://git.trustie.net/xuos/xiuos.git
 
 ### 裁减配置工具的下载
 
-**裁减配置工具：** kconfig-frontends [https://forgeplus.trustie.net/projects/xuos/kconfig-frontends](https://forgeplus.trustie.net/projects/xuos/kconfig-frontends)
+**裁减配置工具：** kconfig-frontends [https://www.gitlink.org.cn/xuos/kconfig-frontends](https://www.gitlink.org.cn/xuos/kconfig-frontends)
 执行以下命令下载配置工具：
 
 ```c
 mkdir kfrontends  && cd kfrontends
-git  clone https://git.trustie.net/xuos/kconfig-frontends.git
+git clone https://gitlink.org.cn/xuos/kconfig-frontends.git
 ```
 
 下载源码后按以下步骤执行软件安装：
@@ -95,6 +98,8 @@ export CROSS_COMPILE ?=/opt/gnu-mcu-eclipse/riscv-none-gcc/8.2.0-2.1-20190425-10
 1.在`VScode`的“命令终端”中执行以下命令，生成配置文件
 
 ```
+cd ./Ubiquitous/XiZi
+make BOARD=k210-emulator distclean
 make BOARD=k210-emulator menuconfig
 ```
 
@@ -120,7 +125,7 @@ make BOARD=k210-emulator menuconfig
 make BOARD=k210-emulator
 ```
 
-4.如果编译正确无误，会在build目录下产生XiUOS_k210-emulator.elf、XiUOS_k210-emulator.bin文件。
+4.如果编译正确无误，会在build目录下产生XiZi_k210-emulator.elf、XiZi_k210-emulator.bin文件。
 
 ## 3. 运行
 
@@ -142,7 +147,7 @@ sudo make install
 通过以下命令启动Q‎EMU并加载XiUOS ELF文件
 
 ```
-qemu-system-riscv64 -nographic -machine sifive_u -bios build/XiUOS_k210-emulator.elf
+qemu-system-riscv64 -nographic -machine sifive_u -bios build/XiZi_k210-emulator.elf
 ```
 
 QEMU运行起来后将会在终端上看到信息打印输出
@@ -154,11 +159,11 @@ QEMU运行起来后将会在终端上看到信息打印输出
 利用Q‎EMU可以方便的对XiUOS进行调试，首先通过以下命令启动Q‎EMU
 
 ```
-qemu-system-riscv64 -nographic -machine sifive_u -bios build/XiUOS_k210-emulator.elf -s -S
+qemu-system-riscv64 -nographic -machine sifive_u -bios build/XiZi_k210-emulator.elf -s -S
 ```
 
 然后要重新开启另一个linux系统终端一个终端，执行`riscv-none-embed-gdb`命令
 
 ```
-riscv-none-embed-gdb build/XiUOS_k210-emulator.elf -ex "target remote localhost:1234"
+riscv-none-embed-gdb build/XiZi_k210-emulator.elf -ex "target remote localhost:1234"
 ```

@@ -61,25 +61,28 @@ $ sudo apt install build-essential pkg-config  git
 $ sudo apt install gcc make libncurses5-dev openssl libssl-dev bison flex libelf-dev autoconf libtool gperf libc6-dev
 ```
 
-**XiUOS操作系统源码下载：** XiUOS [https://forgeplus.trustie.net/projects/xuos/xiuos](https://forgeplus.trustie.net/projects/xuos/xiuos)
+**XiUOS操作系统源码下载：** XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
 
 新建一个空文件夹并进入文件夹中，并下载源码，具体命令如下：
 
 ```c
 mkdir test  &&  cd test
-git clone https://git.trustie.net/xuos/xiuos.git
+git clone https://gitlink.org.cn/xuos/xiuos.git
 ```
 
-打开源码文件包可以看到以下目录：
-| 名称 | 说明 |
-| -- | -- |
-| application | 应用代码 |
-| board | 板级支持包 |
-| framework | 应用框架 |
-| fs | 文件系统 |
-| kernel | 内核源码 |
-| resources | 驱动文件 |
-| tool | 系统工具 |
+1、打开XiUOS源码文件包可以看到以下目录：
+| ------------- | ------- |
+| APP_Framework | 应用代码 |
+| Ubiquitous    | 板级支持包,支持NuttX、RT-Thread和XiZi内核 |
+2、打开XiZi内核源码文件包可以看到以下目录：
+| ------------- | --------|
+| arch          | 架构代码 |
+| board         | 板级支持包 |
+| fs            | 文件系统 |
+| kernel        | 内核源码 |
+| lib           | 第三方库源码 |
+| resources     | 驱动文件 |
+| tool          | 系统工具 |
 
 使用VScode打开代码，具体操作步骤为：在源码文件夹下打开系统终端，输入`code .`即可打开VScode开发环境，如下图所示：
 
@@ -91,18 +94,18 @@ git clone https://git.trustie.net/xuos/xiuos.git
 
 裁减配置工具：
 
-**工具地址：** kconfig-frontends [https://forgeplus.trustie.net/projects/xuos/kconfig-frontends](https://forgeplus.trustie.net/projects/xuos/kconfig-frontends)，下载与安装的具体命令如下：
+**工具地址：** kconfig-frontends [https://www.gitlink.org.cn/xuos/kconfig-frontends](https://www.gitlink.org.cn/xuos/kconfig-frontends)，下载与安装的具体命令如下：
 
 ```c
 mkdir kfrontends  && cd kfrontends
-git  clone https://git.trustie.net/xuos/kconfig-frontends.git
+git clone https://gitlink.org.cn/xuos/kconfig-frontends.git
 ```
 
 下载源码后按以下步骤执行软件安装：
 
 ```c
 cd kconfig-frontends
- ./xs_build.sh
+./xs_build.sh
 ```
 
 ### 编译工具链：
@@ -126,7 +129,9 @@ $ sudo apt install gcc-arm-none-eabi
 1.在VScode命令终端中执行以下命令，生成配置文件
 
 ```c
-   make BOARD=ok1052-c menuconfig
+cd ./Ubiquitous/XiZi
+make BOARD=ok1052-c distclean
+make BOARD=ok1052-c menuconfig
 ```
 
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）
@@ -143,7 +148,7 @@ $ sudo apt install gcc-arm-none-eabi
 make BOARD=ok1052-c
 ```
 
-4.如果编译正确无误，会产生XiUOS_ok1052-c.elf、XiUOS_ok1052-c.bin文件。
+4.如果编译正确无误，会产生XiZi_ok1052-c.elf、XiZi_ok1052-c.bin文件。
 
 ## 3. 烧写及运行
 
@@ -153,7 +158,7 @@ make BOARD=ok1052-c
 2、ok1052-c开发板支持micro usb口烧写程序，打开NXP MCU Boot Utility后，选择好芯片类型为i.MXRT105x，开发板上电，使用usb线将开发板和PC连接，拨码开关设置为1 on 2 on 3 off 4 off，按下复位键K1后，若连接成功，可见Vendor ID和Product ID均有数字显示，点击reconnect，等待NXP MCU Boot Utility中红色显示变成蓝色显示，则表示已正确识别并连接到了开发板。如下图所示：
 ![NXPBootUtility_1](./img/NXPBootUtility_1.png)
 
-3、选择编译生成的XiUOS_ok1052-c.elf文件路径，并选择.out(elf) from GCC ARM烧写选项，最后点击ALL-In-One Action即可烧写程序，若烧写无误，则下列绿色进度条会执行到底。如下图所示：
+3、选择编译生成的XiZi_ok1052-c.elf文件路径，并选择.out(elf) from GCC ARM烧写选项，最后点击ALL-In-One Action即可烧写程序，若烧写无误，则下列绿色进度条会执行到底。如下图所示：
 ![NXPBootUtility_2](./img/NXPBootUtility_2.png)
 
 ### 3.2 运行结果

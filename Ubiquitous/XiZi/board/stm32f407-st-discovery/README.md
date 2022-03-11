@@ -49,25 +49,28 @@ $ sudo apt install build-essential pkg-config  git
 $ sudo apt install gcc make libncurses5-dev openssl libssl-dev bison flex libelf-dev autoconf libtool gperf libc6-dev
 ```
 
-**XiUOS操作系统源码下载：** XiUOS [https://forgeplus.trustie.net/projects/xuos/xiuos](https://forgeplus.trustie.net/projects/xuos/xiuos)
+**XiUOS操作系统源码下载：** XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
 
 新建一个空文件夹并进入文件夹中，并下载源码，具体命令如下：
 
 ```c
 mkdir test  &&  cd test
-git clone https://git.trustie.net/xuos/xiuos.git
+git clone https://gitlink.org.cn/xuos/xiuos.git
 ```
 
-打开源码文件包可以看到以下目录：
-| 名称 | 说明 |
-| -- | -- |
-| application | 应用代码 |
-| board | 板级支持包 |
-| framework | 应用框架 |
-| fs | 文件系统 |
-| kernel | 内核源码 |
-| resources | 驱动文件 |
-| tool | 系统工具 |
+1、打开XiUOS源码文件包可以看到以下目录：
+| ------------- | ------- |
+| APP_Framework | 应用代码 |
+| Ubiquitous    | 板级支持包,支持NuttX、RT-Thread和XiZi内核 |
+2、打开XiZi内核源码文件包可以看到以下目录：
+| ------------- | --------|
+| arch          | 架构代码 |
+| board         | 板级支持包 |
+| fs            | 文件系统 |
+| kernel        | 内核源码 |
+| lib           | 第三方库源码 |
+| resources     | 驱动文件 |
+| tool          | 系统工具 |
 
 使用VScode打开代码，具体操作步骤为：在源码文件夹下打开系统终端，输入`code .`即可打开VScode开发环境，如下图所示：
 
@@ -79,18 +82,18 @@ git clone https://git.trustie.net/xuos/xiuos.git
 
 裁减配置工具：
 
-**工具地址：** kconfig-frontends [https://forgeplus.trustie.net/projects/xuos/kconfig-frontends](https://forgeplus.trustie.net/projects/xuos/kconfig-frontends)，下载与安装的具体命令如下：
+**工具地址：** kconfig-frontends [https://www.gitlink.org.cn/xuos/kconfig-frontends](https://www.gitlink.org.cn/xuos/kconfig-frontends)，下载与安装的具体命令如下：
 
 ```c
 mkdir kfrontends  && cd kfrontends
-git  clone https://git.trustie.net/xuos/kconfig-frontends.git
+git clone https://gitlink.org.cn/xuos/kconfig-frontends.git
 ```
 
 下载源码后按以下步骤执行软件安装：
 
 ```c
 cd kconfig-frontends
- ./xs_build.sh
+./xs_build.sh
 ```
 
 ### 编译工具链：
@@ -124,7 +127,7 @@ XiUOS板级驱动当前支持使用GPIO、I2C、LCD、USB、RTC、SPI、Timer、
 ### 编译工具链：`arm-none-eabi-gcc`
 使用`VScode`打开工程的方法有多种，本文介绍一种快捷键，在项目目录下将`code .`输入linux系统命令终端即可打开目标项目
 
-修改`applications`文件夹下`main.c`
+修改`APP_Framework/Applications`文件夹下`main.c`
 在输出函数中写入 `Hello, world!!! \n   Running on stm32f407-st-discovery`完成代码编辑。
 
 ![main](img/main.png)
@@ -134,7 +137,9 @@ XiUOS板级驱动当前支持使用GPIO、I2C、LCD、USB、RTC、SPI、Timer、
 1.在VScode命令终端中执行以下命令，生成配置文件
 
 ```c
-   make BOARD=stm32f407-st-discovery menuconfig
+cd ./Ubiquitous/XiZi
+make BOARD=stm32f407-st-discovery distclean
+make BOARD=stm32f407-st-discovery menuconfig
 ```
 
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）
@@ -151,7 +156,7 @@ XiUOS板级驱动当前支持使用GPIO、I2C、LCD、USB、RTC、SPI、Timer、
 make BOARD=stm32f407-st-discovery
 ```
 
-4.如果编译正确无误，会产生XiUOS_stm32f407-st-discovery.elf、XiUOS_stm32f407-st-discovery.bin文件。其中XiUOS_stm32f407-st-discovery.bin需要烧写到设备中进行运行。
+4.如果编译正确无误，会产生XiZi_stm32f407-st-discovery.elf、XiZi_stm32f407-st-discovery.bin文件。其中XiZi_stm32f407-st-discovery.bin需要烧写到设备中进行运行。
 
 ## 3. 烧写及执行
 
@@ -170,7 +175,7 @@ ARM：ST-LINK（ST-LINK V2实物如图，可在购物网站搜索关键字购买
 ```
 sudo apt install libusb-dev
 sudo apt install libusb-1.0-0-dev
-sudo apt  install cmake
+sudo apt install cmake
 cd stlink
 make
 cd build/Release && make install DESTDIR=_install
@@ -181,13 +186,13 @@ cd build/Release && make install DESTDIR=_install
 代码根目录下执行st-flash工具烧录
 
 ```
-sudo st-flash  write  build/XiUOS_stm32f407-st-discovery.bin 0x8000000
+sudo st-flash write build/XiZi_stm32f407-st-discovery.bin 0x8000000
 ```
 
 此外，推荐用户使用putty作为终端工具，安装命令如下：
 
 ```c
-sudo apt install  putty
+sudo apt install putty
 ```
 
 打开putty配置串口信息
@@ -203,7 +208,7 @@ sudo puty
 注意：选择正确的终端端口号，最后可以执行以下命令，清除配置文件和编译生成的文件
 
 ```c
-make  BOARD=stm32f407-st-discovery distclean
+make BOARD=stm32f407-st-discovery distclean
 ```
 
 ### 3.1 运行结果

@@ -18,25 +18,28 @@ $ sudo apt install build-essential pkg-config
 $ sudo apt install gcc make libncurses5-dev openssl libssl-dev bison flex libelf-dev autoconf libtool gperf libc6-dev  git
 ```
 
-**源码下载：** XiUOS [https://forgeplus.trustie.net/projects/xuos/xiuos](https://forgeplus.trustie.net/projects/xuos/xiuos)
+**源码下载：** XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
 
 新建一个空文件夹并进入文件夹中，并下载源码，具体命令如下：
 
 ```c
 mkdir test  &&  cd test
-git clone https://git.trustie.net/xuos/xiuos.git
+git clone https://gitlink.org.cn/xuos/xiuos.git
 ```
 
-打开源码文件包可以看到以下目录：
-| 名称 | 说明 |
-| -- | -- |
-| application | 应用代码 |
-| board | 板级支持包 |
-| framework | 应用框架 |
-| fs | 文件系统 |
-| kernel | 内核源码 |
-| resources | 驱动文件 |
-| tool | 系统工具 |
+1、打开XiUOS源码文件包可以看到以下目录：
+| ------------- | ------- |
+| APP_Framework | 应用代码 |
+| Ubiquitous    | 板级支持包,支持NuttX、RT-Thread和XiZi内核 |
+2、打开XiZi内核源码文件包可以看到以下目录：
+| ------------- | --------|
+| arch          | 架构代码 |
+| board         | 板级支持包 |
+| fs            | 文件系统 |
+| kernel        | 内核源码 |
+| lib           | 第三方库源码 |
+| resources     | 驱动文件 |
+| tool          | 系统工具 |
 
 使用VScode打开代码，具体操作步骤为：在源码文件夹下打开系统终端，输入`code .`即可打开VScode开发环境，如下图所示：
 
@@ -46,18 +49,18 @@ git clone https://git.trustie.net/xuos/xiuos.git
 
 裁减配置工具：
 
-**工具地址：** kconfig-frontends [https://forgeplus.trustie.net/projects/xuos/kconfig-frontends](https://forgeplus.trustie.net/projects/xuos/kconfig-frontends)
+**工具地址：** kconfig-frontends [https://www.gitlink.org.cn/xuos/kconfig-frontends](https://www.gitlink.org.cn/xuos/kconfig-frontends)
 
 ```c
 mkdir kfrontends  && cd kfrontends
-git  clone https://git.trustie.net/xuos/kconfig-frontends.git
+git clone https://gitlink.org.cn/xuos/kconfig-frontends.git
 ```
 
 下载源码后按以下步骤执行软件安装：
 
 ```c
 cd kconfig-frontends
- ./xs_build.sh
+./xs_build.sh
 ```
 
 ### 编译工具链：
@@ -99,7 +102,7 @@ XiUOS板级当前支持使用UART。
 
 使用`VScode`打开工程的方法有多种，本文介绍一种快捷键，在项目目录下将`code .`输入终端即可打开目标项目
 
-修改`applications`文件夹下`main.c`
+修改`APP_Framework/Applications`文件夹下`main.c`
 
 在输出函数中写入  Hello, world! \n 完成代码编辑。
 
@@ -109,6 +112,8 @@ XiUOS板级当前支持使用UART。
 1.在VScode终端下执行以下命令，生成配置文件
 
 ```
+cd ./Ubiquitous/XiZi
+make BOARD=gd32vf103_rvstar distclean
 make BOARD=gd32vf103_rvstar menuconfig
 ```
 
@@ -122,7 +127,7 @@ make BOARD=gd32vf103_rvstar menuconfig
 make BOARD=gd32vf103_rvstar
 ```
 
-4.如果编译正确无误，build文件夹下会产生XiUOS_gd32vf103_rvstar.elf、XiUOS_gd32vf103_rvstar.bin文件。
+4.如果编译正确无误，build文件夹下会产生XiZi_gd32vf103_rvstar.elf、XiZi_gd32vf103_rvstar.bin文件。
 
 >注：最后可以执行以下命令，清除配置文件和编译生成的文件
 
@@ -146,7 +151,7 @@ openocd安装完成以后，按照如下步骤进行调试：
 
 1、进入xiuos目录路径下
 ```
-cd ~/xiuos/Ubiquitous/XiUOS 
+cd ~/xiuos/Ubiquitous/XiZi 
 ```
 
 2、编译生成elf文件
@@ -169,7 +174,7 @@ screen /dev/ttyUSB0 115200
 
 5、打开一个新的终端，进入编译生成的elf路径,输入例如：
 ```
-riscv-nuclei-elf-gdb build/XiUOS_gd32vf103_rvstar.elf -ex "target remote localhost:3333"
+riscv-nuclei-elf-gdb build/XiZi_gd32vf103_rvstar.elf -ex "target remote localhost:3333"
 ```
 结果如下图所示：
 ![gdb](./img/gdb_load.png)
