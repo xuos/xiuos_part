@@ -296,11 +296,37 @@
 
 #define PKG_KENDRYTE_SDK_VERNUM 0x0055
 
+/* MicroPython */
+
+
 /* More Drivers */
 
 #define DRV_USING_OV2640
+#define OV2640_JPEG_MODE
+#define OV2640_X_RESOLUTION_IMAGE_OUTSIZE 240
+#define OV2640_Y_RESOLUTION_IMAGE_OUTSIZE 240
+#define OV2640_X_IMAGE_WINDOWS_SIZE 400
+
+/* the value must be greater than OV2640_X_RESOLUTION_IMAGE_OUTSIZE */
+
+#define OV2640_Y_IMAGE_WINDOWS_SIZE 400
+
+/* the value must be greater than OV2640_Y_RESOLUTION_IMAGE_OUTSIZE */
 
 /* APP_Framework */
+
+/* Framework */
+
+#define TRANSFORM_LAYER_ATTRIUBUTE
+#define ADD_XIZI_FETURES
+#define SUPPORT_KNOWING_FRAMEWORK
+#define USING_KPU_PROCESSING
+#define USING_YOLOV2
+#define USING_YOLOV2_JSONPARSER
+#define USING_K210_YOLOV2_DETECT
+
+/* Security */
+
 
 /* Applications */
 
@@ -316,8 +342,8 @@
 
 /* connection app */
 
-/* control app */
 
+/* control app */
 
 /* knowing app */
 
@@ -327,19 +353,6 @@
 /* sensor app */
 
 #define APPLICATION_SENSOR
-
-/* Framework */
-
-#define TRANSFORM_LAYER_ATTRIUBUTE
-#define ADD_XIZI_FETURES
-#define SUPPORT_KNOWING_FRAMEWORK
-#define USING_KPU_PROCESSING
-#define USING_YOLOV2
-#define USING_YOLOV2_JSONPARSER
-#define USING_K210_YOLOV2_DETECT
-
-/* Security */
-
 
 /* lib */
 
