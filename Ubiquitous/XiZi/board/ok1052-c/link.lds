@@ -241,9 +241,9 @@ SECTIONS
     stack_end = .;
     __StackTop = .;
     heap_start = .;
-  } > m_data
+  } > m_data2
 
-  PROVIDE(heap_end = ORIGIN(m_data) + LENGTH(m_data));
+  PROVIDE(heap_end = ORIGIN(m_data2) + LENGTH(m_data2));
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }

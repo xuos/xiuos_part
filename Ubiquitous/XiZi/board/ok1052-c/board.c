@@ -23,6 +23,7 @@ Author: AIIT XUOS Lab
 Modification: 
 1. support imxrt1052-board MPU、clock、memory init
 2. support imxrt1052-board uart、semc、sdio driver init
+3. support imxrt1052-board I2C, SPI, ADC, RTC driver init
 *************************************************/
 
 #include "fsl_common.h"
@@ -67,6 +68,9 @@ int MountSDCard(void)
 
 #include <connect_ethernet.h>
 #include <connect_uart.h>
+#include <connect_adc.h>
+#include <connect_spi.h>
+#include <connect_rtc.h>
 
 #define NVIC_PRIORITYGROUP_0         0x00000007U /*!< 0 bits for pre-emption priority
                                                       4 bits for subpriority */
@@ -658,6 +662,18 @@ void InitBoardHardware()
 
 #ifdef BSP_USING_LPUART
     Imrt1052HwUartInit();
+#endif
+
+#ifdef BSP_USING_ADC
+    Imrt1052HwAdcInit();
+#endif
+
+#ifdef BSP_USING_SPI
+    Imrt1052HwSpiInit();
+#endif
+
+#ifdef BSP_USING_RTC
+    Imrt1052HwRtcInit();
 #endif
 
     InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);

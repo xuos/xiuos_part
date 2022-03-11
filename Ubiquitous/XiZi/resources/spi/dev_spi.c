@@ -13,7 +13,7 @@
 /**
 * @file dev_spi.c
 * @brief register spi dev function using bus driver framework
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-24
 */
@@ -36,7 +36,7 @@ static uint32 SpiDeviceOpen(void *dev)
     SpiDevConfigureCs(dev, 1, 0);
 
     return EOK;
-} 
+}
 
 static uint32 SpiDeviceClose(void *dev)
 {
@@ -45,7 +45,7 @@ static uint32 SpiDeviceClose(void *dev)
     SpiDevConfigureCs(dev, 0, 1);
 
     return EOK;
-} 
+}
 
 static uint32 SpiDeviceWrite(void *dev, struct BusBlockWriteParam *write_param)
 {
@@ -120,7 +120,7 @@ static const struct HalDevDone dev_done =
 HardwareDevType SpiDeviceFind(const char *dev_name, enum DevType dev_type)
 {
     NULL_PARAM_CHECK(dev_name);
-    
+
     struct HardwareDev *device = NONE;
 
     DoubleLinklistType *node = NONE;
@@ -142,7 +142,7 @@ int SpiDeviceRegister(struct SpiHardwareDevice *spi_device, void *spi_param, con
     NULL_PARAM_CHECK(spi_device);
     NULL_PARAM_CHECK(device_name);
 
-    x_err_t ret = EOK;    
+    x_err_t ret = EOK;
     static x_bool dev_link_flag = RET_FALSE;
 
     if (!dev_link_flag) {
@@ -164,7 +164,7 @@ int SpiDeviceRegister(struct SpiHardwareDevice *spi_device, void *spi_param, con
 
         DoubleLinkListInsertNodeAfter(&spidev_linklist, &(spi_device->haldev.dev_link));
     } else {
-        KPrintf("SpiDeviceRegister device has been register state%u\n", spi_device->haldev.dev_state);        
+        KPrintf("SpiDeviceRegister device has been register state%u\n", spi_device->haldev.dev_state);
     }
 
     return ret;
@@ -174,7 +174,7 @@ int SpiDeviceAttachToBus(const char *dev_name, const char *bus_name)
 {
     NULL_PARAM_CHECK(dev_name);
     NULL_PARAM_CHECK(bus_name);
-    
+
     x_err_t ret = EOK;
 
     struct Bus *bus;
@@ -185,7 +185,7 @@ int SpiDeviceAttachToBus(const char *dev_name, const char *bus_name)
         KPrintf("SpiDeviceAttachToBus find spi bus error!name %s\n", bus_name);
         return ERROR;
     }
-    
+
     if (TYPE_SPI_BUS == bus->bus_type) {
         device = SpiDeviceFind(dev_name, TYPE_SPI_DEV);
         if (NONE == device) {
