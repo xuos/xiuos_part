@@ -61,7 +61,7 @@ git clone https://gitlink.org.cn/xuos/xiuos.git
 | -- | -- |
 | APP_Framework | 应用代码 |
 | Ubiquitous | 板级支持包,支持NuttX、RT-Thread和XiZi内核 |
-| | |
+
 2、打开XiZi内核源码文件包可以看到以下目录：
 | 名称 | 说明 |
 | -- | -- |
@@ -72,7 +72,6 @@ git clone https://gitlink.org.cn/xuos/xiuos.git
 | lib | 第三方库源码 |
 | resources | 驱动文件 |
 | tool | 系统工具 |
-| | |
 
 使用VScode打开代码，具体操作步骤为：在源码文件夹下打开系统终端，输入`code .`即可打开VScode开发环境，如下图所示：
 

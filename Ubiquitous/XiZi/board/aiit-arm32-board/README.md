@@ -5,7 +5,7 @@
 | 硬件 | 描述 |
 | -- | -- |
 |芯片型号| Stm32F407zgt6|
-|CPU|arm cortex-m|
+|CPU|arm cortex-m4|
 |主频| 168MHz |
 |片内SRAM| 192KB |
 |扩展SRAM| 1MB |
