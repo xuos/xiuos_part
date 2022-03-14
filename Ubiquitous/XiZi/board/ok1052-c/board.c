@@ -17,10 +17,10 @@
 File name: board.c
 Description: support imxrt1052-board init function
 Others: take SDK_2.6.1_MIMXRT1052xxxxB for references
-History: 
+History:
 1. Date: 2022-01-25
 Author: AIIT XUOS Lab
-Modification: 
+Modification:
 1. support imxrt1052-board MPU、clock、memory init
 2. support imxrt1052-board uart、semc、sdio driver init
 3. support imxrt1052-board I2C, SPI, ADC, RTC driver init
@@ -68,9 +68,18 @@ int MountSDCard(void)
 
 #include <connect_ethernet.h>
 #include <connect_uart.h>
+
+#ifdef BSP_USING_ADC
 #include <connect_adc.h>
+#endif
+
+#ifdef BSP_USING_SPI
 #include <connect_spi.h>
+#endif
+
+#ifdef BSP_USING_RTC
 #include <connect_rtc.h>
+#endif
 
 #define NVIC_PRIORITYGROUP_0         0x00000007U /*!< 0 bits for pre-emption priority
                                                       4 bits for subpriority */
