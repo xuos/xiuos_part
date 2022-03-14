@@ -120,7 +120,10 @@ int openzigbee(void)
 
     return 0;    
 }
+
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, openzigbee, openzigbee, show adapter zigbee information);
+#endif
 
 int sendzigbee(int argc, char *argv[])
 {
@@ -140,7 +143,9 @@ int sendzigbee(int argc, char *argv[])
 
     return 0;    
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, sendzigbee, sendzigbee, show adapter zigbee information);
+#endif
 
 int recvzigbee(void)
 {
@@ -153,5 +158,7 @@ int recvzigbee(void)
     
     return 0;    
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, recvzigbee, recvzigbee, show adapter zigbee information);
+#endif
 

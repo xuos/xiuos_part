@@ -13,7 +13,7 @@
 /**
 * @file dev_adc.c
 * @brief register adc dev function using bus driver framework
-* @version 1.1 
+* @version 1.1
 * @author AIIT XUOS Lab
 * @date 2021-12-28
 */
@@ -33,12 +33,12 @@ static void AdcDeviceLinkInit()
 HardwareDevType AdcDeviceFind(const char *dev_name, enum DevType dev_type)
 {
     NULL_PARAM_CHECK(dev_name);
-    
+
     struct HardwareDev *device = NONE;
 
     DoubleLinklistType *node = NONE;
     DoubleLinklistType *head = &adcdev_linklist;
-    for (node = head->node_next; node != head; node = node->node_next) {    
+    for (node = head->node_next; node != head; node = node->node_next) {
         device = SYS_DOUBLE_LINKLIST_ENTRY(node, struct HardwareDev, dev_link);
         if ((!strcmp(device->dev_name, dev_name)) && (dev_type == device->dev_type)) {
             return device;
@@ -55,7 +55,7 @@ int AdcDeviceRegister(struct AdcHardwareDevice *adc_device, void *adc_param, con
     NULL_PARAM_CHECK(adc_device);
     NULL_PARAM_CHECK(device_name);
 
-    x_err_t ret = EOK;    
+    x_err_t ret = EOK;
     static x_bool dev_link_flag = RET_FALSE;
 
     if (!dev_link_flag) {
@@ -74,7 +74,7 @@ int AdcDeviceRegister(struct AdcHardwareDevice *adc_device, void *adc_param, con
 
         DoubleLinkListInsertNodeAfter(&adcdev_linklist, &(adc_device->haldev.dev_link));
     } else {
-        KPrintf("AdcDeviceRegister device has been register state%u\n", adc_device->haldev.dev_state);        
+        KPrintf("AdcDeviceRegister device has been register state%u\n", adc_device->haldev.dev_state);
     }
 
     return ret;
@@ -85,7 +85,7 @@ int AdcDeviceAttachToBus(const char *dev_name, const char *bus_name)
 {
     NULL_PARAM_CHECK(dev_name);
     NULL_PARAM_CHECK(bus_name);
-    
+
     x_err_t ret = EOK;
 
     struct Bus *bus;
@@ -104,7 +104,7 @@ int AdcDeviceAttachToBus(const char *dev_name, const char *bus_name)
             KPrintf("AdcDeviceAttachToBus find adc device error!name %s\n", dev_name);
             return ERROR;
         }
-    
+
         if (TYPE_ADC_DEV == device->dev_type) {
             ret = DeviceRegisterToBus(bus, device);
 
@@ -117,3 +117,4 @@ int AdcDeviceAttachToBus(const char *dev_name, const char *bus_name)
 
     return EOK;
 }
+

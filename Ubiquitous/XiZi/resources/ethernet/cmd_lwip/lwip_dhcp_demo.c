@@ -7,6 +7,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+/**
+ * @file lwip_dhcp_demo.c
+ * @brief Demo for DHCP function
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2021.12.15
+ */
+
 /*******************************************************************************
  * Includes
  ******************************************************************************/
@@ -31,30 +39,16 @@
 #include "fsl_iomuxc.h"
 #include "sys_arch.h"
 
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
-
 #define LWIP_DHCP_TIME 10000 // 10s
 
-/*******************************************************************************
- * Prototypes
- ******************************************************************************/
-
-/*******************************************************************************
- * Variables
- ******************************************************************************/
-
-/*******************************************************************************
- * Code
- ******************************************************************************/
+/******************************************************************************/
 
 /*!
  * @brief Prints DHCP status of the interface when it has changed from last status.
  *
  * @param netif network interface structure
  */
-int print_dhcp_state(struct netif *netif)
+int LwipPrintDHCP(struct netif *netif)
 {
     static u8_t dhcp_last_state = DHCP_STATE_OFF;
     struct dhcp *dhcp           = netif_dhcp_data(netif);
@@ -124,13 +118,11 @@ int print_dhcp_state(struct netif *netif)
 /*!
  * @brief Main function.
  */
-void lwip_dhcp_test(void)
+void LwipDHCPTest(void)
 {
     u32_t dhcp_time;
     static int flag = 0;
     char ip_addr[4] = {0, 0, 0, 0};
-
-    ETH_BSP_Config();
 
     lwip_config_net(ip_addr, ip_addr, ip_addr);
     set_lwip_bit(LWIP_PRINT_FLAG);
@@ -152,7 +144,7 @@ void lwip_dhcp_test(void)
         sys_check_timeouts();
 
         /* Print DHCP progress */
-        if(print_dhcp_state(&gnetif))
+        if(LwipPrintDHCP(&gnetif))
         {
             sscanf(ipaddr_ntoa(&gnetif.ip_addr), "%d.%d.%d.%d", &lwip_ipaddr[0], &lwip_ipaddr[1],
                 &lwip_ipaddr[2], &lwip_ipaddr[3]);
@@ -172,6 +164,6 @@ void lwip_dhcp_test(void)
 
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     getdynip, lwip_dhcp_test, DHCP_Test);
+     getdynip, LwipDHCPTest, DHCP_Test);
 
 #endif

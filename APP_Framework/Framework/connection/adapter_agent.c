@@ -26,7 +26,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <user_api.h>
+#ifdef ADD_XIZI_FETURES
+# include <user_api.h>
+#endif
 
 #define AT_CMD_MAX_LEN 128
 #define AT_AGENT_MAX 2
@@ -159,9 +161,9 @@ int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const ch
         ATSprintf(agent->fd, cmd_expr, params);
         va_end(params);
         PrivMutexAbandon(&agent->lock);
-        if (PrivSemaphoreObtainWait(&agent->rsp_sem, &abstime) != EOK) {
+        if (PrivSemaphoreObtainWait(&agent->rsp_sem, &abstime) != 0) {
             printf("take sem %d timeout\n",agent->rsp_sem);
-            result = -ETIMEOUT;
+            result = -2;
             goto __out;
         }
     } else {
@@ -277,7 +279,7 @@ int EntmSend(ATAgentType agent, const char *data, int len)
 	PrivWrite(agent->fd, send_buf, len);
     PrivMutexAbandon(&agent->lock);
     printf("entm send %s length %d\n",send_buf, len);
-    return EOK;
+    return 0;
 }
 
 int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
@@ -507,9 +509,16 @@ static int ATAgentInit(ATAgentType agent)
 
     agent->receive_mode = DEFAULT_MODE;
 
+#ifdef ADD_NUTTX_FETURES
+    pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
+    attr.priority = 18;
+    attr.stacksize = 4096;
+
+#else
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 18;
     attr.stacksize = 4096;
+#endif
 
     PrivTaskCreate(&agent->at_handler, &attr, ATAgentReceiveProcess, agent);
     printf("create agent->at_handler = %d\n",agent->at_handler);

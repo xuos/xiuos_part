@@ -15,18 +15,6 @@
  * A PARTICULAR PURPOSE.
  */
 
-/*
- * Copyright (c) 2021 AIIT XUOS Lab
- * XiUOS is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- *        http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
-
 /**
  * @file open62541.c
  * @brief Support OPCUA protocol
@@ -44256,7 +44244,7 @@ UA_Client_run_iterate(UA_Client *client, UA_UInt32 timeout) {
        client->sessionState < UA_SESSIONSTATE_ACTIVATED) {
         retval = connectIterate(client, timeout);
         notifyClientState(client);
-        lw_print("lw: [%s] ret %d timeout %d state %d ch %d\n", __func__, retval, timeout,
+        ua_print("lw: [%s] ret %d timeout %d state %d ch %d\n", __func__, retval, timeout,
             client->sessionState, client->channel.state);
         return retval;
     }
@@ -45299,7 +45287,7 @@ connectIterate(UA_Client *client, UA_UInt32 timeout) {
         break;
     }
 
-    lw_print("lw: [%s] sess %d conn %d\n", __func__, client->sessionState, client->connectStatus);
+    ua_print("ua: [%s] sess %d conn %d\n", __func__, client->sessionState, client->connectStatus);
     return client->connectStatus;
 }
 

@@ -53,6 +53,10 @@ menu "sensor app"
                     config APPLICATION_SENSOR_CO2_ZG09
                     bool "Using sensor ZG09 apps"
                     default n
+
+                    config APPLICATION_SENSOR_CO2_G8S
+                    bool "Using sensor G8S apps"
+                    default n
                 endif
 
             menuconfig APPLICATION_SENSOR_PM1_0
@@ -122,7 +126,36 @@ menu "sensor app"
                     endif
 
                 endif
+                
+            menuconfig APPLICATION_SENSOR_WINDDIRECTION
+                bool "Using sensor wind direction apps"
+                default n
 
+                if APPLICATION_SENSOR_WINDDIRECTION
+                    config APPLICATION_SENSOR_WINDDIRECTION_QS_FX
+                    bool "Using sensor QS-FX apps"
+                    default n
+                endif
+
+            menuconfig APPLICATION_SENSOR_WINDSPEED
+                bool "Using sensor wind speed apps"
+                default n
+
+                if APPLICATION_SENSOR_WINDSPEED
+                    config APPLICATION_SENSOR_WINDSPEED_QS_FS
+                    bool "Using sensor QS-FS apps"
+                    default n
+                endif
+
+            menuconfig APPLICATION_SENSOR_ALTITUDE
+                bool "Using sensor altitude apps"
+                default n
+
+                if APPLICATION_SENSOR_ALTITUDE
+                    config APPLICATION_SENSOR_ALTITUDE_BMP180
+                    bool "Using sensor BMP180 apps"
+                    default n
+                endif
         endif
 
 endmenu

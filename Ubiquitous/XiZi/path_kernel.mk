@@ -205,6 +205,7 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch \
+	-I$(KERNEL_ROOT)/resources/include \
 	-I$(BSP_ROOT)/include #
 endif
 
@@ -214,6 +215,19 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/third_party_driver/libraries/STM32F1xx_HAL/inc \
 	-I$(BSP_ROOT)/third_party_driver/libraries/CMSIS \
+	-I$(KERNEL_ROOT)/include \
+	-I$(BSP_ROOT)/include #
+endif
+
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/nuvoton-m2354)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m23 \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/include/Drivers \
+	-I$(BSP_ROOT)/third_party_driver/include/Regs \
+	-I$(BSP_ROOT)/third_party_driver/include/NuUtils/inc \
+	-I$(BSP_ROOT)/third_party_driver/common/NuClockConfig \
+	-I$(BSP_ROOT)/third_party_driver/common/NuPinConfig \
 	-I$(KERNEL_ROOT)/include \
 	-I$(BSP_ROOT)/include #
 endif
@@ -278,6 +292,8 @@ endif
 ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/interoperability/opcua #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/shared #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON
 endif
 
 ifeq ($(CONFIG_CRYPTO), y)

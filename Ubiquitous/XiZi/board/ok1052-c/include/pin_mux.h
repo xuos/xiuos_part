@@ -8,7 +8,7 @@
 /**
 * @file pin_mux.h
 * @brief define imxrt1052-board pin configure
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-29
 */
@@ -71,6 +71,8 @@ void BOARD_InitBootPins(void);
  *
  */
 void BOARD_InitPins(void);
+void BOARD_InitI2C1Pins(void);
+void BOARD_InitSPIPins(void);
 
 #if defined(__cplusplus)
 }

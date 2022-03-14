@@ -144,6 +144,8 @@
 #define FSL_FEATURE_ADC_SUPPORT_HARDWARE_TRIGGER_REMOVE (0)
 /* @brief Remove ALT Clock selection feature. */
 #define FSL_FEATURE_ADC_SUPPORT_ALTCLK_REMOVE (1)
+/* @brief Conversion control count (related to number of registers HCn and Rn). */
+#define FSL_FEATURE_ADC_CONVERSION_CONTROL_COUNT (8)
 
 /* ADC_ETC module features */
 

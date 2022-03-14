@@ -1,13 +1,4 @@
 /*
- * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
-/*
  * Copyright (c) 2021 AIIT XUOS Lab
  * XiUOS is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -27,11 +18,6 @@
  * @date 2021.12.15
  */
 
-
-/*******************************************************************************
- * Includes
- ******************************************************************************/
-
 #include "lwip/opt.h"
 
 #if LWIP_IPV4 && LWIP_RAW
@@ -46,40 +32,17 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 
-#include <transform.h>
 #include <sys_arch.h>
 #include "connect_ethernet.h"
-
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
-
-/*******************************************************************************
- * Prototypes
- ******************************************************************************/
-
-/*******************************************************************************
- * Variables
- ******************************************************************************/
 
 char test_ip_addr[] = {192, 168, 250, 253};
 char test_net_mask[] = {255, 255, 255, 0};
 char test_gw_addr[] = {192, 168, 250, 252};
 ip4_addr_t ping_addr;
 
-/*******************************************************************************
- * Code
- ******************************************************************************/
+/******************************************************************************/
 
-static void *lwip_ping_test(void *param)
-{
-    IP4_ADDR(&ping_addr, lwip_gwaddr[0], lwip_gwaddr[1], lwip_gwaddr[2], lwip_gwaddr[3]);
-    ETH_BSP_Config();
-    lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    ping_init(&ping_addr);
-}
-
-void lwip_ping_thread(int argc, char *argv[])
+void LwipPingTest(int argc, char *argv[])
 {
     int result = 0;
 
@@ -113,12 +76,11 @@ void lwip_ping_thread(int argc, char *argv[])
     lw_print("lw: [%s] argc %d\n", __func__, argc);
 
     IP4_ADDR(&ping_addr, lwip_gwaddr[0], lwip_gwaddr[1], lwip_gwaddr[2], lwip_gwaddr[3]);
-    ETH_BSP_Config();
     lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     ping_init(&ping_addr);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     ping, lwip_ping_thread, ping [IP] 3 times);
+     ping, LwipPingTest, ping [IP] 3 times);
 
 #endif
