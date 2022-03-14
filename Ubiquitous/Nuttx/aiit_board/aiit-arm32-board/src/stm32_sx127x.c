@@ -143,7 +143,7 @@ static int sx127x_freq_select(uint32_t freq)
 
   /* Only HF supported (BAND3 - 860-930 MHz) */
 
-  if (freq < SX127X_HFBAND_THR)
+  if (freq > SX127X_HFBAND_THR)
     {
       ret = -EINVAL;
       wlerr("LF band not supported\n");

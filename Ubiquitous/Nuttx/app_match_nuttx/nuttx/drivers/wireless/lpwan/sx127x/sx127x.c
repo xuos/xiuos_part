@@ -769,6 +769,36 @@ static int sx127x_open(FAR struct file *filep)
       goto errout;
     }
 
+  /* Set modulation */
+
+  wlinfo("Set modulation mode to %d\n", CONFIG_LPWAN_SX127X_MODULATION_DEFAULT);
+  ret = sx127x_modulation_set(dev, CONFIG_LPWAN_SX127X_MODULATION_DEFAULT); 
+  if (ret < 0)
+  {
+    wlerr("modulation_set failed\n");
+    goto errout;
+  } 
+
+  /* Set RF frequency */
+
+  wlinfo("Set frequency to %" PRId32 "\n", CONFIG_LPWAN_SX127X_RFFREQ_DEFAULT);
+  ret = sx127x_frequency_set(dev, CONFIG_LPWAN_SX127X_RFFREQ_DEFAULT);
+  if (ret < 0)
+  {
+    wlerr("failed to change frequency %d!\n", ret);
+    goto errout;
+  }
+
+  /* Set TX power */
+
+  wlinfo("Set power to %d\n", CONFIG_LPWAN_SX127X_TXPOWER_DEFAULT);
+  ret = sx127x_power_set(dev, CONFIG_LPWAN_SX127X_TXPOWER_DEFAULT);
+  if (ret < 0)
+  {
+    wlerr("failed to change power %d!\n", ret);
+    goto errout;
+  }
+
   dev->nopens++;
 
 errout:
@@ -844,6 +874,13 @@ static ssize_t sx127x_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct sx127x_dev_s *)inode->i_private;
 
+  /* Set mode to RX */
+
+  wlinfo("Set opmode to %" PRId32 "\n", SX127X_OPMODE_RX);
+  sx127x_opmode_set(dev, SX127X_OPMODE_RX);
+
+  sx127x_writeregbyte(dev, SX127X_LRM_IRQ, 8);
+
   ret = nxsem_wait(&dev->dev_sem);
   if (ret < 0)
     {
@@ -912,8 +949,9 @@ static ssize_t sx127x_write(FAR struct file *filep, FAR const char *buffer,
 
   sx127x_opmode_set(dev, SX127X_OPMODE_STANDBY);
 
-  /* Initialize TX mode */
   sx127x_writeregbyte(dev, SX127X_LRM_IRQ, 8);
+
+  /* Initialize TX mode */
 
   ret = sx127x_opmode_init(dev, SX127X_OPMODE_TX);
   if (ret < 0)
@@ -939,6 +977,8 @@ static ssize_t sx127x_write(FAR struct file *filep, FAR const char *buffer,
   /* Wait for TXDONE */
 
   nxsem_wait(&dev->tx_sem);
+
+  sx127x_writeregbyte(dev, SX127X_LRM_IRQ, 8);
 
 errout:
   /* Change mode to IDLE after transfer
