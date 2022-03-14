@@ -58,7 +58,7 @@ config LPWAN_SX127X_RXFIFO_LEN
 
 config LPWAN_SX127X_RXFIFO_DATA_LEN
 	int "SX127X RX FIFO data length"
-	default 256
+	default 128
 
 endif #LPWAN_SX127X_RXSUPPORT
 

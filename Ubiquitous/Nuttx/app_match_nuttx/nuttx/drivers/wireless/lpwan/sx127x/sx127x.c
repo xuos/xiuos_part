@@ -1635,7 +1635,7 @@ static size_t sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
 
   /* Read payload and store */
 
-  sx127x_readreg(dev, SX127X_CMN_FIFO, rxdata.data, datalen);
+  sx127x_readreg(dev, SX127X_CMN_FIFO, (uint8_t*)(&rxdata.data), datalen);
 
   /* Unlock SPI */
 
@@ -1715,7 +1715,7 @@ static size_t sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
 
   /* Read payload */
 
-  sx127x_readreg(dev, SX127X_CMN_FIFO, rxdata.data, datalen);
+  sx127x_readreg(dev, SX127X_CMN_FIFO, (uint8_t*)(&rxdata.data), datalen);
 
   /* Unlock SPI */
 
