@@ -12,7 +12,7 @@
 
 /**
 * @file connect_i2c.h
-* @brief define stm32f407-st-discovery-board i2c function and struct
+* @brief define imxrt1052-baord i2c function and struct
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-25

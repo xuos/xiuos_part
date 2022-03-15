@@ -12,7 +12,7 @@
  
 /**
 * @file connect_usb.h
-* @brief define ok1052-board usb function and struct
+* @brief define imxrt1052-baord usb function and struct
 * @version 2.0 
 * @author AIIT XUOS Lab
 * @date 2022-02-09

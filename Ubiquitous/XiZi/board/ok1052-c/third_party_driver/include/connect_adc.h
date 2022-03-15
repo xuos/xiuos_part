@@ -12,7 +12,7 @@
 
 /**
 * @file connect_adc.h
-* @brief define stm32f407-st-discovery adc function and struct
+* @brief define imxrt1052-baord adc function and struct
 * @version 1.1
 * @author AIIT XUOS Lab
 * @date 2021-12-28
