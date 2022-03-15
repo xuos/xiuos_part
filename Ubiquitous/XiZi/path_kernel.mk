@@ -1,6 +1,25 @@
 
 export KERNELPATHS:=
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/sdio/sdmmc/inc \
+	-I$(BSP_ROOT)/third_party_driver/sdio/sdmmc/port \
+	-I$(BSP_ROOT)/third_party_driver/usb/nxp_usb_driver/host \
+	-I$(BSP_ROOT)/third_party_driver/usb/nxp_usb_driver/host/class \
+	-I$(BSP_ROOT)/third_party_driver/usb/nxp_usb_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/usb/nxp_usb_driver/osa \
+	-I$(BSP_ROOT)/third_party_driver/usb/nxp_usb_driver/phy \
+	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052 \
+	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052/drivers \
+	-I$(BSP_ROOT)/third_party_driver/CMSIS/Include \
+	-I$(KERNEL_ROOT)/include \
+	-I$(KERNEL_ROOT)/resources/include \
+	-I$(BSP_ROOT)/include #
+endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/kd233)
 KERNELPATHS :=-I$(BSP_ROOT) \
