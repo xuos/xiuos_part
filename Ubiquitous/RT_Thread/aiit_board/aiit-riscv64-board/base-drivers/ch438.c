@@ -362,17 +362,16 @@ const struct rt_uart_ops extuart_ops =
     RT_NULL
 };
 
-static plic_irq_callback_t Ch438Irq(void *parameter)
+static int Ch438Irq(void *parameter)
 {
-	rt_sem_release(&ch438_sem);
+	rt_sem_release(ch438_sem);
 }
 
 void Ch438InitDefault(void)
 {
-	xs_uint8	i, dat;
-	xs_err_t flag;
+	rt_err_t flag;
 
-	flag = rt_sem_init(&ch438_sem, "sem_438",0,RT_IPC_FLAG_FIFO);
+	flag = rt_sem_init(ch438_sem, "sem_438",0,RT_IPC_FLAG_FIFO);
 	if (flag != RT_EOK)
 	{
 		rt_kprintf("ch438.drv create sem failed .\n");
@@ -381,7 +380,7 @@ void Ch438InitDefault(void)
 	
     gpiohs_set_drive_mode(FPIOA_CH438_INT, GPIO_DM_INPUT_PULL_UP);
     gpiohs_set_pin_edge(FPIOA_CH438_INT,GPIO_PE_FALLING);
-    gpiohs_irq_register(FPIOA_CH438_INT,1,Ch438Irq,0);
+    gpiohs_irq_register(FPIOA_CH438_INT, 1, Ch438Irq, 0);
 
 	CH438_INIT();
 }
@@ -396,14 +395,14 @@ int rt_hw_ch438_init(void)
 // #ifdef BSP_USING_UART1
     {
         static struct rt_serial_device  extserial0;
-        static struct device_uart       extuart0;
+        // static struct device_uart extuart0;
 
         extserial  = &extserial0;
-        extuart    = &extuart0;
+        // extuart    = &extuart0;
 
         extserial->ops              = &extuart_ops;
         extserial->config           = config;
-        extserial->config.baud_rate = UART_DEFAULT_BAUDRATE;
+        extserial->config.baud_rate = 115200;
 		extserial->config.reserved = 0; ///< extern uart port
 
         // extuart->hw_base   = UART1_BASE_ADDR;
