@@ -6,7 +6,7 @@
 #include "ch438.h"
 #include "sleep.h"
 
-static rt_sem_t ch438_sem;
+static  struct rt_semaphore ch438_sem;
 
 static rt_uint8_t	offsetadd[] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};		/* Offset address of serial port number */
 rt_uint8_t	RevLen ,Ch438Buff[8][BUFFSIZE],Ch438BuffPtr[8];
@@ -364,18 +364,18 @@ const struct rt_uart_ops extuart_ops =
 
 static int Ch438Irq(void *parameter)
 {
-	rt_sem_release(ch438_sem);
+	rt_sem_release(&ch438_sem);
 }
 
-void Ch438InitDefault(void)
+int Ch438InitDefault(void)
 {
 	rt_err_t flag;
 
-	flag = rt_sem_init(ch438_sem, "sem_438",0,RT_IPC_FLAG_FIFO);
+	flag = rt_sem_init(&ch438_sem, "sem_438",0,RT_IPC_FLAG_FIFO);
 	if (flag != RT_EOK)
 	{
 		rt_kprintf("ch438.drv create sem failed .\n");
-		return ;
+		return -1;
 	}		
 	
     gpiohs_set_drive_mode(FPIOA_CH438_INT, GPIO_DM_INPUT_PULL_UP);
@@ -383,7 +383,9 @@ void Ch438InitDefault(void)
     gpiohs_irq_register(FPIOA_CH438_INT, 1, Ch438Irq, 0);
 
 	CH438_INIT();
+	return 0;
 }
+INIT_APP_EXPORT(Ch438InitDefault);
 
 int rt_hw_ch438_init(void)
 {
@@ -464,7 +466,7 @@ int rt_hw_ch438_init(void)
     //                           uart);
     // }
 // #endif
-	Ch438InitDefault();
+	// Ch438InitDefault();
     return 0;
 }
-
+INIT_DEVICE_EXPORT(rt_hw_ch438_init);

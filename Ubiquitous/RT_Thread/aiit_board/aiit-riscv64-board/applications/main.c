@@ -19,6 +19,7 @@
  */
 
 #include <rtthread.h>
+#include <stdio.h>
 
 int main(void)
 {

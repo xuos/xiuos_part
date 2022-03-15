@@ -180,38 +180,6 @@
 #define BSP_UART1_RXD_PIN 21
 #define BSP_UART1_RTS_PIN -1
 #define BSP_UART1_CTS_PIN -1
-#define BSP_USING_SPI1
-#define BSP_SPI1_CLK_PIN 27
-#define BSP_SPI1_D0_PIN 28
-#define BSP_SPI1_D1_PIN 26
-#define BSP_SPI1_USING_SS0
-#define BSP_SPI1_SS0_PIN 29
-#define BSP_SPI1_USING_SS1
-#define BSP_SPI1_SS1_PIN 8
-#define BSP_USING_LCD
-#define BSP_LCD_CS_PIN 36
-#define BSP_LCD_WR_PIN 39
-#define BSP_LCD_DC_PIN 38
-#define BSP_LCD_RST_PIN 37
-#define BSP_LCD_BACKLIGHT_PIN -1
-#define BSP_LCD_BACKLIGHT_ACTIVE_LOW
-#define BSP_LCD_CLK_FREQ 20000000
-#define BSP_BOARD_USER
-#define BSP_LCD_X_MAX 240
-#define BSP_LCD_Y_MAX 320
-#define BSP_USING_SDCARD
-#define BSP_USING_DVP
-
-/* The default pin assignment is based on the Maix Duino K210 development board */
-
-#define BSP_DVP_SCCB_SDA_PIN 40
-#define BSP_DVP_SCCB_SCLK_PIN 41
-#define BSP_DVP_CMOS_RST_PIN 42
-#define BSP_DVP_CMOS_VSYNC_PIN 43
-#define BSP_DVP_CMOS_PWDN_PIN 44
-#define BSP_DVP_CMOS_XCLK_PIN 46
-#define BSP_DVP_CMOS_PCLK_PIN 47
-#define BSP_DVP_CMOS_HREF_PIN 45
 #define BSP_USING_CH438
 #define BSP_CH438_ALE_PIN 23
 #define BSP_CH438_NWR_PIN 24
