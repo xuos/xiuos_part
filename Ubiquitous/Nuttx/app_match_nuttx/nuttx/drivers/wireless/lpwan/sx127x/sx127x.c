@@ -903,8 +903,10 @@ static ssize_t sx127x_read(FAR struct file *filep, FAR char *buffer,
     }
 
   /* Get RX data from fifo */
-
+  
+  wlinfo("buflen=%d \n", buflen);
   ret = sx127x_rxfifo_get(dev, (uint8_t *)buffer, buflen);
+
   sx127x_writeregbyte(dev, SX127X_LRM_IRQ, 8);
 
   nxsem_post(&dev->dev_sem);

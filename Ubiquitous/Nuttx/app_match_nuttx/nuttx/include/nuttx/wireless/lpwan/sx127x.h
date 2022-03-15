@@ -111,7 +111,7 @@
 #ifdef CONFIG_ADAPTER_LORA_SX1278
 /* Framework connect Lora data */
 
-struct LoraDataFormat
+struct SX127xDataFormat
 {
     uint8_t flame_head;
     uint32_t length;
@@ -134,7 +134,7 @@ struct sx127x_read_hdr_s
   int16_t  rssi;
   uint8_t  reserved[3];
 #ifdef CONFIG_ADAPTER_LORA_SX1278
-  struct LoraDataFormat  data;
+  struct SX127xDataFormat  data;
 #else
   uint8_t  data[SX127X_READ_DATA_MAX];
 #endif
