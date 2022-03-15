@@ -8,7 +8,7 @@
 
 /**
 * @file connect_sdio.c
-* @brief support sdio function using bus driver framework on OK1052 board
+* @brief support sdio function using bus driver framework on xidatong board
 * @version 2.0 
 * @author AIIT XUOS Lab
 * @date 2022-01-24

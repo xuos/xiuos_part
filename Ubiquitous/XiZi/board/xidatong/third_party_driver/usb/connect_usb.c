@@ -8,7 +8,7 @@
 
 /**
 * @file connect_usb.c
-* @brief support usb host function using bus driver framework on OK1052 board
+* @brief support usb host function using bus driver framework on xidatong board
 * @version 2.0 
 * @author AIIT XUOS Lab
 * @date 2022-02-09
