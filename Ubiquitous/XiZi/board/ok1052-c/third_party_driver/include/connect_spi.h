@@ -12,7 +12,7 @@
 
 /**
 * @file connect_spi.h
-* @brief define stm32f407-st-discovery-board spi function and struct
+* @brief define imxrt1052-baord spi function and struct
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-25

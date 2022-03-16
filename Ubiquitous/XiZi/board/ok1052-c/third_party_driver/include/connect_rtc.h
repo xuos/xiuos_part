@@ -12,7 +12,7 @@
 
 /**
 * @file connect_rtc.h
-* @brief define ok1052-c rtc function and structure
+* @brief define imxrt1052-baord rtc function and structure
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01
