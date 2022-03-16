@@ -246,7 +246,7 @@ netconn_delete(struct netconn *conn)
   } else
 #endif /* LWIP_NETCONN_FULLDUPLEX */
   {
-//    err = netconn_prepare_delete(conn);
+    err = netconn_prepare_delete(conn);
   }
   if (err == ERR_OK) {
     netconn_free(conn);

@@ -30,7 +30,8 @@
 #define PBUF_SIZE 27
 
 static struct udp_pcb *udpecho_raw_pcb;
-char udp_target[] = {192, 168, 250, 252};
+char udp_demo_ip[] = {192, 168, 250, 252};
+uint16_t udp_demo_port = LWIP_TARGET_PORT;
 char hello_str[] = {"hello world\r\n"};
 char udp_send_msg[] = "\n\nThis one is UDP pkg. Congratulations on you.\n\n";
 
@@ -52,28 +53,23 @@ static void LwipUDPSendTask(void *arg)
 
     struct sockaddr_in udp_sock;
     udp_sock.sin_family = AF_INET;
-    udp_sock.sin_port = htons(LWIP_TARGET_PORT);
-    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_target[0],udp_target[1],udp_target[2],udp_target[3]));
+    udp_sock.sin_port = htons(udp_demo_port);
+    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3]));
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
     if (connect(socket_fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
     {
         lw_print("Unable to connect\n");
-        goto __exit;
+        closesocket(socket_fd);
+        return;
     }
 
     lw_print("UDP connect success, start to send.\n");
     lw_print("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
 
     sendto(socket_fd, udp_send_msg, strlen(udp_send_msg), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
-    lw_pr_info("Send UDP msg: %s ", udp_send_msg);
-
-__exit:
-    if (socket_fd >= 0)
-    {
-        closesocket(socket_fd);
-    }
-
+    lw_notice("Send UDP msg: %s ", udp_send_msg);
+    closesocket(socket_fd);
     return;
 }
 
@@ -86,7 +82,7 @@ void *LwipUdpSendTest(int argc, char *argv[])
 
     if(argc == 1)
     {
-        lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_target[0], udp_target[1], udp_target[2], udp_target[3]);
+        lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3]);
         strncpy(udp_send_msg, hello_str, strlen(hello_str));
     }
     else
@@ -95,12 +91,12 @@ void *LwipUdpSendTest(int argc, char *argv[])
         strncat(udp_send_msg, "\r\n", 2);
         if(argc == 3)
         {
-            sscanf(argv[2], "%d.%d.%d.%d", &udp_target[0], &udp_target[1], &udp_target[2], &udp_target[3]);
+            sscanf(argv[2], "%d.%d.%d.%d", &udp_demo_ip[0], &udp_demo_ip[1], &udp_demo_ip[2], &udp_demo_ip[3]);
         }
     }
-    lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_target[0], udp_target[1], udp_target[2], udp_target[3]);
+    lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3]);
 
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     sys_thread_new("udp socket send", LwipUDPSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
@@ -121,11 +117,11 @@ static void LwipUdpRecvTask(void *arg, struct udp_pcb *upcb, struct pbuf *p,
         return;
     }
     udp_len = p->tot_len;
-    lw_pr_info("Receive data :%dB\r\n", udp_len);
+    lw_notice("Receive data :%dB\r\n", udp_len);
 
     if(udp_len <= 80)
     {
-        lw_pr_info("%.*s\r\n", udp_len, (char *)(p->payload));
+        lw_notice("%.*s\r\n", udp_len, (char *)(p->payload));
     }
 
     udp_buf = pbuf_alloc(PBUF_TRANSPORT, PBUF_SIZE, PBUF_RAM);

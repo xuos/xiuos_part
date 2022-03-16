@@ -53,7 +53,7 @@ void ua_test_browser_objects(UA_Client *client)
     ua_browser_id(client, UA_TEST_BROWSER_NODEID);
     ua_browser_id(client, UA_TEST_BROWSER_NODEID1);
     test_id = UA_TEST_BROWSER_NODEID1;
-    ua_pr_info("Show values in %s:\n", ua_get_nodeid_str(&test_id));
+    ua_notice("Show values in %s:\n", ua_get_nodeid_str(&test_id));
     ua_test_read_array(client);
     return;
 }
@@ -64,11 +64,11 @@ void ua_test_write_attr(UA_Client *client)
     char val_str[UA_NODE_LEN];
     UA_NodeId id = UA_TEST_WRITE_NODEID;
 
-    ua_pr_info("--- Test write %s ---\n", ua_get_nodeid_str(&id));
+    ua_notice("--- Test write %s ---\n", ua_get_nodeid_str(&id));
     ua_read_nodeid_value(client, id, &value);
     ua_write_nodeid_value(client, id, itoa(value + 1, val_str, 10));
     ua_read_nodeid_value(client, id, &value);
-    ua_pr_info("\n");
+    ua_notice("\n");
 }
 
 int ua_test_interact_server(UA_Client *client)

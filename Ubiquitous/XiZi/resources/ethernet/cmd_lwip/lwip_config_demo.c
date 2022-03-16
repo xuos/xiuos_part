@@ -81,18 +81,18 @@ void LwipShowIPTask(int argc, char *argv[])
 {
     char mac_addr[] = configMAC_ADDR;
 
-    lw_pr_info("\r\n************************************************\r\n");
-    lw_pr_info(" Network Configuration\r\n");
-    lw_pr_info("************************************************\r\n");
-    lw_pr_info(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&lwip_ipaddr)[0], ((u8_t *)&lwip_ipaddr)[1],
+    lw_notice("\r\n************************************************\r\n");
+    lw_notice(" Network Configuration\r\n");
+    lw_notice("************************************************\r\n");
+    lw_notice(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&lwip_ipaddr)[0], ((u8_t *)&lwip_ipaddr)[1],
          ((u8_t *)&lwip_ipaddr)[2], ((u8_t *)&lwip_ipaddr)[3]);
-    lw_pr_info(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&lwip_netmask)[0], ((u8_t *)&lwip_netmask)[1],
+    lw_notice(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&lwip_netmask)[0], ((u8_t *)&lwip_netmask)[1],
          ((u8_t *)&lwip_netmask)[2], ((u8_t *)&lwip_netmask)[3]);
-    lw_pr_info(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&lwip_gwaddr)[0], ((u8_t *)&lwip_gwaddr)[1],
+    lw_notice(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&lwip_gwaddr)[0], ((u8_t *)&lwip_gwaddr)[1],
          ((u8_t *)&lwip_gwaddr)[2], ((u8_t *)&lwip_gwaddr)[3]);
-    lw_pr_info(" MAC Address    : %x:%x:%x:%x:%x:%x\r\n", mac_addr[0], mac_addr[1], mac_addr[2],
+    lw_notice(" MAC Address    : %x:%x:%x:%x:%x:%x\r\n", mac_addr[0], mac_addr[1], mac_addr[2],
         mac_addr[3], mac_addr[4], mac_addr[5]);
-    lw_pr_info("************************************************\r\n");
+    lw_notice("************************************************\r\n");
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
