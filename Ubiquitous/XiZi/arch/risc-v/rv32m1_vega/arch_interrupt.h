@@ -1,3 +1,11 @@
+/**
+* @file arch_interrupt.h
+* @brief support rv32m1_vega interrupt
+* @version 1.0 
+* @author AIIT XUOS Lab
+* @date 2022-02-16
+*/
+
 #ifndef ARCH_INTERRUPT_H__
 #define ARCH_INTERRUPT_H__
 
