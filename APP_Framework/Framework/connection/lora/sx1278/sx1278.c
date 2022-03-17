@@ -21,9 +21,6 @@
 #include <adapter.h>
 
 #ifdef ADD_NUTTX_FETURES
- *   fd     
- *   buf    - Data to write
- *   nbytes - Length of data to write
  /**
  * @description: Sx127x_Nuttx_Write function for nuttx
  * @param fd - file descriptor to write to
