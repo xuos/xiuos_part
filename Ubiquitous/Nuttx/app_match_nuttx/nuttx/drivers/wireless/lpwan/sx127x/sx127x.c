@@ -63,8 +63,11 @@
 /* Configuration ************************************************************/
 
 /* Device name */
-
-#define SX127X_DEV_NAME               "/dev/sx127x"
+#ifdef CONFIG_ADAPTER_SX1278_DRIVER
+#  define SX127X_DEV_NAME    CONFIG_ADAPTER_SX1278_DRIVER
+#else
+#  define SX127X_DEV_NAME    "/dev/sx127x"
+#endif
 
 /* Payload fixlen default */
 

@@ -47,7 +47,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DEV_NAME      "/dev/sx127x"
+#ifdef CONFIG_ADAPTER_SX1278_DRIVER
+#  define DEV_NAME    CONFIG_ADAPTER_SX1278_DRIVER
+#else
+#  define DEV_NAME     "/dev/sx127x"
+#endif
+
 #define TX_BUFFER_MAX 255
 
 /****************************************************************************
