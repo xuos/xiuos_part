@@ -63,8 +63,11 @@
 /* Configuration ************************************************************/
 
 /* Device name */
-
-#define SX127X_DEV_NAME               "/dev/sx127x"
+#ifdef CONFIG_ADAPTER_SX1278_DRIVER
+#  define SX127X_DEV_NAME    CONFIG_ADAPTER_SX1278_DRIVER
+#else
+#  define SX127X_DEV_NAME    "/dev/sx127x"
+#endif
 
 /* Payload fixlen default */
 
@@ -903,8 +906,10 @@ static ssize_t sx127x_read(FAR struct file *filep, FAR char *buffer,
     }
 
   /* Get RX data from fifo */
-
+  
+  wlinfo("buflen=%d \n", buflen);
   ret = sx127x_rxfifo_get(dev, (uint8_t *)buffer, buflen);
+
   sx127x_writeregbyte(dev, SX127X_LRM_IRQ, 8);
 
   nxsem_post(&dev->dev_sem);
@@ -1635,7 +1640,7 @@ static size_t sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
 
   /* Read payload and store */
 
-  sx127x_readreg(dev, SX127X_CMN_FIFO, rxdata.data, datalen);
+  sx127x_readreg(dev, SX127X_CMN_FIFO, (uint8_t*)(&rxdata.data), datalen);
 
   /* Unlock SPI */
 
@@ -1715,7 +1720,7 @@ static size_t sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
 
   /* Read payload */
 
-  sx127x_readreg(dev, SX127X_CMN_FIFO, rxdata.data, datalen);
+  sx127x_readreg(dev, SX127X_CMN_FIFO, (uint8_t*)(&rxdata.data), datalen);
 
   /* Unlock SPI */
 

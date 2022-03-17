@@ -5,7 +5,7 @@
 | 硬件 | 描述 |
 | -- | -- |
 |芯片型号| Stm32F407zgt6|
-|CPU|arm cortex-m|
+|CPU|arm cortex-m4|
 |主频| 168MHz |
 |片内SRAM| 192KB |
 |扩展SRAM| 1MB |
@@ -30,23 +30,25 @@ sudo apt-get install gcc-arm-none-eabi
 >2.在代码根目录下执行以下命令，生成配置文件
 
 ```
+cd ./Ubiquitous/XiZi
+make BOARD=aiit-arm32-board distclean
 make BOARD=aiit-arm32-board menuconfig
 ```
 >3.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出
 
-![img](menu.png )
+![img](./img/menu.png )
 
 >4.继续执行以下命令，进行编译
 ```
 make BOARD=aiit-arm32-board
 ```
->5.如果编译正确无误，会产生XiUOS_aiit-arm32-board.elf、XiUOS_aiit-arm32-board.bin文件。其中XiUOS_aiit-arm32-board.bin需要烧写到设备中进行运行。
+>5.如果编译正确无误，会产生XiZi_aiit-arm32-board.elf、XiZi_aiit-arm32-board.bin文件。其中XiZi_aiit-arm32-board.bin需要烧写到设备中进行运行。
 ```
-sudo write build/XiUOS_aiit-arm32-board.bin 0x8000000
+sudo write build/XiZi_aiit-arm32-board.bin 0x8000000
 ```
 >6.最后可以执行以下命令，清除配置文件和编译生成的文件
 ```
-make  BOARD=aiit-arm32-board distclean
+make BOARD=aiit-arm32-board distclean
 ```
 
 ## 3. 烧写及执行
@@ -56,7 +58,7 @@ make  BOARD=aiit-arm32-board distclean
 st-link 图片如下：
 
 <div align= "center"> 
-<img src = st-link.png>
+<img src = ./img/st-link.png>
   </div>
 
 
@@ -66,15 +68,15 @@ git clone https://github.com/texane/stlink.git
 ```
 aiit-arm32-board下载连接示意图如下：
 <div align= "center"> 
-<img src = aiit.jpg>
+<img src = ./img/aiit.jpg>
   </div>
 
 代码根目录下执行st-flash工具烧录
 ```
-sudo st-flash  write  build/XiUOS_aiit-arm32-board.bin 0x8000000
+sudo st-flash write build/XiZi_aiit-arm32-board.bin 0x8000000
 ```
 ### 3.1 运行结果
 
 如果编译 & 烧写无误，将会在串口终端上看到信息打印输出，(终端串口引脚为PA9、PA10)。
 
-![img](shell.png )
+![img](./img/shell.png )

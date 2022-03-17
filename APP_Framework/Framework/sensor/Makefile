@@ -45,5 +45,17 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
         SRC_DIR += humidity
     endif
 
+    ifeq ($(CONFIG_SENSOR_WINDSPEED),y)
+        SRC_DIR += windspeed
+    endif
+
+    ifeq ($(CONFIG_SENSOR_WINDDIRECTION),y)
+        SRC_DIR += winddirection
+    endif
+
+    ifeq ($(CONFIG_SENSOR_ALTITUDE),y)
+        SRC_DIR += altitude
+    endif
+
     include $(KERNEL_ROOT)/compiler.mk
 endif

@@ -12,4 +12,5 @@ menu "lib"
      source "$APP_DIR/lib/cJSON/Kconfig"
 	 source "$APP_DIR/lib/queue/Kconfig"
      source "$APP_DIR/lib/lvgl/Kconfig"
+     source "$APP_DIR/lib/embedded_database/Kconfig"
 endmenu

@@ -297,6 +297,7 @@ static x_err_t _DeleteMsgQueue(struct MsgQueue *mq)
     KERNEL_FREE(mq->msg_buf);
 
     lock = CriticalAreaLock();
+    IdRemoveObj(&k_mq_id_manager, mq->id.id);
     DoubleLinkListRmNode(&(mq->link));
     CriticalAreaUnLock(lock);
     KERNEL_FREE(mq);

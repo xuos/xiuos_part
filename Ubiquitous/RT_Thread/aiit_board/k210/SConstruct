@@ -61,5 +61,9 @@ objs.extend(SConscript(os.getcwd() + '/../../../../APP_Framework/Applications/SC
 
 # include APP_Framework/lib
 objs.extend(SConscript(os.getcwd() + '/../../../../APP_Framework/lib/SConscript'))
+
+# include Ubiquitous/RT-Thread/micropython
+objs.extend(SConscript(os.getcwd() + '/../../micropython/SConscript'))
+
 # make a building
 DoBuilding(TARGET, objs)

@@ -141,6 +141,7 @@ static int PrivSerialIoctl(int fd, int cmd, void *args)
     config.bufsz = RT_SERIAL_RB_BUFSZ;
     config.parity = serial_cfg->serial_parity_mode;
     config.invert = serial_cfg->serial_invert_mode;
+    config.reserved = serial_cfg->ext_uart_no; ///< using extuart port number
     rt_fd = fd_get(fd);
     ret =  rt_fd->fops->ioctl(rt_fd, RT_DEVICE_CTRL_CONFIG, &config);
     return ret;

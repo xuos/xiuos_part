@@ -26,6 +26,8 @@
 #include <xs_waitqueue.h>
 #include <sys/time.h> 
 
+typedef unsigned long NfdsType;
+
 #if !defined(POLLIN) && !defined(POLLOUT)
 
 #define POLLIN                   0x001
@@ -35,8 +37,6 @@
 #define POLLNVAL                 0x010
 
 #define POLLMASK_DEFAULT (POLLIN | POLLOUT )
-
-typedef unsigned long NfdsType;
 
 struct pollfd
 {
@@ -54,6 +54,7 @@ typedef struct Pollreq
 } pollreqType;
 
 void PollAdd(WaitQueueType *wq, pollreqType *req);
+#ifndef poll
 int poll(struct pollfd *fds, NfdsType nfds, int timeout);
-
+#endif
 #endif
