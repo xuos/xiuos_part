@@ -460,8 +460,6 @@ uint32 Imxrt1052PinWrite(void *dev, struct BusBlockWriteParam *write_param)
         return ERROR;
     }
 
-    KPrintf("Imxrt1052PinWrite gpio 0x%x val %u\n", pin_index.gpio, pin_stat->val);
-
     if (GPIO_LOW == pin_stat->val) {
         GPIO_PinWrite(pin_index.gpio, pin_index.pin, 0);
     } else {
