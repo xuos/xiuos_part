@@ -45,7 +45,7 @@ struct Stm32Spi
     struct SpiBus spi_bus;
 };
 
-int Imrt1052HwSpiInit(void);
+int Imxrt1052HwSpiInit(void);
 x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name);
 
 #ifdef __cplusplus

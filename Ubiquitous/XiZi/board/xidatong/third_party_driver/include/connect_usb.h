@@ -13,9 +13,9 @@
 /**
 * @file connect_usb.h
 * @brief define imxrt1052-board usb function and struct
-* @version 2.0 
+* @version 2.0
 * @author AIIT XUOS Lab
-* @date 2022-02-09
+* @date 2022-03-15
 */
 
 #ifndef CONNECT_USB_H
@@ -44,7 +44,7 @@ extern "C" {
 
 #define USB_SINGLE_BLOCK_SIZE 512
 
-int Imrt1052HwUsbHostInit(void);
+int Imxrt1052HwUsbHostInit(void);
 
 #ifdef __cplusplus
 }

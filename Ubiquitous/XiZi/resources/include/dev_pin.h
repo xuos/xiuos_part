@@ -30,23 +30,23 @@ extern "C" {
 #define GPIO_LOW                         0x00
 #define GPIO_HIGH                        0x01
 
-#define GPIO_CFG_OUTPUT                          0x00
-#define GPIO_CFG_INPUT                               0x01
+#define GPIO_CFG_OUTPUT                  0x00
+#define GPIO_CFG_INPUT                   0x01
 #define GPIO_CFG_INPUT_PULLUP            0x02
-#define GPIO_CFG_INPUT_PULLDOWN     0x03
-#define GPIO_CFG_OUTPUT_OD                  0x04
+#define GPIO_CFG_INPUT_PULLDOWN          0x03
+#define GPIO_CFG_OUTPUT_OD               0x04
 
 #define GPIO_IRQ_EDGE_RISING             0x00
-#define GPIO_IRQ_EDGE_FALLING          0x01
+#define GPIO_IRQ_EDGE_FALLING            0x01
 #define GPIO_IRQ_EDGE_BOTH               0x02
-#define GPIO_IRQ_LEVEL_HIGH               0x03
-#define GPIO_IRQ_LEVEL_LOW                 0x04
+#define GPIO_IRQ_LEVEL_HIGH              0x03
+#define GPIO_IRQ_LEVEL_LOW               0x04
 
 #define GPIO_CONFIG_MODE                 0xffffffff
-#define GPIO_IRQ_REGISTER                  0xfffffffe
-#define GPIO_IRQ_FREE                            0xfffffffd
-#define GPIO_IRQ_DISABLE                     0xfffffffc
-#define GPIO_IRQ_ENABLE                      0xfffffffb
+#define GPIO_IRQ_REGISTER                0xfffffffe
+#define GPIO_IRQ_FREE                    0xfffffffd
+#define GPIO_IRQ_DISABLE                 0xfffffffc
+#define GPIO_IRQ_ENABLE                  0xfffffffb
 
 struct PinDevIrq
 {

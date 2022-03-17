@@ -31,7 +31,7 @@ void RtcI2cInit(void);
 status_t RtcI2cWrite(LPI2C_Type *base, uint32_t sub_addr, uint8_t *buf, uint16_t size);
 uint32_t RtcI2cRead(LPI2C_Type *base, uint32_t sub_addr, uint8_t *buf, uint16_t size);
 
-int Imrt1052HwRtcInit(void);
+int Imxrt1052HwRtcInit(void);
 
 #endif
 

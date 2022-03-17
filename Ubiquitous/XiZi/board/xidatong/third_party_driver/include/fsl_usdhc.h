@@ -5,6 +5,15 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+/**
+ * @file fsl_usdhc.h
+ * @brief fsl usdhc drivers
+ * @version 2.0
+ * @author AIIT XUOS Lab
+ * @date 2022-03-15
+ */
+
 #ifndef _FSL_USDHC_H_
 #define _FSL_USDHC_H_
 

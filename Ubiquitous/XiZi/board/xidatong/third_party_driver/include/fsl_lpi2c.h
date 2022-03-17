@@ -7,12 +7,12 @@
  */
 
 /**
-* @file fsl_lpi2c.h
-* @brief support imxrt1052-board i2c driver
-* @version 1.0
-* @author AIIT XUOS Lab
-* @date 2022-03-01
-*/
+ * @file fsl_lpi2c.h
+ * @brief support imxrt1052-board i2c driver
+ * @version 2.0
+ * @author AIIT XUOS Lab
+ * @date 2022-03-15
+ */
 
 #ifndef _FSL_LPI2C_H_
 #define _FSL_LPI2C_H_

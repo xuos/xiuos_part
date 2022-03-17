@@ -1,39 +1,35 @@
 /*
- * Copyright (c) 2020 RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
- * Date           Author            Notes
- * 2018-11-06     balanceTWK        first version
- * 2019-04-23     WillianChan       Fix GPIO serial number disorder
-*/
+ * Date           Author       Notes
+ * 2018-4-30     misonyo     the first version.
+ */
 
 /**
 * @file connect_gpio.c
 * @brief support gpio function using bus driver framework
-* @version 1.0
+* @version 2.0
 * @author AIIT XUOS Lab
-* @date 2021-04-25
+* @date 2022-03-16
 */
 
 /*************************************************
 File name: connect_gpio.c
-Description: support  gpio configure and register to bus framework
-Others: take RT-Thread v4.0.2/bsp/stm32/libraries/HAL_Drivers/drv_gpio.c for references
+Description: support gpio configure and register to bus framework
+Others: take RT-Thread v4.0.2/bsp/imxrt/libraries/drivers/drv_gpio.c for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
 History:
-1. Date: 2021-04-25
+1. Date: 2022-03-16
 Author: AIIT XUOS Lab
 Modification: add bus driver framework support for gpio
 *************************************************/
 
-#include <device.h>
-#include <board.h>
-
-#define STM32_PIN_NUMBERS 100 // [48, 64, 100, 144]
-
-#define ITEM_NUM(items) sizeof(items)/sizeof(items[0])
+#include <connect_gpio.h>
+#include <fsl_gpio.h>
+#include <fsl_iomuxc.h>
 
 struct PinIndex
 {
@@ -50,80 +46,195 @@ struct PinIrq
     uint32 exti_line;
 };
 
-static const struct PinIndex pins[] = {
-    {0, GPIO1, 0},
-    {1, GPIO1, 1},
-    {2, GPIO1, 2},
-    {3, GPIO1, 3},
-    {4, GPIO1, 4},
-    {5, GPIO1, 5},
-    {6, GPIO1, 6},
-    {7, GPIO1, 7},
-    {8, GPIO1, 8},
-    {9, GPIO1, 9},
-    {10, GPIO1, 10},
-    {11, GPIO1, 11},
-    {12, GPIO1, 12},
-    {13, GPIO1, 13},
-    {14, GPIO1, 14},
-    {15, GPIO1, 15},
-    {16, GPIO2, 0},
-    {17, GPIO2, 1},
-    {18, GPIO2, 2},
-    {19, GPIO2, 3},
-    {20, GPIO2, 4},
-    {21, GPIO2, 5},
-    {22, GPIO2, 6},
-    {23, GPIO2, 7},
-    {24, GPIO2, 8},
-    {25, GPIO2, 9},
-    {26, GPIO2, 10},
-    {27, GPIO2, 11},
-    {28, GPIO2, 12},
-    {29, GPIO2, 13},
-    {30, GPIO2, 14},
-    {31, GPIO2, 15},
-    {32, GPIO3, 0},
-    {33, GPIO3, 1},
-    {34, GPIO3, 2},
-    {35, GPIO3, 3},
-    {36, GPIO3, 4},
-    {37, GPIO3, 5},
-    {38, GPIO3, 6},
-    {39, GPIO3, 7},
-    {40, GPIO3, 8},
-    {41, GPIO3, 9},
-    {42, GPIO3, 10},
-    {43, GPIO3, 11},
-    {44, GPIO3, 12},
-    {45, GPIO3, 13},
-    {46, GPIO3, 14},
-    {47, GPIO3, 15},
-    {-1, 0u, -1}
+struct PinMask
+{
+    GPIO_Type *gpio;
+    uint32 valid_mask;
 };
 
-struct PinIrqHdr pin_irq_hdr_tab[] = {};
-
-const struct PinIndex *GetPin(uint8_t pin)
+static const IRQn_Type irq_tab[10] =
 {
-    const struct PinIndex *index;
+    GPIO1_Combined_0_15_IRQn,
+    GPIO1_Combined_16_31_IRQn,
+    GPIO2_Combined_0_15_IRQn,
+    GPIO2_Combined_16_31_IRQn,
+    GPIO3_Combined_0_15_IRQn,
+    GPIO3_Combined_16_31_IRQn,
+    GPIO4_Combined_0_15_IRQn,
+    GPIO4_Combined_16_31_IRQn,
+    GPIO5_Combined_0_15_IRQn,
+    GPIO5_Combined_16_31_IRQn
+};
 
-    if (pin < ITEM_NUM(pins)){
-        index = &pins[pin];
-        if (index->index == -1)
-            index = NONE;
-    }
-    else{
-        index = NONE;
+const struct PinMask pin_mask[] = 
+{
+    {GPIO1, 0xFFFFFFFF},     /* GPIO1 */
+    {GPIO2, 0xFFFFFFFF},     /* GPIO2 */
+    {GPIO3, 0x0FFFFFFF},     /* GPIO3,28~31 not supported */
+    {GPIO4, 0xFFFFFFFF},     /* GPIO4 */
+    {GPIO5, 0x00000007}      /* GPIO5,3~31 not supported */
+};
+
+struct PinIrqHdr pin_irq_hdr_tab[] = 
+{
+/* GPIO1 */
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    /* GPIO2 */
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    /* GPIO3 */
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    /* GPIO4 */
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    /* GPIO5 */
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},
+};
+
+static int GetPin(struct PinIndex *pin_index, uint8_t pin)
+{
+    pin_index->index = pin >> 5;//0:GPIO1 1:GPIO2 2:GPIO3 3:GPIO4 4:GPIO5 
+    pin_index->pin = pin & 31;//each GPIOx support 32 io
+    
+    if ((pin_index->index > 4) || ((pin_mask[pin_index->index].valid_mask & (1 << pin_index->pin)) == 0)) {
+        KPrintf("GetPin unsupport pin index %u pin %u\n", pin_index->index, pin_index->pin);
+        return -1;
     }
 
-    return index;
+    pin_index->gpio = pin_mask[pin_index->index].gpio;
+    return 0;
 }
 
-static int32 GpioConfigMode(int mode, const struct PinIndex* index)
+static int32 GpioConfigMode(int mode, struct PinIndex *index)
 {
     gpio_pin_config_t gpio_config;
     NULL_PARAM_CHECK(index);
+
+    gpio_config.outputLogic = 0;
 
     switch (mode)
     {
@@ -137,14 +248,15 @@ static int32 GpioConfigMode(int mode, const struct PinIndex* index)
             break;
         case GPIO_CFG_INPUT_PULLUP:
             gpio_config.direction = kGPIO_DigitalInput;
-            gpio_config.interruptMode = kGPIO_IntRisingEdge;
+            gpio_config.interruptMode = kGPIO_NoIntmode;
             break;
         case GPIO_CFG_INPUT_PULLDOWN:
             gpio_config.direction = kGPIO_DigitalInput;
-            gpio_config.interruptMode = kGPIO_IntFallingEdge;
+            gpio_config.interruptMode = kGPIO_NoIntmode;
             break;
         case GPIO_CFG_OUTPUT_OD:
             gpio_config.direction = kGPIO_DigitalOutput;
+            gpio_config.interruptMode = kGPIO_NoIntmode;
             break;
         default:
             break;
@@ -153,97 +265,33 @@ static int32 GpioConfigMode(int mode, const struct PinIndex* index)
     return EOK;
 }
 
-static __inline int32 Bit2Bitnum(uint32 bit)
-{
-    for (int i = 0; i < 32; i++){
-        if ((1UL << i) == bit){
-            return i;
-        }
-    }
-    return -1;
-}
-
-static __inline int32 Bitno2Bit(uint32 bitno)
-{
-    if (bitno <= 32) {
-        return 1UL << bitno;
-    }
-    else {
-        return 0;
-    }
-}
-static const struct PinIrq *GetPinIrq(uint16_t pin)
-{
-    static struct PinIrq irq;
-    const struct PinIndex* index = GetPin(pin);
-
-    if (index == NONE) {
-        return NONE;
-    }
-
-    irq.exti_line = index->pin;
-    irq.pin_source = Bit2Bitnum(index->pin);
-    irq.port_source = ((uint32_t)index->gpio - GPIO1_BASE) / (GPIO2_BASE - GPIO1_BASE);
-    switch (irq.pin_source)
-    {
-        case 0 :
-            irq.irq_exti_channel = GPIO1_INT0_IRQn;
-            break;
-        case 1 :
-            irq.irq_exti_channel = GPIO1_INT1_IRQn;
-            break;
-        case 2 :
-            irq.irq_exti_channel = GPIO1_INT2_IRQn;
-            break;
-        case 3 :
-            irq.irq_exti_channel = GPIO1_INT3_IRQn;
-            break;
-        case 4 :
-            irq.irq_exti_channel = GPIO1_INT4_IRQn;
-            break;
-        case 5 :
-            irq.irq_exti_channel = GPIO1_INT5_IRQn;
-            break;
-        case 6 :
-            irq.irq_exti_channel = GPIO1_INT6_IRQn;
-            break;
-        case 7 :
-            irq.irq_exti_channel = GPIO1_INT7_IRQn;
-            break;
-        default :
-            return NONE;
-    }
-
-    return &irq;
-};
 static int32 GpioIrqRegister(int32 pin, int32 mode, void (*hdr)(void *args), void *args)
 {
-    const struct PinIndex* index = GetPin(pin);
-    int32 irqindex = -1;
+    struct PinIndex pin_index;
 
-    irqindex = Bit2Bitnum(index->pin);
-    if (irqindex < 0 || irqindex >= ITEM_NUM(pin_irq_hdr_tab)) {
-        return -ENONESYS;
+    if (GetPin(&pin_index, pin) < 0) {
+        return ERROR;
     }
 
     x_base level = CriticalAreaLock();
-    if (pin_irq_hdr_tab[irqindex].pin == pin   &&
-        pin_irq_hdr_tab[irqindex].hdr == hdr   &&
-        pin_irq_hdr_tab[irqindex].mode == mode &&
-        pin_irq_hdr_tab[irqindex].args == args
+    if (pin_irq_hdr_tab[pin].pin == pin   &&
+        pin_irq_hdr_tab[pin].hdr == hdr   &&
+        pin_irq_hdr_tab[pin].mode == mode &&
+        pin_irq_hdr_tab[pin].args == args
     )
     {
         CriticalAreaUnLock(level);
         return EOK;
     }
-    if (pin_irq_hdr_tab[irqindex].pin != -1) {
+
+    if (pin_irq_hdr_tab[pin].pin != -1) {
         CriticalAreaUnLock(level);
         return -EDEV_BUSY;
     }
-    pin_irq_hdr_tab[irqindex].pin = pin;
-    pin_irq_hdr_tab[irqindex].hdr = hdr;
-    pin_irq_hdr_tab[irqindex].mode = mode;
-    pin_irq_hdr_tab[irqindex].args = args;
+    pin_irq_hdr_tab[pin].pin = pin;
+    pin_irq_hdr_tab[pin].hdr = hdr;
+    pin_irq_hdr_tab[pin].mode = mode;
+    pin_irq_hdr_tab[pin].args = args;
     CriticalAreaUnLock(level);
 
     return EOK;
@@ -251,23 +299,21 @@ static int32 GpioIrqRegister(int32 pin, int32 mode, void (*hdr)(void *args), voi
 
 static uint32 GpioIrqFree(int32 pin)
 {
-    const struct PinIndex* index = GetPin(pin);
-    int32 irqindex = -1;
+    struct PinIndex pin_index;
 
-    irqindex = Bit2Bitnum(index->pin);
-    if (irqindex < 0 || irqindex >= ITEM_NUM(pin_irq_hdr_tab)) {
-        return -ENONESYS;
+    if (GetPin(&pin_index, pin) < 0) {
+        return ERROR;
     }
 
     x_base level = CriticalAreaLock();
-    if (pin_irq_hdr_tab[irqindex].pin == -1){
+    if (pin_irq_hdr_tab[pin].pin == -1){
         CriticalAreaUnLock(level);
         return EOK;
     }
-    pin_irq_hdr_tab[irqindex].pin  = -1;
-    pin_irq_hdr_tab[irqindex].hdr  = NONE;
-    pin_irq_hdr_tab[irqindex].mode = 0;
-    pin_irq_hdr_tab[irqindex].args = NONE;
+    pin_irq_hdr_tab[pin].pin  = -1;
+    pin_irq_hdr_tab[pin].hdr  = NONE;
+    pin_irq_hdr_tab[pin].mode = 0;
+    pin_irq_hdr_tab[pin].args = NONE;
     CriticalAreaUnLock(level);
 
     return EOK;
@@ -275,74 +321,81 @@ static uint32 GpioIrqFree(int32 pin)
 
 static int32 GpioIrqEnable(x_base pin)
 {
-    const struct PinIndex* index = GetPin(pin);
-    int32 irqindex = -1;
-    const struct PinIrq *irq;
-    gpio_pin_config_t gpio_config;
+    uint8_t irq_index;
+    gpio_interrupt_mode_t gpio_int_mode;
+    struct PinIndex pin_index;
 
-    irqindex = Bit2Bitnum(index->pin);
-    if (irqindex < 0 || irqindex >= ITEM_NUM(pin_irq_hdr_tab)){
-        return -ENONESYS;
+    if (GetPin(&pin_index, pin) < 0) {
+        return ERROR;
     }
+
     x_base level = CriticalAreaLock();
-    if (pin_irq_hdr_tab[irqindex].pin == -1) {
+    if (pin_irq_hdr_tab[pin].pin == -1) {
         CriticalAreaUnLock(level);
         return -ENONESYS;
     }
 
-    irq = GetPinIrq(pin);
-    if (irq == NONE){
-        CriticalAreaUnLock(level);
-        return -ENONESYS;
-    }
-
-    switch (pin_irq_hdr_tab[irqindex].mode)
+    switch (pin_irq_hdr_tab[pin].mode)
     {
-    case GPIO_IRQ_EDGE_RISING:
-        gpio_config.direction = kGPIO_DigitalInput;
-        gpio_config.interruptMode = kGPIO_IntRisingEdge;
-        break;
-    case GPIO_IRQ_EDGE_FALLING:
-        gpio_config.direction = kGPIO_DigitalInput;
-        gpio_config.interruptMode = kGPIO_IntFallingEdge;
-        break;
-    case GPIO_IRQ_EDGE_BOTH:
-        gpio_config.direction = kGPIO_DigitalInput;
-        gpio_config.interruptMode = kGPIO_IntRisingOrFallingEdge;
-        break;
+        case GPIO_IRQ_EDGE_RISING:
+            gpio_int_mode = kGPIO_IntRisingEdge;
+            break;
+        case GPIO_IRQ_EDGE_FALLING:
+            gpio_int_mode = kGPIO_IntFallingEdge;
+            break;
+        case GPIO_IRQ_EDGE_BOTH:
+            gpio_int_mode = kGPIO_IntRisingOrFallingEdge;
+            break;
+        case GPIO_IRQ_LEVEL_HIGH:
+            gpio_int_mode = kGPIO_IntHighLevel;
+            break;
+        case GPIO_IRQ_LEVEL_LOW:
+            gpio_int_mode = kGPIO_IntLowLevel;
+            break;
+        default:
+            gpio_int_mode = kGPIO_IntRisingEdge;
+            break;
     }
 
-    GPIO_PinInit(index->gpio, index->pin, &gpio_config);
-    GPIO_PortEnableInterrupts(index->gpio, index->pin);
+    irq_index = (pin_index.index << 1) + (pin_index.pin >> 4);
+    GPIO_PinSetInterruptConfig(pin_index.gpio, pin_index.pin, gpio_int_mode);
+    GPIO_PortEnableInterrupts(pin_index.gpio, 1U << pin_index.pin);
+    NVIC_SetPriority(irq_tab[irq_index], NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
+    EnableIRQ(irq_tab[irq_index]);
     CriticalAreaUnLock(level);
     return EOK;
 }
 
 static int32 GpioIrqDisable(x_base pin)
 {
-    const struct PinIndex* index = GetPin(pin);
-    const struct PinIrq *irq;
+    struct PinIndex pin_index;
 
-    irq = GetPinIrq(index->pin);
-    NULL_PARAM_CHECK(irq);
+    if (GetPin(&pin_index, pin) < 0) {
+        return ERROR;
+    }
 
-    GPIO_PortDisableInterrupts(index->gpio, index->pin);
+    GPIO_PortDisableInterrupts(pin_index.gpio, 1U << pin_index.pin);
     return EOK;
 }
 
-static uint32 Stm32PinConfigure(struct PinParam *param)
+static uint32 Imxrt1052PinConfigure(struct PinParam *param)
 {
     NULL_PARAM_CHECK(param);
     int ret = EOK;
 
-    const struct PinIndex *index = GetPin(param->pin);
+    struct PinIndex pin_index;
+
+    if (GetPin(&pin_index, param->pin) < 0) {
+        return ERROR;
+    }
+
     switch(param->cmd)
     {
         case GPIO_CONFIG_MODE:
-            GpioConfigMode(param->mode, index);
+            GpioConfigMode(param->mode, &pin_index);
             break;
         case GPIO_IRQ_REGISTER:
-            ret = GpioIrqRegister(param->pin,param->irq_set.irq_mode,param->irq_set.hdr,param->irq_set.args);
+            ret = GpioIrqRegister(param->pin, param->irq_set.irq_mode, param->irq_set.hdr, param->irq_set.args);
             break;
         case GPIO_IRQ_FREE:
             ret = GpioIrqFree(param->pin);
@@ -361,7 +414,7 @@ static uint32 Stm32PinConfigure(struct PinParam *param)
     return ret;
 }
 
-static uint32 Stm32PinInit(void)
+static uint32 Imxrt1052PinInit(void)
 {
     static x_bool pin_init_flag = RET_FALSE;
 
@@ -372,7 +425,7 @@ static uint32 Stm32PinInit(void)
     return EOK;
 }
 
-static uint32 Stm32GpioDrvConfigure(void *drv, struct BusConfigureInfo *configure_info)
+static uint32 Imxrt1052GpioDrvConfigure(void *drv, struct BusConfigureInfo *configure_info)
 {
     NULL_PARAM_CHECK(drv);
     NULL_PARAM_CHECK(configure_info);
@@ -383,11 +436,11 @@ static uint32 Stm32GpioDrvConfigure(void *drv, struct BusConfigureInfo *configur
     switch (configure_info->configure_cmd)
     {
         case OPE_INT:
-            ret = Stm32PinInit();
+            ret = Imxrt1052PinInit();
             break;
         case OPE_CFG:
             param = (struct PinParam *)configure_info->private_data;
-            ret = Stm32PinConfigure(param);
+            ret = Imxrt1052PinConfigure(param);
             break;
         default:
             break;
@@ -396,47 +449,55 @@ static uint32 Stm32GpioDrvConfigure(void *drv, struct BusConfigureInfo *configur
     return ret;
 }
 
-uint32 Stm32PinWrite(void *dev, struct BusBlockWriteParam *write_param)
+uint32 Imxrt1052PinWrite(void *dev, struct BusBlockWriteParam *write_param)
 {
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(write_param);
-    struct PinStat *pinstat = (struct PinStat *)write_param->buffer;
-    const struct PinIndex* index = GetPin(pinstat->pin);
-    NULL_PARAM_CHECK(index);
+    struct PinStat *pin_stat = (struct PinStat *)write_param->buffer;
+    struct PinIndex pin_index;
+    
+    if (GetPin(&pin_index, pin_stat->pin) < 0) {
+        return ERROR;
+    }
 
-    if (GPIO_LOW == pinstat->val) {
-        GPIO_PinWrite(index->gpio, index->pin, 0);
+    KPrintf("Imxrt1052PinWrite gpio 0x%x val %u\n", pin_index.gpio, pin_stat->val);
+
+    if (GPIO_LOW == pin_stat->val) {
+        GPIO_PinWrite(pin_index.gpio, pin_index.pin, 0);
     } else {
-        GPIO_PinWrite(index->gpio, index->pin, 1);
+        GPIO_PinWrite(pin_index.gpio, pin_index.pin, 1);
     }
     return EOK;
 }
 
-uint32 Stm32PinRead(void *dev, struct BusBlockReadParam *read_param)
+uint32 Imxrt1052PinRead(void *dev, struct BusBlockReadParam *read_param)
 {
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(read_param);
-    struct PinStat *pinstat = (struct PinStat *)read_param->buffer;
-    const struct PinIndex* index = GetPin(pinstat->pin);
-    NULL_PARAM_CHECK(index);
-
-    if(GPIO_PinRead(index->gpio, index->pin) == GPIO_LOW) {
-        pinstat->val = GPIO_LOW;
-    } else {
-        pinstat->val = GPIO_HIGH;
+    struct PinStat *pin_stat = (struct PinStat *)read_param->buffer;
+    struct PinIndex pin_index;
+    
+    if (GetPin(&pin_index, pin_stat->pin) < 0) {
+        return ERROR;
     }
-    return pinstat->val;
+
+    if(GPIO_LOW == GPIO_PinRead(pin_index.gpio, pin_index.pin)) {
+        pin_stat->val = GPIO_LOW;
+    } else {
+        pin_stat->val = GPIO_HIGH;
+    }
+    return pin_stat->val;
 }
 
 static const struct PinDevDone dev_done =
 {
     .open  = NONE,
     .close = NONE,
-    .write = Stm32PinWrite,
-    .read  = Stm32PinRead,
+    .write = Imxrt1052PinWrite,
+    .read  = Imxrt1052PinRead,
 };
 
-int Stm32HwGpioInit(void)
+int Imxrt1052HwGpioInit(void)
 {
     x_err_t ret = EOK;
 
@@ -449,7 +510,7 @@ int Stm32HwGpioInit(void)
     }
 
     static struct PinDriver drv;
-    drv.configure = &Stm32GpioDrvConfigure;
+    drv.configure = Imxrt1052GpioDrvConfigure;
 
     ret = PinDriverInit(&drv, PIN_DRIVER_NAME, NONE);
     if (ret != EOK) {
@@ -479,66 +540,228 @@ int Stm32HwGpioInit(void)
     return ret;
 }
 
-static __inline void PinIrqHdr(int irqno)
+static __inline void PinIrqHdr(uint32_t index_offset, uint8_t pin_start, GPIO_Type *gpio)
 {
-    const struct PinIndex* index = GetPin(irqno);
-    const struct PinIrq *irq;
+    int i;
+    uint32_t isr_status, pin;
+    struct PinIndex pin_index;
 
-    irq = GetPinIrq(index->pin);
-    NULL_PARAM_CHECK(irq);
+    isr_status = GPIO_PortGetInterruptFlags(gpio) & gpio->IMR;
 
-    GPIO_ClearPinsInterruptFlags(index->gpio, index->pin);
+    for (i = pin_start; i <= pin_start + 15 ; i ++) {
 
-    if (pin_irq_hdr_tab[irqno].hdr){
-       pin_irq_hdr_tab[irqno].hdr(pin_irq_hdr_tab[irqno].args);
+        if (GetPin(&pin_index, i + index_offset) < 0) {
+            continue;
+        }
+
+        if (isr_status & (1 << i)) {
+            GPIO_PortClearInterruptFlags(gpio, (1 << i));
+            pin = index_offset + i;
+            if (pin_irq_hdr_tab[pin].hdr) {
+                pin_irq_hdr_tab[pin].hdr(pin_irq_hdr_tab[pin].args);
+            }
+        }
     }
 }
 
-void EXTI0_IRQHandler(int irq_num, void *arg)
+void GPIO1_0_15_IRQHandler(int irq_num, void *arg)
 {
-    PinIrqHdr(0);
-}
-DECLARE_HW_IRQ(GPIO1_INT0_IRQn, EXTI0_IRQHandler, NONE);
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
 
-void EXTI1_IRQHandler(int irq_num, void *arg)
-{
-    PinIrqHdr(1);
-}
-DECLARE_HW_IRQ(GPIO1_INT1_IRQn, EXTI1_IRQHandler, NONE);
+    PinIrqHdr(0, 0, GPIO1);
 
-void EXTI2_IRQHandler(int irq_num, void *arg)
-{
-    PinIrqHdr(2);
+    ENABLE_INTERRUPT(lock);
 }
-DECLARE_HW_IRQ(GPIO1_INT2_IRQn, EXTI2_IRQHandler, NONE);
+DECLARE_HW_IRQ(GPIO1_Combined_0_15_IRQn, GPIO1_0_15_IRQHandler, NONE);
 
-void EXTI3_IRQHandler(int irq_num, void *arg)
+void GPIO1_16_31_IRQHandler(int irq_num, void *arg)
 {
-    PinIrqHdr(3);
-}
-DECLARE_HW_IRQ(GPIO1_INT3_IRQn, EXTI3_IRQHandler, NONE);
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
 
-void EXTI4_IRQHandler(int irq_num, void *arg)
-{
-    PinIrqHdr(4);
-}
-DECLARE_HW_IRQ(GPIO1_INT4_IRQn, EXTI4_IRQHandler, NONE);
+    PinIrqHdr(0, 15, GPIO1);
 
-void EXTI5_IRQHandler(int irq_num, void *arg)
-{
-    PinIrqHdr(5);
+    ENABLE_INTERRUPT(lock);
 }
-DECLARE_HW_IRQ(GPIO1_INT5_IRQn, EXTI5_IRQHandler, NONE);
+DECLARE_HW_IRQ(GPIO1_Combined_16_31_IRQn, GPIO1_16_31_IRQHandler, NONE);
 
-void EXTI6_IRQHandler(int irq_num, void *arg)
+void GPIO2_0_15_IRQHandler(int irq_num, void *arg)
 {
-    PinIrqHdr(6);
-}
-DECLARE_HW_IRQ(GPIO1_INT6_IRQn, EXTI6_IRQHandler, NONE);
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
 
-void EXTI7_IRQHandler(int irq_num, void *arg)
-{
-    PinIrqHdr(7);
+    PinIrqHdr(32, 0, GPIO2);
+
+    ENABLE_INTERRUPT(lock);
 }
-DECLARE_HW_IRQ(GPIO1_INT7_IRQn, EXTI7_IRQHandler, NONE);
+DECLARE_HW_IRQ(GPIO2_Combined_0_15_IRQn, GPIO2_0_15_IRQHandler, NONE);
+
+void GPIO2_16_31_IRQHandler(int irq_num, void *arg)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    PinIrqHdr(32, 15, GPIO2);
+
+    ENABLE_INTERRUPT(lock);
+}
+DECLARE_HW_IRQ(GPIO2_Combined_16_31_IRQn, GPIO2_16_31_IRQHandler, NONE);
+
+void GPIO3_0_15_IRQHandler(int irq_num, void *arg)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    PinIrqHdr(64, 0, GPIO3);
+
+    ENABLE_INTERRUPT(lock);
+}
+DECLARE_HW_IRQ(GPIO3_Combined_0_15_IRQn, GPIO3_0_15_IRQHandler, NONE);
+
+void GPIO3_16_31_IRQHandler(int irq_num, void *arg)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    PinIrqHdr(64, 15, GPIO3);
+
+    ENABLE_INTERRUPT(lock);
+}
+DECLARE_HW_IRQ(GPIO3_Combined_16_31_IRQn, GPIO3_16_31_IRQHandler, NONE);
+
+void GPIO4_0_15_IRQHandler(int irq_num, void *arg)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    PinIrqHdr(96, 0, GPIO4);
+
+    ENABLE_INTERRUPT(lock);
+}
+DECLARE_HW_IRQ(GPIO4_Combined_0_15_IRQn, GPIO4_0_15_IRQHandler, NONE);
+
+void GPIO4_16_31_IRQHandler(int irq_num, void *arg)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    PinIrqHdr(96, 15, GPIO4);
+
+    ENABLE_INTERRUPT(lock);
+}
+DECLARE_HW_IRQ(GPIO4_Combined_16_31_IRQn, GPIO4_16_31_IRQHandler, NONE);
+
+void GPIO5_0_15_IRQHandler(int irq_num, void *arg)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    PinIrqHdr(128, 0, GPIO5);
+
+    ENABLE_INTERRUPT(lock);
+}
+DECLARE_HW_IRQ(GPIO5_Combined_0_15_IRQn, GPIO5_0_15_IRQHandler, NONE);
+
+void GPIO5_16_31_IRQHandler(int irq_num, void *arg)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    PinIrqHdr(128, 15, GPIO5);
+
+    ENABLE_INTERRUPT(lock);
+}
+DECLARE_HW_IRQ(GPIO5_Combined_16_31_IRQn, GPIO5_16_31_IRQHandler, NONE);
+
+#ifdef GPIO_LED_TEST
+static void GpioLedDelay(void)
+{
+    volatile uint32_t i = 0;
+    for (i = 0; i < 8000000; ++i)
+    {
+        __asm("NOP"); /* delay */
+    }
+}
+
+void GpioLedTest(void)
+{
+	BusType pin;
+    struct BusConfigureInfo configure_info;
+	struct BusBlockWriteParam write_param;
+
+    int ret = 0;
+    bool pinSet = 1;
+
+    pin = BusFind(PIN_BUS_NAME);
+    if (!pin) {
+        KPrintf("find %s failed!\n", PIN_BUS_NAME);
+        return;
+    }
+    pin->owner_driver = BusFindDriver(pin, PIN_DRIVER_NAME);
+    pin->owner_haldev = BusFindDevice(pin, PIN_DEVICE_NAME);
+
+	configure_info.configure_cmd = OPE_INT;
+    ret = BusDrvConfigure(pin->owner_driver, &configure_info);
+    if (ret != EOK) {
+        KPrintf("initialize %s failed!\n", PIN_BUS_NAME);
+        return;
+    }
+
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B0_09_GPIO1_IO09,        /* GPIO_AD_B0_09 is configured as GPIO1_IO09 */
+        0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+                                    /* Software Input On Field: Input Path is determined by functionality */
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B0_09_GPIO1_IO09,        /* GPIO_AD_B0_09 PAD functional properties : */
+        0x10B0u);                               /* Slew Rate Field: Slow Slew Rate
+                                                    Drive Strength Field: R0/6
+                                                    Speed Field: medium(100MHz)
+                                                    Open Drain Enable Field: Open Drain Disabled
+                                                    Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                    Pull / Keep Select Field: Keeper
+                                                    Pull Up / Down Config. Field: 100K Ohm Pull Down
+                                                    Hyst. Enable Field: Hysteresis Disabled */
+    
+    struct PinParam led_gpio_param;
+    struct PinStat led_gpio_stat;
+
+    /* config led pin as output*/
+    led_gpio_param.cmd = GPIO_CONFIG_MODE;
+    led_gpio_param.pin = IMXRT_GET_PIN(1, 9);
+    led_gpio_param.mode = GPIO_CFG_OUTPUT_OD;
+
+	configure_info.configure_cmd = OPE_CFG;
+	configure_info.private_data = (void *)&led_gpio_param;
+    ret = BusDrvConfigure(pin->owner_driver, &configure_info);
+    if (ret != EOK) {
+        KPrintf("config pin %d failed!\n", IMXRT_GET_PIN(1, 9));
+        return;
+    }
+
+    while (1) {
+
+        GpioLedDelay();
+
+        if (pinSet) {
+            /* set led pin as high*/
+            led_gpio_stat.pin = IMXRT_GET_PIN(1, 9);
+            led_gpio_stat.val = GPIO_HIGH;
+            write_param.buffer = (void *)&led_gpio_stat;
+            BusDevWriteData(pin->owner_haldev, &write_param);
+            pinSet = 0;
+        } else {
+            /* set led pin as low*/
+            led_gpio_stat.pin = IMXRT_GET_PIN(1, 9);
+            led_gpio_stat.val = GPIO_LOW;
+            write_param.buffer = (void *)&led_gpio_stat;
+            BusDevWriteData(pin->owner_haldev, &write_param);
+            pinSet = 1;
+        }
+
+    }
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                                                GpioLedTest, GpioLedTest, GpioLedTest GPIO1 IO09 LED);
+#endif
 
