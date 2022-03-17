@@ -34,7 +34,7 @@ int AdapterFrameworkInit(void)
     AppInitDoubleList(&adapter_list);
 
     ret = PrivMutexCreate(&adapter_list_lock, 0);
-    if(ret < 0) {
+    if(ret != 0) {
         printf("AdapterFrameworkInit mutex create failed.\n");
     }
 
@@ -50,11 +50,16 @@ AdapterType AdapterDeviceFindByName(const char *name)
 {
     struct Adapter *ret = NULL;
     struct DoublelistNode *node;
+    int status = 0;
 
     if (NULL == name)
         return NULL;
 
-    PrivMutexObtain(&adapter_list_lock);
+    status = PrivMutexObtain(&adapter_list_lock);
+    if (status != 0){
+       printf("%s:pthread_mutex_lock failed, status=%d\n",__func__,status);
+    }
+
     DOUBLE_LIST_FOR_EACH(node, &adapter_list) {
         struct Adapter *adapter = CONTAINER_OF(node,
                 struct Adapter, link);
@@ -64,7 +69,11 @@ AdapterType AdapterDeviceFindByName(const char *name)
         }
         printf("PrivMutexObtain in loop\n");
     }
-    PrivMutexAbandon(&adapter_list_lock);
+
+    status = PrivMutexAbandon(&adapter_list_lock);
+    if (status != 0){
+       printf("%s:pthread_mutex_unlock failed, status=%d\n",__func__,status);
+    }
 
     return ret;
 }
@@ -76,6 +85,7 @@ AdapterType AdapterDeviceFindByName(const char *name)
  */
 int AdapterDeviceRegister(struct Adapter *adapter)
 {
+    int status = 0;
     if (NULL == adapter )
         return -1;
 
@@ -84,9 +94,17 @@ int AdapterDeviceRegister(struct Adapter *adapter)
         return -1;
     }
 
-    PrivMutexObtain(&adapter_list_lock);
+    status = PrivMutexObtain(&adapter_list_lock);
+    if (status != 0){
+       printf("%s:pthread_mutex_lock failed, status=%d\n",__func__,status);
+    }
+
     AppDoubleListInsertNodeAfter(&adapter_list, &adapter->link);
-    PrivMutexAbandon(&adapter_list_lock);
+    
+    status = PrivMutexAbandon(&adapter_list_lock);
+    if (status != 0){
+       printf("%s:pthread_mutex_unlock failed, status=%d\n",__func__,status);
+    }
 
     adapter->adapter_status = REGISTERED;
 
@@ -100,11 +118,20 @@ int AdapterDeviceRegister(struct Adapter *adapter)
  */
 int AdapterDeviceUnregister(struct Adapter *adapter)
 {
+    int status = 0;
     if (!adapter)
         return -1;
-    PrivMutexObtain(&adapter_list_lock);
+    status = PrivMutexObtain(&adapter_list_lock);
+    if (status != 0){
+       printf("%s:pthread_mutex_lock failed, status=%d\n",__func__,status);
+    }
+
     AppDoubleListRmNode(&adapter->link);
-    PrivMutexAbandon(&adapter_list_lock);
+
+    status = PrivMutexAbandon(&adapter_list_lock);
+    if (status != 0){
+       printf("%s:pthread_mutex_unlock failed, status=%d\n",__func__,status);
+    }
 
     adapter->adapter_status = UNREGISTERED;
 

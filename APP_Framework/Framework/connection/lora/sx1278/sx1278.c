@@ -20,6 +20,35 @@
 
 #include <adapter.h>
 
+#ifdef ADD_NUTTX_FETURES
+ *   fd     
+ *   buf    - Data to write
+ *   nbytes - Length of data to write
+ /**
+ * @description: Sx127x_Nuttx_Write function for nuttx
+ * @param fd - file descriptor to write to
+ * @param buf - Data to write
+ * @param buf - Length of data to write
+ * @return On success, the number of bytes written are returned (zero indicates nothing was written). On error, -1 is returned.
+ */
+static int Sx127x_Nuttx_Write(int fd, const void *buf, size_t len)
+{
+    int ret;
+
+    unsigned char *buffer = (unsigned char*)PrivMalloc(256);
+    if (!buffer)
+    {
+      printf("failed to allocate buffer\n");
+    }
+    memset(buffer, 0, 256);
+    memcpy(buffer,(unsigned char *)buf,len);
+
+    ret = PrivWrite(fd, buffer, len);
+    PrivFree(buffer);
+
+    return ret;
+}
+#endif
 /**
  * @description: Open SX1278 spi function
  * @param adapter - Lora device pointer
@@ -47,9 +76,14 @@ static int Sx1278Open(struct Adapter *adapter)
 static int Sx1278Close(struct Adapter *adapter)
 {
     /*step1: close sx1278 spi port*/
-    PrivClose(adapter->fd);
+    int ret;
+    ret = PrivClose(adapter->fd);
+    if(ret < 0){
+        printf("Sx1278 close failed: %d!\n", ret);
+        return -1;
+    }
 
-    ADAPTER_DEBUG("Sx1278Close done\n");
+    ADAPTER_DEBUG("Sx1278 Close done\n");
 
     return 0;
 }
@@ -73,13 +107,30 @@ static int Sx1278Ioctl(struct Adapter *adapter, int cmd, void *args)
  * @param priv_net_group - priv_net_group params
  * @return success: 0, failure: -1
  */
+#ifdef ADD_NUTTX_FETURES
 static int Sx1278Join(struct Adapter *adapter, unsigned char *priv_net_group)
 {
+    int ret;
+    ret = Sx127x_Nuttx_Write(adapter->fd, (void *)priv_net_group, 144);
+    if(ret < 0){
+        printf("Sx1278 Join net group failed: %d!\n", ret);
+    }
 
-    PrivWrite(adapter->fd, (void *)priv_net_group, 144);
-
-    return 0;
+    return ret;
 }
+#else
+static int Sx1278Join(struct Adapter *adapter, unsigned char *priv_net_group)
+{
+    int ret;
+    ret = PrivWrite(adapter->fd, (void *)priv_net_group, 144);
+    if(ret < 0){
+        printf("Sx1278 Join net group failed: %d!\n", ret);
+    }
+
+    return ret;
+}
+#endif
+
 
 /**
  * @description: SX1278 send data function
@@ -88,11 +139,28 @@ static int Sx1278Join(struct Adapter *adapter, unsigned char *priv_net_group)
  * @param len - data len
  * @return success: 0, failure: -1
  */
+#ifdef ADD_NUTTX_FETURES
 static int Sx1278Send(struct Adapter *adapter, const void *buf, size_t len)
 {
-    PrivWrite(adapter->fd, buf, len);
-    return 0;
+    int ret;
+    ret = Sx127x_Nuttx_Write(adapter->fd, buf, len);
+    if(ret < 0){
+        printf("send failed %d!\n", ret);
+    }
+    return ret;
 }
+#else
+static int Sx1278Send(struct Adapter *adapter, const void *buf, size_t len)
+{
+    int ret;
+    ret = PrivWrite(adapter->fd, buf, len);
+    if(ret < 0){
+        printf("send failed %d!\n", ret);
+    }
+    
+    return ret;
+}
+#endif
 
 /**
  * @description: SX1278 receive data function 
@@ -101,10 +169,25 @@ static int Sx1278Send(struct Adapter *adapter, const void *buf, size_t len)
  * @param len - data len
  * @return success: 0, failure: -1
  */
+#ifdef ADD_NUTTX_FETURES
+static int Sx1278Recv(struct Adapter *adapter, void *buf, size_t len)
+{
+    int ret;
+    struct sx127x_read_hdr_s recv_data;
+    ret = read(adapter->fd, &recv_data, sizeof(struct sx127x_read_hdr_s));
+    if (ret <= 0){
+        printf("Read failed %d!\n", ret);
+        return ret;
+    }
+    memcpy((uint8 *)buf, (uint8 *)(&recv_data), len);
+    return ret;
+}
+#else
 static int Sx1278Recv(struct Adapter *adapter, void *buf, size_t len)
 {
     return PrivRead(adapter->fd, buf, len);
 }
+#endif
 
 /**
  * @description: SX1278 quit lora net group function
@@ -112,12 +195,30 @@ static int Sx1278Recv(struct Adapter *adapter, void *buf, size_t len)
  * @param priv_net_group - priv_net_group params
  * @return success: 0, failure: -1
  */
+#ifdef ADD_NUTTX_FETURES
 static int Sx1278Quit(struct Adapter *adapter, unsigned char *priv_net_group)
 {
-    PrivWrite(adapter->fd, (void *)priv_net_group, 144);
+    int ret;
+    ret = Sx127x_Nuttx_Write(adapter->fd, (void *)priv_net_group, 144);
+    if(ret < 0){
+        printf("Sx1278 quit net group failed %d!\n", ret);
+    }
 
-    return 0;
+    return ret;
 }
+#else
+static int Sx1278Quit(struct Adapter *adapter, unsigned char *priv_net_group)
+{
+    int ret;
+    ret = PrivWrite(adapter->fd, (void *)priv_net_group, 144);
+    if(ret < 0){
+        printf("Sx1278 quit net group failed %d!\n", ret);
+    }
+
+    return ret;
+}
+
+#endif
 
 static const struct PrivProtocolDone sx1278_done = 
 {
