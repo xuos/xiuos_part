@@ -60,7 +60,11 @@ typedef struct PlcSocketParamStruct{
 }PlcSocketParamType;
 
 //debug command
+<<<<<<< HEAD
 #define plc_print KPrintf
+=======
+#define plc_print //KPrintf
+>>>>>>> e5d124231c72798f7f77b842cc8c631b79043914
 #define plc_error KPrintf
 #define plc_notice KPrintf
 

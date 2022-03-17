@@ -71,7 +71,10 @@ int MountSDCard(void)
 #endif
 #ifdef BSP_USING_LPUART
 #include <connect_uart.h>
+<<<<<<< HEAD
 #endif
+=======
+>>>>>>> e5d124231c72798f7f77b842cc8c631b79043914
 
 #ifdef BSP_USING_ADC
 #include <connect_adc.h>
