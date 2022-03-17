@@ -22,7 +22,7 @@ menuconfig BSP_USING_GPIO
 
 menuconfig BSP_USING_I2C
     bool "Using I2C device"
-    default y
+    default n
     select RESOURCES_I2C
 
     if BSP_USING_I2C
@@ -31,7 +31,7 @@ menuconfig BSP_USING_I2C
 
 menuconfig BSP_USING_ADC
     bool "Using ADC device"
-    default y
+    default n
     select RESOURCES_ADC
 
     if BSP_USING_ADC
@@ -40,7 +40,7 @@ menuconfig BSP_USING_ADC
 
 menuconfig BSP_USING_SPI
     bool "Using SPI device"
-    default y
+    default n
     select RESOURCES_SPI
 
     if BSP_USING_SPI

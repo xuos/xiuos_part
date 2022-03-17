@@ -232,7 +232,7 @@ netconn_prepare_delete(struct netconn *conn)
 err_t
 netconn_delete(struct netconn *conn)
 {
-  err_t err;
+  err_t err = ERR_OK;
 
   /* No ASSERT here because possible to get a (conn == NULL) if we got an accept error */
   if (conn == NULL) {
@@ -245,8 +245,9 @@ netconn_delete(struct netconn *conn)
     err = ERR_OK;
   } else
 #endif /* LWIP_NETCONN_FULLDUPLEX */
+//tst by wly
   {
-//    err = netconn_prepare_delete(conn);
+    err = netconn_prepare_delete(conn);
   }
   if (err == ERR_OK) {
     netconn_free(conn);

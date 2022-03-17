@@ -159,9 +159,9 @@ tcpecho_raw_ack(struct tcp_pcb *tpcb, struct tcpecho_raw_state* es){
   if((recv_len != TCP_MSS) || (recv_buf[recv_len - 1] == TCP_EOF_CH))
   {
     if(g_buf_size < MAX_TCP_SHOW_SIZE){
-      lw_pr_info("Received: %s\n", g_buf);
+      lw_notice("Received: %s\n", g_buf);
     }else{
-      lw_pr_info("Received a string of length %d\n", g_buf_size);
+      lw_notice("Received a string of length %d\n", g_buf_size);
     }
 
     tcpecho_raw_ack_size(tpcb, g_buf_size);

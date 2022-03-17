@@ -67,7 +67,7 @@ static void TCPSocketRecvTask(void *arg)
         }
 
         lw_print("tcp bind success, start to receive.\n");
-        lw_pr_info("\n\nLocal Port:%d\n\n", LWIP_LOCAL_PORT);
+        lw_notice("\n\nLocal Port:%d\n\n", LWIP_LOCAL_PORT);
 
         // setup socket fd as listening mode
         if (listen(fd, 5) != 0 )
@@ -78,7 +78,7 @@ static void TCPSocketRecvTask(void *arg)
 
         // accept client connection
         clientfd = accept(fd, (struct sockaddr *)&tcp_addr, (socklen_t*)&addr_len);
-        lw_pr_info("client %s connected\n", inet_ntoa(tcp_addr.sin_addr));
+        lw_notice("client %s connected\n", inet_ntoa(tcp_addr.sin_addr));
 
         while(1)
         {
@@ -86,8 +86,8 @@ static void TCPSocketRecvTask(void *arg)
             recv_len = recvfrom(clientfd, recv_buf, TCP_DEMO_BUF_SIZE, 0, (struct sockaddr *)&tcp_addr, &addr_len);
             if(recv_len > 0)
             {
-                lw_pr_info("Receive from : %s\n", inet_ntoa(tcp_addr.sin_addr));
-                lw_pr_info("Receive data : %d - %s\n\n", recv_len, recv_buf);
+                lw_notice("Receive from : %s\n", inet_ntoa(tcp_addr.sin_addr));
+                lw_notice("Receive data : %d - %s\n\n", recv_len, recv_buf);
             }
             sendto(clientfd, recv_buf, recv_len, 0, (struct sockaddr*)&tcp_addr, addr_len);
         }
@@ -113,7 +113,7 @@ void TCPSocketRecvTest(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &tcp_socket_ip[0], &tcp_socket_ip[1], &tcp_socket_ip[2], &tcp_socket_ip[3]);
     }
 
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
     sys_thread_new("TCPSocketRecvTask", TCPSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
@@ -133,7 +133,7 @@ static void TCPSocketSendTask(void *arg)
     if (fd < 0)
     {
         lw_print("Socket error\n");
-        goto __exit;
+        return;
     }
 
     struct sockaddr_in tcp_sock;
@@ -145,25 +145,23 @@ static void TCPSocketSendTask(void *arg)
     if (connect(fd, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr)))
     {
         lw_print("Unable to connect\n");
-        goto __exit;
+        closesocket(fd);
+        return;
     }
 
     lw_print("tcp connect success, start to send.\n");
-    lw_pr_info("\n\nTarget Port:%d\n\n", LWIP_TARGET_PORT);
+    lw_notice("\n\nTarget Port:%d\n\n", LWIP_TARGET_PORT);
 
     while (cnt --)
     {
         lw_print("Lwip client is running.\n");
         snprintf(send_msg, sizeof(send_msg), "TCP test package times %d\r\n", cnt);
         sendto(fd, send_msg, strlen(send_msg), 0, (struct sockaddr*)&tcp_sock, sizeof(struct sockaddr));
-        lw_pr_info("Send tcp msg: %s ", send_msg);
+        lw_notice("Send tcp msg: %s ", send_msg);
         MdelayKTask(1000);
     }
 
-__exit:
-    if (fd >= 0)
-        closesocket(fd);
-
+    closesocket(fd);
     return;
 }
 

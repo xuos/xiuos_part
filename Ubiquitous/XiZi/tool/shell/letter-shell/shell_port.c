@@ -1,12 +1,12 @@
 /**
  * @file shell_port.c
  * @author Letter (NevermindZZT@gmail.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2019-02-22
- * 
+ *
  * @copyright (c) 2019 Letter
- * 
+ *
  */
 
 #include "xizi.h"
@@ -26,11 +26,11 @@ char *shellBuffer;
 ShellFs shellFs;
 char *shellPathBuffer;
 
-HardwareDevType console; 
+HardwareDevType console;
 
 /**
- * @brief Shell write 
- * 
+ * @brief Shell write
+ *
  * @param data write data
  */
 void userShellWrite(char data)
@@ -40,7 +40,7 @@ void userShellWrite(char data)
 
 /**
  * @brief shell read
- * 
+ *
  * @param data read data
  * @return char  read status
  */
@@ -62,7 +62,7 @@ signed char userShellRead(char *data)
 #ifdef SHELL_ENABLE_FILESYSTEM
 /**
  * @brief list file
- * 
+ *
  * @param path  path
  * @param buffer result buffer
  * @param maxLen the maximum buffer size
@@ -86,14 +86,14 @@ size_t userShellListDir(char *path, char *buffer, size_t maxLen)
 #endif
 
 /**
- * @brief Initialize the shell 
- * 
+ * @brief Initialize the shell
+ *
  */
 int userShellInit(void)
 {
     shellBuffer = x_malloc(512*sizeof(char));
-    
-  
+
+
 #ifdef SHELL_ENABLE_FILESYSTEM
     shellPathBuffer = x_malloc(512*sizeof(char));
     shellPathBuffer[0] = '/';
@@ -102,7 +102,7 @@ int userShellInit(void)
     shellFs.listdir = userShellListDir;
     shellFsInit(&shellFs, shellPathBuffer, 512);
     shellSetPath(&shell, shellPathBuffer);
-#endif    
+#endif
 
     shell.write = userShellWrite;
     shell.read = userShellRead;
@@ -114,13 +114,13 @@ int userShellInit(void)
     serial_dev_param->serial_set_mode = 0;
     serial_dev_param->serial_stream_mode = SIGN_OPER_STREAM;
     BusDevOpen(console);
-    
-    shellInit(&shell, shellBuffer, 512);
+
+    shellInit(&shell, shellBuffer, 4096);
     int32 tid;
     tid = KTaskCreate("letter-shell",
                            shellTask, &shell,
                            SHELL_TASK_STACK_SIZE, SHELL_TASK_PRIORITY);
-        
+
         StartupKTask(tid);
         return 0;
 }

@@ -21,7 +21,9 @@
 #ifndef FLASH_SPI_H
 #define FLASH_SPI_H
 
+#ifdef RESOURCES_SPI_SFUD
 #include <sfud_port.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

@@ -78,8 +78,8 @@ static void UdpSocketRecvTask(void *arg)
         {
             memset(recv_buf, 0, UDP_BUF_SIZE);
             recv_len = recvfrom(socket_fd, recv_buf, UDP_BUF_SIZE, 0, (struct sockaddr *)&server_addr, &addr_len);
-            lw_pr_info("Receive from : %s\n", inet_ntoa(server_addr.sin_addr));
-            lw_pr_info("Receive data : %s\n\n", recv_buf);
+            lw_notice("Receive from : %s\n", inet_ntoa(server_addr.sin_addr));
+            lw_notice("Receive data : %s\n\n", recv_buf);
             sendto(socket_fd, recv_buf, recv_len, 0, (struct sockaddr*)&server_addr, addr_len);
         }
 
@@ -151,7 +151,7 @@ static void UdpSocketSendTask(void *arg)
     {
         snprintf(send_str, sizeof(send_str), "UDP test package times %d\r\n", cnt);
         sendto(socket_fd, send_str, strlen(send_str), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
-        lw_pr_info("Send UDP msg: %s ", send_str);
+        lw_notice("Send UDP msg: %s ", send_str);
         MdelayKTask(1000);
     }
 

@@ -38,13 +38,13 @@ static struct MsgQueue *GetMsgQueueById(int32 id)
 
     if (id < 0 )
        return NONE;
-    
+
     lock = CriticalAreaLock();
     idnode = IdGetObj(&k_mq_id_manager, id);
     if (idnode == NONE){
         CriticalAreaUnLock(lock);
         return NONE;
-    } 
+    }
     mq = CONTAINER_OF(idnode, struct MsgQueue, id);
     CriticalAreaUnLock(lock);
     return mq;
@@ -61,7 +61,7 @@ static x_err_t _InitMsgQueue( struct MsgQueue *mq ,x_size_t   msg_size,
     mq->num_msgs = 0;
     mq->each_len = ALIGN_MEN_UP(msg_size, MEM_ALIGN_SIZE);
     mq->index = 0;
-    
+
     InitDoubleLinkList(&mq->send_pend_list);
     InitDoubleLinkList(&(mq->recv_pend_list));
 
@@ -102,9 +102,9 @@ static x_err_t _MsgQueueSend(struct MsgQueue *mq,
         CriticalAreaUnLock(lock);
         return -EFULL;
     }
-    
+
     while(mq->num_msgs >= mq->max_msgs ) {
-        
+
         task->exstatus = EOK;
         if (timeout == 0) {
             CriticalAreaUnLock(lock);
@@ -171,7 +171,7 @@ static x_err_t _MsgQueueUrgentSend(struct MsgQueue *mq, const void *buffer, x_si
     mq->index --;
     if (mq->index < 0)
         mq->index += mq->max_msgs;
-    
+
     msg = mq->msg_buf + ( ( mq->index + mq->num_msgs ) % mq->max_msgs ) * mq->each_len ;
     memcpy(msg , buffer, size);
     mq->num_msgs ++;
@@ -297,6 +297,7 @@ static x_err_t _DeleteMsgQueue(struct MsgQueue *mq)
     KERNEL_FREE(mq->msg_buf);
 
     lock = CriticalAreaLock();
+    IdRemoveObj(&k_mq_id_manager, mq->id.id);
     DoubleLinkListRmNode(&(mq->link));
     CriticalAreaUnLock(lock);
     KERNEL_FREE(mq);
@@ -381,7 +382,7 @@ x_err_t KMsgQueueReinit(int32 id)
  * @param buffer message info
  * @param size the size of buffer
  * @param timeout time needed waiting
- * 
+ *
  * @return EOK on success;EINVALED on failure
  *
  */
@@ -406,7 +407,7 @@ x_err_t KMsgQueueRecv(int32 id,
  * a dynamic messagequeue will be deleted from the manage list
  *
  * @param id the message id
- * 
+ *
  * @return EOK on success;EINVALED on failure
  *
  */
@@ -429,7 +430,7 @@ x_err_t KDeleteMsgQueue(int32 id)
  * @param id the message id
  * @param buffer message info
  * @param size the size of buffer
- * 
+ *
  * @return EOK on success;EINVALED on failure
  *
  */
@@ -453,7 +454,7 @@ x_err_t KMsgQueueUrgentSend(int32 id, const void *buffer, x_size_t size)
  * @param id the message id
  * @param buffer message info
  * @param size the size of buffer
- * 
+ *
  * @return EOK on success;EINVALED on failure
  *
  */
@@ -477,7 +478,7 @@ x_err_t KMsgQueueSend(int32 id, const void *buffer, x_size_t size)
  * @param buffer message info
  * @param size the size of buffer
  * @param timeout waiting time
- * 
+ *
  * @return EOK on success;EINVALED on failure
  *
  */
