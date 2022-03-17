@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
+* Copyright (c) 2022 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
@@ -9,17 +9,17 @@
 * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 * See the Mulan PSL v2 for more details.
 */
- 
+
 /**
 * @file connect_gpio.h
 * @brief define stm32f407-st-discovery-board gpio function and struct
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-04-25
+* @date 2022-03-01
 */
 
-#ifndef CONNECT_GPIO_H
-#define CONNECT_GPIO_H
+#ifndef __CONNECT_GPIO_H_
+#define __CONNECT_GPIO_H_
 
 #include <device.h>
 

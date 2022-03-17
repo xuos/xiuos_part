@@ -12,7 +12,7 @@
 
 /**
 * @file interrupt.c
-* @brief support arm cortex-m4 interrupt function
+* @brief support arm cortex-m0 interrupt function
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-29

@@ -5,8 +5,9 @@ MAKEFLAGS += --no-print-directory
 .PHONY:COMPILE_APP COMPILE_KERNEL
 
 
-support :=kd233 stm32f407-st-discovery maix-go stm32f407zgt6 aiit-riscv64-board aiit-arm32-board hifive1-rev-B hifive1-emulator k210-emulator cortex-m3-emulator cortex-m4-emulator ok1052-c gapuino stm32f103-nano gd32vf103_rvstar cortex-m0-emulator rv32m1_vega
-SRC_DIR:=
+support :=kd233 stm32f407-st-discovery maix-go stm32f407zgt6 aiit-riscv64-board aiit-arm32-board hifive1-rev-B hifive1-emulator k210-emulator cortex-m3-emulator cortex-m4-emulator ok1052-c gapuino stm32f103-nano gd32vf103_rvstar cortex-m0-emulator rv32m1_vega nuvoton-m2354
+support += xidatong
+SRC_DIR :=
 
 export BOARD ?=kd233
 # This is the environment variable for kconfig-mconf

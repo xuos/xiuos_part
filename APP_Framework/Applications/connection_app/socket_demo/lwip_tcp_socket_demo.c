@@ -17,6 +17,7 @@
 * @author AIIT XUOS Lab
 * @date 2021-05-29
 */
+
 #include <transform.h>
 #include <xizi.h>
 #include "board.h"
@@ -24,27 +25,13 @@
 #include <lwip/sockets.h>
 #include "lwip/sys.h"
 
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
-
-/*******************************************************************************
- * Prototypes
- ******************************************************************************/
-
-/*******************************************************************************
- * Variables
- ******************************************************************************/
+#define TCP_DEMO_BUF_SIZE 65535
 
 char tcp_socket_ip[] = {192, 168, 250, 252};
 
-#define TCP_DEMO_BUF_SIZE 65535
+/******************************************************************************/
 
-/*******************************************************************************
- * Code
- ******************************************************************************/
-
-static void tcp_recv_demo(void *arg)
+static void TCPSocketRecvTask(void *arg)
 {
     int fd = -1, clientfd;
     int recv_len;
@@ -80,7 +67,7 @@ static void tcp_recv_demo(void *arg)
         }
 
         lw_print("tcp bind success, start to receive.\n");
-        lw_print("\n\nLocal Port:%d\n\n", LWIP_LOCAL_PORT);
+        lw_pr_info("\n\nLocal Port:%d\n\n", LWIP_LOCAL_PORT);
 
         // setup socket fd as listening mode
         if (listen(fd, 5) != 0 )
@@ -91,7 +78,7 @@ static void tcp_recv_demo(void *arg)
 
         // accept client connection
         clientfd = accept(fd, (struct sockaddr *)&tcp_addr, (socklen_t*)&addr_len);
-        lw_print("client %s connected\n", inet_ntoa(tcp_addr.sin_addr));
+        lw_pr_info("client %s connected\n", inet_ntoa(tcp_addr.sin_addr));
 
         while(1)
         {
@@ -114,7 +101,7 @@ static void tcp_recv_demo(void *arg)
     }
 }
 
-void tcp_socket_recv_run(int argc, char *argv[])
+void TCPSocketRecvTest(int argc, char *argv[])
 {
     int result = 0;
     pthread_t th_id;
@@ -126,15 +113,14 @@ void tcp_socket_recv_run(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &tcp_socket_ip[0], &tcp_socket_ip[1], &tcp_socket_ip[2], &tcp_socket_ip[3]);
     }
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("tcp_recv_demo", tcp_recv_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    sys_thread_new("TCPSocketRecvTask", TCPSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     TCPSocketRecv, tcp_socket_recv_run, TCP recv echo);
+     TCPSocketRecv, TCPSocketRecvTest, TCP recv echo);
 
-static void tcp_send_demo(void *arg)
+static void TCPSocketSendTask(void *arg)
 {
     int cnt = LWIP_DEMO_TIMES;
     int fd = -1;
@@ -163,7 +149,7 @@ static void tcp_send_demo(void *arg)
     }
 
     lw_print("tcp connect success, start to send.\n");
-    lw_pr_info("\n\nTarget Port:%d\n\n", tcp_sock.sin_port);
+    lw_pr_info("\n\nTarget Port:%d\n\n", LWIP_TARGET_PORT);
 
     while (cnt --)
     {
@@ -182,7 +168,7 @@ __exit:
 }
 
 
-void tcp_socket_send_run(int argc, char *argv[])
+void TCPSocketSendTest(int argc, char *argv[])
 {
     if(argc == 2)
     {
@@ -190,11 +176,10 @@ void tcp_socket_send_run(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &tcp_socket_ip[0], &tcp_socket_ip[1], &tcp_socket_ip[2], &tcp_socket_ip[3]);
     }
 
-    ETH_BSP_Config();
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
-    sys_thread_new("tcp socket", tcp_send_demo, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    sys_thread_new("tcp socket", TCPSocketSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     TCPSocketSend, tcp_socket_send_run, TCP send demo);
+     TCPSocketSend, TCPSocketSendTest, TCP send demo);
 

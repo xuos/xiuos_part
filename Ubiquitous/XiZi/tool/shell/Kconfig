@@ -9,16 +9,16 @@ if TOOL_SHELL
     bool
     config SHELL_ENTER_LF
     bool
-    
+
     choice
     prompt "Set shell end-of-line markers :"
         default SHELL_ENTER_CR_AND_LF
-    
+
     config SHELL_ENTER_CR_AND_LF
         bool "Using CR And LF as end-of-line markers"
         select SHELL_ENTER_CR
-        select SHELL_ENTER_LF    
-    
+        select SHELL_ENTER_LF
+
     config SHELL_ENTER_CRLF
         bool "Using CRLF as end-of-line markers"
     endchoice
@@ -27,7 +27,7 @@ if TOOL_SHELL
         config SHELL_DEFAULT_USER
             string "Set default user's name"
             default "letter"
-        
+
         config SHELL_DEFAULT_USER_PASSWORD
             string "Set default user's password(none for unnecessary)"
             default ""
@@ -41,13 +41,13 @@ if TOOL_SHELL
         config SHELL_TASK_STACK_SIZE
             int "Set the stack size for shell "
             default 4096
-        
+
         config SHELL_TASK_PRIORITY
             int
             default 5  if KTASK_PRIORITY_8
             default 20  if KTASK_PRIORITY_32
             default 120  if KTASK_PRIORITY_256
-        
+
         config SHELL_MAX_NUMBER
         int "Set the max shell count"
         default 5
@@ -57,7 +57,7 @@ if TOOL_SHELL
             default 8
             help
                 The max number of parameter in shell. We support up to eight including command name.
-            
+
         config SHELL_HISTORY_MAX_NUMBER
             int "Set the max number of command history"
             default 5

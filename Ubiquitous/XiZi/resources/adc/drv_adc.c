@@ -13,7 +13,7 @@
 /**
 * @file drv_adc.c
 * @brief register adc drv function using bus driver framework
-* @version 1.1 
+* @version 1.1
 * @author AIIT XUOS Lab
 * @date 2021-12-28
 */
@@ -33,7 +33,7 @@ static void AdcDrvLinkInit()
 DriverType AdcDriverFind(const char *drv_name, enum DriverType_e drv_type)
 {
     NULL_PARAM_CHECK(drv_name);
-    
+
     struct Driver *driver = NONE;
 
     DoubleLinklistType *node = NONE;
@@ -67,3 +67,4 @@ int AdcDriverRegister(struct Driver *driver)
 
     return ret;
 }
+

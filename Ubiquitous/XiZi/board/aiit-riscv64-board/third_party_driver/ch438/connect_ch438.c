@@ -982,7 +982,17 @@ static uint32 Ch438WriteData(void *dev, struct BusBlockWriteParam *write_param)
 	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)dev;
 	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
 
+	if (4 == dev_param->ext_uart_no) {
+		Set485Output(1);
+		MdelayKTask(20);
+	}
+
 	CH438UartSend(dev_param->ext_uart_no, (uint8 *)write_param->buffer, write_param->size);
+
+	if (4 == dev_param->ext_uart_no) {
+		MdelayKTask(20);
+		Set485Input(1);
+	}
 
 	return EOK;
 }
@@ -1162,8 +1172,6 @@ static void Ch438InitDefault(struct SerialDriver *serial_drv)
     serial_cfg.data_cfg.ext_uart_no = 7;
     serial_cfg.data_cfg.serial_baud_rate = BAUD_RATE_9600;
     BusDrvConfigure(&serial_drv->driver, &configure_info);
-
-	Set485Input(1);
 }
 
 static uint32 Ch438DevRegister(struct SerialHardwareDevice *serial_dev, char *dev_name)

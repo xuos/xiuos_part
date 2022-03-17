@@ -68,28 +68,11 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
  */
 static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
 {
-#ifdef ADD_NUTTX_FETURES
-    int ret;
-    ret = PrivRead(sdev->fd, sdev->buffer, len);
-    if (ret != len ){
-        perror("Failed to read data!\n");
-        return -1;
-    }
-
-    return 0;
-#else
-    //send i2c device start signal and address, need to implemente in OS i2c driver
-    if (PrivWrite(sdev->fd, NULL, 0) != 1)
-        return -1;
-    
-    PrivTaskDelay(50);
-
     //Read i2c device data from i2c device address
-    if (PrivRead(sdev->fd, sdev->buffer, len) != 1)
+    if (PrivRead(sdev->fd, sdev->buffer, len) < 0)
         return -1;
 
     return 0;
-#endif
 }
 
 static struct SensorDone done =

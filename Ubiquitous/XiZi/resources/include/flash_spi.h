@@ -13,7 +13,7 @@
 /**
 * @file flash_spi.h
 * @brief define spi-flash dev function using bus driver framework
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-24
 */
