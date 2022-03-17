@@ -21,15 +21,34 @@
 #ifndef __CONTROL_FILE_H_
 #define __CONTROL_FILE_H_
 
-#define CTL_FILE_SIZE 1024
+#define CTL_FILE_SIZE 1000
+#define CTL_CMD_NUM 10 // max command number
+#define CTL_CMD_LEN 100
+#define CTL_IP_LEN 32
+
+#define PLC_SOCK_FILE_NAME "/plc/socket_param.json"
 
 #define ctl_print KPrintf
 #define ctl_error KPrintf
 
-FILE *CtlFileInit(void);
+typedef struct CtlPlcSockParamStruct
+{
+    char ip[CTL_IP_LEN];
+    int port;
+    int cmd_num; //command number
+    int cmd_len[CTL_CMD_NUM]; // command length
+    char cmd[CTL_CMD_NUM][CTL_CMD_LEN];
+}CtlPlcSockParamType;
+
+extern CtlPlcSockParamType ctl_file_param;
+
+FILE *CtlFileInit(char *file);
 void CtlFileClose(FILE *fd);
 void CtlFileRead(FILE *fd, int size, char *buf);
 void CtlFileWrite(FILE *fd, int size, char *buf);
 
+#ifdef LIB_USING_CJSON
+void CtlParseJsonData(char *buf);
+#endif
 #endif
 

@@ -23,36 +23,35 @@
 #include "transform.h"
 #include "control_file.h"
 
-#define CTL_FILE_NAME "/plc/control_cmd.txt"
-
-#define TEST_PLC_CMD_TXT \
-    "cmd=03,00,00,16,11,E0,00,00,02,C8,00,C1,02,02,01,C2,02,02,01,C0,01,0A\r\n\r\n" \
-    "cmd=03,00,00,19,02,F0,80,32,01,00,00,00,0D,00,08,00,00,F0,00,00,01,00,01,00,F0\r\n\r\n" \
-    "cmd=03,00,00,1F,02,F0,80,32,01,00,00,33,01,00,0E,00,00,04,01,12,0A,10,02,00,D2,00,34,84,00,00,00\r\n\r\n" \
-    "port=102\r\n" \
-    "ip=192.168.250.6\r\n"
-
+//json file parameter for PLC socket communication as below:
+//{
+//   "ip": "192.168.250.6",
+//   "port": 102,
+//   "cmd": [3, 0, 0, 22, 17, 224, 0, 0, 2, 200, 0, 193, 2, 2, 1, 194, 2, 2, 1, 192, 1, 10],
+//   "cmd1": [3, 0, 0, 25, 2, 240, 128, 50, 1, 0, 0, 0, 13, 0, 8, 0, 0, 240, 0, 0, 1, 0, 1, 0, 240], \r\n" \
+//   "cmd2": [3, 0, 0, 31, 2, 240, 128, 50, 1, 0, 0, 51, 1, 0, 14, 0, 0, 4, 1, 18, 10, 16,  2, 0, 210, 0, 52, 132, 0, 0, 0]\r\n" \
+//}"
 
 #define TEST_PLC_JSON_TXT \
 "{ \r\n"\
-"    \"S1200\": [ \r\n"\
-"        { \"ip\": \"192.168.250.6\"}, \r\n"\
-"        { \"port\": 102}, \r\n"\
-"        { \"cmd\": [3, 0, 0, 22, 17, 224, 0, 0, 2, 200, 0, 193, 2, 2, 1, 194, 2, 2, 1, 192, 1, 10]}\r\n"\
-"    ] \r\n"\
+"   \"ip\": \"192.168.250.6\", \r\n"\
+"   \"port\": 102, \r\n"\
+"   \"cmd\": [3, 0, 0, 22, 17, 224, 0, 0, 2, 200, 0, 193, 2, 2, 1, 194, 2, 2, 1, 192, 1, 10], \r\n"\
+"   \"cmd1\": [3, 0, 0, 25, 2, 240, 128, 50, 1, 0, 0, 0, 13, 0, 8, 0, 0, 240, 0, 0, 1, 0, 1, 0, 240], \r\n" \
+"   \"cmd2\": [3, 0, 0, 31, 2, 240, 128, 50, 1, 0, 0, 51, 1, 0, 14, 0, 0, 4, 1, 18, 10, 16,  2, 0, 210, 0, 52, 132, 0, 0, 0]\r\n" \
 "}"
-//"        { \"cmd\": [3, 0, 0, 25, 2, 240, 128, 50, 1, 0, 0, 0, 13, 0, 8, 0, 0, 240, 0, 0, 1, 0, 1, 0, 240]},\r\n" \
-//"        { \"cmd\": [3, 0, 0, 31, 2, 240, 128, 50, 1, 0, 0, 51, 1, 0, 14, 0, 0, 4, 1, 18, 10, 16,  2, 0, 210, 0, 52, 132, 0, 0, 0]}\r\n" \
 
 
-FILE *CtlFileInit(void)
+CtlPlcSockParamType ctl_file_param;
+
+FILE *CtlFileInit(char *file)
 {
     FILE *fd = NULL;
 
-    fd = fopen(CTL_FILE_NAME, "a+");
+    fd = fopen(file, "a+");
     if(fd == NULL)
     {
-        ctl_error("open file %s failed\n", CTL_FILE_NAME);
+        ctl_error("open file %s failed\n", file);
     }
 
     return fd;
@@ -65,8 +64,9 @@ void CtlFileClose(FILE *fd)
 
 void CtlFileRead(FILE *fd, int size, char *buf)
 {
+    fseek(fd, 0, SEEK_SET);
     fread(buf, size, 1, fd);
-    ctl_print("read file %d: %s\n", size, buf);
+    ctl_print("read file %d: %.100s\n", size, buf);
 }
 
 void CtlFileWrite(FILE *fd, int size, char *buf)
@@ -76,19 +76,41 @@ void CtlFileWrite(FILE *fd, int size, char *buf)
     ctl_print("write size %d: %s\n", size, buf);
 }
 
-void CtlFileTest(void)
+void CtlCreateFileTest(void)
 {
-    FILE *fd = CtlFileInit();
+    FILE *fd = CtlFileInit(PLC_SOCK_FILE_NAME);
+    if(fd == NULL)
+        return;
     char *file_buf = TEST_PLC_JSON_TXT;
     CtlFileWrite(fd, strlen(file_buf), file_buf);
-    CtlFileRead(fd, CTL_FILE_SIZE, file_buf);
     CtlFileClose(fd);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-    CtlTestFile, CtlFileTest, Test control file);
+    CtlCreateFile, CtlCreateFileTest, Test control file);
 
 #ifdef LIB_USING_CJSON
+
+void CtlParseJsonArray(cJSON *dat, int *cmd_len, char *cmd)
+{
+    int len, i;
+    if(cJSON_IsArray(dat))
+    {
+        len = cJSON_GetArraySize(dat);
+        ctl_print("json cmd %d\n", len);
+
+        for(i = 0; i < len; i++)
+        {
+            cJSON *cmd_val = cJSON_GetArrayItem(dat, i);
+            if(NULL == cmd_val)
+                continue;
+            ctl_print("0x%x ", cmd_val->valueint);
+            cmd[i] = cmd_val->valueint;
+        }
+        *cmd_len = len;
+        ctl_print("\n");
+    }
+}
 
 void CtlParseJsonData(char *buf)
 {
@@ -96,6 +118,10 @@ void CtlParseJsonData(char *buf)
     cJSON *ip_dat = NULL;
     cJSON *port_dat = NULL;
     cJSON *cmd_dat = NULL;
+    int cmd_num = 0;
+    int cmd_index = 1;
+    char cmd_str[10] = {0};
+    CtlPlcSockParamType *file_param = &ctl_file_param;
 
     file_dat = cJSON_Parse(buf);
     if(file_dat == NULL)
@@ -106,17 +132,35 @@ void CtlParseJsonData(char *buf)
 
     ip_dat = cJSON_GetObjectItem(file_dat, "ip");
     port_dat = cJSON_GetObjectItem(file_dat, "port");
-    cmd_dat = cJSON_GetObjectItem(file_dat, "cmd");
 
-    ctl_print("ip  : %s\n", ip_dat->string);
-    ctl_print("port: %d\n", port_dat->valueint);
-    ctl_print("cmd : %s\n", cmd_dat->valueint);
+    ctl_print(" ip  : %s\n", ip_dat->valuestring);
+    sscanf(ip_dat->valuestring, "%d.%d.%d.%d", &file_param->ip[0],
+        &file_param->ip[1],
+        &file_param->ip[2],
+        &file_param->ip[3]);
+
+    ctl_print(" port: %s %d\n", ip_dat->string, port_dat->valueint);
+    file_param->port = port_dat->valueint;
+
+    strcpy(cmd_str, "cmd");
+    while(cmd_dat = cJSON_GetObjectItem(file_dat, cmd_str))
+    {
+        CtlParseJsonArray(cmd_dat, &file_param->cmd_len[cmd_index - 1], file_param->cmd[cmd_index - 1]);
+        snprintf(cmd_str, sizeof(cmd_str), "cmd%d", cmd_index++);
+    }
+    file_param->cmd_num = cmd_index - 1;
+
+    cJSON_Delete(file_dat);
 }
 
 void CtlParseFileTest(void)
 {
+    //for PLC socket parameter file
     char file_buf[CTL_FILE_SIZE] = {0};
-    FILE *fd = CtlFileInit();
+    FILE *fd = CtlFileInit(PLC_SOCK_FILE_NAME);
+    if(fd == NULL)
+        return;
+    memset(file_buf, 0, CTL_FILE_SIZE);
     CtlFileRead(fd, CTL_FILE_SIZE, file_buf);
     CtlFileClose(fd);
     CtlParseJsonData(file_buf);

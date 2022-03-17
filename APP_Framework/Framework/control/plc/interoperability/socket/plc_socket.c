@@ -224,6 +224,46 @@ void PlcShowUsage(void)
     plc_notice("------------------------------------\n");
 }
 
+void PlcGetParamFromFile(void)
+{
+    PlcSocketParamType *param = &plc_socket_demo_data;
+
+    //for PLC socket parameter file
+    char file_buf[CTL_FILE_SIZE] = {0};
+    FILE *fd = CtlFileInit(PLC_SOCK_FILE_NAME);
+
+    if(fd == NULL)
+        return;
+
+    memset(file_buf, 0, CTL_FILE_SIZE);
+
+    CtlFileRead(fd, CTL_FILE_SIZE, file_buf);
+    CtlFileClose(fd);
+    CtlParseJsonData(file_buf);
+
+    memcpy(param->ip, ctl_file_param.ip, 4);
+    param->port = ctl_file_param.port;
+    param->cmd_num = ctl_file_param.cmd_num;
+
+    for(int i = 0; i < param->cmd_num; i++)
+    {
+        TestPlcCmd[i].cmd_len = ctl_file_param.cmd_len[i];
+        memcpy(TestPlcCmd[i].cmd, ctl_file_param.cmd[i], TestPlcCmd[i].cmd_len);
+    }
+
+    plc_print("ip: %d.%d.%d.%d\n", param->ip[0], param->ip[1], param->ip[2], param->ip[3]);
+    plc_print("port: %d", param->port);
+    plc_print("cmd number: %d\n", param->cmd_num);
+
+    for(int i = 0; i < param->cmd_num; i++)
+    {
+        plc_print("cmd %d len %d: ", i, TestPlcCmd[i].cmd_len);
+        for(int j = 0; j < TestPlcCmd[i].cmd_len; j++)
+            plc_print("%x ", TestPlcCmd[i].cmd[j]);
+        plc_print("\n");
+    }
+}
+
 void PlcCheckParam(int argc, char *argv[])
 {
     int i;
@@ -237,6 +277,13 @@ void PlcCheckParam(int argc, char *argv[])
         char cmd_str[PLC_BIN_CMD_LEN] = {0};
 
         plc_print("check %d %s\n", i, str);
+
+        if(strcmp(str, "file") == 0)
+        {
+            plc_notice("get parameter file %s\n", PLC_SOCK_FILE_NAME);
+            PlcGetParamFromFile();
+            return;
+        }
 
         if(sscanf(str, "ip=%d.%d.%d.%d",
             &param->ip[0],
@@ -302,11 +349,6 @@ void PlcCheckParam(int argc, char *argv[])
     }
 }
 
-void PlcGetParamFromFile(char *file)
-{
-
-}
-
 void PlcSocketTask(int argc, char *argv[])
 {
     int result = 0;
@@ -322,7 +364,6 @@ void PlcSocketTask(int argc, char *argv[])
     lwip_config_net(lwip_ipaddr, lwip_netmask, param->ip);
     PrivTaskCreate(&th_id, &attr, PlcSocketStart, param);
 }
-
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
      PlcSocket, PlcSocketTask, Test PLC Socket);
