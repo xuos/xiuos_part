@@ -17,6 +17,14 @@
  * under the License.
  *
  ****************************************************************************/
+/**
+* @file stm32_spi.c
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
 
 /****************************************************************************
  * Included Files
