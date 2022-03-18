@@ -12,6 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+* @file apu.h
+* @brief kendryte k210 source code
+*                https://github.com/kendryte/kendryte-standalone-sdk.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
+
 #ifndef _apu_H_
 #define _apu_H_
 

@@ -37,6 +37,15 @@
  * | 0x0200EFFC | Reserved                        |
  */
 
+/**
+* @file client
+* @brief kendryte k210 source code
+*                https://github.com/kendryte/kendryte-standalone-sdk.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 #ifndef _DRIVER_CLINT_H
 #define _DRIVER_CLINT_H
 
