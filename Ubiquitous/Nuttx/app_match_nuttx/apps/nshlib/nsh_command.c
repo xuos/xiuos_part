@@ -634,6 +634,14 @@ static const struct cmdmap_s g_cmdmap[] =
   { "humi",       cmd_HumiHs300x,       1, 1, "[get humidity with sensor HS300x.]" },
 #endif
 
+#if defined(CONFIG_APPLICATION_SENSOR_WINDDIRECTION_QS_FX) && !defined(CONFIG_NSH_DISABLE_QS_FX)
+  { "WindDirectionQsFx",       cmd_WindDirectionQsFx,       1, 1, "[get WindDirection with sensor QsFx.]" },
+#endif
+
+#if defined(CONFIG_APPLICATION_SENSOR_WINDSPEED_QS_FS) && !defined(CONFIG_NSH_DISABLE_QS_FS)
+  { "WindSpeedQsFs",       cmd_WindSpeedQsFs,       1, 1, "[get WindSpeed with sensor QsFs.]" },
+#endif
+
 #if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_OPENZIGBEE)
   { "openzigbee",       cmd_openzigbee,       1, 1, "[open the zigebee device.]" },
 #endif

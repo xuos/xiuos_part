@@ -204,6 +204,35 @@ int cmd_HumiHs300x(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 }
 #endif
 
+/****************************************************************************
+ * Name: cmd_WindDirectionQsFx
+ ****************************************************************************/
+
+#if defined(CONFIG_APPLICATION_SENSOR_WINDDIRECTION_QS_FX) && !defined(CONFIG_NSH_DISABLE_QS_FX)
+extern void WindDirectionQsFx(void);
+int cmd_WindDirectionQsFx(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    WindDirectionQsFx();
+    return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_WindSpeedQsFs
+ ****************************************************************************/
+
+#if defined(CONFIG_APPLICATION_SENSOR_WINDSPEED_QS_FS) && !defined(CONFIG_NSH_DISABLE_QS_FS)
+extern void WindSpeedQsFs(void);
+int cmd_WindSpeedQsFs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    WindSpeedQsFs();
+    return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: cmd_openzigbee
