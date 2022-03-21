@@ -12,7 +12,7 @@
 
 /* RT-Thread Kernel */
 
-#define RT_NAME_MAX 8
+#define RT_NAME_MAX 24
 #define RT_USING_SMP
 #define RT_CPUS_NR 2
 #define RT_ALIGN_SIZE 8
@@ -206,7 +206,15 @@
 /* Framework */
 
 #define TRANSFORM_LAYER_ATTRIUBUTE
-#define ADD_XIZI_FETURES
+#define ADD_RTTHREAD_FETURES
+#define SUPPORT_SENSOR_FRAMEWORK
+#define SENSOR_CH4
+#define SENSOR_AS830
+#define SENSOR_DEVICE_AS830 "as830_1"
+#define SENSOR_QUANTITY_AS830_CH4 "ch4_1"
+#define SENSOR_AS830_DRIVER_EXTUART
+#define SENSOR_DEVICE_AS830_DEV "/dev/extuart_dev1"
+#define SENSOR_DEVICE_AS830_DEV_EXT_PORT 1
 
 /* Security */
 
@@ -234,11 +242,12 @@
 /* sensor app */
 
 #define APPLICATION_SENSOR
+#define APPLICATION_SENSOR_CH4
+#define APPLICATION_SENSOR_CH4_AS830
 
 /* lib */
 
 #define APP_SELECT_NEWLIB
-#define LIB_USING_CJSON
 #define __STACKSIZE__ 4096
 
 #endif

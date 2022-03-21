@@ -5,11 +5,10 @@
 #include "board.h"
 #include "ch438.h"
 #include "sleep.h"
-
-static  struct rt_semaphore ch438_sem;
+#include <math.h>
 
 static rt_uint8_t	offsetadd[] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};		/* Offset address of serial port number */
-rt_uint8_t	RevLen ,Ch438Buff[8][BUFFSIZE],Ch438BuffPtr[8];
+struct rt_serial_device *extuart_serial_parm[8];
 
 void CH438_INIT(void)
 {	
@@ -25,7 +24,7 @@ void CH438_INIT(void)
 	gpiohs_set_pin(FPIOA_CH438_ALE, GPIO_PV_HIGH);
 }	
 
-void CH438_PORT_INIT( rt_uint8_t ext_uart_no,rt_uint32_t	BaudRate )
+void CH438_PORT_INIT( rt_uint8_t ext_uart_no,rt_uint32_t BaudRate )
 {
 	rt_uint32_t	div;
 	rt_uint8_t	DLL,DLM,dlab;
@@ -164,7 +163,6 @@ rt_uint8_t ReadCH438Data( rt_uint8_t addr )
 	usleep(1);
 
 	return dat;
-
 }
 	
 
@@ -216,106 +214,47 @@ static void WriteCH438Data( rt_uint8_t addr, rt_uint8_t dat)
 	return;
 }
 
-
 static void WriteCH438Block( rt_uint8_t mAddr, rt_uint8_t mLen, rt_uint8_t *mBuf )   
 {
-
     while ( mLen -- ) 	
 	  WriteCH438Data( mAddr, *mBuf++ );
-
 }
 
+static int Ch438Irq(void *parameter)
+{
+	rt_uint8_t gInterruptStatus;
+	rt_uint8_t port = 0;
 
-// void  CH438UARTSend( rt_uint8_t	ext_uart_no,rt_uint8_t *Data, rt_uint8_t Num )
-// {
-// 	rt_uint8_t	REG_LSR_ADDR,REG_THR_ADDR;
-	
-// 			REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
-// 			REG_THR_ADDR = offsetadd[ext_uart_no] | REG_THR0_ADDR;
-			
-//    while( 1 )
-//    {
-
-//        while( ( ReadCH438Data( REG_LSR_ADDR ) & BIT_LSR_TEMT ) == 0 );
-
-//        if( Num <= 128 )
-//        {
-
-//            WriteCH438Block( REG_THR_ADDR, Num, Data );
-
-//            break;
-
-//        }
-
-//        else
-//        {
-
-//            WriteCH438Block( REG_THR_ADDR, 128, Data );
-
-//            Num -= 128;
-
-//            Data += 128;
-
-//        }
-
-//    }
-// }
-
-
-
-// rt_uint8_t  CH438UARTRcv( rt_uint8_t ext_uart_no, rt_uint8_t* buf )
-// {
-//     rt_uint8_t RcvNum = 0;
-// 	rt_uint8_t	dat = 0;
-// 	rt_uint8_t	REG_LSR_ADDR,REG_RBR_ADDR;
-// 	rt_uint8_t	*p_rev;
-	
-// 	p_rev = buf;
-	
-// 	REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
-// 	REG_RBR_ADDR = offsetadd[ext_uart_no] | REG_RBR0_ADDR;
-			
-//     {
-
-// 		while( ( ReadCH438Data( REG_LSR_ADDR ) & BIT_LSR_DATARDY ) == 0 );
-
-//         while( ( ReadCH438Data( REG_LSR_ADDR ) & BIT_LSR_DATARDY ) == 0x01 )
-//         {
-// 			dat =  ReadCH438Data( REG_RBR_ADDR );
-			
-// 			Ch438Buff[ext_uart_no][Ch438BuffPtr[ext_uart_no]] = dat;
-			
-// 			Ch438BuffPtr[ext_uart_no] = Ch438BuffPtr[ext_uart_no] + 1;
-// 			if (Ch438BuffPtr[ext_uart_no] == BUFFSIZE)
-// 				Ch438BuffPtr[ext_uart_no] = 0;
-			
-//             RcvNum = RcvNum + 1;
-
-//         }
-//     }
-//     return( RcvNum );
-// }
+	gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
+	port = log(gInterruptStatus & 0xFF)/log(2);
+	rt_hw_serial_isr(extuart_serial_parm[port], RT_SERIAL_EVENT_RX_IND);
+}
 
 static rt_err_t rt_extuart_configure(struct rt_serial_device *serial, struct serial_configure *cfg)
 {
+	rt_uint32_t baud_rate = cfg->baud_rate;
+	rt_uint16_t port = cfg->reserved;
 
-	rt_uint32_t  baud_rate = cfg->baud_rate;
-	uint16_t port = cfg->reserved;
 	CH438_PORT_INIT(port, baud_rate);
 
+	return RT_EOK;
 }
 
 static rt_err_t extuart_control(struct rt_serial_device *serial, int cmd, void *arg)
 {
+	uint16_t ext_uart_no = serial->config.reserved;
+
     switch (cmd)
     {
     case RT_DEVICE_CTRL_CLR_INT:
+		gpiohs_irq_unregister(FPIOA_CH438_INT);
         break;
-
     case RT_DEVICE_CTRL_SET_INT:
-        break;
+		gpiohs_set_drive_mode(FPIOA_CH438_INT, GPIO_DM_INPUT_PULL_UP);
+    	gpiohs_set_pin_edge(FPIOA_CH438_INT,GPIO_PE_FALLING);
+		gpiohs_irq_register(FPIOA_CH438_INT, 1, Ch438Irq, RT_NULL);
+		break;
     }
-
     return (RT_EOK);
 }
 
@@ -335,22 +274,21 @@ static int drv_extuart_putc(struct rt_serial_device *serial, char c)
 
 static int drv_extuart_getc(struct rt_serial_device *serial)
 {
-	rt_uint8_t	dat = 0;
+	rt_int8_t	dat = -1;
 	rt_uint8_t	REG_LSR_ADDR,REG_RBR_ADDR;
-	
 	uint16_t ext_uart_no = serial->config.reserved;///< get extern uart port
 	
 	REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
 	REG_RBR_ADDR = offsetadd[ext_uart_no] | REG_RBR0_ADDR;
-			
-	while( ( ReadCH438Data( REG_LSR_ADDR ) & BIT_LSR_DATARDY ) == 0 );
 
-	// while( ( ReadCH438Data( REG_LSR_ADDR ) & BIT_LSR_DATARDY ) == 0x01 )
-	// {
-	dat =  ReadCH438Data( REG_RBR_ADDR );
-	// }
-    
-    return( dat );
+	if((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0x01)
+	{
+		dat = ReadCH438Data( REG_RBR_ADDR );
+		if(dat >= 0)
+			return dat;
+	} else {
+		return -1;
+	}
 }
 
 const struct rt_uart_ops extuart_ops =
@@ -362,111 +300,168 @@ const struct rt_uart_ops extuart_ops =
     RT_NULL
 };
 
-static int Ch438Irq(void *parameter)
-{
-	rt_sem_release(&ch438_sem);
-}
-
-int Ch438InitDefault(void)
-{
-	rt_err_t flag;
-
-	flag = rt_sem_init(&ch438_sem, "sem_438",0,RT_IPC_FLAG_FIFO);
-	if (flag != RT_EOK)
-	{
-		rt_kprintf("ch438.drv create sem failed .\n");
-		return -1;
-	}		
-	
-    gpiohs_set_drive_mode(FPIOA_CH438_INT, GPIO_DM_INPUT_PULL_UP);
-    gpiohs_set_pin_edge(FPIOA_CH438_INT,GPIO_PE_FALLING);
-    gpiohs_irq_register(FPIOA_CH438_INT, 1, Ch438Irq, 0);
-
-	CH438_INIT();
-	return 0;
-}
-INIT_APP_EXPORT(Ch438InitDefault);
-
 int rt_hw_ch438_init(void)
 {
     struct rt_serial_device *extserial;
     struct device_uart      *extuart;
     struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT;
+	rt_err_t ret;
 
-
-// #ifdef BSP_USING_UART1
     {
         static struct rt_serial_device  extserial0;
-        // static struct device_uart extuart0;
 
         extserial  = &extserial0;
-        // extuart    = &extuart0;
-
         extserial->ops              = &extuart_ops;
         extserial->config           = config;
         extserial->config.baud_rate = 115200;
-		extserial->config.reserved = 0; ///< extern uart port
+		extserial->config.reserved  = 0; ///< extern uart port
 
-        // extuart->hw_base   = UART1_BASE_ADDR;
-        // extuart->irqno     = IRQN_UART1_INTERRUPT;
+        extuart_serial_parm[0] = &extserial0;
 
-        // _uart_init(UART_DEVICE_1);
-
-        rt_hw_serial_register(extserial,
+        ret = rt_hw_serial_register(extserial,
                               "extuart_dev0",
                               RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
                               extuart);
+		if(ret < 0){
+			rt_kprintf("extuart_dev0 register failed.\n");
+		}
     }
-// #endif
+	{
+        static struct rt_serial_device  extserial1;
 
-// #ifdef BSP_USING_UART2
-    // {
-    //     static struct rt_serial_device  serial2;
-    //     static struct device_uart       uart2;
+        extserial  = &extserial1;
+        extserial->ops              = &extuart_ops;
+        extserial->config           = config;
+        extserial->config.baud_rate = 9600;
+		extserial->config.reserved = 1; ///< extern uart port
 
-    //     serial  = &serial2;
-    //     uart    = &uart2;
+        extuart_serial_parm[1] = &extserial1;
 
-    //     serial->ops              = &_uart_ops;
-    //     serial->config           = config;
-    //     serial->config.baud_rate = UART_DEFAULT_BAUDRATE;
+        ret = rt_hw_serial_register(extserial,
+                              "extuart_dev1",
+                              RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
+                              extuart);
+		if(ret < 0){
+			rt_kprintf("extuart_dev1 register failed.\n");
+		}
+    }
+	{
+        static struct rt_serial_device  extserial2;
 
-    //     uart->hw_base   = UART2_BASE_ADDR;
-    //     uart->irqno     = IRQN_UART2_INTERRUPT;
+        extserial  = &extserial2;
+        extserial->ops              = &extuart_ops;
+        extserial->config           = config;
+        extserial->config.baud_rate = 9600;
+		extserial->config.reserved = 2; ///< extern uart port
 
-    //     _uart_init(UART_DEVICE_2);
+        extuart_serial_parm[2] = &extserial2;
 
-    //     rt_hw_serial_register(serial,
-    //                           "uart2",
-    //                           RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
-    //                           uart);
-    // }
-// #endif
+       ret = rt_hw_serial_register(extserial,
+                              "extuart_dev2",
+                              RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
+                              extuart);
+		if(ret < 0){
+			rt_kprintf("extuart_dev2 register failed.\n");
+		}
 
-// #ifdef BSP_USING_UART3
-    // {
-    //     static struct rt_serial_device  serial3;
-    //     static struct device_uart       uart3;
+    }
+	{
+        static struct rt_serial_device  extserial3;
 
-    //     serial  = &serial3;
-    //     uart    = &uart3;
+        extserial  = &extserial3;
+        extserial->ops              = &extuart_ops;
+        extserial->config           = config;
+        extserial->config.baud_rate = 9600;
+		extserial->config.reserved = 3; ///< extern uart port
 
-    //     serial->ops              = &_uart_ops;
-    //     serial->config           = config;
-    //     serial->config.baud_rate = UART_DEFAULT_BAUDRATE;
+       ret = rt_hw_serial_register(extserial,
+                              "extuart_dev3",
+                              RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
+                              extuart);
+		if(ret < 0){
+			rt_kprintf("extuart_dev3 register failed.\n");
+		}
 
-    //     uart->hw_base   = UART3_BASE_ADDR;
-    //     uart->irqno     = IRQN_UART3_INTERRUPT;
+		extuart_serial_parm[3] = &extserial3;
+    }
+	{
+        static struct rt_serial_device  extserial4;
 
-    //     _uart_init(UART_DEVICE_3);
+        extserial  = &extserial4;
+        extserial->ops              = &extuart_ops;
+        extserial->config           = config;
+        extserial->config.baud_rate = 9600;
+		extserial->config.reserved = 4; ///< extern uart port
 
-    //     rt_hw_serial_register(serial,
-    //                           "uart3",
-    //                           RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
-    //                           uart);
-    // }
-// #endif
-	// Ch438InitDefault();
+       ret = rt_hw_serial_register(extserial,
+                              "extuart_dev4",
+                              RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
+                              extuart);
+		if(ret < 0){
+			rt_kprintf("extuart_dev4 register failed.\n");
+		}
+
+		extuart_serial_parm[4] = &extserial4;
+    }
+	{
+        static struct rt_serial_device  extserial5;
+
+        extserial  = &extserial5;
+        extserial->ops              = &extuart_ops;
+        extserial->config           = config;
+        extserial->config.baud_rate = 115200;
+		extserial->config.reserved = 5; ///< extern uart port
+
+       ret = rt_hw_serial_register(extserial,
+                              "extuart_dev5",
+                              RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
+                              extuart);
+		if(ret < 0){
+			rt_kprintf("extuart_dev5 register failed.\n");
+		}
+
+		extuart_serial_parm[5] = &extserial5;
+    }
+	{
+        static struct rt_serial_device  extserial6;
+
+        extserial  = &extserial6;
+        extserial->ops              = &extuart_ops;
+        extserial->config           = config;
+        extserial->config.baud_rate = 57600;
+		extserial->config.reserved = 6; ///< extern uart port
+
+       ret = rt_hw_serial_register(extserial,
+                              "extuart_dev6",
+                              RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
+                              extuart);
+		if(ret < 0){
+			rt_kprintf("extuart_dev6 register failed.\n");
+		}
+
+		extuart_serial_parm[6] = &extserial6;
+    }
+	{
+        static struct rt_serial_device  extserial7;
+
+        extserial  = &extserial7;
+        extserial->ops              = &extuart_ops;
+        extserial->config           = config;
+        extserial->config.baud_rate = 9600;
+		extserial->config.reserved = 7; ///< extern uart port
+
+       ret = rt_hw_serial_register(extserial,
+                              "extuart_dev7",
+                              RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
+                              extuart);
+		if(ret < 0){
+			rt_kprintf("extuart_dev7 register failed.\n");
+		}
+		extuart_serial_parm[7] = &extserial7;
+
+    }
+
+	CH438_INIT();
     return 0;
 }
 INIT_DEVICE_EXPORT(rt_hw_ch438_init);
