@@ -24,56 +24,18 @@
 #include "lwip/sockets.h"
 #include "control_file.h"
 
-#define PLC_SOCK_CMD_NUM 10
+// max support plc socket test commands number
+#define PLC_SOCK_CMD_NUM CTL_CMD_NUM
+#define PLC_SOCK_TIMEOUT 50000
 
-// for saving PLC command
+// for saving PLC command index
 int plc_cmd_index = 0;
 
+// only for test
+#define SUPPORT_PLC_SIEMENS
+
 //siemens test
-PlcBinCmdType TestPlcCmd[PLC_SOCK_CMD_NUM] =
-{
-#ifdef SUPPORT_PLC_SIEMENS
-    // handshake1 repeat 1
-    {
-        0, 3000, 22,
-        {
-            0x03, 0x00, 0x00, 0x16, 0x11, 0xE0, 0x00, 0x00,
-            0x02, 0xC8, 0x00, 0xC1, 0x02, 0x02, 0x01, 0xC2,
-            0x02, 0x02, 0x01, 0xC0, 0x01, 0x0A
-        }
-    },
-    // handshake2
-    {
-        1, 500, 25,
-        {
-            0x03, 0x00, 0x00, 0x19, 0x02, 0xF0, 0x80, 0x32,
-            0x01, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x08, 0x00,
-            0x00, 0xF0, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,
-            0xF0
-        }
-    },
-    // read command
-    {
-        2, 1000, 31,
-        {
-            0x03, 0x00, 0x00, 0x1F, 0x02, 0xF0, 0x80, 0x32,
-            0x01, 0x00, 0x00, 0x33, 0x01, 0x00, 0x0E, 0x00,
-            0x00, 0x04, 0x01, 0x12, 0x0A, 0x10, 0x02, 0x00,
-            0xD2, 0x00, 0x34, 0x84, 0x00, 0x00, 0x00
-        }
-    }
-    // oml plc
-#else// SUPPORT_PLC_OML
-    {
-        0, 1000, 18,
-        {
-            0x80, 0x00, 0x02, 0x00, 0x03, 0x00, 0x00, 0x7E,
-            0x00, 0x00, 0x01, 0x01, 0x82, 0x0F, 0xA0, 0x00,
-            0x00, 0x20
-        }
-    }
-#endif
-};
+PlcBinCmdType TestPlcCmd[PLC_SOCK_CMD_NUM] = {0};
 
 //Test information
 //SIEMENS ip: 192.168.250.9 port: 102
@@ -82,14 +44,21 @@ PlcBinCmdType TestPlcCmd[PLC_SOCK_CMD_NUM] =
 //OML     ip: 192.168.250.3 port: 9600
 
 PlcSocketParamType plc_socket_demo_data = {
+#ifdef SUPPORT_PLC_SIEMENS
+    .ip = {192, 168, 250, 6},
+    .port = 102,
+    .device_type = PLC_DEV_TYPE_SIEMENS,
+    .socket_type = SOCK_STREAM,
+    .cmd_num = 3,
+#else
     .ip = {192, 168, 250, 3},
     .port = 9600,
     .device_type = PLC_DEV_TYPE_OML,
-    .socket_type = SOCK_STREAM, //SOCK_DGRAM, //udp
-    .step = 0,
-    .cmd_num = 3,
-    .buf_size = PLC_TEST_SIZE,
-    .buf = NULL,
+    .socket_type = SOCK_DGRAM,
+    .cmd_num = 1,
+#endif
+    .recv_len = PLC_RECV_BUF_LEN,
+    .recv_buf = NULL,
 };
 
 #define OML_HEADER_LEN 78
@@ -97,12 +66,20 @@ PlcSocketParamType plc_socket_demo_data = {
 
 /******************************************************************************/
 
+static void plc_print_array(char *title, int size, uint8_t *cmd)
+{
+    lw_notice("%s : %d - ", title, size);
+    for(int i = 0; i < size; i++)
+    {
+        lw_notice(" %#x",  cmd[i]);
+    }
+    lw_notice("\n");
+}
+
 static void *PlcSocketStart(void *arg)
 {
     int fd = -1;
-    int recv_len;
-    int step = 0;
-    char *recv_buf;
+    int timeout, recv_len;
     struct sockaddr_in sock_addr;
     socklen_t addr_len = sizeof(struct sockaddr_in);
     PlcSocketParamType *param = (PlcSocketParamType *)&plc_socket_demo_data;
@@ -116,9 +93,11 @@ static void *PlcSocketStart(void *arg)
         param->device_type,
         param->socket_type);
 
+    param->recv_len = PLC_RECV_BUF_LEN;
+
     //malloc memory
-    recv_buf = (char *)malloc(param->buf_size);
-    if (recv_buf == NULL)
+    param->recv_buf = (char *)malloc(param->recv_len);
+    if (param->recv_buf == NULL)
     {
         plc_error("No memory\n");
         return NULL;
@@ -128,7 +107,7 @@ static void *PlcSocketStart(void *arg)
     if (fd < 0)
     {
         plc_error("Socket error %d\n", param->socket_type);
-        free(recv_buf);
+        free(param->recv_buf);
         return NULL;
     }
 
@@ -143,51 +122,42 @@ static void *PlcSocketStart(void *arg)
     {
         plc_error("Unable to connect\n");
         closesocket(fd);
-        free(recv_buf);
+        free(param->recv_buf);
         return NULL;
     }
 
     lw_notice("client %s connected\n", inet_ntoa(sock_addr.sin_addr));
 
-    while(step < param->cmd_num)
+    for(int i = 0; i < param->cmd_num; i ++)
     {
-        sendto(fd, TestPlcCmd[step].cmd, TestPlcCmd[step].cmd_len, 0, (struct sockaddr*)&sock_addr, addr_len);
-        lw_notice("Send Cmd: %d - ", TestPlcCmd[step].cmd_len);
-        for(int i = 0; i < TestPlcCmd[step].cmd_len; i++)
-        {
-            lw_notice(" %#x",  TestPlcCmd[step].cmd[i]);
-        }
-        lw_notice("\n");
-        MdelayKTask(TestPlcCmd[step].delay_ms);
+        PlcBinCmdType *cmd = &TestPlcCmd[i];
+        sendto(fd, cmd->cmd, cmd->cmd_len, 0, (struct sockaddr*)&sock_addr, addr_len);
+        plc_print_array("Send cmd", cmd->cmd_len, cmd->cmd);
 
-        memset(recv_buf, 0, param->buf_size);
-        while(1)
+        MdelayKTask(cmd->delay_ms);
+        timeout = PLC_SOCK_TIMEOUT;
+        memset(param->recv_buf, 0, param->recv_len);
+        while(timeout --)
         {
-            recv_len = recvfrom(fd, recv_buf, param->buf_size, 0, (struct sockaddr *)&sock_addr, &addr_len);
+            recv_len = recvfrom(fd, param->recv_buf, param->recv_len, 0, (struct sockaddr *)&sock_addr, &addr_len);
             if(recv_len > 0)
             {
                 if(param->device_type == PLC_DEV_TYPE_OML)
                 {
-                    if((recv_len == OML_HEADER_LEN) && (CHECK_OML_HEADER(recv_buf)))
+                    if((recv_len == OML_HEADER_LEN) && (CHECK_OML_HEADER(param->recv_buf)))
                     {
                         lw_notice("This is Oml package!!!\n");
                     }
                 }
                 lw_notice("Receive from : %s\n", inet_ntoa(sock_addr.sin_addr));
-                lw_notice("Receive data : %d -", recv_len);
-                for(int i = 0; i < recv_len; i++)
-                {
-                    lw_notice(" %#x",  recv_buf[i]);
-                }
-                lw_notice("\n");
+                plc_print_array("Receive data", recv_len, param->recv_buf);
                 break;
             }
         }
-        step ++;
     }
 
     closesocket(fd);
-    free(recv_buf);
+    free(param->recv_buf);
     return NULL;
 }
 
@@ -221,29 +191,46 @@ void PlcShowUsage(void)
     plc_notice("tcp=[] 0: udp 1:tcp\n");
     plc_notice("ip=[ip.ip.ip.ip]\n");
     plc_notice("port=port\n");
+    plc_notice("file: use %s\n", PLC_SOCK_FILE_NAME);
     plc_notice("------------------------------------\n");
 }
 
-void PlcGetParamFromFile(void)
+#if defined(MOUNT_SDCARD) && defined(LIB_USING_CJSON)
+void PlcGetParamFromFile(char *file_name)
 {
     PlcSocketParamType *param = &plc_socket_demo_data;
 
-    //for PLC socket parameter file
-    char file_buf[CTL_FILE_SIZE] = {0};
-    FILE *fd = CtlFileInit(PLC_SOCK_FILE_NAME);
-
-    if(fd == NULL)
+    char *file_buf = malloc(CTL_FILE_LEN);
+    if(file_buf == NULL)
+    {
+        plc_error("No enough buffer %d\n", CTL_FILE_LEN);
         return;
+    }
+    memset(file_buf, 0, CTL_FILE_LEN);
 
-    memset(file_buf, 0, CTL_FILE_SIZE);
-
-    CtlFileRead(fd, CTL_FILE_SIZE, file_buf);
-    CtlFileClose(fd);
+    if(CtlFileReadWithFilename(file_name, CTL_FILE_LEN, file_buf) != EOK)
+    {
+        plc_error("Can't open file %s\n", file_name);
+        //try again default file
+        if(strcmp(file_name, PLC_SOCK_FILE_NAME) != 0)
+        {
+            if(CtlFileReadWithFilename(PLC_SOCK_FILE_NAME, CTL_FILE_LEN, file_buf) != EOK)
+            {
+                plc_error("Can't open file %s\n", file_name);
+                return;
+            }
+        }
+        else
+        {
+            return;
+        }
+    }
     CtlParseJsonData(file_buf);
 
     memcpy(param->ip, ctl_file_param.ip, 4);
     param->port = ctl_file_param.port;
     param->cmd_num = ctl_file_param.cmd_num;
+    param->socket_type = ctl_file_param.tcp ? SOCK_STREAM : SOCK_DGRAM;
 
     for(int i = 0; i < param->cmd_num; i++)
     {
@@ -253,16 +240,17 @@ void PlcGetParamFromFile(void)
 
     plc_print("ip: %d.%d.%d.%d\n", param->ip[0], param->ip[1], param->ip[2], param->ip[3]);
     plc_print("port: %d", param->port);
+    plc_print("tcp: %d", param->socket_type);
     plc_print("cmd number: %d\n", param->cmd_num);
 
     for(int i = 0; i < param->cmd_num; i++)
     {
-        plc_print("cmd %d len %d: ", i, TestPlcCmd[i].cmd_len);
-        for(int j = 0; j < TestPlcCmd[i].cmd_len; j++)
-            plc_print("%x ", TestPlcCmd[i].cmd[j]);
-        plc_print("\n");
+        plc_print_array("cmd", TestPlcCmd[i].cmd_len, TestPlcCmd[i].cmd);
     }
+    free(file_buf);
 }
+
+#endif
 
 void PlcCheckParam(int argc, char *argv[])
 {
@@ -278,13 +266,19 @@ void PlcCheckParam(int argc, char *argv[])
 
         plc_print("check %d %s\n", i, str);
 
-        if(strcmp(str, "file") == 0)
+#if defined(MOUNT_SDCARD) && defined(LIB_USING_CJSON)
+        if(strncmp(str, "file", 4) == 0)
         {
-            plc_notice("get parameter file %s\n", PLC_SOCK_FILE_NAME);
-            PlcGetParamFromFile();
+            char file_name[CTL_FILE_NAME_LEN] = {0};
+            if(sscanf(str, "file=%s", file_name) == EOF)
+            {
+                strcpy(file_name, PLC_SOCK_FILE_NAME);
+            }
+            plc_notice("get %s parameter file %s\n", str, file_name);
+            PlcGetParamFromFile(file_name);
             return;
         }
-
+#endif
         if(sscanf(str, "ip=%d.%d.%d.%d",
             &param->ip[0],
             &param->ip[1],

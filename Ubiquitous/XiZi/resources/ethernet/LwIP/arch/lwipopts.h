@@ -250,10 +250,9 @@ typedef unsigned int nfds_t;
 #define MEMP_MEM_MALLOC                 1
 
 #define lw_print //KPrintf
-#define lw_trace() //KPrintf("lw: [%s][%d] passed!\n", __func__, __LINE__)
-#define lw_error() //KPrintf("lw: [%s][%d] failed!\n", __func__, __LINE__)
-#define lw_debug KPrintf
+#define lw_error KPrintf
 #define lw_notice KPrintf
+
 #endif /* __LWIPOPTS_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

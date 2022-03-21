@@ -65,7 +65,6 @@ void I2cEEpromTestWrite(void)
 
 int I2cEEpromTest(void)
 {
-    Stm32HwI2cInit();
     BOARD_InitI2C1Pins();
     I2cHardwareInit();
     I2cEEpromTestWrite();

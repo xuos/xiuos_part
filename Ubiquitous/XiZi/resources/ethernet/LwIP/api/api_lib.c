@@ -245,7 +245,6 @@ netconn_delete(struct netconn *conn)
     err = ERR_OK;
   } else
 #endif /* LWIP_NETCONN_FULLDUPLEX */
-//tst by wly
   {
     err = netconn_prepare_delete(conn);
   }

@@ -497,18 +497,6 @@ get_socket(int fd)
   return sock;
 }
 
-void pr_socket_buf(void)
-{
-  int i;
-  lw_debug("socket:\n");
-  for (i = 0; i < NUM_SOCKETS; ++i) {
-//    if (!sockets[i].conn)
-      lw_debug("%d: conn %p rcv %d send %d wait %d\n", i, sockets[i].conn, sockets[i].rcvevent, sockets[i].sendevent,
-        sockets[i].select_waiting);
-  }
-}
-
-
 /**
  * Allocate a new socket for a given netconn.
  *
@@ -600,7 +588,6 @@ free_socket_free_elements(int is_tcp, struct netconn *conn, union lwip_sock_last
   }
   if (conn != NULL) {
     /* netconn_prepare_delete() has already been called, here we only free the conn */
-  lw_debug("lw: [%s] tcp %d socket %d accept %d recv %d\n", __func__, is_tcp, conn->socket, conn->acceptmbox, conn->recvmbox);
     netconn_delete(conn);
   }
 }
@@ -673,8 +660,6 @@ lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
 
   newsock = alloc_socket(newconn, 1);
   if (newsock == -1) {
-    lw_debug("lw: [%s] recv %d\n", __func__, newconn->recvmbox);
-    pr_socket_buf();
     netconn_delete(newconn);
     sock_set_errno(sock, ENFILE);
     done_socket(sock);
@@ -711,8 +696,6 @@ lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
     err = netconn_peer(newconn, &naddr, &port);
     if (err != ERR_OK) {
       LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_accept(%d): netconn_peer failed, err=%d\n", s, err));
-      lw_debug("lw: [%s] recv %x\n", __func__, newconn->recvmbox);
-
       netconn_delete(newconn);
       free_socket(nsock, 1);
       sock_set_errno(sock, err_to_errno(err));
@@ -1756,8 +1739,6 @@ lwip_socket(int domain, int type, int protocol)
   i = alloc_socket(conn, 0);
 
   if (i == -1) {
-    lw_debug("lw: [%s] recv %d delete no socket\n", __func__, conn->recvmbox);
-    pr_socket_buf();
     netconn_delete(conn);
     set_errno(ENFILE);
     return -1;
@@ -1766,7 +1747,6 @@ lwip_socket(int domain, int type, int protocol)
   done_socket(&sockets[i - LWIP_SOCKET_OFFSET]);
   LWIP_DEBUGF(SOCKETS_DEBUG, ("%d\n", i));
   set_errno(0);
-  lw_debug("lw: [%s] new socket %d %p\n", __func__, i, conn);
   return i;
 }
 

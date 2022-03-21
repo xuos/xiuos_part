@@ -143,7 +143,7 @@ static int BoardI2cDevBend(void)
 }
 
 /*BOARD I2C INIT*/
-int Stm32HwI2cInit(void)
+int Imrt1052HwI2cInit(void)
 {
     static int init_flag = 0;
     x_err_t ret = EOK;

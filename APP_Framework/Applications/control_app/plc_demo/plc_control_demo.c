@@ -101,8 +101,6 @@ void PlcReadUATask(void* arg)
     if(EOK != ret)
     {
         plc_print("plc: [%s] open failed %#x\n", __func__, ret);
-//        free(plc_demo_dev.priv_data);
-//        plc_demo_dev.priv_data = NULL;
         return;
     }
 
@@ -163,8 +161,6 @@ void PlcWriteUATask(void* arg)
     if(EOK != ret)
     {
         plc_print("plc: [%s] open failed %#x\n", __func__, ret);
-//        free(plc_demo_dev.priv_data);
-//        plc_demo_dev.priv_data = NULL;
         return;
     }
 

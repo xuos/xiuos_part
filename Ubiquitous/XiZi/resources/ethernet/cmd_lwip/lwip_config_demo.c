@@ -18,40 +18,18 @@
  * @date 2021.12.15
  */
 
-#include "lwip/opt.h"
-
-#if LWIP_IPV4 && LWIP_RAW
-
-#include "ping.h"
-
-#include "lwip/timeouts.h"
-#include "lwip/init.h"
-#include "netif/ethernet.h"
-
 #include "board.h"
-#include "pin_mux.h"
-#include "clock_config.h"
-
-#include <transform.h>
-#include <sys_arch.h>
-#include "connect_ethernet.h"
+#include "sys_arch.h"
 
 /******************************************************************************/
 
-static void *LwipSetIPTask(void *param)
+static void LwipSetIPTask(void *param)
 {
     lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 }
 
 void LwipSetIPTest(int argc, char *argv[])
 {
-    int result = 0;
-    pthread_t th_id;
-    pthread_attr_t attr;
-
-    attr.schedparam.sched_priority = LWIP_DEMO_TASK_PRIO;
-    attr.stacksize = LWIP_TASK_STACK_SIZE;
-
     if(argc >= 4)
     {
         lw_print("lw: [%s] ip %s mask %s gw %s\n", __func__, argv[1], argv[2], argv[3]);
@@ -65,12 +43,7 @@ void LwipSetIPTest(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &lwip_ipaddr[0], &lwip_ipaddr[1], &lwip_ipaddr[2], &lwip_ipaddr[3]);
     }
 
-    result = pthread_create(&th_id, &attr, LwipSetIPTask, NULL);
-    if (0 == result) {
-        lw_print("lw: [%s] thread %d successfully!\n", __func__, th_id);
-    } else {
-        lw_print("lw: [%s] failed! error code is %d\n", __func__, result);
-    }
+    sys_thread_new("SET ip address", LwipSetIPTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
@@ -98,4 +71,3 @@ void LwipShowIPTask(int argc, char *argv[])
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
      showip, LwipShowIPTask, GetIp [IP] [Netmask] [Gateway]);
 
-#endif

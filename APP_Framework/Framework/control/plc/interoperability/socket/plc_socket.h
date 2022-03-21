@@ -23,9 +23,9 @@
 
 #define PLC_BIN_CMD_LEN 512
 
+// for plc socket test bin commands
 typedef struct
 {
-    uint8_t step;
     uint16_t delay_ms;
     uint8_t cmd_len;
     uint8_t cmd[PLC_BIN_CMD_LEN];
@@ -43,28 +43,23 @@ enum PlcDeviceType {
     PLC_DEV_TYPE_END,
 };
 
-#define PLC_IP_SIZE 16
-#define PLC_DEV_SIZE 32
-#define PLC_TEST_SIZE 65536
+#define PLC_IP_LEN 16
+#define PLC_DEV_NAME_LEN 32
+#define PLC_RECV_BUF_LEN CTL_FILE_LEN
 
 typedef struct PlcSocketParamStruct{
-    char ip[PLC_IP_SIZE];
+    char ip[PLC_IP_LEN];
     uint32_t port;
     uint32_t device_type; //PlcDeviceType
     uint32_t socket_type; //UDP or TCP
-    char device[PLC_DEV_SIZE];
-    uint32_t step; // communication step
+    char device[PLC_DEV_NAME_LEN];
     uint32_t cmd_num; // command number
-    uint32_t buf_size;
-    uint8_t *buf;
+    uint32_t recv_len; // receive length
+    uint8_t *recv_buf; // receive buffer
 }PlcSocketParamType;
 
 //debug command
-<<<<<<< HEAD
-#define plc_print KPrintf
-=======
 #define plc_print //KPrintf
->>>>>>> e5d124231c72798f7f77b842cc8c631b79043914
 #define plc_error KPrintf
 #define plc_notice KPrintf
 

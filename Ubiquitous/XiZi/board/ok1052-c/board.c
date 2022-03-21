@@ -84,6 +84,10 @@ int MountSDCard(void)
 #include <connect_adc.h>
 #endif
 
+#ifdef BSP_USING_I2C
+#include <connect_i2c.h>
+#endif
+
 #ifdef BSP_USING_SPI
 #include <connect_spi.h>
 #endif
@@ -686,6 +690,10 @@ void InitBoardHardware()
 
 #ifdef BSP_USING_ADC
     Imrt1052HwAdcInit();
+#endif
+
+#ifdef BSP_USING_I2C
+    Imrt1052HwI2cInit();
 #endif
 
 #ifdef BSP_USING_SPI
