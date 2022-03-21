@@ -18,6 +18,16 @@
  *
  ****************************************************************************/
 
+
+/**
+* @file aiit-riscv64-board.h
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 #ifndef __AIIT_RISCV64_BOARDS_K210_H
 #define __AIIT_RISCV64_BOARDS_K210_H
 

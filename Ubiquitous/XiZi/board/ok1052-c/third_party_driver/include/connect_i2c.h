@@ -37,7 +37,7 @@ typedef struct Stm32I2c
 
 #define i2c_print KPrintf
 
-int Imrt1052HwI2cInit(void);
+int Imxrt1052HwI2cInit(void);
 
 #ifdef __cplusplus
 }

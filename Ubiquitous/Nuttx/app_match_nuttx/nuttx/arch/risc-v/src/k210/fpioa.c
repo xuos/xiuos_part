@@ -12,6 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+* @file fpioa.c
+* @brief kendryte k210 source code
+*                https://github.com/kendryte/kendryte-standalone-sdk.git
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 #include <stddef.h>
 #include <stdint.h>
 #include "sysctl.h"

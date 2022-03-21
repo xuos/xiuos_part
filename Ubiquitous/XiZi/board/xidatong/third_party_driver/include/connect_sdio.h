@@ -13,9 +13,9 @@
 /**
 * @file connect_sdio.h
 * @brief define imxrt1052-board sdio function and struct
-* @version 2.0 
+* @version 2.0
 * @author AIIT XUOS Lab
-* @date 2022-01-24
+* @date 2022-03-15
 */
  
 #ifndef CONNECT_SDIO_H
@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-int Imrt1052HwSdioInit(void);
+int Imxrt1052HwSdioInit(void);
 
 #ifdef __cplusplus
 }

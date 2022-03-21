@@ -405,7 +405,7 @@ static int BoardRtcDevBend(void)
     return  ret;
 }
 
-int Imrt1052HwRtcInit(void)
+int Imxrt1052HwRtcInit(void)
 {
     x_err_t ret = EOK;
     static struct RtcBus rtc_bus;

@@ -4,6 +4,10 @@ ifeq ($(CONFIG_BSP_USING_LPUART),y)
   SRC_DIR += uart
 endif
 
+ifeq ($(CONFIG_BSP_USING_CH438),y)
+  SRC_DIR += ch438
+endif
+
 ifeq ($(CONFIG_BSP_USING_SDIO),y)
   SRC_DIR += sdio
 endif

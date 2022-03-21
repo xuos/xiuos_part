@@ -294,21 +294,21 @@ static int BoardSerialBusInit(struct SerialBus *serial_bus, struct SerialDriver 
     /*Init the serial bus */
     ret = SerialBusInit(serial_bus, bus_name);
     if (EOK != ret) {
-        KPrintf("Imrt1052HwUartInit SerialBusInit error %d\n", ret);
+        KPrintf("Imxrt1052HwUartInit SerialBusInit error %d\n", ret);
         return ERROR;
     }
 
     /*Init the serial driver*/
     ret = SerialDriverInit(serial_driver, drv_name);
     if (EOK != ret) {
-        KPrintf("Imrt1052HwUartInit SerialDriverInit error %d\n", ret);
+        KPrintf("Imxrt1052HwUartInit SerialDriverInit error %d\n", ret);
         return ERROR;
     }
 
     /*Attach the serial driver to the serial bus*/
     ret = SerialDriverAttachToBus(drv_name, bus_name);
     if (EOK != ret) {
-        KPrintf("Imrt1052HwUartInit SerialDriverAttachToBus error %d\n", ret);
+        KPrintf("Imxrt1052HwUartInit SerialDriverAttachToBus error %d\n", ret);
         return ERROR;
     }
 
@@ -322,20 +322,20 @@ static int BoardSerialDevBend(struct SerialHardwareDevice *serial_device, void *
 
     ret = SerialDeviceRegister(serial_device, serial_param, dev_name);
     if (EOK != ret) {
-        KPrintf("Imrt1052HwUartInit SerialDeviceInit device %s error %d\n", dev_name, ret);
+        KPrintf("Imxrt1052HwUartInit SerialDeviceInit device %s error %d\n", dev_name, ret);
         return ERROR;
     }
 
     ret = SerialDeviceAttachToBus(dev_name, bus_name);
     if (EOK != ret) {
-        KPrintf("Imrt1052HwUartInit SerialDeviceAttachToBus device %s error %d\n", dev_name, ret);
+        KPrintf("Imxrt1052HwUartInit SerialDeviceAttachToBus device %s error %d\n", dev_name, ret);
         return ERROR;
     }
 
     return  ret;
 }
 
-int Imrt1052HwUartInit(void)
+int Imxrt1052HwUartInit(void)
 {
     x_err_t ret = EOK;
 
@@ -361,13 +361,13 @@ int Imrt1052HwUartInit(void)
 
     ret = BoardSerialBusInit(&serial_bus_1, &serial_driver_1, SERIAL_BUS_NAME_1, SERIAL_DRV_NAME_1);
     if (EOK != ret) {
-        KPrintf("Imrt1052HwUartInit uart error ret %u\n", ret);
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
         return ERROR;
     }
 
     ret = BoardSerialDevBend(&serial_device_1, (void *)&serial_cfg_1, SERIAL_BUS_NAME_1, SERIAL_1_DEVICE_NAME_0);
     if (EOK != ret) {
-        KPrintf("Imrt1052HwUartInit uart error ret %u\n", ret);
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
         return ERROR;
     }
 #endif
@@ -394,13 +394,13 @@ int Imrt1052HwUartInit(void)
 
     ret = BoardSerialBusInit(&serial_bus_2, &serial_driver_2, SERIAL_BUS_NAME_2, SERIAL_DRV_NAME_2);
     if (EOK != ret) {
-        KPrintf("Imrt1052HwUartInit uart error ret %u\n", ret);
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
         return ERROR;
     }
 
     ret = BoardSerialDevBend(&serial_device_2, (void *)&serial_cfg_2, SERIAL_BUS_NAME_2, SERIAL_2_DEVICE_NAME_0);
     if (EOK != ret) {
-        KPrintf("Imrt1052HwUartInit uart error ret %u\n", ret);
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
         return ERROR;
     }
 #endif

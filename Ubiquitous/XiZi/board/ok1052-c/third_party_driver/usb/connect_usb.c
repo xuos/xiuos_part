@@ -256,7 +256,7 @@ static int BoardUsbDevBend(void)
 }
 
 /*OK1052-C BOARD USB INIT*/
-int Imrt1052HwUsbHostInit(void)
+int Imxrt1052HwUsbHostInit(void)
 {
     x_err_t ret = EOK;
     int32 usb_host_task = 0;
@@ -284,9 +284,9 @@ int Imrt1052HwUsbHostInit(void)
     usb_host_task = KTaskCreate("usbh", UsbHostTask, NONE,
                            USB_HOST_STACK_SIZE, 8);
     if(usb_host_task < 0) {
-		KPrintf("usb_host_task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
-		return ERROR;
-	}
+        KPrintf("usb_host_task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
+        return ERROR;
+    }
 
     StartupKTask(usb_host_task);
 

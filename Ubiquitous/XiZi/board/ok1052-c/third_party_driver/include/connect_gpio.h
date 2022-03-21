@@ -27,7 +27,9 @@
 extern "C" {
 #endif
 
-int Stm32HwGpioInit(void);
+#define IMXRT_GET_PIN(PORTx, PIN)  (32 * (PORTx - 1) + (PIN & 31))    /* PORTx:1,2,3,4,5 */
+
+int Imxrt1052HwGpioInit(void);
 
 #ifdef __cplusplus
 }

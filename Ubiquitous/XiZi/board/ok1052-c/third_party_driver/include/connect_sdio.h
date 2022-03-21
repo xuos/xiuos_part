@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-int Imrt1052HwSdioInit(void);
+int Imxrt1052HwSdioInit(void);
 
 #ifdef __cplusplus
 }

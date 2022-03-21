@@ -7,6 +7,14 @@
  *
  */
 
+/**
+ * @file fsl_device_registers.h
+ * @brief device register function
+ * @version 2.0
+ * @author AIIT XUOS Lab
+ * @date 2022-03-15
+ */
+
 #ifndef __FSL_DEVICE_REGISTERS_H__
 #define __FSL_DEVICE_REGISTERS_H__
 

@@ -913,7 +913,7 @@ x_err_t HwSpiDeviceAttach(const char *bus_name, const char *device_name)
     return result;
 }
 
-int Imrt1052HwSpiInit(void)
+int Imxrt1052HwSpiInit(void)
 {
     return Stm32HwSpiBusInit();
 }

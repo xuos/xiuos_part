@@ -109,7 +109,7 @@ struct InitSequenceDesc env_init[] =
 	{ "hw usb", Stm32HwUsbInit },
 #endif
 #ifdef BSP_USING_NXP_USBH
-	{ "nxp hw usb", Imrt1052HwUsbHostInit },
+	{ "nxp hw usb", Imxrt1052HwUsbHostInit },
 #endif
 #ifdef MOUNT_SDCARD
 	{ "MountSDCard", MountSDCard },

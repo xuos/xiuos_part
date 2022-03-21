@@ -9,9 +9,9 @@
 /**
  * @file fsl_common.h
  * @brief common drivers header
- * @version 1.0
+ * @version 2.0
  * @author AIIT XUOS Lab
- * @date 2021.11.11
+ * @date 2022-03-15
  */
 
 #ifndef _FSL_COMMON_H_

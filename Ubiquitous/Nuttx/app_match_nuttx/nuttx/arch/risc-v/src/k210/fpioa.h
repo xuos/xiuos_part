@@ -12,25 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
- * @file
- * @brief      Field Programmable GPIO Array (FPIOA)
- *
- *             The FPIOA peripheral supports the following features:
- *
- *             - 48 IO with 256 functions
- *
- *             - Schmitt trigger
- *
- *             - Invert input and output
- *
- *             - Pull up and pull down
- *
- *             - Driving selector
- *
- *             - Static input and output
- *
- */
+* @file fpioa.h
+* @brief kendryte k210 source code
+*                https://github.com/kendryte/kendryte-standalone-sdk.git
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
 
 #ifndef _DRIVER_FPIOA_H
 #define _DRIVER_FPIOA_H

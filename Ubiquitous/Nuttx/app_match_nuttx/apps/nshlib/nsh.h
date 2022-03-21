@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file nsh.h
+* @brief nuttx source code
+*                 https://github.com/apache/incubator-nuttx-apps
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 #ifndef __APPS_NSHLIB_NSH_H
 #define __APPS_NSHLIB_NSH_H
 
