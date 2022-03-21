@@ -78,7 +78,7 @@ void ADC2_IRQHandler(int vector, void *param)
 
 DECLARE_HW_IRQ(ADC2_IRQn, ADC2_IRQHandler, NONE);
 
-uint32 Imrt1052AdcOpen(void *dev)
+uint32 Imxrt1052AdcOpen(void *dev)
 {
     struct AdcHardwareDevice *adc_dev = (struct AdcHardwareDevice *)dev;
     adc_config_t adc_cfg;
@@ -126,12 +126,12 @@ uint32 Imrt1052AdcOpen(void *dev)
     return EOK;
 }
 
-uint32 Imrt1052AdcClose(void *dev)
+uint32 Imxrt1052AdcClose(void *dev)
 {
     return EOK;
 }
 
-uint32 Imrt1052AdcRead(void *dev, struct BusBlockReadParam *read_param)
+uint32 Imxrt1052AdcRead(void *dev, struct BusBlockReadParam *read_param)
 {
     struct AdcHardwareDevice *adc_dev = (struct AdcHardwareDevice *)dev;
     adc_channel_config_t ch_cfg;
@@ -169,7 +169,7 @@ uint32 Imrt1052AdcRead(void *dev, struct BusBlockReadParam *read_param)
     return adc1_val;
 }
 
-static uint32 Imrt1052AdcDrvConfigure(void *drv, struct BusConfigureInfo *configure_info)
+static uint32 Imxrt1052AdcDrvConfigure(void *drv, struct BusConfigureInfo *configure_info)
 {
     NULL_PARAM_CHECK(drv);
     NULL_PARAM_CHECK(configure_info);
@@ -179,14 +179,14 @@ static uint32 Imrt1052AdcDrvConfigure(void *drv, struct BusConfigureInfo *config
 
     struct AdcDriver *adc_drv = (struct AdcDriver *)drv;
     struct AdcHardwareDevice *adc_dev = (struct AdcHardwareDevice *)adc_drv->driver.owner_bus->owner_haldev;
-    struct Imrt1052HwAdc *adc_cfg = (struct Imrt1052HwAdc *)adc_dev->haldev.private_data;
+    struct Imxrt1052HwAdc *adc_cfg = (struct Imxrt1052HwAdc *)adc_dev->haldev.private_data;
 
     switch (configure_info->configure_cmd)
     {
         case OPE_CFG:
             adc_cfg->adc_channel = *(uint8 *)configure_info->private_data;
             if (adc_cfg->adc_channel > 18) {
-                KPrintf("Imrt1052AdcDrvConfigure set adc channel(0-18) %u error!", adc_cfg->adc_channel);
+                KPrintf("Imxrt1052AdcDrvConfigure set adc channel(0-18) %u error!", adc_cfg->adc_channel);
                 adc_cfg->adc_channel = 0;
                 ret = ERROR;
             }
@@ -200,13 +200,13 @@ static uint32 Imrt1052AdcDrvConfigure(void *drv, struct BusConfigureInfo *config
 
 static const struct AdcDevDone dev_done =
 {
-    Imrt1052AdcOpen,
-    Imrt1052AdcClose,
+    Imxrt1052AdcOpen,
+    Imxrt1052AdcClose,
     NONE,
-    Imrt1052AdcRead,
+    Imxrt1052AdcRead,
 };
 
-int Imrt1052HwAdcInit(void)
+int Imxrt1052HwAdcInit(void)
 {
     x_err_t ret = EOK;
 
@@ -214,9 +214,9 @@ int Imrt1052HwAdcInit(void)
     static struct AdcBus adc1_bus;
     static struct AdcDriver adc1_drv;
     static struct AdcHardwareDevice adc1_dev;
-    static struct Imrt1052HwAdc adc1_cfg;
+    static struct Imxrt1052HwAdc adc1_cfg;
 
-    adc1_drv.configure = Imrt1052AdcDrvConfigure;
+    adc1_drv.configure = Imxrt1052AdcDrvConfigure;
 
     ret = AdcBusInit(&adc1_bus, ADC_BUS_NAME_1);
     if (ret != EOK) {
@@ -254,9 +254,9 @@ int Imrt1052HwAdcInit(void)
     static struct AdcBus adc2_bus;
     static struct AdcDriver adc2_drv;
     static struct AdcHardwareDevice adc2_dev;
-    static struct Imrt1052HwAdc adc2_cfg;
+    static struct Imxrt1052HwAdc adc2_cfg;
 
-    adc2_drv.configure = Imrt1052AdcDrvConfigure;
+    adc2_drv.configure = Imxrt1052AdcDrvConfigure;
 
     ret = AdcBusInit(&adc2_bus, ADC_BUS_NAME_2);
     if (ret != EOK) {

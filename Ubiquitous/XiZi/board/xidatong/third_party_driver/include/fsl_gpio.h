@@ -6,6 +6,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+/**
+ * @file fsl_gpio.h
+ * @brief gpio drivers
+ * @version 2.0
+ * @author AIIT XUOS Lab
+ * @date 2022-03-15
+ */
+
 #ifndef _FSL_GPIO_H_
 #define _FSL_GPIO_H_
 

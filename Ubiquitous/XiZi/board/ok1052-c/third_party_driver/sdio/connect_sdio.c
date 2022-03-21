@@ -269,7 +269,7 @@ static struct SdioDevDone dev_done =
     SdioRead,
 };
 
-int Imrt1052HwSdioInit(void)
+int Imxrt1052HwSdioInit(void)
 {
     x_err_t ret = EOK;
     bool is_read_only;

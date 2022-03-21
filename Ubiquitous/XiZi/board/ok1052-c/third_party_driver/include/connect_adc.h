@@ -23,12 +23,12 @@
 
 #include <device.h>
 
-struct Imrt1052HwAdc
+struct Imxrt1052HwAdc
 {
     void *ADCx;
     uint8 adc_channel;
 };
 
-int Imrt1052HwAdcInit(void);
+int Imxrt1052HwAdcInit(void);
 
 #endif

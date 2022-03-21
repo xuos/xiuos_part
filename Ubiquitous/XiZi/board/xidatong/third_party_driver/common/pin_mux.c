@@ -1103,6 +1103,141 @@ void BOARD_InitI2C1Pins ( void )
                                                  Pull Up / Down Config. Field: 22K Ohm Pull Up
                                                  Hyst. Enable Field: Hysteresis Disabled */
 }
+
+void BOARD_InitUartPins(void)
+{
+#ifdef BSP_USING_LPUART1
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B0_12_LPUART1_TX,        /* GPIO_AD_B0_12 is configured as LPUART1_TX */
+        0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B0_13_LPUART1_RX,        /* GPIO_AD_B0_13 is configured as LPUART1_RX */
+        0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B0_12_LPUART1_TX,        /* GPIO_AD_B0_12 PAD functional properties : */
+        0x10B0u);                               /* Slew Rate Field: Slow Slew Rate
+                                                    Drive Strength Field: R0/6
+                                                    Speed Field: medium(100MHz)
+                                                    Open Drain Enable Field: Open Drain Disabled
+                                                    Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                    Pull / Keep Select Field: Keeper
+                                                    Pull Up / Down Config. Field: 100K Ohm Pull Down
+                                                    Hyst. Enable Field: Hysteresis Disabled */
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B0_13_LPUART1_RX,        /* GPIO_AD_B0_13 PAD functional properties : */
+        0x10B0u);                               /* Slew Rate Field: Slow Slew Rate
+                                                    Drive Strength Field: R0/6
+                                                    Speed Field: medium(100MHz)
+                                                    Open Drain Enable Field: Open Drain Disabled
+                                                    Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                    Pull / Keep Select Field: Keeper
+                                                    Pull Up / Down Config. Field: 100K Ohm Pull Down
+                                                    Hyst. Enable Field: Hysteresis Disabled */
+#endif
+#ifdef BSP_USING_LPUART2
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_02_LPUART2_TX,
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_03_LPUART2_RX,
+        0U);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_02_LPUART2_TX,
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_03_LPUART2_RX,
+        0x10B0u);
+#endif
+}
+
+void BOARD_InitCh438Pins(void)
+{
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_09_GPIO1_IO25,        /* GPIO1_IO25 is configured as CH438_DATA0 */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_08_GPIO1_IO24,        /* GPIO1_IO24 is configured as CH438_DATA1 */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_04_GPIO1_IO20,        /* GPIO1_IO20 is configured as CH438_DATA2 */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_05_GPIO1_IO21,        /* GPIO1_IO21 is configured as CH438_DATA3 */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_15_GPIO1_IO31,        /* GPIO1_IO31 is configured as CH438_DATA4 */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_12_GPIO1_IO28,        /* GPIO1_IO28 is configured as CH438_DATA5 */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_14_GPIO1_IO30,        /* GPIO1_IO30 is configured as CH438_DATA6 */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_13_GPIO1_IO29,        /* GPIO1_IO29 is configured as CH438_DATA7 */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_SD_B1_04_GPIO3_IO04,        /* GPIO3_IO04 is configured as CH438_nWR */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_SD_B1_05_GPIO3_IO05,        /* GPIO3_IO05 is configured as CH438_nRD */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_SD_B1_02_GPIO3_IO02,        /* GPIO3_IO02 is configured as CH438_ALE */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_SD_B1_03_GPIO3_IO03,        /* GPIO3_IO03 is configured as CH438_INT */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B0_02_GPIO1_IO02,        /* GPIO3_IO02 is configured as CH438_485_A_DIR */
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B0_00_GPIO1_IO00,        /* GPIO1_IO00 is configured as CH438_485_B_DIR */
+        0U);
+
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_09_GPIO1_IO25,        /* GPIO1_IO25 is configured as CH438_DATA0 */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_08_GPIO1_IO24,        /* GPIO1_IO24 is configured as CH438_DATA1 */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_04_GPIO1_IO20,        /* GPIO1_IO20 is configured as CH438_DATA2 */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_05_GPIO1_IO21,        /* GPIO1_IO21 is configured as CH438_DATA3 */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_15_GPIO1_IO31,        /* GPIO1_IO31 is configured as CH438_DATA4 */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_12_GPIO1_IO28,        /* GPIO1_IO28 is configured as CH438_DATA5 */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_14_GPIO1_IO30,        /* GPIO1_IO30 is configured as CH438_DATA6 */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_13_GPIO1_IO29,        /* GPIO1_IO29 is configured as CH438_DATA7 */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_SD_B1_04_GPIO3_IO04,        /* GPIO3_IO04 is configured as CH438_nWR */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_SD_B1_05_GPIO3_IO05,        /* GPIO3_IO05 is configured as CH438_nRD */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_SD_B1_02_GPIO3_IO02,        /* GPIO3_IO02 is configured as CH438_ALE */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_SD_B1_03_GPIO3_IO03,        /* GPIO3_IO03 is configured as CH438_INT */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B0_02_GPIO1_IO02,        /* GPIO3_IO02 is configured as CH438_485_A_DIR */
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B0_00_GPIO1_IO00,        /* GPIO1_IO00 is configured as CH438_485_B_DIR */
+        0x10B0u);
+}
 /***********************************************************************************************************************
  * EOF
  **********************************************************************************************************************/

@@ -12,10 +12,10 @@
 
 /**
 * @file connect_gpio.h
-* @brief define imxrt1052-baord gpio function and struct
-* @version 1.0
+* @brief define imxrt1052-board gpio function and struct
+* @version 2.0
 * @author AIIT XUOS Lab
-* @date 2022-03-01
+* @date 2022-03-15
 */
 
 #ifndef __CONNECT_GPIO_H_
@@ -27,7 +27,9 @@
 extern "C" {
 #endif
 
-int Stm32HwGpioInit(void);
+#define IMXRT_GET_PIN(PORTx, PIN)  (32 * (PORTx - 1) + (PIN & 31))    /* PORTx:1,2,3,4,5 */
+
+int Imxrt1052HwGpioInit(void);
 
 #ifdef __cplusplus
 }
