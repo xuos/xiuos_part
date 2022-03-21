@@ -256,7 +256,7 @@ static int BoardUsbDevBend(void)
 }
 
 /*RT1052 BOARD USB INIT*/
-int Imrt1052HwUsbHostInit(void)
+int Imxrt1052HwUsbHostInit(void)
 {
     x_err_t ret = EOK;
     int32 usb_host_task = 0;

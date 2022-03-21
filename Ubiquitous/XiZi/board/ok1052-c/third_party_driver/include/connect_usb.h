@@ -44,7 +44,7 @@ extern "C" {
 
 #define USB_SINGLE_BLOCK_SIZE 512
 
-int Imrt1052HwUsbHostInit(void);
+int Imxrt1052HwUsbHostInit(void);
 
 #ifdef __cplusplus
 }

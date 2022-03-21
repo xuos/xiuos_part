@@ -33,7 +33,7 @@ extern "C" {
 #define KERNEL_CONSOLE_DRV_NAME        SERIAL_DRV_NAME_1
 #define KERNEL_CONSOLE_DEVICE_NAME SERIAL_1_DEVICE_NAME_0
 
-int Imrt1052HwUartInit(void);
+int Imxrt1052HwUartInit(void);
 
 #ifdef __cplusplus
 }

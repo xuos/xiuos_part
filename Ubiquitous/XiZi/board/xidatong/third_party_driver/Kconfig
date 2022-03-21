@@ -6,11 +6,17 @@ menuconfig BSP_USING_LPUART
         source "$BSP_DIR/third_party_driver/uart/Kconfig"
     endif
 
+menuconfig BSP_USING_CH438
+    bool "Using CH438 device"
+    default n
+    if BSP_USING_CH438
+        source "$BSP_DIR/third_party_driver/ch438/Kconfig"
+    endif
+
 menuconfig BSP_USING_GPIO
     bool "Using GPIO device "
     default y
     select RESOURCES_PIN
-
     if BSP_USING_GPIO
         source "$BSP_DIR/third_party_driver/gpio/Kconfig"
     endif

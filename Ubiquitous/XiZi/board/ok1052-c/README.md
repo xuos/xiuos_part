@@ -12,9 +12,9 @@
 |架构| cortex-m7 |
 |主频| 600MHz |
 |片内SRAM| 512KB shared with TCM |
-|外设支持| UART |
+|外设支持| UART GPIO I2C RTC SDIO SEMC SPI USB ADC|
 
-XiUOS板级当前支持使用UART。
+XiUOS板级当前支持使用UART、GPIO、I2C、RTC、SDIO、SEMC、SPI、USB、ADC。
 
 ## 2. 开发环境搭建
 
