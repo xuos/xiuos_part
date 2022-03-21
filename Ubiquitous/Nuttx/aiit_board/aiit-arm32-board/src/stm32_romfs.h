@@ -33,6 +33,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file stm32_romfs.h
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 #ifndef __BOARDS_ARM_STM32_STM32F4AIIT_SRC_STM32_ROMFS_H
 #define __BOARDS_ARM_STM32_STM32F4AIIT_SRC_STM32_ROMFS_H
 

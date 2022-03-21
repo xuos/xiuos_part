@@ -17,6 +17,14 @@
  * under the License.
  *
  ****************************************************************************/
+/**
+* @file stm32_spi.c
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
 
 /****************************************************************************
  * Included Files
@@ -71,6 +79,7 @@ void weak_function stm32_spidev_initialize(void)
   stm32_configgpio(GPIO_MAX7219_CS);  /* MAX7219 chip select */
 #endif
 #ifdef CONFIG_LPWAN_SX127X
+  spiinfo("Configure GPIO for SX127X SPI2/CS\n");
   stm32_configgpio(GPIO_SX127X_CS);   /* SX127x chip select */
 #endif
 

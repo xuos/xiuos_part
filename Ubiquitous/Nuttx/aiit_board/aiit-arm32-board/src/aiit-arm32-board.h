@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file aiit-arm32-board.h
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 #ifndef __BOARDS_ARM_STM32_STM32F4AIIT_SRC_STM32F4AIIT_H
 #define __BOARDS_ARM_STM32_STM32F4AIIT_SRC_STM32F4AIIT_H
 
@@ -229,10 +238,9 @@
 
 /* LoRa SX127x */
 
-#define GPIO_SX127X_DIO0    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN0)
+#define GPIO_SX127X_DIO0    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN1)
 
-#define GPIO_SX127X_RESET   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_CLEAR|\
-                             GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
+#define GPIO_SX127X_RESET   (GPIO_PORTF|GPIO_PIN11)
 
 /* PWM
  *

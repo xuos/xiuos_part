@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file board.h
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 #ifndef __BOARDS_ARM_STM32_STM32F4AIIT_INCLUDE_BOARD_H
 #define __BOARDS_ARM_STM32_STM32F4AIIT_INCLUDE_BOARD_H
 
@@ -336,7 +345,7 @@
 #define DMACHAN_SPI1_RX   DMAMAP_SPI1_RX_1
 #define DMACHAN_SPI1_TX   DMAMAP_SPI1_TX_1
 
-/* SPI2 - Test MAX31855 on SPI2 PB10 = SCK, PB14 = MISO */
+/* SPI2 - Test sx127x on SPI2 PB13 = SCK, PC2 = MISO  PC3 MOSI*/
 
 #define GPIO_SPI2_MISO    GPIO_SPI2_MISO_2
 #define GPIO_SPI2_MOSI    GPIO_SPI2_MOSI_2
