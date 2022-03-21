@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
+* Copyright (c) 2021 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
@@ -12,7 +12,7 @@
 
 /**
 * @file connect_i2c.h
-* @brief define stm32f407-st-discovery-board i2c function and struct
+* @brief define ok1052-c board i2c function and struct
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-25

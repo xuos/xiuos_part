@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
+* Copyright (c) 2022 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
@@ -9,11 +9,11 @@
 * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 * See the Mulan PSL v2 for more details.
 */
- 
+
 /**
 * @file connect_usb.h
-* @brief define ok1052-board usb function and struct
-* @version 2.0 
+* @brief define ok1052-c board usb function and struct
+* @version 2.0
 * @author AIIT XUOS Lab
 * @date 2022-02-09
 */

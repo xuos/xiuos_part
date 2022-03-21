@@ -29,23 +29,25 @@ sudo apt-get install gcc-arm-none-eabi
 >2.在代码根目录下执行以下命令，生成配置文件
 
 ```
+cd ./Ubiquitous/XiZi
+make BOARD=stm32f407zgt6 distclean
 make BOARD=stm32f407zgt6 menuconfig
 ```
 >3.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出
 
-![img](menu.png )
+![img](./img/menu.png )
 
 >4.继续执行以下命令，进行编译
 ```
 make BOARD=stm32f407zgt6
 ```
->5.如果编译正确无误，会产生XiUOS_stm32f407zgt6.elf、XiUOS_stm32f407zgt6.bin文件。其中XiUOS_stm32f407zgt6.bin需要烧写到设备中进行运行。
+>5.如果编译正确无误，会产生XiZi_stm32f407zgt6.elf、XiZi_stm32f407zgt6.bin文件。其中XiZi_stm32f407zgt6.bin需要烧写到设备中进行运行。
 ```
-sudo write build/XiUOS_stm32f407zgt6.bin 0x8000000
+sudo write build/XiZi_stm32f407zgt6.bin 0x8000000
 ```
 >6.最后可以执行以下命令，清除配置文件和编译生成的文件
 ```
-make  BOARD=stm32f407zgt6 distclean
+make BOARD=stm32f407zgt6 distclean
 ```
 
 ## 3. 烧写及执行
@@ -59,21 +61,21 @@ git clone https://github.com/texane/stlink.git
 
 开发板接口如下：
 <div align= "center"> 
-<img src = interface.jpg   width =50%>
+<img src = ./img/interface.jpg   width =50%>
   </div>
 
   实际连接图为：
   <div align= "center"> 
-<img src = total.jpg   width =50%>
+<img src = ./img/total.jpg   width =50%>
   </div>
 
 在代码根目录下执行st-flash工具烧录
 ```
-sudo st-flash  write  build/XiUOS_stm32f407zgt6.bin 0x8000000
+sudo st-flash write build/XiZi_stm32f407zgt6.bin 0x8000000
 ```
 ### 3.1 运行结果
 
 如果编译 & 烧写无误，将会在串口终端上看到信息打印输出，(终端串口引脚为PB6、PB7)。
   <div align= "center"> 
-<img src = shell.png   >
+<img src = ./img/shell.png   >
   </div>

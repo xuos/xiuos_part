@@ -9,21 +9,21 @@
 /**
 * @file connect_usb.c
 * @brief support usb host function using bus driver framework on OK1052 board
-* @version 2.0 
+* @version 2.0
 * @author AIIT XUOS Lab
 * @date 2022-02-09
 */
 
 /*************************************************
 File name: connect_usb.c
-Description: support imxrt1052-board usb host configure and sdio bus register function
+Description: support ok1052-c board usb host configure and sdio bus register function
 Others: take SDK_2.6.1_MIMXRT1052xxxxB/boards/evkbimxrt1050/usb_examples/usb_host_msd_command for references
-History: 
+History:
 1. Date: 2022-02-09
 Author: AIIT XUOS Lab
-Modification: 
-1. support imxrt1052-board usb host configure, write and read
-2. support imxrt1052-board usb host bus device and driver register
+Modification:
+1. support ok1052-c board usb host configure, write and read
+2. support ok1052-c board usb host bus device and driver register
 *************************************************/
 #include <board.h>
 #include <connect_usb.h>
@@ -202,7 +202,7 @@ static void UsbHostTask(void* parameter)
     }
 }
 
-/*Init usb host bus、driver*/
+/*Init usb host bus driver*/
 static int BoardUsbBusInit(struct UsbBus *usb_bus, struct UsbDriver *usb_driver)
 {
     x_err_t ret = EOK;
@@ -255,7 +255,7 @@ static int BoardUsbDevBend(void)
     return ret;
 }
 
-/*RT1052 BOARD USB INIT*/
+/*OK1052-C BOARD USB INIT*/
 int Imrt1052HwUsbHostInit(void)
 {
     x_err_t ret = EOK;
@@ -283,7 +283,7 @@ int Imrt1052HwUsbHostInit(void)
 
     usb_host_task = KTaskCreate("usbh", UsbHostTask, NONE,
                            USB_HOST_STACK_SIZE, 8);
-    if(usb_host_task < 0) {		
+    if(usb_host_task < 0) {
 		KPrintf("usb_host_task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
 		return ERROR;
 	}

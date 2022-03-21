@@ -28,7 +28,7 @@
 
 /**
 * @file link.lds
-* @brief ok1052-c Linker script
+* @brief ok1052-c board Linker script
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-28
@@ -36,7 +36,7 @@
 
 /*************************************************
 File name: link.lds
-Description: ok1052-c Linker script
+Description: ok1052-c board Linker script
 Others: take MIMXRT1052xxxxx_flexspi_nor.ld for references
 History:
 1. Date: 2021-05-28

@@ -7,7 +7,7 @@
 
 /**
  * @file board.c
- * @brief relative configure for ok1052-c
+ * @brief relative configure for ok1052-c board
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2021.11.11
@@ -15,15 +15,15 @@
 
 /*************************************************
 File name: board.c
-Description: support imxrt1052-board init function
+Description: support ok1052-c board init function
 Others: take SDK_2.6.1_MIMXRT1052xxxxB for references
 History:
-1. Date: 2022-01-25
+1. Date: 2021-11-11
 Author: AIIT XUOS Lab
 Modification:
-1. support imxrt1052-board MPU、clock、memory init
-2. support imxrt1052-board uart、semc、sdio driver init
-3. support imxrt1052-board I2C, SPI, ADC, RTC driver init
+1. support ok1052-c board MPU, Clock, Memory init
+2. support ok1052-c board uart, semc, sdio driver init
+3. support ok1052-c board I2C, SPI, ADC, RTC driver init
 *************************************************/
 
 #include "fsl_common.h"
@@ -44,6 +44,9 @@ extern int ExtSramInit(void);
 #if defined(FS_VFS) && defined(MOUNT_SDCARD)
 #include <iot-vfs.h>
 
+// SD card mount flag 1: OK
+int sd_mount_flag = 0;
+
 /**
  * @description: Mount SD card
  * @return 0
@@ -51,10 +54,13 @@ extern int ExtSramInit(void);
 int MountSDCard(void)
 {
     if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, FSTYPE_FATFS, "/") == 0)
+    {
+        sd_mount_flag = 1;
         KPrintf("sd card mount to '/'");
+    }
     else
         KPrintf("sd card mount to '/' failed!");
-    
+
     return 0;
 }
 #endif
@@ -69,12 +75,10 @@ int MountSDCard(void)
 #ifdef BSP_USING_LWIP
 #include <connect_ethernet.h>
 #endif
+
 #ifdef BSP_USING_LPUART
 #include <connect_uart.h>
-<<<<<<< HEAD
 #endif
-=======
->>>>>>> e5d124231c72798f7f77b842cc8c631b79043914
 
 #ifdef BSP_USING_ADC
 #include <connect_adc.h>

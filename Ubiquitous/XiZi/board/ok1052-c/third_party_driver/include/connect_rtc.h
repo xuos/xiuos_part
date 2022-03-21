@@ -12,7 +12,7 @@
 
 /**
 * @file connect_rtc.h
-* @brief define ok1052-c rtc function and structure
+* @brief define ok1052-c board rtc function and struct
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01

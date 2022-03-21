@@ -28,7 +28,6 @@ ifeq ($(CONFIG_BSP_USING_RTC),y)
   SRC_DIR += rtc
 endif
 
-
 ifeq ($(CONFIG_BSP_USING_SDIO),y)
   SRC_DIR += sdio
 endif

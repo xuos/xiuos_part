@@ -12,7 +12,7 @@
 
 /**
 * @file connect_gpio.h
-* @brief define ok1052-c gpio function and struct
+* @brief define ok1052-c board gpio function and struct
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01

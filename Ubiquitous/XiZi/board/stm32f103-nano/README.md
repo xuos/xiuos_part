@@ -47,23 +47,29 @@ $ sudo apt install build-essential pkg-config  git
 $ sudo apt install gcc make libncurses5-dev openssl libssl-dev bison flex libelf-dev autoconf libtool gperf libc6-dev
 ```
 
-**XiUOS操作系统源码下载：** XiUOS [https://forgeplus.trustie.net/projects/xuos/xiuos](https://forgeplus.trustie.net/projects/xuos/xiuos)
+**XiUOS操作系统源码下载：** XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
 
 新建一个空文件夹并进入文件夹中，并下载源码，具体命令如下：
 
 ```c
 mkdir test  &&  cd test
-git clone https://git.trustie.net/xuos/xiuos.git
+git clone https://gitlink.org.cn/xuos/xiuos.git
 ```
 
-打开源码文件包可以看到以下目录：
+1、打开XiUOS源码文件包可以看到以下目录：
 | 名称 | 说明 |
 | -- | -- |
-| application | 应用代码 |
+| APP_Framework | 应用代码 |
+| Ubiquitous | 板级支持包,支持NuttX、RT-Thread和XiZi内核 |
+
+2、打开XiZi内核源码文件包可以看到以下目录：
+| 名称 | 说明 |
+| -- | -- |
+| arch | 架构代码 |
 | board | 板级支持包 |
-| framework | 应用框架 |
 | fs | 文件系统 |
 | kernel | 内核源码 |
+| lib | 第三方库源码 |
 | resources | 驱动文件 |
 | tool | 系统工具 |
 
@@ -77,18 +83,18 @@ git clone https://git.trustie.net/xuos/xiuos.git
 
 裁减配置工具：
 
-**工具地址：** kconfig-frontends [https://forgeplus.trustie.net/projects/xuos/kconfig-frontends](https://forgeplus.trustie.net/projects/xuos/kconfig-frontends)，下载与安装的具体命令如下：
+**工具地址：** kconfig-frontends [https://www.gitlink.org.cn/xuos/kconfig-frontends](https://www.gitlink.org.cn/xuos/kconfig-frontends)，下载与安装的具体命令如下：
 
 ```c
 mkdir kfrontends  && cd kfrontends
-git  clone https://git.trustie.net/xuos/kconfig-frontends.git
+git clone https://gitlink.org.cn/xuos/kconfig-frontends.git
 ```
 
 下载源码后按以下步骤执行软件安装：
 
 ```c
 cd kconfig-frontends
- ./xs_build.sh
+./xs_build.sh
 ```
 
 ### 编译工具链：
@@ -132,8 +138,9 @@ XiUOS板级驱动当前支持使用GPIO、UART。
 1.在VScode命令终端中执行以下命令，生成配置文件。
 
 ```c
-   make BOARD=stm32f103-nano distclean
-   make BOARD=stm32f103-nano menuconfig
+cd ./Ubiquitous/XiZi
+make BOARD=stm32f103-nano distclean
+make BOARD=stm32f103-nano menuconfig
 ```
 
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）。
@@ -184,7 +191,7 @@ XiUOS板级驱动当前支持使用GPIO、UART。
 make BOARD=stm32f103-nano
 ```
 
-5.如果编译正确无误，会产生XiUOS_stm32f103-nano.elf、XiUOS_stm32f103-nano.bin文件。其中XiUOS_stm32f103-nano.bin需要烧写到设备中进行运行。
+5.如果编译正确无误，会产生XiZi_stm32f103-nano.elf、XiZi_stm32f103-nano.bin文件。其中XiZi_stm32f103-nano.bin需要烧写到设备中进行运行。
 
 ## 3. 烧写及执行
 
@@ -212,7 +219,7 @@ cd build/Release && make install DESTDIR=_install
 代码根目录下执行st-flash工具烧录
 
 ```
-sudo st-flash write build/XiUOS_stm32f103-nano.bin 0x8000000
+sudo st-flash write build/XiZi_stm32f103-nano.bin 0x8000000
 ```
 
 ### 3.1 运行结果

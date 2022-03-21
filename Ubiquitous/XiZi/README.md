@@ -6,11 +6,11 @@
 
 | 名称 | 说明 |
 | -- | -- |
-| application | 应用代码 |
+| arch | 架构代码 |
 | board | 板级支持包 |
-| framework | 应用框架 |
 | fs | 文件系统 |
 | kernel | 内核源码 |
+| lib | 第三方库源码 |
 | resources | 驱动文件 |
 | tool | 系统工具 |
 | | |
@@ -23,13 +23,13 @@
 
 ARM架构系列的开发板有
 
-	aiit-arm32-board	stm32f407-st-discovery		stm32f407zgt6
+	aiit-arm32-board nuvoton-m2354 ok1052-c stm32f103-nano stm32f407-st-discovery stm32f407zgt6
 
 ### RISC-V
 
 RISC-V架构系列的开发板有
 
-	aiit-riscv64-board		hifive1-rev-B		kd233		maix-go
+	aiit-riscv64-board gapuino gd32vf103_rvstar hifive1-rev-B kd233 maix-go rv32m1_vega
 
 ## 开发环境
 
@@ -61,7 +61,7 @@ $ tar -zxvf gnu-mcu-eclipse-riscv-none-gcc-8.2.0-2.1-20190425-1021-centos64.tgz 
 
 ### 烧写工具
 
-ARM：ST-LINK
+ARM：ST-LINK NU-LINK
 
 RISC-V：K-FLash
 
