@@ -447,13 +447,13 @@ config ARCH_BOARD_IMXRT1050_EVK
 
 config ARCH_BOARD_IMXRT1052_OK
 	bool "NXP i.MX RT 1052 OK"
-	depends on ARCH_CHIP_MIMXRT1052DVL6A
+	depends on ARCH_CHIP_MIMXRT1052CVL5B
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
-		evaluation kit, MIMXRT1052-OK.  This board features the MIMXRT1052DVL6A MCU.
+		evaluation kit, MIMXRT1052-OK.  This board features the MIMXRT1052CVL5B MCU.
 
 config ARCH_BOARD_IMXRT1060_EVK
 	bool "NXP i.MX RT 1060 EVK"
