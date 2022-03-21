@@ -12,6 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+* @file sysctl.c
+* @brief kendryte k210 source code
+*                https://github.com/kendryte/kendryte-standalone-sdk.git
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 //#include <stdint.h>
 #include <stdlib.h>
 //#include <math.h>

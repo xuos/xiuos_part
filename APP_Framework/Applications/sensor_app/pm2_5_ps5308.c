@@ -11,11 +11,11 @@
 */
 
 /**
- * @file pm1_0_ps5308.c
- * @brief PS5308 PM1.0 example
+ * @file pm2_5_ps5308
+ * @brief PS5308 PM2.5 example
  * @version 1.0
  * @author AIIT XUOS Lab
- * @date 2021.04.23
+ * @date 2021.12.28
  */
 
 #ifdef ADD_XIZI_FETURES

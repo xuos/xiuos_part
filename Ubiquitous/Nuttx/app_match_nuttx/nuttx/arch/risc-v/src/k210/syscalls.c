@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+/**
+* @file syscall.c
+* @brief kendryte k210 source code
+*                https://github.com/kendryte/kendryte-standalone-sdk.git
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 /* Enable kernel-mode log API */
 #include <nuttx/config.h>
 

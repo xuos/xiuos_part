@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+/**
+* @file syscall.h
+* @brief kendryte k210 source code
+*                https://github.com/kendryte/kendryte-standalone-sdk.git
+* @version 1.0
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 #ifndef _BSP_SYSCALLS_H
 #define _BSP_SYSCALLS_H
 
