@@ -11,7 +11,7 @@
 */
 
 /**
- * @file xiuos.c
+ * @file transform.c
  * @brief Converts the framework interface to an operating system interface
  * @version 1.0
  * @author AIIT XUOS Lab

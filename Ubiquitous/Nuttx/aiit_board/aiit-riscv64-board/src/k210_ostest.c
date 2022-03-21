@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/k210/aiit-riscv64-board/src/c906_ostest.c
+ * boards/risc-v/k210/aiit-riscv64-board/src/k210_ostest.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +17,15 @@
  * under the License.
  *
  ****************************************************************************/
+
+/**
+* @file k210_ostest.c
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
 
 /****************************************************************************
  * Included Files
