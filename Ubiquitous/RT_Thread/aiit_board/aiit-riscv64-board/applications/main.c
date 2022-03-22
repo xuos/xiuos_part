@@ -20,9 +20,10 @@
 
 #include <rtthread.h>
 #include <stdio.h>
-
+extern int FrameworkInit();
 int main(void)
 {
     printf("Hello World\n"); 
+    FrameworkInit();
     return 0;
 }
