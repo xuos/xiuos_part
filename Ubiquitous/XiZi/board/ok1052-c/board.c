@@ -31,7 +31,7 @@ Modification:
 #include "pin_mux.h"
 
 #ifdef BSP_USING_SDIO
-extern int Imrt1052HwSdioInit(void);
+extern int Imxrt1052HwSdioInit(void);
 #endif
 
 #ifdef BSP_USING_SEMC
@@ -66,11 +66,24 @@ int MountSDCard(void)
 #include "fsl_gpio.h"
 #include "fsl_lpuart.h"
 
+#ifdef BSP_USING_GPIO
+#include <connect_gpio.h>
+#endif
+#ifdef BSP_USING_LWIP
 #include <connect_ethernet.h>
+#endif
+#ifdef BSP_USING_LPUART
 #include <connect_uart.h>
+#endif
+#ifdef BSP_USING_ADC
 #include <connect_adc.h>
+#endif
+#ifdef BSP_USING_SPI
 #include <connect_spi.h>
+#endif
+#ifdef BSP_USING_RTC
 #include <connect_rtc.h>
+#endif
 
 #define NVIC_PRIORITYGROUP_0         0x00000007U /*!< 0 bits for pre-emption priority
                                                       4 bits for subpriority */
@@ -635,6 +648,10 @@ void InitBoardHardware()
     SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
 #endif
 
+#ifdef BSP_USING_GPIO
+    Imxrt1052HwGpioInit();
+#endif
+
 #ifdef BSP_USING_LPUART
     imxrt_uart_pins_init();
 #endif
@@ -661,25 +678,25 @@ void InitBoardHardware()
 #endif
 
 #ifdef BSP_USING_LPUART
-    Imrt1052HwUartInit();
+    Imxrt1052HwUartInit();
 #endif
 
 #ifdef BSP_USING_ADC
-    Imrt1052HwAdcInit();
+    Imxrt1052HwAdcInit();
 #endif
 
 #ifdef BSP_USING_SPI
-    Imrt1052HwSpiInit();
+    Imxrt1052HwSpiInit();
 #endif
 
 #ifdef BSP_USING_RTC
-    Imrt1052HwRtcInit();
+    Imxrt1052HwRtcInit();
 #endif
 
     InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
 
 #ifdef BSP_USING_SDIO
-    Imrt1052HwSdioInit();
+    Imxrt1052HwSdioInit();
 #endif
 
 }

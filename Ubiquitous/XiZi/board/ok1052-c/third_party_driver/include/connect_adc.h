@@ -12,7 +12,7 @@
 
 /**
 * @file connect_adc.h
-* @brief define stm32f407-st-discovery adc function and struct
+* @brief define imxrt1052-baord adc function and struct
 * @version 1.1
 * @author AIIT XUOS Lab
 * @date 2021-12-28
@@ -23,12 +23,12 @@
 
 #include <device.h>
 
-struct Imrt1052HwAdc
+struct Imxrt1052HwAdc
 {
     void *ADCx;
     uint8 adc_channel;
 };
 
-int Imrt1052HwAdcInit(void);
+int Imxrt1052HwAdcInit(void);
 
 #endif

@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file stm32_sx127x.c
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-17
+*/
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -103,7 +112,7 @@ static void sx127x_chip_reset(void)
 
   /* Configure reset as output */
 
-  stm32_configgpio(GPIO_SX127X_RESET);
+ stm32_configgpio(GPIO_SX127X_RESET | GPIO_OUTPUT | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR);
 
   /* Set pin to zero */
 
@@ -143,7 +152,7 @@ static int sx127x_freq_select(uint32_t freq)
 
   /* Only HF supported (BAND3 - 860-930 MHz) */
 
-  if (freq < SX127X_HFBAND_THR)
+  if (freq > SX127X_HFBAND_THR)
     {
       ret = -EINVAL;
       wlerr("LF band not supported\n");
