@@ -300,21 +300,17 @@ void InitBoardHardware()
     BOARD_InitUartPins();
 #endif
 
-#ifdef BSP_USING_CH438
-    BOARD_InitCh438Pins();
-#endif
-
     InitBoardMemory((void *)HEAP_BEGIN, (void *)HEAP_END);
 
 #ifdef BSP_USING_LPUART
     Imxrt1052HwUartInit();
 #endif
 
+    InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
+
 #ifdef BSP_USING_CH438
     Imxrt1052HwCh438Init();
 #endif
-
-    InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
 
 #ifdef BSP_USING_SDIO
     Imxrt1052HwSdioInit();
