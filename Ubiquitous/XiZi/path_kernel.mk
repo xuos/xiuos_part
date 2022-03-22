@@ -310,6 +310,7 @@ endif
 
 ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/shared #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/interoperability/opcua #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/shared #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON

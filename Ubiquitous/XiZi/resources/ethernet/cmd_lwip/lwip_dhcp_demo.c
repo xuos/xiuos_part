@@ -61,54 +61,54 @@ int LwipPrintDHCP(struct netif *netif)
     {
         dhcp_last_state = dhcp->state;
 
-        lw_pr_info(" DHCP state       : ");
+        lw_notice(" DHCP state       : ");
         switch (dhcp_last_state)
         {
             case DHCP_STATE_OFF:
-                lw_pr_info("OFF");
+                lw_notice("OFF");
                 break;
             case DHCP_STATE_REQUESTING:
-                lw_pr_info("REQUESTING");
+                lw_notice("REQUESTING");
                 break;
             case DHCP_STATE_INIT:
-                lw_pr_info("INIT");
+                lw_notice("INIT");
                 break;
             case DHCP_STATE_REBOOTING:
-                lw_pr_info("REBOOTING");
+                lw_notice("REBOOTING");
                 break;
             case DHCP_STATE_REBINDING:
-                lw_pr_info("REBINDING");
+                lw_notice("REBINDING");
                 break;
             case DHCP_STATE_RENEWING:
-                lw_pr_info("RENEWING");
+                lw_notice("RENEWING");
                 break;
             case DHCP_STATE_SELECTING:
-                lw_pr_info("SELECTING");
+                lw_notice("SELECTING");
                 break;
             case DHCP_STATE_INFORMING:
-                lw_pr_info("INFORMING");
+                lw_notice("INFORMING");
                 break;
             case DHCP_STATE_CHECKING:
-                lw_pr_info("CHECKING");
+                lw_notice("CHECKING");
                 break;
             case DHCP_STATE_BOUND:
-                lw_pr_info("BOUND");
+                lw_notice("BOUND");
                 break;
             case DHCP_STATE_BACKING_OFF:
-                lw_pr_info("BACKING_OFF");
+                lw_notice("BACKING_OFF");
                 break;
             default:
-                lw_pr_info("%u", dhcp_last_state);
+                lw_notice("%u", dhcp_last_state);
                 assert(0);
                 break;
         }
-        lw_pr_info("\r\n");
+        lw_notice("\r\n");
 
         if (dhcp_last_state == DHCP_STATE_BOUND)
         {
-            lw_pr_info("\r\n IPv4 Address     : %s\r\n", ipaddr_ntoa(&netif->ip_addr));
-            lw_pr_info(" IPv4 Subnet mask : %s\r\n", ipaddr_ntoa(&netif->netmask));
-            lw_pr_info(" IPv4 Gateway     : %s\r\n\r\n", ipaddr_ntoa(&netif->gw));
+            lw_notice("\r\n IPv4 Address     : %s\r\n", ipaddr_ntoa(&netif->ip_addr));
+            lw_notice(" IPv4 Subnet mask : %s\r\n", ipaddr_ntoa(&netif->netmask));
+            lw_notice(" IPv4 Gateway     : %s\r\n\r\n", ipaddr_ntoa(&netif->gw));
             return 1;
         }
     }

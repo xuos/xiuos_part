@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021 AIIT XUOS Lab
+* Copyright (c) 2022 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
@@ -15,24 +15,23 @@
 * @brief One UDP demo based on LwIP
 * @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-05-29
+* @date 2022-03-21
 */
-#include <transform.h>
-#include <xizi.h>
 #include "board.h"
 #include "sys_arch.h"
 #include "lwip/udp.h"
-#include <lwip/sockets.h>
-#include "lwip/sys.h"
+#include "lwip/sockets.h"
 
-#define UDP_TASK_STACK_SIZE 4096
-#define UDP_TASK_PRIO 15
+
 #define PBUF_SIZE 27
 
 static struct udp_pcb *udpecho_raw_pcb;
-char udp_target[] = {192, 168, 250, 252};
+
+char udp_demo_ip[] = {192, 168, 250, 252};
+u16_t udp_demo_port = LWIP_TARGET_PORT;
+
 char hello_str[] = {"hello world\r\n"};
-char udp_send_msg[] = "\n\nThis one is UDP pkg. Congratulations on you.\n\n";
+char udp_demo_msg[] = "\nThis one is UDP package!!!\n";
 
 /******************************************************************************/
 
@@ -46,62 +45,55 @@ static void LwipUDPSendTask(void *arg)
     socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_fd < 0)
     {
-        lw_print("Socket error\n");
+        lw_error("Socket error\n");
         return;
     }
 
     struct sockaddr_in udp_sock;
     udp_sock.sin_family = AF_INET;
-    udp_sock.sin_port = htons(LWIP_TARGET_PORT);
-    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_target[0],udp_target[1],udp_target[2],udp_target[3]));
+    udp_sock.sin_port = htons(udp_demo_port);
+    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3]));
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
     if (connect(socket_fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
     {
-        lw_print("Unable to connect\n");
-        goto __exit;
-    }
-
-    lw_print("UDP connect success, start to send.\n");
-    lw_print("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
-
-    sendto(socket_fd, udp_send_msg, strlen(udp_send_msg), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
-    lw_pr_info("Send UDP msg: %s ", udp_send_msg);
-
-__exit:
-    if (socket_fd >= 0)
-    {
+        lw_error("Unable to connect\n");
         closesocket(socket_fd);
+        return;
     }
 
+    lw_notice("UDP connect success, start to send.\n");
+    lw_notice("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
+
+    sendto(socket_fd, udp_demo_msg, strlen(udp_demo_msg), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
+    lw_notice("Send UDP msg: %s ", udp_demo_msg);
+    closesocket(socket_fd);
     return;
 }
 
 void *LwipUdpSendTest(int argc, char *argv[])
 {
-    int result = 0;
-    sys_thread_t th_id;
-
-    memset(udp_send_msg, 0, sizeof(udp_send_msg));
+    memset(udp_demo_msg, 0, sizeof(udp_demo_msg));
 
     if(argc == 1)
     {
-        lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_target[0], udp_target[1], udp_target[2], udp_target[3]);
-        strncpy(udp_send_msg, hello_str, strlen(hello_str));
+        lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3]);
+        strncpy(udp_demo_msg, hello_str, strlen(hello_str));
     }
     else
     {
-        strncpy(udp_send_msg, argv[1], strlen(argv[1]));
-        strncat(udp_send_msg, "\r\n", 2);
+        strncpy(udp_demo_msg, argv[1], strlen(argv[1]));
+        strncat(udp_demo_msg, "\r\n", 2);
         if(argc == 3)
         {
-            sscanf(argv[2], "%d.%d.%d.%d", &udp_target[0], &udp_target[1], &udp_target[2], &udp_target[3]);
+            sscanf(argv[2], "%d.%d.%d.%d", &udp_demo_ip[0], &udp_demo_ip[1], &udp_demo_ip[2], &udp_demo_ip[3]);
         }
     }
-    lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_target[0], udp_target[1], udp_target[2], udp_target[3]);
 
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-    sys_thread_new("udp socket send", LwipUDPSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3]);
+
+    lwip_config_net(lwip_ipaddr, lwip_netmask, udp_demo_ip);
+    sys_thread_new("udp send", LwipUDPSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
@@ -120,12 +112,13 @@ static void LwipUdpRecvTask(void *arg, struct udp_pcb *upcb, struct pbuf *p,
     {
         return;
     }
+
     udp_len = p->tot_len;
-    lw_pr_info("Receive data :%dB\r\n", udp_len);
+    lw_notice("Receive data :%dB\r\n", udp_len);
 
     if(udp_len <= 80)
     {
-        lw_pr_info("%.*s\r\n", udp_len, (char *)(p->payload));
+        lw_notice("%.*s\r\n", udp_len, (char *)(p->payload));
     }
 
     udp_buf = pbuf_alloc(PBUF_TRANSPORT, PBUF_SIZE, PBUF_RAM);
@@ -162,5 +155,5 @@ void LwipUdpRecvTest(void)
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     UDPRecv, LwipUdpRecvTest, UDP server echo);
+     UDPRecv, LwipUdpRecvTest, UDP Receive echo);
 

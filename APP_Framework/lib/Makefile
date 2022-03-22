@@ -10,5 +10,8 @@ ifeq ($(CONFIG_LIB_LV),y)
 	SRC_DIR += lvgl
 endif
 
+ifeq ($(CONFIG_LIB_USING_CJSON),y)
+	SRC_DIR += cJSON
+endif
 
 include $(KERNEL_ROOT)/compiler.mk

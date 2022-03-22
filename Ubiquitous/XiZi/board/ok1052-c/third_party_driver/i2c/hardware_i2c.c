@@ -34,7 +34,7 @@
 
 /**
 * @file hardware_i2c.c
-* @brief ok1052-c i2c relative codes
+* @brief ok1052-c i2c board relative codes
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01

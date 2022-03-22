@@ -42,13 +42,13 @@
 
 /*************************************************
 File name: hardware_rtc.c
-Description: support ok1052-c rtc driver I2C function
+Description: support ok1052-c board rtc hardware driver I2C function
 
 History:
 1. Date: 2022-01-18
 Author: AIIT XUOS Lab
 Modification:
-1. support ok1052-c rtc
+1. support ok1052-c board rtc
 *************************************************/
 
 #include "connect_rtc.h"

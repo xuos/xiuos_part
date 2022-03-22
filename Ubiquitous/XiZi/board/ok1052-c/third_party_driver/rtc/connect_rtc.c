@@ -34,7 +34,7 @@
 
 /**
 * @file connect_rtc.c
-* @brief ok1052-c rtc function and structure
+* @brief ok1052-c board rtc function and structure
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01
@@ -42,13 +42,14 @@
 
 /*************************************************
 File name: connect_rtc.c
-Description: support ok1052-c rtc configure and spi bus register function
+Description: support ok1052-c board rtc configure and spi bus register function
 
 History:
 1. Date: 2022-03-01
 Author: AIIT XUOS Lab
 Modification:
 1. change command for XUOS
+2. add module codes for XUOS
 *************************************************/
 
 #include "board.h"
