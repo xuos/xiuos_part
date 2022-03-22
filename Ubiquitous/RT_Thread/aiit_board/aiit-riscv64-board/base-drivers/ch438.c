@@ -116,7 +116,7 @@ void set_485_output(rt_uint8_t	ch_no)
 
 rt_uint8_t ReadCH438Data( rt_uint8_t addr )
 {
-	rt_uint8_t dat;
+	rt_uint8_t dat = 0;
 
 	gpiohs_set_pin(FPIOA_CH438_NWR,GPIO_PV_HIGH);	
 	gpiohs_set_pin(FPIOA_CH438_NRD,GPIO_PV_HIGH);	
@@ -224,9 +224,11 @@ static int Ch438Irq(void *parameter)
 {
 	rt_uint8_t gInterruptStatus;
 	rt_uint8_t port = 0;
-
+	struct rt_serial_device *serial = (struct rt_serial_device *)parameter;
+	/* multi irq may happen*/
 	gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
 	port = log(gInterruptStatus & 0xFF)/log(2);
+
 	rt_hw_serial_isr(extuart_serial_parm[port], RT_SERIAL_EVENT_RX_IND);
 }
 
@@ -242,17 +244,27 @@ static rt_err_t rt_extuart_configure(struct rt_serial_device *serial, struct ser
 
 static rt_err_t extuart_control(struct rt_serial_device *serial, int cmd, void *arg)
 {
-	uint16_t ext_uart_no = serial->config.reserved;
+	rt_uint16_t ext_uart_no = serial->config.reserved;
+	static rt_uint16_t register_flag = 0;
 
     switch (cmd)
     {
     case RT_DEVICE_CTRL_CLR_INT:
-		gpiohs_irq_unregister(FPIOA_CH438_INT);
+		if(1 == register_flag)
+		{
+			gpiohs_irq_unregister(FPIOA_CH438_INT);
+			register_flag = 0;
+		}
         break;
     case RT_DEVICE_CTRL_SET_INT:
-		gpiohs_set_drive_mode(FPIOA_CH438_INT, GPIO_DM_INPUT_PULL_UP);
-    	gpiohs_set_pin_edge(FPIOA_CH438_INT,GPIO_PE_FALLING);
-		gpiohs_irq_register(FPIOA_CH438_INT, 1, Ch438Irq, RT_NULL);
+		if(0 == register_flag)
+		{
+			gpiohs_set_drive_mode(FPIOA_CH438_INT, GPIO_DM_INPUT_PULL_UP);
+    		gpiohs_set_pin_edge(FPIOA_CH438_INT,GPIO_PE_FALLING);
+			gpiohs_irq_register(FPIOA_CH438_INT, 1, Ch438Irq, (void*)serial);
+			register_flag = 1;
+		}
+		
 		break;
     }
     return (RT_EOK);
@@ -261,20 +273,25 @@ static rt_err_t extuart_control(struct rt_serial_device *serial, int cmd, void *
 static int drv_extuart_putc(struct rt_serial_device *serial, char c)
 {
 	uint16_t ext_uart_no = serial->config.reserved;
-
 	rt_uint8_t	REG_LSR_ADDR,REG_THR_ADDR;
 	
 	REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
 	REG_THR_ADDR = offsetadd[ext_uart_no] | REG_THR0_ADDR;
 
-	while( ( ReadCH438Data( REG_LSR_ADDR ) & BIT_LSR_TEMT ) == 0 );
 
-	WriteCH438Block( REG_THR_ADDR, 1, &c );
+	if((ReadCH438Data( REG_LSR_ADDR ) & BIT_LSR_TEMT) != 0)
+	{
+		WriteCH438Block( REG_THR_ADDR, 1, &c );
+		return 1;
+	} else {
+		return 0;
+	}
+	
 }
 
 static int drv_extuart_getc(struct rt_serial_device *serial)
 {
-	rt_int8_t	dat = -1;
+	rt_uint8_t	dat = 0;
 	rt_uint8_t	REG_LSR_ADDR,REG_RBR_ADDR;
 	uint16_t ext_uart_no = serial->config.reserved;///< get extern uart port
 	

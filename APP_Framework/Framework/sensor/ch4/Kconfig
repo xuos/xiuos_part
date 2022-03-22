@@ -55,11 +55,11 @@ config SENSOR_AS830
                         if SENSOR_AS830_DRIVER_EXTUART
                                 config SENSOR_DEVICE_AS830_DEV
                                         string "as830 device extra uart path"
-                                        default "/dev/extuart_dev1"
+                                        default "/dev/extuart_dev4"
 
                                 config SENSOR_DEVICE_AS830_DEV_EXT_PORT
                                         int "if AS830 device using extuart, choose port"
-                                        default "1"
+                                        default "4"
                         endif
                 endif                
         endif
