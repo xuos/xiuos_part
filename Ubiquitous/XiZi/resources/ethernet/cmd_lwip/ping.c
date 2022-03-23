@@ -492,7 +492,7 @@ int get_url_ip(char* url)
     /* convert URL to IP */
     if (lwip_getaddrinfo(url, NULL, &hint, &res) != 0)
     {
-        lw_pr_info("ping: unknown host %s\n", url);
+        lw_notice("ping: unknown host %s\n", url);
         return -1;
     }
     memcpy(&h, &res->ai_addr, sizeof(struct sockaddr_in *));
@@ -500,13 +500,13 @@ int get_url_ip(char* url)
     lwip_freeaddrinfo(res);
     if (inet_aton(inet_ntoa(ina), &target_addr) == 0)
     {
-        lw_pr_info("ping: unknown host %s\n", url);
+        lw_notice("ping: unknown host %s\n", url);
         return -2;
     }
     /* new a socket */
     if ((s = lwip_socket(AF_INET, SOCK_RAW, IP_PROTO_ICMP)) < 0)
     {
-        lw_pr_info("ping: create socket failed\n");
+        lw_notice("ping: create socket failed\n");
         return -3;
     }
 
@@ -521,12 +521,12 @@ int get_url_ip(char* url)
 #endif /* LWIP_DEBUG */
             if ((recv_len = lwip_ping_recv(s, &ttl)) >= 0)
             {
-                lw_pr_info("%d bytes from %s icmp_seq=%d ttl=%d time=%d ms\n", recv_len, inet_ntoa(ina), cnt,
+                lw_notice("%d bytes from %s icmp_seq=%d ttl=%d time=%d ms\n", recv_len, inet_ntoa(ina), cnt,
                 ttl, sys_now() - ping_time);
             }
             else
             {
-                lw_pr_info("From %s icmp_seq=%d timeout\n", inet_ntoa(ina), cnt);
+                lw_notice("From %s icmp_seq=%d timeout\n", inet_ntoa(ina), cnt);
             }
         }
 

@@ -9,15 +9,15 @@
 * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 * See the Mulan PSL v2 for more details.
 */
- 
+
 /**
 * @file connect_sdio.h
-* @brief define imxrt1052-baord sdio function and struct
-* @version 2.0 
+* @brief define ok1052-c board sdio function and struct
+* @version 2.0
 * @author AIIT XUOS Lab
 * @date 2022-01-24
 */
- 
+
 #ifndef CONNECT_SDIO_H
 #define CONNECT_SDIO_H
 

@@ -18,7 +18,8 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/Include \
 	-I$(KERNEL_ROOT)/include \
 	-I$(KERNEL_ROOT)/resources/include \
-	-I$(BSP_ROOT)/include #
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/xip #
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/kd233)
@@ -225,7 +226,8 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch \
 	-I$(KERNEL_ROOT)/resources/include \
-	-I$(BSP_ROOT)/include #
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/xip #
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32f103-nano)
@@ -310,6 +312,7 @@ endif
 
 ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/shared #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/interoperability/opcua #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/shared #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON

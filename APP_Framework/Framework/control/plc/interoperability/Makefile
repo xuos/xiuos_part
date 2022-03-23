@@ -6,6 +6,10 @@ ifeq ($(CONFIG_USING_CONTROL_PLC_OPCUA), y)
 	SRC_DIR += opcua
 endif
 
+ifeq ($(CONFIG_USING_CONTROL_PLC_SOCKET), y)
+	SRC_DIR += socket
+endif
+
 endif
 
 SRC_FILES += interoperability.c

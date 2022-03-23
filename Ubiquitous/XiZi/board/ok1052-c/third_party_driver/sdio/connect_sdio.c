@@ -9,21 +9,21 @@
 /**
 * @file connect_sdio.c
 * @brief support sdio function using bus driver framework on OK1052 board
-* @version 2.0 
+* @version 2.0
 * @author AIIT XUOS Lab
 * @date 2022-01-24
 */
 
 /*************************************************
 File name: connect_sdio.c
-Description: support imxrt1052-board sd card configure and sdio bus register function
+Description: support ok1052-c board sd card configure and sdio bus register function
 Others: take SDK_2.6.1_MIMXRT1052xxxxB/boards/evkbimxrt1050/driver_examples/sdcard/polling/sdcard_polling.c for references
-History: 
+History:
 1. Date: 2022-01-24
 Author: AIIT XUOS Lab
-Modification: 
-1. support imxrt1052-board sdio configure, write and read
-2. support imxrt1052-board sdio bus device and driver register
+Modification:
+1. support ok1052-c board sdio configure, write and read
+2. support ok1052-c board sdio bus device and driver register
 *************************************************/
 
 #include <connect_sdio.h>
@@ -261,7 +261,7 @@ static uint32 SdioWrite(void *dev, struct BusBlockWriteParam *write_param)
     return write_param->size;
 }
 
-static struct SdioDevDone dev_done = 
+static struct SdioDevDone dev_done =
 {
     SdioOpen,
     SdioClose,
@@ -273,7 +273,7 @@ int Imxrt1052HwSdioInit(void)
 {
     x_err_t ret = EOK;
     bool is_read_only;
-    
+
     static struct SdioBus sdio_bus;
     static struct SdioDriver sdio_drv;
     static struct SdioHardwareDevice sdio_dev;
@@ -333,7 +333,7 @@ int Imxrt1052HwSdioInit(void)
 
     /* Check if card is readonly. */
     is_read_only = SD_CheckReadOnly(card);
-    
+
     ret = SdioBusInit(&sdio_bus, SDIO_BUS_NAME);
     if (ret != EOK) {
         KPrintf("Sdio bus init error %d\n", ret);

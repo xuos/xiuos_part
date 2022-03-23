@@ -513,16 +513,16 @@ void lwip_config_net(char *ip, char *mask, char *gw)
 
   if(chk_lwip_bit(LWIP_PRINT_FLAG))
   {
-    lw_pr_info("\r\n************************************************\r\n");
-    lw_pr_info(" Network Configuration\r\n");
-    lw_pr_info("************************************************\r\n");
-    lw_pr_info(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
+    lw_notice("\r\n************************************************\r\n");
+    lw_notice(" Network Configuration\r\n");
+    lw_notice("************************************************\r\n");
+    lw_notice(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
          ((u8_t *)&net_ipaddr)[2], ((u8_t *)&net_ipaddr)[3]);
-    lw_pr_info(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
+    lw_notice(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
          ((u8_t *)&net_netmask)[2], ((u8_t *)&net_netmask)[3]);
-    lw_pr_info(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
+    lw_notice(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
          ((u8_t *)&net_gw)[2], ((u8_t *)&net_gw)[3]);
-    lw_pr_info("************************************************\r\n");
+    lw_notice("************************************************\r\n");
   }
   lwip_config_input(&gnetif);
 }
