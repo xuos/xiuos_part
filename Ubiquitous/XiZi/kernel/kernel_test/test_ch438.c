@@ -12,7 +12,7 @@
 
 /**
 * @file TestCh438.c
-* @brief support to test ch438 function
+* @brief support to test ch438 function, only support aiit_arm32_board and aiit_riscv64-board
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2021-04-24

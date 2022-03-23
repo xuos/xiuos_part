@@ -412,7 +412,6 @@ static uint32 Imxrt1052PinConfigure(struct PinParam *param)
 
     struct PinIndex pin_index;
 
-    KPrintf("Imxrt1052PinConfigure\n");
     if (GetPin(&pin_index, param->pin) < 0) {
         return ERROR;
     }
@@ -420,7 +419,6 @@ static uint32 Imxrt1052PinConfigure(struct PinParam *param)
     switch(param->cmd)
     {
         case GPIO_CONFIG_MODE:
-            KPrintf("GpioConfigMode %u\n", param->pin);
             GpioConfigMode(param->mode, &pin_index, param->pin);
             break;
         case GPIO_IRQ_REGISTER:
