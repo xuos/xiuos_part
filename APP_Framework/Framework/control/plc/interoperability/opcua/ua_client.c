@@ -27,14 +27,14 @@
 const char *opc_server_url = {"opc.tcp://192.168.250.2:4840"};
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
-static void handler_TheAnswerChanged(UA_Client* client, UA_UInt32 subId, void* subContext,
+static void UaAnswerChangedHandler(UA_Client* client, UA_UInt32 subId, void* subContext,
                                      UA_UInt32 monId, void* monContext, UA_DataValue* value)
 {
-    ua_print("The Answer has changed!\n");
+    ua_notice("Answer changed!\n");
 }
 #endif
 
-static UA_StatusCode nodeIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void* handle)
+static UA_StatusCode UaShowNodeIdIterate(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void* handle)
 {
     if(isInverse)
     {
@@ -49,7 +49,7 @@ static UA_StatusCode nodeIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId
     return UA_STATUSCODE_GOOD;
 }
 
-int ua_get_points(UA_Client* client)
+int UaGetEndPoints(UA_Client* client)
 {
     /* Listing endpoints */
     UA_EndpointDescription* endpointArray = NULL;
@@ -76,7 +76,7 @@ int ua_get_points(UA_Client* client)
     return EXIT_SUCCESS;
 }
 
-void ua_print_value(UA_Variant* val)
+static void UaShowNodeValue(UA_Variant* val)
 {
     if(val->type == &UA_TYPES[UA_TYPES_LOCALIZEDTEXT])
     {
@@ -103,6 +103,16 @@ void ua_print_value(UA_Variant* val)
         UA_Int16* ptr = (UA_Int16*)val->data;
         ua_notice("%d (Int16)\n", *ptr);
     }
+    else if(val->type == &UA_TYPES[UA_TYPES_FLOAT])
+    {
+        UA_Float* ptr = (UA_Float*)val->data;
+        ua_notice("%d (Float)\n", *ptr);
+    }
+    else if(val->type == &UA_TYPES[UA_TYPES_DOUBLE])
+    {
+        UA_Double* ptr = (UA_Double*)val->data;
+        ua_notice("%d (Double)\n", *ptr);
+    }
     else if(val->type == &UA_TYPES[UA_TYPES_STRING])
     {
         UA_String* ptr = (UA_String*)val->data;
@@ -117,7 +127,7 @@ void ua_print_value(UA_Variant* val)
     }
 }
 
-char *ua_get_nodeid_str(UA_NodeId *node_id)
+char *UaGetNodeIdString(UA_NodeId *node_id)
 {
     static char nodeid_str[UA_NODE_LEN] = {0};
 
@@ -139,7 +149,7 @@ char *ua_get_nodeid_str(UA_NodeId *node_id)
     return nodeid_str;
 }
 
-void ua_print_nodeid(UA_NodeId *node_id)
+static void UaShowNodeId(UA_NodeId *node_id)
 {
     switch(node_id->identifierType)
     {
@@ -158,7 +168,7 @@ void ua_print_nodeid(UA_NodeId *node_id)
     }
 }
 
-void ua_print_object(UA_BrowseResponse* res)
+static void UaShowObject(UA_BrowseResponse* res)
 {
     ua_notice("%-9s %-16s %-16s %-16s\n", "NAMESPACE", "NODEID", "BROWSE NAME", "DISPLAY NAME");
 
@@ -191,7 +201,7 @@ void ua_print_object(UA_BrowseResponse* res)
     ua_notice("\n");
 }
 
-UA_StatusCode ua_read_array_value(UA_Client* client, int array_size, UA_ReadValueId* array)
+UA_StatusCode UaReadArrayValue(UA_Client* client, int array_size, UA_ReadValueId* array)
 {
     UA_ReadRequest request;
     UA_ReadRequest_init(&request);
@@ -209,14 +219,19 @@ UA_StatusCode ua_read_array_value(UA_Client* client, int array_size, UA_ReadValu
     }
 
     UA_StatusCode* arr_ret = malloc(array_size * sizeof(UA_StatusCode));
+    if(arr_ret == NULL)
+    {
+        ua_error("ua: [%s] malloc %d failed!\n", __func__, array_size * sizeof(UA_StatusCode));
+        return UA_STATUSCODE_BADOUTOFMEMORY;
+    }
 
     for(int i = 0; i < array_size; ++i)
     {
         if((response.results[i].status == UA_STATUSCODE_GOOD)
                 && (response.results[i].hasValue))
         {
-            ua_notice("node %s: ", ua_get_nodeid_str(&array[i].nodeId));
-            ua_print_value(&response.results[i].value);
+            ua_notice("node %s: ", UaGetNodeIdString(&array[i].nodeId));
+            UaShowNodeValue(&response.results[i].value);
         }
     }
     ua_notice("\n");
@@ -226,32 +241,82 @@ UA_StatusCode ua_read_array_value(UA_Client* client, int array_size, UA_ReadValu
     return UA_STATUSCODE_GOOD;
 }
 
-void ua_browser_id(UA_Client* client, UA_NodeId id)
+void UaBrowserNodeId(UA_Client* client, UA_NodeId id)
 {
+    UA_BrowseRequest ua_req;
+    UA_BrowseResponse ua_resp;
+
     /* Browse some objects */
     ua_notice("Browsing nodes in objects folder:\n");
-    UA_BrowseRequest bReq;
-    UA_BrowseRequest_init(&bReq);
-    bReq.requestedMaxReferencesPerNode = 0;
-    bReq.nodesToBrowse = UA_BrowseDescription_new();
-    bReq.nodesToBrowseSize = 1;
-    bReq.nodesToBrowse[0].nodeId = id; /* browse objects folder */
-    bReq.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_ALL; /* return everything */
-    UA_BrowseResponse res = UA_Client_Service_browse(client, bReq);
-    ua_print_object(&res);
-    UA_BrowseResponse_clear(&res);
-//    UA_BrowseRequest_clear(&bReq);
+
+    UA_BrowseRequest_init(&ua_req);
+
+    ua_req.requestedMaxReferencesPerNode = 0;
+    ua_req.nodesToBrowse = UA_BrowseDescription_new();
+    ua_req.nodesToBrowseSize = 1;
+    ua_req.nodesToBrowse[0].nodeId = id; /* browse objects folder */
+    ua_req.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_ALL; /* return everything */
+
+    ua_resp = UA_Client_Service_browse(client, ua_req);
+
+    UaShowObject(&ua_resp);
+
+    UA_BrowseResponse_clear(&ua_resp);
 }
 
-void ua_browser_nodes(UA_Client* client)
+
+int UaGetNodeIdArray(UA_Client* client, UA_NodeId id, int array_size, int *id_array)
+{
+    int i, j;
+    int array_cnt = 0;// return array number
+    UA_BrowseRequest ua_req;
+    UA_BrowseResponse ua_resp;
+
+    /* Browse some objects */
+    ua_notice("Browsing nodes in objects folder:\n");
+
+    UA_BrowseRequest_init(&ua_req);
+
+    ua_req.requestedMaxReferencesPerNode = 0;
+    ua_req.nodesToBrowse = UA_BrowseDescription_new();
+    ua_req.nodesToBrowseSize = 1;
+    ua_req.nodesToBrowse[0].nodeId = id; /* browse objects folder */
+    ua_req.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_ALL; /* return everything */
+
+    ua_resp = UA_Client_Service_browse(client, ua_req);
+
+    for(i = 0; i < ua_resp.resultsSize; ++i)
+    {
+        for(j = 0; j < ua_resp.results[i].referencesSize; ++j)
+        {
+            UA_ReferenceDescription* ref = &(ua_resp.results[i].references[j]);
+
+            if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_NUMERIC)
+            {
+                *(id_array + array_cnt) = ref->nodeId.nodeId.identifier.numeric;
+                array_cnt ++;
+                if(array_cnt >= array_size)
+                {
+                    UA_BrowseResponse_clear(&ua_resp);
+                    return array_cnt;
+                }
+            }
+        }
+    }
+
+    UA_BrowseResponse_clear(&ua_resp);
+    return array_cnt;
+}
+
+void UaBrowserNodes(UA_Client* client)
 {
     UA_NodeId* parent = UA_NodeId_new();
     *parent = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
-    UA_Client_forEachChildNodeCall(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), nodeIter, (void*) parent);
+    UA_Client_forEachChildNodeCall(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UaShowNodeIdIterate, (void*) parent);
     UA_NodeId_delete(parent);
 }
 
-UA_UInt32 ua_start_sub(UA_Client* client, UA_NodeId node_id)
+UA_UInt32 UaStartSubscription(UA_Client* client, UA_NodeId node_id)
 {
     /* Create a subscription */
     UA_CreateSubscriptionRequest request = UA_CreateSubscriptionRequest_default();
@@ -274,7 +339,7 @@ UA_UInt32 ua_start_sub(UA_Client* client, UA_NodeId node_id)
     UA_MonitoredItemCreateResult monResponse =
         UA_Client_MonitoredItems_createDataChange(client, response.subscriptionId,
                                                   UA_TIMESTAMPSTORETURN_BOTH,
-                                                  monRequest, NULL, handler_TheAnswerChanged, NULL);
+                                                  monRequest, NULL, UaAnswerChangedHandler, NULL);
 
     if(monResponse.statusCode == UA_STATUSCODE_GOOD)
     {
@@ -290,7 +355,7 @@ UA_UInt32 ua_start_sub(UA_Client* client, UA_NodeId node_id)
     return subId;
 }
 
-void ua_write_nodeid_value(UA_Client* client, UA_NodeId id, char* value)
+void UaWriteNodeValue(UA_Client* client, UA_NodeId id, char* value)
 {
     UA_Boolean bool_val;
     uint32_t integer_val;
@@ -332,24 +397,17 @@ void ua_write_nodeid_value(UA_Client* client, UA_NodeId id, char* value)
 
     UA_WriteRequest_clear(&wReq);
     UA_WriteResponse_clear(&wResp);
-
-//    /* Write node attribute (using the highlevel API) */
-//    value++;
-//    UA_Variant *myVariant = UA_Variant_new();
-//    UA_Variant_setScalarCopy(myVariant, &value, &UA_TYPES[UA_TYPES_INT32]);
-//    UA_Client_writeValueAttribute(client, UA_NODEID_STRING(1, UA_NODE_STR), myVariant);
-//    UA_Variant_delete(myVariant);
 }
 
 /* Read attribute */
-void ua_read_nodeid_value(UA_Client* client, UA_NodeId id, UA_Int32 *value)
+void UaReadNodeValue(UA_Client* client, UA_NodeId id, UA_Int32 *value)
 {
     UA_Variant* val = UA_Variant_new();
     UA_StatusCode ret = UA_Client_readValueAttribute(client, id, val);
 
     if(ret == UA_STATUSCODE_GOOD)
     {
-        ua_print_value(val);
+        UaShowNodeValue(val);
         if(UA_Variant_isScalar(val))
         {
             if(val->type == &UA_TYPES[UA_TYPES_BOOLEAN])
@@ -370,7 +428,7 @@ void ua_read_nodeid_value(UA_Client* client, UA_NodeId id, UA_Int32 *value)
     UA_Variant_delete(val);
 }
 
-void ua_call_remote(UA_Client* client)
+void UaCallRemote(UA_Client* client)
 {
     /* Call a remote method */
     UA_Variant input;
@@ -397,7 +455,7 @@ void ua_call_remote(UA_Client* client)
 }
 
 
-void ua_add_nodes(UA_Client* client)
+void UaAddNodes(UA_Client* client)
 {
     /* Add new nodes*/
     /* New ReferenceType */
@@ -477,7 +535,7 @@ void ua_add_nodes(UA_Client* client)
     }
 }
 
-void ua_read_time(UA_Client* client)
+void UaGetServerTime(UA_Client* client)
 {
     UA_Variant value;
     UA_Variant_init(&value);

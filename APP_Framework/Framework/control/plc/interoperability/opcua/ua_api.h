@@ -42,32 +42,33 @@ typedef struct UaParam
 }UaParamType;
 
 #define ua_print //KPrintf
-#define ua_trace() //KPrintf("ua: [%s] line %d checked!\n", __func__, __LINE__)
 #define ua_notice KPrintf
 #define ua_debug //KPrintf
 #define ua_error KPrintf
+#define ua_debug1
 
 extern const char *opc_server_url;
 extern char test_ua_ip[];
 
-int ua_server_connect(void);
-void ua_browser_nodes(UA_Client *client);
-void ua_browser_id(UA_Client *client, UA_NodeId id);
-void ua_read_time(UA_Client *client);
-void ua_add_nodes(UA_Client *client);
+int UaServerRun(void);
+void UaBrowserNodes(UA_Client *client);
+void UaBrowserNodeId(UA_Client *client, UA_NodeId id);
+void UaGetServerTime(UA_Client *client);
+void UaAddNodes(UA_Client *client);
 
-int ua_open(void *dev); // open and connect PLC device
-void ua_close(void* dev); // close and disconnect PLC device
-int ua_read(void* dev, void *buf, size_t len); // read data from PLC
-int ua_write(void* dev, const void *buf, size_t len); // write data from PLC
-int ua_ioctl(void* dev, int cmd, void *arg); // send control command to PLC
+int UaDevOpen(void *dev); // open and connect PLC device
+void UaDevClose(void* dev); // close and disconnect PLC device
+int UaDevRead(void* dev, void *buf, size_t len); // read data from PLC
+int UaDevWrite(void* dev, const void *buf, size_t len); // write data from PLC
+int UaDevIoctl(void* dev, int cmd, void *arg); // send control command to PLC
 
-char *ua_get_nodeid_str(UA_NodeId *node_id);
-void ua_read_nodeid_value(UA_Client *client, UA_NodeId id, UA_Int32 *value);
-void ua_write_nodeid_value(UA_Client *client, UA_NodeId id, char* value);
-void ua_test_attr(UA_Client *client);
-UA_StatusCode ua_read_array_value(UA_Client *client, int array_size, UA_ReadValueId *array);
-void ua_test_browser_objects(UA_Client *client);
-int ua_test_interact_server(UA_Client *client);
+char *UaGetNodeIdString(UA_NodeId *node_id);
+void UaReadNodeValue(UA_Client *client, UA_NodeId id, UA_Int32 *value);
+void UaWriteNodeValue(UA_Client *client, UA_NodeId id, char* value);
+UA_StatusCode UaReadArrayValue(UA_Client *client, int array_size, UA_ReadValueId *array);
+int UaGetNodeIdArray(UA_Client* client, UA_NodeId id, int array_size, int *id_array);
+
+void UaTestBrowserObjects(UA_Client *client);
+int UaTestInteractServer(UA_Client *client);
 
 #endif

@@ -446,6 +446,7 @@ void lwip_input_thread(void *param)
         /* Poll the driver, get any outstanding frames */
         ethernetif_input(net);
         sys_check_timeouts(); /* Handle all system timeouts for all core protocols */
+        KPrintf("");
     }
   }
 }
