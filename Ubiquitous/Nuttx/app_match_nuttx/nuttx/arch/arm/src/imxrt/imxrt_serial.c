@@ -1746,27 +1746,29 @@ void arm_serialinit(void)
 
   /* Register all UARTs */
 
-  uart_register("/dev/ttyS0", &TTYS0_DEV);
-#ifdef TTYS1_DEV
-  uart_register("/dev/ttyS1", &TTYS1_DEV);
+#ifdef CONFIG_IMXRT_LPUART1
+  uart_register("/dev/ttyS1", &g_uart1port);
 #endif
-#ifdef TTYS2_DEV
-  uart_register("/dev/ttyS2", &TTYS2_DEV);
+#ifdef CONFIG_IMXRT_LPUART2
+  uart_register("/dev/ttyS2", &g_uart2port);
 #endif
-#ifdef TTYS3_DEV
-  uart_register("/dev/ttyS3", &TTYS3_DEV);
+#ifdef CONFIG_IMXRT_LPUART3
+  uart_register("/dev/ttyS3", &g_uart3port);
 #endif
-#ifdef TTYS4_DEV
-  uart_register("/dev/ttyS4", &TTYS4_DEV);
+#ifdef CONFIG_IMXRT_LPUART4
+  uart_register("/dev/ttyS4", &g_uart4port);
 #endif
-#ifdef TTYS5_DEV
-  uart_register("/dev/ttyS5", &TTYS5_DEV);
+#ifdef CONFIG_IMXRT_LPUART5
+  uart_register("/dev/ttyS5", &g_uart5port);
 #endif
-#ifdef TTYS6_DEV
-  uart_register("/dev/ttyS6", &TTYS6_DEV);
+#ifdef CONFIG_IMXRT_LPUART6
+  uart_register("/dev/ttyS6", &g_uart6port);
 #endif
-#ifdef TTYS7_DEV
-  uart_register("/dev/ttyS7", &TTYS7_DEV);
+#ifdef CONFIG_IMXRT_LPUART7
+  uart_register("/dev/ttyS7", &g_uart7port);
+#endif
+#ifdef CONFIG_IMXRT_LPUART8
+  uart_register("/dev/ttyS8", &g_uart8port);
 #endif
 }
 
