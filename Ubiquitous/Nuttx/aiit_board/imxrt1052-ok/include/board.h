@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file board.h
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-23
+*/
+
 #ifndef __BOARDS_ARM_IMXRT_IMXRT1052_OK_INCLUDE_BOARD_H
 #define __BOARDS_ARM_IMXRT_IMXRT1052_OK_INCLUDE_BOARD_H
 

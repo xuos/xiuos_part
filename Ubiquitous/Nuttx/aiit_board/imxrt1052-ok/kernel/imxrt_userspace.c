@@ -22,6 +22,15 @@
  * Included Files
  ****************************************************************************/
 
+/**
+* @file imxrt_userspace.c
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-23
+*/
+
 #include <nuttx/config.h>
 
 #include <stdlib.h>

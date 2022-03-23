@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file imxrt_autoleds.c
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-23
+*/
+
 /* There are four LED status indicators located on the EVK Board.  The
  * functions of these LEDs include:
  *

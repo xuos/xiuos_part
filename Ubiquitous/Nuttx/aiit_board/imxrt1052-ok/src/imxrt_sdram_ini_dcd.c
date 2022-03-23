@@ -31,6 +31,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+/**
+* @file imxrt_sdram_ini_dcd.c
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.2.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-23
+*/
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
