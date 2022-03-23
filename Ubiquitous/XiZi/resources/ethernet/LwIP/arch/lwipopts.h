@@ -74,7 +74,7 @@ a lot of data that needs to be copied, this should be set high. */
 #define MEMP_NUM_TCP_PCB_LISTEN 2
 /* MEMP_NUM_TCP_SEG: the number of simultaneously queued TCP
    segments. */
-#define MEMP_NUM_TCP_SEG        120
+#define MEMP_NUM_TCP_SEG        20
 /* MEMP_NUM_SYS_TIMEOUT: the number of simulateously active
    timeouts. */
 #define MEMP_NUM_SYS_TIMEOUT    6
@@ -212,25 +212,18 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
    ---------------------------------
 */
 
-#define DEFAULT_RAW_RECVMBOX_SIZE       10
-#define DEFAULT_UDP_RECVMBOX_SIZE       10
-#define DEFAULT_TCP_RECVMBOX_SIZE       10
-#define DEFAULT_ACCEPTMBOX_SIZE         10
+#define DEFAULT_RAW_RECVMBOX_SIZE       8
+#define DEFAULT_UDP_RECVMBOX_SIZE       8
+#define DEFAULT_TCP_RECVMBOX_SIZE       8
+#define DEFAULT_ACCEPTMBOX_SIZE         8
 
 #define DEFAULT_THREAD_PRIO             20
 #define DEFAULT_THREAD_STACKSIZE        1024
 
 #define TCPIP_THREAD_NAME               "tcp"
 #define TCPIP_THREAD_STACKSIZE          8192
-#define TCPIP_MBOX_SIZE                 10
+#define TCPIP_MBOX_SIZE                 8
 #define TCPIP_THREAD_PRIO               15
-
-//#define IPERF_SERVER_THREAD_NAME            "iperf_server"
-//#define IPERF_SERVER_THREAD_STACKSIZE        1024
-//#define IPERF_SERVER_THREAD_PRIO             0
-
-//#define BLOCK_TIME                     250
-//#define BLOCK_TIME_WAITING_FOR_INPUT ( ( portTickType ) 100 )
 
 /*
    ----------------------------------------
@@ -257,9 +250,9 @@ typedef unsigned int nfds_t;
 #define MEMP_MEM_MALLOC                 1
 
 #define lw_print //KPrintf
-#define lw_trace() //KPrintf("lw: [%s][%d] passed!\n", __func__, __LINE__)
-#define lw_error() //KPrintf("lw: [%s][%d] failed!\n", __func__, __LINE__)
-#define lw_pr_info KPrintf
+#define lw_error KPrintf
+#define lw_notice KPrintf
+
 #endif /* __LWIPOPTS_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

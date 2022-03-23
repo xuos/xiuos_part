@@ -7,7 +7,7 @@
 
 /**
 * @file board.h
-* @brief define imxrt1052-board init configure and start-up function
+* @brief define ok1052-c init configure and start-up function
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-28
@@ -15,7 +15,7 @@
 
 /*************************************************
 File name: board.h
-Description: define imxrt1052-board board init function and struct
+Description: define ok1052-c board init function and struct
 Others:
 History:
 1. Date: 2021-05-28

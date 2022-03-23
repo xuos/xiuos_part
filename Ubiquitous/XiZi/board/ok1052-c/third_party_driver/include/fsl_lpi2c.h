@@ -8,7 +8,7 @@
 
 /**
 * @file fsl_lpi2c.h
-* @brief support ok1052-c i2c driver
+* @brief support ok1052-c board i2c driver
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01
@@ -16,7 +16,7 @@
 
 /*************************************************
 File name: fsl_lpi2c.h
-Description: support ok1052-c i2c driver
+Description: support ok1052-c board i2c driver
 
 History:
 1. Date: 2022-03-01

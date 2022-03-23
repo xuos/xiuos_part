@@ -28,7 +28,7 @@
 
 /**
 * @file link.lds
-* @brief ok1052-c Linker script
+* @brief ok1052-c board Linker script
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-28
@@ -36,7 +36,7 @@
 
 /*************************************************
 File name: link.lds
-Description: ok1052-c Linker script
+Description: ok1052-c board Linker script
 Others: take MIMXRT1052xxxxx_flexspi_nor.ld for references
 History:
 1. Date: 2021-05-28
@@ -54,6 +54,9 @@ STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x1000;
 /* Specify the memory areas */
 MEMORY
 {
+  m_boot_data           (RX)  : ORIGIN = 0x60000000, LENGTH = 0x00001000
+  m_image_vertor_table  (RX)  : ORIGIN = 0x60001000, LENGTH = 0x00001000  
+    
   m_interrupts          (RX)  : ORIGIN = 0x60002000, LENGTH = 0x00000400
   m_text                (RX)  : ORIGIN = 0x60002400, LENGTH = 0x03FFDC00
   m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00020000
@@ -63,6 +66,17 @@ MEMORY
 /* Define output sections */
 SECTIONS
 {
+  .boot_data :
+  {
+    KEEP(*(.boot_hdr.conf))
+  } > m_boot_data
+
+  .image_vertor_table :
+  {
+    KEEP(*(.boot_hdr.ivt))
+    KEEP(*(.boot_hdr.boot_data))
+    KEEP(*(.boot_hdr.dcd_data))
+  } > m_image_vertor_table
 
   /* The startup code goes first into internal RAM */
   .interrupts :

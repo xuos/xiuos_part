@@ -60,7 +60,7 @@ void LwipPingTest(int argc, char *argv[])
         {
             if(sscanf(argv[1], "%d.%d.%d.%d", &lwip_gwaddr[0], &lwip_gwaddr[1], &lwip_gwaddr[2], &lwip_gwaddr[3]) == EOF)
             {
-                lw_pr_info("input wrong ip\n");
+                lw_notice("input wrong ip\n");
                 return;
             }
         }

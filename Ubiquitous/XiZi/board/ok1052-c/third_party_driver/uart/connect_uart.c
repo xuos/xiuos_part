@@ -8,22 +8,22 @@
 
 /**
 * @file connect_uart.c
-* @brief support imxrt1052-board uart function and register to bus framework
-* @version 1.0 
+* @brief support ok1052-c board uart function and register to bus framework
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-28
 */
 
 /*************************************************
 File name: connect_uart.c
-Description: support imxrt1052-board uart configure and uart bus register function
+Description: support ok1052-c board uart configure and uart bus register function
 Others: take SDK_2.6.1_MIMXRT1052xxxxB/components/uart/lpuart_adapter.c for references
-History: 
+History:
 1. Date: 2021-05-28
 Author: AIIT XUOS Lab
-Modification: 
-1. support imxrt1052-board uart configure, write and read
-2. support imxrt1052-board uart bus device and driver register
+Modification:
+1. support ok1052-c board uart configure, write and read
+2. support ok1052-c board uart bus device and driver register
 *************************************************/
 
 #include <board.h>
@@ -105,7 +105,7 @@ static void UartIsr(struct SerialBus *serial, struct SerialDriver *serial_drv, s
 {
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
     LPUART_Type *uart_base = (LPUART_Type *)serial_cfg->hw_cfg.private_data;
-    
+
     /* kLPUART_RxDataRegFullFlag can only cleared or set by hardware */
     if (LPUART_GetStatusFlags(uart_base) & kLPUART_RxDataRegFullFlag) {
         SerialSetIsr(serial_dev, SERIAL_EVENT_RX_IND);
@@ -262,7 +262,7 @@ static uint32 SerialDrvConfigure(void *drv, struct BusConfigureInfo *configure_i
     return ret;
 }
 
-static const struct SerialDataCfg data_cfg_init = 
+static const struct SerialDataCfg data_cfg_init =
 {
     .serial_baud_rate = BAUD_RATE_115200,
     .serial_data_bits = DATA_BITS_8,
@@ -310,7 +310,7 @@ static int BoardSerialBusInit(struct SerialBus *serial_bus, struct SerialDriver 
     if (EOK != ret) {
         KPrintf("Imxrt1052HwUartInit SerialDriverAttachToBus error %d\n", ret);
         return ERROR;
-    } 
+    }
 
     return ret;
 }
@@ -324,13 +324,13 @@ static int BoardSerialDevBend(struct SerialHardwareDevice *serial_device, void *
     if (EOK != ret) {
         KPrintf("Imxrt1052HwUartInit SerialDeviceInit device %s error %d\n", dev_name, ret);
         return ERROR;
-    }  
+    }
 
     ret = SerialDeviceAttachToBus(dev_name, bus_name);
     if (EOK != ret) {
         KPrintf("Imxrt1052HwUartInit SerialDeviceAttachToBus device %s error %d\n", dev_name, ret);
         return ERROR;
-    }  
+    }
 
     return  ret;
 }
@@ -345,7 +345,7 @@ int Imxrt1052HwUartInit(void)
 
     static struct SerialDevParam serial_dev_param_1;
     memset(&serial_dev_param_1, 0, sizeof(struct SerialDevParam));
-    
+
     serial_driver_1.drv_done = &drv_done;
     serial_driver_1.configure = &SerialDrvConfigure;
     serial_device_1.hwdev_done = &hwdev_done;
@@ -369,7 +369,7 @@ int Imxrt1052HwUartInit(void)
     if (EOK != ret) {
         KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
         return ERROR;
-    }    
+    }
 #endif
 
 #ifdef BSP_USING_LPUART2
@@ -378,7 +378,7 @@ int Imxrt1052HwUartInit(void)
 
     static struct SerialDevParam serial_dev_param_2;
     memset(&serial_dev_param_2, 0, sizeof(struct SerialDevParam));
-    
+
     serial_driver_2.drv_done = &drv_done;
     serial_driver_2.configure = &SerialDrvConfigure;
     serial_device_2.hwdev_done = &hwdev_done;
@@ -402,7 +402,7 @@ int Imxrt1052HwUartInit(void)
     if (EOK != ret) {
         KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
         return ERROR;
-    }  
+    }
 #endif
 
     return ret;

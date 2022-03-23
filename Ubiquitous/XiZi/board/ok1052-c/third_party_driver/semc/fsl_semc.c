@@ -5,26 +5,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-/**
- * @file board.c
- * @brief relative configure for ok1052-c
- * @version 1.0
- * @author AIIT XUOS Lab
- * @date 2021.11.11
- */
-
-/*************************************************
-File name: board.c
-Description: support imxrt1052-board init function
-Others: take SDK_2.6.1_MIMXRT1052xxxxB for references
-History: 
-1. Date: 2022-01-25
-Author: AIIT XUOS Lab
-Modification: 
-1. support imxrt1052-board MPU、clock、memory init
-2. support imxrt1052-board uart、semc、sdio driver init
-*************************************************/
-
 #include "fsl_semc.h"
 
 /*******************************************************************************

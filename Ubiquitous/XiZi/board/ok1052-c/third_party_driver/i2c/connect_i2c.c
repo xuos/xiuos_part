@@ -1,42 +1,27 @@
 /*
- * Copyright (c) 2020 RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Change Logs:
- * Date           Author        Notes
- * 2012-04-25     weety         first version
- */
+* Copyright (c) 2022 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
 
 /**
 * @file connect_i2c.c
-* @brief support ok1052-c i2c function and register to bus framework
+* @brief support ok1052-c board i2c function and register to bus framework
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01
 */
 
-/*************************************************
-File name: connect_i2c.c
-Description: support ok1052-c i2c configure and i2c bus register function
-Others: take RT-Thread v4.0.2/components/drivers/i2c/i2c-bit-ops.c for references
-                https://github.com/RT-Thread/rt-thread/tree/v4.0.2
-History:
-1. Date: 2022-03-01
-Author: AIIT XUOS Lab
-Modification:
-1. support ok1052-c i2c bit configure, write and read
-2. support ok1052-c i2c bus device and driver register
-*************************************************/
-
 #include <board.h>
 #include "bus_serial.h"
 #include "connect_i2c.h"
 #include "fsl_lpi2c.h"
-
-#ifndef BSP_USING_I2C1
-#define BSP_USING_I2C1
-#endif
 
 static uint32 I2cWriteData(struct I2cHardwareDevice *i2c_dev, struct I2cDataStandard *msg)
 {
@@ -158,7 +143,7 @@ static int BoardI2cDevBend(void)
 }
 
 /*BOARD I2C INIT*/
-int Stm32HwI2cInit(void)
+int Imxrt1052HwI2cInit(void)
 {
     static int init_flag = 0;
     x_err_t ret = EOK;
@@ -174,7 +159,7 @@ int Stm32HwI2cInit(void)
     static struct I2cDriver i2c_driver;
     memset(&i2c_driver, 0, sizeof(struct I2cDriver));
 
-#ifdef  BSP_USING_I2C1
+#ifdef BSP_USING_I2C
     i2c_driver.configure = I2cDrvConfigure;
 
     ret = BoardI2cBusInit(&i2c_bus, &i2c_driver);
