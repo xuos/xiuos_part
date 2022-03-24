@@ -70,6 +70,13 @@ int MountSDCard(void)
 #include <connect_sdio.h>
 #endif
 
+#ifdef BSP_USING_SEMC
+extern status_t BOARD_InitSEMC(void);
+#ifdef BSP_USING_EXTSRAM
+extern int ExtSramInit(void);
+#endif
+#endif
+
 void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength)
 {
     IOMUXC_SetPinConfig(IOMUXC_GPIO_SD_B0_00_USDHC1_CMD,
@@ -301,6 +308,22 @@ void InitBoardHardware()
 #endif
 
     InitBoardMemory((void *)HEAP_BEGIN, (void *)HEAP_END);
+
+#ifdef BSP_USING_SEMC
+    CLOCK_InitSysPfd(kCLOCK_Pfd2, 29);
+    /* Set semc clock to 163.86 MHz */
+    CLOCK_SetMux(kCLOCK_SemcMux, 1);
+    CLOCK_SetDiv(kCLOCK_SemcDiv, 1);
+
+    if (BOARD_InitSEMC() != kStatus_Success) {
+        KPrintf("\r\n SEMC Init Failed\r\n");
+    }
+#ifdef MEM_EXTERN_SRAM
+    else {
+        ExtSramInit();
+    }
+#endif
+#endif
 
 #ifdef BSP_USING_LPUART
     Imxrt1052HwUartInit();
