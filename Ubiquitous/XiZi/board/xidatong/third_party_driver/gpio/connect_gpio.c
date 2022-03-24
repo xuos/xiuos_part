@@ -78,6 +78,7 @@ const struct PinMask pin_mask[] =
 struct PinIrqHdr pin_irq_hdr_tab[] = 
 {
 /* GPIO1 */
+    {-1, 0, NONE, NONE},//1
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
@@ -108,9 +109,9 @@ struct PinIrqHdr pin_irq_hdr_tab[] =
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
-    {-1, 0, NONE, NONE},
-    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},//32
     /* GPIO2 */
+    {-1, 0, NONE, NONE},//33
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
@@ -141,9 +142,9 @@ struct PinIrqHdr pin_irq_hdr_tab[] =
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
-    {-1, 0, NONE, NONE},
-    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},//64
     /* GPIO3 */
+    {-1, 0, NONE, NONE},//65
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
@@ -174,8 +175,7 @@ struct PinIrqHdr pin_irq_hdr_tab[] =
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
-    {-1, 0, NONE, NONE},
-    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},//96
     /* GPIO4 */
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
@@ -208,9 +208,9 @@ struct PinIrqHdr pin_irq_hdr_tab[] =
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
-    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},//128
     /* GPIO5 */
-    {-1, 0, NONE, NONE},
+    {-1, 0, NONE, NONE},//129
     {-1, 0, NONE, NONE},
     {-1, 0, NONE, NONE},
 };
@@ -581,6 +581,9 @@ static __inline void PinIrqHdr(uint32_t index_offset, uint8_t pin_start, GPIO_Ty
 
         if (isr_status & (1 << i)) {
             GPIO_PortClearInterruptFlags(gpio, (1 << i));
+
+            __DSB();
+
             pin = index_offset + i;
             if (pin_irq_hdr_tab[pin].hdr) {
                 pin_irq_hdr_tab[pin].hdr(pin_irq_hdr_tab[pin].args);

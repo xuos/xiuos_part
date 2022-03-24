@@ -611,7 +611,7 @@ void WriteCH438Data(uint8 addr, uint8 dat)
 ********************************************************************************************************/
 void WriteCH438Block(uint8 maddr, uint8 mlen, uint8 *mbuf)   
 {
-    while (mlen--) {
+	while (mlen--) {
 		WriteCH438Data(maddr, *mbuf++);
 	}
 }
@@ -742,7 +742,7 @@ static void Timeout438Proc(void *parameter)
 	}
 }
 
-void Ch438PortInit( uint8 ext_uart_no,uint32	BaudRate )
+void Ch438PortInit(uint8 ext_uart_no, uint32 BaudRate )
 {
 	uint32 div;
 	uint8 DLL,DLM,dlab;
@@ -767,7 +767,8 @@ void Ch438PortInit( uint8 ext_uart_no,uint32	BaudRate )
 	REG_IIR_ADDR = offset_addr[ext_uart_no] | REG_IIR0_ADDR;
 			
     WriteCH438Data(REG_IER_ADDR, BIT_IER_RESET);             /* reset the uart */
-	MdelayKTask(50);
+	//MdelayKTask(50);
+	ImxrtUdelay(50000);
 	
 	dlab = ReadCH438Data(REG_IER_ADDR);
 	dlab &= 0xDF;
@@ -818,7 +819,8 @@ void CH438PortInitParityCheck(uint8 ext_uart_no, uint32 BaudRate)
 	REG_IIR_ADDR = offset_addr[ext_uart_no] | REG_IIR0_ADDR;
 			
     WriteCH438Data(REG_IER_ADDR, BIT_IER_RESET);             /* reset the uart */
-	MdelayKTask(50);
+	//MdelayKTask(50);
+	ImxrtUdelay(50000);	
 	
 	dlab = ReadCH438Data(REG_IER_ADDR);
 	dlab &= 0xDF;
@@ -896,14 +898,12 @@ static uint32 ImxrtCh438Init(struct SerialDriver *serial_drv,  struct SerialCfgP
     }
 
 	/* config NRD pin as output*/
-	KPrintf("####TEST CH438_NRD_PIN %u start####\n", CH438_NRD_PIN);
 	pin_cfg.pin = CH438_NRD_PIN;
 	ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
     if (ret != EOK) {
         KPrintf("config NRD pin %d failed!\n", CH438_NRD_PIN);
         return ERROR;
     }
-	KPrintf("####TEST CH438_NRD_PIN %u done####\n", CH438_NRD_PIN);
 
 	/* config ALE pin as output*/
 	pin_cfg.pin = CH438_ALE_PIN;
@@ -1027,7 +1027,7 @@ static uint32 ImxrtCh438ReadData(void *dev, struct BusBlockReadParam *read_param
 					case INT_THR_EMPTY:		/* THR EMPTY INTERRUPT*/							
 						break;
 					case INT_RCV_OVERTIME:	/* RECV OVERTIME INTERRUPT*/
-					case INT_RCV_SUCCESS:	/*  RECV INTERRUPT SUCCESSFULLY*/
+					case INT_RCV_SUCCESS:	/* RECV INTERRUPT SUCCESSFULLY*/
 						rcv_num = Ch438UartRcv(dev_param->ext_uart_no, (uint8 *)read_param->buffer, read_param->size);
 						read_param->read_length = rcv_num;
 						break;
@@ -1056,14 +1056,14 @@ static const struct SerialDevDone dev_done =
 
 static void Ch438InitDefault(struct SerialDriver *serial_drv)
 {
-	struct PinParam PinCfg;
+	struct PinParam pin_cfg;
 	BusType ch438_pin;
 
     struct BusConfigureInfo configure_info;
 
     int ret = 0;
 	configure_info.configure_cmd = OPE_CFG;
-	configure_info.private_data = (void *)&PinCfg;
+	configure_info.private_data = (void *)&pin_cfg;
 
 	ch438_sem = KSemaphoreCreate(0);
 	if (ch438_sem < 0) {
@@ -1073,72 +1073,43 @@ static void Ch438InitDefault(struct SerialDriver *serial_drv)
 
 	ch438_pin = PinBusInitGet();
 
-	PinCfg.cmd = GPIO_CONFIG_MODE;
-    PinCfg.pin = CH438_INT_PIN;
-    PinCfg.mode = GPIO_CFG_INPUT_PULLUP;
+	pin_cfg.cmd = GPIO_CONFIG_MODE;
+    pin_cfg.pin = CH438_INT_PIN;
+    pin_cfg.mode = GPIO_CFG_INPUT_PULLUP;
     ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
     if (ret != EOK) {
         KPrintf("config BSP_CH438_INT_PIN pin %d failed!\n", CH438_INT_PIN);
         return;
     }
 
-	PinCfg.cmd = GPIO_IRQ_REGISTER;
-    PinCfg.pin = CH438_INT_PIN;
-    PinCfg.irq_set.irq_mode = GPIO_IRQ_EDGE_FALLING;
-    PinCfg.irq_set.hdr = Ch438Irq;
-    PinCfg.irq_set.args = NONE;
+	pin_cfg.cmd = GPIO_IRQ_REGISTER;
+    pin_cfg.pin = CH438_INT_PIN;
+    pin_cfg.irq_set.irq_mode = GPIO_IRQ_EDGE_FALLING;
+    pin_cfg.irq_set.hdr = Ch438Irq;
+    pin_cfg.irq_set.args = NONE;
 	ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
     if (ret != EOK) {
-        KPrintf("config BSP_CH438_INT_PIN  %d failed!\n", CH438_INT_PIN);
+        KPrintf("config BSP_CH438_INT_PIN GPIO_IRQ_REGISTER %d failed!\n", CH438_INT_PIN);
         return;
     }
 
-	PinCfg.cmd = GPIO_IRQ_ENABLE;
-    PinCfg.pin = CH438_INT_PIN;
+	//disable ch438 int gpio irq
+	pin_cfg.cmd = GPIO_IRQ_DISABLE;
+    pin_cfg.pin = CH438_INT_PIN;
     ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
     if (ret != EOK) {
-        KPrintf("config BSP_CH438_INT_PIN  %d failed!\n", CH438_INT_PIN);
+        KPrintf("config BSP_CH438_INT_PIN GPIO_IRQ_DISABLE %d failed!\n", CH438_INT_PIN);
         return;
     }
 
-    struct SerialCfgParam serial_cfg;
-    memset(&serial_cfg, 0, sizeof(struct SerialCfgParam));
-    configure_info.configure_cmd = OPE_INT;
-    configure_info.private_data = (void *)&serial_cfg;
-
-    serial_cfg.data_cfg.port_configure = PORT_CFG_INIT;
-
-    serial_cfg.data_cfg.ext_uart_no = 0;
-    serial_cfg.data_cfg.serial_baud_rate = BAUD_RATE_115200;
-    BusDrvConfigure(&serial_drv->driver, &configure_info);
-
-    serial_cfg.data_cfg.ext_uart_no = 1;
-    serial_cfg.data_cfg.serial_baud_rate = BAUD_RATE_9600;
-    BusDrvConfigure(&serial_drv->driver, &configure_info);
-
-    serial_cfg.data_cfg.ext_uart_no = 2;
-    serial_cfg.data_cfg.serial_baud_rate = BAUD_RATE_9600;
-    BusDrvConfigure(&serial_drv->driver, &configure_info);
-
-    serial_cfg.data_cfg.ext_uart_no = 3;
-    serial_cfg.data_cfg.serial_baud_rate = BAUD_RATE_9600;
-    BusDrvConfigure(&serial_drv->driver, &configure_info);
-
-    serial_cfg.data_cfg.ext_uart_no = 4;
-    serial_cfg.data_cfg.serial_baud_rate = BAUD_RATE_9600;
-    BusDrvConfigure(&serial_drv->driver, &configure_info);
-
-    serial_cfg.data_cfg.ext_uart_no = 5;
-    serial_cfg.data_cfg.serial_baud_rate = BAUD_RATE_9600;
-    BusDrvConfigure(&serial_drv->driver, &configure_info);
-
-    serial_cfg.data_cfg.ext_uart_no = 6;
-    serial_cfg.data_cfg.serial_baud_rate = BAUD_RATE_9600;
-    BusDrvConfigure(&serial_drv->driver, &configure_info);
-
-    serial_cfg.data_cfg.ext_uart_no = 7;
-    serial_cfg.data_cfg.serial_baud_rate = BAUD_RATE_9600;
-    BusDrvConfigure(&serial_drv->driver, &configure_info);
+	//enable ch438 int gpio irq
+	pin_cfg.cmd = GPIO_IRQ_ENABLE;
+    pin_cfg.pin = CH438_INT_PIN;
+    ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
+    if (ret != EOK) {
+        KPrintf("config BSP_CH438_INT_PIN GPIO_IRQ_ENABLE %d failed!\n", CH438_INT_PIN);
+        return;
+    }
 }
 
 static uint32 ImxrtCh438DevRegister(struct SerialHardwareDevice *serial_dev, char *dev_name)
@@ -1272,25 +1243,108 @@ int Imxrt1052HwCh438Init(void)
     return ret;
 }
 
-void CH438RegTest(unsigned char num)//for test
+#ifdef CH438_EXTUART_TEST
+static void CH438RegTest(unsigned char num)//for test
 {
 	uint8 dat;
 	
-	KPrintf("current test serilnum:  %02x \r\n",offset_addr[num]);
-	KPrintf("IER: %02x\r\n",ReadCH438Data(offset_addr[num] | REG_IER0_ADDR));//?IER
-	KPrintf("IIR: %02x\r\n",ReadCH438Data(offset_addr[num] | REG_IIR0_ADDR));//?IIR
-	KPrintf("LCR: %02x\r\n",ReadCH438Data(offset_addr[num] | REG_LCR0_ADDR));//?LCR
-	KPrintf("MCR: %02x\r\n",ReadCH438Data(offset_addr[num] | REG_MCR0_ADDR));//?MCR
-	KPrintf("LSR: %02x\r\n",ReadCH438Data(offset_addr[num] | REG_LSR0_ADDR));//?LSR
-	KPrintf("MSR: %02x\r\n",ReadCH438Data(offset_addr[num] | REG_MSR0_ADDR));//?MSR
-	KPrintf("FCR: %02x\r\n",ReadCH438Data(offset_addr[num] | REG_FCR0_ADDR));//?FCR
-	KPrintf("SSR: %02x\r\n",ReadCH438Data( offset_addr[num] | REG_SSR_ADDR ));//?SSR
+	KPrintf("current test serial num:  %02x \r\n",offset_addr[num]);
+	KPrintf("IER: 0x%02x\r\n",ReadCH438Data(offset_addr[num] | REG_IER0_ADDR));//IER
+	KPrintf("IIR: 0x%02x\r\n",ReadCH438Data(offset_addr[num] | REG_IIR0_ADDR));//IIR
+	KPrintf("LCR: 0x%02x\r\n",ReadCH438Data(offset_addr[num] | REG_LCR0_ADDR));//LCR
+	KPrintf("MCR: 0x%02x\r\n",ReadCH438Data(offset_addr[num] | REG_MCR0_ADDR));//MCR
+	KPrintf("LSR: 0x%02x\r\n",ReadCH438Data(offset_addr[num] | REG_LSR0_ADDR));//LSR
+	KPrintf("MSR: 0x%02x\r\n",ReadCH438Data(offset_addr[num] | REG_MSR0_ADDR));//MSR
+	KPrintf("FCR: 0x%02x\r\n",ReadCH438Data(offset_addr[num] | REG_FCR0_ADDR));//FCR
+	KPrintf("SSR: 0x%02x\r\n",ReadCH438Data(offset_addr[num] | REG_SSR_ADDR ));//SSR
 	
-	KPrintf("SCR0: %02x\r\n",(unsigned short)ReadCH438Data(offset_addr[num] | REG_SCR0_ADDR));//?SCR
+	KPrintf("SCR0: 0x%02x\r\n",(unsigned short)ReadCH438Data(offset_addr[num] | REG_SCR0_ADDR));//SCR
 	dat = 0x55;
 	WriteCH438Data(offset_addr[num] | REG_SCR0_ADDR, dat);
-	KPrintf("SCR55: %02x\r\n",(unsigned short)ReadCH438Data(offset_addr[num] | REG_SCR0_ADDR));//?SCR
+	KPrintf("SCR55: 0x%02x\r\n",(unsigned short)ReadCH438Data(offset_addr[num] | REG_SCR0_ADDR));//SCR
 	dat = 0xAA;
 	WriteCH438Data(offset_addr[num] | REG_SCR0_ADDR, dat);
-	KPrintf("SCRAA: %02x\r\n",(unsigned short)ReadCH438Data(offset_addr[num] | REG_SCR0_ADDR));//?SCR
+	KPrintf("SCRAA: 0x%02x\r\n",(unsigned short)ReadCH438Data(offset_addr[num] | REG_SCR0_ADDR));//SCR
 }
+
+static struct Bus *bus;
+static struct HardwareDev *dev;
+static struct Driver *drv;
+
+static void Ch438Read(void *parameter)
+{
+	uint8 RevLen;
+    uint8 ext_uart_no = 0;
+	uint8 i, cnt = 0;
+
+    struct BusBlockReadParam read_param;
+    static uint8 Ch438Buff[8][256];
+
+    struct BusBlockWriteParam write_param;
+	
+    while (1)
+    {
+        KPrintf("ready to read test_ch438 data\n");
+
+        read_param.buffer = Ch438Buff[ext_uart_no];
+        RevLen = BusDevReadData(dev, &read_param);
+
+		KPrintf("test_ch438 get data %u\n", RevLen);
+							
+		if (RevLen) {
+			for(i = 0 ; i < RevLen; i ++) {
+				KPrintf("i %u data 0x%x\n", i, Ch438Buff[ext_uart_no][i]);
+				Ch438Buff[ext_uart_no][i] = 0;
+			}
+
+			cnt ++;
+			write_param.buffer = &cnt;
+			write_param.size = 1;
+			BusDevWriteData(dev, &write_param);
+		}
+
+	}
+}
+
+static void TestCh438Init(void)
+{ 
+    x_err_t flag;
+
+    struct BusConfigureInfo configure_info;
+
+    bus = BusFind(CH438_BUS_NAME);
+    drv = BusFindDriver(bus, CH438_DRIVER_NAME);
+
+    dev = BusFindDevice(bus, CH438_DEVICE_NAME_0);
+
+    struct SerialCfgParam serial_cfg;
+    memset(&serial_cfg, 0, sizeof(struct SerialCfgParam));
+    configure_info.configure_cmd = OPE_INT;
+    configure_info.private_data = (void *)&serial_cfg;
+
+    serial_cfg.data_cfg.port_configure = PORT_CFG_INIT;
+
+    serial_cfg.data_cfg.ext_uart_no = 0;
+    serial_cfg.data_cfg.serial_baud_rate = 115200;
+    BusDrvConfigure(drv, &configure_info);
+
+	KPrintf("ready to create test_ch438 task\n");
+
+	int32 task_CH438_read = KTaskCreate("task_CH438_read", Ch438Read, NONE, 2048, 10); 
+	flag = StartupKTask(task_CH438_read);
+    if (flag != EOK) {
+		KPrintf("StartupKTask task_CH438_read failed .\n");
+		return;
+	} 
+}
+
+void TestCh438(void)
+{
+	TestCh438Init();
+
+	CH438RegTest(0);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                                                TestCh438, TestCh438, TestCh438 );
+
+#endif												

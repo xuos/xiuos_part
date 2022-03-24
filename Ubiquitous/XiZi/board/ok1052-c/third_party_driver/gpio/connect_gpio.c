@@ -581,6 +581,9 @@ static __inline void PinIrqHdr(uint32_t index_offset, uint8_t pin_start, GPIO_Ty
 
         if (isr_status & (1 << i)) {
             GPIO_PortClearInterruptFlags(gpio, (1 << i));
+
+            __DSB();
+
             pin = index_offset + i;
             if (pin_irq_hdr_tab[pin].hdr) {
                 pin_irq_hdr_tab[pin].hdr(pin_irq_hdr_tab[pin].args);
