@@ -1,28 +1,44 @@
 /*
+ * The Clear BSD License
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2018 NXP
+ * Copyright 2016-2017 NXP
  * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted (subject to the limitations in the disclaimer below) provided
+ *  that the following conditions are met:
  *
- * SPDX-License-Identifier: BSD-3-Clause
+ * o Redistributions of source code must retain the above copyright notice, this list
+ *   of conditions and the following disclaimer.
+ *
+ * o Redistributions in binary form must reproduce the above copyright notice, this
+ *   list of conditions and the following disclaimer in the documentation and/or
+ *   other materials provided with the distribution.
+ *
+ * o Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from this
+ *   software without specific prior written permission.
+ *
+ * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * @file fsl_phy.c
- * @brief phy drivers for ksz8081
- * @version 1.0
- * @author AIIT XUOS Lab
- * @date 2021.11.11
- */
-
-#include "lwipopts.h"
 #include "fsl_phy.h"
-
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 
 /*! @brief Defines the timeout macro. */
-#define PHY_TIMEOUT_COUNT 100000
+#define PHY_TIMEOUT_COUNT 0x3FFFFFFU
 
 /*******************************************************************************
  * Prototypes
@@ -52,12 +68,11 @@ extern clock_ip_name_t s_enetClock[FSL_FEATURE_SOC_ENET_COUNT];
 status_t PHY_Init(ENET_Type *base, uint32_t phyAddr, uint32_t srcClock_Hz)
 {
     uint32_t bssReg;
-    uint32_t counter  = PHY_TIMEOUT_COUNT;
-    uint32_t idReg    = 0;
-    status_t result   = kStatus_Success;
+    uint32_t counter = PHY_TIMEOUT_COUNT;
+    uint32_t idReg = 0;
+    status_t result = kStatus_Success;
     uint32_t instance = ENET_GetInstance(base);
     uint32_t timeDelay;
-    uint32_t ctlReg = 0;
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     /* Set SMI first. */
@@ -69,7 +84,7 @@ status_t PHY_Init(ENET_Type *base, uint32_t phyAddr, uint32_t srcClock_Hz)
     while ((idReg != PHY_CONTROL_ID1) && (counter != 0))
     {
         PHY_Read(base, phyAddr, PHY_ID1_REG, &idReg);
-        counter--;
+        counter --;       
     }
 
     if (!counter)
@@ -79,44 +94,30 @@ status_t PHY_Init(ENET_Type *base, uint32_t phyAddr, uint32_t srcClock_Hz)
 
     /* Reset PHY. */
     counter = PHY_TIMEOUT_COUNT;
-    result  = PHY_Write(base, phyAddr, PHY_BASICCONTROL_REG, PHY_BCTL_RESET_MASK);
+    result = PHY_Write(base, phyAddr, PHY_BASICCONTROL_REG, PHY_BCTL_RESET_MASK);
     if (result == kStatus_Success)
-    {
-#if defined(FSL_FEATURE_PHYKSZ8081_USE_RMII50M_MODE)
-        uint32_t data = 0;
-        result        = PHY_Read(base, phyAddr, PHY_CONTROL2_REG, &data);
-        if (result != kStatus_Success)
-        {
-            return result;
-        }
-        result = PHY_Write(base, phyAddr, PHY_CONTROL2_REG, (data | PHY_CTL2_REFCLK_SELECT_MASK));
-        if (result != kStatus_Success)
-        {
-            return result;
-        }
-#endif /* FSL_FEATURE_PHYKSZ8081_USE_RMII50M_MODE */
-
+    {  
+        
         /* Set the negotiation. */
         result = PHY_Write(base, phyAddr, PHY_AUTONEG_ADVERTISE_REG,
                            (PHY_100BASETX_FULLDUPLEX_MASK | PHY_100BASETX_HALFDUPLEX_MASK |
                             PHY_10BASETX_FULLDUPLEX_MASK | PHY_10BASETX_HALFDUPLEX_MASK | 0x1U));
         if (result == kStatus_Success)
         {
-            result =
-                PHY_Write(base, phyAddr, PHY_BASICCONTROL_REG, (PHY_BCTL_AUTONEG_MASK | PHY_BCTL_RESTART_AUTONEG_MASK));
+            result = PHY_Write(base, phyAddr, PHY_BASICCONTROL_REG,
+                               (PHY_BCTL_AUTONEG_MASK | PHY_BCTL_RESTART_AUTONEG_MASK));
             if (result == kStatus_Success)
             {
                 /* Check auto negotiation complete. */
-                while (counter--)
+                while (counter --)
                 {
                     result = PHY_Read(base, phyAddr, PHY_BASICSTATUS_REG, &bssReg);
-                    if (result == kStatus_Success)
+                    if ( result == kStatus_Success)
                     {
-                        PHY_Read(base, phyAddr, PHY_CONTROL1_REG, &ctlReg);
-                        if (((bssReg & PHY_BSTATUS_AUTONEGCOMP_MASK) != 0) && (ctlReg & PHY_LINK_READY_MASK))
+                        if ((bssReg & PHY_BSTATUS_AUTONEGCOMP_MASK) != 0)
                         {
                             /* Wait a moment for Phy status stable. */
-                            for (timeDelay = 0; timeDelay < PHY_TIMEOUT_COUNT; timeDelay++)
+                            for (timeDelay = 0; timeDelay < PHY_TIMEOUT_COUNT; timeDelay ++)
                             {
                                 __ASM("nop");
                             }
@@ -219,17 +220,17 @@ status_t PHY_EnableLoopback(ENET_Type *base, uint32_t phyAddr, phy_loop_t mode, 
             }
             else
             {
-                data = PHY_BCTL_DUPLEX_MASK | PHY_BCTL_LOOP_MASK;
+                data = PHY_BCTL_DUPLEX_MASK | PHY_BCTL_LOOP_MASK;                
             }
-            return PHY_Write(base, phyAddr, PHY_BASICCONTROL_REG, data);
+           return PHY_Write(base, phyAddr, PHY_BASICCONTROL_REG, data);
         }
         else
         {
             /* First read the current status in control register. */
-            result = PHY_Read(base, phyAddr, PHY_CONTROL2_REG, &data);
+            result = PHY_Read(base, phyAddr, PHY_CONTROL1_REG, &data);
             if (result == kStatus_Success)
             {
-                return PHY_Write(base, phyAddr, PHY_CONTROL2_REG, (data | PHY_CTL2_REMOTELOOP_MASK));
+                return PHY_Write(base, phyAddr, PHY_CONTROL1_REG, (data | PHY_CTL1_REMOTELOOP_MASK));
             }
         }
     }
@@ -249,10 +250,10 @@ status_t PHY_EnableLoopback(ENET_Type *base, uint32_t phyAddr, phy_loop_t mode, 
         else
         {
             /* First read the current status in control one register. */
-            result = PHY_Read(base, phyAddr, PHY_CONTROL2_REG, &data);
+            result = PHY_Read(base, phyAddr, PHY_CONTROL1_REG, &data);
             if (result == kStatus_Success)
             {
-                return PHY_Write(base, phyAddr, PHY_CONTROL2_REG, (data & ~PHY_CTL2_REMOTELOOP_MASK));
+                return PHY_Write(base, phyAddr, PHY_CONTROL1_REG, (data & ~PHY_CTL1_REMOTELOOP_MASK));
             }
         }
     }
@@ -290,7 +291,6 @@ status_t PHY_GetLinkSpeedDuplex(ENET_Type *base, uint32_t phyAddr, phy_speed_t *
 
     status_t result = kStatus_Success;
     uint32_t data, ctlReg;
-
 
     /* Read the control two register. */
     result = PHY_Read(base, phyAddr, PHY_CONTROL1_REG, &ctlReg);

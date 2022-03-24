@@ -14,7 +14,7 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver/usb/nxp_usb_driver/osa \
 	-I$(BSP_ROOT)/third_party_driver/usb/nxp_usb_driver/phy \
 	-I$(BSP_ROOT)/third_party_driver/ethernet \
-	-I$(BSP_ROOT)/third_party_driver/ethernet/ksz8081 \
+	-I$(BSP_ROOT)/third_party_driver/ethernet/lan8720 \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052 \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052/drivers \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/Include \
