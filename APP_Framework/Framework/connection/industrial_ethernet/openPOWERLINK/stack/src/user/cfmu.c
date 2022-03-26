@@ -846,6 +846,8 @@ static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
                             pNodeInfo_p->eventCnProgress.nodeId,
                             ret);
     }
+#else
+    UNUSED_PARAMETER(pNodeInfo_p);
 #endif
 
     return ret;

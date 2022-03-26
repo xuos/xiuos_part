@@ -35,7 +35,7 @@ menu "gapuino feature"
         endmenu
 
         menu "config hardware resources for connection"
-            if CONNECTION_COMMUNICATION_ETHERNET
+            if CONNECTION_INDUSTRIAL_ETHERNET
                 config ETHERNET_UART_NAME
                     string "ethernet uart name"
                     default "/dev/uart3_dev3"

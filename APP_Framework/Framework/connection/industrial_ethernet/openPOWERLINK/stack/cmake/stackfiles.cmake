@@ -5,6 +5,7 @@
 # Copyright (c) 2017, B&R Industrial Automation GmbH
 # Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
 # Copyright (c) 2018, Kalycito Infotech Private Limited
+# Copyright (c) 2020, AIIT XUOS Lab
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -220,6 +221,11 @@ SET(EVENT_UCAL_LINUXUSER_SOURCES
     ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
     )
 
+SET(EVENT_UCAL_XIUOS_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucal-xiuos.c
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+    )
+
 SET(EVENT_UCAL_LINUXIOCTL_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-linuxioctl.c
     )
@@ -396,6 +402,11 @@ SET(EVENT_KCAL_WINDOWS_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
     )
 
+SET(EVENT_KCAL_XIUOS_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-xiuos.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    )
+
 SET(EVENT_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcal-linuxkernel.c
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
@@ -476,6 +487,13 @@ SET(HARDWARE_DRIVER_LINUXUSERRAWSOCKET_SOURCES
     ${EDRV_SOURCE_DIR}/edrv-rawsock_linux.c
     )
 
+SET(HARDWARE_DRIVER_XIUOS_SOURCES
+    ${KERNEL_SOURCE_DIR}/veth/veth-generic.c
+    ${KERNEL_SOURCE_DIR}/timer/hrestimer-xiuos.c
+    ${EDRV_SOURCE_DIR}/edrvcyclic.c
+    ${EDRV_SOURCE_DIR}/edrv-xiuos.c
+    )
+
 SET(HARDWARE_DRIVER_WINDOWS_SOURCES
     ${EDRV_SOURCE_DIR}/edrvcyclic.c
     ${EDRV_SOURCE_DIR}/edrv-pcap_win.c
@@ -530,6 +548,10 @@ SET(USER_TIMER_LINUXUSER_SOURCES
     )
 
 SET(USER_TIMER_WINDOWS_SOURCES
+    ${USER_SOURCE_DIR}/timer/timer-generic.c
+    )
+
+SET(USER_TIMER_XIUOS_SOURCES
     ${USER_SOURCE_DIR}/timer/timer-generic.c
     )
 
@@ -642,6 +664,12 @@ ELSE ()
         ${ARCH_SOURCE_DIR}/linux/netif-linux.c
         )
 ENDIF ()
+
+SET(TARGET_XIUOS_SOURCES
+    ${ARCH_SOURCE_DIR}/xiuos/target-xiuos.c
+    ${ARCH_SOURCE_DIR}/xiuos/target-mutex.c
+    ${ARCH_SOURCE_DIR}/xiuos/netif-xiuos.c
+    )
 
 SET(TARGET_MICROBLAZE_SOURCES
     ${ARCH_SOURCE_DIR}/xilinx-microblaze/systemtimer.c

@@ -2,8 +2,8 @@
 
 current_path=$(pwd)
 xizi_path=Ubiquitous/XiZi
-board=cortex-m3-emulator
-qemu_machine=lm3s6965evb
+board=cortex-m4-emulator
+qemu_machine=netduinoplus2
 
 run_in_docker() {
     docker run \
@@ -31,11 +31,11 @@ distclean() {
 }
 
 simulate() {
-    [ "$1" = "debug" ] && debug_param="-s -S"
     qemu-system-arm $debug_param \
         -machine $qemu_machine \
         -nographic \
-        -kernel $xizi_path/build/XiZi_$board.elf
+        -kernel $xizi_path/build/XiZi_$board.elf \
+        $@
 }
 
 gdb() {

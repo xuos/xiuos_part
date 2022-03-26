@@ -136,6 +136,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #elif (defined (_WIN32) || defined (__MINGW32__))
 #define TARGET_SYSTEM   _WIN32_                             // WIN32 definition
 #define DEV_SYSTEM      _DEV_WIN32_MINGW_
+#elif (defined(__XIUOS__))                                  // ARM / XiUOS
+#define TARGET_SYSTEM   _XIUOS_
+#define DEV_SYSTEM      _DEV_LINUX_
 #else /* (defined (_WIN32) || defined (__MINGW32__)) */     // unsupported
 #error 'ERROR: TARGET_SYSTEM / DEV_SYSTEM not found!'
 #endif
@@ -171,7 +174,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 //  TARGET_SYSTEM specific definitions
 //------------------------------------------------------------------------------
-#if (TARGET_SYSTEM == _LINUX_)
+#if (TARGET_SYSTEM == _LINUX_ || TARGET_SYSTEM == _XIUOS_)
 
 #include <oplk/targetdefs/linux.h>
 
