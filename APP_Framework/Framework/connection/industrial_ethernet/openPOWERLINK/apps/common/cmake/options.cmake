@@ -4,6 +4,7 @@
 #
 # Copyright (c) 2016, B&R Industrial Automation GmbH
 # Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2020, AIIT XUOS Lab
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -95,6 +96,8 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     INCLUDE(configure-linux)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     INCLUDE(configure-windows)
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "XiUOS")
+    INCLUDE(configure-xiuos)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise")
     INCLUDE(configure-microblazeise)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "alterac5arm")

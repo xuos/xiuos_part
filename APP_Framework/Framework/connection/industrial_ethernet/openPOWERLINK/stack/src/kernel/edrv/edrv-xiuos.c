@@ -229,7 +229,7 @@ tOplkError edrv_exit(void)
     edrvInstance_l.fStartCommunication = FALSE;
 
     // Wait to terminate thread safely
-    usleep(100000);
+    target_msleep(100);
 
     if (edrvInstance_l.fThreadIsExited)
         pthread_cancel(edrvInstance_l.hThread);

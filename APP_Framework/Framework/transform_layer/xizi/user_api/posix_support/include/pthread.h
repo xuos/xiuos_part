@@ -67,6 +67,7 @@ typedef int   pid_t;
 #define SCHED_OTHER		0
 #define SCHED_FIFO		1
 #define SCHED_RR		2
+#define SCHED_IDLE      5
 
 /* function in pthread.c */
 int       pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void));

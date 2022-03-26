@@ -4,6 +4,7 @@
 #
 # Copyright (c) 2017, B&R Industrial Automation GmbH
 # Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2020, AIIT XUOS Lab
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -126,6 +127,8 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include(linux.cmake)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     include (windows.cmake)
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "XiUOS")
+    include(xiuos.cmake)
 ELSE()
     MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} is not supported!")
 ENDIF()
@@ -146,7 +149,11 @@ SOURCE_GROUP("Object Dictionary" FILES
 ################################################################################
 # Set the executable
 
-ADD_EXECUTABLE(demo_mn_console ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc)
+IF(CMAKE_SYSTEM_NAME STREQUAL "XiUOS")
+    ADD_LIBRARY(demo_mn_console ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc)
+ELSE()
+    ADD_EXECUTABLE(demo_mn_console ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc)
+ENDIF()
 SET_PROPERTY(TARGET demo_mn_console
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
@@ -164,5 +171,5 @@ TARGET_LINK_LIBRARIES(demo_mn_console ${ARCH_LIBRARIES})
 ################################################################################
 # Installation rules
 
-INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION ${PROJECT_NAME})
+INSTALL(TARGETS demo_mn_console DESTINATION ${PROJECT_NAME})
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${PROJECT_NAME})

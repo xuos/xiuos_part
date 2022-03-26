@@ -112,6 +112,8 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include(linux.cmake)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     include (windows.cmake)
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "XiUOS")
+    include(xiuos.cmake)
 ELSE()
     MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} is not supported!")
 ENDIF()
@@ -131,7 +133,11 @@ SOURCE_GROUP("Object Dictionary" FILES
 ################################################################################
 # Set the executable
 
-ADD_EXECUTABLE(demo_cn_console ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES})
+IF(CMAKE_SYSTEM_NAME STREQUAL "XiUOS")
+    ADD_LIBRARY(demo_cn_console STATIC ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES})
+ELSE()
+    ADD_EXECUTABLE(demo_cn_console ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES})
+ENDIF()
 SET_PROPERTY(TARGET demo_cn_console
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
@@ -144,4 +150,4 @@ TARGET_LINK_LIBRARIES(demo_cn_console ${ARCH_LIBRARIES})
 ################################################################################
 # Installation rules
 
-INSTALL(TARGETS demo_cn_console RUNTIME DESTINATION ${PROJECT_NAME})
+INSTALL(TARGETS demo_cn_console DESTINATION ${PROJECT_NAME})

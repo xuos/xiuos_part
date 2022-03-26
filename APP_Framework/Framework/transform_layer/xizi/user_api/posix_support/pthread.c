@@ -67,6 +67,12 @@ pthread_t pthread_self(void){
     return pthread;
 }
 
+int pthread_setschedparam(pthread_t thread, int policy,
+                          const struct sched_param *pParam)
+{
+    return 0;
+}
+
 int pthread_setschedprio(pthread_t thread, int prio)
 {
     //add syscall
@@ -94,6 +100,11 @@ int pthread_setcancelstate(int state, int *oldstate)
 }
 
 int pthread_setcanceltype(int type, int *oldtype)
+{
+    return -1;
+}
+
+int pthread_join(pthread_t thread, void **retval)
 {
     return -1;
 }

@@ -151,7 +151,11 @@ This is the main function of the openPOWERLINK console MN demo application.
 \ingroup module_demo_mn_console
 */
 //------------------------------------------------------------------------------
+#ifdef __XIUOS__
+int OplkDemoMnConsole(int argc, char* argv[])
+#else
 int main(int argc, char* argv[])
+#endif
 {
     tOplkError      ret = kErrorOk;
     tOptions        opts;

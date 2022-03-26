@@ -461,7 +461,6 @@ flag m_fContinue is set the thread loops until the timer is deleted.
 //------------------------------------------------------------------------------
 static void* timerThread(void* pArgument_p)
 {
-    int                 iRet;
     tHresTimerInfo*     pTimerInfo;
     struct timespec     startTime, timeout;
     ULONGLONG           period;
@@ -504,13 +503,7 @@ static void* timerThread(void* pArgument_p)
             do
             {
                 /* sleep until timeout */
-                iRet = usleep(period / 1000);
-                if (iRet < 0)
-                {
-                    DEBUG_LVL_ERROR_TRACE("%s(): Error in clock_nanosleep!\n",
-                                          __func__);
-                    /* todo how to signal that timeout wasn't correct? */
-                }
+                target_msleep(period / 1000000);
                 FTRACE_MARKER("HighReskTimer(%d) expired (%d ns)",
                               (int)pArgument_p, period);
 

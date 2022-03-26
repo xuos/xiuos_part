@@ -142,7 +142,11 @@ This is the main function of the openPOWERLINK console CN demo application.
 \ingroup module_demo_cn_console
 */
 //------------------------------------------------------------------------------
+#ifdef __XIUOS__
+int OplkDemoCnConsole(int argc, char* argv[])
+#else
 int main(int argc, char* argv[])
+#endif
 {
     tOplkError  ret = kErrorOk;
     tOptions    opts;
