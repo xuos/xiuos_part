@@ -33,7 +33,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 
     if (NULL == attr) {
         task.prio = KTASK_PRIORITY_MAX / 2;
-        task.stack_size = 1024 ;
+        task.stack_size = 4096 ;
     } else {
         task.prio = attr->schedparam.sched_priority ;
         task.stack_size = attr->stacksize ;

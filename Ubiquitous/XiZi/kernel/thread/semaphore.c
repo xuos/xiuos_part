@@ -120,7 +120,7 @@ static int32 _SemaphoreObtain(struct Semaphore *sem, int32 msec)
     SYS_KDEBUG_LOG(KDBG_IPC, ("obtain semaphore: suspending task %s\n",
             GetKTaskDescriptor()->task_base_info.name));
 
-    LinklistSuspend(&sem->pend_list, task, LINKLIST_FLAG_PRIO);
+    LinklistSuspend(&sem->pend_list, task, LINKLIST_FLAG_FIFO);
 
     if (wait_time > 0) {
          KTaskSetDelay(task, wait_time);
