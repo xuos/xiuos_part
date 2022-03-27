@@ -11,6 +11,7 @@ This file contains the console input/output implementation for XiUOS.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2020, AIIT XUOS Lab
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+// #include <strings.h>
+
+#include <xsconfig.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -61,7 +65,7 @@ termios library.
 //------------------------------------------------------------------------------
 int console_getch(void)
 {
-    return getchar();
+    return 'p';
 }
 
 //------------------------------------------------------------------------------
@@ -78,5 +82,5 @@ The function checks the console for a keystroke.
 //------------------------------------------------------------------------------
 int console_kbhit(void)
 {
-    return 1;
+    return 0;
 }

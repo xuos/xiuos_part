@@ -421,6 +421,11 @@ static void loopMain(void)
 
     while (!fExit)
     {
+#ifdef __XIUOS__
+        ret = oplk_process();
+        if (ret != kErrorOk)
+            return;
+#endif
         if (console_kbhit())
         {
             cKey = (char)console_getch();

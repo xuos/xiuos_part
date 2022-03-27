@@ -138,4 +138,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_SDO_MAX_CONNECTION_COM               100
 #define CONFIG_SDO_MAX_CONNECTION_UDP               50
 
+//==============================================================================
+// Circular buffer specific defines
+//==============================================================================
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER        2048
+#define CONFIG_EVENT_SIZE_CIRCBUF_USER_TO_KERNEL        2048
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL       2048
+#define CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL         2048
+
 #endif // _INC_oplkcfg_H_

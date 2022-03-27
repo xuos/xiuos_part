@@ -131,4 +131,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // SDO module specific defines
 //==============================================================================
 
+//==============================================================================
+// Circular buffer specific defines
+//==============================================================================
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER        2048
+#define CONFIG_EVENT_SIZE_CIRCBUF_USER_TO_KERNEL        2048
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL       2048
+#define CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL         2048
+
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT                2047
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_GEN                2047
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH               2048
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC               2048
+
 #endif // _INC_oplkcfg_H_

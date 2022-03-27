@@ -110,7 +110,18 @@ tOplkError target_enumerateNetworkInterfaces(tNetIfId* pInterfaces_p,
 {
     UNUSED_PARAMETER(pInterfaces_p);
     UNUSED_PARAMETER(pNoInterfaces_p);
-    return kErrorApiNotSupported;
+
+    if (*pNoInterfaces_p == 0)
+        return kErrorOk;
+
+    memset(pInterfaces_p[0].aMacAddress, 0,
+           sizeof(pInterfaces_p[0].aMacAddress));
+    strcpy(pInterfaces_p[0].aDeviceName, "eth0");
+    strcpy(pInterfaces_p[0].aDeviceDescription, "eth0");
+
+    *pNoInterfaces_p = 1;
+
+    return kErrorOk;
 }
 
 //============================================================================//

@@ -128,10 +128,15 @@ int netselect_selectNetworkInterface(char* pDevName_p, size_t maxLen_p)
 
     printf("--------------------------------------------------\n");
     printf("Select the interface to be used for POWERLINK (1-%u):", (unsigned int)i);
+#ifdef __XIUOS__
+    printf("1\n");
+    num = 1;
+#else
     if (scanf("%u", &num) == EOF)
     {
         return -1;
     }
+#endif
 
     printf("--------------------------------------------------\n");
     if ((num < 1) || (num > i))

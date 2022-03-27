@@ -221,11 +221,6 @@ SET(EVENT_UCAL_LINUXUSER_SOURCES
     ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
     )
 
-SET(EVENT_UCAL_XIUOS_SOURCES
-    ${USER_SOURCE_DIR}/event/eventucal-xiuos.c
-    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
-    )
-
 SET(EVENT_UCAL_LINUXIOCTL_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-linuxioctl.c
     )
@@ -399,11 +394,6 @@ SET(EVENT_KCAL_LINUXUSER_SOURCES
 
 SET(EVENT_KCAL_WINDOWS_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcal-win32.c
-    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
-    )
-
-SET(EVENT_KCAL_XIUOS_SOURCES
-    ${KERNEL_SOURCE_DIR}/event/eventkcal-xiuos.c
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
     )
 
