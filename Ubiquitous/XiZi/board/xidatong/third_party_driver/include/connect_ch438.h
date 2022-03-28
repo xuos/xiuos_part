@@ -266,11 +266,7 @@
 #define CH438_NWR_PIN	       IMXRT_GET_PIN(3, 4)
 #define CH438_NRD_PIN	       IMXRT_GET_PIN(3, 5)
 #define CH438_ALE_PIN	       IMXRT_GET_PIN(3, 2)
-#define CH438_INT_PIN	       IMXRT_GET_PIN(3, 3)
-// #define	DIR_485CH1_PIN
-// #define	DIR_485CH2_PIN     
-
-void CH438RegTest(unsigned char num);
+#define CH438_INT_PIN	       IMXRT_GET_PIN(3, 3)    
 
 int Imxrt1052HwCh438Init(void);
 
