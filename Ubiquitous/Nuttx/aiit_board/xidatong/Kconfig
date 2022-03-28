@@ -7,7 +7,7 @@ if ARCH_BOARD_XIDATONG
 
 choice
 	prompt "Boot Flash"
-	default XIDATONG_HYPER_FLASH
+	default XIDATONG_QSPI_FLASH
 
 config XIDATONG_HYPER_FLASH
 	bool "HYPER Flash"
@@ -19,7 +19,7 @@ endchoice # Boot Flash
 
 config XIDATONG_SDRAM
 	bool "Enable SDRAM"
-	default n
+	default y
 	select IMXRT_SEMC_INIT_DONE
 	---help---
 		Activate DCD configuration of SDRAM
