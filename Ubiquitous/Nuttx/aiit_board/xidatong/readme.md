@@ -172,7 +172,7 @@ make时加上V=1参数可以看到较为详细的编译信息，但是编译过�
 3、同时需要匹配xidatong开发板所使用的Flash型号，点击Boot Device Configuration，在Use Typical Device中选择Winbond_W25QxxxJV，然后点击ok。如下图所示：
 ![flashconfig](./img/flashconfig.png)
 
-4、选择编译生成的nuttx文件路径(nuttx不带任何后缀，是一个elf文件)，按照图示步骤，将文件烧写至Flash中（若烧写无误，则下列绿色进度条会执行到底）。如下图所示：
+4、选择编译生成的nuttx.bin文件路径,按照图示步骤，将文件烧写至Flash中（若烧写无误，则下列绿色进度条会执行到底）。如下图所示：
 ![NXPBootUtility_2](./img/NXPBootUtility_2.png)
 
 ### 3.2 运行结果
