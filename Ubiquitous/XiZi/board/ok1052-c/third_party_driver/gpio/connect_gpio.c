@@ -412,7 +412,6 @@ static uint32 Imxrt1052PinConfigure(struct PinParam *param)
 
     struct PinIndex pin_index;
 
-    KPrintf("Imxrt1052PinConfigure\n");
     if (GetPin(&pin_index, param->pin) < 0) {
         return ERROR;
     }
@@ -420,7 +419,6 @@ static uint32 Imxrt1052PinConfigure(struct PinParam *param)
     switch(param->cmd)
     {
         case GPIO_CONFIG_MODE:
-            KPrintf("GpioConfigMode %u\n", param->pin);
             GpioConfigMode(param->mode, &pin_index, param->pin);
             break;
         case GPIO_IRQ_REGISTER:
@@ -583,6 +581,9 @@ static __inline void PinIrqHdr(uint32_t index_offset, uint8_t pin_start, GPIO_Ty
 
         if (isr_status & (1 << i)) {
             GPIO_PortClearInterruptFlags(gpio, (1 << i));
+
+            __DSB();
+
             pin = index_offset + i;
             if (pin_irq_hdr_tab[pin].hdr) {
                 pin_irq_hdr_tab[pin].hdr(pin_irq_hdr_tab[pin].args);
