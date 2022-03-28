@@ -630,6 +630,14 @@ config NSH_DISABLE_TEMPHS300X
 config NSH_DISABLE_HUMIHS300X
 	bool "Disable the humidity function of the sensor Hs300x."
 	default n
+
+config NSH_DISABLE_QS_FX
+	bool "Disable the winddirection function of the sensor QS-FX."
+	default n
+
+config NSH_DISABLE_QS_FS
+	bool "Disable the windspeed function of the sensor QS-FS."
+	default n
     
 config NSH_DISABLE_OPENZIGBEE
 	bool "Disable the open function of the zigebee."

@@ -47,6 +47,14 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
         CSRCS += temperature_hs300x.c
     endif
 
+    ifeq ($(CONFIG_APPLICATION_SENSOR_WINDDIRECTION_QS_FX), y)
+        CSRCS += winddirection_qs_fx.c
+    endif
+
+    ifeq ($(CONFIG_APPLICATION_SENSOR_WINDSPEED_QS_FS), y)
+        CSRCS += windspeed_qs_fs.c
+    endif
+
     include $(APPDIR)/Application.mk
 
 endif

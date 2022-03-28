@@ -34,5 +34,7 @@ void WindSpeedQsFs(void)
     printf("wind speed : %d.%d m/s\n", result/10, result%10);
     SensorQuantityClose(wind_speed);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, WindSpeedQsFs, WindSpeedQsFs, WindSpeedQsFs function);
+#endif
 

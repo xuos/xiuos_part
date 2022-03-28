@@ -1461,6 +1461,14 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
   int cmd_HumiHs300x(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
+#if defined(CONFIG_APPLICATION_SENSOR_WINDDIRECTION_QS_FX) && !defined(CONFIG_NSH_DISABLE_QS_FX)
+  int cmd_WindDirectionQsFx(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_APPLICATION_SENSOR_WINDSPEED_QS_FS) && !defined(CONFIG_NSH_DISABLE_QS_FS)
+  int cmd_WindSpeedQsFs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
 
 #if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_OPENZIGBEE)
   int cmd_openzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
