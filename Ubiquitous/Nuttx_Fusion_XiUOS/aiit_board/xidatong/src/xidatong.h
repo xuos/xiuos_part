@@ -119,6 +119,10 @@
 #define GPIO_MMCSD_EN   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
                          GPIO_PORT3 | GPIO_PIN2 | IOMUX_MMCSD_EN)
 
+/* USB OTG ID Pin： GPIO_AD_B1_01 */
+
+#define GPIO_USBOTG_ID  (GPIO_USB_OTG1_ID_2 | IOMUX_USBOTG_ID_DEFAULT)      /* GPIO_AD_B1_01 */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -196,6 +200,10 @@ void imxrt_autoled_initialize(void);
  ****************************************************************************/
 
 int imxrt_gpio_initialize(void);
+#endif
+
+#if defined(CONFIG_IMXRT_USBOTG) || defined(CONFIG_USBHOST)
+int imxrt_usbhost_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
