@@ -132,10 +132,10 @@ $ sudo apt install gcc-arm-none-eabi
 1.在VScode命令终端中执行以下命令，生成配置文件
 
 ```shell
-cd ./Ubiquitous/Nuttx/app_match_nuttx
+cd ./Ubiquitous/Nuttx_Fusion_XiUOS/app_match_nuttx
 source build.sh
 
-执行完毕会自动进入./Ubiquitous/Nuttx/nuttx下，继续执行
+执行完毕会自动进入./Ubiquitous/Nuttx_Fusion_XiUOS/nuttx下，继续执行
 
 sudo ./tools/configure.sh xidatong:nsh
 sudo make menuconfig

@@ -12,8 +12,8 @@ nuttx代码及apps代码以子仓的形式托管在xiuos\Ubiquitous\Nuttx下，a
 cd xiuos
 git submodule
 git submodule init
-git submodule update Ubiquitous/Nuttx/apps
-git submodule update Ubiquitous/Nuttx/nuttx
+git submodule update Ubiquitous/Nuttx_Fusion_XiUOS/apps
+git submodule update Ubiquitous/Nuttx_Fusion_XiUOS/nuttx
 ```
 
 执行完成后在Ubiquitous/Nuttx目录下，apps和nuttx的代码都被下载下来，当前的版本是nuttx-10.2.0版本。
@@ -199,7 +199,7 @@ CFLAGS := $(APPPATHS) $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCP
                                 └── stm32_serial.c
 ```
 
-(1)Nuttx/app_match_nuttx/apps/nshlib下修改，将应用编译成cmd形式，与上面HS300x处描述一致，参考上面即可
+(1)Nuttx_Fusion_XiUOS/app_match_nuttx/apps/nshlib下修改，将应用编译成cmd形式，与上面HS300x处描述一致，参考上面即可
 
 (2)/nuttx/arch/arm/src/stm32/stm32_serial.c，此处代码原本是会将所有打开的串口从0开始依次注册为ttyS1-ttySN，比较不方便，例如打开了USART1、USART3、USART5，USART3将会被注册为ttyS2，容易引起歧义，这边做的修改会将USARTN，注册为ttySN。
 

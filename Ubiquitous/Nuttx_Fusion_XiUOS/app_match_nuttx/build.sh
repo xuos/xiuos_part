@@ -7,8 +7,8 @@ export top=$current/../../..
 cd $top
 git submodule
 git submodule init
-git submodule update Ubiquitous/Nuttx/apps
-git submodule update Ubiquitous/Nuttx/nuttx
+git submodule update Ubiquitous/Nuttx_Fusion_XiUOS/apps
+git submodule update Ubiquitous/Nuttx_Fusion_XiUOS/nuttx
 cd $current
 
 chmod -R +x $top
