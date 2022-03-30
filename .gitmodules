@@ -4,12 +4,12 @@
 [submodule "Ubiquitous/RT_Thread/aiit_board/k210/kendryte-sdk/kendryte-sdk-source"]
 	path = Ubiquitous/RT_Thread/aiit_board/k210/kendryte-sdk/kendryte-sdk-source
 	url = https://code.gitlink.org.cn/chunyexixiaoyu/kendryte-sdk-source.git
-[submodule "Ubiquitous/Nuttx/apps"]
-	path = Ubiquitous/Nuttx/apps
-	url = https://gitlink.org.cn/wgzAIIT/incubator-nuttx-apps.git
-[submodule "Ubiquitous/Nuttx/nuttx"]
-	path = Ubiquitous/Nuttx/nuttx
-	url = https://gitlink.org.cn/wgzAIIT/incubator-nuttx.git
 [submodule "Ubiquitous/RT_Thread/aiit_board/aiit-riscv64-board/kendryte-sdk/kendryte-sdk-source"]
 	path = Ubiquitous/RT_Thread/aiit_board/aiit-riscv64-board/kendryte-sdk/kendryte-sdk-source
 	url = https://code.gitlink.org.cn/chunyexixiaoyu/kendryte-sdk-source.git
+[submodule "Ubiquitous/Nuttx_Fusion_XiUOS/apps"]
+	path = Ubiquitous/Nuttx_Fusion_XiUOS/apps
+	url = https://code.gitlink.org.cn/wgzAIIT/incubator-nuttx-apps.git
+[submodule "Ubiquitous/Nuttx_Fusion_XiUOS/nuttx"]
+	path = Ubiquitous/Nuttx_Fusion_XiUOS/nuttx
+	url = https://code.gitlink.org.cn/wgzAIIT/incubator-nuttx.git

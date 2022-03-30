@@ -161,7 +161,10 @@ make BOARD=ok1052-c
 2、ok1052-c开发板支持micro usb口烧写程序，打开NXP MCU Boot Utility后，选择好芯片类型为i.MXRT105x，开发板上电，使用usb线将开发板和PC连接，拨码开关设置为1 on 2 on 3 off 4 off，按下复位键K1后，若连接成功，可见Vendor ID和Product ID均有数字显示，点击reconnect，等待NXP MCU Boot Utility中红色显示变成蓝色显示，则表示已正确识别并连接到了开发板。如下图所示：
 ![NXPBootUtility_1](./img/NXPBootUtility_1.png)
 
-3、选择编译生成的XiZi_ok1052-c.elf文件路径，并选择.out(elf) from GCC ARM烧写选项，最后点击ALL-In-One Action即可烧写程序，若烧写无误，则下列绿色进度条会执行到底。如下图所示：
+3、同时需要匹配ok1052-c开发板所使用的Flash型号，点击Boot Device Configuration，在Use Typical Device中选择Winbond_W25QxxxJV，然后点击ok。如下图所示：
+![flashconfig](./img/flashconfig.png)
+
+4、选择编译生成的XiZi_ok1052-c.elf或bin文件路径，按照图示步骤，将文件烧写至Flash中（link.lds中已构造Flash Bootable image，如有修改Flash相关配置需求，可修改/xip目录内相关文件，无需NXPBootUtility再次构造），若烧写无误，则下列绿色进度条会执行到底。如下图所示：
 ![NXPBootUtility_2](./img/NXPBootUtility_2.png)
 
 ### 3.2 运行结果
