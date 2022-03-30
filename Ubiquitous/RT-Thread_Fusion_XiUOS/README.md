@@ -16,11 +16,11 @@ xiuos/Ubiquitous/Rt-thread
 
 ## 支持平台
 
-Rt-thread/aiit_board 目前主要支持两个平台：STM32F4 和 Kendryte K210。如果后续用户想自己添加相关的板级支持包在此目录添加即可。
+RT-Thread_Fusion_XiUOS/aiit_board 目前主要支持两个平台：STM32F4 和 Kendryte K210。如果后续用户想自己添加相关的板级支持包在此目录添加即可。
 
-Rt-thread/app_match_rt-thread  目前主要支持 WiFi 和 Camera，其他驱动复用 RT-Thread 的内容。如果rt-thread官方仓库驱动不满足用户使用要求，如果用户增加相关驱动可在此目录。
+RT-Thread_Fusion_XiUOS/app_match_rt-thread  目前主要支持 WiFi 和 Camera，其他驱动复用 RT-Thread 的内容。如果rt-thread官方仓库驱动不满足用户使用要求，如果用户增加相关驱动可在此目录。
 
-Rt-thread/rt-thread 使用 RT-Thread 作为系统基础设施，提供底层支持。
+RT-Thread_Fusion_XiUOS/rt-thread 使用 RT-Thread 作为系统基础设施，提供底层支持。
 
 ## 使用
 
@@ -30,10 +30,10 @@ Rt-thread/rt-thread 使用 RT-Thread 作为系统基础设施，提供底层支�
 # 下载代码
 # 进入xiuos目录下载更新子模块(包括RT-thread 和 K210 SDK（如果用到K210 需更新kendryte-sdk）)执行以下三条命令或者直接执行当前目录下的download.sh脚本命令
 git submodule init
-git submodule update Ubiquitous/RT_Thread/rt-thread
-git submodule update Ubiquitous/RT_Thread/aiit_board/k210/kendryte-sdk/kendryte-sdk-source
+git submodule update Ubiquitous/RT-Thread_Fusion_XiUOS/rt-thread
+git submodule update Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/k210/kendryte-sdk/kendryte-sdk-source
 
-# 进入 xiuos/Ubiquitous/Rt-thread/aiit_board/stm32f407_core 配置 Kconfig
+# 进入 xiuos/Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/stm32f407_core 配置 Kconfig
 scons --menuconfig
 # 编译
 scons
