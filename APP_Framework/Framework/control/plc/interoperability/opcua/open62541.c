@@ -17970,6 +17970,11 @@ UA_SecureChannel_close(UA_SecureChannel *channel) {
     /* Set the status to closed */
     channel->state = UA_SECURECHANNELSTATE_CLOSED;
 
+    if(channel->connection == 0)
+    {
+        ua_error("ua: [%s] conn null return!\n", __func__);
+        return;
+    }
     /* Detach from the connection and close the connection */
     if(channel->connection) {
         if(channel->connection->state != UA_CONNECTIONSTATE_CLOSED)
@@ -43658,6 +43663,7 @@ UA_Client_delete(UA_Client* client) {
     UA_Client_clear(client);
     UA_ClientConfig_clear(&client->config);
     UA_free(client);
+    client = NULL;
     ua_run_flag = 0;
 }
 
@@ -43978,7 +43984,7 @@ receiveResponse(UA_Client *client, void *response, const UA_DataType *responseTy
                                    "Receiving the response failed with StatusCode %s",
                                    UA_StatusCode_name(retval));
             ua_print("ua: [%s] state %d ret %d %#x\n", __func__, client->channel.state, retval, retval);
-            closeSecureChannel(client);
+//            closeSecureChannel(client);
             retval = UA_STATUSCODE_BADCONNECTIONCLOSED;
             break;
         }
@@ -44246,7 +44252,7 @@ UA_Client_run_iterate(UA_Client *client, UA_UInt32 timeout) {
        client->sessionState < UA_SESSIONSTATE_ACTIVATED) {
         retval = connectIterate(client, timeout);
         notifyClientState(client);
-        ua_print("lw: [%s] ret %d timeout %d state %d ch %d\n", __func__, retval, timeout,
+        ua_print("lw: [%s] ret %x timeout %d state %d ch %d\n", __func__, retval, timeout,
             client->sessionState, client->channel.state);
         return retval;
     }
@@ -70301,16 +70307,25 @@ UA_ServerConfig_setDefaultWithSecurityPolicies(UA_ServerConfig *conf,
 
 UA_Client * UA_Client_new() {
     UA_ClientConfig config;
+    UA_Client *ret = NULL;
 
     if(ua_run_flag)
+    {
         return NULL;
+    }
 
     memset(&config, 0, sizeof(UA_ClientConfig));
     config.logger.log = UA_Log_Stdout_log;
     config.logger.context = NULL;
     config.logger.clear = UA_Log_Stdout_clear;
-    ua_run_flag = 1;
-    return UA_Client_newWithConfig(&config);
+
+    ret = UA_Client_newWithConfig(&config);
+
+    if(ret)
+    {
+        ua_run_flag = 1;
+    }
+    return ret;
 }
 
 UA_StatusCode
@@ -71603,6 +71618,12 @@ typedef struct TCPClientConnection {
 
 static void
 ClientNetworkLayerTCP_close(UA_Connection *connection) {
+    if(connection == NULL)
+    {
+        ua_error("connection NULL!\n");
+        return;
+    }
+
     if(connection->state == UA_CONNECTIONSTATE_CLOSED)
         return;
 

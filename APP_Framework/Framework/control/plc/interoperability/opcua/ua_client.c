@@ -106,12 +106,12 @@ static void UaShowNodeValue(UA_Variant* val)
     else if(val->type == &UA_TYPES[UA_TYPES_FLOAT])
     {
         UA_Float* ptr = (UA_Float*)val->data;
-        ua_notice("%d (Float)\n", *ptr);
+        printf("%f (Float)\n", *ptr);
     }
     else if(val->type == &UA_TYPES[UA_TYPES_DOUBLE])
     {
         UA_Double* ptr = (UA_Double*)val->data;
-        ua_notice("%d (Double)\n", *ptr);
+        printf("%f (Double)\n", *ptr);
     }
     else if(val->type == &UA_TYPES[UA_TYPES_STRING])
     {
