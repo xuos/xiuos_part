@@ -210,6 +210,39 @@ menu "Onboard Peripheral Drivers"
     config BSP_USING_SDRAM
         bool "Enable SDRAM"
         default n
+    
+    menuconfig BSP_USING_ETH
+	bool "Enable Ethernet"
+	select RT_USING_NETDEV
+	default n
+	if BSP_USING_ETH
+		config BSP_USING_PHY
+            select RT_USING_PHY
+			bool "Enable ethernet phy"
+			default y
+
+	    if BSP_USING_PHY
+            config PHY_DEVICE_ADDRESS
+                int "Specify address of phy device"
+                default 0
+
+            config PHY_USING_8720A
+                bool "xidatong use LAN8720A phy"
+                default y
+
+            if PHY_USING_8720A
+                config PHY_RESET_PORT
+                    int "indicate port of reset"
+                    default 1
+
+                config PHY_RESET_PIN
+                    int "indicate pin of reset"
+                    default 3
+            endif
+
+        endif
+	endif
+
 endmenu
 
 
