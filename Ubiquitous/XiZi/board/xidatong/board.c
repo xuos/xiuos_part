@@ -77,6 +77,10 @@ extern int ExtSramInit(void);
 #endif
 #endif
 
+#ifdef BSP_USING_LWIP
+extern int ETH_BSP_Config();
+#endif
+
 void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength)
 {
     IOMUXC_SetPinConfig(IOMUXC_GPIO_SD_B0_00_USDHC1_CMD,
@@ -296,8 +300,10 @@ void InitBoardHardware()
     BOARD_InitPins();
     BOARD_BootClockRUN();
 
+#ifndef BSP_USING_LWIP
     NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
     SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
+#endif
 
 #ifdef BSP_USING_GPIO
     Imxrt1052HwGpioInit();
@@ -323,6 +329,10 @@ void InitBoardHardware()
         ExtSramInit();
     }
 #endif
+#endif
+
+#ifdef BSP_USING_LWIP
+    ETH_BSP_Config();
 #endif
 
 #ifdef BSP_USING_LPUART
