@@ -5,18 +5,18 @@
 ## 目录内容
 
 ```
-xiuos/Ubiquitous/Rt-thread
+xiuos/Ubiquitous/RT-Thread_Fusion_XiUOS
     ├── README.md    
     ├── aiit_board              板级支持包
         |──stm32f407_core
         |──k210
     ├── app_match_rt-thread     WiFi、Camera 等适配rt-thread的用户驱动
-    └── rt-thread               RT-Thread 代码
+    └── rt-thread               rt-thread 代码
 ```
 
 ## 支持平台
 
-RT-Thread_Fusion_XiUOS/aiit_board 目前主要支持两个平台：STM32F4 和 Kendryte K210。如果后续用户想自己添加相关的板级支持包在此目录添加即可。
+RT-Thread_Fusion_XiUOS/aiit_board 目前主要支持平台：stm32f407_core，k210,aiit-riscv64-board,stm32h743_openmv_h7plus,xidatong.
 
 RT-Thread_Fusion_XiUOS/app_match_rt-thread  目前主要支持 WiFi 和 Camera，其他驱动复用 RT-Thread 的内容。如果rt-thread官方仓库驱动不满足用户使用要求，如果用户增加相关驱动可在此目录。
 
