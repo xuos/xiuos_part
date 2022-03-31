@@ -30,11 +30,22 @@ struct PlcChannel plc_demo_ch;
 struct PlcDriver plc_demo_drv;
 struct PlcDevice plc_demo_dev;
 
+int plc_test_flag = 0;
+
 PlcCtrlParamType plc_ctrl_param;
 
 UA_NodeId test_nodeid = {4, UA_NODEIDTYPE_NUMERIC, 5};
 
 /******************************************************************************/
+
+void PlcDelay(int sec)
+{
+    volatile uint32_t i = 0;
+    for (i = 0; i < 100000000 * sec; ++i)
+    {
+        __asm("NOP"); /* delay */
+    }
+}
 
 // get NodeId from str
 void PlcGetTestNodeId(char *str, UA_NodeId *id)
@@ -149,7 +160,7 @@ void PlcReadUATask(void* arg)
     ops->close(&plc_demo_dev);
 }
 
-void PlcReadTest(int argc, char* argv[])
+void PlcReadTestShell(int argc, char* argv[])
 {
     static char node_str[UA_NODE_LEN];
     memset(node_str, 0, sizeof(node_str));
@@ -163,7 +174,7 @@ void PlcReadTest(int argc, char* argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 PlcRead, PlcReadTest, Read PLC);
+                 PlcRead, PlcReadTestShell, Read PLC);
 
 void PlcWriteUATask(void* arg)
 {
@@ -192,7 +203,7 @@ void PlcWriteUATask(void* arg)
     ops->close(&plc_demo_dev);
 }
 
-void PlcWriteTest(int argc, char* argv[])
+void PlcWriteTestShell(int argc, char* argv[])
 {
     static char node_str[UA_NODE_LEN];
     static char val_param[UA_NODE_LEN];
@@ -214,32 +225,38 @@ void PlcWriteTest(int argc, char* argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 PlcWrite, PlcWriteTest, Read PLC);
+                 PlcWrite, PlcWriteTestShell, Read PLC);
 
 // test motor
-// 清零
-//PlcWrite n4,2 0b
-//PlcWrite n4,3 0b
-//PlcWrite n4,4 0b
-//PlcWrite n4,5 0b
+// clear parameter
+// PlcWrite n4,2 0b
+// PlcWrite n4,3 0b
+// PlcWrite n4,4 0b
+// PlcWrite n4,5 0b
 //
-// 使能
-//PlcWrite n4,2 1b
+// enable
+// PlcWrite n4,2 1b
 //
-// 设转速
-//PlcWrite n4,7 50
+// set rotate speed
+// PlcWrite n4,3 50
 //
-// 正转
-//PlcWrite n4,4 1b
+// positive turn
+// PlcWrite n4,4 1b
 //
-// 反转
-//PlcWrite n4,5 1b
+// reversal turn
+// PlcWrite n4,5 1b
 
+static int plc_test_speed = 50;
+static int plc_test_dir = 1; // direction positive: 1 reversal: 0
 
 void PlcMotorTestTask(void* arg)
 {
-    char *test_target[] = {"n4,2", "n4,3", "n4,4", "n4,5"};
-    char *test_cmd[] = {"1b", "50", "1b", "1b"};
+    //support node id
+    char *test_nodeid[] = {"n4,2", "n4,3", "n4,4", "n4,5", "n4,7"};
+    // enable -> speed -> positive dir or inversal dir -> stop -> enable
+    char test_sort[] = {0, 4, 2, 1, 0};
+    char test_cmd[][4] = {"1b", "50", "1b", "1b", "0b"};
+    char *test_notice[] = {"Enable Motor", "Set Speed", "Set Forward", "Set Reverse", "Stop Motor"};
 
     int ret = 0;
     struct PlcOps* ops = NULL;
@@ -258,37 +275,80 @@ void PlcMotorTestTask(void* arg)
 
     UaParamType* ua_ptr = plc_demo_dev.priv_data;
 
-    for(int i = 0; i < 4; i++)
+    // initialize step
+    for(int i = 0; i < 5; i++)
     {
-        UA_NodeId id;
-        PlcGetTestNodeId(test_target[i], &id);
-        memcpy(&ua_ptr->ua_id, &id, sizeof(id));
+        plc_print("###\n### Clear %s\n###\n", test_notice[i]);
+        PlcGetTestNodeId(test_nodeid[i], &ua_ptr->ua_id);
         ret = ops->write(&plc_demo_dev, "0b", PLC_BUF_SIZE);
         if(EOK != ret)
         {
             plc_print("plc: [%s] %d write failed\n", __func__, __LINE__);
         }
+        PlcDelay(1);
     }
 
-    for(int i = 0; i < 4; i++)
+    if(plc_test_speed != 50)
     {
-        UA_NodeId id;
-        PlcGetTestNodeId(test_target[i], &id);
-        memcpy(&ua_ptr->ua_id, &id, sizeof(id));
+        snprintf(test_cmd[1], 4, "%d", plc_test_speed);
+    }
+
+    if(plc_test_dir == 0) // if not postive, next running
+        test_sort[2] = 3;
+
+    for(int i = 0; i < sizeof(test_sort)/sizeof(test_sort[0]); i++)
+    {
+        PlcGetTestNodeId(test_nodeid[test_sort[i]], &ua_ptr->ua_id);
+        plc_print("###\n### %s\n###\n", test_notice[i]);
         ret = ops->write(&plc_demo_dev, test_cmd[i], PLC_BUF_SIZE);
         if(EOK != ret)
         {
             plc_print("plc: [%s] %d write failed\n", __func__, __LINE__);
         }
+        PlcDelay(1);
+        if(i == 2) // postive
+        {
+            PlcDelay(10);
+        }
     }
     ops->close(&plc_demo_dev);
+    plc_test_flag = 0;
 }
 
-void PlcMotorTest(int argc, char* argv[])
+// get parameter from
+void PlcGetMotorParam(char *str)
 {
+    static char node_str[UA_NODE_LEN];
+    memset(node_str, 0, sizeof(node_str));
+
+    plc_print("plc: arg %s\n", str);
+
+    sscanf(str, "speed=%d", &plc_test_speed);
+    sscanf(str, "dir=%d", &plc_test_dir);
+    plc_print("speed is %d\n", plc_test_speed);
+    plc_print("dir is %d\n", plc_test_dir);
+}
+
+void PlcMotorTestShell(int argc, char* argv[])
+{
+    if(plc_test_flag)
+    {
+        plc_print("PLC Motor testing!\n");
+        return;
+    }
+    plc_test_flag = 1;
+
+    if(argc > 1)
+    {
+        for(int i = 0; i < argc; i++)
+        {
+            PlcGetMotorParam(argv[i]);
+        }
+    }
+
     sys_thread_new("plc motor", PlcMotorTestTask, NULL, PLC_STACK_SIZE, PLC_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 PlcMotorTest, PlcMotorTest, Run motor);
+                 PlcMotorTest, PlcMotorTestShell, Run motor);
 

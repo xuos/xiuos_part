@@ -23,6 +23,18 @@
  * @date 2021.12.15
  */
 
+/*************************************************
+File name: open62541.c
+Description: Support OPCUA protocol
+Others: take https://github.com/open62541/open62541.git
+History:
+1. Date: 2021-12-15
+Author: AIIT XUOS Lab
+Modification:
+1. added debug
+2. fixed bug to free twice when receiveResponse timeout
+*************************************************/
+
 #ifndef UA_DYNAMIC_LINKING_EXPORT
 # define UA_DYNAMIC_LINKING_EXPORT
 # define MDNSD_DYNAMIC_LINKING

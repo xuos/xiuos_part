@@ -21,7 +21,6 @@
 #include <list.h>
 #include <transform.h>
 #include "board.h"
-#include <lwip/altcp.h>
 #include "open62541.h"
 #include "ua_api.h"
 
