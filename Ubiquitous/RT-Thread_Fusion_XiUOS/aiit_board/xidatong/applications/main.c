@@ -32,7 +32,7 @@ int main(void)
 }
 
 #ifdef BSP_USING_SDRAM
-static void sram_test2(void)
+static void sdram_test2(void)
 {
     char *p =NULL;
 	p = rt_malloc(1024*1024*8);
@@ -46,5 +46,5 @@ static void sram_test2(void)
 	}
 	rt_free(p);
 }
-MSH_CMD_EXPORT(sram_test2, sram test2);
+MSH_CMD_EXPORT(sdram_test2, sdram test2);
 #endif
