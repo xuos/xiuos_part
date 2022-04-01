@@ -702,8 +702,8 @@ static inline void imxrt_lpspi_master_set_delays(
   uint32_t clock_div_prescaler;
   uint32_t additional_scaler;
 
-  if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) &
-       CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) != 0)
+  if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB2) &
+       CCM_ANALOG_PLL_USB2_DIV_SELECT_MASK) != 0)
     {
       pll3_div = 22;
     }
@@ -915,8 +915,8 @@ static uint32_t imxrt_lpspi_setfrequency(FAR struct spi_dev_s *dev,
                                         LPSPI_CR_MEN, 0);
         }
 
-      if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) &
-           CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) != 0)
+      if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB2) &
+           CCM_ANALOG_PLL_USB2_DIV_SELECT_MASK) != 0)
         {
           pll3_div = 22;
         }

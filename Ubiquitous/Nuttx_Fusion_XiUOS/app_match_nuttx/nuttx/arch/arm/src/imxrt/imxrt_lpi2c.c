@@ -1054,8 +1054,8 @@ static void imxrt_lpi2c_setclock(FAR struct imxrt_lpi2c_priv_s *priv,
             }
           else
             {
-              if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) &
-                   CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) != 0)
+              if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB2) &
+                   CCM_ANALOG_PLL_USB2_DIV_SELECT_MASK) != 0)
                 {
                   pll3_div = 22;
                 }

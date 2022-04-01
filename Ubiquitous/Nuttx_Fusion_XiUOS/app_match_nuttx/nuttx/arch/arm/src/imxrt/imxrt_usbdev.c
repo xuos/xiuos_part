@@ -2879,7 +2879,7 @@ void arm_usbinitialize(void)
 
   /* Soft reset PHY and enable clock */
 
-  putreg32(USBPHY_CTRL_SFTRST | USBPHY_CTRL_CLKGATE, IMXRT_USBPHY1_CTRL_CLR);
+  putreg32(USBPHY_CTRL_SFTRST | USBPHY_CTRL_CLKGATE, IMXRT_USBPHY2_CTRL_CLR);
 
   /* Disconnect device */
 
@@ -2898,7 +2898,7 @@ void arm_usbinitialize(void)
    * CCM_ANALOG_USBPHYx_PLL_480_CTRLn.
    */
 
-  imxrt_putreg(0, IMXRT_USBPHY1_PWD);
+  imxrt_putreg(0, IMXRT_USBPHY2_PWD);
 
   /* Program the controller to be the USB device controller */
 
@@ -2907,8 +2907,8 @@ void arm_usbinitialize(void)
 
   /* Attach USB controller interrupt handler */
 
-  irq_attach(IMXRT_IRQ_USBOTG1, imxrt_usbinterrupt, NULL);
-  up_enable_irq(IMXRT_IRQ_USBOTG1);
+  irq_attach(IMXRT_IRQ_USBOTG2, imxrt_usbinterrupt, NULL);
+  up_enable_irq(IMXRT_IRQ_USBOTG2);
 
   leave_critical_section(flags);
 
@@ -2945,8 +2945,8 @@ void arm_usbuninitialize(void)
 
   /* Disable and detach IRQs */
 
-  up_disable_irq(IMXRT_IRQ_USBOTG1);
-  irq_detach(IMXRT_IRQ_USBOTG1);
+  up_disable_irq(IMXRT_IRQ_USBOTG2);
+  irq_detach(IMXRT_IRQ_USBOTG2);
 
   /* Reset the controller */
 
@@ -2958,7 +2958,7 @@ void arm_usbuninitialize(void)
 
   /* Power down the PHY */
 
-  imxrt_putreg(0xffffffff, IMXRT_USBPHY1_PWD);
+  imxrt_putreg(0xffffffff, IMXRT_USBPHY2_PWD);
 
   /* Stop clock
    * NOTE: This will interfere with USB OTG 2 and should probably be removed
@@ -3016,7 +3016,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
     {
       /* Enable USB controller interrupts */
 
-      up_enable_irq(IMXRT_IRQ_USBOTG1);
+      up_enable_irq(IMXRT_IRQ_USBOTG2);
     }
 
   return ret;
@@ -3051,7 +3051,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   /* Disable USB controller interrupts */
 
-  up_disable_irq(IMXRT_IRQ_USBOTG1);
+  up_disable_irq(IMXRT_IRQ_USBOTG2);
 
   /* Unhook the driver */
 

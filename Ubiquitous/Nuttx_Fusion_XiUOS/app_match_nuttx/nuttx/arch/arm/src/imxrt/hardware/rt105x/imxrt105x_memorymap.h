@@ -232,7 +232,7 @@
                                /* 0x402d4000     16KB Reserved */
 #define IMXRT_ENET_BASE           0x402d8000  /* 16KB ENET */
 #define IMXRT_USBPL301_BASE       0x402dc000  /* 16KB USB(PL301) */
-#define IMXRT_USB_BASE            0x402e0000  /* 16KB USB(USB) */
+#define IMXRT_USB_BASE            0x402e0200  /* 16KB USB(USB) */
 
                                /* 0x402e4000     16KB Reserved */
 

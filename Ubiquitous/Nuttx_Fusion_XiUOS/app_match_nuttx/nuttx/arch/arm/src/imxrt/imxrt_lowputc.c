@@ -386,8 +386,8 @@ int imxrt_lpuart_configure(uint32_t base,
     }
   else
     {
-      if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) &
-           CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) != 0)
+      if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB2) &
+           CCM_ANALOG_PLL_USB2_DIV_SELECT_MASK) != 0)
         {
           pll3_div = 22;
         }

@@ -5363,10 +5363,10 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   /* Interrupt Configuration ************************************************/
 
-  ret = irq_attach(IMXRT_IRQ_USBOTG1, imxrt_ehci_interrupt, NULL);
+  ret = irq_attach(IMXRT_IRQ_USBOTG2, imxrt_ehci_interrupt, NULL);
   if (ret != 0)
     {
-      usbhost_trace1(EHCI_TRACE1_IRQATTACH_FAILED, IMXRT_IRQ_USBOTG1);
+      usbhost_trace1(EHCI_TRACE1_IRQATTACH_FAILED, IMXRT_IRQ_USBOTG2);
       return NULL;
     }
 
@@ -5378,7 +5378,7 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   /* Enable interrupts at the interrupt controller */
 
-  up_enable_irq(IMXRT_IRQ_USBOTG1);
+  up_enable_irq(IMXRT_IRQ_USBOTG2);
 
   /* Drive Vbus +5V (the smoke test) */
 

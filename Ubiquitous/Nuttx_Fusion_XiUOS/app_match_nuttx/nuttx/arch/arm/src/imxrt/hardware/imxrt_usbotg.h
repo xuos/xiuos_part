@@ -117,7 +117,9 @@
 /* USB Non-core memory map & register definition */
 
 #define IMXRT_USBNC_USB_OTG1_CTRL_OFFSET        0x0800 /* OTG1 Control Register */
+#define IMXRT_USBNC_USB_OTG2_CTRL_OFFSET        0x0800 /* OTG2 Control Register */
 #define IMXRT_USBNC_USB_OTG1_PHY_CTRL_0_OFFSET  0x0818 /* OTG1 Phy Control Register */
+#define IMXRT_USBNC_USB_OTG2_PHY_CTRL_0_OFFSET  0x0818 /* OTG2 Phy Control Register */
 
 /* USBOTG register (virtual) addresses **************************************/
 
@@ -200,6 +202,9 @@
 
 #define IMXRT_USBNC_USB_OTG1_CTRL            (IMXRT_USB_BASE + IMXRT_USBNC_USB_OTG1_CTRL_OFFSET)
 #define IMXRT_USBNC_USB_OTG1_PHY_CTRL_0      (IMXRT_USB_BASE + IMXRT_USBNC_USB_OTG1_PHY_CTRL_0_OFFSET)
+
+#define IMXRT_USBNC_USB_OTG2_CTRL            (IMXRT_USB_BASE + IMXRT_USBNC_USB_OTG2_CTRL_OFFSET)
+#define IMXRT_USBNC_USB_OTG2_PHY_CTRL_0      (IMXRT_USB_BASE + IMXRT_USBNC_USB_OTG2_PHY_CTRL_0_OFFSET)
 
 /* USBOTG register bit definitions ******************************************/
 
