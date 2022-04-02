@@ -32,7 +32,7 @@
 #endif
 #endif
 
-#define LED0_PIN    GET_PIN(F, 9)
+#define LED0_PIN    GET_PIN(G, 15)
 extern int FrameworkInit();
 int main(void)
 {
