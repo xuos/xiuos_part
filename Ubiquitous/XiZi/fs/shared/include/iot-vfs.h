@@ -24,6 +24,9 @@ enum FilesystemType
     FSTYPE_FATFS = 0,
     FSTYPE_IOTDEVICEFILE,
     FSTYPE_CH376,
+#ifdef FS_LWEXT4
+    FSTYPE_LWEXT4,
+#endif
     FSTYPE_END,
 };
 

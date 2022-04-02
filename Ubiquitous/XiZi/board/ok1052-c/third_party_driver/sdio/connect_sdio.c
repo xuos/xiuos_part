@@ -261,6 +261,19 @@ static uint32 SdioWrite(void *dev, struct BusBlockWriteParam *write_param)
     return write_param->size;
 }
 
+static int SdioControl(struct HardwareDev *dev, struct HalDevBlockParam *block_param)
+{
+    NULL_PARAM_CHECK(dev);
+
+    if (OPER_BLK_GETGEOME == block_param->cmd) {
+        block_param->dev_block.size_perbank = g_sd.blockSize;
+        block_param->dev_block.block_size = g_sd.blockSize;
+        block_param->dev_block.bank_num = g_sd.blockCount;
+    }
+
+    return EOK;
+}
+
 static struct SdioDevDone dev_done =
 {
     SdioOpen,
@@ -352,6 +365,7 @@ int Imxrt1052HwSdioInit(void)
     }
 
     sdio_dev.dev_done = &dev_done;
+    sdio_dev.haldev.dev_block_control = SdioControl;
     ret = SdioDeviceRegister(&sdio_dev, SDIO_DEVICE_NAME);
     if (ret != EOK) {
         KPrintf("Sdio device register error %d\n", ret);
