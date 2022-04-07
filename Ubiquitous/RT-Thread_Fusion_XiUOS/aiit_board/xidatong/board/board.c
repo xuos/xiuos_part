@@ -950,6 +950,104 @@ void imxrt_enet_pins_init(void)
 }
 
 #endif
+
+#ifdef RT_USING_SDIO
+void imxrt_sdio_pins_init(void)
+{
+    IOMUXC_SetPinMux(
+      IOMUXC_GPIO_B1_14_USDHC1_VSELECT,       /* GPIO_B1_14 is configured as USDHC1_VSELECT */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+    IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B0_00_USDHC1_CMD,        /* GPIO_SD_B0_00 is configured as USDHC1_CMD */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+    IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B0_01_USDHC1_CLK,        /* GPIO_SD_B0_01 is configured as USDHC1_CLK */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+     IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B0_02_USDHC1_DATA0,      /* GPIO_SD_B0_02 is configured as USDHC1_DATA0 */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+     IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B0_03_USDHC1_DATA1,      /* GPIO_SD_B0_03 is configured as USDHC1_DATA1 */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+    IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B0_04_USDHC1_DATA2,      /* GPIO_SD_B0_04 is configured as USDHC1_DATA2 */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+    IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B0_05_USDHC1_DATA3,      /* GPIO_SD_B0_05 is configured as USDHC1_DATA3 */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+    IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_B1_14_USDHC1_VSELECT,       /* GPIO_B1_14 PAD functional properties : */
+      0x0170A1u);                             /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: R0/4
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Disabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Pull
+                                                 Pull Up / Down Config. Field: 47K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Enabled */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B0_00_USDHC1_CMD,        /* GPIO_SD_B0_00 PAD functional properties : */
+      0x017089u);                             /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: R0(150 Ohm @ 3.3V, 260 Ohm@1.8V)
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Disabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Pull
+                                                 Pull Up / Down Config. Field: 47K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Enabled */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B0_01_USDHC1_CLK,        /* GPIO_SD_B0_01 PAD functional properties : */
+      0x014089u);                             /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: R0(150 Ohm @ 3.3V, 260 Ohm@1.8V)
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Disabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Disabled
+                                                 Pull / Keep Select Field: Keeper
+                                                 Pull Up / Down Config. Field: 47K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Enabled */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B0_02_USDHC1_DATA0,      /* GPIO_SD_B0_02 PAD functional properties : */
+      0x017089u);                             /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: R0(150 Ohm @ 3.3V, 260 Ohm@1.8V)
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Disabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Pull
+                                                 Pull Up / Down Config. Field: 47K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Enabled */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B0_03_USDHC1_DATA1,      /* GPIO_SD_B0_03 PAD functional properties : */
+      0x017089u);                             /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: R0(150 Ohm @ 3.3V, 260 Ohm@1.8V)
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Disabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Pull
+                                                 Pull Up / Down Config. Field: 47K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Enabled */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B0_04_USDHC1_DATA2,      /* GPIO_SD_B0_04 PAD functional properties : */
+      0x017089u);                             /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: R0(150 Ohm @ 3.3V, 260 Ohm@1.8V)
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Disabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Pull
+                                                 Pull Up / Down Config. Field: 47K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Enabled */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B0_05_USDHC1_DATA3,      /* GPIO_SD_B0_05 PAD functional properties : */
+      0x017089u);                             /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: R0(150 Ohm @ 3.3V, 260 Ohm@1.8V)
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Disabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Pull
+                                                 Pull Up / Down Config. Field: 47K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Enabled */
+
+}
+#endif
 void rt_hw_board_init()
 {
     BOARD_ConfigMPU();
@@ -972,6 +1070,10 @@ void rt_hw_board_init()
 
 #ifdef BSP_USING_DMA
     imxrt_dma_init();
+#endif
+
+#ifdef RT_USING_SDIO
+    imxrt_sdio_pins_init();
 #endif
 
 #ifdef RT_USING_HEAP
