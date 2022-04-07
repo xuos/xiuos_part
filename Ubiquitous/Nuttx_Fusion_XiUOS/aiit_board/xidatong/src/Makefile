@@ -70,4 +70,8 @@ ifeq ($(CONFIG_USBHOST),y)
 CSRCS += imxrt_usbhost.c
 endif
 
+ifeq ($(CONFIG_XIDATONG_SDHC_AUTOMOUNT),y)
+CSRCS += imxrt_sdhc_automount.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

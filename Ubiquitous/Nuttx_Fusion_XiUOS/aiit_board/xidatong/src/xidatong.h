@@ -41,9 +41,13 @@
 
 #include <arch/irq.h>
 #include <nuttx/irq.h>
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
 
 #include "imxrt_gpio.h"
 #include "imxrt_iomuxc.h"
+#include "imxrt_usdhc.h"
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -204,6 +208,15 @@ int imxrt_gpio_initialize(void);
 
 #if defined(CONFIG_IMXRT_USBOTG) || defined(CONFIG_USBHOST)
 int imxrt_usbhost_initialize(void);
+#endif
+
+#if defined(CONFIG_IMXRT_USBOTG) || defined(CONFIG_USBHOST)
+int imxrt_mmcsd_initialize(void);
+#endif
+
+#ifdef CONFIG_XIDATONG_SDHC_AUTOMOUNT
+int imxrt_sdhc_automount_event(void *arg);
+void imxrt_automount_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
