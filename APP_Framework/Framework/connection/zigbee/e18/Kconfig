@@ -18,6 +18,13 @@ endchoice
 
 
 if ADD_XIZI_FETURES
+        config ADAPTER_E18_MODEPIN
+                int "E18 MODE pin number"
+                default "61"
+
+        config ADAPTER_BC28_PIN_DRIVER
+                string "BC28 device pin driver path"
+                default "/dev/pin_dev"
 
         config ADAPTER_E18_DRIVER_EXTUART
                 bool "Using extra uart to support zigbee"

@@ -46,7 +46,7 @@ __attribute__((aligned(MEM_ALIGN_SIZE)))
 void RunningIntoLowPowerMode()
 {
 #ifdef ARCH_ARM 
-    __asm volatile("WFI");    
+    // __asm volatile("WFI");    
 #endif
 
 #ifdef ARCH_RISCV 

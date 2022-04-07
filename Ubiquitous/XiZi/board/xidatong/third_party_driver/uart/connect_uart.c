@@ -39,13 +39,12 @@ struct SerialHardwareDevice serial_device_1;
 
 void LPUART1_IRQHandler(int irqn, void *arg)
 {
-    x_base lock = 0;
-    // KPrintf("LPUART1_IRQHandler \n");
-    lock = DISABLE_INTERRUPT();
+
+    DisableIRQ(UART1_IRQn);
 
     UartIsr(&serial_bus_1, &serial_driver_1, &serial_device_1);
+     EnableIRQ(UART1_IRQn);
 
-    ENABLE_INTERRUPT(lock);
 }
 DECLARE_HW_IRQ(UART1_IRQn, LPUART1_IRQHandler, NONE);
 #endif
@@ -57,12 +56,12 @@ struct SerialHardwareDevice serial_device_2;
 
 void LPUART2_IRQHandler(int irqn, void *arg)
 {
-    x_base lock = 0;
-    lock = DISABLE_INTERRUPT();
+
+    DisableIRQ(UART2_IRQn);
 
     UartIsr(&serial_bus_2, &serial_driver_2, &serial_device_2);
+    EnableIRQ(UART2_IRQn);
 
-    ENABLE_INTERRUPT(lock);
 }
 DECLARE_HW_IRQ(UART2_IRQn, LPUART2_IRQHandler, NONE);
 #endif
