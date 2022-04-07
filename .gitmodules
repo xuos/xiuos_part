@@ -1,15 +1,15 @@
-[submodule "Ubiquitous/RT_Thread/rt-thread"]
-	path = Ubiquitous/RT_Thread/rt-thread
+[submodule "Ubiquitous/RT-Thread_Fusion_XiUOS/rt-thread"]
+	path = Ubiquitous/RT-Thread_Fusion_XiUOS/rt-thread
 	url = https://code.gitlink.org.cn/chunyexixiaoyu/rt-thread.git
-[submodule "Ubiquitous/RT_Thread/aiit_board/k210/kendryte-sdk/kendryte-sdk-source"]
-	path = Ubiquitous/RT_Thread/aiit_board/k210/kendryte-sdk/kendryte-sdk-source
+[submodule "Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/k210/kendryte-sdk/kendryte-sdk-source"]
+	path = Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/k210/kendryte-sdk/kendryte-sdk-source
 	url = https://code.gitlink.org.cn/chunyexixiaoyu/kendryte-sdk-source.git
-[submodule "Ubiquitous/RT_Thread/aiit_board/aiit-riscv64-board/kendryte-sdk/kendryte-sdk-source"]
-	path = Ubiquitous/RT_Thread/aiit_board/aiit-riscv64-board/kendryte-sdk/kendryte-sdk-source
+[submodule "Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/aiit-riscv64-board/kendryte-sdk/kendryte-sdk-source"]
+	path = Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/aiit-riscv64-board/kendryte-sdk/kendryte-sdk-source
 	url = https://code.gitlink.org.cn/chunyexixiaoyu/kendryte-sdk-source.git
-[submodule "Ubiquitous/Nuttx/apps"]
-	path = Ubiquitous/Nuttx/apps
+[submodule "Ubiquitous/Nuttx_Fusion_XiUOS/apps"]
+	path = Ubiquitous/Nuttx_Fusion_XiUOS/apps
 	url = https://code.gitlink.org.cn/wgzAIIT/incubator-nuttx-apps.git
-[submodule "Ubiquitous/Nuttx/nuttx"]
-	path = Ubiquitous/Nuttx/nuttx
+[submodule "Ubiquitous/Nuttx_Fusion_XiUOS/nuttx"]
+	path = Ubiquitous/Nuttx_Fusion_XiUOS/nuttx
 	url = https://code.gitlink.org.cn/wgzAIIT/incubator-nuttx.git

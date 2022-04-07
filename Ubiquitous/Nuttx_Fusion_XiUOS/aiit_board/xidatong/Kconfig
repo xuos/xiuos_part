@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_XIDATONG
+
+choice
+	prompt "Boot Flash"
+	default XIDATONG_QSPI_FLASH
+
+config XIDATONG_HYPER_FLASH
+	bool "HYPER Flash"
+
+config XIDATONG_QSPI_FLASH
+	bool "QSPI Flash"
+
+endchoice # Boot Flash
+
+config XIDATONG_SDRAM
+	bool "Enable SDRAM"
+	default y
+	select IMXRT_SEMC_INIT_DONE
+	---help---
+		Activate DCD configuration of SDRAM
+
+endif
