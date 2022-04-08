@@ -191,7 +191,7 @@ int PrivTaskCreate(pthread_t *thread, const pthread_attr_t *attr,
 int PrivTaskStartup(pthread_t *thread);
 int PrivTaskDelete(pthread_t thread, int sig);
 void PrivTaskQuit(void *value_ptr);
-int PrivTaskDelay(int32_t ms);
+void PrivTaskDelay(int32_t ms);
 uint32_t PrivGetTickTime();
 
 /*********************driver*************************/

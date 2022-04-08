@@ -90,9 +90,9 @@ void PrivTaskQuit(void *value_ptr)
     pthread_exit(value_ptr);
 }
 
-int PrivTaskDelay(int32_t ms)
+void PrivTaskDelay(int32_t ms)
 {
-    return usleep(ms);
+    usleep(1000 * ms);
 }
 
 uint32_t PrivGetTickTime(){
