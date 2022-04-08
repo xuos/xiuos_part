@@ -90,12 +90,13 @@ void PrivTaskQuit(void *value_ptr)
     pthread_exit(value_ptr);
 }
 
-void PrivTaskDelay(int32_t ms)
+int PrivTaskDelay(int32_t ms)
 {
-    usleep(1000 * ms);
+    return usleep(1000 * ms);
 }
 
-uint32_t PrivGetTickTime(){
+uint32_t PrivGetTickTime(void)
+{
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
