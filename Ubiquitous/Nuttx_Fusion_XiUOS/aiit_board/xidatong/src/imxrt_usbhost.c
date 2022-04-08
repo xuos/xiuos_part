@@ -27,17 +27,21 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <sched.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <sys/mount.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kthread.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 #include <nuttx/usb/ehci.h>
+#include <nuttx/wdog.h>
 
 #include <imxrt_ehci.h>
 
@@ -73,6 +77,12 @@
 /* Retained device driver handle */
 
 static struct usbhost_connection_s *g_ehciconn;
+
+#ifdef CONFIG_XIDATONG_USB_AUTOMOUNT
+/* Unmount retry timer */
+
+static struct wdog_s g_umount_tmr[CONFIG_XIDATONG_USB_AUTOMOUNT_NUM_BLKDEV];
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -118,6 +128,148 @@ static int ehci_waiter(int argc, char *argv[])
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_XIDATONG_USB_AUTOMOUNT
+/****************************************************************************
+ * Name: usb_msc_connect
+ *
+ * Description:
+ *   Mount the USB mass storage device
+ *
+ ****************************************************************************/
+
+static void usb_msc_connect(FAR void *arg)
+{
+  int  index  = (int)arg;
+  char sdchar = 'a' + index;
+  int  ret;
+
+  char blkdev[32];
+  char mntpnt[32];
+
+  DEBUGASSERT(index >= 0 &&
+              index < CONFIG_XIDATONG_USB_AUTOMOUNT_NUM_BLKDEV);
+
+  wd_cancel(&g_umount_tmr[index]);
+
+  /* Resetup the event. */
+
+  usbhost_msc_notifier_setup(usb_msc_connect, WORK_USB_MSC_CONNECT,
+      sdchar, arg);
+
+  snprintf(blkdev, sizeof(blkdev), "%s%c",
+      CONFIG_XIDATONG_USB_AUTOMOUNT_BLKDEV, sdchar);
+  snprintf(mntpnt, sizeof(mntpnt), "%s%c",
+      CONFIG_XIDATONG_USB_AUTOMOUNT_MOUNTPOINT, sdchar);
+
+  /* Mount */
+
+  ret = nx_mount((FAR const char *)blkdev, (FAR const char *)mntpnt,
+      CONFIG_XIDATONG_USB_AUTOMOUNT_FSTYPE, 0, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Mount failed: %d\n", ret);
+    }
+}
+
+/****************************************************************************
+ * Name: unmount_retry_timeout
+ *
+ * Description:
+ *   A previous unmount failed because the volume was busy... busy meaning
+ *   the volume could not be unmounted because there are open references
+ *   the files or directories in the volume.  When this failure occurred,
+ *   the unmount logic setup a delay and this function is called as a result
+ *   of that delay timeout.
+ *
+ *   This function will attempt the unmount again.
+ *
+ * Input Parameters:
+ *   Standard wdog timeout parameters
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void unmount_retry_timeout(wdparm_t arg)
+{
+  int  index  = arg;
+  char sdchar = 'a' + index;
+
+  finfo("Timeout!\n");
+  DEBUGASSERT(index >= 0 &&
+              index < CONFIG_XIDATONG_USB_AUTOMOUNT_NUM_BLKDEV);
+
+  /* Resend the notification. */
+
+  usbhost_msc_notifier_signal(WORK_USB_MSC_DISCONNECT, sdchar);
+}
+
+/****************************************************************************
+ * Name: usb_msc_disconnect
+ *
+ * Description:
+ *   Unmount the USB mass storage device
+ *
+ ****************************************************************************/
+
+static void usb_msc_disconnect(FAR void *arg)
+{
+  int  index  = (int)arg;
+  char sdchar = 'a' + index;
+  int  ret;
+
+  char mntpnt[32];
+
+  DEBUGASSERT(index >= 0 &&
+              index < CONFIG_XIDATONG_USB_AUTOMOUNT_NUM_BLKDEV);
+
+  wd_cancel(&g_umount_tmr[index]);
+
+  /* Resetup the event. */
+
+  usbhost_msc_notifier_setup(usb_msc_disconnect, WORK_USB_MSC_DISCONNECT,
+      sdchar, arg);
+
+  snprintf(mntpnt, sizeof(mntpnt), "%s%c",
+      CONFIG_XIDATONG_USB_AUTOMOUNT_MOUNTPOINT, sdchar);
+
+  /* Unmount */
+
+  ret = nx_umount2((FAR const char *)mntpnt, MNT_FORCE);
+  if (ret < 0)
+    {
+      /* We expect the error to be EBUSY meaning that the volume could
+       * not be unmounted because there are currently reference via open
+       * files or directories.
+       */
+
+      if (ret == -EBUSY)
+        {
+          finfo("WARNING: Volume is busy, try again later\n");
+
+          /* Start a timer to retry the umount2 after a delay */
+
+          ret = wd_start(&g_umount_tmr[index],
+                          MSEC2TICK(CONFIG_XIDATONG_USB_AUTOMOUNT_UDELAY),
+                          unmount_retry_timeout, index);
+          if (ret < 0)
+            {
+              ferr("ERROR: wd_start failed: %d\n", ret);
+            }
+        }
+
+      /* Other errors are fatal */
+
+      else
+        {
+          ferr("ERROR: Unmount failed!\n");
+        }
+    }
+}
+#endif /* CONFIG_XIDATONG_USB_AUTOMOUNT */
+
+
 /****************************************************************************
  * Name: imxrt_usbhost_initialize
  *
@@ -133,6 +285,9 @@ int imxrt_usbhost_initialize(void)
 {
   pid_t pid;
   int ret;
+#ifdef CONFIG_XIDATONG_USB_AUTOMOUNT
+  int index;
+#endif
 
   imxrt_clockall_usboh3();
 
@@ -162,6 +317,20 @@ int imxrt_usbhost_initialize(void)
 
 #ifdef CONFIG_USBHOST_MSC
   /* Register the USB host Mass Storage Class */
+
+#ifdef CONFIG_XIDATONG_USB_AUTOMOUNT
+  /* Initialize the notifier listener for automount */
+
+  for (index = 0; index < CONFIG_XIDATONG_USB_AUTOMOUNT_NUM_BLKDEV; index++)
+    {
+      char sdchar = 'a' + index;
+
+      usbhost_msc_notifier_setup(usb_msc_connect,
+          WORK_USB_MSC_CONNECT, sdchar, (FAR void *)(intptr_t)index);
+      usbhost_msc_notifier_setup(usb_msc_disconnect,
+          WORK_USB_MSC_DISCONNECT, sdchar, (FAR void *)(intptr_t)index);
+    }
+#endif
 
   ret = usbhost_msc_initialize();
   if (ret != OK)
