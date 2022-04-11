@@ -67,20 +67,14 @@
 /* Test Pins ****************************************************************/
 
 #define BOARD_NGPIOIN   0 /* Amount of GPIO Input pins */
-#define BOARD_NGPIOOUT  4 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOOUT  2 /* Amount of GPIO Output pins */
 #define BOARD_NGPIOINT  0 /* Amount of GPIO Input w/ Interruption pins */
 
-#define GPIO_GOUT1      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
-                         GPIO_PORT1 | GPIO_PIN19)
-
-#define GPIO_GOUT2      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
-                         GPIO_PIN18 | GPIO_PORT1)
-
-#define GPIO_GOUT3      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
-                         GPIO_PIN10 | GPIO_PORT1)
-
-#define GPIO_GOUT4      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
+#define GPIO_E220_M0    (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
                          GPIO_PIN9 | GPIO_PORT1)
+
+#define GPIO_E220_M1    (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
+                         GPIO_PIN11 | GPIO_PORT1)
 
 /* Backlight */
 

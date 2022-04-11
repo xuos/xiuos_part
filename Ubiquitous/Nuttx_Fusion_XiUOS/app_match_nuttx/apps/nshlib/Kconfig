@@ -652,7 +652,7 @@ config NSH_DISABLE_RECVZIGBEE
 	default n
 
 config NSH_DISABLE_ADAPTER_LORATEST
-	bool "Disable  sx128 AdapterLoraTest."
+	bool "Disable sx1278 AdapterLoraTest."
 	default n
 
 config NSH_DISABLE_K210_FFT
