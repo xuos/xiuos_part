@@ -137,8 +137,9 @@ source build.sh
 
 执行完毕会自动进入./Ubiquitous/Nuttx_Fusion_XiUOS/nuttx下，继续执行
 
-sudo ./tools/configure.sh xidatong:nsh
-sudo make menuconfig
+./tools/configure.sh xidatong:nsh
+make menuconfig
+视情况而定，如果需要前面加sudo
 ```
 
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）
@@ -152,9 +153,9 @@ sudo make menuconfig
 3.继续执行以下命令，进行编译
 
 ```shell
-sudo make
+make
 或
-sudo make -j8
+make -j8
 ```
 
 make时加上V=1参数可以看到较为详细的编译信息，但是编译过程会比较慢。

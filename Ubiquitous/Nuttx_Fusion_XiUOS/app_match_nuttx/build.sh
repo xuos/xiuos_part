@@ -11,7 +11,6 @@ git submodule update Ubiquitous/Nuttx_Fusion_XiUOS/apps
 git submodule update Ubiquitous/Nuttx_Fusion_XiUOS/nuttx
 cd $current
 
-chmod -R +x $top
 find $top -name Kconfig -exec dos2unix -q {} \;
 
 cp -rf $current/nuttx $nuttx
