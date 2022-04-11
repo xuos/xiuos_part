@@ -44,7 +44,6 @@ menu "xidatong feature"
         config MOUNT_SDCARD
             bool "mount cd card"
             default n
-            select BSP_USING_SDIO
     endmenu
 
 endmenu

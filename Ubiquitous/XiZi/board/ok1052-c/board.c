@@ -41,30 +41,6 @@ extern int ExtSramInit(void);
 #endif
 #endif
 
-#if defined(FS_VFS) && defined(MOUNT_SDCARD)
-#include <iot-vfs.h>
-
-// SD card mount flag 1: OK
-int sd_mount_flag = 0;
-
-/**
- * @description: Mount SD card
- * @return 0
- */
-int MountSDCard(void)
-{
-    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, FSTYPE_FATFS, "/") == 0)
-    {
-        sd_mount_flag = 1;
-        KPrintf("sd card mount to '/'");
-    }
-    else
-        KPrintf("sd card mount to '/' failed!");
-
-    return 0;
-}
-#endif
-
 #if defined(SDK_I2C_BASED_COMPONENT_USED) && SDK_I2C_BASED_COMPONENT_USED
 #include "fsl_lpi2c.h"
 #endif /* SDK_I2C_BASED_COMPONENT_USED */
