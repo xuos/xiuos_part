@@ -40,7 +40,7 @@ static int PlcDeviceOpen(void *dev)
 
     if(plc_dev->net == PLC_IND_ENET_OPCUA)
     {
-        return ua_open(plc_dev->priv_data);
+        return UaDevOpen(plc_dev->priv_data);
     }
 
     return EOK;
@@ -54,7 +54,7 @@ static void PlcDeviceClose(void *dev)
 
     if(plc_dev->net == PLC_IND_ENET_OPCUA)
     {
-        ua_close(plc_dev->priv_data);
+        UaDevClose(plc_dev->priv_data);
     }
 }
 
@@ -67,7 +67,7 @@ static int PlcDeviceWrite(void *dev, const void *buf, size_t len)
 
     if(plc_dev->net == PLC_IND_ENET_OPCUA)
     {
-        ret = ua_write(plc_dev->priv_data, buf, len);
+        ret = UaDevWrite(plc_dev->priv_data, buf, len);
     }
 
     return ret;
@@ -83,7 +83,7 @@ static int PlcDeviceRead(void *dev, void *buf, size_t len)
 
     if(plc_dev->net == PLC_IND_ENET_OPCUA)
     {
-        ret = ua_read(plc_dev->priv_data, buf, len);
+        ret = UaDevRead(plc_dev->priv_data, buf, len);
     }
 
     return ret;

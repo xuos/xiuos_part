@@ -322,7 +322,7 @@ ChDevType ChannelFindDevice(struct Channel *ch, const char *device_name)
 * @param dev_recv_callback - callback function
 * @return successful:EOK,failed:ERROR
 */
-uint32 ChannelDevRecvCallback(struct ChDev *dev, int (*dev_recv_callback) (void *dev, x_size_t length))
+uint32 ChannelDevRecvCallback(struct ChDev *dev, int (*dev_recv_callback) (void *dev, size_t length))
 {
     CHECK_CH_PARAM(dev );
 

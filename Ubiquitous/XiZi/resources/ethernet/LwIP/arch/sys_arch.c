@@ -184,7 +184,7 @@ sys_sem_free(sys_sem_t *sem)
 
 int sys_sem_valid(sys_sem_t *sem)
 {
-  return (*sem >= SYS_SEM_NULL);
+  return (*sem > SYS_SEM_NULL);
 }
 
 void
@@ -212,7 +212,7 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
 
 
   if(KSemaphoreObtain(*sem, wait_time) == EOK)
-    return ((CurrentTicksGain()-start_tick)*MS_PER_SYSTICK_F407);
+    return ((CurrentTicksGain()-start_tick)*MS_PER_SYSTICK);
   else
     return SYS_ARCH_TIMEOUT;
 }
@@ -226,7 +226,7 @@ void sys_sem_signal(sys_sem_t *sem)
 err_t sys_mutex_new(sys_mutex_t *mutex)
 {
   *mutex = KMutexCreate();
-  if(*mutex >= 0)
+  if(*mutex > SYS_MRTEX_NULL)
     return ERR_OK;
   else
   {
@@ -344,7 +344,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *q, void **msg, u32_t timeout)
     wait_time = timeout;
 
   if(KMsgQueueRecv(*q, &(*msg), sizeof(void *), wait_time) == EOK)
-    return ((CurrentTicksGain()-start_tick)*MS_PER_SYSTICK_F407);
+    return ((CurrentTicksGain()-start_tick)*MS_PER_SYSTICK);
   else{
     *msg = NULL;
     return SYS_ARCH_TIMEOUT;
