@@ -12,7 +12,7 @@
 
 /**
 * @file plc_channel.h
-* @brief define ch driver framework function and common API
+* @brief define channel driver framework function and common API
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01
@@ -22,9 +22,6 @@
 #define __PLC_CHANNEL_H_
 
 #include "list.h"
-
-#define x_OffPos uint32
-#define x_size_t size_t
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,26 +94,18 @@ struct ChConfigInfo
 
 struct ChReadParam
 {
-    x_OffPos pos;
+    uint32 pos;
     void* buffer;
-    x_size_t size;
-    x_size_t read_length;
+    size_t size;
+    size_t read_length;
 };
 
 struct ChWriteParam
 {
-    x_OffPos pos;
+    uint32 pos;
     const void* buffer;
-    x_size_t size;
+    size_t size;
 };
-
-//struct ChHalDevBlockParam
-//{
-//    uint32 cmd;
-////tst by wly
-////    struct DeviceBlockArrange dev_block;
-////    struct DeviceBlockAddr *dev_addr;
-//};
 
 struct ChHalDevDone
 {
@@ -134,8 +123,7 @@ struct ChDev
 
     const struct ChHalDevDone *dev_done;
 
-    int (*dev_recv_callback) (void *dev, x_size_t length);
-//    int (*dev_block_control) (struct ChDev *dev, struct ChHalDevBlockParam *block_param);
+    int (*dev_recv_callback) (void *dev, size_t length);
 
     struct Channel *owner_ch;
     void *private_data;
@@ -220,7 +208,7 @@ ChDrvType ChannelFindDriver(struct Channel *ch, const char *driver_name);
 ChDevType ChannelFindDevice(struct Channel *ch, const char *device_name);
 
 /*Dev receive data callback function*/
-uint32 ChannelDevRecvCallback(struct ChDev *dev, int (*dev_recv_callback) (void *dev, x_size_t length));
+uint32 ChannelDevRecvCallback(struct ChDev *dev, int (*dev_recv_callback) (void *dev, size_t length));
 
 /*Open the device of the channel*/
 uint32 ChannelDevOpen(struct ChDev *dev);
