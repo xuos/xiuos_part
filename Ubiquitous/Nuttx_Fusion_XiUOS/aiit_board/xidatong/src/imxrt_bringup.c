@@ -119,7 +119,7 @@ static int nsh_sdmmc_initialize(void)
                  ret);
         }
 
-#ifdef CONFIG_XIDATONG_SDHC_AUTOMOUNT
+#ifdef CONFIG_XIDATONG_SDIO_AUTOMOUNT
       imxrt_automount_initialize();
       imxrt_usdhc_set_sdio_card_isr(sdmmc, imxrt_sdhc_automount_event, NULL);
 #else

@@ -208,7 +208,7 @@ int imxrt_usbhost_initialize(void);
 int imxrt_mmcsd_initialize(void);
 #endif
 
-#ifdef CONFIG_XIDATONG_SDHC_AUTOMOUNT
+#ifdef CONFIG_XIDATONG_SDIO_AUTOMOUNT
 int imxrt_sdhc_automount_event(void *arg);
 void imxrt_automount_initialize(void);
 #endif
