@@ -43,10 +43,6 @@
 #include <imxrt_lpi2c.h>
 #include <imxrt_lpspi.h>
 
-#ifdef CONFIG_IMXRT_USDHC
-#  include "imxrt_usdhc.h"
-#endif
-
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
 #endif
@@ -92,45 +88,6 @@ static void imxrt_i2c_register(int bus)
         }
     }
 }
-#endif
-
-#ifdef CONFIG_IMXRT_USDHC
-static int nsh_sdmmc_initialize(void)
-{
-  struct sdio_dev_s *sdmmc;
-  int ret = 0;
-
-  /* Get an instance of the SDIO interface */
-
-  sdmmc = imxrt_usdhc_initialize(0);
-  if (!sdmmc)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SD/MMC\n");
-    }
-  else
-    {
-      /* Bind the SDIO interface to the MMC/SD driver */
-
-      ret = mmcsd_slotinitialize(0, sdmmc);
-      if (ret != OK)
-        {
-          syslog(LOG_ERR,
-                 "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
-                 ret);
-        }
-
-#ifdef CONFIG_XIDATONG_SDIO_AUTOMOUNT
-      imxrt_automount_initialize();
-      imxrt_usdhc_set_sdio_card_isr(sdmmc, imxrt_sdhc_automount_event, NULL);
-#else
-      imxrt_usdhc_set_sdio_card_isr(sdmmc, NULL, NULL);
-#endif
-    }
-
-  return OK;
-}
-#else
-#  define nsh_sdmmc_initialize() (OK)
 #endif
 
 /****************************************************************************
