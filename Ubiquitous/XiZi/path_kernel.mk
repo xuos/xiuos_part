@@ -305,7 +305,7 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/zigbee 
 endif
 
 ifeq ($(CONFIG_ADAPTER_HFA21_ETHERCAT), y)
-KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/ethercat #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_ethernet/ethercat #
 endif
 
 ifeq ($(CONFIG_SUPPORT_KNOWING_FRAMEWORK), y)

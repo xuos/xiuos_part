@@ -62,7 +62,7 @@
 
 /* USER CODE END 0 */
 #define SYS_MBOX_NULL  -1
-#define SYS_SEM_NULL   0
+#define SYS_SEM_NULL   -1
 #define SYS_MRTEX_NULL SYS_SEM_NULL
 
 typedef int32 sys_sem_t;
@@ -71,7 +71,7 @@ typedef int32 sys_mbox_t;
 typedef int32 sys_thread_t;
 typedef x_base sys_prot_t;
 
-#define MS_PER_SYSTICK_F407 (1000 / TICK_PER_SECOND)
+#define MS_PER_SYSTICK (1000 / TICK_PER_SECOND)
 
 //debug rtos with IRQ
 //#define FSL_RTOS_XIUOS

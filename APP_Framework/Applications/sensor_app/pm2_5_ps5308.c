@@ -11,7 +11,7 @@
 */
 
 /**
- * @file pm2_5_ps5308
+ * @file pm2_5_ps5308.c
  * @brief PS5308 PM2.5 example
  * @version 1.0
  * @author AIIT XUOS Lab

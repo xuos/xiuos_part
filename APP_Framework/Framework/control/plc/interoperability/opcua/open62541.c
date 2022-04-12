@@ -23,6 +23,19 @@
  * @date 2021.12.15
  */
 
+/*************************************************
+File name: open62541.c
+Description: Support OPCUA protocol
+Others: take https://github.com/open62541/open62541.git
+History:
+1. Date: 2021-12-15
+Author: AIIT XUOS Lab
+Modification:
+1. added debug information for locate
+2. avoid calling client NEW at same time
+3. fixed the bug of free twice when receiveResponse timeout
+*************************************************/
+
 #ifndef UA_DYNAMIC_LINKING_EXPORT
 # define UA_DYNAMIC_LINKING_EXPORT
 # define MDNSD_DYNAMIC_LINKING
@@ -35,6 +48,8 @@
 
 #include "open62541.h"
 #include "ua_api.h"
+
+int ua_run_flag = 0;
 
 #if LWIP_DNS
 
@@ -7482,10 +7497,6 @@ Array_encodeBinary(const void *src, size_t length, const UA_DataType *type, Ctx 
     }
     UA_assert(ret != UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED);
 
-    //tst by wly
-    ua_debug("ua: [%s] src %p len %d %d type %p <%d> <%d> %p ret %d\n", __func__,
-        src, length, signed_length, *type, type->typeKind, type->overlayable, ctx, ret);
-
     return ret;
 }
 
@@ -8330,23 +8341,8 @@ encodeBinaryStruct(const void *src, const UA_DataType *type, Ctx *ctx) {
 
         if(mt->typeKind > UA_DATATYPEKINDS)
         {
-            ua_debug("ua: [%s] %d type %d %p ptr %p failed\n", __func__, i, mt->typeKind, m->memberType, ptr);
             return ret;
         }
-
-        ua_debug("ua: [%s] >  %d < %d mt %p %d %d dep %d msg %p %p:<%x> <%d> isArry %d ret %d\n", __func__,
-            i,
-            type->membersSize,
-            mt,
-            mt->typeKind,
-            mt->memSize,
-            ctx->depth,
-            ptr,
-            src,
-            ((UA_TcpMessageHeader *)src)->messageTypeAndChunkType,
-            ((UA_TcpMessageHeader *)src)->messageSize,
-            m->isArray,
-            ret);
 
         /* Array. Buffer-exchange is done inside Array_encodeBinary if required. */
         if(m->isArray) {
@@ -8361,20 +8357,6 @@ encodeBinaryStruct(const void *src, const UA_DataType *type, Ctx *ctx) {
         /* Scalar */
         ret = encodeWithExchangeBuffer((const void*)ptr, mt, ctx);
         UA_assert(ret != UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED);
-
-        ua_debug("ua: [%s] >> %d < %d mt %p %d %d dep %d msg %p %p:<%x> <%d> isArry %d ret %d\n", __func__,
-            i,
-            type->membersSize,
-            mt,
-            mt->typeKind,
-            mt->memSize,
-            ctx->depth,
-            ptr,
-            src,
-            ((UA_TcpMessageHeader *)src)->messageTypeAndChunkType,
-            ((UA_TcpMessageHeader *)src)->messageSize,
-            m->isArray,
-            ret);
 
         ptr += mt->memSize;
     }
@@ -8614,34 +8596,8 @@ decodeBinaryStructure(void *dst, const UA_DataType *type, Ctx *ctx) {
 
         if(mt->typeKind >= UA_DATATYPEKINDS)
         {
-            ua_debug("ua: [%s] fail %d < %d mt %p %d %d dep %d msg %p %p:<%x> <%d>\n", __func__,
-                i,
-                membersSize,
-                mt,
-                mt->typeKind,
-                mt->memSize,
-                ctx->depth,
-                ptr,
-                dst,
-                ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
-                ((UA_TcpMessageHeader *)dst)->messageSize);
-
             return ret;
         }
-
-        ua_debug("ua: [%s] >  %d < %d mt %p %d %d dep %d msg %p %p:<%x> <%d> isArry %d ret %d\n", __func__,
-            i,
-            membersSize,
-            mt,
-            mt->typeKind,
-            mt->memSize,
-            ctx->depth,
-            ptr,
-            dst,
-            ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
-            ((UA_TcpMessageHeader *)dst)->messageSize,
-            m->isArray,
-            ret);
 
         /* Array */
         if(m->isArray) {
@@ -8649,32 +8605,13 @@ decodeBinaryStructure(void *dst, const UA_DataType *type, Ctx *ctx) {
             ptr += sizeof(size_t);
             ret = Array_decodeBinary((void *UA_RESTRICT *UA_RESTRICT)ptr, length, mt , ctx);
             ptr += sizeof(void*);
-            ua_debug("ua: [%s] %d ret %d ptr %p len %d\n", __func__, i, ret, ptr, length);
             continue;
         }
 
         /* Scalar */
         ret = decodeBinaryJumpTable[mt->typeKind]((void *UA_RESTRICT)ptr, mt, ctx);
         ptr += mt->memSize;
-
-        ua_debug("ua: [%s] >> %d < %d dep %d msg %p %p:<%x> <%d> ret %d\n", __func__,
-            i,
-            membersSize,
-            ctx->depth,
-            ptr,
-            dst,
-            ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
-            ((UA_TcpMessageHeader *)dst)->messageSize,
-            ret);
     }
-
-    ua_debug("ua: [%s] >>> dep %d msg %p %p:<%x> <%d> ret %d\n", __func__,
-        ctx->depth,
-        ptr,
-        dst,
-        ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
-        ((UA_TcpMessageHeader *)dst)->messageSize,
-        ret);
 
     ctx->depth--;
     return ret;
@@ -8818,16 +8755,7 @@ UA_decodeBinaryInternal(const UA_ByteString *src, size_t *offset,
     /* Decode */
     memset(dst, 0, type->memSize); /* Initialize the value */
 
-    ua_debug("ua: [%s] t %d mem %d len %d off %d pos %d end %d dst %p type %x size %x\n", __func__,
-        type->typeKind, type->memSize, src->length, *offset, *ctx.pos, *ctx.end,
-        dst, ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
-        ((UA_TcpMessageHeader *)dst)->messageSize);
-
     status ret = decodeBinaryJumpTable[type->typeKind](dst, type, &ctx);
-
-    ua_debug("ua: [%s] -> t %d dst %p type %x size %x ret %d\n", __func__,
-        type->typeKind, dst, ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
-        ((UA_TcpMessageHeader *)dst)->messageSize, ret);
 
     if(UA_LIKELY(ret == UA_STATUSCODE_GOOD)) {
         /* Set the new offset */
@@ -8836,16 +8764,8 @@ UA_decodeBinaryInternal(const UA_ByteString *src, size_t *offset,
         /* Clean up */
         UA_clear(dst, type);
         memset(dst, 0, type->memSize);
-
-        ua_debug("ua: [%s] => t %d dst %p type %x size %x\n", __func__,
-            type->typeKind, dst, ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
-            ((UA_TcpMessageHeader *)dst)->messageSize);
     }
 
-    ua_debug("ua: [%s] #> off %d %p %p t %d dst %p type %x size %x\n", __func__, *offset,
-        ctx.pos, src->data,
-        type->typeKind, dst, ((UA_TcpMessageHeader *)dst)->messageTypeAndChunkType,
-        ((UA_TcpMessageHeader *)dst)->messageSize);
     return ret;
 }
 
@@ -17969,6 +17889,11 @@ UA_SecureChannel_close(UA_SecureChannel *channel) {
     /* Set the status to closed */
     channel->state = UA_SECURECHANNELSTATE_CLOSED;
 
+    if(channel->connection == 0)
+    {
+        ua_error("ua: [%s] conn null return!\n", __func__);
+        return;
+    }
     /* Detach from the connection and close the connection */
     if(channel->connection) {
         if(channel->connection->state != UA_CONNECTIONSTATE_CLOSED)
@@ -18613,12 +18538,6 @@ processChunks(UA_SecureChannel *channel, void *application,
             channel->decryptedChunksCount > channel->config.localMaxChunkCount) ||
            (channel->config.localMaxMessageSize != 0 &&
             channel->decryptedChunksLength > channel->config.localMaxMessageSize)) {
-            ua_print("ua: [%s] count %d max %d len %d mess %d\n",
-                channel->decryptedChunksCount,
-                channel->config.localMaxChunkCount,
-                channel->decryptedChunksLength,
-                channel->config.localMaxMessageSize
-                );
             return UA_STATUSCODE_BADTCPMESSAGETOOLARGE;
         }
 
@@ -18656,9 +18575,6 @@ extractCompleteChunk(UA_SecureChannel *channel, const UA_ByteString *buffer,
         UA_decodeBinaryInternal(buffer, &initial_offset, &hdr,
                                 &UA_TRANSPORT[UA_TRANSPORT_TCPMESSAGEHEADER], NULL);
 
-    ua_debug("ua: [%s] res %d buf %p offset %d hdr %d size %d\n", __func__, res, buffer, *offset,
-        hdr.messageTypeAndChunkType, hdr.messageSize);
-
     UA_assert(res == UA_STATUSCODE_GOOD);
     (void)res; /* pacify compilers if assert is ignored */
     UA_MessageType msgType = (UA_MessageType)
@@ -18671,7 +18587,6 @@ extractCompleteChunk(UA_SecureChannel *channel, const UA_ByteString *buffer,
         return UA_STATUSCODE_BADTCPMESSAGETYPEINVALID;
     if(hdr.messageSize > channel->config.recvBufferSize)
     {
-        ua_debug("lw: [%s] msg size %d rec %d\n", __func__, hdr.messageSize, channel->config.recvBufferSize);
         return UA_STATUSCODE_BADTCPMESSAGETOOLARGE;
     }
 
@@ -43657,6 +43572,8 @@ UA_Client_delete(UA_Client* client) {
     UA_Client_clear(client);
     UA_ClientConfig_clear(&client->config);
     UA_free(client);
+    client = NULL;
+    ua_run_flag = 0;
 }
 
 void
@@ -43976,7 +43893,7 @@ receiveResponse(UA_Client *client, void *response, const UA_DataType *responseTy
                                    "Receiving the response failed with StatusCode %s",
                                    UA_StatusCode_name(retval));
             ua_print("ua: [%s] state %d ret %d %#x\n", __func__, client->channel.state, retval, retval);
-            closeSecureChannel(client);
+//            closeSecureChannel(client);
             retval = UA_STATUSCODE_BADCONNECTIONCLOSED;
             break;
         }
@@ -44244,7 +44161,7 @@ UA_Client_run_iterate(UA_Client *client, UA_UInt32 timeout) {
        client->sessionState < UA_SESSIONSTATE_ACTIVATED) {
         retval = connectIterate(client, timeout);
         notifyClientState(client);
-        ua_print("lw: [%s] ret %d timeout %d state %d ch %d\n", __func__, retval, timeout,
+        ua_print("lw: [%s] ret %x timeout %d state %d ch %d\n", __func__, retval, timeout,
             client->sessionState, client->channel.state);
         return retval;
     }
@@ -45187,9 +45104,6 @@ connectIterate(UA_Client *client, UA_UInt32 timeout) {
         return UA_STATUSCODE_BADCONNECTIONCLOSED;
     }
 
-    ua_debug("ua: [%s] conn %d state %d handle %p\n",  __func__, client->connectStatus,
-        client->connection.state, client->connection.handle);
-
     /* The connection is closed. Reset the SecureChannel and open a new TCP
      * connection */
     if(client->connection.state == UA_CONNECTIONSTATE_CLOSED)
@@ -45200,11 +45114,6 @@ connectIterate(UA_Client *client, UA_UInt32 timeout) {
         client->connectStatus =
             client->config.pollConnectionFunc(&client->connection, timeout,
                                               &client->config.logger);
-
-        ua_debug("ua: [%s] exit conn %x %d time %d handle %p\n",  __func__,
-            client->connectStatus,
-            client->connection.state, timeout, client->connection.handle);
-
         return client->connectStatus;
     }
 
@@ -45398,8 +45307,6 @@ static UA_StatusCode
 connectSync(UA_Client *client) {
     UA_DateTime now = UA_DateTime_nowMonotonic();
     UA_DateTime maxDate = now + ((UA_DateTime)client->config.timeout * UA_DATETIME_MSEC);
-
-    ua_print("ua; [%s] time %d\n", __func__, (UA_DateTime)client->config.timeout);
 
     UA_StatusCode retval = initConnect(client);
     if(retval != UA_STATUSCODE_GOOD)
@@ -70300,16 +70207,30 @@ UA_ServerConfig_setDefaultWithSecurityPolicies(UA_ServerConfig *conf,
 
 UA_Client * UA_Client_new() {
     UA_ClientConfig config;
+    UA_Client *ret = NULL;
+
+    if(ua_run_flag)
+    {
+        return NULL;
+    }
+
     memset(&config, 0, sizeof(UA_ClientConfig));
     config.logger.log = UA_Log_Stdout_log;
     config.logger.context = NULL;
     config.logger.clear = UA_Log_Stdout_clear;
-    return UA_Client_newWithConfig(&config);
+
+    ret = UA_Client_newWithConfig(&config);
+
+    if(ret)
+    {
+        ua_run_flag = 1;
+    }
+    return ret;
 }
 
 UA_StatusCode
 UA_ClientConfig_setDefault(UA_ClientConfig *config) {
-    config->timeout = 20000;
+    config->timeout = 5000;
     config->secureChannelLifeTime = 10 * 60 * 1000; /* 10 minutes */
 
     if(!config->logger.log) {
@@ -71205,7 +71126,6 @@ ServerNetworkLayerTCP_add(UA_ServerNetworkLayer *nl, ServerNetworkLayerTCP *laye
 static UA_StatusCode
 addServerSocket(ServerNetworkLayerTCP *layer, struct addrinfo *ai) {
     /* Create the server socket */
-    ua_print("ua: [%s] %d %d %d\n", __func__, ai->ai_family, ai->ai_socktype, ai->ai_protocol);
     UA_SOCKET newsock = UA_socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
     if(newsock == UA_INVALID_SOCKET)
     {
@@ -71341,17 +71261,11 @@ ServerNetworkLayerTCP_start(UA_ServerNetworkLayer *nl, const UA_Logger *logger,
     int retcode = UA_getaddrinfo(customHostname->length ? hostname : NULL,
                                  portno, &hints, &res);
 
-    ua_print("ua: [%s] host %s pro %d ret %d\n", __func__, hostname, portno, retcode);
-
     if(retcode != 0) {
         UA_LOG_SOCKET_ERRNO_GAI_WRAP(UA_LOG_WARNING(layer->logger, UA_LOGCATEGORY_NETWORK,
                                                     "getaddrinfo lookup of %s failed with error %d - %s", hostname, retcode, errno_str));
         return UA_STATUSCODE_BADINTERNALERROR;
     }
-
-    ua_print("ua: [%s] res %p fam %d len %d %s\n", __func__, res, res->ai_family,
-        customHostname->length,
-        customHostname->data);
 
     /* There might be serveral addrinfos (for different network cards,
      * IPv4/IPv6). Add a server socket for all of them. */
@@ -71597,6 +71511,12 @@ typedef struct TCPClientConnection {
 
 static void
 ClientNetworkLayerTCP_close(UA_Connection *connection) {
+    if(connection == NULL)
+    {
+        ua_error("connection NULL!\n");
+        return;
+    }
+
     if(connection->state == UA_CONNECTIONSTATE_CLOSED)
         return;
 
@@ -71637,10 +71557,6 @@ UA_ClientConnectionTCP_poll(UA_Connection *connection, UA_UInt32 timeout,
         return UA_STATUSCODE_BADDISCONNECT;
     }
 
-    ua_print("ua: [%s] conn handle %p fam %d sa %d\n", __func__,
-        connection->handle, tcpConnection->server->ai_family,
-        tcpConnection->server->ai_addr->sa_family);
-
     /* Get a socket and connect (only once) if not already done in a previous
      * call. On win32, calling connect multiple times is not recommended on
      * non-blocking sockets
@@ -71651,26 +71567,16 @@ UA_ClientConnectionTCP_poll(UA_Connection *connection, UA_UInt32 timeout,
      * and getsockopt using SO_ERROR on win32 and posix.
      */
     if(connection->sockfd == UA_INVALID_SOCKET) {
-        ua_print("ua: [%s] start socket %p ai %d sa %d\n", __func__,
-            tcpConnection->server,
-            tcpConnection->server->ai_family,
-            tcpConnection->server->ai_addr->sa_family);
+
         connection->sockfd = UA_socket(tcpConnection->server->ai_family,
                                        tcpConnection->server->ai_socktype,
                                        tcpConnection->server->ai_protocol);
         if(connection->sockfd == UA_INVALID_SOCKET) {
-            ua_print("ua: [%s] %s\n", __func__, strerror(UA_ERRNO));
             UA_LOG_WARNING(logger, UA_LOGCATEGORY_NETWORK,
                            "Could not create client socket: %s", strerror(UA_ERRNO));
             ClientNetworkLayerTCP_close(connection);
             return UA_STATUSCODE_BADDISCONNECT;
         }
-
-        ua_print("ua: [%s] socket fd %d %p fam %d sa %d\n", __func__,
-            connection->sockfd,
-            tcpConnection->server,
-            tcpConnection->server->ai_family,
-            tcpConnection->server->ai_addr->sa_family);
 
         /* Non blocking connect to be able to timeout */
         if(UA_socket_set_nonblocking(connection->sockfd) != UA_STATUSCODE_GOOD) {
@@ -71680,11 +71586,6 @@ UA_ClientConnectionTCP_poll(UA_Connection *connection, UA_UInt32 timeout,
             return UA_STATUSCODE_BADDISCONNECT;
         }
 
-        ua_print("ua: [%s] check fd %d %p fam %d sa %d\n", __func__,
-            connection->sockfd,
-            tcpConnection->server,
-            tcpConnection->server->ai_family,
-            tcpConnection->server->ai_addr->sa_family);
         /* Don't have the socket create interrupt signals */
 #ifdef SO_NOSIGPIPE
         int val = 1;
@@ -71693,12 +71594,6 @@ UA_ClientConnectionTCP_poll(UA_Connection *connection, UA_UInt32 timeout,
         if(sso_result < 0)
             UA_LOG_WARNING(logger, UA_LOGCATEGORY_NETWORK, "Couldn't set SO_NOSIGPIPE");
 #endif
-        ua_print("ua: [%s] connect ai %d sa fam %d len %d %x addr len %d\n",  __func__,
-                tcpConnection->server->ai_family,
-                tcpConnection->server->ai_addr->sa_family,
-                tcpConnection->server->ai_addr->sa_len,
-                tcpConnection->server->ai_addr->sa_data[0],
-                tcpConnection->server->ai_addrlen);
 
         int error = UA_connect(connection->sockfd, tcpConnection->server->ai_addr,
                                tcpConnection->server->ai_addrlen);
@@ -71708,7 +71603,6 @@ UA_ClientConnectionTCP_poll(UA_Connection *connection, UA_UInt32 timeout,
             connection->state = UA_CONNECTIONSTATE_ESTABLISHED;
             return UA_STATUSCODE_GOOD;
         }
-        ua_print("ua: [%s] connected failed %d\n", __func__, error);
 
         /* The connection failed */
         if((UA_ERRNO != UA_ERR_CONNECTION_PROGRESS)) {
@@ -71772,6 +71666,7 @@ UA_ClientConnectionTCP_poll(UA_Connection *connection, UA_UInt32 timeout,
                        (int)tcpConnection->endpointUrl.length,
                        tcpConnection->endpointUrl.data, strerror(UA_ERRNO));
         ClientNetworkLayerTCP_close(connection);
+        ua_error("ua: [%s] line %d failed\n", __func__, __LINE__);
         return UA_STATUSCODE_BADDISCONNECT;
     }
 
@@ -71802,6 +71697,7 @@ UA_ClientConnectionTCP_poll(UA_Connection *connection, UA_UInt32 timeout,
         LocalFree(errno_str);
 #endif
         ClientNetworkLayerTCP_close(connection);
+        ua_error("ua: [%s] line %d failed\n", __func__, __LINE__);
         return UA_STATUSCODE_BADDISCONNECT;
     }
 
@@ -71831,14 +71727,11 @@ UA_ClientConnectionTCP_init(UA_ConnectionConfig config, const UA_String endpoint
     connection.releaseSendBuffer = connection_releasesendbuffer;
     connection.releaseRecvBuffer = connection_releaserecvbuffer;
 
-    ua_print("ua: [%s] endpoint url (%d)%.28s %d\n", __func__, endpointUrl.length, endpointUrl.data,
-        sizeof(TCPClientConnection));
-
     TCPClientConnection *tcpClientConnection = (TCPClientConnection*)
         UA_malloc(sizeof(TCPClientConnection));
     if(!tcpClientConnection) {
         connection.state = UA_CONNECTIONSTATE_CLOSED;
-        ua_print("ua: [%s] malloc %d failed\n", __func__, sizeof(TCPClientConnection));
+        ua_error("ua: [%s] malloc %d failed\n", __func__, sizeof(TCPClientConnection));
         return connection;
     }
     memset(tcpClientConnection, 0, sizeof(TCPClientConnection));
@@ -71849,8 +71742,6 @@ UA_ClientConnectionTCP_init(UA_ConnectionConfig config, const UA_String endpoint
     UA_UInt16 port = 0;
     char hostname[512];
     tcpClientConnection->connStart = UA_DateTime_nowMonotonic();
-
-    ua_print("ua: [%s] line %d!\n", __func__, __LINE__);
 
     UA_String_copy(&endpointUrl, &tcpClientConnection->endpointUrl);
 
@@ -71864,8 +71755,6 @@ UA_ClientConnectionTCP_init(UA_ConnectionConfig config, const UA_String endpoint
         return connection;
     }
 
-    ua_print("ua: [%s] line %d!\n", __func__, __LINE__);
-
     memcpy(hostname, hostnameString.data, hostnameString.length);
     hostname[hostnameString.length] = 0;
 
@@ -71875,22 +71764,16 @@ UA_ClientConnectionTCP_init(UA_ConnectionConfig config, const UA_String endpoint
                     "No port defined, using default port %" PRIu16, port);
     }
 
-    ua_print("ua: [%s] line %d!\n", __func__, __LINE__);
-
     memset(&tcpClientConnection->hints, 0, sizeof(tcpClientConnection->hints));
     tcpClientConnection->hints.ai_family = AF_UNSPEC;
     tcpClientConnection->hints.ai_socktype = SOCK_STREAM;
     char portStr[6];
     UA_snprintf(portStr, 6, "%d", port);
 
-//    ua_print("ua: [%s] host %s port %s fam %d\n",  __func__, hostname, portStr,
-//        tcpClientConnection->server->ai_addr->sa_family);
-
 #if LWIP_DNS
     int error = UA_getaddrinfo(hostname, portStr, &tcpClientConnection->hints,
                                &tcpClientConnection->server);
     if(error != 0 || !tcpClientConnection->server) {
-        ua_print("ua: [%s] host %s error %d\n", __func__, hostname, error);
         UA_LOG_SOCKET_ERRNO_GAI_WRAP(UA_LOG_WARNING(logger, UA_LOGCATEGORY_NETWORK,
                                                     "DNS lookup of %s failed with error %d - %s",
                                                     hostname, error, errno_str));

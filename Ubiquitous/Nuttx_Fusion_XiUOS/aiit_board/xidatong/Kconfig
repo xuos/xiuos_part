@@ -1,0 +1,87 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_XIDATONG
+
+choice
+	prompt "Boot Flash"
+	default XIDATONG_QSPI_FLASH
+
+config XIDATONG_HYPER_FLASH
+	bool "HYPER Flash"
+
+config XIDATONG_QSPI_FLASH
+	bool "QSPI Flash"
+
+endchoice # Boot Flash
+
+config XIDATONG_SDRAM
+	bool "Enable SDRAM"
+	default y
+	select IMXRT_SEMC_INIT_DONE
+	---help---
+		Activate DCD configuration of SDRAM
+
+config XIDATONG_SDHC_AUTOMOUNT
+  bool "SDHC automounter"
+  default n
+  depends on FS_AUTOMOUNTER && IMXRT_USDHC
+
+if XIDATONG_SDHC_AUTOMOUNT
+
+config XIDATONG_SDHC_AUTOMOUNT_FSTYPE
+  string "SDHC file system type"
+  default "vfat"
+
+config XIDATONG_SDHC_AUTOMOUNT_BLKDEV
+  string "SDHC block device"
+  default "/dev/mmcsd0"
+
+config XIDATONG_SDHC_AUTOMOUNT_MOUNTPOINT
+  string "SDHC mount point"
+  default "/mnt/sdcard"
+
+config XIDATONG_SDHC_AUTOMOUNT_DDELAY
+  int "SDHC debounce delay (milliseconds)"
+  default 1000
+
+config XIDATONG_SDHC_AUTOMOUNT_UDELAY
+  int "SDHC unmount retry delay (milliseconds)"
+  default 2000
+
+endif # XIDATONG_SDHC_AUTOMOUNT
+
+config XIDATONG_USB_AUTOMOUNT
+	bool "USB Mass Storage automounter"
+	default n
+	depends on USBHOST_MSC && USBHOST_MSC_NOTIFIER
+
+if XIDATONG_USB_AUTOMOUNT
+
+config XIDATONG_USB_AUTOMOUNT_FSTYPE
+	string "USB file system type"
+	default "vfat"
+
+config XIDATONG_USB_AUTOMOUNT_BLKDEV
+	string "USB block device prefix"
+	default "/dev/sd"
+
+config XIDATONG_USB_AUTOMOUNT_MOUNTPOINT
+	string "USB mount point prefix"
+	default "/mnt/usb"
+
+config XIDATONG_USB_AUTOMOUNT_NUM_BLKDEV
+	int "Number of block devices to monitor."
+	range 1 26
+	default 4
+
+config XIDATONG_USB_AUTOMOUNT_UDELAY
+	int "USB unmount retry delay (milliseconds)"
+	default 2000
+
+endif # XIDATONG_USB_AUTOMOUNT
+
+
+endif
