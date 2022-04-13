@@ -34,30 +34,6 @@
 #ifdef CONFIG_IMXRT_USDHC
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* This structure holds static information unique to one SDHC peripheral */
-
-struct imxrt_sdhc_state_s
-{
-  struct sdio_dev_s *sdhc;    /* R/W device handle */
-  bool inserted;              /* true: card is inserted */
-};
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* device state */
-
-static struct imxrt_sdhc_state_s g_sdhc;
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -71,20 +47,20 @@ static struct imxrt_sdhc_state_s g_sdhc;
 
 int nsh_sdmmc_initialize(void)
 {
+  struct sdio_dev_s *sdmmc;
   int ret = 0;
 
   /* Get an instance of the SDIO interface */
 
-  g_sdhc.sdhc = imxrt_usdhc_initialize(0);
-  if (!g_sdhc.sdhc)
+  sdmmc = imxrt_usdhc_initialize(0);
+  if (!sdmmc)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SD/MMC\n");
-      return -ENODEV; 
+      return -ENODEV;
     }
-
   /* Bind the SDIO interface to the MMC/SD driver */
 
-  ret = mmcsd_slotinitialize(0, g_sdhc.sdhc);
+  ret = mmcsd_slotinitialize(0, sdmmc);
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
@@ -93,9 +69,9 @@ int nsh_sdmmc_initialize(void)
 
 #ifdef CONFIG_XIDATONG_SDIO_AUTOMOUNT
       imxrt_automount_initialize();
-      imxrt_usdhc_set_sdio_card_isr(g_sdhc.sdhc, imxrt_sdhc_automount_event, NULL);
+      imxrt_usdhc_set_sdio_card_isr(sdmmc, imxrt_sdhc_automount_event, NULL);
 #else
-      imxrt_usdhc_set_sdio_card_isr(g_sdhc.sdhc, NULL, NULL);
+      imxrt_usdhc_set_sdio_card_isr(sdmmc, NULL, NULL);
 #endif
 
   return OK;
