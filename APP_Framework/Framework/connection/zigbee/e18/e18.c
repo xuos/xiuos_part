@@ -56,7 +56,7 @@ static int E18HardwareModeGet()
 
     PrivClose(pin_fd);
 
-    if(pin_stat.pin == GPIO_HIGH) {
+    if(pin_stat.val == GPIO_HIGH) {
         printf(" E18 as AT mode\n");
         return E18_AS_AT_MODE;
     } else {

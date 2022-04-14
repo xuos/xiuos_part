@@ -10,7 +10,7 @@ if ADD_XIZI_FETURES
 
         config ADAPTER_ESP07S_DRIVER
                 string "ESP07S device uart driver path"
-                default "/dev/usart2_dev2"
+                default "/dev/uart2_dev2"
                 depends on !ADAPTER_ESP07S_DRIVER_EXTUART
 
         if ADAPTER_ESP07S_DRIVER_EXTUART                    

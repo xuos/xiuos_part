@@ -156,14 +156,14 @@ int AdapterWifiTest(void)
 
 
     AdapterDeviceOpen(adapter);
-    AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+    // AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
 
     AdapterDeviceSetUp(adapter);
-    AdapterDeviceSetAddr(adapter, "192.168.66.253", "255.255.255.0", "192.168.66.1");
+    AdapterDeviceSetAddr(adapter, "192.168.64.253", "192.168.66.1", "255.255.252.0");
     AdapterDevicePing(adapter, "36.152.44.95");
     AdapterDeviceNetstat(adapter);
 
-    const char *ip = "192.168.66.211";
+    const char *ip = "192.168.64.60";
     const char *port = "12345";
     enum NetRoleType net_role = CLIENT;
     enum IpType ip_type = IPV4;
