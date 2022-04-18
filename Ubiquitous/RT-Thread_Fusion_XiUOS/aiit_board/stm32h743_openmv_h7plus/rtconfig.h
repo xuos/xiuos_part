@@ -105,7 +105,7 @@
 #define RT_DFS_ELM_REENTRANT
 #define RT_DFS_ELM_MUTEX_TIMEOUT 3000
 #define RT_USING_DFS_DEVFS
-#define RT_USING_DFS_ROMFS
+#define RT_USING_DFS_RAMFS
 
 /* Device Drivers */
 
@@ -116,6 +116,19 @@
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
+#define RT_USING_SDIO
+#define RT_SDIO_STACK_SIZE 512
+#define RT_SDIO_THREAD_PRIORITY 15
+#define RT_MMCSD_STACK_SIZE 1024
+#define RT_MMCSD_THREAD_PREORITY 22
+#define RT_MMCSD_MAX_PARTITION 16
+#define RT_USING_SPI
+#define RT_USING_QSPI
+#define RT_USING_SFUD
+#define RT_SFUD_USING_SFDP
+#define RT_SFUD_USING_FLASH_INFO_TABLE
+#define RT_SFUD_USING_QSPI
+#define RT_SFUD_SPI_MAX_HZ 50000000
 
 /* Using USB */
 
@@ -163,7 +176,12 @@
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART1
+#define BSP_USING_QSPI
+
+/* Onboard Peripheral Drivers */
+
 #define BSP_USING_SDRAM
+#define BSP_USING_QSPI_FLASH
 
 /* More Drivers */
 
