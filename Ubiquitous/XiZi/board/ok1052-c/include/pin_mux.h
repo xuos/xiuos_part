@@ -7,7 +7,7 @@
 
 /**
 * @file pin_mux.h
-* @brief define imxrt1052-board pin configure
+* @brief define ok1052-c board pin configure
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-29

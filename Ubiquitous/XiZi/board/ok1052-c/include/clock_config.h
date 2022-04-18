@@ -7,8 +7,8 @@
 
 /**
 * @file clock_config.h
-* @brief define imxrt1052-board clock configure
-* @version 1.0 
+* @brief define ok1052-c board clock configure
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-29
 */

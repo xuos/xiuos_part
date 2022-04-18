@@ -15,7 +15,7 @@
 
 /**
 * @file connect_spi.c
-* @brief support ok1052-c spi function and register to bus framework
+* @brief support ok1052-c board spi function and register to bus framework
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-03-01
@@ -23,16 +23,16 @@
 
 /*************************************************
 File name: connect_spi.c
-Description: support ok1052-c spi configure and spi bus register function
+Description: support ok1052-c board spi configure and spi bus register function
 Others: take RT-Thread v4.0.2/bsp/stm32/libraries/HAL_Drivers/drv_spi.c for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
 History:
 1. Date: 2022-03-01
 Author: AIIT XUOS Lab
 Modification:
-1. support ok1052-c spi configure, write and read
-2. support ok1052-c spi bus device and driver register
-3. add ok1052-c spi test letter command
+1. support ok1052-c board spi configure, write and read
+2. support ok1052-c board spi bus device and driver register
+3. add ok1052-c board spi test letter command
 *************************************************/
 
 #include "board.h"
@@ -58,7 +58,6 @@ Modification:
 #define TRANSFER_BAUDRATE (500000U) /*! Transfer baudrate - 500k */
 
 #define spi_print KPrintf
-#define spi_trace() KPrintf("lw: [%s][%d] passed!\n", __func__, __LINE__)
 
 typedef struct __spi_transfer_t
 {

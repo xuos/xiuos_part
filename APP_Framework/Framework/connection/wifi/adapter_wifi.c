@@ -24,6 +24,9 @@
 #ifdef ADAPTER_HFA21_WIFI
 extern AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter);
 #endif
+#ifdef ADAPTER_ESP07S_WIFI
+extern AdapterProductInfoType Esp07sWifiAttach(struct Adapter *adapter);
+#endif
 
 #define ADAPTER_WIFI_NAME "wifi"
 
@@ -69,6 +72,19 @@ int AdapterWifiInit(void)
     AdapterProductInfoType product_info = Hfa21WifiAttach(adapter);
     if (!product_info) {
         printf("AdapterWifiInit hfa21 attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
+
+#endif
+#ifdef ADAPTER_ESP07S_WIFI
+    AdapterProductInfoType product_info = Esp07sWifiAttach(adapter);
+    if (!product_info) {
+        printf("AdapterWifiInit ESP07S attach error\n");
         PrivFree(adapter);
         return -1;
     }
@@ -140,14 +156,14 @@ int AdapterWifiTest(void)
 
 
     AdapterDeviceOpen(adapter);
-    AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+    // AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
 
     AdapterDeviceSetUp(adapter);
-    AdapterDeviceSetAddr(adapter, "192.168.66.253", "255.255.255.0", "192.168.66.1");
+    AdapterDeviceSetAddr(adapter, "192.168.64.253", "192.168.66.1", "255.255.252.0");
     AdapterDevicePing(adapter, "36.152.44.95");
     AdapterDeviceNetstat(adapter);
 
-    const char *ip = "192.168.66.211";
+    const char *ip = "192.168.64.60";
     const char *port = "12345";
     enum NetRoleType net_role = CLIENT;
     enum IpType ip_type = IPV4;

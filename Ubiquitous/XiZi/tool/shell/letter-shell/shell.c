@@ -3,12 +3,12 @@
  * @author Letter (NevermindZZT@gmail.com)
  * @version 3.0.0
  * @date 2019-12-30
- * 
+ *
  * @copyright (c) 2020 Letter
- * 
+ *
  */
 /*change log:
-    Change Chinese comment to English comment 
+    Change Chinese comment to English comment
 */
 
 #include "shell.h"
@@ -38,14 +38,14 @@ const ShellCommand shellUserDefault SECTION("shellCommand") =
 };
 
 
-   
+
     #if defined(__GNUC__)
         extern const unsigned long _shell_command_start;
         extern const unsigned long _shell_command_end;
     #endif
 
 /**
- * @brief shell Constant text index 
+ * @brief shell Constant text index
  */
 enum
 {
@@ -87,45 +87,45 @@ static const char *shellText[] =
         "Build:       "__DATE__" "__TIME__"\r\n"
         "Version:     "SHELL_VERSION"\r\n"
         "Copyright:   (c) 2020 Letter\r\n",
-    [SHELL_TEXT_CMD_TOO_LONG] = 
+    [SHELL_TEXT_CMD_TOO_LONG] =
         "\r\nWarning: Command is too long\r\n",
-    [SHELL_TEXT_CMD_LIST] = 
+    [SHELL_TEXT_CMD_LIST] =
         "\r\nCommand List:\r\n",
-    [SHELL_TEXT_VAR_LIST] = 
+    [SHELL_TEXT_VAR_LIST] =
         "\r\nVar List:\r\n",
-    [SHELL_TEXT_USER_LIST] = 
+    [SHELL_TEXT_USER_LIST] =
         "\r\nUser List:\r\n",
     [SHELL_TEXT_KEY_LIST] =
         "\r\nKey List:\r\n",
-    [SHELL_TEXT_CMD_NOT_FOUND] = 
+    [SHELL_TEXT_CMD_NOT_FOUND] =
         "Command not Found\r\n",
-    [SHELL_TEXT_POINT_CANNOT_MODIFY] = 
+    [SHELL_TEXT_POINT_CANNOT_MODIFY] =
         "can't set pointer\r\n",
-    [SHELL_TEXT_VAR_READ_ONLY_CANNOT_MODIFY] = 
+    [SHELL_TEXT_VAR_READ_ONLY_CANNOT_MODIFY] =
         "can't set read only var\r\n",
     [SHELL_TEXT_NOT_VAR] =
         " is not a var\r\n",
-    [SHELL_TEXT_VAR_NOT_FOUND] = 
+    [SHELL_TEXT_VAR_NOT_FOUND] =
         "Var not Fount\r\n",
     [SHELL_TEXT_HELP_HEADER] =
         "command help of ",
-    [SHELL_TEXT_PASSWORD_HINT] = 
+    [SHELL_TEXT_PASSWORD_HINT] =
         "\r\nPlease input password:",
-    [SHELL_TEXT_PASSWORD_ERROR] = 
+    [SHELL_TEXT_PASSWORD_ERROR] =
         "\r\npassword error\r\n",
-    [SHELL_TEXT_CLEAR_CONSOLE] = 
+    [SHELL_TEXT_CLEAR_CONSOLE] =
         "\033[2J\033[1H",
-    [SHELL_TEXT_CLEAR_LINE] = 
+    [SHELL_TEXT_CLEAR_LINE] =
         "\033[2K\r",
-    [SHELL_TEXT_TYPE_CMD] = 
+    [SHELL_TEXT_TYPE_CMD] =
         "CMD ",
-    [SHELL_TEXT_TYPE_VAR] = 
+    [SHELL_TEXT_TYPE_VAR] =
         "VAR ",
-    [SHELL_TEXT_TYPE_USER] = 
+    [SHELL_TEXT_TYPE_USER] =
         "USER",
-    [SHELL_TEXT_TYPE_KEY] = 
+    [SHELL_TEXT_TYPE_KEY] =
         "KEY ",
-    [SHELL_TEXT_TYPE_NONE] = 
+    [SHELL_TEXT_TYPE_NONE] =
         "NONE",
 };
 
@@ -147,8 +147,8 @@ ShellCommand* shellSeekCommand(Shell *shell,
                                unsigned short compareLength);
 
 /**
- * @brief shell initialization 
- * 
+ * @brief shell initialization
+ *
  * @param shell shell
  * @param buffer buffer,used to record history
  * @param size the size of buffer
@@ -195,7 +195,7 @@ void shellInit(Shell *shell, char *buffer, unsigned short size)
 
 /**
  * @brief  Add shell
- * 
+ *
  * @param shell shell
  */
 static void shellAdd(Shell *shell)
@@ -212,9 +212,9 @@ static void shellAdd(Shell *shell)
 
 
 /**
- * @brief Get the current active shell 
- * 
- * @return Shell* Currently active shell object 
+ * @brief Get the current active shell
+ *
+ * @return Shell* Currently active shell object
  */
 Shell* shellGetCurrent(void)
 {
@@ -230,10 +230,10 @@ Shell* shellGetCurrent(void)
 
 
 /**
- * @brief Shell write characters 
- * 
+ * @brief Shell write characters
+ *
  * @param shell shell
- * @param data Character data 
+ * @param data Character data
  */
 static void shellWriteByte(Shell *shell, const char data)
 {
@@ -242,11 +242,11 @@ static void shellWriteByte(Shell *shell, const char data)
 
 
 /**
- * @brief shell Write string 
- * 
+ * @brief shell Write string
+ *
  * @param shell shell
- * @param string String data 
- * 
+ * @param string String data
+ *
  * @return unsigned short Number of characters written (include '\n')
  */
 unsigned short shellWriteString(Shell *shell, const char *string)
@@ -263,12 +263,12 @@ unsigned short shellWriteString(Shell *shell, const char *string)
 
 
 /**
- * @brief Shell write command description string 
- * 
- * @param shell shell 
- * @param string String data 
- * 
- * @return unsigned short Number of characters written 
+ * @brief Shell write command description string
+ *
+ * @param shell shell
+ * @param string String data
+ *
+ * @return unsigned short Number of characters written
  */
 static unsigned short shellWriteCommandDesc(Shell *shell, const char *string)
 {
@@ -296,10 +296,10 @@ extern char working_dir[];
 #endif
 /**
  * @brief Shell write new command line
- * 
+ *
  * @param shell shell
- * @param newline Bool ,Whether to write a line 
- * 
+ * @param newline Bool ,Whether to write a line
+ *
  */
 static void shellWriteCommandLine(Shell *shell, unsigned char newline)
 {
@@ -326,19 +326,19 @@ static void shellWriteCommandLine(Shell *shell, unsigned char newline)
 
 
 /**
- * @brief shell Check command permissions 
- * 
+ * @brief shell Check command permissions
+ *
  * @param shell shell
  * @param command ShellCommand
- * 
- * @return signed char 0 The current user has the command authority 
- * @return signec char -1 The current user does not have the command authority 
+ *
+ * @return signed char 0 The current user has the command authority
+ * @return signec char -1 The current user does not have the command authority
  */
 signed char shellCheckPermission(Shell *shell, ShellCommand *command)
 {
     return ((!command->attr.attrs.permission
                 || command->attr.attrs.type == SHELL_TYPE_USER
-                || (command->attr.attrs.permission 
+                || (command->attr.attrs.permission
                     & shell->info.user->attr.attrs.permission))
             && (shell->status.isChecked
                 || command->attr.attrs.enableUnchecked))
@@ -347,12 +347,12 @@ signed char shellCheckPermission(Shell *shell, ShellCommand *command)
 
 
 /**
- * @brief int to hexadecimal string 
- * 
+ * @brief int to hexadecimal string
+ *
  * @param value int value
  * @param buffer  hexadecimal result
- * 
- * @return signed char, data length after conversion 
+ *
+ * @return signed char, data length after conversion
  */
 signed char shellToHex(unsigned int value, char *buffer)
 {
@@ -370,12 +370,12 @@ signed char shellToHex(unsigned int value, char *buffer)
 
 
 /**
-* @brief int to decimal string 
- * 
+* @brief int to decimal string
+ *
  * @param value int value
  * @param buffer decimal result
- * 
- * @return  signed char, data length after conversion 
+ *
+ * @return  signed char, data length after conversion
  */
 signed char shellToDec(int value, char *buffer)
 {
@@ -403,11 +403,11 @@ signed char shellToDec(int value, char *buffer)
 
 
 /**
- * @brief shell string copy 
- * 
- * @param dest destination string 
- * @param src Source string 
- * @return Unsigned short ,String length 
+ * @brief shell string copy
+ *
+ * @param dest destination string
+ * @param src Source string
+ * @return Unsigned short ,String length
  */
 static unsigned short shellStringCopy(char *dest, char* src)
 {
@@ -423,11 +423,11 @@ static unsigned short shellStringCopy(char *dest, char* src)
 
 
 /**
- * @brief Shell string comparison 
- * 
- * @param dest destination string 
- * @param src Source string 
- * @return unsigned short, Match length 
+ * @brief Shell string comparison
+ *
+ * @param dest destination string
+ * @param src Source string
+ * @return unsigned short, Match length
  */
 static unsigned short shellStringCompare(char* dest, char *src)
 {
@@ -448,10 +448,10 @@ static unsigned short shellStringCompare(char* dest, char *src)
 
 
 /**
- * @brief shell get command name 
- * 
+ * @brief shell get command name
+ *
  * @param command command
- * @return const char* ,Command name 
+ * @return const char* ,Command name
  */
 static const char* shellGetCommandName(ShellCommand *command)
 {
@@ -482,7 +482,7 @@ static const char* shellGetCommandName(ShellCommand *command)
 
 /**
  * @brief shell get command description
- * 
+ *
  * @param command command
  * @return const char* ,Command description
  */
@@ -508,7 +508,7 @@ static const char* shellGetCommandDesc(ShellCommand *command)
 
 /**
  * @brief shell list items
- * 
+ *
  * @param shell shell ojbect
  * @param item ShellCommand item(func,user,key,variable...)
  */
@@ -555,8 +555,8 @@ void shellListItem(Shell *shell, ShellCommand *item)
 
 
 /**
- * @brief shell lists all function commands 
- * 
+ * @brief shell lists all function commands
+ *
  * @param shell shell
  */
 void shellListCommand(Shell *shell)
@@ -576,7 +576,7 @@ void shellListCommand(Shell *shell)
 
 /**
  * @brief shell list all variable
- * 
+ *
  * @param shell shell
  */
 void shellListVar(Shell *shell)
@@ -597,8 +597,8 @@ void shellListVar(Shell *shell)
 
 /**
  * @brief shell list all users
- * 
- * @param shell shell 
+ *
+ * @param shell shell
  */
 void shellListUser(Shell *shell)
 {
@@ -618,8 +618,8 @@ void shellListUser(Shell *shell)
 
 /**
  * @brief shell list all keys
- * 
- * @param shell shell 
+ *
+ * @param shell shell
  */
 void shellListKey(Shell *shell)
 {
@@ -638,8 +638,8 @@ void shellListKey(Shell *shell)
 
 
 /**
- * @brief shell delete command line data 
- * 
+ * @brief shell delete command line data
+ *
  * @param shell shell
  * @param length  length of delete data
  */
@@ -654,7 +654,7 @@ void shellDeleteCommandLine(Shell *shell, unsigned char length)
 
 /**
  * @brief shell clear command line data
- * 
+ *
  * @param shell shell
  */
 void shellClearCommandLine(Shell *shell)
@@ -668,8 +668,8 @@ void shellClearCommandLine(Shell *shell)
 
 
 /**
- * @brief shell Insert a character at the cursor position 
- * 
+ * @brief shell Insert a character at the cursor position
+ *
  * @param shell shell
  * @param data charactoer
  */
@@ -696,7 +696,7 @@ void shellInsertByte(Shell *shell, char data)
     {
         for (short i = shell->parser.length - shell->parser.cursor; i > 0; i--)
         {
-            shell->parser.buffer[shell->parser.cursor + i] = 
+            shell->parser.buffer[shell->parser.cursor + i] =
                 shell->parser.buffer[shell->parser.cursor + i - 1];
         }
         shell->parser.buffer[shell->parser.cursor++] = data;
@@ -715,10 +715,10 @@ void shellInsertByte(Shell *shell, char data)
 
 /**
  * @brief shell delete character
- * 
+ *
  * @param shell shell
  * @param direction delete a character:
- *                                          {@code 1} Delete the character before the cursor 
+ *                                          {@code 1} Delete the character before the cursor
  *                                          {@code -1}Delete the character after the cursor
  */
 void shellDeleteByte(Shell *shell, signed char direction)
@@ -741,7 +741,7 @@ void shellDeleteByte(Shell *shell, signed char direction)
     {
         for (short i = offset; i < shell->parser.length - shell->parser.cursor; i++)
         {
-            shell->parser.buffer[shell->parser.cursor + i - 1] = 
+            shell->parser.buffer[shell->parser.cursor + i - 1] =
                 shell->parser.buffer[shell->parser.cursor + i];
         }
         shell->parser.length--;
@@ -765,8 +765,8 @@ void shellDeleteByte(Shell *shell, signed char direction)
 
 
 /**
- * @brief shell Parsing parameters 
- * 
+ * @brief shell Parsing parameters
+ *
  * @param shell shell
  */
 static void shellParserParam(Shell *shell)
@@ -815,8 +815,8 @@ static void shellParserParam(Shell *shell)
 
 
 /**
- * @brief shell Remove the double quotes at the beginning and end of string parameters 
- * 
+ * @brief shell Remove the double quotes at the beginning and end of string parameters
+ *
  * @param shell shell
  */
 static void shellRemoveParamQuotes(Shell *shell)
@@ -839,13 +839,13 @@ static void shellRemoveParamQuotes(Shell *shell)
 
 
 /**
- * @brief shell seeking command 
- * 
+ * @brief shell seeking command
+ *
  * @param shell shell
  * @param cmd command
- * @param base command table base address 
- * @param compareLength Match string length 
- * @return ShellCommand* :find command 
+ * @param base command table base address
+ * @param compareLength Match string length
+ * @return ShellCommand* :find command
  */
 ShellCommand* shellSeekCommand(Shell *shell,
                                const char *cmd,
@@ -883,8 +883,8 @@ ShellCommand* shellSeekCommand(Shell *shell,
 
 
 /**
- * @brief shell Get variable value 
- * 
+ * @brief shell Get variable value
+ *
  * @param shell shell
  * @param command command
  * @return int value
@@ -921,7 +921,7 @@ int shellGetVarValue(Shell *shell, ShellCommand *command)
 
 /**
  * @brief shell set variable value
- * 
+ *
  * @param shell shell
  * @param command command
  * @param value value
@@ -976,7 +976,7 @@ int shellSetVarValue(Shell *shell, ShellCommand *command, int value)
 
 /**
  * @brief shell print variable value
- * 
+ *
  * @param shell shell
  * @param command command
  * @return int value
@@ -985,7 +985,7 @@ static int shellShowVar(Shell *shell, ShellCommand *command)
 {
     char buffer[12] = "00000000000";
     int value = shellGetVarValue(shell, command);
-    
+
     shellWriteString(shell, command->data.var.name);
     shellWriteString(shell, " = ");
 
@@ -1019,7 +1019,7 @@ static int shellShowVar(Shell *shell, ShellCommand *command)
 
 /**
  * @brief shell set variable value
- * 
+ *
  * @param name value name
  * @param value value
  * @return int value
@@ -1056,10 +1056,10 @@ setVar, shellSetVar, set var);
 
 /**
  * @brief shell run command
- * 
+ *
  * @param shell shell
  * @param command command
- * 
+ *
  * @return unsigned int command return value
  */
 unsigned int shellRunCommand(Shell *shell, ShellCommand *command)
@@ -1104,7 +1104,7 @@ unsigned int shellRunCommand(Shell *shell, ShellCommand *command)
 
 /**
  * @brief shell check password
- * 
+ *
  * @param shell shell
  */
 static void shellCheckPassword(Shell *shell)
@@ -1124,20 +1124,20 @@ static void shellCheckPassword(Shell *shell)
 
 
 /**
- * @brief shell set user 
- * 
+ * @brief shell set user
+ *
  * @param shell shell
  * @param user user
  */
 static void shellSetUser(Shell *shell, const ShellCommand *user)
 {
     shell->info.user = user;
-    shell->status.isChecked = 
+    shell->status.isChecked =
         ((user->data.user.password && strlen(user->data.user.password) != 0)
             && (shell->parser.paramCount < 2
                 || strcmp(user->data.user.password, shell->parser.param[1]) != 0))
          ? 0 : 1;
-        
+
     if (shell->status.isChecked)
     {
         shellWriteString(shell, shellText[SHELL_TEXT_INFO]);
@@ -1147,7 +1147,7 @@ static void shellSetUser(Shell *shell, const ShellCommand *user)
 
 /**
  * @brief shell write return value
- * 
+ *
  * @param shell shell
  * @param value value
  */
@@ -1169,14 +1169,14 @@ static void shellWriteReturnValue(Shell *shell, int value)
 
 /**
  * @brief shell add history
- * 
+ *
  * @param shell shell
  */
 static void shellHistoryAdd(Shell *shell)
 {
     shell->history.offset = 0;
     if (shell->history.number > 0
-        && strcmp(shell->history.item[(shell->history.record == 0 ? 
+        && strcmp(shell->history.item[(shell->history.record == 0 ?
                 SHELL_HISTORY_MAX_NUMBER : shell->history.record) - 1],
                 shell->parser.buffer) == 0)
     {
@@ -1200,7 +1200,7 @@ static void shellHistoryAdd(Shell *shell)
 
 /**
  * @brief shell history find
- * 
+ *
  * @param shell shell
  * @param dir directory:{@code <0}UP, {@code >0}Down
  */
@@ -1208,7 +1208,7 @@ static void shellHistory(Shell *shell, signed char dir)
 {
     if (dir > 0)
     {
-        if (shell->history.offset-- <= 
+        if (shell->history.offset-- <=
             -((shell->history.number > shell->history.record) ?
                 shell->history.number : shell->history.record))
         {
@@ -1244,14 +1244,14 @@ static void shellHistory(Shell *shell, signed char dir)
         shell->parser.cursor = shell->parser.length;
         shellWriteString(shell, shell->parser.buffer);
     }
-    
+
 }
 
 
 /**
  * @brief shell normalinput
- * 
- * @param shell shell 
+ *
+ * @param shell shell
  * @param data input character
  */
 void shellNormalInput(Shell *shell, char data)
@@ -1263,12 +1263,12 @@ void shellNormalInput(Shell *shell, char data)
 
 /**
  * @brief shell run command
- * 
+ *
  * @param shell shell
  */
 void shellExec(Shell *shell)
 {
-    
+
     if (shell->parser.length == 0)
     {
         return;
@@ -1308,8 +1308,8 @@ void shellExec(Shell *shell)
 
 
 /**
- * @brief shell Previous history 
- * 
+ * @brief shell Previous history
+ *
  * @param shell shell
  */
 void shellUp(Shell *shell)
@@ -1321,7 +1321,7 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0), 0x1B5B4100, shellUp, up);
 
 /**
  * @brief shell Next
- * 
+ *
  * @param shell shell
  */
 void shellDown(Shell *shell)
@@ -1333,7 +1333,7 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0), 0x1B5B4200, shellDown, down);
 
 /**
  * @brief shell input right key
- * 
+ *
  * @param shell shell
  */
 void shellRight(Shell *shell)
@@ -1349,7 +1349,7 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
 
 /**
  * @brief shell input left key
- * 
+ *
  * @param shell shell
  */
 void shellLeft(Shell *shell)
@@ -1366,7 +1366,7 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
 
 /**
  * @brief shell Tab key function
- * 
+ *
  * @param shell shell
  */
 void shellTab(Shell *shell)
@@ -1399,7 +1399,7 @@ void shellTab(Shell *shell)
                         shellWriteString(shell, "\r\n");
                     }
                     shellListItem(shell, &base[lastMatchIndex]);
-                    length = 
+                    length =
                         shellStringCompare((char *)shellGetCommandName(&base[lastMatchIndex]),
                                            (char *)shellGetCommandName(&base[i]));
                     maxMatch = (maxMatch > length) ? length : maxMatch;
@@ -1418,7 +1418,7 @@ void shellTab(Shell *shell)
         }
         if (matchNum != 0)
         {
-            shell->parser.length = 
+            shell->parser.length =
                 shellStringCopy(shell->parser.buffer,
                                 (char *)shellGetCommandName(&base[lastMatchIndex]));
         }
@@ -1460,8 +1460,8 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0), 0x09000000, shellTab, tab);
 
 
 /**
- * @brief shell backspace 
- * 
+ * @brief shell backspace
+ *
  * @param shell shell
  */
 void shellBackspace(Shell *shell)
@@ -1476,7 +1476,7 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
 
 /**
  * @brief shell delet
- * 
+ *
  * @param shell shell
  */
 void shellDelete(Shell *shell)
@@ -1489,7 +1489,7 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
 
 /**
  * @brief shell Enter key
- * 
+ *
  * @param shell shell
  */
 void shellEnter(Shell *shell)
@@ -1497,24 +1497,24 @@ void shellEnter(Shell *shell)
     shellExec(shell);
     shellWriteCommandLine(shell, 1);
 }
-#ifdef SHELL_ENTER_LF 
+#ifdef SHELL_ENTER_LF
 SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
 0x0A000000, shellEnter, enter);
 #endif
-#ifdef SHELL_ENTER_CR 
+#ifdef SHELL_ENTER_CR
 SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
 0x0D000000, shellEnter, enter);
 #endif
-#ifdef SHELL_ENTER_CRLF 
+#ifdef SHELL_ENTER_CRLF
 SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
 0x0D0A0000, shellEnter, enter);
 #endif
 
 /**
  * @brief shell help
- * 
- * @param argc Number of parameters 
- * @param argv parameter 
+ *
+ * @param argc Number of parameters
+ * @param argv parameter
  */
 void shellHelp(int argc, char *argv[])
 {
@@ -1542,15 +1542,15 @@ SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_DISABLE_RE
 Help, shellHelp, show command info\r\nhelp [cmd]);
 
 /**
- * @brief shell Input processing 
- * 
+ * @brief shell Input processing
+ *
  * @param shell shell
  * @param data input data
  */
 void shellHandler(Shell *shell, char data)
 {
     CHECK(data);
-    
+
 
 #if SHELL_LOCK_TIMEOUT > 0
     if (shell->info.user->data.user.password
@@ -1597,7 +1597,7 @@ void shellHandler(Shell *shell, char data)
             {
                 shell->parser.keyValue |= data << keyByteOffset;
                 data = 0x00;
-                if (keyByteOffset == 0 
+                if (keyByteOffset == 0
                     || (base[i].data.key.value & (0xFF << (keyByteOffset - 8)))
                         == 0x00000000)
                 {
@@ -1630,9 +1630,9 @@ void shellHandler(Shell *shell, char data)
 
 /**
  * @brief shell task
- * 
+ *
  * @param param parameter(shell)
- * 
+ *
  */
 void shellTask(void *param)
 {
@@ -1652,12 +1652,13 @@ void shellTask(void *param)
                 shellHandler(shell, data[i]);
             }
         }
+        KPrintf("");
     }
 }
 
 
 /**
- * @brief Output user list (shell call) 
+ * @brief Output user list (shell call)
  */
 void shellUsers(void)
 {
@@ -1675,7 +1676,7 @@ users, shellUsers, list all user);
 
 
 /**
- * @brief Output variable list (shell call) 
+ * @brief Output variable list (shell call)
  */
 void shellVars(void)
 {
@@ -1692,7 +1693,7 @@ vars, shellVars, list all var);
 #endif
 
 /**
- * @brief Output key list (shell call) 
+ * @brief Output key list (shell call)
  */
 void shellKeys(void)
 {
@@ -1708,7 +1709,7 @@ SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_DISABLE_RE
 keys, shellKeys, list all key);
 #endif
 /**
- * @brief Clear the console (shell call) 
+ * @brief Clear the console (shell call)
  */
 void shellClear(void)
 {

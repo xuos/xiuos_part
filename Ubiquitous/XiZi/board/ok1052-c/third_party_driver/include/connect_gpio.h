@@ -12,10 +12,10 @@
 
 /**
 * @file connect_gpio.h
-* @brief define imxrt1052-board gpio function and struct
-* @version 2.0
+* @brief define ok1052-c board gpio function and struct
+* @version 1.0
 * @author AIIT XUOS Lab
-* @date 2022-03-15
+* @date 2022-03-01
 */
 
 #ifndef __CONNECT_GPIO_H_

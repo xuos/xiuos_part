@@ -13,7 +13,7 @@
 * @brief support gpio function using bus driver framework
 * @version 2.0
 * @author AIIT XUOS Lab
-* @date 2022-03-16
+* @date 2022-03-22
 */
 
 /*************************************************
@@ -22,7 +22,7 @@ Description: support gpio configure and register to bus framework
 Others: take RT-Thread v4.0.2/bsp/imxrt/libraries/drivers/drv_gpio.c for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
 History:
-1. Date: 2022-03-16
+1. Date: 2022-03-22
 Author: AIIT XUOS Lab
 Modification: add bus driver framework support for gpio
 *************************************************/
@@ -215,6 +215,20 @@ struct PinIrqHdr pin_irq_hdr_tab[] =
     {-1, 0, NONE, NONE},
 };
 
+#define MUX_BASE            0x401f8014
+#define CONFIG_BASE         0x401f8204
+
+#define GPIO5_MUX_BASE      0x400A8000
+#define GPIO5_CONFIG_BASE   0x400A8018
+
+const uint8_t reg_offset[] =
+{
+    42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73,
+    74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99,100,101,102,103,104,105,
+   112,113,114,115,116,117,118,119,120,121,122,123,106,107,108,109,110,111, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, -1, -1, -1, -1,
+     0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+};
+
 static int GetPin(struct PinIndex *pin_index, uint8_t pin)
 {
     pin_index->index = pin >> 5;//0:GPIO1 1:GPIO2 2:GPIO3 3:GPIO4 4:GPIO5 
@@ -229,39 +243,52 @@ static int GetPin(struct PinIndex *pin_index, uint8_t pin)
     return 0;
 }
 
-static int32 GpioConfigMode(int mode, struct PinIndex *index)
+static int32 GpioConfigMode(int mode, struct PinIndex *pin_index, int32 pin)
 {
     gpio_pin_config_t gpio_config;
-    NULL_PARAM_CHECK(index);
+    uint32_t config_value = 0;
+    NULL_PARAM_CHECK(pin_index);
 
     gpio_config.outputLogic = 0;
+    gpio_config.interruptMode = kGPIO_NoIntmode;
 
     switch (mode)
     {
         case GPIO_CFG_OUTPUT:
             gpio_config.direction = kGPIO_DigitalOutput;
-            gpio_config.interruptMode = kGPIO_NoIntmode;
+            config_value = 0x0030U;    /* Drive Strength R0/6 */
             break;
         case GPIO_CFG_INPUT:
             gpio_config.direction = kGPIO_DigitalInput;
-            gpio_config.interruptMode = kGPIO_NoIntmode;
+            config_value = 0x0830U;    /* Open Drain Enable */
             break;
         case GPIO_CFG_INPUT_PULLUP:
             gpio_config.direction = kGPIO_DigitalInput;
-            gpio_config.interruptMode = kGPIO_NoIntmode;
+            config_value = 0xB030U;    /* 100K Ohm Pull Up */
             break;
         case GPIO_CFG_INPUT_PULLDOWN:
             gpio_config.direction = kGPIO_DigitalInput;
-            gpio_config.interruptMode = kGPIO_NoIntmode;
+            config_value = 0x3030U;    /* 100K Ohm Pull Down */
             break;
         case GPIO_CFG_OUTPUT_OD:
             gpio_config.direction = kGPIO_DigitalOutput;
-            gpio_config.interruptMode = kGPIO_NoIntmode;
+            config_value = 0x0830U;    /* Open Drain Enable */
             break;
         default:
             break;
     }
-    GPIO_PinInit(index->gpio, index->pin, &gpio_config);
+
+    if (pin_mask[pin_index->index].gpio != GPIO5) {
+        CLOCK_EnableClock(kCLOCK_Iomuxc);
+        IOMUXC_SetPinMux(MUX_BASE + reg_offset[pin] * 4, 0x5U, 0, 0, CONFIG_BASE + reg_offset[pin] * 4, 1);
+        IOMUXC_SetPinConfig(MUX_BASE + reg_offset[pin] * 4, 0x5U, 0, 0, CONFIG_BASE + reg_offset[pin] * 4, config_value);
+    } else {
+        CLOCK_EnableClock(kCLOCK_IomuxcSnvs);
+        IOMUXC_SetPinMux(GPIO5_MUX_BASE + pin_index->pin * 4, 0x5U, 0, 0, GPIO5_CONFIG_BASE + pin_index->pin * 4, 1);
+        IOMUXC_SetPinConfig(GPIO5_MUX_BASE + pin_index->pin * 4, 0x5U, 0, 0, GPIO5_CONFIG_BASE + pin_index->pin * 4, config_value);
+    }
+
+    GPIO_PinInit(pin_index->gpio, pin_index->pin, &gpio_config);
     return EOK;
 }
 
@@ -392,7 +419,7 @@ static uint32 Imxrt1052PinConfigure(struct PinParam *param)
     switch(param->cmd)
     {
         case GPIO_CONFIG_MODE:
-            GpioConfigMode(param->mode, &pin_index);
+            GpioConfigMode(param->mode, &pin_index, param->pin);
             break;
         case GPIO_IRQ_REGISTER:
             ret = GpioIrqRegister(param->pin, param->irq_set.irq_mode, param->irq_set.hdr, param->irq_set.args);
@@ -554,6 +581,9 @@ static __inline void PinIrqHdr(uint32_t index_offset, uint8_t pin_start, GPIO_Ty
 
         if (isr_status & (1 << i)) {
             GPIO_PortClearInterruptFlags(gpio, (1 << i));
+
+            __DSB();
+
             pin = index_offset + i;
             if (pin_irq_hdr_tab[pin].hdr) {
                 pin_irq_hdr_tab[pin].hdr(pin_irq_hdr_tab[pin].args);
@@ -705,21 +735,6 @@ void GpioLedTest(void)
         KPrintf("initialize %s failed!\n", PIN_BUS_NAME);
         return;
     }
-
-    IOMUXC_SetPinMux(
-        IOMUXC_GPIO_AD_B0_09_GPIO1_IO09,        /* GPIO_AD_B0_09 is configured as GPIO1_IO09 */
-        0U);                                    /* Software Input On Field: Input Path is determined by functionality */
-                                    /* Software Input On Field: Input Path is determined by functionality */
-    IOMUXC_SetPinConfig(
-        IOMUXC_GPIO_AD_B0_09_GPIO1_IO09,        /* GPIO_AD_B0_09 PAD functional properties : */
-        0x10B0u);                               /* Slew Rate Field: Slow Slew Rate
-                                                    Drive Strength Field: R0/6
-                                                    Speed Field: medium(100MHz)
-                                                    Open Drain Enable Field: Open Drain Disabled
-                                                    Pull / Keep Enable Field: Pull/Keeper Enabled
-                                                    Pull / Keep Select Field: Keeper
-                                                    Pull Up / Down Config. Field: 100K Ohm Pull Down
-                                                    Hyst. Enable Field: Hysteresis Disabled */
     
     struct PinParam led_gpio_param;
     struct PinStat led_gpio_stat;
@@ -762,4 +777,3 @@ void GpioLedTest(void)
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
                                                 GpioLedTest, GpioLedTest, GpioLedTest GPIO1 IO09 LED);
 #endif
-

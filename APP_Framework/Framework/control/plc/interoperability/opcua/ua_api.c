@@ -28,7 +28,7 @@ int ua_open(void *dev)
 
     param->client = UA_Client_new();
 
-    ua_pr_info("ua: [%s] start ...\n", __func__);
+    ua_notice("ua: [%s] start ...\n", __func__);
 
     if (param->client == NULL)
     {
@@ -39,11 +39,11 @@ int ua_open(void *dev)
     UA_ClientConfig *config = UA_Client_getConfig(param->client);
     UA_ClientConfig_setDefault(config);
 
-    ua_pr_info("ua: [%s] %d %s\n", __func__, strlen(param->ua_remote_ip), param->ua_remote_ip);
+    ua_notice("ua: [%s] %d %s\n", __func__, strlen(param->ua_remote_ip), param->ua_remote_ip);
 
     UA_StatusCode retval = UA_Client_connect(param->client, param->ua_remote_ip);
     if(retval != UA_STATUSCODE_GOOD) {
-        ua_pr_info("ua: [%s] deleted ret %x!\n", __func__, retval);
+        ua_notice("ua: [%s] deleted ret %x!\n", __func__, retval);
         return (int)retval;
     }
     return EOK;
@@ -52,7 +52,6 @@ int ua_open(void *dev)
 void ua_close(void *dev)
 {
     UaParamType *param = (UaParamType *)dev;
-    UA_Client_disconnect(param->client);
     UA_Client_delete(param->client); /* Disconnects the client internally */
 }
 

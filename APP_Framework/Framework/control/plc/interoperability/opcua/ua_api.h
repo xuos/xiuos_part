@@ -43,8 +43,9 @@ typedef struct UaParam
 
 #define ua_print //KPrintf
 #define ua_trace() //KPrintf("ua: [%s] line %d checked!\n", __func__, __LINE__)
-#define ua_pr_info KPrintf
+#define ua_notice KPrintf
 #define ua_debug //KPrintf
+#define ua_error KPrintf
 
 extern const char *opc_server_url;
 extern char test_ua_ip[];

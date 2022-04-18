@@ -68231,11 +68231,11 @@ UA_Log_Stdout_log(void *context, UA_LogLevel level, UA_LogCategory category,
     //        (int)(tOffset / UA_DATETIME_SEC / 36), logLevelNames[level], logCategoryNames[category]);
     // vprintf(msg, args);
 
-    KPrintf("%s/%s" ANSI_COLOR_RESET "\t",
+    ua_print("%s/%s" ANSI_COLOR_RESET "\t",
             logLevelNames[level], logCategoryNames[category]);
     vsnprintf(str, sizeof(str) - 1, msg, args);
-    KPrintf(msg, str);
-    KPrintf("\n");
+    ua_print(msg, str);
+    ua_print("\n");
 
     // printf("\n");
     fflush(stdout);

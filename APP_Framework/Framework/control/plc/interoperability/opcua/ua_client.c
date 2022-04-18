@@ -42,7 +42,7 @@ static UA_StatusCode nodeIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId
     }
 
     UA_NodeId* parent = (UA_NodeId*)handle;
-    ua_pr_info("%d, %d --- %d ---> NodeId %d, %d\n",
+    ua_notice("%d, %d --- %d ---> NodeId %d, %d\n",
                parent->namespaceIndex, parent->identifier.numeric,
                referenceTypeId.identifier.numeric, childId.namespaceIndex,
                childId.identifier.numeric);
@@ -81,38 +81,38 @@ void ua_print_value(UA_Variant* val)
     if(val->type == &UA_TYPES[UA_TYPES_LOCALIZEDTEXT])
     {
         UA_LocalizedText* ptr = (UA_LocalizedText*)val->data;
-        ua_pr_info("%.*s (Text)\n", ptr->text.length, ptr->text.data);
+        ua_notice("%.*s (Text)\n", ptr->text.length, ptr->text.data);
     }
     else if(val->type == &UA_TYPES[UA_TYPES_UINT32])
     {
         UA_UInt32* ptr = (UA_UInt32*)val->data;
-        ua_pr_info("%d (UInt32)\n", *ptr);
+        ua_notice("%d (UInt32)\n", *ptr);
     }
     else if(val->type == &UA_TYPES[UA_TYPES_BOOLEAN])
     {
         UA_Boolean* ptr = (UA_Boolean*)val->data;
-        ua_pr_info("%i (BOOL)\n", *ptr);
+        ua_notice("%i (BOOL)\n", *ptr);
     }
     else if(val->type == &UA_TYPES[UA_TYPES_INT32])
     {
         UA_Int32* ptr = (UA_Int32*)val->data;
-        ua_pr_info("%d (Int32)\n", *ptr);
+        ua_notice("%d (Int32)\n", *ptr);
     }
     else if(val->type == &UA_TYPES[UA_TYPES_INT16])
     {
         UA_Int16* ptr = (UA_Int16*)val->data;
-        ua_pr_info("%d (Int16)\n", *ptr);
+        ua_notice("%d (Int16)\n", *ptr);
     }
     else if(val->type == &UA_TYPES[UA_TYPES_STRING])
     {
         UA_String* ptr = (UA_String*)val->data;
-        ua_pr_info("%*.s (String)\n", ptr->length, ptr->data);
+        ua_notice("%*.s (String)\n", ptr->length, ptr->data);
     }
     else if(val->type == &UA_TYPES[UA_TYPES_DATETIME])
     {
         UA_DateTime* ptr = (UA_DateTime*)val->data;
         UA_DateTimeStruct dts = UA_DateTime_toStruct(*ptr);
-        ua_pr_info("%d-%d-%d %d:%d:%d.%03d (Time)\n",
+        ua_notice("%d-%d-%d %d:%d:%d.%03d (Time)\n",
                    dts.day, dts.month, dts.year, dts.hour, dts.min, dts.sec, dts.milliSec);
     }
 }
@@ -144,14 +144,14 @@ void ua_print_nodeid(UA_NodeId *node_id)
     switch(node_id->identifierType)
     {
         case UA_NODEIDTYPE_NUMERIC:
-            ua_pr_info(" NodeID n%d,%d ", node_id->namespaceIndex, node_id->identifier.numeric);
+            ua_notice(" NodeID n%d,%d ", node_id->namespaceIndex, node_id->identifier.numeric);
             break;
         case UA_NODEIDTYPE_STRING:
-            ua_pr_info(" NodeID n%d,%.*s ", node_id->namespaceIndex, node_id->identifier.string.length,
+            ua_notice(" NodeID n%d,%.*s ", node_id->namespaceIndex, node_id->identifier.string.length,
                 node_id->identifier.string.data);
             break;
         case UA_NODEIDTYPE_BYTESTRING:
-            ua_pr_info(" NodeID n%d,%s ", node_id->namespaceIndex, node_id->identifier.byteString.data);
+            ua_notice(" NodeID n%d,%s ", node_id->namespaceIndex, node_id->identifier.byteString.data);
             break;
         default:
             break;
@@ -160,7 +160,7 @@ void ua_print_nodeid(UA_NodeId *node_id)
 
 void ua_print_object(UA_BrowseResponse* res)
 {
-    ua_pr_info("%-9s %-16s %-16s %-16s\n", "NAMESPACE", "NODEID", "BROWSE NAME", "DISPLAY NAME");
+    ua_notice("%-9s %-16s %-16s %-16s\n", "NAMESPACE", "NODEID", "BROWSE NAME", "DISPLAY NAME");
 
     for(size_t i = 0; i < res->resultsSize; ++i)
     {
@@ -170,14 +170,14 @@ void ua_print_object(UA_BrowseResponse* res)
 
             if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_NUMERIC)
             {
-                ua_pr_info("%-9d %-16d %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
+                ua_notice("%-9d %-16d %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
                            ref->nodeId.nodeId.identifier.numeric, (int)ref->browseName.name.length,
                            ref->browseName.name.data, (int)ref->displayName.text.length,
                            ref->displayName.text.data);
             }
             else if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_STRING)
             {
-                ua_pr_info("%-9d %-16.*s %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
+                ua_notice("%-9d %-16.*s %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
                            (int)ref->nodeId.nodeId.identifier.string.length,
                            ref->nodeId.nodeId.identifier.string.data,
                            (int)ref->browseName.name.length, ref->browseName.name.data,
@@ -188,7 +188,7 @@ void ua_print_object(UA_BrowseResponse* res)
         }
     }
 
-    ua_pr_info("\n");
+    ua_notice("\n");
 }
 
 UA_StatusCode ua_read_array_value(UA_Client* client, int array_size, UA_ReadValueId* array)
@@ -203,7 +203,7 @@ UA_StatusCode ua_read_array_value(UA_Client* client, int array_size, UA_ReadValu
             || (response.resultsSize != array_size))
     {
         UA_ReadResponse_clear(&response);
-        ua_pr_info("ua: [%s] read failed 0x%x\n", __func__,
+        ua_notice("ua: [%s] read failed 0x%x\n", __func__,
                    response.responseHeader.serviceResult);
         return UA_STATUSCODE_BADUNEXPECTEDERROR;
     }
@@ -215,11 +215,11 @@ UA_StatusCode ua_read_array_value(UA_Client* client, int array_size, UA_ReadValu
         if((response.results[i].status == UA_STATUSCODE_GOOD)
                 && (response.results[i].hasValue))
         {
-            ua_pr_info("node %s: ", ua_get_nodeid_str(&array[i].nodeId));
+            ua_notice("node %s: ", ua_get_nodeid_str(&array[i].nodeId));
             ua_print_value(&response.results[i].value);
         }
     }
-    ua_pr_info("\n");
+    ua_notice("\n");
 
     free(arr_ret);
     UA_ReadResponse_clear(&response);
@@ -229,7 +229,7 @@ UA_StatusCode ua_read_array_value(UA_Client* client, int array_size, UA_ReadValu
 void ua_browser_id(UA_Client* client, UA_NodeId id)
 {
     /* Browse some objects */
-    ua_pr_info("Browsing nodes in objects folder:\n");
+    ua_notice("Browsing nodes in objects folder:\n");
     UA_BrowseRequest bReq;
     UA_BrowseRequest_init(&bReq);
     bReq.requestedMaxReferencesPerNode = 0;
@@ -327,7 +327,7 @@ void ua_write_nodeid_value(UA_Client* client, UA_NodeId id, char* value)
 
     if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD)
     {
-        ua_pr_info("write new value is: %s\n", value);
+        ua_notice("write new value is: %s\n", value);
     }
 
     UA_WriteRequest_clear(&wReq);
@@ -489,7 +489,7 @@ void ua_read_time(UA_Client* client)
     {
         UA_DateTime raw_date = *(UA_DateTime*) value.data;
         UA_DateTimeStruct dts = UA_DateTime_toStruct(raw_date);
-        ua_pr_info("date is: %d-%d-%d %d:%d:%d.%03d\n",
+        ua_notice("date is: %d-%d-%d %d:%d:%d.%03d\n",
                     dts.day, dts.month, dts.year, dts.hour, dts.min, dts.sec, dts.milliSec);
     }
 

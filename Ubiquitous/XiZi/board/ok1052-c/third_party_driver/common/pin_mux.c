@@ -7,7 +7,7 @@
 
 /**
 * @file pin_mux.c
-* @brief support imxrt1052-board pin configure
+* @brief support ok1052-c board pin configure
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-29
@@ -271,7 +271,7 @@ void SemcPinmuxConfig(void)
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_41_SEMC_CSX00,          /* GPIO_EMC_41 is configured as SEMC_CSX00 */
       0U);                                    /* Software Input On Field: Input Path is determined by functionality */
-  
+
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_EMC_00_SEMC_DATA00,         /* GPIO_EMC_00 PAD functional properties : */
       0x0110F9u);                             /* Slew Rate Field: Fast Slew Rate

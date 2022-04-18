@@ -62,7 +62,7 @@ void InitBoardHardware(void);
 #define NVIC_PRIORITYGROUP_4         0x00000003U /*!< 4 bits for pre-emption priority*/
 
 /*! @brief The ENET PHY address. */
-#define BOARD_ENET0_PHY_ADDRESS (0x02U) /* Phy address of enet port 0. */
+#define BOARD_ENET0_PHY_ADDRESS (0x0U) /* Phy address of enet port 0. */
 
 /* USB PHY condfiguration */
 #define BOARD_USB_PHY_D_CAL (0x0CU)
