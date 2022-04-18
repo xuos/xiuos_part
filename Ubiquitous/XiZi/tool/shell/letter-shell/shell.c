@@ -1652,7 +1652,6 @@ void shellTask(void *param)
                 shellHandler(shell, data[i]);
             }
         }
-        KPrintf("");
     }
 }
 

@@ -99,7 +99,7 @@ void ethernetif_clk_init(void)
 {
     const clock_enet_pll_config_t config = {.enableClkOutput = true, .enableClkOutput25M = false, .loopDivider = 1};
     CLOCK_InitEnetPll(&config);
-    SysTick_Config(USEC_TO_COUNT(1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)));
+    SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
 }
 
 void ethernetif_gpio_init(void)
@@ -109,9 +109,7 @@ void ethernetif_gpio_init(void)
     IOMUXC_EnableMode(IOMUXC_GPR, kIOMUXC_GPR_ENET1TxClkOutputDir, true);
 
     GPIO_PinInit(GPIO1, 3, &gpio_config);
-    GPIO_PinInit(GPIO1, 10, &gpio_config);
     /* pull up the ENET_INT before RESET. */
-    GPIO_WritePinOutput(GPIO1, 10, 1);
     GPIO_WritePinOutput(GPIO1, 3, 0);
     enet_delay();
     GPIO_WritePinOutput(GPIO1, 3, 1);

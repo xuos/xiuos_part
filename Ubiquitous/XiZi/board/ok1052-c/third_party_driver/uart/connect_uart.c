@@ -41,11 +41,9 @@ void LPUART1_IRQHandler(int irqn, void *arg)
 {
     x_base lock = 0;
     // KPrintf("LPUART1_IRQHandler \n");
-    lock = DISABLE_INTERRUPT();
-
+    lock = DisableIRQ(UART1_IRQn);
     UartIsr(&serial_bus_1, &serial_driver_1, &serial_device_1);
-
-    ENABLE_INTERRUPT(lock);
+    EnableIRQ(UART1_IRQn);
 }
 DECLARE_HW_IRQ(UART1_IRQn, LPUART1_IRQHandler, NONE);
 #endif

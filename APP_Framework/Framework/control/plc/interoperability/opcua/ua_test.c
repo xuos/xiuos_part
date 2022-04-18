@@ -27,72 +27,60 @@
 #define UA_TEST_BROWSER_NODEID1 UA_NODEID_NUMERIC(4, 1)
 #define UA_TEST_WRITE_NODEID UA_NODEID_NUMERIC(4, 5)
 
+#define UA_TEST_NODE_ARRAY_NUM 10
 
-static UA_StatusCode ua_test_read_array(UA_Client *client)
+static UA_StatusCode UaTestReadArrayValue(UA_Client *client, UA_NodeId id)
 {
-    const int item_size = 4;
-    UA_ReadValueId test_item[item_size];
+    int i;
+    int array_size = 0;
+    int test_id[UA_TEST_NODE_ARRAY_NUM];
+    UA_ReadValueId test_array[UA_TEST_NODE_ARRAY_NUM];
 
-    for (int i = 0; i < item_size; i++)
+    for(i = 0; i < UA_TEST_NODE_ARRAY_NUM; i++)
     {
-        UA_ReadValueId_init(&test_item[i]);
-        test_item[i].attributeId = UA_ATTRIBUTEID_VALUE;
+        UA_ReadValueId_init(&test_array[i]);
+        test_array[i].attributeId = UA_ATTRIBUTEID_VALUE;
     }
 
-    test_item[0].nodeId = UA_NODEID_NUMERIC(4, 2);
-    test_item[1].nodeId = UA_NODEID_NUMERIC(4, 3);
-    test_item[2].nodeId = UA_NODEID_NUMERIC(4, 4);
-    test_item[3].nodeId = UA_NODEID_NUMERIC(4, 5);
+    array_size = UaGetNodeIdArray(client, id, UA_TEST_NODE_ARRAY_NUM, test_id);
 
-    return ua_read_array_value(client, item_size, test_item);
+    for(i = 0; i < array_size; i++)
+    {
+        test_array[i].nodeId = UA_NODEID_NUMERIC(id.namespaceIndex, test_id[i]);
+    }
+
+    return UaReadArrayValue(client, array_size, test_array);
 }
 
-void ua_test_browser_objects(UA_Client *client)
+void UaTestBrowserObjects(UA_Client *client)
 {
     UA_NodeId test_id;
-    ua_browser_id(client, UA_TEST_BROWSER_NODEID);
-    ua_browser_id(client, UA_TEST_BROWSER_NODEID1);
+    UaBrowserNodeId(client, UA_TEST_BROWSER_NODEID);
+    UaBrowserNodeId(client, UA_TEST_BROWSER_NODEID1);
     test_id = UA_TEST_BROWSER_NODEID1;
-    ua_notice("Show values in %s:\n", ua_get_nodeid_str(&test_id));
-    ua_test_read_array(client);
+    ua_notice("Show values in %s:\n", UaGetNodeIdString(&test_id));
+    UaTestReadArrayValue(client, test_id);
     return;
 }
 
-void ua_test_write_attr(UA_Client *client)
+static void UaTestWriteNodeValue(UA_Client *client)
 {
     UA_Int32 value;
     char val_str[UA_NODE_LEN];
     UA_NodeId id = UA_TEST_WRITE_NODEID;
 
-    ua_notice("--- Test write %s ---\n", ua_get_nodeid_str(&id));
-    ua_read_nodeid_value(client, id, &value);
-    ua_write_nodeid_value(client, id, itoa(value + 1, val_str, 10));
-    ua_read_nodeid_value(client, id, &value);
+    ua_notice("--- Test write %s ---\n", UaGetNodeIdString(&id));
+    UaReadNodeValue(client, id, &value);
+    UaWriteNodeValue(client, id, itoa(value + 1, val_str, 10));
+    UaReadNodeValue(client, id, &value);
     ua_notice("\n");
 }
 
-int ua_test_interact_server(UA_Client *client)
+int UaTestInteractServer(UA_Client *client)
 {
-    ua_read_time(client);
-    ua_test_browser_objects(client);
-    ua_test_write_attr(client);
-    return EXIT_SUCCESS;
-}
-
-int16 ua_test(void)
-{
-    UA_Client *client = UA_Client_new();
-    UA_StatusCode retval = UA_Client_connect(client, opc_server_url);
-    if(retval != UA_STATUSCODE_GOOD) {
-        UA_Client_delete(client);
-        return (int)retval;
-    }
-
-    ua_read_time(client);
-
-    /* Clean up */
-    UA_Client_disconnect(client);
-    UA_Client_delete(client); /* Disconnects the client internally */
+    UaGetServerTime(client);
+    UaTestBrowserObjects(client);
+    UaTestWriteNodeValue(client);
     return EXIT_SUCCESS;
 }
 

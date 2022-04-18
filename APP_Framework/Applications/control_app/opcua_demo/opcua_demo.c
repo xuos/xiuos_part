@@ -21,7 +21,6 @@
 #include <list.h>
 #include <transform.h>
 #include "board.h"
-#include <lwip/altcp.h>
 #include "open62541.h"
 #include "ua_api.h"
 
@@ -40,6 +39,9 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+// to count test
+static int test_cnt = 0;
+static int fail_cnt = 0; // count failure times
 
 char test_ua_ip[] = {192, 168, 250, 2};
 
@@ -50,37 +52,56 @@ char test_ua_ip[] = {192, 168, 250, 2};
 static void UaConnectTestTask(void* arg)
 {
     struct netif net;
-    UA_StatusCode retval;
-    char ua_uri[UA_URL_SIZE];
-    memset(ua_uri, 0, sizeof(ua_uri));
+    UA_StatusCode ret;
+    char url[UA_URL_SIZE];
+    memset(url, 0, sizeof(url));
+
     UA_Client* client = UA_Client_new();
 
     if(client == NULL)
     {
-        ua_print("ua: [%s] tcp client null\n", __func__);
+        ua_error("ua: [%s] tcp client null\n", __func__);
         return;
     }
 
     UA_ClientConfig* config = UA_Client_getConfig(client);
-    UA_ClientConfig_setDefault(config);
-    snprintf(ua_uri, sizeof(ua_uri), "opc.tcp://%d.%d.%d.%d:4840",
-             test_ua_ip[0], test_ua_ip[1], test_ua_ip[2], test_ua_ip[3]);
-    ua_notice("ua uri: %d %s\n", strlen(ua_uri), ua_uri);
-    retval = UA_Client_connect(client,ua_uri);
 
-    if(retval != UA_STATUSCODE_GOOD)
+    UA_ClientConfig_setDefault(config);
+
+    snprintf(url, sizeof(url), "opc.tcp://%d.%d.%d.%d:4840",
+             test_ua_ip[0], test_ua_ip[1], test_ua_ip[2], test_ua_ip[3]);
+
+    ua_notice("ua connect cnt %d fail %d\n", test_cnt++, fail_cnt ++);
+    ua_notice("ua connect uri: %.*s\n", strlen(url), url);
+
+    ret = UA_Client_connect(client, url);
+
+    if(ret != UA_STATUSCODE_GOOD)
     {
-        ua_notice("ua: [%s] connected failed %x\n", __func__, retval);
+        ua_error("ua: [%s] connected failed %x\n", __func__, ret);
         UA_Client_delete(client);
+        fail_cnt++;
         return;
     }
 
-    ua_notice("ua: [%s] connected ok!\n", __func__);
+    ua_notice("ua connected ok!\n");
     UA_Client_delete(client);
 }
 
-void UaConnectTest(void* arg)
+static void UaConnectTest(int argc, char *argv[])
 {
+    if(argc == 2)
+    {
+        if(isdigit(argv[1][0]))
+        {
+            if(sscanf(argv[1], "%d.%d.%d.%d", &test_ua_ip[0], &test_ua_ip[1], &test_ua_ip[2], &test_ua_ip[3]) == EOF)
+            {
+                lw_notice("input wrong ip\n");
+                return;
+            }
+        }
+    }
+
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
     sys_thread_new("ua test", UaConnectTestTask, NULL, UA_STACK_SIZE, UA_TASK_PRIO);
 }
@@ -90,9 +111,9 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
 
 void UaBrowserObjectsTestTask(void* param)
 {
-    static int test_cnt = 0;
-    UA_Client* client = UA_Client_new();
     ua_notice("ua: [%s] start %d ...\n", __func__, test_cnt++);
+
+    UA_Client* client = UA_Client_new();
 
     if(client == NULL)
     {
@@ -102,25 +123,26 @@ void UaBrowserObjectsTestTask(void* param)
 
     UA_ClientConfig* config = UA_Client_getConfig(client);
     UA_ClientConfig_setDefault(config);
-    UA_StatusCode retval = UA_Client_connect(client, opc_server_url);
+    UA_StatusCode ret = UA_Client_connect(client, opc_server_url);
 
-    if(retval != UA_STATUSCODE_GOOD)
+    if(ret != UA_STATUSCODE_GOOD)
     {
-        ua_error("ua: [%s] connect failed %#x\n", __func__, retval);
+        ua_error("ua: [%s] connect failed %#x\n", __func__, ret);
         UA_Client_delete(client);
         return;
     }
 
     ua_notice("--- start read time ---\n", __func__);
-    ua_read_time(client);
+    UaGetServerTime(client);
+
     ua_notice("--- get server info ---\n", __func__);
-    ua_test_browser_objects(client);
+    UaTestBrowserObjects(client);
 
     /* Clean up */
     UA_Client_delete(client);    /* Disconnects the client internally */
 }
 
-void* UaBrowserObjectsTest(int argc, char* argv[])
+static void* UaBrowserObjectsTest(int argc, char* argv[])
 {
     if(argc == 2)
     {
@@ -140,35 +162,33 @@ void* UaBrowserObjectsTest(int argc, char* argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 UaObj, UaBrowserObjectsTest, UaObj [IP]);
+                 UaObject, UaBrowserObjectsTest, UaObject [IP]);
 
 void UaGetInfoTestTask(void* param)
 {
     UA_Client* client = UA_Client_new();
-    ua_notice("ua: [%s] start ...\n", __func__);
+    ua_notice("--- Get OPUCA objects ---\n", __func__);
 
     if(client == NULL)
     {
-        ua_print("ua: [%s] tcp client null\n", __func__);
+        ua_error("ua: [%s] tcp client null\n", __func__);
         return;
     }
 
     UA_ClientConfig* config = UA_Client_getConfig(client);
     UA_ClientConfig_setDefault(config);
-    UA_StatusCode retval = UA_Client_connect(client, opc_server_url);
+    UA_StatusCode ret = UA_Client_connect(client, opc_server_url);
 
-    if(retval != UA_STATUSCODE_GOOD)
+    if(ret != UA_STATUSCODE_GOOD)
     {
-        ua_print("ua: [%s] connect failed %#x\n", __func__, retval);
+        ua_error("ua: [%s] connect failed %#x\n", __func__, ret);
         UA_Client_delete(client);
         return;
     }
 
-    ua_print("ua: [%s] connect ok!\n", __func__);
     ua_notice("--- interactive server ---\n", __func__);
-    ua_test_interact_server(client);
-    /* Clean up */
-    UA_Client_disconnect(client);
+    UaTestInteractServer(client);
+
     UA_Client_delete(client);    /* Disconnects the client internally */
 }
 
@@ -201,26 +221,24 @@ void UaAddNodesTask(void* param)
 
     if(client == NULL)
     {
-        ua_print("ua: [%s] tcp client null\n", __func__);
+        ua_error("ua: [%s] client null\n", __func__);
         return;
     }
 
     UA_ClientConfig* config = UA_Client_getConfig(client);
     UA_ClientConfig_setDefault(config);
-    UA_StatusCode retval = UA_Client_connect(client, opc_server_url);
+    UA_StatusCode ret = UA_Client_connect(client, opc_server_url);
 
-    if(retval != UA_STATUSCODE_GOOD)
+    if(ret != UA_STATUSCODE_GOOD)
     {
-        ua_print("ua: [%s] connect failed %#x\n", __func__, retval);
+        ua_print("ua: [%s] connect failed %#x\n", __func__, ret);
         UA_Client_delete(client);
         return;
     }
 
-    ua_print("ua: [%s] connect ok!\n", __func__);
     ua_notice("--- add nodes ---\n", __func__);
-    ua_add_nodes(client);
-    /* Clean up */
-    UA_Client_disconnect(client);
+    UaAddNodes(client);
+
     UA_Client_delete(client);    /* Disconnects the client internally */
 }
 
