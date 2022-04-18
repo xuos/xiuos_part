@@ -18,6 +18,7 @@
 #define RT_TICK_PER_SECOND 1000
 #define RT_USING_OVERFLOW_CHECK
 #define RT_USING_HOOK
+#define RT_HOOK_USING_FUNC_PTR
 #define RT_USING_IDLE_HOOK
 #define RT_IDLE_HOOK_LIST_SIZE 4
 #define IDLE_THREAD_STACK_SIZE 256
@@ -39,8 +40,9 @@
 
 #define RT_USING_MEMPOOL
 #define RT_USING_MEMHEAP
-#define RT_USING_MEMHEAP_AUTO_BINDING
+#define RT_MEMHEAP_FAST_MODE
 #define RT_USING_MEMHEAP_AS_HEAP
+#define RT_USING_MEMHEAP_AUTO_BINDING
 #define RT_USING_HEAP
 
 /* Kernel Device Object */
@@ -49,7 +51,7 @@
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 256
 #define RT_CONSOLE_DEVICE_NAME "uart1"
-#define RT_VER_NUM 0x40004
+#define RT_VER_NUM 0x40100
 #define ARCH_ARM
 #define RT_USING_CPU_FFS
 #define ARCH_ARM_CORTEX_M
@@ -61,15 +63,8 @@
 #define RT_USING_USER_MAIN
 #define RT_MAIN_THREAD_STACK_SIZE 2048
 #define RT_MAIN_THREAD_PRIORITY 10
-
-/* C++ features */
-
-#define RT_USING_CPLUSPLUS
-
-/* Command shell */
-
-#define RT_USING_FINSH
 #define RT_USING_MSH
+#define RT_USING_FINSH
 #define FINSH_USING_MSH
 #define FINSH_THREAD_NAME "tshell"
 #define FINSH_THREAD_PRIORITY 20
@@ -81,10 +76,8 @@
 #define MSH_USING_BUILT_IN_COMMANDS
 #define FINSH_USING_DESCRIPTION
 #define FINSH_ARG_MAX 10
-
-/* Device virtual file system */
-
 #define RT_USING_DFS
+#define DFS_USING_POSIX
 #define DFS_USING_WORKDIR
 #define DFS_FILESYSTEMS_MAX 4
 #define DFS_FILESYSTEM_TYPES_MAX 4
@@ -110,7 +103,6 @@
 /* Device Drivers */
 
 #define RT_USING_DEVICE_IPC
-#define RT_PIPE_BUFSZ 512
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
 #define RT_SERIAL_USING_DMA
@@ -133,31 +125,38 @@
 
 /* Using USB */
 
+#define RT_USING_USB
+#define RT_USING_USB_DEVICE
+#define RT_USBD_THREAD_STACK_SZ 4096
+#define USB_VENDOR_ID 0x0FFE
+#define USB_PRODUCT_ID 0x0001
+#define _RT_USB_DEVICE_CDC
+#define RT_USB_DEVICE_CDC
+#define RT_VCOM_TASK_STK_SIZE 512
+#define RT_CDC_RX_BUFSIZE 128
+#define RT_VCOM_SERNO "32021919830108"
+#define RT_VCOM_SER_LEN 14
+#define RT_VCOM_TX_TIMEOUT 1000
 
-/* POSIX layer and C standard library */
+/* C/C++ and POSIX layer */
 
-#define RT_USING_LIBC
-#define RT_USING_PTHREADS
-#define PTHREAD_NUM_MAX 8
-#define RT_USING_POSIX
-#define RT_LIBC_USING_TIME
 #define RT_LIBC_DEFAULT_TIMEZONE 8
 
+/* POSIX (Portable Operating System Interface) layer */
+
+#define RT_USING_POSIX_DELAY
+#define RT_USING_POSIX_CLOCK
+#define RT_USING_PTHREADS
+#define PTHREAD_NUM_MAX 8
+
+/* Interprocess Communication (IPC) */
+
+
+/* Socket is in the 'Network' category */
+
+#define RT_USING_CPLUSPLUS
+
 /* Network */
-
-/* Socket abstraction layer */
-
-
-/* Network interface device */
-
-
-/* light weight TCP/IP stack */
-
-
-/* AT commands */
-
-
-/* VBUS(Virtual Software BUS) */
 
 
 /* Utilities */
@@ -184,6 +183,7 @@
 
 #define BSP_USING_SDRAM
 #define BSP_USING_SDMMC
+#define BSP_USING_USBD
 
 /* More Drivers */
 

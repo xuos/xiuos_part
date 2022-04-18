@@ -54,6 +54,11 @@ menu "On-chip Peripheral Drivers"
             select RT_USING_SPI
             default n
         
+        config BSP_USING_ONCHIP_RTC
+            bool "Enable RTC"
+            select RT_USING_RTC
+            default n
+        
     source "$RTT_DIR/bsp/stm32/libraries/HAL_Drivers/Kconfig"
     
     endmenu
@@ -77,6 +82,11 @@ menu "On-chip Peripheral Drivers"
             select RT_USING_DFS
             select RT_USING_DFS_ELMFAT
             default n
+
+        config BSP_USING_USBD
+            bool "Enable OTGFS as USB device"
+            select RT_USING_USB_DEVICE
+            default n 
             
     endmenu
 
