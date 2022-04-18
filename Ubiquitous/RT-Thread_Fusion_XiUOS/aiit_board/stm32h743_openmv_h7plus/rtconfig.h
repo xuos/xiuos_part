@@ -116,6 +116,7 @@
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
+#define RT_USING_RTC
 #define RT_USING_SDIO
 #define RT_SDIO_STACK_SIZE 512
 #define RT_SDIO_THREAD_PRIORITY 15
@@ -177,11 +178,12 @@
 #define BSP_USING_UART
 #define BSP_USING_UART1
 #define BSP_USING_QSPI
+#define BSP_USING_ONCHIP_RTC
 
 /* Onboard Peripheral Drivers */
 
 #define BSP_USING_SDRAM
-#define BSP_USING_QSPI_FLASH
+#define BSP_USING_SDMMC
 
 /* More Drivers */
 
