@@ -92,8 +92,8 @@ int Adapter4GTest(void)
 
 #ifdef ADAPTER_EC200T
     //Using Hang Xiao server to test 4G Socket connection
-    uint8 server_addr[64] = "101.68.82.219";
-    uint8 server_port[64] = "9898";
+    uint8 server_addr[64] = "120.76.100.197";
+    uint8 server_port[64] = "10002";
 
     adapter->socket.socket_id = 0;
 

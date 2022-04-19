@@ -36,6 +36,9 @@
 #define EC200T_CREG_REPLY           ",1"
 #define EC200T_CONNECT_REPLY        "CONNECT"
 
+#ifdef ADD_NUTTX_FETURES
+static void Ec200tPowerSet(void){ return; }
+#else
 static void Ec200tPowerSet(void)
 {
     int pin_fd;
@@ -69,6 +72,7 @@ static void Ec200tPowerSet(void)
 
     PrivTaskDelay(10000);
 }
+#endif
 
 static int Ec200tOpen(struct Adapter *adapter)
 {
@@ -82,7 +86,7 @@ static int Ec200tOpen(struct Adapter *adapter)
     /*step2: init AT agent*/
     if (!adapter->agent) {
         char *agent_name = "4G_uart_client";
-        if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+        if (0 != InitATAgent(agent_name, adapter->fd, 512)) {
             printf("at agent init failed !\n");
             return -1;
         }
@@ -137,6 +141,10 @@ out:
     return ret;
 }
 
+
+#ifdef ADD_NUTTX_FETURES
+static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args){ return 0;}
+#else
 static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
 {
     if (OPE_INT != cmd) {
@@ -169,7 +177,77 @@ static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
     
     return 0;
 }
+#endif
 
+#ifdef ADD_NUTTX_FETURES
+static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
+{
+    int ret = 0;
+    uint8_t ec200t_cmd[64];
+
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
+
+    /*step1: serial write "+++", quit transparent mode*/
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
+
+    PrivTaskDelay(3000);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "ATE0\r\n");
+
+    /*step2: serial write "AT+CCID", get SIM ID*/
+    PrivTaskDelay(3000);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, EC200T_GET_CCID_CMD);
+
+    /*step3: serial write "AT+CPIN?", check SIM status*/
+    PrivTaskDelay(3000);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, EC200T_GET_CPIN_CMD);
+
+    /*step4: serial write "AT+CREG?", check whether registered to GSM net*/
+    PrivTaskDelay(3000);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, EC200T_GET_CREG_CMD);
+
+    /*step5: serial write "AT+QICSGP", connect to China Mobile using ipv4 or ipv6*/
+    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
+
+    if (IPV4 == ip_type) {
+        strcpy(ec200t_cmd, "AT+QICSGP=1,1,\"CMNET\",\"\",\"\",1\r\n");
+    } else if (IPV6 == ip_type) {
+        strcpy(ec200t_cmd, "AT+QICSGP=1,2,\"CMNET\",\"\",\"\",1\r\n");
+    }
+    PrivTaskDelay(3000);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, ec200t_cmd);
+
+    /*step6: serial write "AT+QICLOSE", close socket connect before open socket*/
+    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
+    sprintf(ec200t_cmd, EC200T_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
+    PrivTaskDelay(3000);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, ec200t_cmd);
+
+    /*step7: serial write "AT+QIDEACT", close TCP net before open socket*/
+    PrivTaskDelay(3000);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, EC200T_DEACTIVE_PDP_CMD);
+
+    /*step8: serial write "AT+QIACT", open TCP net*/
+    PrivTaskDelay(3000);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, EC200T_ACTIVE_PDP_CMD);
+
+    /*step9: serial write "AT+QIOPEN", connect socket using TCP*/
+    memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
+    sprintf(ec200t_cmd, EC200T_OPEN_SOCKET_CMD, adapter->socket.socket_id);
+    strcat(ec200t_cmd, ",\"TCP\",\"");
+    strcat(ec200t_cmd, ip);
+    strcat(ec200t_cmd, "\",");
+    strcat(ec200t_cmd, port);
+    strcat(ec200t_cmd, ",0,2\r\n");
+
+    AtSetReplyEndChar(adapter->agent, 0x43, 0x54);
+    PrivTaskDelay(3000);
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, ec200t_cmd);
+
+    ADAPTER_DEBUG("Ec200t connect TCP done\n");
+
+    return 0;
+}
+#else
 static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
 {
     int ret = 0;
@@ -257,10 +335,10 @@ out:
     Ec200tPowerSet();
     return -1;
 }
+#endif
 
 static int Ec200tSend(struct Adapter *adapter, const void *buf, size_t len)
 {
-    x_err_t result = EOK;
     if (adapter->agent) {
         EntmSend(adapter->agent, (const char *)buf, len);
     } else {

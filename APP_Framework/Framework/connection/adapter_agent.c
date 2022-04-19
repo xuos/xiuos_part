@@ -194,13 +194,15 @@ int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
         ret = -1;
         goto __exit;
     }
+
     ret = ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd);
     if(ret < 0){
         printf("%s %d ATOrderSend failed.\n",__func__,__LINE__);
         ret = -1;
         goto __exit;
     }
-    // PrivTaskDelay(3000);
+
+    PrivTaskDelay(3000);
 
     result = GetReplyText(reply);
     if (!result) {
@@ -295,7 +297,7 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
     agent->receive_mode = ENTM_MODE;
     agent->read_len = buffer_len;
     PrivMutexAbandon(&agent->lock); 
-    // PrivTaskDelay(1000);
+    PrivTaskDelay(1000);
     if (PrivSemaphoreObtainWait(&agent->entm_rx_notice, &abstime)) {
         printf("wait sem[%d] timeout\n",agent->entm_rx_notice);
         return -ERROR;
@@ -424,10 +426,17 @@ int DeleteATAgent(ATAgentType agent)
         PrivClose(agent->fd);
     }
 
+#ifdef ADD_NUTTX_FETURES
+    if (agent->lock.sem.semcount > 0) {
+        printf("delete agent lock = %d\n",agent->lock.sem.semcount);
+        PrivMutexDelete(&agent->lock);
+    }
+#else
     if (agent->lock) {
         printf("delete agent lock = %d\n",agent->lock);
         PrivMutexDelete(&agent->lock);
     }
+#endif
 
     if (agent->entm_rx_notice) {
         printf("delete agent entm_rx_notice = %d\n",agent->entm_rx_notice);
