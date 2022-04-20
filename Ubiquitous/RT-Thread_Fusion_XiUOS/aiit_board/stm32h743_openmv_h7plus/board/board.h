@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2006-2021, RT-Thread Development Team
+ * Copyright (c) 2006-2022, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
  * 2021-12-14     supperthomas first version
- * 2022-03-14     wwt          add sram2
+ * 2022-03-16     Miaowulue    add sram2
  */
 
 

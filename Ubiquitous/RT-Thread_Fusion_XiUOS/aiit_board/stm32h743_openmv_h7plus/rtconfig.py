@@ -2,7 +2,7 @@ import os
 SRC_APP_DIR = '../../../../APP_Framework'
 # toolchains options
 ARCH='arm'
-CPU='cortex-m4'
+CPU='cortex-m7'
 CROSS_TOOL='gcc'
 
 # bsp lib config
