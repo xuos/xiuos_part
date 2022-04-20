@@ -203,6 +203,10 @@ menu "On-chip Peripheral Drivers"
         bool "Enable RTC"
         select RT_USING_RTC
         default n
+    
+    config BSP_USING_SDIO
+        bool "Enable SDIO"
+        default n
 
 endmenu
 
@@ -210,7 +214,14 @@ menu "Onboard Peripheral Drivers"
     config BSP_USING_SDRAM
         bool "Enable SDRAM"
         default n
-    
+    config BSP_USING_SDCARD
+	    bool "Using SDCard"
+        select BSP_USING_SDIO
+        select RT_USING_SDIO
+        select RT_USING_DFS
+        select RT_USING_DFS_ELMFAT
+	    default n 
+
     menuconfig BSP_USING_ETH
 	bool "Enable Ethernet"
 	select RT_USING_NETDEV
