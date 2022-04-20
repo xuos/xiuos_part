@@ -222,6 +222,9 @@ void InitBoardHardware(void)
     DmacInit();
 #endif
 
+    /* initialize memory system */
+	InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
+
     /* initalize interrupt */
     InitHwinterrupt();
 #ifdef BSP_USING_UART    
@@ -239,8 +242,7 @@ void InitBoardHardware(void)
 #ifdef ARCH_SMP
     EnableHwclintIpi();
 #endif
-    /* initialize memory system */
-	InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
+
 
 #ifdef KERNEL_COMPONENTS_INIT
 	for(i = 0; _board_init[i].fn != NONE; i++) {

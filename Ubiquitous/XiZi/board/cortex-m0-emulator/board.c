@@ -34,6 +34,8 @@ void InitBoardHardware()
 {
 	extern int InitHwUart(void);
 	InitHwUart();
-	InstallConsole(SERIAL_BUS_NAME_1, SERIAL_DRV_NAME_1, SERIAL_DEVICE_NAME_1);
+
 	InitBoardMemory((void*)LM3S_SRAM_START, (void*)LM3S_SRAM_END);
+
+	InstallConsole(SERIAL_BUS_NAME_1, SERIAL_DRV_NAME_1, SERIAL_DEVICE_NAME_1);
 }

@@ -146,6 +146,10 @@ void InitBoardHardware(void)
 #ifdef BSP_USING_UART    
     HwUartInit();
 #endif
+
+    /* initialize memory system */
+	InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
+
 #ifdef KERNEL_CONSOLE
     /* set console device */
     InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
@@ -158,9 +162,6 @@ void InitBoardHardware(void)
 #ifdef ARCH_SMP
     EnableHwclintIpi();
 #endif
-    /* initialize memory system */
-	InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
-
 
 	KPrintf("board init done.\n");
 	KPrintf("start kernel...\n");
