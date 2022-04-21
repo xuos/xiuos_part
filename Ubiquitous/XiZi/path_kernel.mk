@@ -305,7 +305,7 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/zigbee 
 endif
 
 ifeq ($(CONFIG_ADAPTER_HFA21_ETHERCAT), y)
-KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/ethercat #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_ethernet/ethercat #
 endif
 
 ifeq ($(CONFIG_SUPPORT_KNOWING_FRAMEWORK), y)
@@ -352,6 +352,12 @@ endif
 
 ifeq ($(CONFIG_LIB_NEWLIB),y)
 KERNELPATHS += -I$(KERNEL_ROOT)/lib/newlib/include #
+endif
+
+ifeq ($(CONFIG_FS_LWEXT4),y)
+KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/blockdev/xiuos #
+KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/include #
+KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/include/misc 
 endif
 
 

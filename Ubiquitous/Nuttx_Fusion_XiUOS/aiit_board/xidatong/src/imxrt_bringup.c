@@ -43,8 +43,8 @@
 #include <imxrt_lpi2c.h>
 #include <imxrt_lpspi.h>
 
-#ifdef CONFIG_IMXRT_USDHC
-#  include "imxrt_usdhc.h"
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include "xidatong.h"
@@ -88,38 +88,6 @@ static void imxrt_i2c_register(int bus)
         }
     }
 }
-#endif
-
-#ifdef CONFIG_IMXRT_USDHC
-static int nsh_sdmmc_initialize(void)
-{
-  struct sdio_dev_s *sdmmc;
-  int ret = 0;
-
-  /* Get an instance of the SDIO interface */
-
-  sdmmc = imxrt_usdhc_initialize(0);
-  if (!sdmmc)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SD/MMC\n");
-    }
-  else
-    {
-      /* Bind the SDIO interface to the MMC/SD driver */
-
-      ret = mmcsd_slotinitialize(0, sdmmc);
-      if (ret != OK)
-        {
-          syslog(LOG_ERR,
-                 "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
-                 ret);
-        }
-    }
-
-  return OK;
-}
-#else
-#  define nsh_sdmmc_initialize() (OK)
 #endif
 
 /****************************************************************************
@@ -172,6 +140,25 @@ int imxrt_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SD slot %d: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_IMXRT_USBOTG) || defined(CONFIG_USBHOST)
+  ret = imxrt_usbhost_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start USB host services: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
     }
 #endif
 

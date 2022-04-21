@@ -24,4 +24,64 @@ config XIDATONG_SDRAM
 	---help---
 		Activate DCD configuration of SDRAM
 
+config XIDATONG_SDIO_AUTOMOUNT
+  bool "SD card automounter"
+  default n
+  depends on FS_AUTOMOUNTER && IMXRT_USDHC
+
+if XIDATONG_SDIO_AUTOMOUNT
+
+config XIDATONG_SDIO_AUTOMOUNT_FSTYPE
+  string "SD card file system type"
+  default "vfat"
+
+config XIDATONG_SDIO_AUTOMOUNT_BLKDEV
+  string "SD card block device"
+  default "/dev/mmcsd0"
+
+config XIDATONG_SDIO_AUTOMOUNT_MOUNTPOINT
+  string "SD card mount point"
+  default "/mnt/sdcard"
+
+config XIDATONG_SDIO_AUTOMOUNT_DDELAY
+  int "SD card debounce delay (milliseconds)"
+  default 1000
+
+config XIDATONG_SDIO_AUTOMOUNT_UDELAY
+  int "SD card unmount retry delay (milliseconds)"
+  default 2000
+
+endif # XIDATONG_SDIO_AUTOMOUNT
+
+config XIDATONG_USB_AUTOMOUNT
+	bool "USB Mass Storage automounter"
+	default n
+	depends on USBHOST_MSC && USBHOST_MSC_NOTIFIER
+
+if XIDATONG_USB_AUTOMOUNT
+
+config XIDATONG_USB_AUTOMOUNT_FSTYPE
+	string "USB file system type"
+	default "vfat"
+
+config XIDATONG_USB_AUTOMOUNT_BLKDEV
+	string "USB block device prefix"
+	default "/dev/sd"
+
+config XIDATONG_USB_AUTOMOUNT_MOUNTPOINT
+	string "USB mount point prefix"
+	default "/mnt/usb"
+
+config XIDATONG_USB_AUTOMOUNT_NUM_BLKDEV
+	int "Number of block devices to monitor."
+	range 1 26
+	default 4
+
+config XIDATONG_USB_AUTOMOUNT_UDELAY
+	int "USB unmount retry delay (milliseconds)"
+	default 2000
+
+endif # XIDATONG_USB_AUTOMOUNT
+
+
 endif

@@ -31,9 +31,11 @@ extern int FrameworkInit();
 int main(void)
 {
     rt_pin_mode(LEDR_PIN, PIN_MODE_OUTPUT);
-	rt_thread_mdelay(100);
     FrameworkInit();
     printf("XIUOS stm32h7 build %s %s\n",__DATE__,__TIME__);
+    #ifdef BSP_USING_USBD
+    //rt_console_set_device("vcom");
+    #endif
     while (1)
     {
         rt_pin_write(LEDR_PIN, PIN_HIGH);

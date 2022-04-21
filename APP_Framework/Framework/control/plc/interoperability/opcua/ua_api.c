@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include "ua_api.h"
 
-int ua_open(void *dev)
+int UaDevOpen(void *dev)
 {
     UaParamType *param = (UaParamType *)dev;
 
@@ -32,7 +32,7 @@ int ua_open(void *dev)
 
     if (param->client == NULL)
     {
-        ua_print("ua: [%s] tcp client null\n", __func__);
+        ua_error("ua: [%s] tcp client null\n", __func__);
         return EEMPTY;
     }
 
@@ -43,28 +43,29 @@ int ua_open(void *dev)
 
     UA_StatusCode retval = UA_Client_connect(param->client, param->ua_remote_ip);
     if(retval != UA_STATUSCODE_GOOD) {
-        ua_notice("ua: [%s] deleted ret %x!\n", __func__, retval);
+        ua_error("ua: [%s] deleted ret %x!\n", __func__, retval);
         return (int)retval;
     }
     return EOK;
 }
 
-void ua_close(void *dev)
+void UaDevClose(void *dev)
 {
     UaParamType *param = (UaParamType *)dev;
+    ua_notice("ua: [%s] close %s!\n", __func__, param->ua_remote_ip);
     UA_Client_delete(param->client); /* Disconnects the client internally */
 }
 
-int ua_read(void *dev, void *buf, size_t len)
+int UaDevRead(void *dev, void *buf, size_t len)
 {
     UaParamType *param = (UaParamType *)dev;
     switch(param->act)
     {
         case UA_ACT_ATTR:
-            ua_read_nodeid_value(param->client, param->ua_id, buf);
+            UaReadNodeValue(param->client, param->ua_id, buf);
             break;
         case UA_ACT_OBJ:
-            ua_test_browser_objects(param->client);
+            UaTestBrowserObjects(param->client);
             break;
         default:
             break;
@@ -72,17 +73,17 @@ int ua_read(void *dev, void *buf, size_t len)
     return EOK;
 }
 
-int ua_write(void *dev, const void *buf, size_t len)
+int UaDevWrite(void *dev, const void *buf, size_t len)
 {
     UaParamType *param = (UaParamType *)dev;
 
     switch(param->act)
     {
         case UA_ACT_ATTR:
-            ua_write_nodeid_value(param->client, param->ua_id, (char *)buf);
+            UaWriteNodeValue(param->client, param->ua_id, (char *)buf);
             break;
         case UA_ACT_OBJ:
-            ua_test_browser_objects(param->client);
+            UaTestBrowserObjects(param->client);
             break;
         default:
             break;
@@ -90,7 +91,7 @@ int ua_write(void *dev, const void *buf, size_t len)
     return EOK;
 }
 
-int ua_ioctl(void *dev, int cmd, void *arg)
+int UaDevIoctl(void *dev, int cmd, void *arg)
 {
     return EOK;
 }

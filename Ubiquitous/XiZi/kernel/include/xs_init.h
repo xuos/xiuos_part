@@ -40,6 +40,7 @@ extern int FlashW25qxxSpiDeviceInit(void);
 extern int LoraSx12xxSpiDeviceInit(void);
 extern int FatfsInit(void);
 extern int Ch376fsInit(void);
+extern int Lwext4Init(void);
 extern int LibcSystemInit(void);
 extern int RtcNtpSyncInit(void);
 extern int MountSDCard(void);

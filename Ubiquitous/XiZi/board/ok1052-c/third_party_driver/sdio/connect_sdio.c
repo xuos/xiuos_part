@@ -104,9 +104,6 @@ static const sdmmchost_card_switch_voltage_func_t s_sdcard_voltage_switch = {
 };
 #endif
 
-/*! @brief SD card detect flag  */
-static volatile bool s_card_inserted = false;
-
 /*! @brief Card descriptor. */
 static sd_card_t g_sd;
 static int sd_lock = -1;
@@ -140,11 +137,6 @@ static void BoardPowerOffSdCard(void)
 static void BoardPowerOnSdCard(void)
 {
     BOARD_USDHC_SDCARD_POWER_CONTROL(1);
-}
-
-static void SdcardDetectCallBack(bool is_inserted, void *user_data)
-{
-    s_card_inserted = is_inserted;
 }
 
 static void CardInformationLog(sd_card_t *card)
@@ -261,6 +253,19 @@ static uint32 SdioWrite(void *dev, struct BusBlockWriteParam *write_param)
     return write_param->size;
 }
 
+static int SdioControl(struct HardwareDev *dev, struct HalDevBlockParam *block_param)
+{
+    NULL_PARAM_CHECK(dev);
+
+    if (OPER_BLK_GETGEOME == block_param->cmd) {
+        block_param->dev_block.size_perbank = g_sd.blockSize;
+        block_param->dev_block.block_size = g_sd.blockSize;
+        block_param->dev_block.bank_num = g_sd.blockCount;
+    }
+
+    return EOK;
+}
+
 static struct SdioDevDone dev_done =
 {
     SdioOpen,
@@ -269,10 +274,126 @@ static struct SdioDevDone dev_done =
     SdioRead,
 };
 
+#if defined(FS_VFS) && defined(MOUNT_SDCARD_FS)
+#include <iot-vfs.h>
+
+int sd_mount_flag = 0;
+
+/**
+ * @description: Mount SD card
+ * @return 0
+ */
+static int MountSDCardFs(enum FilesystemType fs_type)
+{
+    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, fs_type, "/") == 0) {
+        sd_mount_flag = 1;
+        KPrintf("Sd card mount to '/'");
+    } else {
+        KPrintf("Sd card mount to '/' failed!");
+    }
+    
+    return 0;
+}
+#endif
+
+static void SdCardAttach(void)
+{
+    bool is_read_only;
+    static sd_card_t *card = &g_sd;
+    
+    KPrintf("\r\nCard inserted.\r\n");
+    /* reset host once card re-plug in */
+    SD_HostReset(&(card->host));
+    /* power on the card */
+    SD_PowerOnCard(card->host.base, card->usrParam.pwr);
+    KPrintf("Power on done\n");
+
+    /* Init card. */
+    if (SD_CardInit(card)) {
+        KPrintf("\r\nSD card init failed.\r\n");
+        return;
+    }
+
+    /* card information log */
+    CardInformationLog(card);
+
+    /* Check if card is readonly. */
+    is_read_only = SD_CheckReadOnly(card);
+
+#ifdef MOUNT_SDCARD_FS
+    /*mount file system*/
+    MountSDCardFs(MOUNT_SDCARD_FS_TYPE);
+#endif
+}
+
+static void SdCardDetach(void)
+{
+    /*unmount file system*/
+    KPrintf("\r\nCard detect extracted.\r\n");
+
+#ifdef MOUNT_SDCARD_FS
+    UnmountFileSystem("/");
+#endif
+}
+
+static uint8 SdCardReadCd(void)
+{
+	BusType pin;
+
+    pin = BusFind(PIN_BUS_NAME);
+
+    pin->owner_haldev = BusFindDevice(pin, PIN_DEVICE_NAME);
+
+    struct PinStat PinStat;
+
+    struct BusBlockReadParam read_param;
+    read_param.buffer = (void *)&PinStat;
+
+    PinStat.pin = IMXRT_GET_PIN(2, 28);
+    
+    return BusDevReadData(pin->owner_haldev, &read_param);
+}
+
+static void SdCardTask(void* parameter)
+{
+    static int sd_card_status = 0;
+
+    while (1) {
+        if (!SdCardReadCd()) {
+            if (!sd_card_status) {
+                SdCardAttach();
+                sd_card_status = 1;
+            }
+        } else {
+            if (sd_card_status) {
+                SdCardDetach();
+                sd_card_status = 0;
+            }
+        }
+    }
+}
+
+#ifdef MOUNT_SDCARD
+int MountSDCard()
+{
+    int sd_card_task = 0;
+    sd_card_task = KTaskCreate("sd_card", SdCardTask, NONE,
+                           SD_CARD_STACK_SIZE, 8);
+    if(sd_card_task < 0) {		
+		KPrintf("sd_card_task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
+		return ERROR;
+	}
+
+    StartupKTask(sd_card_task);
+
+    return EOK;
+}
+#endif
+
+
 int Imxrt1052HwSdioInit(void)
 {
     x_err_t ret = EOK;
-    bool is_read_only;
 
     static struct SdioBus sdio_bus;
     static struct SdioDriver sdio_drv;
@@ -305,35 +426,6 @@ int Imxrt1052HwSdioInit(void)
         return ERROR;
     }
 
-    KPrintf("\r\nPlease insert a card into board.\r\n");
-
-    /* power off card */
-    SD_PowerOffCard(card->host.base, card->usrParam.pwr);
-
-    if (SD_WaitCardDetectStatus(SD_HOST_BASEADDR, &s_sdcard_detect, true) == kStatus_Success) {
-        KPrintf("\r\nCard inserted.\r\n");
-        /* reset host once card re-plug in */
-        SD_HostReset(&(card->host));
-        /* power on the card */
-        SD_PowerOnCard(card->host.base, card->usrParam.pwr);
-        KPrintf("power on done\n");
-    } else {
-        KPrintf("\r\nCard detect fail.\r\n");
-        return ERROR;
-    }
-
-    /* Init card. */
-    if (SD_CardInit(card)) {
-        KPrintf("\r\nSD card init failed.\r\n");
-        return ERROR;
-    }
-
-    /* card information log */
-    CardInformationLog(card);
-
-    /* Check if card is readonly. */
-    is_read_only = SD_CheckReadOnly(card);
-
     ret = SdioBusInit(&sdio_bus, SDIO_BUS_NAME);
     if (ret != EOK) {
         KPrintf("Sdio bus init error %d\n", ret);
@@ -352,6 +444,7 @@ int Imxrt1052HwSdioInit(void)
     }
 
     sdio_dev.dev_done = &dev_done;
+    sdio_dev.haldev.dev_block_control = SdioControl;
     ret = SdioDeviceRegister(&sdio_dev, SDIO_DEVICE_NAME);
     if (ret != EOK) {
         KPrintf("Sdio device register error %d\n", ret);

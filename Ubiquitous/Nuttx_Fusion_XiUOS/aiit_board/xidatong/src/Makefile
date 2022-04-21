@@ -66,4 +66,16 @@ ifeq ($(CONFIG_XIDATONG_SDRAM),y)
 CSRCS += imxrt_sdram_ini_dcd.c
 endif
 
+ifeq ($(CONFIG_USBHOST),y)
+CSRCS += imxrt_usbhost.c
+endif
+
+ifeq ($(CONFIG_IMXRT_USDHC),y)
+CSRCS += imxrt_mmcsd.c
+endif
+
+ifeq ($(CONFIG_XIDATONG_SDIO_AUTOMOUNT),y)
+CSRCS += imxrt_mmcsd_automount.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

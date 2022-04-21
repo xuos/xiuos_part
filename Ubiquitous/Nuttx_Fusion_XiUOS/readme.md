@@ -266,23 +266,22 @@ git  clone https://git.trustie.net/xuos/kconfig-frontends.git
 #### 在Nuttx\app_match_nuttx目录下执行
 
 ```shell
-chmod +x build.sh
-
 source build.sh
 ```
 
 #### 执行完毕会跳转到Nuttx\nuttx目录，执行
 
 ```shell
-sudo ./tools/configure.sh stm32f4discovery:nsh  (应用内核一起编译)
+./tools/configure.sh stm32f4discovery:nsh  (应用内核一起编译)
 
-sudo ./tools/configure.sh stm32f4discovery:kostest  (应用内核分开编译)
+./tools/configure.sh stm32f4discovery:kostest  (应用内核分开编译)
+视情况而定，如果需要前面加sudo
 ```
 
 #### 然后执行
 
 ```shell
-sudo make  menuconfig
+make  menuconfig
 ```
 
 ##### 开启Nuttx Support CLOCK_MONOTONIC
@@ -328,7 +327,9 @@ sudo make  menuconfig
 #### 在当前目录执行编译
 
 ```shell
-sudo make -j8
+make
+或
+make -j8
 ```
 
 make时加上V=1参数可以看到较为详细的编译信息，但是编译过程会比较慢。最后在nuttx下会编译出一个nuttx.bin文件(应用内核一起编译)
