@@ -186,6 +186,13 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
 
     LPUART_Init(uart_base, &config, GetUartSrcFreq());
 
+    if (configure_info->private_data) {
+        DisableIRQ(serial_cfg->hw_cfg.serial_irq_interrupt);
+        LPUART_EnableInterrupts(uart_base, kLPUART_RxDataRegFullInterruptEnable);
+        NVIC_SetPriority(serial_cfg->hw_cfg.serial_irq_interrupt, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 0));
+        EnableIRQ(serial_cfg->hw_cfg.serial_irq_interrupt);
+    }
+
     return EOK;
 }
 
@@ -195,6 +202,10 @@ static uint32 SerialConfigure(struct SerialDriver *serial_drv, int serial_operat
 
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
     LPUART_Type *uart_base = (LPUART_Type *)serial_cfg->hw_cfg.private_data;
+    struct BusConfigureInfo configure_info;
+    configure_info.private_data = NONE;
+
+    SerialInit(serial_drv, &configure_info);
 
     switch (serial_operation_cmd)
     {

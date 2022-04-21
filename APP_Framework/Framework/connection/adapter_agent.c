@@ -522,7 +522,7 @@ static int ATAgentInit(ATAgentType agent)
 
 #else
     pthread_attr_t attr;
-    attr.schedparam.sched_priority = 18;
+    attr.schedparam.sched_priority = 25;
     attr.stacksize = 4096;
 #endif
 
