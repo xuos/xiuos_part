@@ -54,6 +54,9 @@ void InitBoardHardware(void)
     CLINT_MTIMECMP_ADDR = CLINT_MTIME_ADDR + TICK;
     SET_CSR(mie, MIP_MTIP);
 
+    /* initialize memory system */
+	InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
+
     extern int InitHwUart(void);
     InitHwUart();
     InstallConsole(SERIAL_BUS_NAME, SERIAL_DRV_NAME, SERIAL_DEVICE_NAME);
@@ -62,8 +65,6 @@ void InitBoardHardware(void)
     KPrintf("board initialization......\n");
 
     KPrintf("memory address range: [0x%08x - 0x%08x], size: %d\n", (x_ubase) MEMORY_START_ADDRESS, (x_ubase) MEMORY_END_ADDRESS, MEMORY_SIZE);
-    /* initialize memory system */
-	InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
 
     return;
 }

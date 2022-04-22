@@ -27,10 +27,13 @@
 #include <clock_config.h>
 #include <fsl_gpio.h>
 #include <fsl_common.h>
+#include <connect_gpio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define SD_CARD_STACK_SIZE 2048
 
 int Imxrt1052HwSdioInit(void);
 

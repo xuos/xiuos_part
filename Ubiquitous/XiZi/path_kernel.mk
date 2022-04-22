@@ -354,6 +354,12 @@ ifeq ($(CONFIG_LIB_NEWLIB),y)
 KERNELPATHS += -I$(KERNEL_ROOT)/lib/newlib/include #
 endif
 
+ifeq ($(CONFIG_FS_LWEXT4),y)
+KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/blockdev/xiuos #
+KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/include #
+KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/include/misc 
+endif
+
 
 ifeq ($(ARCH), risc-v)
 KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared

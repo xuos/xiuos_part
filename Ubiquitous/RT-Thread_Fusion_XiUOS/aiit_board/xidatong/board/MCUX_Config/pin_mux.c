@@ -66,12 +66,7 @@ void BOARD_InitPins(void)
 {
     CLOCK_EnableClock(kCLOCK_Iomuxc);           /* iomuxc clock (iomuxc_clk_enable): 0x03U */
     
-    /*CH438 IO initialize
-    IOMUXC_SetPinMux(
-        IOMUXC_GPIO_SD_B1_05_GPIO3_IO05,        /* GPIO3_IO05 is configured as CH438_nRD 
-        0U);*/
-
-    /* uart 1 2 3 4 8 io initialize */
+    /* uart 1 */
     IOMUXC_SetPinMux(
         IOMUXC_GPIO_AD_B0_12_LPUART1_TX,        /* GPIO_AD_B0_12 is configured as LPUART1_TX */
         0U);                                    /* Software Input On Field: Input Path is determined by functionality */
