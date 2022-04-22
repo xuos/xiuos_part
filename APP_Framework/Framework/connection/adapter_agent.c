@@ -202,7 +202,7 @@ int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
         goto __exit;
     }
 
-    PrivTaskDelay(3000);
+    //PrivTaskDelay(3000);
 
     result = GetReplyText(reply);
     if (!result) {
@@ -297,7 +297,7 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
     agent->receive_mode = ENTM_MODE;
     agent->read_len = buffer_len;
     PrivMutexAbandon(&agent->lock); 
-    PrivTaskDelay(1000);
+    //PrivTaskDelay(1000);
     if (PrivSemaphoreObtainWait(&agent->entm_rx_notice, &abstime)) {
         printf("wait sem[%d] timeout\n",agent->entm_rx_notice);
         return -ERROR;
