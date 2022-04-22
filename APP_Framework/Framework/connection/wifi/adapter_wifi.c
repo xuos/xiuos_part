@@ -25,8 +25,6 @@
 extern AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter);
 #endif
 
-#define ADAPTER_WIFI_NAME "wifi"
-
 static int AdapterWifiRegister(struct Adapter *adapter)
 {
     int ret = 0;

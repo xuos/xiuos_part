@@ -26,7 +26,7 @@
 // therefore, only the TCP/UDP datagrams are considered,
 // here EtherCAT is in fact an application layer protocol.
 
-#define ADAPTER_ETHERNET_NAME "ethernet" //"wifi"
+// #define ADAPTER_ETHERNET_NAME "ethernet" //"wifi"
 EcatFrame ecat_data;
 static struct Adapter *ethernet;
 uint32_t self_address;

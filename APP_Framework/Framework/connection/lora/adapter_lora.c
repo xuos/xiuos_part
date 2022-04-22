@@ -24,8 +24,11 @@
 extern AdapterProductInfoType Sx1278Attach(struct Adapter *adapter);
 #endif
 
-#define ADAPTER_LORA_NAME "lora"
-#define ADAPTER_LORA_CLIENT_NUM 6
+#ifdef ADAPTER_E220
+extern AdapterProductInfoType E220Attach(struct Adapter *adapter);
+#endif
+
+#define ADAPTER_LORA_CLIENT_NUM 255
 #define ADAPTER_LORA_DATA_LENGTH 128
 #define ADAPTER_LORA_RECV_DATA_LENGTH 256
 
@@ -422,7 +425,7 @@ static int LoraClientDataAnalyze(struct Adapter *adapter, void *send_buf, int le
 
     LoraReceiveDataCheck(lora_recv_data, ADAPTER_LORA_RECV_DATA_LENGTH, client_recv_data);
 
-    printf("%s:client_recv_data\n",__func__);
+    printf("%s:client_recv_data\n", __func__);
     printf("head 0x%x length %d panid 0x%x data_type 0x%x client_id 0x%x gateway_id 0x%x crc 0x%x\n",
         client_recv_data->flame_head, client_recv_data->length, client_recv_data->panid, client_recv_data->data_type,
         client_recv_data->client_id, client_recv_data->gateway_id, client_recv_data->crc16);
@@ -476,7 +479,7 @@ static int LoraClientJoinNet(struct Adapter *adapter, unsigned short panid)
     client_join_data.client_id = adapter->net_role_id;
     client_join_data.crc16 = LoraCrc16((uint8 *)&client_join_data, sizeof(struct LoraDataFormat) - 2);
 
-    printf("%s:client_join_data\n",__func__);
+    printf("%s:client_join_data\n", __func__);
     printf("head 0x%x length %d panid 0x%x data_type 0x%x client_id 0x%x gateway_id 0x%x crc 0x%x\n",
         client_join_data.flame_head, client_join_data.length, client_join_data.panid, client_join_data.data_type,
         client_join_data.client_id, client_join_data.gateway_id, client_join_data.crc16);
@@ -784,6 +787,19 @@ int AdapterLoraInit(void)
     adapter->info = product_info;
     adapter->done = product_info->model_done;
 
+#endif
+
+#ifdef ADAPTER_E220
+    AdapterProductInfoType product_info = E220Attach(adapter);
+    if (!product_info) {
+        printf("AdapterLoraInit e220 attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
 #endif
 
     return ret;
