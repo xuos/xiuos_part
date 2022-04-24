@@ -29,6 +29,8 @@
 #ifdef ADD_XIZI_FETURES
 # include <user_api.h>
 #endif
+#ifdef ADD_RTTHREAD_FETURES
+#include <rtthread.h>
 
 #define AT_CMD_MAX_LEN 128
 #define AT_AGENT_MAX 2
@@ -139,7 +141,7 @@ int ATOrderSend(ATAgentType agent, uint32_t timeout_s, ATReplyType reply, const 
 
     PrivMutexObtain(&agent->lock); 
     agent->receive_mode = AT_MODE;
-
+    
     memset(agent->maintain_buffer, 0x00, agent->maintain_max);
     agent->maintain_len = 0;
 
@@ -300,7 +302,7 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
     //PrivTaskDelay(1000);
     if (PrivSemaphoreObtainWait(&agent->entm_rx_notice, &abstime)) {
         printf("wait sem[%d] timeout\n",agent->entm_rx_notice);
-        return -ERROR;
+        return -1;
     }
     PrivMutexObtain(&agent->lock); 
 
@@ -390,7 +392,7 @@ static int GetCompleteATReply(ATAgentType agent)
                     memset(agent->maintain_buffer, 0x00, agent->maintain_max);
                     agent->maintain_len = 0;
                     PrivMutexAbandon(&agent->lock);
-                    return -ERROR;
+                    return -1;
                 }
                
                 printf("GetCompleteATReply done\n");
@@ -449,10 +451,10 @@ int DeleteATAgent(ATAgentType agent)
         PrivSemaphoreDelete(&agent->entm_rx_notice);
     }
 
-    if (agent->rsp_sem) {
-        printf("delete agent rsp_sem = %d\n",agent->rsp_sem);
-        PrivSemaphoreDelete(&agent->rsp_sem);
-    }
+    // if (agent->rsp_sem) {
+    //     printf("delete agent rsp_sem = %d\n",agent->rsp_sem);
+    //     PrivSemaphoreDelete(&agent->rsp_sem);
+    // }
 
     if (agent->maintain_buffer) {
         PrivFree(agent->maintain_buffer);

@@ -42,7 +42,6 @@ struct ATReply
     uint32 reply_len;
 };
 typedef struct ATReply *ATReplyType;
-
 struct ATAgent
 {
     char agent_name[64];
@@ -56,7 +55,7 @@ struct ATAgent
 #ifdef ADD_NUTTX_FETURES   
     pthread_mutex_t lock;
 #else
-    int lock;
+    pthread_mutex_t lock;
 #endif
 
     ATReplyType reply;
@@ -64,7 +63,33 @@ struct ATAgent
     char reply_end_last_char;
     char reply_end_char;
     uint32 reply_char_num;
-    int rsp_sem;
+    sem_t rsp_sem;
+
+    pthread_t at_handler;
+
+    #define ENTM_RECV_MAX 256
+    char entm_recv_buf[ENTM_RECV_MAX];
+    uint32 entm_recv_len;
+    enum ReceiveMode receive_mode;
+    int entm_rx_notice;
+};
+typedef struct ATAgent *ATAgentType;
+
+int EntmSend(ATAgentType agent, const char *data, int len);
+int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s);
+char *GetReplyText(ATReplyType reply);
+int AtSetReplyEndChar(ATAgentType agent, char last_ch, char end_ch);
+int AtSetReplyCharNum(ATAgentType agent, unsigned int num);
+int AtSetReplyLrEnd(ATAgentType agent, char enable);
+ATReplyType CreateATReply(uint32 reply_max_len);
+unsigned int IpTint(char *ipstr);
+void SwapStr(char *str, int begin, int end);
+char* IpTstr(unsigned int ipint);
+ATAgentType GetATAgent(const char *agent_name);
+int InitATAgent(const char *agent_name, int fd, uint32 maintain_max);
+int DeleteATAgent(ATAgentType agent);
+int ParseATReply(char* str, const char *format, ...);
+void DeleteATReply(ATReplyType reply);
 
     pthread_t at_handler;
 
