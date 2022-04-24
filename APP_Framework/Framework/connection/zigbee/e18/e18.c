@@ -37,6 +37,33 @@ char *cmd_role_as_e = "AT+DEV=E"; /*set device type for end device*/
 char *cmd_role_as_r = "AT+DEV=R"; /*set device type for router*/
 char *cmd_set_ch = "AT+CH=11";    /*set channel as 11*/
 
+#define E18_AS_HEX_MODE 0
+#define E18_AS_AT_MODE  1
+
+static int E18HardwareModeGet()
+{
+    int ret = 0;
+    int pin_fd;
+
+    pin_fd = PrivOpen(ADAPTER_BC28_PIN_DRIVER, O_RDWR);
+
+    struct PinStat pin_stat;
+    pin_stat.pin = ADAPTER_E18_MODEPIN;
+
+    ret = PrivRead(pin_fd, &pin_stat, 1);
+
+    PrivTaskDelay(200);
+
+    PrivClose(pin_fd);
+
+    if(pin_stat.val == GPIO_HIGH) {
+        printf(" E18 as AT mode\n");
+        return E18_AS_AT_MODE;
+    } else {
+        printf(" E18 as HEX mode\n");
+        return E18_AS_HEX_MODE;
+    } 
+}
 
 #ifdef ADD_NUTTX_FETURES
 static int E18UartOpen(struct Adapter *adapter)
@@ -96,15 +123,22 @@ static int E18UartOpen(struct Adapter *adapter)
 static int E18NetworkModeConfig(struct Adapter *adapter)
 {
     int ret = 0;
+    int mode = -1;
+
     if (NULL == adapter) {
         return -1;
     }
-    ret = AtCmdConfigAndCheck(adapter->agent, cmd_hex2at, "+OK");
-    if(ret < 0) {
-        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_hex2at);
-        ret = -1;
-        goto out;
+    mode = E18HardwareModeGet();
+    if(E18_AS_HEX_MODE == mode)
+    {
+        ret = AtCmdConfigAndCheck(adapter->agent, cmd_hex2at, "+OK");
+        if(ret < 0) {
+            printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_hex2at);
+            ret = -1;
+            goto out;
+        }
     }
+    
 
     switch (adapter->info->work_mode)
     {
@@ -141,26 +175,35 @@ static int E18NetworkModeConfig(struct Adapter *adapter)
     }
 
 out:
-    AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
+    if(E18_AS_HEX_MODE == mode){
+        AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
+    }
+    
     return ret;
 }
 
 static int E18NetRoleConfig(struct Adapter *adapter)
 {
     int ret = 0;
+    int mode = -1;
+
 
     if (NULL == adapter) {
         printf("%s %d adapter is null!\n",__func__,__LINE__);
         ret = -1;
         goto out;
     }
-
-    ret = AtCmdConfigAndCheck(adapter->agent, cmd_hex2at, "+OK");
-    if(ret < 0) {
-        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_hex2at);
-        ret = -1;
-        goto out;
+    mode = E18HardwareModeGet();
+    if(E18_AS_HEX_MODE == mode)
+    {
+        ret = AtCmdConfigAndCheck(adapter->agent, cmd_hex2at, "+OK");
+        if(ret < 0) {
+            printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_hex2at);
+            ret = -1;
+            goto out;
+        }
     }
+    
 
     switch (adapter->net_role)
     {
@@ -197,7 +240,10 @@ static int E18NetRoleConfig(struct Adapter *adapter)
     }
 
 out:
-    AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
+    if(E18_AS_HEX_MODE == mode) {
+        AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
+    }
+
     return ret;
 }
 
@@ -205,6 +251,7 @@ static int E18Open(struct Adapter *adapter)
 {
     int ret = 0;
     int try_times = 5;
+    int count = 0;
 
     if (NULL == adapter) {
         return -1;
@@ -231,9 +278,12 @@ static int E18Open(struct Adapter *adapter)
 try_again:
     while(try_times--){
         ret = E18NetRoleConfig(adapter);
+        count++;
         if(ret < 0){
-            printf("E18NetRoleConfig failed [%d] times.\n",try_times);
-            goto try_again;
+            printf("E18NetRoleConfig failed [%d] times.\n",count);
+            continue;
+        } else {
+            break;
         }
     }
     
@@ -274,12 +324,17 @@ static int E18Ioctl(struct Adapter *adapter, int cmd, void *args)
 static int E18Join(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret = 0;
+    int mode = -1;
 
-    ret = AtCmdConfigAndCheck(adapter->agent, cmd_hex2at, "+OK");
-    if(ret < 0) {
-        printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_hex2at);
-        ret = -1;
-        goto out;
+    mode = E18HardwareModeGet();
+    if(E18_AS_HEX_MODE == mode)
+    {
+        ret = AtCmdConfigAndCheck(adapter->agent, cmd_hex2at, "+OK");
+        if(ret < 0) {
+            printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_hex2at);
+            ret = -1;
+            goto out;
+        }
     }
 
     switch (adapter->net_role)
@@ -327,9 +382,13 @@ static int E18Join(struct Adapter *adapter, unsigned char *priv_net_group)
 
     // }
     if(!ret){
-        ret = AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
-        if(ret < 0) {
-            printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_exit);
+        if(E18_AS_HEX_MODE == mode) {
+            ret = AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
+            if(ret < 0) {
+                printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_exit);
+                ret = -1;
+            }
+        } else {
             ret = -1;
         }
     }
