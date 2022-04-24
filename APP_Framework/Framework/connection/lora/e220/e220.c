@@ -201,7 +201,7 @@ static int E220SetRegisterParam(struct Adapter *adapter, uint16 address, uint8 c
     buffer[3] = (address >> 8) & 0xFF;  //high address
     buffer[4] = address & 0xFF;         //low adderss
 
-    buffer[5] = ((baud_rate_bit << 5) & 0xE0) | 0x00;
+    buffer[5] = ((baud_rate_bit << 5) & 0xE0) | 0x04;
 
     buffer[6] = 0x00;
     buffer[7] = channel;                 //channel
@@ -478,7 +478,7 @@ static void LoraRead(void *parameter)
 
             memset(buffer, 0, 256);
 
-            PrivTaskDelay(30);
+            PrivTaskDelay(1000);
 
 			cnt ++;
             E220Send(adapter, &cnt, 1);
