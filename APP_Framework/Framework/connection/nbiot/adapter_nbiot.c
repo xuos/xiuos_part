@@ -25,8 +25,6 @@
 extern AdapterProductInfoType BC28Attach(struct Adapter *adapter);
 #endif
 
-#define ADAPTER_NBIOT_NAME "nbiot"
-
 static int AdapterNbiotRegister(struct Adapter *adapter)
 {
     int ret = 0;

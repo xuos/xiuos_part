@@ -24,8 +24,6 @@
 extern AdapterProductInfoType Ec200tAttach(struct Adapter *adapter);
 #endif
 
-#define ADAPTER_4G_NAME "4G"
-
 static int Adapter4GRegister(struct Adapter *adapter)
 {
     int ret = 0;

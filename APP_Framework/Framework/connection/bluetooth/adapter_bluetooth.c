@@ -24,8 +24,6 @@
 extern AdapterProductInfoType Hc08Attach(struct Adapter *adapter);
 #endif
 
-#define ADAPTER_BLUETOOTH_NAME "bluetooth"
-
 static int AdapterBlueToothRegister(struct Adapter *adapter)
 {
     int ret = 0;
