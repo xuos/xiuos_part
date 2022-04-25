@@ -41,12 +41,12 @@ extern usb_status_t USB_HostMsdWriteApi(usb_host_msd_command_instance_t *msdComm
 //USB HOST ISR
 void UsbOtg2IrqHandler(int irqn, void *arg)
 {
-    x_base lock = 0;
-    lock = DISABLE_INTERRUPT();
+
+    DisableIRQ(USB2_IRQn);
 
     USB_HostEhciIsrFunction(g_HostHandle);
+    EnableIRQ(USB2_IRQn);
 
-    ENABLE_INTERRUPT(lock);
 }
 DECLARE_HW_IRQ(USB2_IRQn, UsbOtg2IrqHandler, NONE);
 
