@@ -226,7 +226,7 @@ SECTIONS
     __noncachedata_init_end__ = .;   /* create a global symbol at initialized ncache data end */
   } > m_nocache
   . = __noncachedata_init_end__;
-  .ncache :
+  .ncache(NOLOAD):
   {
     *(NonCacheable)
     . = ALIGN(4);
