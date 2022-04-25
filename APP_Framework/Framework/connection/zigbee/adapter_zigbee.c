@@ -26,8 +26,6 @@
 extern AdapterProductInfoType E18Attach(struct Adapter *adapter);
 #endif
 
-#define ADAPTER_ZIGBEE_NAME "zigbee"
-
 static int AdapterZigbeeRegister(struct Adapter *adapter)
 {
     int ret = 0;

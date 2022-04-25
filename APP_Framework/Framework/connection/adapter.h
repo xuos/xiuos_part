@@ -45,6 +45,15 @@ extern "C" {
 #define ADAPTER_DEBUG
 #endif
 
+#define ADAPTER_4G_NAME "4G"
+#define ADAPTER_BLUETOOTH_NAME "bluetooth"
+#define ADAPTER_ETHERNET_NAME "ethernet"
+#define ADAPTER_ETHERCAT_NAME "ethercat"
+#define ADAPTER_LORA_NAME "lora"
+#define ADAPTER_NBIOT_NAME "nbiot"
+#define ADAPTER_WIFI_NAME "wifi"
+#define ADAPTER_ZIGBEE_NAME "zigbee"
+
 struct Adapter;
 struct AdapterProductInfo;
 typedef struct Adapter *AdapterType;
@@ -106,6 +115,12 @@ enum IpType
 {
     IPV4 = 1,
     IPV6,
+};
+
+struct AdapterData
+{
+    uint32 len;
+    uint8 *buffer;
 };
 
 struct AdapterProductInfo

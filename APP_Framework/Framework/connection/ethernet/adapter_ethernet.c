@@ -24,8 +24,6 @@
 extern AdapterProductInfoType Hfa21EthernetAttach(struct Adapter *adapter);
 #endif
 
-#define ADAPTER_ETHERNET_NAME "ethernet"
-
 static int AdapterEthernetRegister(struct Adapter *adapter)
 {
     int ret = 0;
