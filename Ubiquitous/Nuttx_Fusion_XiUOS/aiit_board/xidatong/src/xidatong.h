@@ -71,10 +71,10 @@
 #define BOARD_NGPIOINT  0 /* Amount of GPIO Input w/ Interruption pins */
 
 #define GPIO_E220_M0    (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
-                         GPIO_PIN9 | GPIO_PORT1)
+                         GPIO_PIN11 | GPIO_PORT1)
 
 #define GPIO_E220_M1    (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
-                         GPIO_PIN11 | GPIO_PORT1)
+                         GPIO_PIN9 | GPIO_PORT1)
 
 /* Backlight */
 
