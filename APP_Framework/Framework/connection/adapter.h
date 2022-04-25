@@ -117,6 +117,12 @@ enum IpType
     IPV6,
 };
 
+struct AdapterData
+{
+    uint32 len;
+    uint8 *buffer;
+};
+
 struct AdapterProductInfo
 {
     uint32_t functions;

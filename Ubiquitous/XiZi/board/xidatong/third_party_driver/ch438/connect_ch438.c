@@ -629,7 +629,7 @@ void WriteCH438Block(uint8 maddr, uint8 mlen, uint8 *mbuf)
 ** date:
 **-------------------------------------------------------------------------------------------------------
 ********************************************************************************************************/
-void  Ch438UartSend( uint8	ext_uart_no,uint8 *data, uint8 Num )
+void Ch438UartSend(uint8 ext_uart_no, uint8 *data, uint16 Num)
 {
 	uint8 REG_LSR_ADDR,REG_THR_ADDR;
 	
@@ -958,10 +958,35 @@ static uint32 ImxrtCh438WriteData(void *dev, struct BusBlockWriteParam *write_pa
 	NULL_PARAM_CHECK(dev);
 	NULL_PARAM_CHECK(write_param);
 
+	int write_len, write_len_continue;
+	int i, write_index;
+	uint8 *write_buffer;
+
 	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)dev;
 	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
 
-	Ch438UartSend(dev_param->ext_uart_no, (uint8 *)write_param->buffer, write_param->size);
+	write_len = write_param->size;
+	write_len_continue = write_param->size;
+	write_buffer = (uint8 *)write_param->buffer;
+
+	if (write_len > 256) {
+		if (0 == write_len % 256) {
+			write_index = write_len / 256;
+			for (i = 0; i < write_index; i ++) {
+				Ch438UartSend(dev_param->ext_uart_no, write_buffer + i * 256, 256);
+			}
+		} else {
+			write_index = 0;
+			while (write_len_continue > 256) {
+				Ch438UartSend(dev_param->ext_uart_no, write_buffer + write_index * 256, 256);
+				write_index++;
+				write_len_continue = write_len - write_index * 256;
+			}
+			Ch438UartSend(dev_param->ext_uart_no, write_buffer + write_index * 256, write_len_continue);
+		}
+	} else {
+		Ch438UartSend(dev_param->ext_uart_no, write_buffer, write_len);
+	}
 
 	return EOK;
 }
@@ -1028,6 +1053,12 @@ static uint32 ImxrtCh438ReadData(void *dev, struct BusBlockReadParam *read_param
 						read_param->read_length = rcv_num;
 
 						interrupt_done = 1;
+
+						// int i;
+						// uint8 *buffer = (uint8 *)read_param->buffer;
+						// for (i = 0; i < rcv_num; i ++) {
+						// 	KPrintf("Ch438UartRcv i %u data 0x%x\n", i, buffer[i]);
+						// }
 					}
 				}
 			}

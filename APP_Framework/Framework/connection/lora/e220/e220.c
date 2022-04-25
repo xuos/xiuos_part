@@ -344,10 +344,9 @@ static int E220Ioctl(struct Adapter *adapter, int cmd, void *args)
 static int E220Join(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret;
+    struct AdapterData *priv_net_group_data = (struct AdapterData *)priv_net_group;
 
-    uint16 len = 144;
-
-    ret = PrivWrite(adapter->fd, (void *)priv_net_group, len);
+    ret = PrivWrite(adapter->fd, (void *)priv_net_group_data->buffer, priv_net_group_data->len);
     if(ret < 0) {
         printf("E220 Join net group failed: %d!\n", ret);
     }
@@ -383,7 +382,22 @@ static int E220Send(struct Adapter *adapter, const void *buf, size_t len)
  */
 static int E220Recv(struct Adapter *adapter, void *buf, size_t len)
 {
-    return PrivRead(adapter->fd, buf, len);
+    int recv_len, recv_len_continue;
+
+    uint8 *recv_buf = PrivMalloc(len);
+
+    recv_len = PrivRead(adapter->fd, recv_buf, len);
+    while (recv_len < len) {
+        recv_len_continue = PrivRead(adapter->fd, recv_buf + recv_len, len - recv_len);
+
+        recv_len += recv_len_continue;
+    }
+
+    memcpy(buf, recv_buf, recv_len);
+
+    PrivFree(recv_buf);
+    
+    return recv_len;
 }
 
 /**
@@ -396,9 +410,9 @@ static int E220Quit(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret;
 
-    uint16 len = 144;
+    struct AdapterData *priv_net_group_data = (struct AdapterData *)priv_net_group;
 
-    ret = PrivWrite(adapter->fd, (void *)priv_net_group, len);
+    ret = PrivWrite(adapter->fd, (void *)priv_net_group_data->buffer, priv_net_group_data->len);
     if(ret < 0){
         printf("E220 quit net group failed %d!\n", ret);
     }

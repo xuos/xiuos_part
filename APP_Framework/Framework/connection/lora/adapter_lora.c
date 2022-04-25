@@ -29,8 +29,8 @@ extern AdapterProductInfoType E220Attach(struct Adapter *adapter);
 #endif
 
 #define ADAPTER_LORA_CLIENT_NUM 255
-#define ADAPTER_LORA_DATA_LENGTH 128
-#define ADAPTER_LORA_RECV_DATA_LENGTH 256
+#define ADAPTER_LORA_DATA_LENGTH 256
+#define ADAPTER_LORA_RECV_DATA_LENGTH ADAPTER_LORA_DATA_LENGTH + 16
 
 #define ADAPTER_LORA_DATA_HEAD            0x3C
 #define ADAPTER_LORA_NET_PANID            0x0102
@@ -167,13 +167,7 @@ static int LoraReceiveDataCheck(uint8 *data, uint16 length, struct LoraDataForma
     uint32 recv_data_length = 0;
     for ( i = 0; i < length; i ++) {
         if (ADAPTER_LORA_DATA_HEAD == data[i]) {
-#ifdef ADD_NUTTX_FETURES
-            /*Big-Endian*/
             recv_data_length = (data[i + 4] & 0xFF) | ((data[i + 5] & 0xFF) << 8) | ((data[i + 6] & 0xFF) << 16) | ((data[i + 7] & 0xFF) << 24);
-#else
-            /*Little-Endian*/
-            recv_data_length = ((data[i + 4] & 0xFF) << 24) | ((data[i + 5] & 0xFF) << 16) | ((data[i + 6] & 0xFF) << 8) | (data[i + 7] & 0xFF);
-#endif
             if (sizeof(struct LoraDataFormat) == recv_data_length) {
                 memcpy(recv_data, (uint8 *)(data + i), sizeof(struct LoraDataFormat));
                 return 0;
@@ -469,6 +463,7 @@ static int LoraClientDataAnalyze(struct Adapter *adapter, void *send_buf, int le
 static int LoraClientJoinNet(struct Adapter *adapter, unsigned short panid)
 {
     struct LoraDataFormat client_join_data;
+    struct AdapterData priv_lora_net;
 
     memset(&client_join_data, 0, sizeof(struct LoraDataFormat));
 
@@ -484,7 +479,10 @@ static int LoraClientJoinNet(struct Adapter *adapter, unsigned short panid)
         client_join_data.flame_head, client_join_data.length, client_join_data.panid, client_join_data.data_type,
         client_join_data.client_id, client_join_data.gateway_id, client_join_data.crc16);
     
-    if (AdapterDeviceJoin(adapter, (uint8 *)&client_join_data) < 0) {
+    priv_lora_net.len = sizeof(struct LoraDataFormat);
+    priv_lora_net.buffer = (uint8 *)&client_join_data;
+
+    if (AdapterDeviceJoin(adapter, (uint8 *)&priv_lora_net) < 0) {
         return -1;
     }
 
@@ -498,18 +496,22 @@ static int LoraClientJoinNet(struct Adapter *adapter, unsigned short panid)
  */
 static int LoraClientQuitNet(struct Adapter *adapter, unsigned short panid)
 {
-    struct LoraDataFormat client_join_data;
+    struct LoraDataFormat client_quit_data;
+    struct AdapterData priv_lora_net;
 
-    memset(&client_join_data, 0, sizeof(struct LoraDataFormat));
+    memset(&client_quit_data, 0, sizeof(struct LoraDataFormat));
 
-    client_join_data.flame_head = ADAPTER_LORA_DATA_HEAD;
-    client_join_data.length = sizeof(struct LoraDataFormat);
-    client_join_data.panid = panid;
-    client_join_data.data_type = ADAPTER_LORA_DATA_TYPE_QUIT;
-    client_join_data.client_id = adapter->net_role_id;
-    client_join_data.crc16 = LoraCrc16((uint8 *)&client_join_data, sizeof(struct LoraDataFormat) - 2);
+    client_quit_data.flame_head = ADAPTER_LORA_DATA_HEAD;
+    client_quit_data.length = sizeof(struct LoraDataFormat);
+    client_quit_data.panid = panid;
+    client_quit_data.data_type = ADAPTER_LORA_DATA_TYPE_QUIT;
+    client_quit_data.client_id = adapter->net_role_id;
+    client_quit_data.crc16 = LoraCrc16((uint8 *)&client_quit_data, sizeof(struct LoraDataFormat) - 2);
     
-    if (AdapterDeviceDisconnect(adapter, (uint8 *)&client_join_data) < 0) {
+    priv_lora_net.len = sizeof(struct LoraDataFormat);
+    priv_lora_net.buffer = (uint8 *)&client_quit_data;
+
+    if (AdapterDeviceDisconnect(adapter, (uint8 *)&priv_lora_net) < 0) {
         return -1;
     }
 
@@ -623,7 +625,6 @@ static void *LoraGatewayTask(void *parameter)
 static void *LoraClientDataTask(void *parameter)
 {
     int i, ret = 0;
-    int join_times = 10;
     struct Adapter *lora_adapter = (struct Adapter *)parameter;
     struct LoraClientParam *client = (struct LoraClientParam *)lora_adapter->adapter_param;
 
