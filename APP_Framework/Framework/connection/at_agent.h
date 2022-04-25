@@ -87,7 +87,7 @@ int InitATAgent(const char *agent_name, int fd, uint32 maintain_max);
 int DeleteATAgent(ATAgentType agent);
 int ParseATReply(char* str, const char *format, ...);
 void DeleteATReply(ATReplyType reply);
-int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const char *cmd_expr, ...);
+int ATOrderSend(ATAgentType agent, uint32_t timeout_s, ATReplyType reply, const char *cmd_expr, ...);
 int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check);
 
 #endif

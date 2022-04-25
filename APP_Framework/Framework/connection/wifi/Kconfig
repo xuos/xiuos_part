@@ -7,3 +7,11 @@ config ADAPTER_HFA21_WIFI
 if ADAPTER_HFA21_WIFI
     source "$APP_DIR/Framework/connection/wifi/hfa21_wifi/Kconfig"
 endif
+
+config ADAPTER_ESP07S_WIFI
+        bool "Using wifi adapter device esp07s"
+        default n
+
+if ADAPTER_ESP07S_WIFI
+    source "$APP_DIR/Framework/connection/wifi/esp07s_wifi/Kconfig"
+endif 
