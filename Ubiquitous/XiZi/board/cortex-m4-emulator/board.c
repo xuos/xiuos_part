@@ -109,6 +109,9 @@ void InitBoardHardware()
 #ifdef BSP_USING_UART
 	Stm32HwUsartInit();
 #endif
+
+    InitBoardMemory((void*)MEMORY_START_ADDRESS, (void*)MEMORY_END_ADDRESS);
+
 #ifdef KERNEL_CONSOLE
     InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
 
@@ -119,7 +122,5 @@ void InitBoardHardware()
     KPrintf("\nconsole init completed.\n");
     KPrintf("board initialization......\n");
 #endif
-    
-    InitBoardMemory((void*)MEMORY_START_ADDRESS, (void*)MEMORY_END_ADDRESS);
 	
 }

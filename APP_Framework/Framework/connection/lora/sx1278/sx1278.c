@@ -108,7 +108,9 @@ static int Sx1278Ioctl(struct Adapter *adapter, int cmd, void *args)
 static int Sx1278Join(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret;
-    ret = Sx127x_Nuttx_Write(adapter->fd, (void *)priv_net_group, 144);
+    struct AdapterData *priv_net_group_data = (struct AdapterData *)priv_net_group;
+
+    ret = Sx127x_Nuttx_Write(adapter->fd, (void *)priv_net_group_data->buffer, priv_net_group_data->len);
     if(ret < 0){
         printf("Sx1278 Join net group failed: %d!\n", ret);
     }
@@ -119,7 +121,9 @@ static int Sx1278Join(struct Adapter *adapter, unsigned char *priv_net_group)
 static int Sx1278Join(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret;
-    ret = PrivWrite(adapter->fd, (void *)priv_net_group, 144);
+    struct AdapterData *priv_net_group_data = (struct AdapterData *)priv_net_group;
+
+    ret = PrivWrite(adapter->fd, (void *)priv_net_group_data->buffer, priv_net_group_data->len);
     if(ret < 0){
         printf("Sx1278 Join net group failed: %d!\n", ret);
     }
@@ -196,7 +200,9 @@ static int Sx1278Recv(struct Adapter *adapter, void *buf, size_t len)
 static int Sx1278Quit(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret;
-    ret = Sx127x_Nuttx_Write(adapter->fd, (void *)priv_net_group, 144);
+    struct AdapterData *priv_net_group_data = (struct AdapterData *)priv_net_group;
+
+    ret = Sx127x_Nuttx_Write(adapter->fd, (void *)priv_net_group_data->buffer, priv_net_group_data->len);
     if(ret < 0){
         printf("Sx1278 quit net group failed %d!\n", ret);
     }
@@ -207,7 +213,9 @@ static int Sx1278Quit(struct Adapter *adapter, unsigned char *priv_net_group)
 static int Sx1278Quit(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret;
-    ret = PrivWrite(adapter->fd, (void *)priv_net_group, 144);
+    struct AdapterData *priv_net_group_data = (struct AdapterData *)priv_net_group;
+
+    ret = PrivWrite(adapter->fd, (void *)priv_net_group_data->buffer, priv_net_group_data->len);
     if(ret < 0){
         printf("Sx1278 quit net group failed %d!\n", ret);
     }

@@ -83,3 +83,32 @@
 | PG8  | FMC_SDCLK  |
 | PG15 | FMC_SDNCAS |
 | PF11 | FMC_SDNRAS |
+
+### QSPI FLASH W25Q256JV
+
+| 引脚 | 作用            |
+| ---- | --------------- |
+| PF6  | QUADSPI_BK1_IO3 |
+| PF7  | QUADSPI_BK1_IO2 |
+| PF8  | QUADSPI_BK1_IO0 |
+| PF9  | QUADSPI_BK1_IO1 |
+| PF10 | QUADSPI_CLK     |
+| PG6  | QUADSPI_BK1_NCS |
+
+### SDIO USD-1040310811
+
+| 引脚 | 作用       |
+| ---- | ---------- |
+| PC8  | SDMMC1_D0  |
+| PC9  | SDMMC1_D1  |
+| PC10 | SDMMC1_D2  |
+| PC11 | SDMMC1_D3  |
+| PC12 | SDMMC1_CK  |
+| PD2  | SDMMC1_CMD |
+
+### USBCDC
+
+| 引脚 | 作用          |
+| ---- | ------------- |
+| PA11 | USB_OTG_FS_DM |
+| PA12 | USB_OTG_FS_DP |

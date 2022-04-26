@@ -19,13 +19,15 @@
  */
 
 #include <adapter.h>
+#include "adapter_wifi.h"
 #include <bus_pin.h>
 
 #ifdef ADAPTER_HFA21_WIFI
 extern AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter);
 #endif
-
-#define ADAPTER_WIFI_NAME "wifi"
+#ifdef ADAPTER_ESP07S_WIFI
+extern AdapterProductInfoType Esp07sWifiAttach(struct Adapter *adapter);
+#endif
 
 static int AdapterWifiRegister(struct Adapter *adapter)
 {
@@ -78,12 +80,25 @@ int AdapterWifiInit(void)
     adapter->done = product_info->model_done;
 
 #endif
+#ifdef ADAPTER_ESP07S_WIFI
+    AdapterProductInfoType product_info = Esp07sWifiAttach(adapter);
+    if (!product_info) {
+        printf("AdapterWifiInit ESP07S attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
+
+#endif
 
     return ret;
 }
 
 /******************wifi TEST*********************/
-int AdapterWifiTest(void)
+int AdapterwifiTest(void)
 {
     char cmd[64];
     int baud_rate = BAUD_RATE_57600;
@@ -140,14 +155,14 @@ int AdapterWifiTest(void)
 
 
     AdapterDeviceOpen(adapter);
-    AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+    // AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
 
     AdapterDeviceSetUp(adapter);
-    AdapterDeviceSetAddr(adapter, "192.168.66.253", "255.255.255.0", "192.168.66.1");
+    AdapterDeviceSetAddr(adapter, "192.168.64.253", "192.168.66.1", "255.255.252.0");
     AdapterDevicePing(adapter, "36.152.44.95");
     AdapterDeviceNetstat(adapter);
 
-    const char *ip = "192.168.66.211";
+    const char *ip = "192.168.64.60";
     const char *port = "12345";
     enum NetRoleType net_role = CLIENT;
     enum IpType ip_type = IPV4;
@@ -166,4 +181,97 @@ int AdapterWifiTest(void)
     }
     
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterWifiTest, AdapterWifiTest, show adapter wifi information);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterwifiTest, AdapterwifiTest, show adapter wifi information);
+
+int wifiopen(void)
+{
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+
+    AdapterDeviceOpen(adapter);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, wifiopen, wifiopen, open adapter wifi );
+int wificlose(void)
+{
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+
+    AdapterDeviceClose(adapter);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, wificlose, wificlose, close adapter wifi );
+
+int wifisetup(int argc, char *argv[])
+{
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    struct WifiParam param;
+    memset(&param,0,sizeof(struct WifiParam));
+    strncpy(param.wifi_ssid, argv[1], strlen(argv[1]));
+    strncpy(param.wifi_pwd, argv[2], strlen(argv[2]));
+
+    adapter->adapter_param = &param;
+
+    AdapterDeviceSetUp(adapter);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3)|SHELL_CMD_DISABLE_RETURN, wifisetup, wifisetup, setup adapter wifi );
+int wifiaddrset(int argc, char *argv[])
+{
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    char *ip = argv[1];
+    char *gateway = argv[2];
+    char *netmask = argv[3];
+
+    AdapterDeviceSetAddr(adapter, ip, gateway, netmask);
+    AdapterDevicePing(adapter, "36.152.44.95");///< ping www.baidu.com
+    AdapterDeviceNetstat(adapter);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(4)|SHELL_CMD_DISABLE_RETURN, wifiaddrset, wifiaddrset, addrset adapter wifi);
+
+int wifiping(int argc, char *argv[])
+{
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    printf("ping %s\n",argv[1]);
+    AdapterDevicePing(adapter, argv[1]);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3), wifiping, wifiping, wifiping adapter );
+
+int wificonnect(int argc, char *argv[])
+{
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    char *ip = argv[1];
+    char *port = argv[2];
+    enum NetRoleType net_role = CLIENT;
+    enum IpType ip_type = IPV4;
+
+    if(0 == strncmp("tcp",argv[3],strlen("tcp"))) {
+        adapter->socket.protocal = SOCKET_PROTOCOL_TCP;
+    }
+
+    if(0 == strncmp("udp",argv[3],strlen("udp"))) {
+        adapter->socket.protocal = SOCKET_PROTOCOL_UDP;
+    }
+
+    AdapterDeviceConnect(adapter, net_role, ip, port, ip_type);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(4)|SHELL_CMD_DISABLE_RETURN, wificonnect, wificonnect, wificonnect adapter);
+int wifisend(int argc, char *argv[])
+{
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+
+    const char *wifi_msg = argv[1];
+    int len = strlen(wifi_msg);
+    for(int i = 0;i < 10; ++i) {
+        AdapterDeviceSend(adapter, wifi_msg, len);
+        PrivTaskDelay(1000);
+    }
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3)|SHELL_CMD_DISABLE_RETURN, wifisend, wifisend, wifisend adapter wifi information);
+int wifirecv(int argc, char *argv[])
+{
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+
+    char wifi_recv_msg[128];
+    while (1) {
+        AdapterDeviceRecv(adapter, wifi_recv_msg, 128);
+        PrivTaskDelay(1000);
+        printf("wifi recv [%s]\n",wifi_recv_msg);
+    }
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3)|SHELL_CMD_DISABLE_RETURN, wifirecv, wifirecv, wifirecv adapter wifi information);

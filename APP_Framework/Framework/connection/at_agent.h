@@ -52,8 +52,12 @@ struct ATAgent
     char *maintain_buffer;
     uint32 maintain_len;
     uint32 maintain_max;
-    
+
+#ifdef ADD_NUTTX_FETURES   
+    pthread_mutex_t lock;
+#else
     int lock;
+#endif
 
     ATReplyType reply;
     char reply_lr_end;
@@ -87,7 +91,7 @@ int InitATAgent(const char *agent_name, int fd, uint32 maintain_max);
 int DeleteATAgent(ATAgentType agent);
 int ParseATReply(char* str, const char *format, ...);
 void DeleteATReply(ATReplyType reply);
-int ATOrderSend(ATAgentType agent, uint32 timeout_s, ATReplyType reply, const char *cmd_expr, ...);
+int ATOrderSend(ATAgentType agent, uint32_t timeout_s, ATReplyType reply, const char *cmd_expr, ...);
 int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check);
 
 #endif
