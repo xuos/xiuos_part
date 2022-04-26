@@ -939,7 +939,12 @@ static uint32 Ch438DrvConfigure(void *drv, struct BusConfigureInfo *configure_in
     x_err_t ret = EOK;
 
     struct SerialDriver *serial_drv = (struct SerialDriver *)drv;
+	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)serial_drv->driver.owner_bus->owner_haldev;
 	struct SerialCfgParam *ext_serial_cfg = (struct SerialCfgParam *)configure_info->private_data;
+	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
+
+	//config serial receive sem timeout
+	dev_param->serial_timeout = ext_serial_cfg->data_cfg.serial_timeout;
 
     switch (configure_info->configure_cmd)
     {
@@ -1018,7 +1023,7 @@ static uint32 ImxrtCh438ReadData(void *dev, struct BusBlockReadParam *read_param
 	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
 
 	while (!interrupt_done) {
-		result = KSemaphoreObtain(ch438_sem, WAITING_FOREVER);
+		result = KSemaphoreObtain(ch438_sem, dev_param->serial_timeout);
 		if (EOK == result) {
 			gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
 			if (!gInterruptStatus) { 
@@ -1062,6 +1067,10 @@ static uint32 ImxrtCh438ReadData(void *dev, struct BusBlockReadParam *read_param
 					}
 				}
 			}
+		} else {
+			//Wait serial sem timeout, break and return 0
+			rcv_num = 0;
+			break;
 		}
 	}
 	return rcv_num;
