@@ -1,7 +1,28 @@
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
+
+/**
+ * @file imxrt_ch438.c
+ * @brief imxrt board sd card automount
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022.04.26
+ */
+
 #include <nuttx/config.h>
 
 #include <sys/types.h>
 #include <errno.h>
+#include <syslog.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -91,12 +112,12 @@ void* ImxrtCh438ReadData(void *parameter)
 	// abstime.tv_sec = 2;
     // while (1)
     // {
-		printf("sem_438 is %d\n",sem_438.semcount);
+		syslog(LOG_INFO, "sem_438 is %d\n",sem_438.semcount);
         result = sem_wait(&sem_438);
         if (result == OK)
         {
 			gInterruptStatus = ReadCH438Data( REG_SSR_ADDR );
-			printf("gInterruptStatus is %d\n", gInterruptStatus);
+			syslog(LOG_INFO,"gInterruptStatus is %d\n", gInterruptStatus);
 			if(!gInterruptStatus)
 			{ 
 				 
@@ -122,7 +143,7 @@ void* ImxrtCh438ReadData(void *parameter)
 						REG_MSR_ADDR = offsetadd[ext_uart_no] | REG_MSR0_ADDR;
 								
 						InterruptStatus = ReadCH438Data( REG_IIR_ADDR ) & 0x0f;    /* 读串口的中断状态 */	
-						printf("InterruptStatus is %d\n", InterruptStatus);
+						syslog(LOG_INFO,"InterruptStatus is %d\n", InterruptStatus);
 						
 						switch( InterruptStatus )
 						{
@@ -136,7 +157,7 @@ void* ImxrtCh438ReadData(void *parameter)
 								RevLen = CH438UARTRcv(ext_uart_no, buff[ext_uart_no]);
 								for(i=0;i<RevLen;++i)
 								{
-									printf("%c(0x%x) ", buff[ext_uart_no][i], buff[ext_uart_no][i]);
+									syslog(LOG_INFO,"%c(0x%x) ", buff[ext_uart_no][i], buff[ext_uart_no][i]);
 								}
 
 								for(i=0;i<128;i++)
@@ -170,13 +191,13 @@ void Ch438InitDefault(void)
 	int ret = 0;
 
 	sem_init(&sem_438, 0, 0);
-	printf("sem_438 init is %d\n",sem_438.semcount);
+	syslog(LOG_INFO,"sem_438 init is %d\n",sem_438.semcount);
 	// attr.priority = 120;
     // attr.stacksize = 8192;
 	// ret = pthread_create(&thr_438, &attr, &ImxrtCh438ReadData, NULL);
 
 	if (ret != 0){
-      printf("ImxrtCh438ReadData: task create failed, status=%d\n", ret);
+      syslog(LOG_INFO,"ImxrtCh438ReadData: task create failed, status=%d\n", ret);
     }
 	
 	ImxrtCH438Init();
