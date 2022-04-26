@@ -204,7 +204,28 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 /**
  * LWIP_SO_RCVBUF==1: Enable SO_RCVBUF processing.
  */
-#define LWIP_SO_RCVBUF 1
+#define LWIP_SO_RCVBUF                  1
+
+   /**
+    * LWIP_SO_SNDTIMEO==1: Enable send timeout for sockets/netconns and
+    * SO_SNDTIMEO processing.
+    */
+#ifndef LWIP_SO_SNDTIMEO
+#define LWIP_SO_SNDTIMEO                1
+#endif
+
+    /**
+     * LWIP_SO_RCVTIMEO==1: Enable receive timeout for sockets/netconns and
+     * SO_RCVTIMEO processing.
+     */
+#ifndef LWIP_SO_RCVTIMEO
+#define LWIP_SO_RCVTIMEO                1
+#endif
+
+     /**
+      * LWIP_SO_LINGER==1: Enable SO_LINGER processing.
+      */
+#define LWIP_SO_LINGER                  1
 
 /*
    ---------------------------------

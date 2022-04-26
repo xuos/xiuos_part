@@ -7,7 +7,7 @@ menu "Applications"
         config MAIN_KTASK_PRIORITY
             int
             default 4  if KTASK_PRIORITY_8
-            default 10  if KTASK_PRIORITY_32
+            default 16  if KTASK_PRIORITY_32
             default 85  if KTASK_PRIORITY_256
     endmenu
 
