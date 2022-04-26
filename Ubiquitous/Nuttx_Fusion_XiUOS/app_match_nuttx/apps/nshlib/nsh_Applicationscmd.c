@@ -38,6 +38,17 @@
 
 extern int FrameworkInit(void);
 
+extern void CH438Demo(void);
+int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    CH438Demo();
+    return OK;
+}
+
+
+
 /****************************************************************************
  * Name: cmd_Hcho1os
  ****************************************************************************/
