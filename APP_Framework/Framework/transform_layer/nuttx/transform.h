@@ -28,6 +28,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <nuttx/wireless/lpwan/sx127x.h>
+#include <nuttx/ioexpander/gpio.h>
 
 typedef uint8_t uint8;
 typedef uint16_t uint16;
@@ -43,10 +44,11 @@ typedef int64_t int64;
 extern "C" {
 #endif
 
-#define OPE_INT                  0x0000
-#define OPE_CFG                 0x0001
+#define OPE_INT             0x0000
+#define OPE_CFG             0x0001
 
-#define NAME_NUM_MAX            32
+#define NAME_NUM_MAX        32
+
 
 /*********************GPIO define*********************/
 #define GPIO_LOW    0x00
@@ -201,7 +203,7 @@ int PrivOpen(const char *path, int flags);
 int PrivRead(int fd, void *buf, size_t len);
 int PrivWrite(int fd, const void *buf, size_t len);
 int PrivClose(int fd);
-int PrivIoctl(int fd, int cmd, void *args);
+int PrivIoctl(int fd, int cmd, unsigned long args);
 
 /*********************memory***********************/
 

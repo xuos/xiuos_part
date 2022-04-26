@@ -42,7 +42,6 @@ extern void CH438Demo(void);
 int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
-    FrameworkInit();
     CH438Demo();
     return OK;
 }
@@ -301,6 +300,28 @@ int cmd_Adapter4GTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     Adapter4GTest();
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORATEST)
+extern void LoraTest(void);
+int cmd_e220loraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    LoraTest();
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORASEND)
+extern void LoraSend(int argc, char *argv[]);
+int cmd_e220loraSend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    LoraSend(argc,argv);
     return OK;
 }
 #endif

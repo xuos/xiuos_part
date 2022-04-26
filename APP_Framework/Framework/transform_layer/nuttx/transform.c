@@ -133,40 +133,9 @@ int PrivWrite(int fd, const void *buf, size_t len)
     return write(fd, buf, len);
 }
 
-static int PrivSerialIoctl(int fd, int cmd, void *args)
+int PrivIoctl(int fd, int cmd, unsigned long args)
 {
-    struct SerialDataCfg *serial_cfg = (struct SerialDataCfg *)args;
-    return ioctl(fd, cmd, serial_cfg);
-}
-
-static int PrivPinIoctl(int fd, int cmd, void *args)
-{
-    struct PinParam *pin_cfg = (struct PinParam *)args;
-
-    return ioctl(fd, cmd, pin_cfg);
-}
-
-int PrivIoctl(int fd, int cmd, void *args)
-{
-    int ret = 0;
-    struct PrivIoctlCfg *ioctl_cfg = (struct PrivIoctlCfg *)args;
-    
-    switch (ioctl_cfg->ioctl_driver_type)
-    {
-    case SERIAL_TYPE:
-        ret = PrivSerialIoctl(fd, cmd, ioctl_cfg->args);
-        break;
-    case PIN_TYPE:
-        ret = PrivPinIoctl(fd, cmd, ioctl_cfg->args);
-        break;
-    case I2C_TYPE:
-        ret = ioctl(fd, cmd, ioctl_cfg->args);
-        break;
-    default:
-        break;
-    }
-
-    return ret;
+    return ioctl(fd, cmd, args);
 }
 
 /********************memory api************/

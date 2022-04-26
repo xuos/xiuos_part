@@ -1492,6 +1492,14 @@ int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
   int cmd_Adapter4GTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORATEST)
+  int cmd_e220loraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORASEND)
+  int cmd_e220loraSend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
   int cmd_fft(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif

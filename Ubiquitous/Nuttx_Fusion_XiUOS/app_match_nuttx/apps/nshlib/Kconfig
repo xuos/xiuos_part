@@ -659,6 +659,14 @@ config NSH_DISABLE_ADAPTER_4GTEST
 	bool "Disable ec200t Adapter4GTest."
 	default n
 
+config DISABLE_E220_LORATEST
+	bool "Disable e220 Lora test."
+	default n
+
+config DISABLE_E220_LORASEND
+	bool "Disable e220 Lora send."
+	default n
+
 config NSH_DISABLE_K210_FFT
 	bool "Disable the K210 fft device."
 	default n

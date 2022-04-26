@@ -590,7 +590,7 @@ static const struct cmdmap_s g_cmdmap[] =
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
 #endif
 
-  { "ch438",       cmd_Ch438,       1, 1, "[get the concentration of formaldehyde with sensor tb600b_wq_hcho1os.]" },
+  { "ch438",       cmd_Ch438,       1, 1, "[ch438 demo cmd.]" },
 
 #if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
   { "hcho1os",       cmd_Hcho1os,       1, 1, "[get the concentration of formaldehyde with sensor tb600b_wq_hcho1os.]" },
@@ -662,6 +662,14 @@ static const struct cmdmap_s g_cmdmap[] =
 
 #if defined(CONFIG_ADAPTER_4G_EC200T) && !defined(CONFIG_NSH_DISABLE_ADAPTER_4GTEST)
   { "Adapter4GTest",       cmd_Adapter4GTest,       1, 1, "[4G ec200t test.]" },
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORATEST)
+  { "e220loraTest",       cmd_e220loraTest,       1, 1, "[e220 lora test.]" },
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORASEND)
+  { "e220loraSend",       cmd_e220loraSend,       1, 2, "[e220loraSend <message>]" },
 #endif
 
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
