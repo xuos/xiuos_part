@@ -96,7 +96,12 @@ static x_err_t _MsgQueueSend(struct MsgQueue *mq,
 
     tick_delta = 0;
     task = GetKTaskDescriptor();
-    timeout = CalculteTickFromTimeMs(msec);
+    
+    if(WAITING_FOREVER == msec)
+        timeout = WAITING_FOREVER;
+    else
+        timeout = CalculteTickFromTimeMs(msec);
+
     lock = CriticalAreaLock();
     if (mq->num_msgs >= mq->max_msgs && timeout == 0) {
         CriticalAreaUnLock(lock);
