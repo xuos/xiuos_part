@@ -36,6 +36,11 @@
 #define EC200T_CREG_REPLY           ",1"
 #define EC200T_CONNECT_REPLY        "CONNECT"
 
+#define TRY_TIMES 10
+
+#ifdef ADD_NUTTX_FETURES
+static void Ec200tPowerSet(void){ return; }
+#else
 static void Ec200tPowerSet(void)
 {
     int pin_fd;
@@ -69,6 +74,7 @@ static void Ec200tPowerSet(void)
 
     PrivTaskDelay(10000);
 }
+#endif
 
 static int Ec200tOpen(struct Adapter *adapter)
 {
@@ -82,7 +88,7 @@ static int Ec200tOpen(struct Adapter *adapter)
     /*step2: init AT agent*/
     if (!adapter->agent) {
         char *agent_name = "4G_uart_client";
-        if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+        if (0 != InitATAgent(agent_name, adapter->fd, 512)) {
             printf("at agent init failed !\n");
             return -1;
         }
@@ -116,6 +122,7 @@ static int Ec200tClose(struct Adapter *adapter)
     /*step2: serial write "AT+QICLOSE", close socket connect before open socket*/
     memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
     sprintf(ec200t_cmd, EC200T_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
+
     ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_OK_REPLY);
     if (ret < 0) {
         goto out;
@@ -137,6 +144,10 @@ out:
     return ret;
 }
 
+
+#ifdef ADD_NUTTX_FETURES
+static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args){ return 0;}
+#else
 static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
 {
     if (OPE_INT != cmd) {
@@ -169,10 +180,12 @@ static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
     
     return 0;
 }
+#endif
 
 static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
 {
     int ret = 0;
+    int try = 0;
     uint8_t ec200t_cmd[64];
 
     AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
@@ -181,19 +194,34 @@ static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
 
     /*step2: serial write "AT+CCID", get SIM ID*/
-    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_GET_CCID_CMD, EC200T_OK_REPLY);
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200T_GET_CCID_CMD, EC200T_OK_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
     if (ret < 0) {
         goto out;
     }
 
     /*step3: serial write "AT+CPIN?", check SIM status*/
-    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_GET_CPIN_CMD, EC200T_READY_REPLY);
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200T_GET_CPIN_CMD, EC200T_READY_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
     if (ret < 0) {
         goto out;
     }
 
     /*step4: serial write "AT+CREG?", check whether registered to GSM net*/
-    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_GET_CREG_CMD, EC200T_CREG_REPLY);
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200T_GET_CREG_CMD, EC200T_CREG_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
     if (ret < 0) {
         goto out;
     }
@@ -207,7 +235,12 @@ static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, con
         strcpy(ec200t_cmd, "AT+QICSGP=1,2,\"CMNET\",\"\",\"\",1\r\n");
     }
     
-    ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_OK_REPLY);
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_OK_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
     if (ret < 0) {
         goto out;
     }
@@ -215,19 +248,34 @@ static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     /*step6: serial write "AT+QICLOSE", close socket connect before open socket*/
     memset(ec200t_cmd, 0, sizeof(ec200t_cmd));
     sprintf(ec200t_cmd, EC200T_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
-    ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_OK_REPLY);
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_OK_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
     if (ret < 0) {
         goto out;
     }
 
     /*step7: serial write "AT+QIDEACT", close TCP net before open socket*/
-    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_DEACTIVE_PDP_CMD, EC200T_OK_REPLY);
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200T_DEACTIVE_PDP_CMD, EC200T_OK_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
     if (ret < 0) {
         goto out;
     }
 
     /*step8: serial write "AT+QIACT", open TCP net*/
-    ret = AtCmdConfigAndCheck(adapter->agent, EC200T_ACTIVE_PDP_CMD, EC200T_OK_REPLY);
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200T_ACTIVE_PDP_CMD, EC200T_OK_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
     if (ret < 0) {
         goto out;
     }
@@ -243,7 +291,12 @@ static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, con
 
     AtSetReplyEndChar(adapter->agent, 0x43, 0x54);
 
-    ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_CONNECT_REPLY);
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, ec200t_cmd, EC200T_CONNECT_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
     if (ret < 0) {
         goto out;
     }
@@ -260,7 +313,6 @@ out:
 
 static int Ec200tSend(struct Adapter *adapter, const void *buf, size_t len)
 {
-    x_err_t result = EOK;
     if (adapter->agent) {
         EntmSend(adapter->agent, (const char *)buf, len);
     } else {
