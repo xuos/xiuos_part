@@ -395,7 +395,7 @@ static int E220Recv(struct Adapter *adapter, void *buf, size_t len)
             printf("recv_len %u len %u\n", recv_len, len);
             recv_len_continue = PrivRead(adapter->fd, recv_buf + recv_len, len - recv_len);
             if (recv_len_continue) {
-                printf("recv_len_continue %u\n", recv_len);
+                printf("recv_len_continue %u\n", recv_len_continue);
                 recv_len += recv_len_continue;
                 printf("recv_len done %u\n", recv_len);
             } else {
