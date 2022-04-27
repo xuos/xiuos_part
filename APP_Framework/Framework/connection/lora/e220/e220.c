@@ -31,7 +31,7 @@
 #define E220_ADDRESS ADAPTER_LORA_NET_ROLE_ID
 #endif
 
-#define E220_UART_BAUD_RATE 9600
+#define E220_UART_BAUD_RATE 115200
 
 enum E220LoraMode
 {
@@ -299,6 +299,11 @@ static int E220Open(struct Adapter *adapter)
     PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
 
     E220SetRegisterParam(adapter, E220_ADDRESS, E220_CHANNEL, E220_UART_BAUD_RATE);
+
+    cfg.serial_baud_rate = E220_UART_BAUD_RATE;
+    ioctl_cfg.args = &cfg;
+
+    PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
 
     ADAPTER_DEBUG("E220Open done\n");
 

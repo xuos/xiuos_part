@@ -28,8 +28,12 @@ extern AdapterProductInfoType Sx1278Attach(struct Adapter *adapter);
 extern AdapterProductInfoType E220Attach(struct Adapter *adapter);
 #endif
 
+#define CLIENT_UPDATE_MODE
+
 #define ADAPTER_LORA_CLIENT_NUM 255
-#define ADAPTER_LORA_DATA_LENGTH 256
+
+//LORA single transfer data max size 128 bytes: data format 16 bytes and user data 112 bytes
+#define ADAPTER_LORA_DATA_LENGTH 112
 #define ADAPTER_LORA_TRANSFER_DATA_LENGTH ADAPTER_LORA_DATA_LENGTH + 16
 
 #define ADAPTER_LORA_DATA_HEAD            0x3C
@@ -653,6 +657,7 @@ int LoraGatewayProcess(struct Adapter *lora_adapter, struct LoraGatewayParam *ga
         LoraGatewayState = LORA_RECV_DATA;
         break;
     case LORA_RECV_DATA:
+#ifdef GATEWAY_CMD_MODE
         for (i = 0; i < gateway->client_num; i ++) {
             if (gateway->client_id[i]) {
                 printf("LoraGatewayProcess send to client %d for data\n", gateway->client_id[i]);
@@ -689,6 +694,34 @@ int LoraGatewayProcess(struct Adapter *lora_adapter, struct LoraGatewayParam *ga
                 }
             }
         }
+#endif
+
+#ifdef CLIENT_UPDATE_MODE
+        memset(lora_recv_data, 0, ADAPTER_LORA_TRANSFER_DATA_LENGTH);
+        ret = AdapterDeviceRecv(lora_adapter, lora_recv_data, ADAPTER_LORA_TRANSFER_DATA_LENGTH);
+        if (ret <= 0) {
+            printf("LoraGatewayProcess recv error.Just return\n");
+            break;
+        }
+
+        ret = LoraReceiveDataCheck(lora_recv_data, ADAPTER_LORA_TRANSFER_DATA_LENGTH, gateway_recv_data);
+        if (ret < 0) {
+            printf("LoraReceiveDataCheck recv error.Just return\n");
+            break;
+        }
+
+        if (ADAPTER_LORA_DATA_TYPE_JOIN == gateway_recv_data->data_type) {
+            LoraGatewayState = LORA_JOIN_NET;
+        } else if (ADAPTER_LORA_DATA_TYPE_QUIT == gateway_recv_data->data_type) {
+            LoraGatewayState = LORA_QUIT_NET;
+        } else {
+            ret = LoraGateWayDataAnalyze(lora_adapter, gateway_recv_data);
+            if (ret < 0) {
+                printf("LoraGateWayDataAnalyze error, re-send data cmd to client\n");
+                PrivTaskDelay(500);
+            }
+        }
+#endif
         break;
     default:
         break;
@@ -751,15 +784,22 @@ static void *LoraClientDataTask(void *parameter)
 
         if (CLIENT_CONNECT == client->client_state) {
             //Condition 1: Gateway send user_data cmd, client send user_data after receiving user_data cmd
+#ifdef GATEWAY_CMD_MODE
             ret = LoraClientDataAnalyze(lora_adapter, (void *)lora_send_buf, strlen(lora_send_buf), 0);
             if (ret < 0) {
                 printf("LoraClientDataAnalyze error, wait for next data cmd\n");
                 PrivTaskDelay(500);
                 continue;
             }
-
+#endif
             //Condition 2: client send user_data automatically
-            //to do
+#ifdef CLIENT_UPDATE_MODE
+            if (lora_send_buf) {
+                PrivTaskDelay(2000);
+                printf("LoraClientSendData\n");
+                LoraClientSendData(lora_adapter, (void *)lora_send_buf, strlen(lora_send_buf), 0);
+            }
+#endif
         }
     }
 
