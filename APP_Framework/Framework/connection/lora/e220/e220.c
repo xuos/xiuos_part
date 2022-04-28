@@ -290,7 +290,7 @@ static int E220Open(struct Adapter *adapter)
 #endif
 
     //serial receive timeout 100s
-    cfg.serial_timeout = 100000;
+    cfg.serial_timeout = 10000;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
@@ -397,12 +397,9 @@ static int E220Recv(struct Adapter *adapter, void *buf, size_t len)
     recv_len = PrivRead(adapter->fd, recv_buf, len);
     if (recv_len) {
         while (recv_len < len) {
-            printf("recv_len %u len %u\n", recv_len, len);
             recv_len_continue = PrivRead(adapter->fd, recv_buf + recv_len, len - recv_len);
             if (recv_len_continue) {
-                printf("recv_len_continue %u\n", recv_len_continue);
                 recv_len += recv_len_continue;
-                printf("recv_len done %u\n", recv_len);
             } else {
                 recv_len = 0;
                 break;
