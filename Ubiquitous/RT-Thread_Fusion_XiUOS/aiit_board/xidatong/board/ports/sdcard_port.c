@@ -1,4 +1,3 @@
-
 #include <rtdevice.h>
 #include <rtthread.h>
 #include "drv_gpio.h"
@@ -15,7 +14,11 @@ int sd_mount()
     if (result == MMCSD_HOST_PLUGED)
     {
         /* mount sd card fat partition 1 as root directory */
-        if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
+        #ifdef RT_USING_DFS_ROMFS
+        if(dfs_mount("sd0", "/SD", "elm", 0, 0) == 0)
+        #else
+        if(dfs_mount("sd0", "/", "elm", 0, 0) == 0)
+        #endif
         {
             LOG_I("File System initialized!\n");
             return RT_EOK;
