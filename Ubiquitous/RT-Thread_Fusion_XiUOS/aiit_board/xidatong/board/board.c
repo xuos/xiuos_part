@@ -1093,3 +1093,10 @@ void rt_hw_us_delay(rt_uint32_t usec)
 {
    ;
 }
+
+static int reboot(void)
+{
+    NVIC_SystemReset();
+    return 0;
+}
+MSH_CMD_EXPORT(reboot, reboot system);
