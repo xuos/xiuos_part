@@ -429,7 +429,6 @@ void ImxrtCh438ReadData(uint8_t ext_uart_no)
 		pthread_cond_wait(&cond, &mutex);
 	if (done[ext_uart_no] == 1)
 	{
-		ext_uart_no = 2;		
 		REG_IIR_ADDR = offsetadd[ext_uart_no] | REG_IIR0_ADDR;
 		REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
 		REG_MSR_ADDR = offsetadd[ext_uart_no] | REG_MSR0_ADDR;
