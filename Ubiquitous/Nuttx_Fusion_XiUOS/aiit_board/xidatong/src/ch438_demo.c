@@ -55,16 +55,16 @@ void CH438Demo(void)
     while(1)
     {
         CH438UARTSend(2,"AT+BAUD=?",9);
-        ImxrtCh438ReadData(NULL);
+        ImxrtCh438ReadData(2);
         up_mdelay(1000);
         CH438UARTSend(2,"AT+NAME=?",9);
-        ImxrtCh438ReadData(NULL);
+        ImxrtCh438ReadData(2);
         up_mdelay(1000);
         CH438UARTSend(2,"AT+ADDR=?",9);
-        ImxrtCh438ReadData(NULL);
+        ImxrtCh438ReadData(2);
         up_mdelay(1000);
         CH438UARTSend(2,"AT+MODE=?",9);
-        ImxrtCh438ReadData(NULL);
+        ImxrtCh438ReadData(2);
         up_mdelay(1000);
     }
 }

@@ -300,9 +300,8 @@
 
 
 
-void CH438UARTSend(uint8_t ext_uart_no,uint8_t *Data, uint8_t Num);
-void Ch438InitDefault(void);
-void ImxrtCh438ReadData(void *parameter);
 int getInterruptStatus(int argc, char **argv);
-
+void CH438UARTSend(uint8_t ext_uart_no,uint8_t *Data, uint8_t Num);
+void ImxrtCh438ReadData(uint8_t ext_uart_no);
+void Ch438InitDefault(void);
 #endif

@@ -44,21 +44,24 @@
 #include <sched.h>
 #include <debug.h>
 
+#define CH438PORTNUM 8
+#define BUFFERSIZE   128
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* Semaphore for receiving data */
 
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t  cond = PTHREAD_COND_INITIALIZER;
-volatile int done = 0;
+volatile int done[CH438PORTNUM] = {0};
 
 static	uint8_t	RevLen;
-static	uint8_t	buff[8][128];
-static	uint8_t buff_ptr[8];
-static	uint8_t	Interruptnum[8] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,};	/* SSR寄存器中断号对应值 */
-static 	uint8_t	offsetadd[] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};		/* 串口号的偏移地址 */
+static	uint8_t	buff[CH438PORTNUM][BUFFERSIZE];
+static	uint8_t buff_ptr[CH438PORTNUM];
+static	uint8_t	Interruptnum[CH438PORTNUM] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,};	/* SSR寄存器中断号对应值 */
+static 	uint8_t	offsetadd[CH438PORTNUM] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};		/* 串口号的偏移地址 */
 
 static uint8_t gInterruptStatus;
 
@@ -89,7 +92,7 @@ static uint8_t CH438UARTRcv(uint8_t ext_uart_no, uint8_t* buf);
  ****************************************************************************/
 int getInterruptStatus(int argc, char **argv)
 {
-	int ext_uart_no = 2;
+	uint8_t ext_uart_no = 0;
 	while(1)
 	{
 		pthread_mutex_lock(&mutex);
@@ -99,11 +102,15 @@ int getInterruptStatus(int argc, char **argv)
 			pthread_mutex_unlock(&mutex);
 			continue;
 		}
-		if(gInterruptStatus & Interruptnum[ext_uart_no])
+
+		for(ext_uart_no = 0; ext_uart_no < CH438PORTNUM; ext_uart_no++)
 		{
-			done = 1;
-			pthread_cond_signal(&cond);
-			pthread_mutex_unlock(&mutex);
+			if(gInterruptStatus & Interruptnum[ext_uart_no])
+			{
+				done[ext_uart_no] = 1;
+				pthread_cond_signal(&cond);
+				pthread_mutex_unlock(&mutex);
+			}
 		}
 	}
 }
@@ -145,113 +152,6 @@ void CH438SetInput(void)
 	imxrt_config_gpio(CH438_D5_PIN_INPUT);
 	imxrt_config_gpio(CH438_D6_PIN_INPUT);
 	imxrt_config_gpio(CH438_D7_PIN_INPUT);	
-}
-
-/****************************************************************************
- * Name: ImxrtCh438ReadData
- *
- * Description:
- *   Read data from ch438 port
- *
- ****************************************************************************/
-void ImxrtCh438ReadData(void *parameter)
-{
-    int result, i;
-	uint8_t InterruptStatus;
-	uint8_t ext_uart_no;
-	uint8_t	REG_IIR_ADDR;
-	uint8_t	REG_LSR_ADDR;
-	uint8_t	REG_MSR_ADDR;
-
-	pthread_mutex_lock(&mutex);
-	while(done == 0)
-		pthread_cond_wait(&cond, &mutex);
-	if (done == 1)
-	{
-		ext_uart_no = 2;		
-		REG_IIR_ADDR = offsetadd[ext_uart_no] | REG_IIR0_ADDR;
-		REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
-		REG_MSR_ADDR = offsetadd[ext_uart_no] | REG_MSR0_ADDR;
-		InterruptStatus = ReadCH438Data(REG_IIR_ADDR) & 0x0f;    /* 读串口的中断状态 */	
-		_info("InterruptStatus is %d\n", InterruptStatus);
-		
-		switch( InterruptStatus )
-		{
-			case INT_NOINT:			/* 没有中断 */					
-				break;
-			case INT_THR_EMPTY:		/* THR空中断 */									
-				break;
-			case INT_RCV_OVERTIME:	/* 接收超时中断，收到数据后一般是触发这个 。在收到一帧数据后4个数据时间没有后续的数据时触发*/
-			case INT_RCV_SUCCESS:	/* 接收数据可用中断。这是一个数据帧超过缓存了才发生，否则一般是前面的超时中断。处理过程同上面的超时中断 */
-				RevLen = CH438UARTRcv(ext_uart_no, buff[ext_uart_no]);
-				for(i=0;i<RevLen;++i)
-				{
-					_info("%c(0x%x)\n", buff[ext_uart_no][i], buff[ext_uart_no][i]);
-				}
-
-				for(i=0;i<128;i++)
-					buff[ext_uart_no][i] = 0;
-				buff_ptr[ext_uart_no] = 0;
-
-				break;
-
-			case INT_RCV_LINES:		/* 接收线路状态中断 */
-				ReadCH438Data(REG_LSR_ADDR);
-				break;
-			case INT_MODEM_CHANGE:	/* MODEM输入变化中断 */
-				ReadCH438Data(REG_MSR_ADDR);
-				break;
-			default:
-				break;
-		}
-
-	}
-	pthread_mutex_unlock(&mutex);	
-}
-
-/****************************************************************************
- * Name: Ch438InitDefault
- *
- * Description:
- *   Ch438 default initialization function
- *
- ****************************************************************************/
-void Ch438InitDefault(void)
-{
-	
-	int ret;
-
-	/* Initialize the mutex */
-
-	ret = pthread_mutex_init(&mutex, NULL);
-	if (ret != 0)
-	{
-		_info("pthread_mutex_init failed, status=%d\n", ret);
-	}
-
-	/* Initialize the condition variable */
-
-	ret = pthread_cond_init(&cond, NULL);
-	if (ret != 0)
-	{
-		_info("pthread_cond_init failed, status=%d\n", ret);
-	}
-
-	ret = task_create("ch438_task", 60, 8192, getInterruptStatus, NULL);
-    if (ret < 0)
-    {
-        _info("task create failed, status=%d\n", ret);
-    }
-
-	ImxrtCH438Init();
-	CH438PortInit(0,115200);
-	CH438PortInit(1,115200);
-	CH438PortInit(2,9600);
-	CH438PortInit(3,9600);
-	CH438PortInit(4,115200);
-	CH438PortInit(5,115200);
-	CH438PortInit(6,115200);
-	CH438PortInit(7,115200);
 }
 
 /****************************************************************************
@@ -448,37 +348,6 @@ static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, uint8_t *mBuf)
 }
 
 /****************************************************************************
- * Name: CH438UARTSend
- *
- * Description:
- *   Enable FIFO mode, which is used for ch438 serial port to send multi byte data, 
- *   with a maximum of 128 bytes of data sent at a time
- *
- ****************************************************************************/	
-void CH438UARTSend(uint8_t ext_uart_no, uint8_t *Data, uint8_t Num)
-{
-	uint8_t	REG_LSR_ADDR,REG_THR_ADDR;
-	REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
-	REG_THR_ADDR = offsetadd[ext_uart_no] | REG_THR0_ADDR;
-	
-   while(1)
-   {
-       while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_TEMT ) == 0);    /* 等待数据发送完毕，THR,TSR全空 */
-       if(Num <= 128)
-       {
-           WriteCH438Block(REG_THR_ADDR, Num, Data);
-           break;
-       }
-       else
-       {
-           WriteCH438Block(REG_THR_ADDR, 128, Data);
-           Num -= 128;
-           Data += 128;
-       }
-   }
-}
-
-/****************************************************************************
  * Name: CH438UARTRcv
  *
  * Description:
@@ -501,9 +370,147 @@ uint8_t CH438UARTRcv(uint8_t ext_uart_no, uint8_t* buf)
 		buff[ext_uart_no][buff_ptr[ext_uart_no]] = dat;
 		
 		buff_ptr[ext_uart_no] = buff_ptr[ext_uart_no] + 1;
-		if (buff_ptr[ext_uart_no] == 128)
+		if (buff_ptr[ext_uart_no] == BUFFERSIZE)
 			buff_ptr[ext_uart_no] = 0;
 		RcvNum = RcvNum + 1;
 	}
     return RcvNum;
+}
+
+/****************************************************************************
+ * Name: CH438UARTSend
+ *
+ * Description:
+ *   Enable FIFO mode, which is used for ch438 serial port to send multi byte data, 
+ *   with a maximum of 128 bytes of data sent at a time
+ *
+ ****************************************************************************/	
+void CH438UARTSend(uint8_t ext_uart_no, uint8_t *Data, uint8_t Num)
+{
+	uint8_t	REG_LSR_ADDR,REG_THR_ADDR;
+	REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
+	REG_THR_ADDR = offsetadd[ext_uart_no] | REG_THR0_ADDR;
+	
+   while(1)
+   {
+       while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_TEMT ) == 0);    /* 等待数据发送完毕，THR,TSR全空 */
+       if(Num <= BUFFERSIZE)
+       {
+           WriteCH438Block(REG_THR_ADDR, Num, Data);
+           break;
+       }
+       else
+       {
+           WriteCH438Block(REG_THR_ADDR, BUFFERSIZE, Data);
+           Num -= BUFFERSIZE;
+           Data += BUFFERSIZE;
+       }
+   }
+}
+
+
+/****************************************************************************
+ * Name: ImxrtCh438ReadData
+ *
+ * Description:
+ *   Read data from ch438 port
+ *
+ ****************************************************************************/
+void ImxrtCh438ReadData(uint8_t ext_uart_no)
+{
+    int result, i;
+	uint8_t InterruptStatus;
+	uint8_t	REG_IIR_ADDR;
+	uint8_t	REG_LSR_ADDR;
+	uint8_t	REG_MSR_ADDR;
+
+	pthread_mutex_lock(&mutex);
+	while(done[ext_uart_no] == 0)
+		pthread_cond_wait(&cond, &mutex);
+	if (done[ext_uart_no] == 1)
+	{
+		ext_uart_no = 2;		
+		REG_IIR_ADDR = offsetadd[ext_uart_no] | REG_IIR0_ADDR;
+		REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
+		REG_MSR_ADDR = offsetadd[ext_uart_no] | REG_MSR0_ADDR;
+		InterruptStatus = ReadCH438Data(REG_IIR_ADDR) & 0x0f;    /* 读串口的中断状态 */	
+		_info("InterruptStatus is %d\n", InterruptStatus);
+		
+		switch( InterruptStatus )
+		{
+			case INT_NOINT:			/* 没有中断 */					
+				break;
+			case INT_THR_EMPTY:		/* THR空中断 */									
+				break;
+			case INT_RCV_OVERTIME:	/* 接收超时中断，收到数据后一般是触发这个 。在收到一帧数据后4个数据时间没有后续的数据时触发*/
+			case INT_RCV_SUCCESS:	/* 接收数据可用中断。这是一个数据帧超过缓存了才发生，否则一般是前面的超时中断。处理过程同上面的超时中断 */
+				RevLen = CH438UARTRcv(ext_uart_no, buff[ext_uart_no]);
+				for(i=0;i<RevLen;++i)
+				{
+					_info("%c(0x%x)\n", buff[ext_uart_no][i], buff[ext_uart_no][i]);
+				}
+
+				for(i = 0; i < BUFFERSIZE; i++)
+					buff[ext_uart_no][i] = 0;
+				buff_ptr[ext_uart_no] = 0;
+
+				break;
+
+			case INT_RCV_LINES:		/* 接收线路状态中断 */
+				ReadCH438Data(REG_LSR_ADDR);
+				break;
+			case INT_MODEM_CHANGE:	/* MODEM输入变化中断 */
+				ReadCH438Data(REG_MSR_ADDR);
+				break;
+			default:
+				break;
+		}
+
+	}
+	pthread_mutex_unlock(&mutex);	
+}
+
+/****************************************************************************
+ * Name: Ch438InitDefault
+ *
+ * Description:
+ *   Ch438 default initialization function
+ *
+ ****************************************************************************/
+void Ch438InitDefault(void)
+{
+	
+	int ret;
+
+	/* Initialize the mutex */
+
+	ret = pthread_mutex_init(&mutex, NULL);
+	if (ret != 0)
+	{
+		_info("pthread_mutex_init failed, status=%d\n", ret);
+	}
+
+	/* Initialize the condition variable */
+
+	ret = pthread_cond_init(&cond, NULL);
+	if (ret != 0)
+	{
+		_info("pthread_cond_init failed, status=%d\n", ret);
+	}
+
+	ret = task_create("ch438_task", 60, 8192, getInterruptStatus, NULL);
+    if (ret < 0)
+    {
+        _info("task create failed, status=%d\n", ret);
+    }
+
+	ImxrtCH438Init();
+	CH438PortInit(0,115200);
+	CH438PortInit(1,115200);
+	CH438PortInit(2,9600);
+	CH438PortInit(3,9600);
+	CH438PortInit(4,115200);
+	CH438PortInit(5,115200);
+	CH438PortInit(6,115200);
+	CH438PortInit(7,115200);
 }
