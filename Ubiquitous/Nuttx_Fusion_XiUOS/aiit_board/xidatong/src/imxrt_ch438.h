@@ -299,19 +299,10 @@
                             GPIO_PORT1 | GPIO_PIN29)
 
 
-static void ImxrtCH438Init(void);
-static void CH438PortInit( uint8_t ext_uart_no,uint32_t	baud_rate );
-static void CH438SetOutput(void);
-static void CH438SetInput(void);
-static uint8_t ReadCH438Data( uint8_t addr );
-static void WriteCH438Data( uint8_t addr, uint8_t dat);
-static void WriteCH438Block( uint8_t mAddr, uint8_t mLen, uint8_t *mBuf )   ;
- void  CH438UARTSend( uint8_t ext_uart_no,uint8_t *Data, uint8_t Num );
-static uint8_t  CH438UARTRcv( uint8_t ext_uart_no, uint8_t* buf );
 
+void CH438UARTSend(uint8_t ext_uart_no,uint8_t *Data, uint8_t Num);
 void Ch438InitDefault(void);
-void ch438_irq_enable(void);
- void *ImxrtCh438ReadData(void *parameter);
-
+void ImxrtCh438ReadData(void *parameter);
+int getInterruptStatus(int argc, char **argv);
 
 #endif
