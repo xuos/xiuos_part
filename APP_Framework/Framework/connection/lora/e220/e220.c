@@ -28,10 +28,10 @@
 #endif
 
 #ifdef AS_LORA_CLIENT_ROLE
-#define E220_ADDRESS 0xFFFF
+#define E220_ADDRESS ADAPTER_LORA_NET_ROLE_ID
 #endif
 
-#define E220_UART_BAUD_RATE 9600
+#define E220_UART_BAUD_RATE 115200
 
 enum E220LoraMode
 {
@@ -289,6 +289,16 @@ static int E220Open(struct Adapter *adapter)
     cfg.port_configure      = PORT_CFG_INIT;
 #endif
 
+#ifdef AS_LORA_GATEWAY_ROLE
+    //serial receive timeout 10s
+    cfg.serial_timeout = 10000;
+#endif
+
+#ifdef AS_LORA_CLIENT_ROLE
+    //serial receive wait forever
+    cfg.serial_timeout = -1;
+#endif
+
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
     ioctl_cfg.args = &cfg;
@@ -296,6 +306,11 @@ static int E220Open(struct Adapter *adapter)
     PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
 
     E220SetRegisterParam(adapter, E220_ADDRESS, E220_CHANNEL, E220_UART_BAUD_RATE);
+
+    cfg.serial_baud_rate = E220_UART_BAUD_RATE;
+    ioctl_cfg.args = &cfg;
+
+    PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
 
     ADAPTER_DEBUG("E220Open done\n");
 
@@ -387,13 +402,18 @@ static int E220Recv(struct Adapter *adapter, void *buf, size_t len)
     uint8 *recv_buf = PrivMalloc(len);
 
     recv_len = PrivRead(adapter->fd, recv_buf, len);
-    while (recv_len < len) {
-        recv_len_continue = PrivRead(adapter->fd, recv_buf + recv_len, len - recv_len);
-
-        recv_len += recv_len_continue;
+    if (recv_len) {
+        while (recv_len < len) {
+            recv_len_continue = PrivRead(adapter->fd, recv_buf + recv_len, len - recv_len);
+            if (recv_len_continue) {
+                recv_len += recv_len_continue;
+            } else {
+                recv_len = 0;
+                break;
+            }
+        }
+        memcpy(buf, recv_buf, len);
     }
-
-    memcpy(buf, recv_buf, recv_len);
 
     PrivFree(recv_buf);
     
@@ -467,7 +487,7 @@ static void LoraOpen(void)
 static void LoraRead(void *parameter)
 {
 	int RevLen;
-	uint8 i, cnt = 0;
+	int i, cnt = 0;
 
     uint8 buffer[256];
 
@@ -481,11 +501,11 @@ static void LoraRead(void *parameter)
 	
     while (1)
     {
-        KPrintf("ready to read lora data\n");
+        printf("ready to read lora data\n");
 
         RevLen = E220Recv(adapter, buffer, 256);
 		if (RevLen) {
-            KPrintf("lora get data %u\n", RevLen);
+            printf("lora get data %u\n", RevLen);
             for (i = 0; i < RevLen; i ++) {
                 printf("i %u data 0x%x\n", i, buffer[i]);
             }

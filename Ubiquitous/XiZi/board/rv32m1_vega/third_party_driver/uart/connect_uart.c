@@ -57,6 +57,10 @@ static void SerialCfgParamCheck(struct SerialCfgParam *serial_cfg_default, struc
     if ((data_cfg_default->serial_stop_bits != data_cfg_new->serial_stop_bits) && (data_cfg_new->serial_stop_bits)) {
         data_cfg_default->serial_stop_bits = data_cfg_new->serial_stop_bits;
     }
+
+    if ((data_cfg_default->serial_timeout != data_cfg_new->serial_timeout) && (data_cfg_new->serial_timeout)) {
+        data_cfg_default->serial_timeout = data_cfg_new->serial_timeout;
+    }
 }
 
 static void UartIsr(struct SerialDriver *serial_drv, struct SerialHardwareDevice *serial_dev)
@@ -85,6 +89,17 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
 
     NULL_PARAM_CHECK(serial_drv);
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
+
+    if (configure_info->private_data) {
+        struct SerialCfgParam *serial_cfg_new = (struct SerialCfgParam *)configure_info->private_data;
+        SerialCfgParamCheck(serial_cfg, serial_cfg_new);
+    }
+
+	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)serial_drv->driver.owner_bus->owner_haldev;
+	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
+
+	// config serial receive sem timeout
+	dev_param->serial_timeout = serial_cfg->data_cfg.serial_timeout;
 
     LPUART_GetDefaultConfig(&config);
     config.baudRate_Bps = serial_cfg->data_cfg.serial_baud_rate;
@@ -218,6 +233,7 @@ static const struct SerialDataCfg data_cfg_init =
     .serial_bit_order = BIT_ORDER_LSB,
     .serial_invert_mode = NRZ_NORMAL,
     .serial_buffer_size = SERIAL_RB_BUFSZ,
+    .serial_timeout = WAITING_FOREVER,
 };
 
 
