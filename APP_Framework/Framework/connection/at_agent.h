@@ -52,8 +52,12 @@ struct ATAgent
     char *maintain_buffer;
     uint32 maintain_len;
     uint32 maintain_max;
-    
+
+#ifdef ADD_NUTTX_FETURES   
+    pthread_mutex_t lock;
+#else
     int lock;
+#endif
 
     ATReplyType reply;
     char reply_lr_end;
