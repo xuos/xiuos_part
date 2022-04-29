@@ -22,11 +22,13 @@
  * Included Files
  ****************************************************************************/
 
+
 #include <nuttx/config.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <nuttx/arch.h>
 
 #include <unistd.h>
 #include <stdint.h>
@@ -39,7 +41,6 @@
 #include <debug.h>
 #include <poll.h>
 #include <fcntl.h>
-#include <syslog.h>
 
 #include "imxrt_ch438.h"
 
@@ -48,16 +49,22 @@
 
 void CH438Demo(void)
 {
-    int i=0;
-    syslog(LOG_INFO,"ch438_main\n");
+    _info("ch438_main\n");
     Ch438InitDefault();
-    ch438_irq_enable();
     up_mdelay(1000);
     while(1)
     {
         CH438UARTSend(2,"AT+BAUD=?",9);
-        syslog(LOG_INFO,"send success\n");
         ImxrtCh438ReadData(NULL);
-        up_mdelay(2000);
+        up_mdelay(1000);
+        CH438UARTSend(2,"AT+NAME=?",9);
+        ImxrtCh438ReadData(NULL);
+        up_mdelay(1000);
+        CH438UARTSend(2,"AT+ADDR=?",9);
+        ImxrtCh438ReadData(NULL);
+        up_mdelay(1000);
+        CH438UARTSend(2,"AT+MODE=?",9);
+        ImxrtCh438ReadData(NULL);
+        up_mdelay(1000);
     }
 }
