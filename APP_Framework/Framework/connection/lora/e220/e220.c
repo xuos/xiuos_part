@@ -289,8 +289,15 @@ static int E220Open(struct Adapter *adapter)
     cfg.port_configure      = PORT_CFG_INIT;
 #endif
 
-    //serial receive timeout 100s
+#ifdef AS_LORA_GATEWAY_ROLE
+    //serial receive timeout 10s
     cfg.serial_timeout = 10000;
+#endif
+
+#ifdef AS_LORA_CLIENT_ROLE
+    //serial receive wait forever
+    cfg.serial_timeout = -1;
+#endif
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;

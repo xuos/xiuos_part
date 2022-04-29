@@ -32,7 +32,7 @@ extern AdapterProductInfoType E220Attach(struct Adapter *adapter);
 #define GATEWAY_CMD_MODE
 
 //Client num index 1-ADAPTER_LORA_CLIENT_NUM
-#define ADAPTER_LORA_CLIENT_NUM 20
+//#define ADAPTER_LORA_CLIENT_NUM 20
 
 //LORA single transfer data max size 128 bytes: data format 16 bytes and user data 112 bytes
 #define ADAPTER_LORA_DATA_LENGTH 112
@@ -198,8 +198,8 @@ static int LoraGatewayReply(struct Adapter *adapter, struct LoraDataFormat *gate
         }
         
         if (!client_join_flag) {
-            if (gateway->client_num > 6) {
-                printf("Lora gateway only support 6(max) client\n");
+            if (gateway->client_num > ADAPTER_LORA_CLIENT_NUM) {
+                printf("Lora gateway only support %u(max) client\n", ADAPTER_LORA_CLIENT_NUM);
                 gateway->client_num = 0;
             }
             gateway->client_id[gateway->client_num] = gateway_recv_data->client_id;
@@ -592,9 +592,6 @@ static int LoraReceiveDataCheck(struct Adapter *adapter, uint8_t *recv_data, uin
     int ret;
     uint8_t client_id;
 
-    printf("gateway client_id 0x%x head 0x%x%x end 0x%x%x\n", 
-        recv_data[10], recv_data[0], recv_data[1], recv_data[length - 2], recv_data[length - 1]);
-
     if ((ADAPTER_LORA_DATA_HEAD == recv_data[0]) && (ADAPTER_LORA_DATA_HEAD == recv_data[1]) &&
         (ADAPTER_LORA_DATA_END == recv_data[length - 1]) && (ADAPTER_LORA_DATA_END == recv_data[length - 2])) {
 
@@ -617,9 +614,9 @@ static int LoraReceiveDataCheck(struct Adapter *adapter, uint8_t *recv_data, uin
         return ret;
 #else
         client_id = recv_data[10];
-        printf("client_id 0x%x\n", client_id);
 
         if (client_id == adapter->net_role_id) {
+            printf("client_id 0x%x recv data\n", client_id);
             client_recv_data_format[client_id - 1].flame_head = ((recv_data[0] << 8) & 0xFF00) | recv_data[1];
             client_recv_data_format[client_id - 1].flame_index = ((recv_data[2] << 8) & 0xFF00) | recv_data[3];
             client_recv_data_format[client_id - 1].length = ((recv_data[4] << 24) & 0xFF000000) | ((recv_data[5] << 16) & 0xFF0000) |
@@ -641,42 +638,6 @@ static int LoraReceiveDataCheck(struct Adapter *adapter, uint8_t *recv_data, uin
 }
 
 /**
- * @description: Lora gateway re-send cmd
- * @param adapter Lora adapter pointer
- */
-static void LoraGatewayReSendCmd(struct Adapter *adapter)
-{
-    int i, ret = 0;
-    struct LoraGatewayParam *gateway = (struct LoraGatewayParam *)adapter->adapter_param;
-
-#ifdef GATEWAY_CMD_MODE
-    for (i = 0; i < gateway->client_num; i ++) {
-        if (gateway->client_id[i]) {
-            printf("LoraGatewayProcess send to client %d for data\n", gateway->client_id[i]);
-            ret = LoraGatewaySendCmd(adapter, gateway->client_id[i], ADAPTER_LORA_DATA_TYPE_CMD);
-            if (ret < 0) {
-                printf("LoraGatewaySendCmd client ID %d error\n", gateway->client_id[i]);
-                continue;
-            }
-        }
-    }
-#endif
-}
-
-/**
- * @description: Lora client re-send data
- * @param adapter Lora adapter pointer
- */
-static void LoraClientReSendData(struct Adapter *adapter)
-{
-    //set lora_send_buf for re-connect
-    uint8_t client_re_send_buf[ADAPTER_LORA_DATA_LENGTH];
-    memset(client_re_send_buf, 0, ADAPTER_LORA_DATA_LENGTH);
-    LoraClientSendData(adapter, client_re_send_buf, ADAPTER_LORA_DATA_LENGTH, 0);
-    printf("LoraClientReSendData client 0x%x\n", adapter->net_role_id);
-}
-
-/**
  * @description: Lora data receive task
  * @param parameter - Lora adapter pointer
  */
@@ -695,11 +656,7 @@ static void *LoraReceiveTask(void *parameter)
             if (recv_error_cnt > ADAPTER_LORA_RECEIVE_ERROR_CNT) {
                 recv_error_cnt = 0;
 #ifdef AS_LORA_GATEWAY_ROLE
-                //LoraGatewayReSendCmd(lora_adapter);
-#endif
-
-#ifdef AS_LORA_CLIENT_ROLE
-                LoraClientReSendData(lora_adapter);
+                PrivSemaphoreAbandon(&gateway_recv_data_sem);
 #endif
             }
             continue;
@@ -707,7 +664,6 @@ static void *LoraReceiveTask(void *parameter)
 
         ret = LoraReceiveDataCheck(lora_adapter, lora_recv_data, ADAPTER_LORA_TRANSFER_DATA_LENGTH);
         if (ret < 0) {
-            printf("LoraReceiveDataCheck recv error.Just return\n");
             continue;
         }
 
@@ -759,6 +715,11 @@ static void *LoraGatewayTask(void *parameter)
     struct LoraGatewayParam *gateway = (struct LoraGatewayParam *)lora_adapter->adapter_param;
 
     memset(&gateway_recv_data_format, 0, sizeof(struct LoraDataFormat));
+
+    gateway->client_num = ADAPTER_LORA_CLIENT_NUM;
+    for (i = 0; i < ADAPTER_LORA_CLIENT_NUM;i ++) {
+        gateway->client_id[i] = i + 1;
+    }   
     
     while (1) {
         LoraGatewayProcess(lora_adapter, gateway);
@@ -781,6 +742,10 @@ static void *LoraClientDataTask(void *parameter)
         memset(&client_recv_data_format[i], 0, sizeof(struct LoraDataFormat));
     }
 
+    client->gateway_id = 0xFF;
+    client->panid = ADAPTER_LORA_NET_PANID;
+    client->client_state = CLIENT_CONNECT;
+
     //set lora_send_buf for test
     uint8_t lora_send_buf[ADAPTER_LORA_DATA_LENGTH];
     memset(lora_send_buf, 0, ADAPTER_LORA_DATA_LENGTH);
@@ -794,7 +759,6 @@ static void *LoraClientDataTask(void *parameter)
             printf("LoraClientDataAnalyze error, wait for next data cmd\n");
             continue;
         }
-        PrivTaskDelay(2000);
 #endif
         //Condition 2: client send user_data automatically
 #ifdef CLIENT_UPDATE_MODE
@@ -804,61 +768,6 @@ static void *LoraClientDataTask(void *parameter)
             LoraClientSendData(lora_adapter, (void *)lora_send_buf, strlen(lora_send_buf), 0);
         }
 #endif
-    }
-
-    return 0;
-}
-
-/**
- * @description: Lora Client join task
- * @param parameter - Lora adapter pointer
- */
-static void *LoraClientJoinTask(void *parameter)
-{
-    int ret = 0;
-    struct Adapter *lora_adapter = (struct Adapter *)parameter;
-    struct LoraClientParam *client = (struct LoraClientParam *)lora_adapter->adapter_param;
-
-    while (1) {
-        PrivTaskDelay(5000);
-
-        if ((CLIENT_DISCONNECT == client->client_state) && (!g_adapter_lora_quit_flag)) {
-            ret = LoraClientJoinNet(lora_adapter, client->panid);
-            if (ret < 0) {
-                printf("LoraClientJoinNet error panid 0x%x\n", client->panid);
-            }
-        }
-    }
-
-    return 0;
-}
-
-/**
- * @description: Lora Client quit task
- * @param parameter - Lora adapter pointer
- */
-static void *LoraClientQuitTask(void *parameter)
-{
-    int ret = 0;
-    struct Adapter *lora_adapter = (struct Adapter *)parameter;
-    struct LoraClientParam *client = (struct LoraClientParam *)lora_adapter->adapter_param;
-
-    while (1) {
-        PrivTaskDelay(100);
-
-        if ((CLIENT_CONNECT == client->client_state) && (g_adapter_lora_quit_flag)) {
-            ret = LoraClientQuitNet(lora_adapter, client->panid);
-            if (ret < 0) {
-                printf("LoraClientQuitNet error panid 0x%x, re-quit net\n", client->panid);
-                continue;
-            }
-
-            ret = LoraClientDataAnalyze(lora_adapter, NULL, 0, 0);
-            if (ret < 0) {
-                printf("LoraClientQuitTask LoraClientDataAnalyze error\n");
-                continue;
-            }
-        }
     }
 
     return 0;
@@ -987,8 +896,6 @@ static pthread_t lora_recv_data_task;
 static pthread_t lora_gateway_task;
 #else //AS_LORA_CLIENT_ROLE
 static pthread_t lora_client_data_task;
-static pthread_t lora_client_join_task;
-static pthread_t lora_client_quit_task;
 #endif
 
 int AdapterLoraTest(void)
@@ -1044,13 +951,6 @@ int AdapterLoraTest(void)
     PrivTaskCreate(&lora_client_data_task, &lora_client_attr, &LoraClientDataTask, (void *)adapter);
     PrivTaskStartup(&lora_client_data_task);
 
-    lora_client_attr.stacksize = 1024;
-
-    PrivTaskCreate(&lora_client_join_task, &lora_client_attr, &LoraClientJoinTask, (void *)adapter);
-    PrivTaskStartup(&lora_client_join_task);
-
-    PrivTaskCreate(&lora_client_quit_task, &lora_client_attr, &LoraClientQuitTask, (void *)adapter);
-    PrivTaskStartup(&lora_client_quit_task);
 #endif
 
     return 0;
