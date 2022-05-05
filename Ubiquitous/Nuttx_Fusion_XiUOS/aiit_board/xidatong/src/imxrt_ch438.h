@@ -299,10 +299,29 @@
                             GPIO_PORT1 | GPIO_PIN29)
 
 
+#ifdef CONFIG_DEBUG_CH438_ERROR
+#  define ch438err      _err
+#else
+#  define ch438err     _none
+#endif
+
+#ifdef CONFIG_DEBUG_CH438_WARN
+#  define ch438warn    _warn
+#else
+#  define ch438warn    _none
+#endif
+
+#ifdef CONFIG_DEBUG_CH438_INFO
+#  define ch438info    _info
+#else
+#  define ch438info    _none
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 int getInterruptStatus(int argc, char **argv);
 void Ch438InitDefault(void);
 int ch438_register(FAR const char *devpath,uint8_t port);
+void board_ch438_initialize(void);
 #endif

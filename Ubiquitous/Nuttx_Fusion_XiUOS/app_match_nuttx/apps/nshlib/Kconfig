@@ -587,6 +587,11 @@ config NSH_DISABLE_XD
 	bool "Disable xd"
 	default y if DEFAULT_SMALL
 	default n if !DEFAULT_SMALL
+
+config NSH_DISABLE_CH438
+	bool "Disable the ch438 demo."
+	default n
+
 config NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS
 	bool "Disable the sensor tb600b_wq_hcho1os."
 	default n

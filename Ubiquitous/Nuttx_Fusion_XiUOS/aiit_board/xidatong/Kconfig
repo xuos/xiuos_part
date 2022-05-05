@@ -83,5 +83,43 @@ config XIDATONG_USB_AUTOMOUNT_UDELAY
 
 endif # XIDATONG_USB_AUTOMOUNT
 
+menuconfig BSP_USING_CH438
+    bool "Using CH438 device"
+    default n
 
-endif
+if BSP_USING_CH438
+config CH438_EXTUART0
+	bool "using ch438 port 0"
+	default n
+
+config CH438_EXTUART1
+	bool "using ch438 port 1"
+	default n
+
+config CH438_EXTUART2
+	bool "using ch438 port 2"
+	default n
+
+config CH438_EXTUART3
+	bool "using ch438 port 3"
+	default n
+
+config CH438_EXTUART4
+	bool "using ch438 port 4"
+	default n
+
+config CH438_EXTUART5
+	bool "using ch438 port 5"
+	default n
+
+config CH438_EXTUART6
+	bool "using ch438 port 6"
+	default n
+
+config CH438_EXTUART7
+	bool "using ch438 port 7"
+	default n
+
+endif # BSP_USING_CH438
+
+endif # ARCH_BOARD_XIDATONG

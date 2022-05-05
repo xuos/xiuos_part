@@ -53,26 +53,26 @@ void CH438Demo(void)
     int i;
     char buffer[256];
     int readlen;
-    _info("ch438_main\n");
-    Ch438InitDefault();
-    ch438_register("/dev/ext_uart3",2);
-    ch438_register("/dev/ext_uart2",1);
 
-    fd1 = open("/dev/ext_uart3", O_RDWR);
+    fd1 = open("/dev/extuart_dev2", O_RDWR);
     write(fd1, "AT+BAUD=?",9);
     readlen = read(fd1, buffer, 256);
 
     for(i=0;i<readlen;++i)
     {
-        _info("%c(0x%x)\n", buffer[i], buffer[i]);
+        printf("%c(0x%x)\n", buffer[i], buffer[i]);
     }
+    close(fd1);
+
     up_mdelay(1000);
 
-    fd2 = open("/dev/ext_uart2", O_RDWR);
+    fd2 = open("/dev/extuart_dev1", O_RDWR);
     write(fd2, "AT+BAUD=?",9);
     readlen = read(fd2, buffer, 256);
     for(i=0;i<readlen;++i)
     {
-        _info("%c(0x%x)\n", buffer[i], buffer[i]);
+        printf("%c(0x%x)\n", buffer[i], buffer[i]);
     }
+
+    close(fd2);
 }

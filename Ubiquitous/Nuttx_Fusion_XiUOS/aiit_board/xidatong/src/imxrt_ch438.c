@@ -452,7 +452,7 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
 		REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
 		REG_MSR_ADDR = offsetadd[ext_uart_no] | REG_MSR0_ADDR;
 		InterruptStatus = ReadCH438Data(REG_IIR_ADDR) & 0x0f;    /* 读串口的中断状态 */	
-		_info("InterruptStatus is %d\n", InterruptStatus);
+		ch438info("InterruptStatus is %d\n", InterruptStatus);
 		
 		switch(InterruptStatus)
 		{
@@ -498,7 +498,7 @@ void Ch438InitDefault(void)
 	ret = pthread_mutex_init(&mutex, NULL);
 	if (ret != 0)
 	{
-		_info("pthread_mutex_init failed, status=%d\n", ret);
+		ch438err("pthread_mutex_init failed, status=%d\n", ret);
 	}
 
 	/* Initialize the condition variable */
@@ -506,13 +506,13 @@ void Ch438InitDefault(void)
 	ret = pthread_cond_init(&cond, NULL);
 	if (ret != 0)
 	{
-		_info("pthread_cond_init failed, status=%d\n", ret);
+		ch438err("pthread_cond_init failed, status=%d\n", ret);
 	}
 
 	ret = task_create("ch438_task", 60, 8192, getInterruptStatus, NULL);
     if (ret < 0)
     {
-        _info("task create failed, status=%d\n", ret);
+        ch438err("task create failed, status=%d\n", ret);
     }
 
 	ImxrtCH438Init();
@@ -615,6 +615,7 @@ int ch438_register(FAR const char *devpath, uint8_t port)
 	priv = (FAR struct ch438_dev_s *)kmm_malloc(sizeof(struct ch438_dev_s));
 	if (priv == NULL)
 	{
+		ch438err("ERROR: Failed to allocate instance\n");
 		return -ENOMEM;
 	}
 
@@ -624,8 +625,53 @@ int ch438_register(FAR const char *devpath, uint8_t port)
 	ret = register_driver(devpath, &g_ch438fops, 0666, priv);
 	if (ret < 0)
 	{
+		ch438err("ERROR: Failed to register driver: %d\n", ret);
 		kmm_free(priv);
 	}
 	
 	return ret;
+}
+
+/****************************************************************************
+ * Name: board_ch438_initialize
+ *
+ * Description:
+ *   ch438 initialize
+ *
+ ****************************************************************************/
+void board_ch438_initialize(void)
+{
+	Ch438InitDefault();
+
+#ifdef CONFIG_CH438_EXTUART0
+	ch438_register("/dev/extuart_dev0", 0);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART1
+	ch438_register("/dev/extuart_dev1", 1);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART2
+	ch438_register("/dev/extuart_dev2", 2);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART3
+	ch438_register("/dev/extuart_dev3", 3);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART4
+	ch438_register("/dev/extuart_dev4", 4);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART5
+	ch438_register("/dev/extuart_dev5", 5);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART6
+	ch438_register("/dev/extuart_dev6", 6);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART7
+	ch438_register("/dev/extuart_dev7", 7);
+#endif
 }

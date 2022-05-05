@@ -1417,7 +1417,9 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
                     FAR void *arg);
 #endif
 
-int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)
+  int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
   int cmd_Hcho1os(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);

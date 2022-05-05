@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = imxrt_boot.c imxrt_flexspi_nor_boot.c imxrt_flexspi_nor_flash.c imxrt_ch438.c ch438_demo.c
+CSRCS = imxrt_boot.c imxrt_flexspi_nor_boot.c imxrt_flexspi_nor_flash.c
 
 ifeq ($(CONFIG_IMXRT_SDRAMC),y)
 CSRCS += imxrt_sdram.c
@@ -80,6 +80,10 @@ endif
 
 ifeq ($(CONFIG_XIDATONG_SDIO_AUTOMOUNT),y)
 CSRCS += imxrt_mmcsd_automount.c
+endif
+
+ifeq ($(CONFIG_BSP_USING_CH438),y)
+CSRCS += imxrt_ch438.c ch438_demo.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

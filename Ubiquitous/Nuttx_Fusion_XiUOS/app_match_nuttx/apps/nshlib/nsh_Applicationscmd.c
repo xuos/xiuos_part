@@ -36,8 +36,10 @@
 #include "nsh.h"
 #include "nsh_console.h"
 
-extern int FrameworkInit(void);
-
+/****************************************************************************
+ * Name: cmd_Ch438
+ ****************************************************************************/
+#if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)
 extern void CH438Demo(void);
 int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
@@ -45,8 +47,7 @@ int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     CH438Demo();
     return OK;
 }
-
-
+#endif
 
 /****************************************************************************
  * Name: cmd_Hcho1os

@@ -47,6 +47,10 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
+#ifdef CONFIG_BSP_USING_CH438
+#  include "imxrt_ch438.h"
+#endif
+
 #include "xidatong.h"
 
 #include <arch/board/board.h>  /* Must always be included last */
@@ -179,6 +183,10 @@ int imxrt_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_BSP_USING_CH438
+  board_ch438_initialize();
 #endif
 
   UNUSED(ret);
