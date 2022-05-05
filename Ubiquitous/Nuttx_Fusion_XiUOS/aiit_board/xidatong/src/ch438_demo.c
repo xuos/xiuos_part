@@ -49,22 +49,30 @@
 
 void CH438Demo(void)
 {
+    int fd1,fd2;
+    int i;
+    char buffer[256];
+    int readlen;
     _info("ch438_main\n");
     Ch438InitDefault();
-    up_mdelay(1000);
-    while(1)
+    ch438_register("/dev/ext_uart3",2);
+    ch438_register("/dev/ext_uart2",1);
+
+    fd1 = open("/dev/ext_uart3", O_RDWR);
+    write(fd1, "AT+BAUD=?",9);
+    readlen = read(fd1, buffer, 256);
+
+    for(i=0;i<readlen;++i)
     {
-        CH438UARTSend(2,"AT+BAUD=?",9);
-        ImxrtCh438ReadData(2);
-        up_mdelay(1000);
-        CH438UARTSend(2,"AT+NAME=?",9);
-        ImxrtCh438ReadData(2);
-        up_mdelay(1000);
-        CH438UARTSend(2,"AT+ADDR=?",9);
-        ImxrtCh438ReadData(2);
-        up_mdelay(1000);
-        CH438UARTSend(2,"AT+MODE=?",9);
-        ImxrtCh438ReadData(2);
-        up_mdelay(1000);
+        _info("%c(0x%x)\n", buffer[i], buffer[i]);
+    }
+    up_mdelay(1000);
+
+    fd2 = open("/dev/ext_uart2", O_RDWR);
+    write(fd2, "AT+BAUD=?",9);
+    readlen = read(fd2, buffer, 256);
+    for(i=0;i<readlen;++i)
+    {
+        _info("%c(0x%x)\n", buffer[i], buffer[i]);
     }
 }

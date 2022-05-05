@@ -299,9 +299,10 @@
                             GPIO_PORT1 | GPIO_PIN29)
 
 
-
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 int getInterruptStatus(int argc, char **argv);
-void CH438UARTSend(uint8_t ext_uart_no,uint8_t *Data, uint8_t Num);
-void ImxrtCh438ReadData(uint8_t ext_uart_no);
 void Ch438InitDefault(void);
+int ch438_register(FAR const char *devpath,uint8_t port);
 #endif
