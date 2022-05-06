@@ -20,8 +20,9 @@
 
 #include <adapter.h>
 #include "adapter_wifi.h"
+#ifdef ADD_XIZI_FETURES
 #include <bus_pin.h>
-
+#endif
 
 #ifdef ADAPTER_HFA21_WIFI
 extern AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter);
@@ -99,7 +100,7 @@ int AdapterWifiInit(void)
 }
 
 /******************wifi TEST*********************/
-int AdapterwifiTest(void)
+int AdapterWifiTest(void)
 {
     char cmd[64];
     int baud_rate = BAUD_RATE_57600;
@@ -197,15 +198,18 @@ int wifiopen(void)
 
     AdapterDeviceOpen(adapter);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, wifiopen, wifiopen, open adapter wifi );
+#endif
 int wificlose(void)
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
 
     AdapterDeviceClose(adapter);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, wificlose, wificlose, close adapter wifi );
-
+#endif
 int wifisetup(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -218,7 +222,9 @@ int wifisetup(int argc, char *argv[])
 
     AdapterDeviceSetUp(adapter);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3)|SHELL_CMD_DISABLE_RETURN, wifisetup, wifisetup, setup adapter wifi );
+#endif
 int wifiaddrset(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -230,16 +236,18 @@ int wifiaddrset(int argc, char *argv[])
     AdapterDevicePing(adapter, "36.152.44.95");///< ping www.baidu.com
     AdapterDeviceNetstat(adapter);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(4)|SHELL_CMD_DISABLE_RETURN, wifiaddrset, wifiaddrset, addrset adapter wifi);
-
+#endif
 int wifiping(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
     printf("ping %s\n",argv[1]);
     AdapterDevicePing(adapter, argv[1]);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3), wifiping, wifiping, wifiping adapter );
-
+#endif
 int wificonnect(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -258,7 +266,9 @@ int wificonnect(int argc, char *argv[])
 
     AdapterDeviceConnect(adapter, net_role, ip, port, ip_type);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(4)|SHELL_CMD_DISABLE_RETURN, wificonnect, wificonnect, wificonnect adapter);
+#endif
 int wifisend(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -270,7 +280,9 @@ int wifisend(int argc, char *argv[])
         PrivTaskDelay(1000);
     }
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3)|SHELL_CMD_DISABLE_RETURN, wifisend, wifisend, wifisend adapter wifi information);
+#endif
 int wifirecv(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -282,4 +294,6 @@ int wifirecv(int argc, char *argv[])
         printf("wifi recv [%s]\n",wifi_recv_msg);
     }
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3)|SHELL_CMD_DISABLE_RETURN, wifirecv, wifirecv, wifirecv adapter wifi information);
+#endif

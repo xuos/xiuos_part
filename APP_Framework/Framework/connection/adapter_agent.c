@@ -31,7 +31,7 @@
 #endif
 #ifdef ADD_RTTHREAD_FETURES
 #include <rtthread.h>
-
+#endif
 #define AT_CMD_MAX_LEN 128
 #define AT_AGENT_MAX 2
 static char send_buf[AT_CMD_MAX_LEN];
@@ -439,6 +439,7 @@ int DeleteATAgent(ATAgentType agent)
         printf("delete agent lock = %d\n",agent->lock.sem.semcount);
         PrivMutexDelete(&agent->lock);
     }
+#elif defined ADD_RTTHREAD_FETURES
 #else
     if (agent->lock) {
         printf("delete agent lock = %d\n",agent->lock);
@@ -450,12 +451,12 @@ int DeleteATAgent(ATAgentType agent)
         printf("delete agent entm_rx_notice = %d\n",agent->entm_rx_notice);
         PrivSemaphoreDelete(&agent->entm_rx_notice);
     }
-
-    // if (agent->rsp_sem) {
-    //     printf("delete agent rsp_sem = %d\n",agent->rsp_sem);
-    //     PrivSemaphoreDelete(&agent->rsp_sem);
-    // }
-
+#ifdef ADD_XIZI_FETURES
+     if (agent->rsp_sem) {
+         printf("delete agent rsp_sem = %d\n",agent->rsp_sem);
+         PrivSemaphoreDelete(&agent->rsp_sem);
+    }
+#endif
     if (agent->maintain_buffer) {
         PrivFree(agent->maintain_buffer);
     }
