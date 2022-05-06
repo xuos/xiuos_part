@@ -35,6 +35,9 @@ extern "C" {
 #define OPE_INT                 0x0000
 #define OPE_CFG                 0x0001
 
+#define OPER_WDT_SET_TIMEOUT    0x0002
+#define OPER_WDT_KEEPALIVE      0x0003
+
 #define NAME_NUM_MAX            32
 
 /*********************GPIO define*********************/
@@ -142,6 +145,7 @@ enum IoctlDriverType
     LCD_TYPE,
     ADC_TYPE,
     DAC_TYPE,
+    WDT_TYPE,
     DEFAULT_TYPE,
 };
 
