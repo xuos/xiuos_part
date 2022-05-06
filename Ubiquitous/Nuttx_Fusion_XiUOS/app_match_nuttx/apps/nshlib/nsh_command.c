@@ -674,6 +674,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "e220loraSend",       cmd_e220loraSend,       1, 2, "[e220loraSend <message>]" },
 #endif
 
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORAOPEN)
+  { "e220loraOpen",       cmd_e220LoraOpen,       1, 1, "[e220lora open device" },
+#endif
+
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
   { "fft",       cmd_fft,       1, 1, "[K210 fft function.]" },
 #endif

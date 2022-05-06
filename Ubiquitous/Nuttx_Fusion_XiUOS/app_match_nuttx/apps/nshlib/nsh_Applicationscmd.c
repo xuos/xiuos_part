@@ -327,6 +327,17 @@ int cmd_e220loraSend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 }
 #endif
 
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORAOPEN)
+extern void LoraOpen(void);
+int cmd_e220LoraOpen(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    LoraOpen();
+    return OK;
+}
+#endif
+
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
 extern void nuttx_k210_fft_test(void);
 int cmd_fft(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
