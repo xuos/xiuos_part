@@ -63,6 +63,10 @@ extern int ExtSramInit(void);
 extern int ETH_BSP_Config();
 #endif
 
+#ifdef BSP_USING_LCD
+extern int Imxrt1052HwLcdInit(void);
+#endif
+
 void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength)
 {
     IOMUXC_SetPinConfig(IOMUXC_GPIO_SD_B0_00_USDHC1_CMD,
@@ -273,6 +277,8 @@ void SysTick_Handler(int irqn, void *arg)
 }
 DECLARE_HW_IRQ(SYSTICK_IRQN, SysTick_Handler, NONE);
 
+
+
 /**
  * This function will initial imxrt1050 board.
  */
@@ -331,5 +337,8 @@ void InitBoardHardware()
     Imxrt1052HwSdioInit();
 #endif
 
+#ifdef BSP_USING_LCD
+    Imxrt1052HwLcdInit();
+#endif
 }
 
