@@ -17,6 +17,10 @@ choice
                 bool "config as a client"
 endchoice
 
+config ADAPTER_LORA_CLIENT_NUM
+        int "Lora net client num"
+        default "20"
+
 if AS_LORA_GATEWAY_ROLE
         config ADAPTER_LORA_NET_ROLE_ID
                 hex "if Lora device config as a gateway, set gateway net id"

@@ -68,11 +68,12 @@ void InstallConsole(const char *bus_name, const char *drv_name, const char *dev_
             BusDevClose(_console);
         }
 
+        console_bus->match(console_drv, console);
+
         configure_info.configure_cmd = OPE_INT;
         memset(&serial_cfg, 0, sizeof(struct SerialCfgParam));
         configure_info.private_data = &serial_cfg;
         BusDrvConfigure(console_drv, &configure_info);
-        console_bus->match(console_drv, console);
 
         serial_dev_param = (struct SerialDevParam *)console->private_data;
         serial_dev_param->serial_set_mode = 0;

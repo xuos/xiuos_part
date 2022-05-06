@@ -127,6 +127,7 @@ struct SerialDataCfg
     uint8_t serial_bit_order;
     uint8_t serial_invert_mode;
     uint16_t serial_buffer_size;
+    int32 serial_timeout;
 
     uint8_t ext_uart_no;
     enum ExtSerialPortConfigure port_configure;

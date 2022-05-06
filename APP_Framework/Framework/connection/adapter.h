@@ -190,6 +190,9 @@ struct Adapter
     void *done;
     void *adapter_param;
 
+    sem_t sem;
+    pthread_mutex_t lock;
+ 
     struct DoublelistNode link;
 };
 
