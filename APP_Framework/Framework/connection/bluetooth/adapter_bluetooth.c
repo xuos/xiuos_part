@@ -78,13 +78,13 @@ int AdapterBlueToothInit(void)
     return ret;
 }
 
-/******************4G TEST*********************/
+/******************BT TEST*********************/
 int AdapterBlueToothTest(void)
 {
     const char *bluetooth_msg = "BT Adapter Test";
     char bluetooth_recv_msg[128];
     int len;
-    int baud_rate = BAUD_RATE_115200;
+    int baud_rate = BAUD_RATE_9600;
 
     struct Adapter *adapter =  AdapterDeviceFindByName(ADAPTER_BLUETOOTH_NAME);
 
@@ -99,7 +99,7 @@ int AdapterBlueToothTest(void)
         printf("bluetooth_recv_msg %s\n", bluetooth_recv_msg);
         AdapterDeviceSend(adapter, bluetooth_msg, len);
         printf("send %s after recv\n", bluetooth_msg);
-        PrivTaskDelay(100);
+        PrivTaskDelay(1000);
         memset(bluetooth_recv_msg, 0, 128);
     }
 
@@ -107,4 +107,9 @@ int AdapterBlueToothTest(void)
 
     return 0;    
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterBlueToothTest, AdapterBlueToothTest, show adapter BT information);
+#ifdef ADD_RTTHREAD_FETURES
+MSH_CMD_EXPORT(AdapterBlueToothTest,a bt adpter sample);
+#endif
+#ifdef ADD_XIZI_FETURES
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterWifiTest, AdapterWifiTest, show adapter wifi information);
+#endif

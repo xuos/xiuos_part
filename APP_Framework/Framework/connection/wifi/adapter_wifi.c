@@ -22,6 +22,7 @@
 #include "adapter_wifi.h"
 #include <bus_pin.h>
 
+
 #ifdef ADAPTER_HFA21_WIFI
 extern AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter);
 #endif
@@ -107,30 +108,30 @@ int AdapterwifiTest(void)
 
 
 #ifdef ADAPTER_HFA21_DRIVER_EXT_PORT
-    // static BusType ch438_pin;
-    // ch438_pin = PinBusInitGet();
-	// struct PinParam pin_cfg;	
-	// int ret = 0;
+    static BusType ch438_pin;
+    ch438_pin = PinBusInitGet();
+	struct PinParam pin_cfg;	
+	int ret = 0;
 
-	// struct BusConfigureInfo configure_info;
-	// configure_info.configure_cmd = OPE_CFG;
-	// configure_info.private_data = (void *)&pin_cfg;
+	struct BusConfigureInfo configure_info;
+	configure_info.configure_cmd = OPE_CFG;
+	configure_info.private_data = (void *)&pin_cfg;
 
-    // pin_cfg.cmd = GPIO_CONFIG_MODE;
-    // pin_cfg.pin = 22;
-    // pin_cfg.mode = GPIO_CFG_OUTPUT;
+    pin_cfg.cmd = GPIO_CONFIG_MODE;
+    pin_cfg.pin = 22;
+    pin_cfg.mode = GPIO_CFG_OUTPUT;
 
-	// ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
+	ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
 
-    // struct PinStat pin_stat;
-	// struct BusBlockWriteParam write_param;
-	// struct BusBlockReadParam read_param;
-	// write_param.buffer = (void *)&pin_stat;
+    struct PinStat pin_stat;
+	struct BusBlockWriteParam write_param;
+	struct BusBlockReadParam read_param;
+	write_param.buffer = (void *)&pin_stat;
 	
-	// pin_stat.val = GPIO_HIGH;
+	pin_stat.val = GPIO_HIGH;
 
-    // pin_stat.pin = 22;
-    // BusDevWriteData(ch438_pin->owner_haldev, &write_param);
+    pin_stat.pin = 22;
+    BusDevWriteData(ch438_pin->owner_haldev, &write_param);
 
     int pin_fd;
     pin_fd = PrivOpen("/dev/pin_dev", O_RDWR);
@@ -168,7 +169,7 @@ int AdapterwifiTest(void)
     enum IpType ip_type = IPV4;
     AdapterDeviceConnect(adapter, net_role, ip, port, ip_type);
 
-    const char *wifi_msg = "LiuKai Test";
+    const char *wifi_msg = "Wifi Test";
     int len = strlen(wifi_msg);
     for(int i = 0;i < 10; ++i) {
         AdapterDeviceSend(adapter, wifi_msg, len);
@@ -176,12 +177,19 @@ int AdapterwifiTest(void)
     }
 
     char wifi_recv_msg[128];
-    while (1) {
+    for(int j=0;j<10;++j){
         AdapterDeviceRecv(adapter, wifi_recv_msg, 128);
+        PrivTaskDelay(1000);
     }
     
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterwifiTest, AdapterwifiTest, show adapter wifi information);
+
+#ifdef ADD_RTTHREAD_FETURES
+MSH_CMD_EXPORT(AdapterWifiTest,a wifi adpter sample);
+#endif
+#ifdef ADD_XIZI_FETURES
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterWifiTest, AdapterWifiTest, show adapter wifi information);
+#endif
 
 int wifiopen(void)
 {
