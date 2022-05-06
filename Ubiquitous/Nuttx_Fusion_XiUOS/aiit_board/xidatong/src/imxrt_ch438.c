@@ -18,33 +18,7 @@
  * @date 2022.04.26
  */
 
-#include <nuttx/config.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-#include <nuttx/pthread.h>
-#include <nuttx/semaphore.h>
-#include <nuttx/time.h>
-#include <nuttx/fs/fs.h>
-
-#include <sys/types.h>
-#include <errno.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <sched.h>
-#include <debug.h>
-#include <assert.h>
-
-#include <arch/board/board.h>
-#include "arm_arch.h"
-
-#include "imxrt_config.h"
-#include "imxrt_irq.h"
-#include "imxrt_gpio.h"
 #include "imxrt_ch438.h"
-#include "xidatong.h"
-
 
 #define CH438PORTNUM 8
 #define BUFFERSIZE   128
@@ -74,7 +48,7 @@ static ssize_t ch438_write(FAR struct file *filep, FAR const char *buffer, size_
  ****************************************************************************/
 struct ch438_dev_s
 {
-  uint8_t port;                 /* ch438 port number*/
+  uint8_t port;    /* ch438 port number*/
 };
 
 /****************************************************************************
@@ -271,14 +245,12 @@ static uint8_t ReadCH438Data(uint8_t addr)
 	up_udelay(1);
 
 	imxrt_gpio_write(CH438_ALE_PIN, false);	
-
 	up_udelay(1);		
 
 	CH438SetInput();
 	up_udelay(1);
 	
 	imxrt_gpio_write(CH438_NRD_PIN, false);	
-	
 	up_udelay(1);	
 	
 	if (imxrt_gpio_read(CH438_D7_PIN_INPUT))	dat |= 0x80;
@@ -292,7 +264,6 @@ static uint8_t ReadCH438Data(uint8_t addr)
 	
 	imxrt_gpio_write(CH438_NRD_PIN, true);	
 	imxrt_gpio_write(CH438_ALE_PIN, true);	
-
 	up_udelay(1);
 
 	return dat;
@@ -341,12 +312,10 @@ static void WriteCH438Data(uint8_t addr, uint8_t dat)
 	up_udelay(1);	
 
 	imxrt_gpio_write(CH438_NWR_PIN, false);	
-
 	up_udelay(1);	
 	
 	imxrt_gpio_write(CH438_NWR_PIN, true);	
 	imxrt_gpio_write(CH438_ALE_PIN, true);	
-	
 	up_udelay(1);	
 
 	CH438SetInput();
@@ -639,39 +608,84 @@ int ch438_register(FAR const char *devpath, uint8_t port)
  *   ch438 initialize
  *
  ****************************************************************************/
-void board_ch438_initialize(void)
+int board_ch438_initialize(void)
 {
+	int ret = 0;
+
 	Ch438InitDefault();
 
 #ifdef CONFIG_CH438_EXTUART0
-	ch438_register("/dev/extuart_dev0", 0);
+	ret = ch438_register("/dev/extuart_dev0", 0);
+	if (ret < 0)
+	{
+		ch438err("Failed to register /dev/extuart_dev0: %d\n", ret);
+		goto __exit;
+	}
 #endif
 
 #ifdef CONFIG_CH438_EXTUART1
-	ch438_register("/dev/extuart_dev1", 1);
+	ret = ch438_register("/dev/extuart_dev1", 1);
+	if (ret < 0)
+	{
+		ch438err("Failed to register /dev/extuart_dev1: %d\n", ret);
+		goto __exit;
+	}
 #endif
 
 #ifdef CONFIG_CH438_EXTUART2
-	ch438_register("/dev/extuart_dev2", 2);
+	ret = ch438_register("/dev/extuart_dev2", 2);
+	if (ret < 0)
+	{
+		ch438err("Failed to register /dev/extuart_dev2: %d\n", ret);
+		goto __exit;
+	}
 #endif
 
 #ifdef CONFIG_CH438_EXTUART3
-	ch438_register("/dev/extuart_dev3", 3);
+	ret = ch438_register("/dev/extuart_dev3", 3);
+	if (ret < 0)
+	{
+		ch438err("Failed to register /dev/extuart_dev3: %d\n", ret);
+		goto __exit;
+	}
 #endif
 
 #ifdef CONFIG_CH438_EXTUART4
-	ch438_register("/dev/extuart_dev4", 4);
+	ret = ch438_register("/dev/extuart_dev4", 4);
+	if (ret < 0)
+	{
+		ch438err("Failed to register /dev/extuart_dev4: %d\n", ret);
+		goto __exit;
+	}
 #endif
 
 #ifdef CONFIG_CH438_EXTUART5
-	ch438_register("/dev/extuart_dev5", 5);
+	ret = ch438_register("/dev/extuart_dev5", 5);
+	if (ret < 0)
+	{
+		ch438err("Failed to register /dev/extuart_dev5: %d\n", ret);
+		goto __exit;
+	}
 #endif
 
 #ifdef CONFIG_CH438_EXTUART6
-	ch438_register("/dev/extuart_dev6", 6);
+	ret = ch438_register("/dev/extuart_dev6", 6);
+	if (ret < 0)
+	{
+		ch438err("Failed to register /dev/extuart_dev6: %d\n", ret);
+		goto __exit;
+	}
 #endif
 
 #ifdef CONFIG_CH438_EXTUART7
-	ch438_register("/dev/extuart_dev7", 7);
+	ret = ch438_register("/dev/extuart_dev7", 7);
+	if (ret < 0)
+	{
+		ch438err("Failed to register /dev/extuart_dev7: %d\n", ret);
+		goto __exit;
+	}
 #endif
+
+__exit:
+    return ret;
 }

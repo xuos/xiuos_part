@@ -152,7 +152,6 @@ int imxrt_bringup(void)
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB host services: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -171,7 +170,6 @@ int imxrt_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -186,7 +184,12 @@ int imxrt_bringup(void)
 #endif
 
 #ifdef CONFIG_BSP_USING_CH438
-  board_ch438_initialize();
+  ret = board_ch438_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize ch438 Driver: %d\n", ret);
+    }
+
 #endif
 
   UNUSED(ret);

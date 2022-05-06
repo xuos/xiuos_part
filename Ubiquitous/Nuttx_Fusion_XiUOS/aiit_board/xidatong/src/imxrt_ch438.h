@@ -18,9 +18,44 @@
  * @date 2022.04.26
  */
 
-#ifndef __QC_TEST_CH438__
-#define __QC_TEST_CH438__
+#ifndef __BOARDS_ARM_IMXRT_XIDATONG_SRC_IMXRT_CH438_H
+#define __BOARDS_ARM_IMXRT_XIDATONG_SRC_IMXRT_CH438_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+#include <nuttx/config.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+#include <nuttx/pthread.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/time.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/arch.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <errno.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <sched.h>
+#include <debug.h>
+#include <assert.h>
+#include <unistd.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+#include <fcntl.h>
+
+#include <arch/board/board.h>
+#include "arm_arch.h"
+
+#include "imxrt_config.h"
+#include "imxrt_irq.h"
+#include "imxrt_gpio.h"
 #include "xidatong.h"
 
 /******************************************************************************************/
@@ -300,7 +335,7 @@
 
 
 #ifdef CONFIG_DEBUG_CH438_ERROR
-#  define ch438err      _err
+#  define ch438err     _err
 #else
 #  define ch438err     _none
 #endif
@@ -320,8 +355,12 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+#ifdef CONFIG_BSP_USING_CH438
 int getInterruptStatus(int argc, char **argv);
 void Ch438InitDefault(void);
 int ch438_register(FAR const char *devpath,uint8_t port);
-void board_ch438_initialize(void);
+int board_ch438_initialize(void);
 #endif
+
+#endif /* __BOARDS_ARM_IMXRT_XIDATONG_SRC_IMXRT_CH438_H */
+
