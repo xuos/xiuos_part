@@ -31,6 +31,10 @@
 #include "connect_usb.h"
 #endif
 
+#ifdef BSP_USING_WDT
+#include "connect_wdt.h"
+#endif
+
 #ifdef KERNEL_USER_MAIN
 #ifndef MAIN_KTASK_STACK_SIZE
 #define MAIN_KTASK_STACK_SIZE     2048
@@ -240,6 +244,10 @@ extern int InitUserspace(void);
 
 #ifdef ARCH_SMP
 	HwLockSpinlock(&AssignSpinLock);
+#endif
+
+#ifdef BSP_USING_WDT
+    StartWatchdog();
 #endif
 
     StartupOsAssign();

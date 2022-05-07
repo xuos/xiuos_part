@@ -36,5 +36,9 @@ if ADD_NUTTX_FETURES
 endif
 
 if ADD_RTTHREAD_FETURES
-
+        config ADAPTER_HC08_DRIVER
+                string "HC08 device uart driver path"
+                default "/dev/uart4"
+        config ADAPTER_HC08_WORK_ROLE
+                string "HC08 work role M(MASTER) or S(SLAVER)"
 endif

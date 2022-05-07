@@ -11,7 +11,7 @@
 */
 
 /**
-* @file connect_wdt.c
+* @file connect_wdg.c
 * @brief support aiit-arm32-board watchdog function and register to bus framework
 * @version 1.0 
 * @author AIIT XUOS Lab

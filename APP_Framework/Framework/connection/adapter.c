@@ -21,9 +21,11 @@
 #include <adapter.h>
 
 static DoublelistType adapter_list;
-
+#ifdef ADD_XIZI_FETURES
 static int adapter_list_lock;
-
+#else
+static pthread_mutex_t adapter_list_lock;
+#endif
 /**
  * @description: Init adapter framework
  * @return 0
@@ -481,6 +483,7 @@ int AdapterDeviceDisconnect(struct Adapter *adapter, unsigned char *priv_net_gro
  */
 int AdapterDeviceSetUp(struct Adapter *adapter)
 {
+    
     if (!adapter)
         return -1;
 
@@ -488,10 +491,10 @@ int AdapterDeviceSetUp(struct Adapter *adapter)
 
     struct IpProtocolDone *ip_done = NULL;
     struct PrivProtocolDone *priv_done = NULL;
-
     switch (adapter->net_protocol)
     {
     case PRIVATE_PROTOCOL:
+        
         priv_done = (struct PrivProtocolDone *)adapter->done;
         if (NULL == priv_done->setup)
             return 0;
@@ -515,6 +518,7 @@ int AdapterDeviceSetUp(struct Adapter *adapter)
             return 0;
         
         result = ip_done->setup(adapter);
+        
         if (0 == result) {
             printf("Device %s setup success.\n", adapter->name);
             adapter->adapter_status = INSTALL;

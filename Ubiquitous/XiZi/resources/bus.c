@@ -52,7 +52,7 @@ static int BusMatchDrvDev(struct Driver  *driver, struct HardwareDev *device)
     NULL_PARAM_CHECK(device);
 
     if(!strncmp(driver->owner_bus->bus_name, device->owner_bus->bus_name, NAME_NUM_MAX)) {
-        KPrintf("BusMatchDrvDev match successfully, bus name %s\n", driver->owner_bus->bus_name);
+        //KPrintf("BusMatchDrvDev match successfully, bus name %s\n", driver->owner_bus->bus_name);
 
         driver->private_data = device->private_data;//driver get the device param
         device->owner_bus->owner_driver = driver;

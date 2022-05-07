@@ -29,7 +29,9 @@
 #ifdef ADD_XIZI_FETURES
 # include <user_api.h>
 #endif
-
+#ifdef ADD_RTTHREAD_FETURES
+#include <rtthread.h>
+#endif
 #define AT_CMD_MAX_LEN 128
 #define AT_AGENT_MAX 2
 static char send_buf[AT_CMD_MAX_LEN];
@@ -139,7 +141,7 @@ int ATOrderSend(ATAgentType agent, uint32_t timeout_s, ATReplyType reply, const 
 
     PrivMutexObtain(&agent->lock); 
     agent->receive_mode = AT_MODE;
-
+    
     memset(agent->maintain_buffer, 0x00, agent->maintain_max);
     agent->maintain_len = 0;
 
@@ -194,13 +196,15 @@ int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
         ret = -1;
         goto __exit;
     }
+
     ret = ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd);
     if(ret < 0){
         printf("%s %d ATOrderSend failed.\n",__func__,__LINE__);
         ret = -1;
         goto __exit;
     }
-    // PrivTaskDelay(3000);
+
+    //PrivTaskDelay(3000);
 
     result = GetReplyText(reply);
     if (!result) {
@@ -295,10 +299,10 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
     agent->receive_mode = ENTM_MODE;
     agent->read_len = buffer_len;
     PrivMutexAbandon(&agent->lock); 
-    // PrivTaskDelay(1000);
+    //PrivTaskDelay(1000);
     if (PrivSemaphoreObtainWait(&agent->entm_rx_notice, &abstime)) {
         printf("wait sem[%d] timeout\n",agent->entm_rx_notice);
-        return -ERROR;
+        return -1;
     }
     PrivMutexObtain(&agent->lock); 
 
@@ -388,7 +392,7 @@ static int GetCompleteATReply(ATAgentType agent)
                     memset(agent->maintain_buffer, 0x00, agent->maintain_max);
                     agent->maintain_len = 0;
                     PrivMutexAbandon(&agent->lock);
-                    return -ERROR;
+                    return -1;
                 }
                
                 printf("GetCompleteATReply done\n");
@@ -430,21 +434,29 @@ int DeleteATAgent(ATAgentType agent)
         PrivClose(agent->fd);
     }
 
+#ifdef ADD_NUTTX_FETURES
+    if (agent->lock.sem.semcount > 0) {
+        printf("delete agent lock = %d\n",agent->lock.sem.semcount);
+        PrivMutexDelete(&agent->lock);
+    }
+#elif defined ADD_RTTHREAD_FETURES
+#else
     if (agent->lock) {
         printf("delete agent lock = %d\n",agent->lock);
         PrivMutexDelete(&agent->lock);
     }
+#endif
 
     if (agent->entm_rx_notice) {
         printf("delete agent entm_rx_notice = %d\n",agent->entm_rx_notice);
         PrivSemaphoreDelete(&agent->entm_rx_notice);
     }
-
-    if (agent->rsp_sem) {
-        printf("delete agent rsp_sem = %d\n",agent->rsp_sem);
-        PrivSemaphoreDelete(&agent->rsp_sem);
+#ifdef ADD_XIZI_FETURES
+     if (agent->rsp_sem) {
+         printf("delete agent rsp_sem = %d\n",agent->rsp_sem);
+         PrivSemaphoreDelete(&agent->rsp_sem);
     }
-
+#endif
     if (agent->maintain_buffer) {
         PrivFree(agent->maintain_buffer);
     }

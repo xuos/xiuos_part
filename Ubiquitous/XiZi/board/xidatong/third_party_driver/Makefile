@@ -27,4 +27,8 @@ endif
 ifeq ($(CONFIG_BSP_USING_LCD),y)
   SRC_DIR += lcd
 endif
+ifeq ($(CONFIG_BSP_USING_WDT),y)
+  SRC_DIR += wdt
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

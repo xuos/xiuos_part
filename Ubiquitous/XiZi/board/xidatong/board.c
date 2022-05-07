@@ -52,6 +52,10 @@ Modification:
 #include <connect_sdio.h>
 #endif
 
+#ifdef BSP_USING_WDT
+#include <connect_wdt.h>
+#endif
+
 #ifdef BSP_USING_SEMC
 extern status_t BOARD_InitSEMC(void);
 #ifdef BSP_USING_EXTSRAM
@@ -339,6 +343,9 @@ void InitBoardHardware()
 
 #ifdef BSP_USING_LCD
     Imxrt1052HwLcdInit();
+#endif
+#ifdef BSP_USING_WDT 
+    Imxrt1052HwWdgInit();
 #endif
 }
 

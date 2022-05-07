@@ -32,6 +32,9 @@ if ADD_XIZI_FETURES
 endif
 
 if ADD_NUTTX_FETURES
+        config ADAPTER_EC200T_DRIVER
+                string "EC200T device uart driver path"
+                default "/dev/ttyS8"
 
 endif
 

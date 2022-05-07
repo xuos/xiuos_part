@@ -42,7 +42,6 @@ struct ATReply
     uint32 reply_len;
 };
 typedef struct ATReply *ATReplyType;
-
 struct ATAgent
 {
     char agent_name[64];
@@ -52,16 +51,23 @@ struct ATAgent
     char *maintain_buffer;
     uint32 maintain_len;
     uint32 maintain_max;
-    
+
+#ifdef ADD_XIZI_FETURES   
     int lock;
+#else
+    pthread_mutex_t lock;
+#endif
 
     ATReplyType reply;
     char reply_lr_end;
     char reply_end_last_char;
     char reply_end_char;
     uint32 reply_char_num;
-    int rsp_sem;
-
+#ifdef ADD_XIZI_FETURES  
+	int rsp_sem;
+#else
+    sem_t rsp_sem;
+#endif
     pthread_t at_handler;
 
     #define ENTM_RECV_MAX 256

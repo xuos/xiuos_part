@@ -107,6 +107,8 @@ struct SerialDevParam
     uint16 serial_work_mode;
     uint16 serial_set_mode;
     uint16 serial_stream_mode;
+
+    int32 serial_timeout;
 };
 
 struct SerialHardwareDevice;
