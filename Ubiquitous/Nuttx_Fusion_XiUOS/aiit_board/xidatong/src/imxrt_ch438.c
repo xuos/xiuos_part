@@ -81,7 +81,7 @@ static pthread_cond_t cond[CH438PORTNUM] =
 	PTHREAD_COND_INITIALIZER
 };
 
-volatile int done[CH438PORTNUM] = {0};
+volatile bool done[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
 
 static	char buff[CH438PORTNUM][CH438_BUFFSIZE];
 static	uint8_t buff_ptr[CH438PORTNUM];
@@ -126,7 +126,7 @@ static int getInterruptStatus(int argc, char **argv)
 		{
 			if(gInterruptStatus & Interruptnum[ext_uart_no])
 			{
-				done[ext_uart_no] = 1;
+				done[ext_uart_no] = true;
 				pthread_cond_signal(&cond[ext_uart_no]);
 				pthread_mutex_unlock(&mutex[ext_uart_no]);
 			}
@@ -496,9 +496,9 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
 	uint8_t	REG_MSR_ADDR;
 
 	pthread_mutex_lock(&mutex[ext_uart_no]);
-	while(done[ext_uart_no] == 0)
+	while(done[ext_uart_no] == false)
 		pthread_cond_wait(&cond[ext_uart_no], &mutex[ext_uart_no]);
-	if (done[ext_uart_no] == 1)
+	if (done[ext_uart_no] == true)
 	{
 		REG_IIR_ADDR = offsetadd[ext_uart_no] | REG_IIR0_ADDR;
 		REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
@@ -527,6 +527,9 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
 			default:
 				break;
 		}
+
+		done[ext_uart_no]  = false;
+
 	}
 	pthread_mutex_unlock(&mutex[ext_uart_no]);
 
