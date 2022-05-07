@@ -21,27 +21,30 @@
 #include "imxrt_ch438.h"
 
 #define CH438PORTNUM 8
-#define BUFFERSIZE   128
+#define CH438_BUFFSIZE   256
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-static void ImxrtCH438Init(void);
-static void CH438PortInit(uint8_t ext_uart_no, uint32_t baud_rate);
+static int getInterruptStatus(int argc, char **argv);
 static void CH438SetOutput(void);
 static void CH438SetInput(void);
 static uint8_t ReadCH438Data(uint8_t addr);
 static void WriteCH438Data(uint8_t addr, uint8_t dat);
 static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf);
-static uint8_t CH438UARTRcv(uint8_t ext_uart_no, char *buf);
+static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num);
+uint8_t CH438UARTRcv(uint8_t ext_uart_no, char* buf);
+static void ImxrtCH438Init(void);
+static void CH438PortInit(uint8_t ext_uart_no, uint32_t	baud_rate);
+static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t size);
 static size_t ImxrtCh438ReadData(uint8_t ext_uart_no);
-static void CH438UARTSend(uint8_t ext_uart_no, char *Data, uint8_t Num);
-
+static void Ch438InitDefault(void);
 
 static int ch438_open(FAR struct file *filep);
 static int ch438_close(FAR struct file *filep);
 static ssize_t ch438_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
 static ssize_t ch438_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+static int ch438_register(FAR const char *devpath, uint8_t ext_uart_no);
 
 /****************************************************************************
  * Private type
@@ -80,7 +83,7 @@ static pthread_cond_t cond[CH438PORTNUM] =
 
 volatile int done[CH438PORTNUM] = {0};
 
-static	char buff[CH438PORTNUM][BUFFERSIZE];
+static	char buff[CH438PORTNUM][CH438_BUFFSIZE];
 static	uint8_t buff_ptr[CH438PORTNUM];
 static	uint8_t	Interruptnum[CH438PORTNUM] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,};	/* SSR寄存器中断号对应值 */
 static 	uint8_t	offsetadd[CH438PORTNUM] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};		/* 串口号的偏移地址 */
@@ -106,7 +109,7 @@ static const struct file_operations g_ch438fops =
  *   thread task getInterruptStatus
  *
  ****************************************************************************/
-int getInterruptStatus(int argc, char **argv)
+static int getInterruptStatus(int argc, char **argv)
 {
 	uint8_t ext_uart_no = 0;
 	while(1)
@@ -148,7 +151,6 @@ static void CH438SetOutput(void)
 	imxrt_config_gpio(CH438_D5_PIN_OUT);
 	imxrt_config_gpio(CH438_D6_PIN_OUT);
 	imxrt_config_gpio(CH438_D7_PIN_OUT);
-	
 }
 
 /****************************************************************************
@@ -168,73 +170,6 @@ static void CH438SetInput(void)
 	imxrt_config_gpio(CH438_D5_PIN_INPUT);
 	imxrt_config_gpio(CH438_D6_PIN_INPUT);
 	imxrt_config_gpio(CH438_D7_PIN_INPUT);	
-}
-
-/****************************************************************************
- * Name: ImxrtCH438Init
- *
- * Description:
- *   ch438 initialization
- *
- ****************************************************************************/
-static void ImxrtCH438Init(void)
-{
-	CH438SetOutput();
-	imxrt_config_gpio(CH438_NWR_PIN);
-	imxrt_config_gpio(CH438_NRD_PIN);
-	imxrt_config_gpio(CH438_ALE_PIN);
-	
-	imxrt_gpio_write(CH438_NWR_PIN,true);
-	imxrt_gpio_write(CH438_NRD_PIN,true);
-	imxrt_gpio_write(CH438_ALE_PIN,true);
-}	
-
-/****************************************************************************
- * Name: CH438PortInit
- *
- * Description:
- *   ch438 port initialization
- *
- ****************************************************************************/
-static void CH438PortInit(uint8_t ext_uart_no, uint32_t	baud_rate)
-{
-	uint32_t div;
-	uint8_t	DLL,DLM,dlab;
-	uint8_t	REG_LCR_ADDR;
-	uint8_t	REG_DLL_ADDR;
-	uint8_t	REG_DLM_ADDR;
-	uint8_t	REG_IER_ADDR;
-	uint8_t	REG_MCR_ADDR;
-	uint8_t	REG_FCR_ADDR;
-	
-	REG_LCR_ADDR = offsetadd[ext_uart_no] | REG_LCR0_ADDR;
-	REG_DLL_ADDR = offsetadd[ext_uart_no] | REG_DLL0_ADDR;
-	REG_DLM_ADDR = offsetadd[ext_uart_no] | REG_DLM0_ADDR;
-	REG_IER_ADDR = offsetadd[ext_uart_no] | REG_IER0_ADDR;
-	REG_MCR_ADDR = offsetadd[ext_uart_no] | REG_MCR0_ADDR;
-	REG_FCR_ADDR = offsetadd[ext_uart_no] | REG_FCR0_ADDR;
-	
-    WriteCH438Data(REG_IER_ADDR, BIT_IER_RESET);             /* 复位该串口 */
-	up_mdelay(50);
-	
-	dlab = ReadCH438Data(REG_IER_ADDR);
-	dlab &= 0xDF;
-	WriteCH438Data(REG_IER_ADDR, dlab);
-	
-	dlab = ReadCH438Data(REG_LCR_ADDR);
-	dlab |= 0x80;		//置LCR寄存器DLAB位为1
-	WriteCH438Data(REG_LCR_ADDR, dlab);
-
-    div = ( Fpclk >> 4 ) / baud_rate;
-    DLM = div >> 8;
-    DLL = div & 0xff;
-	WriteCH438Data(REG_DLL_ADDR, DLL);             /* 设置波特率 */
-    WriteCH438Data(REG_DLM_ADDR, DLM);
-	WriteCH438Data(REG_FCR_ADDR, BIT_FCR_RECVTG1 | BIT_FCR_RECVTG0 | BIT_FCR_FIFOEN);    /* 设置FIFO模式，触发点为112字节 */
-    WriteCH438Data(REG_LCR_ADDR, BIT_LCR_WORDSZ1 | BIT_LCR_WORDSZ0 );                     /* 字长8位，1位停止位、无校验 */
-	WriteCH438Data(REG_IER_ADDR, BIT_IER_IERECV);    /* 使能中断 */
-    WriteCH438Data(REG_MCR_ADDR, BIT_MCR_OUT2);// | BIT_MCR_RTS     | BIT_MCR_DTR 	);              /* 允许中断输出,DTR,RTS为1 */
-	WriteCH438Data(REG_FCR_ADDR, ReadCH438Data(REG_FCR_ADDR)| BIT_FCR_TFIFORST);  /* 清空FIFO中的数据 */
 }
 
 /****************************************************************************
@@ -288,7 +223,6 @@ static uint8_t ReadCH438Data(uint8_t addr)
 	up_udelay(1);
 
 	return dat;
-
 }
 
 /****************************************************************************
@@ -358,6 +292,37 @@ static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf)
 }
 
 /****************************************************************************
+ * Name: CH438UARTSend
+ *
+ * Description:
+ *   Enable FIFO mode, which is used for ch438 serial port to send multi byte data, 
+ *   with a maximum of 128 bytes of data sent at a time
+ *
+ ****************************************************************************/	
+static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num)
+{
+	uint8_t	REG_LSR_ADDR,REG_THR_ADDR;
+	REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
+	REG_THR_ADDR = offsetadd[ext_uart_no] | REG_THR0_ADDR;
+	
+   while(1)
+   {
+       while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_TEMT ) == 0);    /* 等待数据发送完毕，THR,TSR全空 */
+       if(Num <= CH438_BUFFSIZE)
+       {
+           WriteCH438Block(REG_THR_ADDR, Num, Data);
+           break;
+       }
+       else
+       {
+           WriteCH438Block(REG_THR_ADDR, 128, Data);
+           Num -= CH438_BUFFSIZE;
+           Data += CH438_BUFFSIZE;
+       }
+   }
+}
+
+/****************************************************************************
  * Name: CH438UARTRcv
  *
  * Description:
@@ -373,14 +338,15 @@ uint8_t CH438UARTRcv(uint8_t ext_uart_no, char* buf)
 	REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
 	REG_RBR_ADDR = offsetadd[ext_uart_no] | REG_RBR0_ADDR;
 
-	while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0 );    /* 等待数据准备好 */
+	/* Wait for the data to be ready */
+	while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0 );
 	while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0x01 )
 	{
 		dat =  ReadCH438Data(REG_RBR_ADDR);
 		buff[ext_uart_no][buff_ptr[ext_uart_no]] = dat;
 		
 		buff_ptr[ext_uart_no] = buff_ptr[ext_uart_no] + 1;
-		if (buff_ptr[ext_uart_no] == BUFFERSIZE)
+		if (buff_ptr[ext_uart_no] == CH438_BUFFSIZE)
 			buff_ptr[ext_uart_no] = 0;
 		RcvNum = RcvNum + 1;
 	}
@@ -388,34 +354,130 @@ uint8_t CH438UARTRcv(uint8_t ext_uart_no, char* buf)
 }
 
 /****************************************************************************
- * Name: CH438UARTSend
+ * Name: ImxrtCH438Init
  *
  * Description:
- *   Enable FIFO mode, which is used for ch438 serial port to send multi byte data, 
- *   with a maximum of 128 bytes of data sent at a time
+ *   ch438 initialization
  *
- ****************************************************************************/	
-static void CH438UARTSend(uint8_t ext_uart_no, char *Data, uint8_t Num)
+ ****************************************************************************/
+static void ImxrtCH438Init(void)
 {
-	uint8_t	REG_LSR_ADDR,REG_THR_ADDR;
-	REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
-	REG_THR_ADDR = offsetadd[ext_uart_no] | REG_THR0_ADDR;
+	CH438SetOutput();
+	imxrt_config_gpio(CH438_NWR_PIN);
+	imxrt_config_gpio(CH438_NRD_PIN);
+	imxrt_config_gpio(CH438_ALE_PIN);
 	
-   while(1)
-   {
-       while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_TEMT ) == 0);    /* 等待数据发送完毕，THR,TSR全空 */
-       if(Num <= BUFFERSIZE)
-       {
-           WriteCH438Block(REG_THR_ADDR, Num, Data);
-           break;
-       }
-       else
-       {
-           WriteCH438Block(REG_THR_ADDR, BUFFERSIZE, Data);
-           Num -= BUFFERSIZE;
-           Data += BUFFERSIZE;
-       }
-   }
+	imxrt_gpio_write(CH438_NWR_PIN,true);
+	imxrt_gpio_write(CH438_NRD_PIN,true);
+	imxrt_gpio_write(CH438_ALE_PIN,true);
+}	
+
+/****************************************************************************
+ * Name: CH438PortInit
+ *
+ * Description:
+ *   ch438 port initialization
+ *
+ ****************************************************************************/
+static void CH438PortInit(uint8_t ext_uart_no, uint32_t	baud_rate)
+{
+	uint32_t div;
+	uint8_t	DLL,DLM,dlab;
+	uint8_t	REG_LCR_ADDR;
+	uint8_t	REG_DLL_ADDR;
+	uint8_t	REG_DLM_ADDR;
+	uint8_t	REG_IER_ADDR;
+	uint8_t	REG_MCR_ADDR;
+	uint8_t	REG_FCR_ADDR;
+	
+	REG_LCR_ADDR = offsetadd[ext_uart_no] | REG_LCR0_ADDR;
+	REG_DLL_ADDR = offsetadd[ext_uart_no] | REG_DLL0_ADDR;
+	REG_DLM_ADDR = offsetadd[ext_uart_no] | REG_DLM0_ADDR;
+	REG_IER_ADDR = offsetadd[ext_uart_no] | REG_IER0_ADDR;
+	REG_MCR_ADDR = offsetadd[ext_uart_no] | REG_MCR0_ADDR;
+	REG_FCR_ADDR = offsetadd[ext_uart_no] | REG_FCR0_ADDR;
+	
+	/* reset the uart */
+    WriteCH438Data(REG_IER_ADDR, BIT_IER_RESET); 
+	up_mdelay(50);
+	
+	dlab = ReadCH438Data(REG_IER_ADDR);
+	dlab &= 0xDF;
+	WriteCH438Data(REG_IER_ADDR, dlab);
+	
+	/* set LCR register DLAB bit 1 */
+	dlab = ReadCH438Data(REG_LCR_ADDR);
+	dlab |= 0x80;
+	WriteCH438Data(REG_LCR_ADDR, dlab);
+
+    div = ( Fpclk >> 4 ) / baud_rate;
+    DLM = div >> 8;
+    DLL = div & 0xff;
+
+	/* set bps */
+	WriteCH438Data(REG_DLL_ADDR, DLL);
+    WriteCH438Data(REG_DLM_ADDR, DLM);
+
+	/* set FIFO mode, 112 bytes */
+	WriteCH438Data(REG_FCR_ADDR, BIT_FCR_RECVTG1 | BIT_FCR_RECVTG0 | BIT_FCR_FIFOEN);
+
+	/* 8 bit word size, 1 bit stop bit, no crc */
+    WriteCH438Data(REG_LCR_ADDR, BIT_LCR_WORDSZ1 | BIT_LCR_WORDSZ0);
+
+	/* enable interrupt */
+	WriteCH438Data(REG_IER_ADDR, BIT_IER_IERECV);
+
+	/* allow interrupt output, DTR and RTS is 1 */
+    WriteCH438Data(REG_MCR_ADDR, BIT_MCR_OUT2);
+
+	/* release the data in FIFO */
+	WriteCH438Data(REG_FCR_ADDR, ReadCH438Data(REG_FCR_ADDR)| BIT_FCR_TFIFORST); 
+}
+
+/****************************************************************************
+ * Name: ImxrtCh438ReadData
+ *
+ * Description:
+ *   Read data from ch438 port
+ *
+ ****************************************************************************/
+static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t size)
+{
+	int write_len, write_len_continue;
+	int i, write_index;
+	DEBUGASSERT(write_buffer != NULL);
+
+	write_len = size;;
+	write_len_continue = size;
+
+	if (write_len > CH438_BUFFSIZE) 
+	{
+		if (0 == write_len % CH438_BUFFSIZE) 
+		{
+			write_index = write_len / CH438_BUFFSIZE;
+			for (i = 0; i < write_index; i ++) 
+			{
+				Ch438UartSend(ext_uart_no, write_buffer + i * CH438_BUFFSIZE, CH438_BUFFSIZE);
+			}
+		} 
+		else 
+		{
+			write_index = 0;
+			while (write_len_continue > CH438_BUFFSIZE) 
+			{
+				Ch438UartSend(ext_uart_no, write_buffer + write_index * CH438_BUFFSIZE, CH438_BUFFSIZE);
+				write_index++;
+				write_len_continue = write_len - write_index * CH438_BUFFSIZE;
+			}
+			Ch438UartSend(ext_uart_no, write_buffer + write_index * CH438_BUFFSIZE, write_len_continue);
+		}
+	} 
+	else 
+	{
+		Ch438UartSend(ext_uart_no, write_buffer, write_len);
+	}
+
+	return 0;
 }
 
 /****************************************************************************
@@ -478,7 +540,7 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
  *   Ch438 default initialization function
  *
  ****************************************************************************/
-void Ch438InitDefault(void)
+static void Ch438InitDefault(void)
 {
 	
 	int ret, i;
@@ -566,7 +628,7 @@ static ssize_t ch438_read(FAR struct file *filep, FAR char *buffer, size_t bufle
 	DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
 	length = ImxrtCh438ReadData(port);
-    memcpy(buffer, buff[port], buflen);
+    memcpy(buffer, buff[port], length);
 
 	if (length > buflen)
 	{
@@ -586,7 +648,7 @@ static ssize_t ch438_write(FAR struct file *filep, FAR const char *buffer, size_
 	uint8_t port = priv->port;
 	DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
-	CH438UARTSend(port, buffer, buflen);
+	ImxrtCh438WriteData(port, buffer, buflen);
 	
 	return buflen;
 }
@@ -599,7 +661,7 @@ static ssize_t ch438_write(FAR struct file *filep, FAR const char *buffer, size_
  *   Register /dev/ext_uartN
  *
  ****************************************************************************/
-int ch438_register(FAR const char *devpath, uint8_t port)
+static int ch438_register(FAR const char *devpath, uint8_t port)
 {
 	FAR struct ch438_dev_s *priv;
 	int ret = 0;

@@ -356,9 +356,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 #ifdef CONFIG_BSP_USING_CH438
-int getInterruptStatus(int argc, char **argv);
-void Ch438InitDefault(void);
-int ch438_register(FAR const char *devpath,uint8_t port);
 int board_ch438_initialize(void);
 #endif
 
