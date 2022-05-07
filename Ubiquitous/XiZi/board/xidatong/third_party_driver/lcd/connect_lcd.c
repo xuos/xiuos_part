@@ -113,12 +113,6 @@ static void HwLcdInit()
 
     ELCDIF_RgbModeStart(LCDIF);
 
-    // /* LCD DEVICE */
-    // xidatong_lcd.lcd_info.width          = LCD_WIDTH;
-    // xidatong_lcd.lcd_info.height         = LCD_HEIGHT;
-    // xidatong_lcd.lcd_info.pixel_format   = PIXEL_FORMAT_RGB565;
-    // xidatong_lcd.lcd_info.bits_per_pixel = 16;
-    // xidatong_lcd.lcd_info.framebuffer    = (void *)frame_buffer;
 }
 static void DrvLcdSetPixelDot(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, void* color)
 {
@@ -131,7 +125,6 @@ static void DrvLcdSetPixelDot(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2
             color += sizeof(uint16_t);
         }
     }
-    // ELCDIF_SetNextBufferAddr(LCDIF, (uint32_t)frame_buffer);
 }
 
 static uint32 LcdWrite(void *dev, struct BusBlockWriteParam *write_param)
