@@ -22,29 +22,66 @@
  * Included Files
  ****************************************************************************/
 #include "imxrt_ch438.h"
+#include <sys/ioctl.h>
+#include <nuttx/ioexpander/gpio.h>
 
 void CH438Demo(void)
 {
-    int fd;
+    int fd,m0fd,m1fd;
     int i;
+    char sendbuffer1[4] = {0xC0,0x04,0x01,0x09};
+    char sendbuffer2[6] = {0xC0,0x00,0x03,0x12,0x34,0x61};
+    char sendbuffer3[3] = {0xC1,0x04,0x01};
+    char sendbuffer4[3] = {0xC1,0x00,0x03};
     char buffer[256];
     int readlen;
 
-    while(1)
+    // while(1)
+    // {
+    fd = open("/dev/extuart_dev3", O_RDWR);
+    m0fd = open("/dev/gpout0", O_RDWR);
+    m1fd = open("/dev/gpout1", O_RDWR);
+    ioctl(m0fd, GPIOC_WRITE, (unsigned long)1);
+    ioctl(m1fd, GPIOC_WRITE, (unsigned long)1);
+    sleep(1);
+
+    write(fd, sendbuffer1,4);
+    sleep(1);
+    readlen = read(fd, buffer, 256);
+    printf("readlen1 = %d\n", readlen);
+    for(i = 0;i< readlen; ++i)
     {
-        fd = open("/dev/extuart_dev2", O_RDWR);
-        write(fd, "AT+ADDR=?",9);
-        sleep(1);
-        readlen = read(fd, buffer, 256);
-
-        printf("readlen1 = %d\n", readlen);
-
-        for(i = 0;i< readlen; ++i)
-        {
-            printf("%c(0x%x)\n", buffer[i], buffer[i]);
-        }
-
-        close(fd);
+        printf("0x%x\n", buffer[i]);
     }
+
+    write(fd, sendbuffer2,6);
+    sleep(1);
+    readlen = read(fd, buffer, 256);
+    printf("readlen1 = %d\n", readlen);
+    for(i = 0;i< readlen; ++i)
+    {
+        printf("0x%x\n", buffer[i]);
+    }
+
+    write(fd, sendbuffer3,3);
+    sleep(1);
+    readlen = read(fd, buffer, 256);
+    printf("readlen1 = %d\n", readlen);
+    for(i = 0;i< readlen; ++i)
+    {
+        printf("0x%x\n", buffer[i]);
+    }
+
+    write(fd, sendbuffer4,3);
+    sleep(1);
+    readlen = read(fd, buffer, 256);
+    printf("readlen1 = %d\n", readlen);
+    for(i = 0;i< readlen; ++i)
+    {
+        printf("0x%x\n", buffer[i]);
+    }
+
+    close(fd);
+    // }
     
 }

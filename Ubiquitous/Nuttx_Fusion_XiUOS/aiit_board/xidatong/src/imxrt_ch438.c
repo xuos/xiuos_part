@@ -55,8 +55,29 @@ struct ch438_dev_s
  * Private Data
  ****************************************************************************/
 
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t  cond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t mutex[CH438PORTNUM] = 
+{
+	PTHREAD_MUTEX_INITIALIZER,
+	PTHREAD_MUTEX_INITIALIZER,
+	PTHREAD_MUTEX_INITIALIZER,
+	PTHREAD_MUTEX_INITIALIZER,
+	PTHREAD_MUTEX_INITIALIZER,
+	PTHREAD_MUTEX_INITIALIZER,
+	PTHREAD_MUTEX_INITIALIZER,
+	PTHREAD_MUTEX_INITIALIZER
+};
+static pthread_cond_t cond[CH438PORTNUM] = 
+{
+	PTHREAD_COND_INITIALIZER,
+	PTHREAD_COND_INITIALIZER,
+	PTHREAD_COND_INITIALIZER,
+	PTHREAD_COND_INITIALIZER,
+	PTHREAD_COND_INITIALIZER,
+	PTHREAD_COND_INITIALIZER,
+	PTHREAD_COND_INITIALIZER,
+	PTHREAD_COND_INITIALIZER
+};
+
 volatile int done[CH438PORTNUM] = {0};
 
 static	char buff[CH438PORTNUM][BUFFERSIZE];
@@ -90,11 +111,11 @@ int getInterruptStatus(int argc, char **argv)
 	uint8_t ext_uart_no = 0;
 	while(1)
 	{
-		pthread_mutex_lock(&mutex);
+		pthread_mutex_lock(&mutex[ext_uart_no]);
 		gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
 		if(!gInterruptStatus)
 		{
-			pthread_mutex_unlock(&mutex);
+			pthread_mutex_unlock(&mutex[ext_uart_no]);
 			continue;
 		}
 
@@ -103,8 +124,8 @@ int getInterruptStatus(int argc, char **argv)
 			if(gInterruptStatus & Interruptnum[ext_uart_no])
 			{
 				done[ext_uart_no] = 1;
-				pthread_cond_signal(&cond);
-				pthread_mutex_unlock(&mutex);
+				pthread_cond_signal(&cond[ext_uart_no]);
+				pthread_mutex_unlock(&mutex[ext_uart_no]);
 			}
 		}
 	}
@@ -412,9 +433,9 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
 	uint8_t	REG_LSR_ADDR;
 	uint8_t	REG_MSR_ADDR;
 
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&mutex[ext_uart_no]);
 	while(done[ext_uart_no] == 0)
-		pthread_cond_wait(&cond, &mutex);
+		pthread_cond_wait(&cond[ext_uart_no], &mutex[ext_uart_no]);
 	if (done[ext_uart_no] == 1)
 	{
 		REG_IIR_ADDR = offsetadd[ext_uart_no] | REG_IIR0_ADDR;
@@ -445,7 +466,7 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
 				break;
 		}
 	}
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&mutex[ext_uart_no]);
 
 	return RevLen;
 }
@@ -460,22 +481,27 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
 void Ch438InitDefault(void)
 {
 	
-	int ret;
+	int ret, i;
 
 	/* Initialize the mutex */
 
-	ret = pthread_mutex_init(&mutex, NULL);
-	if (ret != 0)
+	for(i = 0; i < CH438PORTNUM; i++)
 	{
-		ch438err("pthread_mutex_init failed, status=%d\n", ret);
+		ret = pthread_mutex_init(&mutex[i], NULL);
+		if (ret != 0)
+		{
+			ch438err("pthread_mutex_init failed, status=%d\n", ret);
+		}
 	}
 
 	/* Initialize the condition variable */
-
-	ret = pthread_cond_init(&cond, NULL);
-	if (ret != 0)
+	for(i = 0; i < CH438PORTNUM; i++)
 	{
-		ch438err("pthread_cond_init failed, status=%d\n", ret);
+		ret = pthread_cond_init(&cond[i], NULL);
+		if (ret != 0)
+		{
+			ch438err("pthread_cond_init failed, status=%d\n", ret);
+		}
 	}
 
 	ret = task_create("ch438_task", 60, 8192, getInterruptStatus, NULL);
