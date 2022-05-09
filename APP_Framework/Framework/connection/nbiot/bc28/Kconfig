@@ -36,5 +36,13 @@ if ADD_NUTTX_FETURES
 endif
 
 if ADD_RTTHREAD_FETURES
-
+        config ADAPTER_BC28_DRIVER
+                string "BC28 device uart driver path"
+                default "/dev/uart2"
+        config ADAPTER_BC28_PIN_DRIVER
+                string "BC28 device pin driver path"
+                default "/dev/pin"
+        config ADAPTER_BC28_RESETPIN
+                string "BC28 RESET pin number"
+                default "100"
 endif
