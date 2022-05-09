@@ -184,12 +184,7 @@ int imxrt_bringup(void)
 #endif
 
 #ifdef CONFIG_BSP_USING_CH438
-  ret = board_ch438_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize ch438 Driver: %d\n", ret);
-    }
-
+  board_ch438_initialize();
 #endif
 
   UNUSED(ret);

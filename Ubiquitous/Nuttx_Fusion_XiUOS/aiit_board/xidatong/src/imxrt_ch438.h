@@ -356,7 +356,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 #ifdef CONFIG_BSP_USING_CH438
-int board_ch438_initialize(void);
+void board_ch438_initialize(void);
 #endif
 
 #endif /* __BOARDS_ARM_IMXRT_XIDATONG_SRC_IMXRT_CH438_H */
