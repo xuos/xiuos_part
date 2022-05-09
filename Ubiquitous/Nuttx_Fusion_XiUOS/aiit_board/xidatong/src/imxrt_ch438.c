@@ -26,7 +26,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-static int getInterruptStatus(int argc, char **argv);
+static FAR void *getInterruptStatus(FAR void *arg);
 static void CH438SetOutput(void);
 static void CH438SetInput(void);
 static uint8_t ReadCH438Data(uint8_t addr);
@@ -83,10 +83,10 @@ static pthread_cond_t cond[CH438PORTNUM] =
 
 volatile bool done[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
 
-static    char buff[CH438PORTNUM][CH438_BUFFSIZE];
-static    uint8_t buff_ptr[CH438PORTNUM];
-static    uint8_t    Interruptnum[CH438PORTNUM] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,};    /* SSR寄存器中断号对应值 */
-static     uint8_t    offsetadd[CH438PORTNUM] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};        /* 串口号的偏移地址 */
+static char buff[CH438PORTNUM][CH438_BUFFSIZE];
+static uint8_t buff_ptr[CH438PORTNUM];
+static uint8_t Interruptnum[CH438PORTNUM] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,};    /* SSR寄存器中断号对应值 */
+static uint8_t offsetadd[CH438PORTNUM] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};        /* 串口号的偏移地址 */
 
 static uint8_t gInterruptStatus;
 
@@ -109,27 +109,25 @@ static const struct file_operations g_ch438fops =
  *   thread task getInterruptStatus
  *
  ****************************************************************************/
-static int getInterruptStatus(int argc, char **argv)
+static FAR void *getInterruptStatus(FAR void *arg)
 {
-    uint8_t ext_uart_no = 0;
-    while(1)
+    uint8_t i;
+	while(1)
     {
-        pthread_mutex_lock(&mutex[ext_uart_no]);
-        gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
-        if(!gInterruptStatus)
+		gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
+		if(!gInterruptStatus)
+		{
+			continue;
+		}
+		for(i = 0; i < CH438PORTNUM; i++)
         {
-            pthread_mutex_unlock(&mutex[ext_uart_no]);
-            continue;
-        }
-
-        for(ext_uart_no = 0; ext_uart_no < CH438PORTNUM; ext_uart_no++)
-        {
-            if(gInterruptStatus & Interruptnum[ext_uart_no])
-            {
-                done[ext_uart_no] = true;
-                pthread_cond_signal(&cond[ext_uart_no]);
-                pthread_mutex_unlock(&mutex[ext_uart_no]);
-            }
+			if(gInterruptStatus & Interruptnum[i])
+			{
+				pthread_mutex_lock(&mutex[i]);
+				done[i] = true;
+				pthread_cond_signal(&cond[i]);
+				pthread_mutex_unlock(&mutex[i]);
+			}
         }
     }
 }
@@ -548,6 +546,9 @@ static void Ch438InitDefault(void)
     
     int ret = 0;
     int i;
+	struct sched_param param;
+	pthread_attr_t attr;
+	pthread_t thread;
 
     /* Initialize the mutex */
 
@@ -570,7 +571,11 @@ static void Ch438InitDefault(void)
         }
     }
 
-    ret = task_create("ch438_task", 60, 8192, getInterruptStatus, NULL);
+	pthread_attr_init(&attr);
+	param.sched_priority = 60;
+	pthread_attr_setschedparam(&attr, &param);
+	pthread_attr_setstacksize(&attr, 2048);
+	ret = pthread_create(&thread, &attr, getInterruptStatus, NULL);
     if (ret < 0)
     {
         ch438err("task create failed, status=%d\n", ret);
