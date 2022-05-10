@@ -26,7 +26,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-static FAR void *getInterruptStatus(FAR void *arg);
+static FAR void getInterruptStatus(FAR void *arg);
 static void CH438SetOutput(void);
 static void CH438SetInput(void);
 static uint8_t ReadCH438Data(uint8_t addr);
@@ -58,7 +58,7 @@ struct ch438_dev_s
  * Private Data
  ****************************************************************************/
 
-static pthread_mutex_t mutex[CH438PORTNUM] = 
+static pthread_mutex_t mutex[CH438PORTNUM] =
 {
     PTHREAD_MUTEX_INITIALIZER,
     PTHREAD_MUTEX_INITIALIZER,
@@ -69,7 +69,7 @@ static pthread_mutex_t mutex[CH438PORTNUM] =
     PTHREAD_MUTEX_INITIALIZER,
     PTHREAD_MUTEX_INITIALIZER
 };
-static pthread_cond_t cond[CH438PORTNUM] = 
+static pthread_cond_t cond[CH438PORTNUM] =
 {
     PTHREAD_COND_INITIALIZER,
     PTHREAD_COND_INITIALIZER,
@@ -109,25 +109,25 @@ static const struct file_operations g_ch438fops =
  *   thread task getInterruptStatus
  *
  ****************************************************************************/
-static FAR void *getInterruptStatus(FAR void *arg)
+static FAR void getInterruptStatus(FAR void *arg)
 {
     uint8_t i;
-	while(1)
+    while(1)
     {
-		gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
-		if(!gInterruptStatus)
-		{
-			continue;
-		}
-		for(i = 0; i < CH438PORTNUM; i++)
+        gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
+        if(!gInterruptStatus)
         {
-			if(gInterruptStatus & Interruptnum[i])
-			{
-				pthread_mutex_lock(&mutex[i]);
-				done[i] = true;
-				pthread_cond_signal(&cond[i]);
-				pthread_mutex_unlock(&mutex[i]);
-			}
+            continue;
+        }
+        for(i = 0; i < CH438PORTNUM; i++)
+        {
+            if(gInterruptStatus & Interruptnum[i])
+            {
+                pthread_mutex_lock(&mutex[i]);
+                done[i] = true;
+                pthread_cond_signal(&cond[i]);
+                pthread_mutex_unlock(&mutex[i]);
+            }
         }
     }
 }
@@ -187,14 +187,14 @@ static uint8_t ReadCH438Data(uint8_t addr)
     CH438SetOutput();
     up_udelay(1);
     
-    if(addr &0x80)    imxrt_gpio_write(CH438_D7_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D7_PIN_OUT, false);    
-    if(addr &0x40)    imxrt_gpio_write(CH438_D6_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D6_PIN_OUT, false);    
-    if(addr &0x20)    imxrt_gpio_write(CH438_D5_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D5_PIN_OUT, false);    
-    if(addr &0x10)    imxrt_gpio_write(CH438_D4_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D4_PIN_OUT, false);    
-    if(addr &0x08)    imxrt_gpio_write(CH438_D3_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D3_PIN_OUT, false);    
-    if(addr &0x04)    imxrt_gpio_write(CH438_D2_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D2_PIN_OUT, false);    
-    if(addr &0x02)    imxrt_gpio_write(CH438_D1_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D1_PIN_OUT, false);    
-    if(addr &0x01)    imxrt_gpio_write(CH438_D0_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D0_PIN_OUT, false);    
+    if(addr &0x80)    imxrt_gpio_write(CH438_D7_PIN_OUT, true);   else    imxrt_gpio_write(CH438_D7_PIN_OUT, false);
+    if(addr &0x40)    imxrt_gpio_write(CH438_D6_PIN_OUT, true);   else    imxrt_gpio_write(CH438_D6_PIN_OUT, false);
+    if(addr &0x20)    imxrt_gpio_write(CH438_D5_PIN_OUT, true);   else    imxrt_gpio_write(CH438_D5_PIN_OUT, false);
+    if(addr &0x10)    imxrt_gpio_write(CH438_D4_PIN_OUT, true);   else    imxrt_gpio_write(CH438_D4_PIN_OUT, false);
+    if(addr &0x08)    imxrt_gpio_write(CH438_D3_PIN_OUT, true);   else    imxrt_gpio_write(CH438_D3_PIN_OUT, false);
+    if(addr &0x04)    imxrt_gpio_write(CH438_D2_PIN_OUT, true);   else    imxrt_gpio_write(CH438_D2_PIN_OUT, false);
+    if(addr &0x02)    imxrt_gpio_write(CH438_D1_PIN_OUT, true);   else    imxrt_gpio_write(CH438_D1_PIN_OUT, false);
+    if(addr &0x01)    imxrt_gpio_write(CH438_D0_PIN_OUT, true);   else    imxrt_gpio_write(CH438_D0_PIN_OUT, false);
         
     up_udelay(1);
 
@@ -229,7 +229,7 @@ static uint8_t ReadCH438Data(uint8_t addr)
  * Description:
  *   write data to ch438 address
  *
- ****************************************************************************/    
+ ****************************************************************************/
 static void WriteCH438Data(uint8_t addr, uint8_t dat)
 {
     imxrt_gpio_write(CH438_ALE_PIN, true);    
@@ -239,36 +239,36 @@ static void WriteCH438Data(uint8_t addr, uint8_t dat)
     CH438SetOutput();
     up_udelay(1);    
     
-    if(addr &0x80)    imxrt_gpio_write(CH438_D7_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D7_PIN_OUT, false);    
-    if(addr &0x40)    imxrt_gpio_write(CH438_D6_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D6_PIN_OUT, false);    
-    if(addr &0x20)    imxrt_gpio_write(CH438_D5_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D5_PIN_OUT, false);    
-    if(addr &0x10)    imxrt_gpio_write(CH438_D4_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D4_PIN_OUT, false);    
-    if(addr &0x08)    imxrt_gpio_write(CH438_D3_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D3_PIN_OUT, false);    
-    if(addr &0x04)    imxrt_gpio_write(CH438_D2_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D2_PIN_OUT, false);    
-    if(addr &0x02)    imxrt_gpio_write(CH438_D1_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D1_PIN_OUT, false);    
-    if(addr &0x01)    imxrt_gpio_write(CH438_D0_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D0_PIN_OUT, false);    
+    if(addr &0x80)    imxrt_gpio_write(CH438_D7_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D7_PIN_OUT, false);
+    if(addr &0x40)    imxrt_gpio_write(CH438_D6_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D6_PIN_OUT, false);
+    if(addr &0x20)    imxrt_gpio_write(CH438_D5_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D5_PIN_OUT, false);
+    if(addr &0x10)    imxrt_gpio_write(CH438_D4_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D4_PIN_OUT, false);
+    if(addr &0x08)    imxrt_gpio_write(CH438_D3_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D3_PIN_OUT, false);
+    if(addr &0x04)    imxrt_gpio_write(CH438_D2_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D2_PIN_OUT, false);
+    if(addr &0x02)    imxrt_gpio_write(CH438_D1_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D1_PIN_OUT, false);
+    if(addr &0x01)    imxrt_gpio_write(CH438_D0_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D0_PIN_OUT, false);
     
     up_udelay(1);    
     
-    imxrt_gpio_write(CH438_ALE_PIN, false);    
+    imxrt_gpio_write(CH438_ALE_PIN, false);
     up_udelay(1);
     
-    if(dat &0x80)    imxrt_gpio_write(CH438_D7_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D7_PIN_OUT, false);    
-    if(dat &0x40)    imxrt_gpio_write(CH438_D6_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D6_PIN_OUT, false);    
-    if(dat &0x20)    imxrt_gpio_write(CH438_D5_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D5_PIN_OUT, false);    
-    if(dat &0x10)    imxrt_gpio_write(CH438_D4_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D4_PIN_OUT, false);    
-    if(dat &0x08)    imxrt_gpio_write(CH438_D3_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D3_PIN_OUT, false);    
-    if(dat &0x04)    imxrt_gpio_write(CH438_D2_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D2_PIN_OUT, false);    
-    if(dat &0x02)    imxrt_gpio_write(CH438_D1_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D1_PIN_OUT, false);    
-    if(dat &0x01)    imxrt_gpio_write(CH438_D0_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D0_PIN_OUT, false);    
+    if(dat &0x80)    imxrt_gpio_write(CH438_D7_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D7_PIN_OUT, false);
+    if(dat &0x40)    imxrt_gpio_write(CH438_D6_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D6_PIN_OUT, false);
+    if(dat &0x20)    imxrt_gpio_write(CH438_D5_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D5_PIN_OUT, false);
+    if(dat &0x10)    imxrt_gpio_write(CH438_D4_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D4_PIN_OUT, false);
+    if(dat &0x08)    imxrt_gpio_write(CH438_D3_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D3_PIN_OUT, false);
+    if(dat &0x04)    imxrt_gpio_write(CH438_D2_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D2_PIN_OUT, false);
+    if(dat &0x02)    imxrt_gpio_write(CH438_D1_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D1_PIN_OUT, false);
+    if(dat &0x01)    imxrt_gpio_write(CH438_D0_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D0_PIN_OUT, false);
     
     up_udelay(1);    
 
-    imxrt_gpio_write(CH438_NWR_PIN, false);    
+    imxrt_gpio_write(CH438_NWR_PIN, false);
     up_udelay(1);    
     
-    imxrt_gpio_write(CH438_NWR_PIN, true);    
-    imxrt_gpio_write(CH438_ALE_PIN, true);    
+    imxrt_gpio_write(CH438_NWR_PIN, true);
+    imxrt_gpio_write(CH438_ALE_PIN, true);
     up_udelay(1);    
 
     CH438SetInput();
@@ -282,10 +282,10 @@ static void WriteCH438Data(uint8_t addr, uint8_t dat)
  * Description:
  *   Write data block from ch438 address
  *
- ****************************************************************************/    
+ ****************************************************************************/
 static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf)   
 {
-    while (mLen--)     
+    while(mLen--)     
       WriteCH438Data(mAddr, *mBuf++);
 }
 
@@ -293,31 +293,31 @@ static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf)
  * Name: CH438UARTSend
  *
  * Description:
- *   Enable FIFO mode, which is used for ch438 serial port to send multi byte data, 
+ *   Enable FIFO mode, which is used for ch438 serial port to send multi byte data,
  *   with a maximum of 128 bytes of data sent at a time
  *
- ****************************************************************************/    
+ ****************************************************************************/
 static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num)
 {
-    uint8_t    REG_LSR_ADDR,REG_THR_ADDR;
+    uint8_t REG_LSR_ADDR,REG_THR_ADDR;
     REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
     REG_THR_ADDR = offsetadd[ext_uart_no] | REG_THR0_ADDR;
     
-   while(1)
-   {
-       while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_TEMT ) == 0);    /* 等待数据发送完毕，THR,TSR全空 */
-       if(Num <= CH438_BUFFSIZE)
-       {
-           WriteCH438Block(REG_THR_ADDR, Num, Data);
-           break;
-       }
-       else
-       {
-           WriteCH438Block(REG_THR_ADDR, 128, Data);
-           Num -= CH438_BUFFSIZE;
-           Data += CH438_BUFFSIZE;
-       }
-   }
+    while(1)
+    {
+        while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_TEMT) == 0);    /* 等待数据发送完毕，THR,TSR全空 */
+        if(Num <= CH438_BUFFSIZE)
+        {
+            WriteCH438Block(REG_THR_ADDR, Num, Data);
+            break;
+        }
+        else
+        {
+            WriteCH438Block(REG_THR_ADDR, 128, Data);
+            Num -= CH438_BUFFSIZE;
+            Data += CH438_BUFFSIZE;
+        }
+    }
 }
 
 /****************************************************************************
@@ -326,25 +326,25 @@ static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num)
  * Description:
  *   Disable FIFO mode for ch438 serial port to receive multi byte data
  *
- ****************************************************************************/    
+ ****************************************************************************/
 uint8_t CH438UARTRcv(uint8_t ext_uart_no, char* buf)
 {
     uint8_t RcvNum = 0;
-    uint8_t    dat = 0;
-    uint8_t    REG_LSR_ADDR,REG_RBR_ADDR;
+    uint8_t dat = 0;
+    uint8_t REG_LSR_ADDR,REG_RBR_ADDR;
     
     REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
     REG_RBR_ADDR = offsetadd[ext_uart_no] | REG_RBR0_ADDR;
 
     /* Wait for the data to be ready */
     while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0 );
-    while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0x01 )
+    while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0x01)
     {
         dat =  ReadCH438Data(REG_RBR_ADDR);
         buff[ext_uart_no][buff_ptr[ext_uart_no]] = dat;
         
         buff_ptr[ext_uart_no] = buff_ptr[ext_uart_no] + 1;
-        if (buff_ptr[ext_uart_no] == CH438_BUFFSIZE)
+        if(buff_ptr[ext_uart_no] == CH438_BUFFSIZE)
             buff_ptr[ext_uart_no] = 0;
         RcvNum = RcvNum + 1;
     }
@@ -380,13 +380,13 @@ static void ImxrtCH438Init(void)
 static void CH438PortInit(uint8_t ext_uart_no, uint32_t    baud_rate)
 {
     uint32_t div;
-    uint8_t    DLL,DLM,dlab;
-    uint8_t    REG_LCR_ADDR;
-    uint8_t    REG_DLL_ADDR;
-    uint8_t    REG_DLM_ADDR;
-    uint8_t    REG_IER_ADDR;
-    uint8_t    REG_MCR_ADDR;
-    uint8_t    REG_FCR_ADDR;
+    uint8_t DLL,DLM,dlab;
+    uint8_t REG_LCR_ADDR;
+    uint8_t REG_DLL_ADDR;
+    uint8_t REG_DLM_ADDR;
+    uint8_t REG_IER_ADDR;
+    uint8_t REG_MCR_ADDR;
+    uint8_t REG_FCR_ADDR;
     
     REG_LCR_ADDR = offsetadd[ext_uart_no] | REG_LCR0_ADDR;
     REG_DLL_ADDR = offsetadd[ext_uart_no] | REG_DLL0_ADDR;
@@ -408,7 +408,7 @@ static void CH438PortInit(uint8_t ext_uart_no, uint32_t    baud_rate)
     dlab |= 0x80;
     WriteCH438Data(REG_LCR_ADDR, dlab);
 
-    div = ( Fpclk >> 4 ) / baud_rate;
+    div = (Fpclk >> 4) / baud_rate;
     DLM = div >> 8;
     DLL = div & 0xff;
 
@@ -448,12 +448,12 @@ static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t s
     write_len = size;;
     write_len_continue = size;
 
-    if (write_len > CH438_BUFFSIZE) 
+    if(write_len > CH438_BUFFSIZE) 
     {
-        if (0 == write_len % CH438_BUFFSIZE) 
+        if(0 == write_len % CH438_BUFFSIZE) 
         {
             write_index = write_len / CH438_BUFFSIZE;
-            for (i = 0; i < write_index; i ++) 
+            for(i = 0; i < write_index; i ++) 
             {
                 Ch438UartSend(ext_uart_no, write_buffer + i * CH438_BUFFSIZE, CH438_BUFFSIZE);
             }
@@ -461,7 +461,7 @@ static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t s
         else 
         {
             write_index = 0;
-            while (write_len_continue > CH438_BUFFSIZE) 
+            while(write_len_continue > CH438_BUFFSIZE) 
             {
                 Ch438UartSend(ext_uart_no, write_buffer + write_index * CH438_BUFFSIZE, CH438_BUFFSIZE);
                 write_index++;
@@ -489,26 +489,26 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
 {
     size_t RevLen = 0;
     uint8_t InterruptStatus;
-    uint8_t    REG_IIR_ADDR;
-    uint8_t    REG_LSR_ADDR;
-    uint8_t    REG_MSR_ADDR;
+    uint8_t REG_IIR_ADDR;
+    uint8_t REG_LSR_ADDR;
+    uint8_t REG_MSR_ADDR;
 
     pthread_mutex_lock(&mutex[ext_uart_no]);
     while(done[ext_uart_no] == false)
         pthread_cond_wait(&cond[ext_uart_no], &mutex[ext_uart_no]);
-    if (done[ext_uart_no] == true)
+    if(done[ext_uart_no] == true)
     {
         REG_IIR_ADDR = offsetadd[ext_uart_no] | REG_IIR0_ADDR;
         REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
         REG_MSR_ADDR = offsetadd[ext_uart_no] | REG_MSR0_ADDR;
-        InterruptStatus = ReadCH438Data(REG_IIR_ADDR) & 0x0f;    /* 读串口的中断状态 */    
+        InterruptStatus = ReadCH438Data(REG_IIR_ADDR) & 0x0f;    /* 读串口的中断状态 */
         ch438info("InterruptStatus is %d\n", InterruptStatus);
         
         switch(InterruptStatus)
         {
-            case INT_NOINT:            /* 没有中断 */                    
+            case INT_NOINT:            /* 没有中断 */
                 break;
-            case INT_THR_EMPTY:        /* THR空中断 */                                    
+            case INT_THR_EMPTY:        /* THR空中断 */
                 break;
             case INT_RCV_OVERTIME:    /* 接收超时中断，收到数据后一般是触发这个 。在收到一帧数据后4个数据时间没有后续的数据时触发*/
             case INT_RCV_SUCCESS:    /* 接收数据可用中断。这是一个数据帧超过缓存了才发生，否则一般是前面的超时中断。处理过程同上面的超时中断 */
@@ -546,16 +546,16 @@ static void Ch438InitDefault(void)
     
     int ret = 0;
     int i;
-	struct sched_param param;
-	pthread_attr_t attr;
-	pthread_t thread;
+    struct sched_param param;
+    pthread_attr_t attr;
+    pthread_t thread;
 
     /* Initialize the mutex */
 
     for(i = 0; i < CH438PORTNUM; i++)
     {
         ret = pthread_mutex_init(&mutex[i], NULL);
-        if (ret != 0)
+        if(ret != 0)
         {
             ch438err("pthread_mutex_init failed, status=%d\n", ret);
         }
@@ -565,18 +565,18 @@ static void Ch438InitDefault(void)
     for(i = 0; i < CH438PORTNUM; i++)
     {
         ret = pthread_cond_init(&cond[i], NULL);
-        if (ret != 0)
+        if(ret != 0)
         {
             ch438err("pthread_cond_init failed, status=%d\n", ret);
         }
     }
 
-	pthread_attr_init(&attr);
-	param.sched_priority = 60;
-	pthread_attr_setschedparam(&attr, &param);
-	pthread_attr_setstacksize(&attr, 2048);
-	ret = pthread_create(&thread, &attr, getInterruptStatus, NULL);
-    if (ret < 0)
+    pthread_attr_init(&attr);
+    param.sched_priority = 60;
+    pthread_attr_setschedparam(&attr, &param);
+    pthread_attr_setstacksize(&attr, 2048);
+    ret = pthread_create(&thread, &attr, (void*)getInterruptStatus, NULL);
+    if(ret < 0)
     {
         ch438err("task create failed, status=%d\n", ret);
     }
@@ -602,7 +602,7 @@ static int ch438_open(FAR struct file *filep)
     uint8_t port = priv->port;
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
-    if (g_ch438open[port])
+    if(g_ch438open[port])
     {
         return -EBUSY;
     }
@@ -639,7 +639,7 @@ static ssize_t ch438_read(FAR struct file *filep, FAR char *buffer, size_t bufle
     length = ImxrtCh438ReadData(port);
     memcpy(buffer, buff[port], length);
 
-    if (length > buflen)
+    if(length > buflen)
     {
         length = buflen;
     }
@@ -679,7 +679,7 @@ static int ch438_register(FAR const char *devpath, uint8_t port)
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
     priv = (FAR struct ch438_dev_s *)kmm_malloc(sizeof(struct ch438_dev_s));
-    if (priv == NULL)
+    if(priv == NULL)
     {
         ch438err("ERROR: Failed to allocate instance\n");
         return -ENOMEM;
@@ -689,7 +689,7 @@ static int ch438_register(FAR const char *devpath, uint8_t port)
 
     /* Register the character driver */
     ret = register_driver(devpath, &g_ch438fops, 0666, priv);
-    if (ret < 0)
+    if(ret < 0)
     {
         ch438err("ERROR: Failed to register driver: %d\n", ret);
         kmm_free(priv);
