@@ -666,17 +666,14 @@ static const struct cmdmap_s g_cmdmap[] =
   { "Adapter4GTest",       cmd_Adapter4GTest,       1, 1, "[4G ec200t test.]" },
 #endif
 
-#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORATEST)
-  { "e220loraTest",       cmd_e220loraTest,       1, 1, "[e220 lora test.]" },
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_RECEIVE)
+  { "E220Receive",       cmd_E220LoraReceive,       1, 1, "[e220 lora receive.]" },
 #endif
 
-#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORASEND)
-  { "e220loraSend",       cmd_e220loraSend,       1, 2, "[e220loraSend <message>]" },
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_SEND)
+  { "e220Send",       cmd_E220LoraSend,       1, 2, "[e220loraSend <message>]" },
 #endif
 
-#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORAOPEN)
-  { "e220loraOpen",       cmd_e220LoraOpen,       1, 1, "[e220lora open device" },
-#endif
 
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
   { "fft",       cmd_fft,       1, 1, "[K210 fft function.]" },

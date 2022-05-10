@@ -305,35 +305,24 @@ int cmd_Adapter4GTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 }
 #endif
 
-#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORATEST)
-extern void LoraTest(void);
-int cmd_e220loraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_RECEIVE)
+void E220LoraReceive(void);
+int cmd_E220LoraReceive(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
-    LoraTest();
+    E220LoraReceive();
     return OK;
 }
 #endif
 
-#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORASEND)
-extern void LoraSend(int argc, char *argv[]);
-int cmd_e220loraSend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_SEND)
+extern void E220LoraSend(int argc, char *argv[]);
+int cmd_E220LoraSend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
-    LoraSend(argc,argv);
-    return OK;
-}
-#endif
-
-#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORAOPEN)
-extern void LoraOpen(void);
-int cmd_e220LoraOpen(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
-{
-    nsh_output(vtbl, "Hello, world!\n");
-    FrameworkInit();
-    LoraOpen();
+    E220LoraSend(argc,argv);
     return OK;
 }
 #endif
