@@ -1027,15 +1027,15 @@ static uint32 ImxrtCh438ReadData(void *dev, struct BusBlockReadParam *read_param
 		if (EOK == result) {
 			gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
 			if (!gInterruptStatus) { 
-				// dat = ReadCH438Data(REG_LCR0_ADDR);	
-				// dat = ReadCH438Data(REG_IER0_ADDR);	
-				// dat = ReadCH438Data(REG_MCR0_ADDR);	
-				// dat = ReadCH438Data(REG_LSR0_ADDR);	
-				// dat = ReadCH438Data(REG_MSR0_ADDR);	
-				// dat = ReadCH438Data(REG_RBR0_ADDR);	
-				// dat = ReadCH438Data(REG_THR0_ADDR);	
-				// dat = ReadCH438Data(REG_IIR0_ADDR);	
-				// dat = dat;	
+				dat = ReadCH438Data(REG_LCR0_ADDR);	
+				dat = ReadCH438Data(REG_IER0_ADDR);	
+				dat = ReadCH438Data(REG_MCR0_ADDR);	
+				dat = ReadCH438Data(REG_LSR0_ADDR);	
+				dat = ReadCH438Data(REG_MSR0_ADDR);	
+				dat = ReadCH438Data(REG_RBR0_ADDR);	
+				dat = ReadCH438Data(REG_THR0_ADDR);	
+				dat = ReadCH438Data(REG_IIR0_ADDR);	
+				dat = dat;	
 				interrupt_done = 0;
 			} else {
 				if (gInterruptStatus & interrupt_num[dev_param->ext_uart_no]) {   /* check which uart port triggers interrupt*/
@@ -1053,17 +1053,26 @@ static uint32 ImxrtCh438ReadData(void *dev, struct BusBlockReadParam *read_param
 								
 					InterruptStatus = ReadCH438Data( REG_IIR_ADDR ) & 0x0f;    /* read the status of the uart port*/
 
-					if ((INT_RCV_OVERTIME == InterruptStatus) || (INT_RCV_SUCCESS == InterruptStatus)) {
-						rcv_num = Ch438UartRcv(dev_param->ext_uart_no, (uint8 *)read_param->buffer, read_param->size);
-						read_param->read_length = rcv_num;
-
-						interrupt_done = 1;
-
-						// int i;
-						// uint8 *buffer = (uint8 *)read_param->buffer;
-						// for (i = 0; i < rcv_num; i ++) {
-						// 	KPrintf("Ch438UartRcv i %u data 0x%x\n", i, buffer[i]);
-						// }
+					switch( InterruptStatus )
+					{
+						case INT_NOINT:			/* NO INTERRUPT */					
+							break;
+						case INT_THR_EMPTY:		/* THR EMPTY INTERRUPT */							
+							break;
+						case INT_RCV_OVERTIME:	/* RECV OVERTIME INTERRUPT */
+						case INT_RCV_SUCCESS:	/* RECV INTERRUPT SUCCESSFULLY */
+							rcv_num = Ch438UartRcv(dev_param->ext_uart_no, (uint8 *)read_param->buffer, read_param->size);
+							read_param->read_length = rcv_num;
+							interrupt_done = 1;
+							break;
+						case INT_RCV_LINES:		/* RECV LINES INTERRUPT */
+							ReadCH438Data( REG_LSR_ADDR );
+							break;
+						case INT_MODEM_CHANGE:	/* MODEM CHANGE INTERRUPT */
+							ReadCH438Data( REG_MSR_ADDR );
+							break;
+						default:
+							break;
 					}
 				}
 			}
