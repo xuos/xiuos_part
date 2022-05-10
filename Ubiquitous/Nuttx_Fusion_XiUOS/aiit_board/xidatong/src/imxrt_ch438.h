@@ -32,6 +32,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/time.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/arch.h>
 
 #include <sys/types.h>
@@ -333,7 +334,6 @@
 #define CH438_D7_PIN_INPUT	(GPIO_INPUT | \
                             GPIO_PORT1 | GPIO_PIN29)
 
-
 #ifdef CONFIG_DEBUG_CH438_ERROR
 #  define ch438err     _err
 #else
@@ -351,6 +351,10 @@
 #else
 #  define ch438info    _none
 #endif
+
+
+#define OPE_INT   0x0000
+#define OPE_CFG   0x0001
 
 /****************************************************************************
  * Public Function Prototypes

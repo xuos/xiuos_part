@@ -44,6 +44,7 @@ static int ch438_open(FAR struct file *filep);
 static int ch438_close(FAR struct file *filep);
 static ssize_t ch438_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
 static ssize_t ch438_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+static int ch438_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int ch438_register(FAR const char *devpath, uint8_t ext_uart_no);
 
 /****************************************************************************
@@ -51,6 +52,7 @@ static int ch438_register(FAR const char *devpath, uint8_t ext_uart_no);
  ****************************************************************************/
 struct ch438_dev_s
 {
+  sem_t devsem;
   uint8_t port;    /* ch438 port number*/
 };
 
@@ -90,7 +92,6 @@ static uint8_t offsetadd[CH438PORTNUM] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x3
 
 static uint8_t gInterruptStatus;
 
-static bool g_ch438open[CH438PORTNUM];
 static const struct file_operations g_ch438fops =
 {
   ch438_open,
@@ -98,7 +99,7 @@ static const struct file_operations g_ch438fops =
   ch438_read,
   ch438_write,
   NULL,
-  NULL,
+  ch438_ioctl,
   NULL
 };
 
@@ -377,7 +378,7 @@ static void ImxrtCH438Init(void)
  *   ch438 port initialization
  *
  ****************************************************************************/
-static void CH438PortInit(uint8_t ext_uart_no, uint32_t    baud_rate)
+static void CH438PortInit(uint8_t ext_uart_no, uint32_t baud_rate)
 {
     uint32_t div;
     uint8_t DLL,DLM,dlab;
@@ -600,15 +601,18 @@ static int ch438_open(FAR struct file *filep)
     FAR struct inode *inode = filep->f_inode;
     FAR struct ch438_dev_s *priv = inode->i_private;
     uint8_t port = priv->port;
+    int ret = OK;
+
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
-    if(g_ch438open[port])
+    ret = nxsem_wait_uninterruptible(&priv->devsem);
+    if (ret < 0)
     {
-        return -EBUSY;
+        return ret;
     }
-    g_ch438open[port] = true;
+    nxsem_post(&priv->devsem);
 
-    return OK;
+    return ret;
 }
 
 /****************************************************************************
@@ -619,10 +623,18 @@ static int ch438_close(FAR struct file *filep)
     FAR struct inode *inode = filep->f_inode;
     FAR struct ch438_dev_s *priv = inode->i_private;
     uint8_t port = priv->port;
+    int ret = OK;
+
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
-    g_ch438open[port] = false;
-    return OK;
+    ret = nxsem_wait_uninterruptible(&priv->devsem);
+    if (ret < 0)
+    {
+        return ret;
+    }
+
+    nxsem_post(&priv->devsem);
+    return ret;
 }
 
 /****************************************************************************
@@ -634,7 +646,15 @@ static ssize_t ch438_read(FAR struct file *filep, FAR char *buffer, size_t bufle
     FAR struct inode *inode = filep->f_inode;
     FAR struct ch438_dev_s *priv = inode->i_private;
     uint8_t port = priv->port;
+    int ret = OK;
+
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
+
+    ret = nxsem_wait_uninterruptible(&priv->devsem);
+    if (ret < 0)
+    {
+        return (ssize_t)ret;
+    }
 
     length = ImxrtCh438ReadData(port);
     memcpy(buffer, buff[port], length);
@@ -643,6 +663,7 @@ static ssize_t ch438_read(FAR struct file *filep, FAR char *buffer, size_t bufle
     {
         length = buflen;
     }
+    nxsem_post(&priv->devsem);
 
     return length;
 }
@@ -655,11 +676,55 @@ static ssize_t ch438_write(FAR struct file *filep, FAR const char *buffer, size_
     FAR struct inode *inode = filep->f_inode;
     FAR struct ch438_dev_s *priv = inode->i_private;
     uint8_t port = priv->port;
+    int ret = OK;
+
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
+    ret = nxsem_wait_uninterruptible(&priv->devsem);
+    if (ret < 0)
+    {
+        return (ssize_t)ret;
+    }
     ImxrtCh438WriteData(port, buffer, buflen);
+    nxsem_post(&priv->devsem);
     
     return buflen;
+}
+
+/****************************************************************************
+ * Name: ch438_ioctl
+ ****************************************************************************/
+static int ch438_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+    FAR struct inode *inode = filep->f_inode;
+    FAR struct ch438_dev_s *priv = inode->i_private;
+    uint8_t port = priv->port;
+    int ret = OK;
+
+    DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
+
+    /* Get exclusive access */
+    ret = nxsem_wait_uninterruptible(&priv->devsem);
+    if (ret < 0)
+    {
+        return ret;
+    }
+
+    switch(cmd)
+    {
+        case OPE_CFG:
+        case OPE_INT:
+            CH438PortInit(port, (uint32_t)arg);
+            break;
+
+        default:
+            ch438info("Unrecognized cmd: %d\n", cmd);
+            ret = -ENOTTY;
+            break;
+    }
+
+    nxsem_post(&priv->devsem);
+    return ret;
 }
 
 
@@ -686,12 +751,12 @@ static int ch438_register(FAR const char *devpath, uint8_t port)
     }
 
     priv->port = port;
+    nxsem_init(&priv->devsem, 0, 1);
 
     /* Register the character driver */
     ret = register_driver(devpath, &g_ch438fops, 0666, priv);
     if(ret < 0)
     {
-        ch438err("ERROR: Failed to register driver: %d\n", ret);
         kmm_free(priv);
     }
     
