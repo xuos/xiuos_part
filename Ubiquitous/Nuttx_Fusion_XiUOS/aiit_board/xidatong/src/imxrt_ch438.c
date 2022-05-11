@@ -307,7 +307,7 @@ static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num)
     while(1)
     {
         while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_TEMT) == 0);    /* 等待数据发送完毕，THR,TSR全空 */
-        if(Num <= CH438_BUFFSIZE)
+        if(Num <= 128)
         {
             WriteCH438Block(REG_THR_ADDR, Num, Data);
             break;
@@ -315,8 +315,8 @@ static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num)
         else
         {
             WriteCH438Block(REG_THR_ADDR, 128, Data);
-            Num -= CH438_BUFFSIZE;
-            Data += CH438_BUFFSIZE;
+            Num -= 128;
+            Data += 128;
         }
     }
 }
@@ -345,7 +345,7 @@ uint8_t CH438UARTRcv(uint8_t ext_uart_no, char* buf)
         buff[ext_uart_no][buff_ptr[ext_uart_no]] = dat;
         
         buff_ptr[ext_uart_no] = buff_ptr[ext_uart_no] + 1;
-        if(buff_ptr[ext_uart_no] == CH438_BUFFSIZE)
+        if(buff_ptr[ext_uart_no] == 256)
             buff_ptr[ext_uart_no] = 0;
         RcvNum = RcvNum + 1;
     }
@@ -446,29 +446,29 @@ static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t s
     int i, write_index;
     DEBUGASSERT(write_buffer != NULL);
 
-    write_len = size;;
+    write_len = size;
     write_len_continue = size;
 
-    if(write_len > CH438_BUFFSIZE) 
+    if(write_len > 256) 
     {
-        if(0 == write_len % CH438_BUFFSIZE) 
+        if(0 == write_len % 256) 
         {
-            write_index = write_len / CH438_BUFFSIZE;
+            write_index = write_len / 256;
             for(i = 0; i < write_index; i ++) 
             {
-                Ch438UartSend(ext_uart_no, write_buffer + i * CH438_BUFFSIZE, CH438_BUFFSIZE);
+                Ch438UartSend(ext_uart_no, write_buffer + i * 256, 256);
             }
         } 
         else 
         {
             write_index = 0;
-            while(write_len_continue > CH438_BUFFSIZE) 
+            while(write_len_continue > 256) 
             {
-                Ch438UartSend(ext_uart_no, write_buffer + write_index * CH438_BUFFSIZE, CH438_BUFFSIZE);
+                Ch438UartSend(ext_uart_no, write_buffer + write_index * 256, 256);
                 write_index++;
-                write_len_continue = write_len - write_index * CH438_BUFFSIZE;
+                write_len_continue = write_len - write_index * 256;
             }
-            Ch438UartSend(ext_uart_no, write_buffer + write_index * CH438_BUFFSIZE, write_len_continue);
+            Ch438UartSend(ext_uart_no, write_buffer + write_index * 256, write_len_continue);
         }
     } 
     else 
@@ -543,8 +543,7 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
  *
  ****************************************************************************/
 static void Ch438InitDefault(void)
-{
-    
+{ 
     int ret = 0;
     int i;
     struct sched_param param;
@@ -552,7 +551,6 @@ static void Ch438InitDefault(void)
     pthread_t thread;
 
     /* Initialize the mutex */
-
     for(i = 0; i < CH438PORTNUM; i++)
     {
         ret = pthread_mutex_init(&mutex[i], NULL);
@@ -712,8 +710,8 @@ static int ch438_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     switch(cmd)
     {
-        case OPE_CFG:
         case OPE_INT:
+        case OPE_CFG:
             CH438PortInit(port, (uint32_t)arg);
             break;
 

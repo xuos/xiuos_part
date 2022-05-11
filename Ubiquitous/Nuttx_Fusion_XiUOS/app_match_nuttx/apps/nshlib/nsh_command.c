@@ -671,7 +671,7 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
 
 #if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_SEND)
-  { "e220Send",       cmd_E220LoraSend,       1, 2, "[e220loraSend <message>]" },
+  { "E220Send",       cmd_E220LoraSend,       1, 2, "[e220loraSend <message>]" },
 #endif
 
 
