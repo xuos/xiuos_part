@@ -30,6 +30,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/pthread.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/wdog.h>
+#include <nuttx/clock.h>
 #include <nuttx/time.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>

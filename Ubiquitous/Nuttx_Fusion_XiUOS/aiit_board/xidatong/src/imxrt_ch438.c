@@ -20,8 +20,9 @@
 
 #include "imxrt_ch438.h"
 
-#define CH438PORTNUM 8
-#define CH438_BUFFSIZE   256
+#define CH438PORTNUM  8
+#define CH438_BUFFSIZE  256
+#define CH438_INCREMENT  MSEC2TICK(33)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -86,6 +87,9 @@ static pthread_cond_t cond[CH438PORTNUM] =
     PTHREAD_COND_INITIALIZER
 };
 
+/* ch438 Callback work queue structure */
+static struct work_s g_ch438irqwork;
+
 /* there is data available on the corresponding port */
 static volatile bool done[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
 
@@ -97,10 +101,6 @@ static uint8_t Interruptnum[CH438PORTNUM] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,
 
 /* Offset address of serial port number */
 static uint8_t offsetadd[CH438PORTNUM] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};
-
-/* Interrupt register status global variable */
-static uint8_t gInterruptStatus;
-
 
 /* port open status global variable */
 static volatile bool g_ch438open[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
@@ -127,13 +127,12 @@ static const struct file_operations g_ch438fops =
 static FAR void getInterruptStatus(FAR void *arg)
 {
     uint8_t i;
-    while(1)
+    uint8_t gInterruptStatus;  /* Interrupt register status */
+
+    gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
+
+    if(gInterruptStatus)
     {
-        gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
-        if(!gInterruptStatus)
-        {
-            continue;
-        }
         for(i = 0; i < CH438PORTNUM; i++)
         {
             if(gInterruptStatus & Interruptnum[i])
@@ -145,6 +144,8 @@ static FAR void getInterruptStatus(FAR void *arg)
             }
         }
     }
+
+    work_queue(HPWORK, &g_ch438irqwork, getInterruptStatus, NULL, CH438_INCREMENT);
 }
 
 /****************************************************************************
@@ -567,9 +568,6 @@ static void Ch438InitDefault(void)
 { 
     int ret = 0;
     int i;
-    struct sched_param param;
-    pthread_attr_t attr;
-    pthread_t thread;
 
     /* Initialize the mutex */
     for(i = 0; i < CH438PORTNUM; i++)
@@ -590,17 +588,7 @@ static void Ch438InitDefault(void)
             ch438err("pthread_cond_init failed, status=%d\n", ret);
         }
     }
-
-    pthread_attr_init(&attr);
-    param.sched_priority = 60;
-    pthread_attr_setschedparam(&attr, &param);
-    pthread_attr_setstacksize(&attr, 2048);
-    ret = pthread_create(&thread, &attr, (void*)getInterruptStatus, NULL);
-    if(ret < 0)
-    {
-        ch438err("task create failed, status=%d\n", ret);
-    }
-
+    
     ImxrtCH438Init();
     CH438PortInit(0,115200);
     CH438PortInit(1,115200);
@@ -610,6 +598,10 @@ static void Ch438InitDefault(void)
     CH438PortInit(5,115200);
     CH438PortInit(6,115200);
     CH438PortInit(7,115200);
+
+    up_mdelay(10);
+
+    work_queue(HPWORK, &g_ch438irqwork, getInterruptStatus, NULL, CH438_INCREMENT);
 }
 
 /****************************************************************************
