@@ -52,8 +52,8 @@ static int ch438_register(FAR const char *devpath, uint8_t ext_uart_no);
  ****************************************************************************/
 struct ch438_dev_s
 {
-  sem_t devsem;
-  uint8_t port;    /* ch438 port number*/
+    sem_t devsem;     /* ch438 port devsem */
+    uint8_t port;    /* ch438 port number*/
 };
 
 /****************************************************************************
@@ -83,7 +83,7 @@ static pthread_cond_t cond[CH438PORTNUM] =
     PTHREAD_COND_INITIALIZER
 };
 
-volatile bool done[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
+static volatile bool done[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
 
 static char buff[CH438PORTNUM][CH438_BUFFSIZE];
 static uint8_t buff_ptr[CH438PORTNUM];
@@ -92,6 +92,7 @@ static uint8_t offsetadd[CH438PORTNUM] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x3
 
 static uint8_t gInterruptStatus;
 
+static volatile bool g_ch438open[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
 static const struct file_operations g_ch438fops =
 {
   ch438_open,
@@ -608,6 +609,14 @@ static int ch438_open(FAR struct file *filep)
     {
         return ret;
     }
+
+    if(g_ch438open[port])
+    {
+        ch438err("ERROR: ch438 port %d is opened!\n",port);
+        return -EBUSY;
+    }
+    g_ch438open[port] = true;
+
     nxsem_post(&priv->devsem);
 
     return ret;
@@ -631,6 +640,13 @@ static int ch438_close(FAR struct file *filep)
         return ret;
     }
 
+    if(!g_ch438open[port])
+    {
+        ch438err("ERROR: ch438 port %d is closed!\n",port);
+        return -EBUSY;
+    }
+    g_ch438open[port] = false;
+
     nxsem_post(&priv->devsem);
     return ret;
 }
@@ -644,15 +660,8 @@ static ssize_t ch438_read(FAR struct file *filep, FAR char *buffer, size_t bufle
     FAR struct inode *inode = filep->f_inode;
     FAR struct ch438_dev_s *priv = inode->i_private;
     uint8_t port = priv->port;
-    int ret = OK;
 
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
-
-    ret = nxsem_wait_uninterruptible(&priv->devsem);
-    if (ret < 0)
-    {
-        return (ssize_t)ret;
-    }
 
     length = ImxrtCh438ReadData(port);
     memcpy(buffer, buff[port], length);
@@ -661,7 +670,6 @@ static ssize_t ch438_read(FAR struct file *filep, FAR char *buffer, size_t bufle
     {
         length = buflen;
     }
-    nxsem_post(&priv->devsem);
 
     return length;
 }
@@ -674,17 +682,10 @@ static ssize_t ch438_write(FAR struct file *filep, FAR const char *buffer, size_
     FAR struct inode *inode = filep->f_inode;
     FAR struct ch438_dev_s *priv = inode->i_private;
     uint8_t port = priv->port;
-    int ret = OK;
 
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
-    ret = nxsem_wait_uninterruptible(&priv->devsem);
-    if (ret < 0)
-    {
-        return (ssize_t)ret;
-    }
     ImxrtCh438WriteData(port, buffer, buflen);
-    nxsem_post(&priv->devsem);
     
     return buflen;
 }
@@ -701,13 +702,6 @@ static int ch438_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
-    /* Get exclusive access */
-    ret = nxsem_wait_uninterruptible(&priv->devsem);
-    if (ret < 0)
-    {
-        return ret;
-    }
-
     switch(cmd)
     {
         case OPE_INT:
@@ -720,8 +714,6 @@ static int ch438_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             ret = -ENOTTY;
             break;
     }
-
-    nxsem_post(&priv->devsem);
     return ret;
 }
 
