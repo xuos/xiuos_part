@@ -33,11 +33,11 @@ static uint8_t ReadCH438Data(uint8_t addr);
 static void WriteCH438Data(uint8_t addr, uint8_t dat);
 static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf);
 static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num);
-uint8_t CH438UARTRcv(uint8_t ext_uart_no, char* buf);
+uint8_t CH438UARTRcv(uint8_t ext_uart_no, char *buf, size_t size);
 static void ImxrtCH438Init(void);
 static void CH438PortInit(uint8_t ext_uart_no, uint32_t	baud_rate);
 static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t size);
-static size_t ImxrtCh438ReadData(uint8_t ext_uart_no);
+static size_t ImxrtCh438ReadData(uint8_t ext_uart_no, size_t size);
 static void Ch438InitDefault(void);
 
 static int ch438_open(FAR struct file *filep);
@@ -52,7 +52,7 @@ static int ch438_register(FAR const char *devpath, uint8_t ext_uart_no);
  ****************************************************************************/
 struct ch438_dev_s
 {
-    sem_t devsem;     /* ch438 port devsem */
+    sem_t devsem;    /* ch438 port devsem */
     uint8_t port;    /* ch438 port number*/
 };
 
@@ -60,6 +60,7 @@ struct ch438_dev_s
  * Private Data
  ****************************************************************************/
 
+/*mutex of corresponding port*/
 static pthread_mutex_t mutex[CH438PORTNUM] =
 {
     PTHREAD_MUTEX_INITIALIZER,
@@ -71,6 +72,8 @@ static pthread_mutex_t mutex[CH438PORTNUM] =
     PTHREAD_MUTEX_INITIALIZER,
     PTHREAD_MUTEX_INITIALIZER
 };
+
+/* Condition variable of corresponding port */
 static pthread_cond_t cond[CH438PORTNUM] =
 {
     PTHREAD_COND_INITIALIZER,
@@ -83,25 +86,35 @@ static pthread_cond_t cond[CH438PORTNUM] =
     PTHREAD_COND_INITIALIZER
 };
 
+/* there is data available on the corresponding port */
 static volatile bool done[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
 
+/* Eight port data buffer */
 static char buff[CH438PORTNUM][CH438_BUFFSIZE];
-static uint8_t buff_ptr[CH438PORTNUM];
-static uint8_t Interruptnum[CH438PORTNUM] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,};    /* SSR寄存器中断号对应值 */
-static uint8_t offsetadd[CH438PORTNUM] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};        /* 串口号的偏移地址 */
 
+/* the value of interrupt number of SSR register */
+static uint8_t Interruptnum[CH438PORTNUM] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,};
+
+/* Offset address of serial port number */
+static uint8_t offsetadd[CH438PORTNUM] = {0x00,0x10,0x20,0x30,0x08,0x18,0x28,0x38,};
+
+/* Interrupt register status global variable */
 static uint8_t gInterruptStatus;
 
+
+/* port open status global variable */
 static volatile bool g_ch438open[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
+
+/* Ch438 POSIX interface */
 static const struct file_operations g_ch438fops =
 {
-  ch438_open,
-  ch438_close,
-  ch438_read,
-  ch438_write,
-  NULL,
-  ch438_ioctl,
-  NULL
+    ch438_open,
+    ch438_close,
+    ch438_read,
+    ch438_write,
+    NULL,
+    ch438_ioctl,
+    NULL
 };
 
 /****************************************************************************
@@ -182,9 +195,9 @@ static void CH438SetInput(void)
 static uint8_t ReadCH438Data(uint8_t addr)
 {
     uint8_t dat = 0;
-    imxrt_gpio_write(CH438_NWR_PIN, true);    
-    imxrt_gpio_write(CH438_NRD_PIN, true);    
-    imxrt_gpio_write(CH438_ALE_PIN, true);    
+    imxrt_gpio_write(CH438_NWR_PIN, true);
+    imxrt_gpio_write(CH438_NRD_PIN, true);
+    imxrt_gpio_write(CH438_ALE_PIN, true);
 
     CH438SetOutput();
     up_udelay(1);
@@ -234,9 +247,9 @@ static uint8_t ReadCH438Data(uint8_t addr)
  ****************************************************************************/
 static void WriteCH438Data(uint8_t addr, uint8_t dat)
 {
-    imxrt_gpio_write(CH438_ALE_PIN, true);    
-    imxrt_gpio_write(CH438_NRD_PIN, true);    
-    imxrt_gpio_write(CH438_NWR_PIN, true);    
+    imxrt_gpio_write(CH438_ALE_PIN, true);
+    imxrt_gpio_write(CH438_NRD_PIN, true);
+    imxrt_gpio_write(CH438_NWR_PIN, true);
 
     CH438SetOutput();
     up_udelay(1);    
@@ -285,10 +298,10 @@ static void WriteCH438Data(uint8_t addr, uint8_t dat)
  *   Write data block from ch438 address
  *
  ****************************************************************************/
-static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf)   
+static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf)
 {
-    while(mLen--)     
-      WriteCH438Data(mAddr, *mBuf++);
+    while(mLen--)
+        WriteCH438Data(mAddr, *mBuf++);
 }
 
 /****************************************************************************
@@ -307,7 +320,7 @@ static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num)
     
     while(1)
     {
-        while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_TEMT) == 0);    /* 等待数据发送完毕，THR,TSR全空 */
+        while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_TEMT) == 0); /* wait for sending data done, THR and TSR is NULL */
         if(Num <= 128)
         {
             WriteCH438Block(REG_THR_ADDR, Num, Data);
@@ -329,28 +342,38 @@ static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num)
  *   Disable FIFO mode for ch438 serial port to receive multi byte data
  *
  ****************************************************************************/
-uint8_t CH438UARTRcv(uint8_t ext_uart_no, char* buf)
+uint8_t CH438UARTRcv(uint8_t ext_uart_no, char *buf, size_t size)
 {
-    uint8_t RcvNum = 0;
+    uint8_t rcv_num = 0;
     uint8_t dat = 0;
     uint8_t REG_LSR_ADDR,REG_RBR_ADDR;
-    
+    char *read_buffer;
+    size_t buffer_index = 0;
+
+    read_buffer = buf;
+
     REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
     REG_RBR_ADDR = offsetadd[ext_uart_no] | REG_RBR0_ADDR;
 
-    /* Wait for the data to be ready */
-    while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0 );
-    while((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0x01)
+    /* Wait for the data to be ready */	
+    while ((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0);
+
+    while (((ReadCH438Data(REG_LSR_ADDR) & BIT_LSR_DATARDY) == 0x01) && (size != 0))
     {
-        dat =  ReadCH438Data(REG_RBR_ADDR);
-        buff[ext_uart_no][buff_ptr[ext_uart_no]] = dat;
-        
-        buff_ptr[ext_uart_no] = buff_ptr[ext_uart_no] + 1;
-        if(buff_ptr[ext_uart_no] == 256)
-            buff_ptr[ext_uart_no] = 0;
-        RcvNum = RcvNum + 1;
+        dat = ReadCH438Data(REG_RBR_ADDR);
+        *read_buffer = dat;
+        read_buffer++;
+        buffer_index++;
+        if (255 == buffer_index) {
+            buffer_index = 0;
+            read_buffer = buf;
+        }
+
+        ++rcv_num;
+        --size;
     }
-    return RcvNum;
+
+    return rcv_num;
 }
 
 /****************************************************************************
@@ -477,7 +500,7 @@ static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t s
         Ch438UartSend(ext_uart_no, write_buffer, write_len);
     }
 
-    return 0;
+    return OK;
 }
 
 /****************************************************************************
@@ -487,7 +510,7 @@ static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t s
  *   Read data from ch438 port
  *
  ****************************************************************************/
-static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
+static size_t ImxrtCh438ReadData(uint8_t ext_uart_no, size_t size)
 {
     size_t RevLen = 0;
     uint8_t InterruptStatus;
@@ -503,33 +526,30 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no)
         REG_IIR_ADDR = offsetadd[ext_uart_no] | REG_IIR0_ADDR;
         REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
         REG_MSR_ADDR = offsetadd[ext_uart_no] | REG_MSR0_ADDR;
-        InterruptStatus = ReadCH438Data(REG_IIR_ADDR) & 0x0f;    /* 读串口的中断状态 */
+        /* Read the interrupt status of the serial port */
+        InterruptStatus = ReadCH438Data(REG_IIR_ADDR) & 0x0f;
         ch438info("InterruptStatus is %d\n", InterruptStatus);
         
         switch(InterruptStatus)
         {
-            case INT_NOINT:            /* 没有中断 */
+            case INT_NOINT:            /* no interrupt */
                 break;
-            case INT_THR_EMPTY:        /* THR空中断 */
+            case INT_THR_EMPTY:        /* the transmit hold register is not interrupted */
                 break;
-            case INT_RCV_OVERTIME:    /* 接收超时中断，收到数据后一般是触发这个 。在收到一帧数据后4个数据时间没有后续的数据时触发*/
-            case INT_RCV_SUCCESS:    /* 接收数据可用中断。这是一个数据帧超过缓存了才发生，否则一般是前面的超时中断。处理过程同上面的超时中断 */
-                RevLen = CH438UARTRcv(ext_uart_no, buff[ext_uart_no]);
-                buff_ptr[ext_uart_no] = 0;
+            case INT_RCV_OVERTIME:     /* receive data timeout interrupt */
+            case INT_RCV_SUCCESS:      /* receive data available interrupt */
+                RevLen = CH438UARTRcv(ext_uart_no, buff[ext_uart_no], size);
                 break;
-
-            case INT_RCV_LINES:        /* 接收线路状态中断 */
+            case INT_RCV_LINES:       /* receive line status interrupt */
                 ReadCH438Data(REG_LSR_ADDR);
                 break;
-            case INT_MODEM_CHANGE:    /* MODEM输入变化中断 */
+            case INT_MODEM_CHANGE:    /* modem input change interrupt */
                 ReadCH438Data(REG_MSR_ADDR);
                 break;
             default:
                 break;
         }
-
         done[ext_uart_no]  = false;
-
     }
     pthread_mutex_unlock(&mutex[ext_uart_no]);
 
@@ -663,7 +683,7 @@ static ssize_t ch438_read(FAR struct file *filep, FAR char *buffer, size_t bufle
 
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
-    length = ImxrtCh438ReadData(port);
+    length = ImxrtCh438ReadData(port, buflen);
     memcpy(buffer, buff[port], length);
 
     if(length > buflen)
