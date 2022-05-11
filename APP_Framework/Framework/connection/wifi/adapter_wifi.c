@@ -20,7 +20,9 @@
 
 #include <adapter.h>
 #include "adapter_wifi.h"
+#ifdef ADD_XIZI_FETURES
 #include <bus_pin.h>
+#endif
 
 #ifdef ADAPTER_HFA21_WIFI
 extern AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter);
@@ -98,7 +100,7 @@ int AdapterWifiInit(void)
 }
 
 /******************wifi TEST*********************/
-int AdapterwifiTest(void)
+int AdapterWifiTest(void)
 {
     char cmd[64];
     int baud_rate = BAUD_RATE_57600;
@@ -107,30 +109,30 @@ int AdapterwifiTest(void)
 
 
 #ifdef ADAPTER_HFA21_DRIVER_EXT_PORT
-    // static BusType ch438_pin;
-    // ch438_pin = PinBusInitGet();
-	// struct PinParam pin_cfg;	
-	// int ret = 0;
+    static BusType ch438_pin;
+    ch438_pin = PinBusInitGet();
+	struct PinParam pin_cfg;	
+	int ret = 0;
 
-	// struct BusConfigureInfo configure_info;
-	// configure_info.configure_cmd = OPE_CFG;
-	// configure_info.private_data = (void *)&pin_cfg;
+	struct BusConfigureInfo configure_info;
+	configure_info.configure_cmd = OPE_CFG;
+	configure_info.private_data = (void *)&pin_cfg;
 
-    // pin_cfg.cmd = GPIO_CONFIG_MODE;
-    // pin_cfg.pin = 22;
-    // pin_cfg.mode = GPIO_CFG_OUTPUT;
+    pin_cfg.cmd = GPIO_CONFIG_MODE;
+    pin_cfg.pin = 22;
+    pin_cfg.mode = GPIO_CFG_OUTPUT;
 
-	// ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
+	ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
 
-    // struct PinStat pin_stat;
-	// struct BusBlockWriteParam write_param;
-	// struct BusBlockReadParam read_param;
-	// write_param.buffer = (void *)&pin_stat;
+    struct PinStat pin_stat;
+	struct BusBlockWriteParam write_param;
+	struct BusBlockReadParam read_param;
+	write_param.buffer = (void *)&pin_stat;
 	
-	// pin_stat.val = GPIO_HIGH;
+	pin_stat.val = GPIO_HIGH;
 
-    // pin_stat.pin = 22;
-    // BusDevWriteData(ch438_pin->owner_haldev, &write_param);
+    pin_stat.pin = 22;
+    BusDevWriteData(ch438_pin->owner_haldev, &write_param);
 
     int pin_fd;
     pin_fd = PrivOpen("/dev/pin_dev", O_RDWR);
@@ -168,7 +170,7 @@ int AdapterwifiTest(void)
     enum IpType ip_type = IPV4;
     AdapterDeviceConnect(adapter, net_role, ip, port, ip_type);
 
-    const char *wifi_msg = "LiuKai Test";
+    const char *wifi_msg = "Wifi Test";
     int len = strlen(wifi_msg);
     for(int i = 0;i < 10; ++i) {
         AdapterDeviceSend(adapter, wifi_msg, len);
@@ -176,12 +178,19 @@ int AdapterwifiTest(void)
     }
 
     char wifi_recv_msg[128];
-    while (1) {
+    for(int j=0;j<10;++j){
         AdapterDeviceRecv(adapter, wifi_recv_msg, 128);
+        PrivTaskDelay(1000);
     }
     
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterwifiTest, AdapterwifiTest, show adapter wifi information);
+
+#ifdef ADD_RTTHREAD_FETURES
+MSH_CMD_EXPORT(AdapterWifiTest,a wifi adpter sample);
+#endif
+#ifdef ADD_XIZI_FETURES
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterWifiTest, AdapterWifiTest, show adapter wifi information);
+#endif
 
 int wifiopen(void)
 {
@@ -189,15 +198,18 @@ int wifiopen(void)
 
     AdapterDeviceOpen(adapter);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, wifiopen, wifiopen, open adapter wifi );
+#endif
 int wificlose(void)
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
 
     AdapterDeviceClose(adapter);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, wificlose, wificlose, close adapter wifi );
-
+#endif
 int wifisetup(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -210,7 +222,9 @@ int wifisetup(int argc, char *argv[])
 
     AdapterDeviceSetUp(adapter);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3)|SHELL_CMD_DISABLE_RETURN, wifisetup, wifisetup, setup adapter wifi );
+#endif
 int wifiaddrset(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -222,16 +236,18 @@ int wifiaddrset(int argc, char *argv[])
     AdapterDevicePing(adapter, "36.152.44.95");///< ping www.baidu.com
     AdapterDeviceNetstat(adapter);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(4)|SHELL_CMD_DISABLE_RETURN, wifiaddrset, wifiaddrset, addrset adapter wifi);
-
+#endif
 int wifiping(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
     printf("ping %s\n",argv[1]);
     AdapterDevicePing(adapter, argv[1]);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3), wifiping, wifiping, wifiping adapter );
-
+#endif
 int wificonnect(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -250,7 +266,9 @@ int wificonnect(int argc, char *argv[])
 
     AdapterDeviceConnect(adapter, net_role, ip, port, ip_type);
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(4)|SHELL_CMD_DISABLE_RETURN, wificonnect, wificonnect, wificonnect adapter);
+#endif
 int wifisend(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -262,7 +280,9 @@ int wifisend(int argc, char *argv[])
         PrivTaskDelay(1000);
     }
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3)|SHELL_CMD_DISABLE_RETURN, wifisend, wifisend, wifisend adapter wifi information);
+#endif
 int wifirecv(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
@@ -274,4 +294,6 @@ int wifirecv(int argc, char *argv[])
         printf("wifi recv [%s]\n",wifi_recv_msg);
     }
 }
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(3)|SHELL_CMD_DISABLE_RETURN, wifirecv, wifirecv, wifirecv adapter wifi information);
+#endif

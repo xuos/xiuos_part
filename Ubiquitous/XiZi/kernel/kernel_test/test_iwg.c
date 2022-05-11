@@ -28,14 +28,17 @@ static BusType wdt;
  */
 static void FeedWatchdog(void)
 {
-    while (1)
+    int cnt = 0;
+    while (cnt < 20)
     {
         /* keep watchdog alive in idle task */
         struct BusConfigureInfo cfg;
         cfg.configure_cmd = OPER_WDT_KEEPALIVE;
         cfg.private_data = NONE;
         BusDrvConfigure(wdt->owner_driver, &cfg);
-        KPrintf("feed the dog!\n ");
+        KPrintf("feed the dog! cnt %u\n", cnt);
+        cnt++;
+        MdelayKTask(1000);
     }
 }
 
@@ -46,18 +49,17 @@ static void FeedWatchdog(void)
 int TestIwg(void)
 {
     x_err_t res = EOK;
-    uint32 timeout = 1000;    /* timeout time */
+    uint16 timeout = 1000;    /* timeout time */
 
-    wdt = BusFind(WDT_BUS_NAME_0);
-    wdt->owner_driver = BusFindDriver(wdt, WDT_DRIVER_NAME_0);
-    wdt->owner_haldev = BusFindDevice(wdt, WDT_0_DEVICE_NAME_0);
+    wdt = BusFind(WDT_BUS_NAME);
+    wdt->owner_driver = BusFindDriver(wdt, WDT_DRIVER_NAME);
+    wdt->owner_haldev = BusFindDevice(wdt, WDT_DEVICE_NAME);
 
     /* set watchdog timeout time */
     struct BusConfigureInfo cfg;
     cfg.configure_cmd = OPER_WDT_SET_TIMEOUT;
     cfg.private_data = &timeout;
     res = BusDrvConfigure(wdt->owner_driver, &cfg);
-    KPrintf("feed the dog!\n");
     
     int32 WdtTask = KTaskCreate("WdtTask", (void *)FeedWatchdog, NONE, 2048, 20); 
 	res = StartupKTask(WdtTask);
