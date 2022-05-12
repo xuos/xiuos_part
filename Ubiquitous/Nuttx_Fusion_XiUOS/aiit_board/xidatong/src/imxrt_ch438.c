@@ -53,8 +53,8 @@ static int ch438_register(FAR const char *devpath, uint8_t ext_uart_no);
  ****************************************************************************/
 struct ch438_dev_s
 {
-    sem_t devsem;    /* ch438 port devsem */
-    uint8_t port;    /* ch438 port number*/
+  sem_t devsem;    /* ch438 port devsem */
+  uint8_t port;    /* ch438 port number*/
 };
 
 /****************************************************************************
@@ -64,27 +64,56 @@ struct ch438_dev_s
 /*mutex of corresponding port*/
 static pthread_mutex_t mutex[CH438PORTNUM] =
 {
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER,
-    PTHREAD_MUTEX_INITIALIZER
+  PTHREAD_MUTEX_INITIALIZER,
+  PTHREAD_MUTEX_INITIALIZER,
+  PTHREAD_MUTEX_INITIALIZER,
+  PTHREAD_MUTEX_INITIALIZER,
+  PTHREAD_MUTEX_INITIALIZER,
+  PTHREAD_MUTEX_INITIALIZER,
+  PTHREAD_MUTEX_INITIALIZER,
+  PTHREAD_MUTEX_INITIALIZER
 };
 
 /* Condition variable of corresponding port */
 static pthread_cond_t cond[CH438PORTNUM] =
 {
-    PTHREAD_COND_INITIALIZER,
-    PTHREAD_COND_INITIALIZER,
-    PTHREAD_COND_INITIALIZER,
-    PTHREAD_COND_INITIALIZER,
-    PTHREAD_COND_INITIALIZER,
-    PTHREAD_COND_INITIALIZER,
-    PTHREAD_COND_INITIALIZER,
-    PTHREAD_COND_INITIALIZER
+  PTHREAD_COND_INITIALIZER,
+  PTHREAD_COND_INITIALIZER,
+  PTHREAD_COND_INITIALIZER,
+  PTHREAD_COND_INITIALIZER,
+  PTHREAD_COND_INITIALIZER,
+  PTHREAD_COND_INITIALIZER,
+  PTHREAD_COND_INITIALIZER,
+  PTHREAD_COND_INITIALIZER
+};
+
+/* This array shows whether the current serial port is selected */
+static bool const g_uart_selected[CH438PORTNUM] =
+{
+#ifdef CONFIG_CH438_EXTUART0
+  [0] = true,
+#endif
+#ifdef CONFIG_CH438_EXTUART1
+  [1] = true,
+#endif
+#ifdef CONFIG_CH438_EXTUART2
+  [2] = true,
+#endif
+#ifdef CONFIG_CH438_EXTUART3
+  [3] = true,
+#endif
+#ifdef CONFIG_CH438_EXTUART4
+  [4] = true,
+#endif
+#ifdef CONFIG_CH438_EXTUART5
+  [5] = true,
+#endif
+#ifdef CONFIG_CH438_EXTUART6
+  [6] = true,
+#endif
+#ifdef CONFIG_CH438_EXTUART7
+  [7] = true,
+#endif
 };
 
 /* ch438 Callback work queue structure */
@@ -108,13 +137,13 @@ static volatile bool g_ch438open[CH438PORTNUM] = {false,false,false,false,false,
 /* Ch438 POSIX interface */
 static const struct file_operations g_ch438fops =
 {
-    ch438_open,
-    ch438_close,
-    ch438_read,
-    ch438_write,
-    NULL,
-    ch438_ioctl,
-    NULL
+  ch438_open,
+  ch438_close,
+  ch438_read,
+  ch438_write,
+  NULL,
+  ch438_ioctl,
+  NULL
 };
 
 /****************************************************************************
@@ -135,7 +164,7 @@ static FAR void getInterruptStatus(FAR void *arg)
     {
         for(i = 0; i < CH438PORTNUM; i++)
         {
-            if(gInterruptStatus & Interruptnum[i])
+            if(g_uart_selected[i] && (gInterruptStatus & Interruptnum[i]))
             {
                 pthread_mutex_lock(&mutex[i]);
                 done[i] = true;
@@ -183,7 +212,7 @@ static void CH438SetInput(void)
     imxrt_config_gpio(CH438_D4_PIN_INPUT);
     imxrt_config_gpio(CH438_D5_PIN_INPUT);
     imxrt_config_gpio(CH438_D6_PIN_INPUT);
-    imxrt_config_gpio(CH438_D7_PIN_INPUT);    
+    imxrt_config_gpio(CH438_D7_PIN_INPUT);
 }
 
 /****************************************************************************
@@ -214,13 +243,13 @@ static uint8_t ReadCH438Data(uint8_t addr)
         
     up_udelay(1);
 
-    imxrt_gpio_write(CH438_ALE_PIN, false);    
+    imxrt_gpio_write(CH438_ALE_PIN, false);
     up_udelay(1);        
 
     CH438SetInput();
     up_udelay(1);
     
-    imxrt_gpio_write(CH438_NRD_PIN, false);    
+    imxrt_gpio_write(CH438_NRD_PIN, false);
     up_udelay(1);    
     
     if (imxrt_gpio_read(CH438_D7_PIN_INPUT))    dat |= 0x80;
@@ -232,8 +261,8 @@ static uint8_t ReadCH438Data(uint8_t addr)
     if (imxrt_gpio_read(CH438_D1_PIN_INPUT))    dat |= 0x02;
     if (imxrt_gpio_read(CH438_D0_PIN_INPUT))    dat |= 0x01;
     
-    imxrt_gpio_write(CH438_NRD_PIN, true);    
-    imxrt_gpio_write(CH438_ALE_PIN, true);    
+    imxrt_gpio_write(CH438_NRD_PIN, true);
+    imxrt_gpio_write(CH438_ALE_PIN, true);
     up_udelay(1);
 
     return dat;
@@ -263,12 +292,12 @@ static void WriteCH438Data(uint8_t addr, uint8_t dat)
     if(addr &0x04)    imxrt_gpio_write(CH438_D2_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D2_PIN_OUT, false);
     if(addr &0x02)    imxrt_gpio_write(CH438_D1_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D1_PIN_OUT, false);
     if(addr &0x01)    imxrt_gpio_write(CH438_D0_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D0_PIN_OUT, false);
-    
+
     up_udelay(1);    
     
     imxrt_gpio_write(CH438_ALE_PIN, false);
     up_udelay(1);
-    
+
     if(dat &0x80)    imxrt_gpio_write(CH438_D7_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D7_PIN_OUT, false);
     if(dat &0x40)    imxrt_gpio_write(CH438_D6_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D6_PIN_OUT, false);
     if(dat &0x20)    imxrt_gpio_write(CH438_D5_PIN_OUT, true);    else    imxrt_gpio_write(CH438_D5_PIN_OUT, false);
@@ -394,7 +423,7 @@ static void ImxrtCH438Init(void)
     imxrt_gpio_write(CH438_NWR_PIN,true);
     imxrt_gpio_write(CH438_NRD_PIN,true);
     imxrt_gpio_write(CH438_ALE_PIN,true);
-}    
+}
 
 /****************************************************************************
  * Name: CH438PortInit
@@ -413,18 +442,18 @@ static void CH438PortInit(uint8_t ext_uart_no, uint32_t baud_rate)
     uint8_t REG_IER_ADDR;
     uint8_t REG_MCR_ADDR;
     uint8_t REG_FCR_ADDR;
-    
+
     REG_LCR_ADDR = offsetadd[ext_uart_no] | REG_LCR0_ADDR;
     REG_DLL_ADDR = offsetadd[ext_uart_no] | REG_DLL0_ADDR;
     REG_DLM_ADDR = offsetadd[ext_uart_no] | REG_DLM0_ADDR;
     REG_IER_ADDR = offsetadd[ext_uart_no] | REG_IER0_ADDR;
     REG_MCR_ADDR = offsetadd[ext_uart_no] | REG_MCR0_ADDR;
     REG_FCR_ADDR = offsetadd[ext_uart_no] | REG_FCR0_ADDR;
-    
+
     /* reset the uart */
     WriteCH438Data(REG_IER_ADDR, BIT_IER_RESET); 
     up_mdelay(50);
-    
+
     dlab = ReadCH438Data(REG_IER_ADDR);
     dlab &= 0xDF;
     WriteCH438Data(REG_IER_ADDR, dlab);
@@ -455,7 +484,7 @@ static void CH438PortInit(uint8_t ext_uart_no, uint32_t baud_rate)
     WriteCH438Data(REG_MCR_ADDR, BIT_MCR_OUT2);
 
     /* release the data in FIFO */
-    WriteCH438Data(REG_FCR_ADDR, ReadCH438Data(REG_FCR_ADDR)| BIT_FCR_TFIFORST); 
+    WriteCH438Data(REG_FCR_ADDR, ReadCH438Data(REG_FCR_ADDR)| BIT_FCR_TFIFORST);
 }
 
 /****************************************************************************
@@ -483,8 +512,8 @@ static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t s
             {
                 Ch438UartSend(ext_uart_no, write_buffer + i * 256, 256);
             }
-        } 
-        else 
+        }
+        else
         {
             write_index = 0;
             while(write_len_continue > 256) 
@@ -496,7 +525,7 @@ static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t s
             Ch438UartSend(ext_uart_no, write_buffer + write_index * 256, write_len_continue);
         }
     } 
-    else 
+    else
     {
         Ch438UartSend(ext_uart_no, write_buffer, write_len);
     }
@@ -530,7 +559,7 @@ static size_t ImxrtCh438ReadData(uint8_t ext_uart_no, size_t size)
         /* Read the interrupt status of the serial port */
         InterruptStatus = ReadCH438Data(REG_IIR_ADDR) & 0x0f;
         ch438info("InterruptStatus is %d\n", InterruptStatus);
-        
+
         switch(InterruptStatus)
         {
             case INT_NOINT:            /* no interrupt */
@@ -572,6 +601,11 @@ static void Ch438InitDefault(void)
     /* Initialize the mutex */
     for(i = 0; i < CH438PORTNUM; i++)
     {
+        if(!g_uart_selected[i])
+        {
+            continue;
+        }
+        
         ret = pthread_mutex_init(&mutex[i], NULL);
         if(ret != 0)
         {
@@ -582,22 +616,51 @@ static void Ch438InitDefault(void)
     /* Initialize the condition variable */
     for(i = 0; i < CH438PORTNUM; i++)
     {
+        if(!g_uart_selected[i])
+        {
+            continue;
+        }
+        
         ret = pthread_cond_init(&cond[i], NULL);
         if(ret != 0)
         {
             ch438err("pthread_cond_init failed, status=%d\n", ret);
         }
     }
-    
+
     ImxrtCH438Init();
-    CH438PortInit(0,115200);
-    CH438PortInit(1,115200);
-    CH438PortInit(2,9600);
-    CH438PortInit(3,9600);
-    CH438PortInit(4,115200);
-    CH438PortInit(5,115200);
-    CH438PortInit(6,115200);
-    CH438PortInit(7,115200);
+
+#ifdef CONFIG_CH438_EXTUART0
+    CH438PortInit(0, CONFIG_CH438_EXTUART0_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART1
+    CH438PortInit(1, CONFIG_CH438_EXTUART1_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART2
+    CH438PortInit(2, CONFIG_CH438_EXTUART2_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART3
+    CH438PortInit(3, CONFIG_CH438_EXTUART3_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART4
+    CH438PortInit(4, CONFIG_CH438_EXTUART4_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART5
+    CH438PortInit(5, CONFIG_CH438_EXTUART5_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART6
+    CH438PortInit(6, CONFIG_CH438_EXTUART6_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART7
+    CH438PortInit(7, CONFIG_CH438_EXTUART7_BAUD);
+#endif
 
     up_mdelay(10);
 
