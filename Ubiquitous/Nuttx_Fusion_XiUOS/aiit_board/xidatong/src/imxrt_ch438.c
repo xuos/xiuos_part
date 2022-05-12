@@ -31,13 +31,13 @@ static FAR void getInterruptStatus(FAR void *arg);
 static void CH438SetOutput(void);
 static void CH438SetInput(void);
 static uint8_t ReadCH438Data(uint8_t addr);
-static void WriteCH438Data(uint8_t addr, uint8_t dat);
-static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf);
-static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num);
-uint8_t CH438UARTRcv(uint8_t ext_uart_no, char *buf, size_t size);
+static void WriteCH438Data(uint8_t addr, const uint8_t dat);
+static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, const uint8_t *mBuf);
+static void Ch438UartSend(uint8_t ext_uart_no, const uint8_t *Data, uint16_t Num);
+uint8_t CH438UARTRcv(uint8_t ext_uart_no, uint8_t *buf, size_t size);
 static void ImxrtCH438Init(void);
 static void CH438PortInit(uint8_t ext_uart_no, uint32_t	baud_rate);
-static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t size);
+static int ImxrtCh438WriteData(uint8_t ext_uart_no, const uint8_t *write_buffer, size_t size);
 static size_t ImxrtCh438ReadData(uint8_t ext_uart_no, size_t size);
 static void Ch438InitDefault(void);
 
@@ -123,7 +123,7 @@ static struct work_s g_ch438irqwork;
 static volatile bool done[CH438PORTNUM] = {false,false,false,false,false,false,false,false};
 
 /* Eight port data buffer */
-static char buff[CH438PORTNUM][CH438_BUFFSIZE];
+static uint8_t buff[CH438PORTNUM][CH438_BUFFSIZE];
 
 /* the value of interrupt number of SSR register */
 static uint8_t Interruptnum[CH438PORTNUM] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,};
@@ -275,7 +275,7 @@ static uint8_t ReadCH438Data(uint8_t addr)
  *   write data to ch438 address
  *
  ****************************************************************************/
-static void WriteCH438Data(uint8_t addr, uint8_t dat)
+static void WriteCH438Data(uint8_t addr, const uint8_t dat)
 {
     imxrt_gpio_write(CH438_ALE_PIN, true);
     imxrt_gpio_write(CH438_NRD_PIN, true);
@@ -328,7 +328,7 @@ static void WriteCH438Data(uint8_t addr, uint8_t dat)
  *   Write data block from ch438 address
  *
  ****************************************************************************/
-static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf)
+static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, const uint8_t *mBuf)
 {
     while(mLen--)
         WriteCH438Data(mAddr, *mBuf++);
@@ -342,7 +342,7 @@ static void WriteCH438Block(uint8_t mAddr, uint8_t mLen, char *mBuf)
  *   with a maximum of 128 bytes of data sent at a time
  *
  ****************************************************************************/
-static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num)
+static void Ch438UartSend(uint8_t ext_uart_no, const uint8_t *Data, uint16_t Num)
 {
     uint8_t REG_LSR_ADDR,REG_THR_ADDR;
     REG_LSR_ADDR = offsetadd[ext_uart_no] | REG_LSR0_ADDR;
@@ -372,12 +372,12 @@ static void Ch438UartSend(uint8_t ext_uart_no, char *Data, uint16_t Num)
  *   Disable FIFO mode for ch438 serial port to receive multi byte data
  *
  ****************************************************************************/
-uint8_t CH438UARTRcv(uint8_t ext_uart_no, char *buf, size_t size)
+uint8_t CH438UARTRcv(uint8_t ext_uart_no, uint8_t *buf, size_t size)
 {
     uint8_t rcv_num = 0;
     uint8_t dat = 0;
     uint8_t REG_LSR_ADDR,REG_RBR_ADDR;
-    char *read_buffer;
+    uint8_t *read_buffer;
     size_t buffer_index = 0;
 
     read_buffer = buf;
@@ -494,7 +494,7 @@ static void CH438PortInit(uint8_t ext_uart_no, uint32_t baud_rate)
  *   Read data from ch438 port
  *
  ****************************************************************************/
-static int ImxrtCh438WriteData(uint8_t ext_uart_no, char *write_buffer, size_t size)
+static int ImxrtCh438WriteData(uint8_t ext_uart_no, const uint8_t *write_buffer, size_t size)
 {
     int write_len, write_len_continue;
     int i, write_index;
@@ -760,7 +760,7 @@ static ssize_t ch438_write(FAR struct file *filep, FAR const char *buffer, size_
 
     DEBUGASSERT(port >= 0 && port < CH438PORTNUM);
 
-    ImxrtCh438WriteData(port, buffer, buflen);
+    ImxrtCh438WriteData(port, (const uint8_t *)buffer, buflen);
     
     return buflen;
 }
