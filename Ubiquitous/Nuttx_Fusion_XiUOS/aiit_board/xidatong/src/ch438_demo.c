@@ -36,8 +36,6 @@ void CH438Demo(void)
     char buffer[256];
     int readlen;
 
-    // while(1)
-    // {
     fd = open("/dev/extuart_dev3", O_RDWR);
     m0fd = open("/dev/gpout0", O_RDWR);
     m1fd = open("/dev/gpout1", O_RDWR);
@@ -82,6 +80,5 @@ void CH438Demo(void)
     }
 
     close(fd);
-    // }
     
 }
