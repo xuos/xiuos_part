@@ -64,283 +64,281 @@
 
 /******************************************************************************************/
 
-/* 芯片定义 */
-/* CH438串口0寄存器地址 */
+/* chip definition */
+/* CH438serial port0 register address */
 
-#define REG_RBR0_ADDR        0x00      /* 串口0接收缓冲寄存器地址 */
-#define REG_THR0_ADDR        0x00      /* 串口0发送保持寄存器地址 */
-#define REG_IER0_ADDR        0x01      /* 串口0中断使能寄存器地址 */
-#define REG_IIR0_ADDR        0x02      /* 串口0中断识别寄存器地址 */
-#define REG_FCR0_ADDR        0x02      /* 串口0FIFO控制寄存器地址 */
-#define REG_LCR0_ADDR        0x03      /* 串口0线路控制寄存器地址 */
-#define REG_MCR0_ADDR        0x04      /* 串口0MODEM控制寄存器地址 */
-#define REG_LSR0_ADDR        0x05      /* 串口0线路状态寄存器地址 */
-#define REG_MSR0_ADDR        0x06      /* 串口0MODEM状态寄存器地址 */
-#define REG_SCR0_ADDR        0x07      /* 串口0用户可定义寄存器地址 */
-#define REG_DLL0_ADDR        0x00      /* 波特率除数锁存器低8位字节地址 */
-#define REG_DLM0_ADDR        0x01      /* 波特率除数锁存器高8位字节地址 */
-
-/* CH438串口1寄存器地址 */
-
-#define REG_RBR1_ADDR       0x10      /* 串口1接收缓冲寄存器地址 */
-#define REG_THR1_ADDR       0x10      /* 串口1发送保持寄存器地址 */
-#define REG_IER1_ADDR       0x11      /* 串口1中断使能寄存器地址 */
-#define REG_IIR1_ADDR       0x12      /* 串口1中断识别寄存器地址 */
-#define REG_FCR1_ADDR       0x12      /* 串口1FIFO控制寄存器地址 */
-#define REG_LCR1_ADDR       0x13      /* 串口1线路控制寄存器地址 */
-#define REG_MCR1_ADDR       0x14      /* 串口1MODEM控制寄存器地址 */
-#define REG_LSR1_ADDR       0x15      /* 串口1线路状态寄存器地址 */
-#define REG_MSR1_ADDR       0x16      /* 串口1MODEM状态寄存器地址 */
-#define REG_SCR1_ADDR       0x17      /* 串口1用户可定义寄存器地址 */
-#define REG_DLL1_ADDR       0x10      /* 波特率除数锁存器低8位字节地址 */
-#define REG_DLM1_ADDR       0x11      /* 波特率除数锁存器高8位字节地址 */
+#define REG_RBR0_ADDR        0x00      /* serial port0receive buffer register address */
+#define REG_THR0_ADDR        0x00      /* serial port0send hold register address */
+#define REG_IER0_ADDR        0x01      /* serial port0interrupt enable register address */
+#define REG_IIR0_ADDR        0x02      /* serial port0interrupt identifies register address */
+#define REG_FCR0_ADDR        0x02      /* serial port0FIFO controls register address */
+#define REG_LCR0_ADDR        0x03      /* serial port0circuit control register address */
+#define REG_MCR0_ADDR        0x04      /* serial port0MODEM controls register address */
+#define REG_LSR0_ADDR        0x05      /* serial port0line status register address */
+#define REG_MSR0_ADDR        0x06      /* serial port0address of MODEM status register */
+#define REG_SCR0_ADDR        0x07      /* serial port0the user can define the register address */
+#define REG_DLL0_ADDR        0x00      /* Baud rate divisor latch low 8-bit byte address */
+#define REG_DLM0_ADDR        0x01      /* Baud rate divisor latch high 8-bit byte address */
 
 
-/* CH438串口2寄存器地址 */
+/* CH438serial port1 register address */
 
-#define REG_RBR2_ADDR       0x20      /* 串口2接收缓冲寄存器地址 */
-#define REG_THR2_ADDR       0x20      /* 串口2发送保持寄存器地址 */
-#define REG_IER2_ADDR       0x21      /* 串口2中断使能寄存器地址 */
-#define REG_IIR2_ADDR       0x22      /* 串口2中断识别寄存器地址 */
-#define REG_FCR2_ADDR       0x22      /* 串口2FIFO控制寄存器地址 */
-#define REG_LCR2_ADDR       0x23      /* 串口2线路控制寄存器地址 */
-#define REG_MCR2_ADDR       0x24      /* 串口2MODEM控制寄存器地址 */
-#define REG_LSR2_ADDR       0x25      /* 串口2线路状态寄存器地址 */
-#define REG_MSR2_ADDR       0x26      /* 串口2MODEM状态寄存器地址 */
-#define REG_SCR2_ADDR       0x27      /* 串口2用户可定义寄存器地址 */
-#define REG_DLL2_ADDR       0x20      /* 波特率除数锁存器低8位字节地址 */
-#define REG_DLM2_ADDR       0x21      /* 波特率除数锁存器高8位字节地址 */
-
-
-
-/* CH438串口3寄存器地址 */
-
-#define REG_RBR3_ADDR       0x30      /* 串口3接收缓冲寄存器地址 */
-#define REG_THR3_ADDR       0x30      /* 串口3发送保持寄存器地址 */
-#define REG_IER3_ADDR       0x31      /* 串口3中断使能寄存器地址 */
-#define REG_IIR3_ADDR       0x32      /* 串口3中断识别寄存器地址 */
-#define REG_FCR3_ADDR       0x32      /* 串口3FIFO控制寄存器地址 */
-#define REG_LCR3_ADDR       0x33      /* 串口3线路控制寄存器地址 */
-#define REG_MCR3_ADDR       0x34      /* 串口3MODEM控制寄存器地址 */
-#define REG_LSR3_ADDR       0x35      /* 串口3线路状态寄存器地址 */
-#define REG_MSR3_ADDR       0x36      /* 串口3MODEM状态寄存器地址 */
-#define REG_SCR3_ADDR       0x37      /* 串口3用户可定义寄存器地址 */
-#define REG_DLL3_ADDR       0x30      /* 波特率除数锁存器低8位字节地址 */
-#define REG_DLM3_ADDR       0x31      /* 波特率除数锁存器高8位字节地址 */
+#define REG_RBR1_ADDR       0x10      /* serial port1receive buffer register address */
+#define REG_THR1_ADDR       0x10      /* serial port1send hold register address */
+#define REG_IER1_ADDR       0x11      /* serial port1interrupt enable register address */
+#define REG_IIR1_ADDR       0x12      /* serial port1interrupt identifies register address */
+#define REG_FCR1_ADDR       0x12      /* serial port1FIFO controls register address */
+#define REG_LCR1_ADDR       0x13      /* serial port1circuit control register address */
+#define REG_MCR1_ADDR       0x14      /* serial port1MODEM controls register address */
+#define REG_LSR1_ADDR       0x15      /* serial port1line status register address */
+#define REG_MSR1_ADDR       0x16      /* serial port1address of MODEM status register */
+#define REG_SCR1_ADDR       0x17      /* serial port1the user can define the register address */
+#define REG_DLL1_ADDR       0x10      /* Baud rate divisor latch low 8-bit byte address */
+#define REG_DLM1_ADDR       0x11      /* Baud rate divisor latch high 8-bit byte address */
 
 
-/* CH438串口4寄存器地址 */
+/* CH438serial port2 register address */
 
-#define REG_RBR4_ADDR       0x08      /* 串口4接收缓冲寄存器地址 */
-#define REG_THR4_ADDR       0x08      /* 串口4发送保持寄存器地址 */
-#define REG_IER4_ADDR       0x09      /* 串口4中断使能寄存器地址 */
-#define REG_IIR4_ADDR       0x0A      /* 串口4中断识别寄存器地址 */
-#define REG_FCR4_ADDR       0x0A      /* 串口4FIFO控制寄存器地址 */
-#define REG_LCR4_ADDR       0x0B      /* 串口4线路控制寄存器地址 */
-#define REG_MCR4_ADDR       0x0C      /* 串口4MODEM控制寄存器地址 */
-#define REG_LSR4_ADDR       0x0D      /* 串口4线路状态寄存器地址 */
-#define REG_MSR4_ADDR       0x0E      /* 串口4MODEM状态寄存器地址 */
-#define REG_SCR4_ADDR       0x0F      /* 串口4用户可定义寄存器地址 */
-#define REG_DLL4_ADDR       0x08      /* 波特率除数锁存器低8位字节地址 */
-#define REG_DLM4_ADDR       0x09      /* 波特率除数锁存器高8位字节地址 */
-
-
-
-/* CH438串口5寄存器地址 */
-
-#define REG_RBR5_ADDR       0x18      /* 串口5接收缓冲寄存器地址 */
-#define REG_THR5_ADDR       0x18      /* 串口5发送保持寄存器地址 */
-#define REG_IER5_ADDR       0x19      /* 串口5中断使能寄存器地址 */
-#define REG_IIR5_ADDR       0x1A      /* 串口5中断识别寄存器地址 */
-#define REG_FCR5_ADDR       0x1A      /* 串口5FIFO控制寄存器地址 */
-#define REG_LCR5_ADDR       0x1B      /* 串口5线路控制寄存器地址 */
-#define REG_MCR5_ADDR       0x1C      /* 串口5MODEM控制寄存器地址 */
-#define REG_LSR5_ADDR       0x1D      /* 串口5线路状态寄存器地址 */
-#define REG_MSR5_ADDR       0x1E      /* 串口5MODEM状态寄存器地址 */
-#define REG_SCR5_ADDR       0x1F      /* 串口5用户可定义寄存器地址 */
-#define REG_DLL5_ADDR       0x18      /* 波特率除数锁存器低8位字节地址 */
-#define REG_DLM5_ADDR       0x19      /* 波特率除数锁存器高8位字节地址 */
+#define REG_RBR2_ADDR       0x20      /* serial port2receive buffer register address */
+#define REG_THR2_ADDR       0x20      /* serial port2send hold register address */
+#define REG_IER2_ADDR       0x21      /* serial port2interrupt enable register address */
+#define REG_IIR2_ADDR       0x22      /* serial port2interrupt identifies register address */
+#define REG_FCR2_ADDR       0x22      /* serial port2FIFO controls register address */
+#define REG_LCR2_ADDR       0x23      /* serial port2circuit control register address */
+#define REG_MCR2_ADDR       0x24      /* serial port2MODEM controls register address */
+#define REG_LSR2_ADDR       0x25      /* serial port2line status register address */
+#define REG_MSR2_ADDR       0x26      /* serial port2address of MODEM status register */
+#define REG_SCR2_ADDR       0x27      /* serial port2the user can define the register address */
+#define REG_DLL2_ADDR       0x20      /* Baud rate divisor latch low 8-bit byte address */
+#define REG_DLM2_ADDR       0x21      /* Baud rate divisor latch high 8-bit byte address */
 
 
-/* CH438串口6寄存器地址 */
+/* CH438serial port3 register address */
 
-#define REG_RBR6_ADDR       0x28      /* 串口6接收缓冲寄存器地址 */
-#define REG_THR6_ADDR       0x28      /* 串口6发送保持寄存器地址 */
-#define REG_IER6_ADDR       0x29      /* 串口6中断使能寄存器地址 */
-#define REG_IIR6_ADDR       0x2A      /* 串口6中断识别寄存器地址 */
-#define REG_FCR6_ADDR       0x2A      /* 串口6FIFO控制寄存器地址 */
-#define REG_LCR6_ADDR       0x2B      /* 串口6线路控制寄存器地址 */
-#define REG_MCR6_ADDR       0x2C      /* 串口6MODEM控制寄存器地址 */
-#define REG_LSR6_ADDR       0x2D      /* 串口6线路状态寄存器地址 */
-#define REG_MSR6_ADDR       0x2E      /* 串口6MODEM状态寄存器地址 */
-#define REG_SCR6_ADDR       0x2F      /* 串口6用户可定义寄存器地址 */
-#define REG_DLL6_ADDR       0x28      /* 波特率除数锁存器低8位字节地址 */
-#define REG_DLM6_ADDR       0x29      /* 波特率除数锁存器高8位字节地址 */
-
-
-/* CH438串口7寄存器地址 */
-
-#define REG_RBR7_ADDR       0x38      /* 串口7接收缓冲寄存器地址 */
-#define REG_THR7_ADDR       0x38      /* 串口7发送保持寄存器地址 */
-#define REG_IER7_ADDR       0x39      /* 串口7中断使能寄存器地址 */
-#define REG_IIR7_ADDR       0x3A      /* 串口7中断识别寄存器地址 */
-#define REG_FCR7_ADDR       0x3A      /* 串口7FIFO控制寄存器地址 */
-#define REG_LCR7_ADDR       0x3B      /* 串口7线路控制寄存器地址 */
-#define REG_MCR7_ADDR       0x3C      /* 串口7MODEM控制寄存器地址 */
-#define REG_LSR7_ADDR       0x3D      /* 串口7线路状态寄存器地址 */
-#define REG_MSR7_ADDR       0x3E      /* 串口7MODEM状态寄存器地址 */
-#define REG_SCR7_ADDR       0x3F      /* 串口7用户可定义寄存器地址 */
-#define REG_DLL7_ADDR       0x38      /* 波特率除数锁存器低8位字节地址 */
-#define REG_DLM7_ADDR       0x39      /* 波特率除数锁存器高8位字节地址 */
+#define REG_RBR3_ADDR       0x30      /* serial port3receive buffer register address */
+#define REG_THR3_ADDR       0x30      /* serial port3send hold register address */
+#define REG_IER3_ADDR       0x31      /* serial port3interrupt enable register address */
+#define REG_IIR3_ADDR       0x32      /* serial port3interrupt identifies register address */
+#define REG_FCR3_ADDR       0x32      /* serial port3FIFO controls register address */
+#define REG_LCR3_ADDR       0x33      /* serial port3circuit control register address */
+#define REG_MCR3_ADDR       0x34      /* serial port3MODEM controls register address */
+#define REG_LSR3_ADDR       0x35      /* serial port3line status register address */
+#define REG_MSR3_ADDR       0x36      /* serial port3address of MODEM status register */
+#define REG_SCR3_ADDR       0x37      /* serial port3the user can define the register address */
+#define REG_DLL3_ADDR       0x30      /* Baud rate divisor latch low 8-bit byte address */
+#define REG_DLM3_ADDR       0x31      /* Baud rate divisor latch high 8-bit byte address */
 
 
+/* CH438serial port4 register address */
 
-/* CH438内部串口0~7 专用状态寄存器 */
-#define REG_SSR_ADDR        0x4F       /* 专用状态寄存器地址 */
+#define REG_RBR4_ADDR       0x08      /* serial port4receive buffer register address */
+#define REG_THR4_ADDR       0x08      /* serial port4send hold register address */
+#define REG_IER4_ADDR       0x09      /* serial port4interrupt enable register address */
+#define REG_IIR4_ADDR       0x0A      /* serial port4interrupt identifies register address */
+#define REG_FCR4_ADDR       0x0A      /* serial port4FIFO controls register address */
+#define REG_LCR4_ADDR       0x0B      /* serial port4circuit control register address */
+#define REG_MCR4_ADDR       0x0C      /* serial port4MODEM controls register address */
+#define REG_LSR4_ADDR       0x0D      /* serial port4line status register address */
+#define REG_MSR4_ADDR       0x0E      /* serial port4address of MODEM status register */
+#define REG_SCR4_ADDR       0x0F      /* serial port4the user can define the register address */
+#define REG_DLL4_ADDR       0x08      /* Baud rate divisor latch low 8-bit byte address */
+#define REG_DLM4_ADDR       0x09      /* Baud rate divisor latch high 8-bit byte address */
 
 
-/* IER寄存器的位 */
+/* CH438serial port5 register address */
 
-#define BIT_IER_RESET       0x80      /* 该位置1则软复位该串口 */
-#define BIT_IER_LOWPOWER    0x40      /* 该位为1则关闭该串口的内部基准时钟 */
-#define BIT_IER_SLP         0x20      /* 串口0是SLP,为1则关闭时钟震荡器 */
-#define BIT_IER1_CK2X       0x20      /* 串口1是CK2X,为1则强制将外部时钟信号2倍频后作为内部基准时钟 */
-#define BIT_IER_IEMODEM     0x08      /* 该位为1允许MODEM输入状态变化中断 */
-#define BIT_IER_IELINES     0x04      /* 该位为1允许接收线路状态中断 */
-#define BIT_IER_IETHRE      0x02      /* 该位为1允许发送保持寄存器空中断 */
-#define BIT_IER_IERECV      0x01      /* 该位为1允许接收到数据中断 */
+#define REG_RBR5_ADDR       0x18      /* serial port5receive buffer register address */
+#define REG_THR5_ADDR       0x18      /* serial port5send hold register address */
+#define REG_IER5_ADDR       0x19      /* serial port5interrupt enable register address */
+#define REG_IIR5_ADDR       0x1A      /* serial port5interrupt identifies register address */
+#define REG_FCR5_ADDR       0x1A      /* serial port5FIFO controls register address */
+#define REG_LCR5_ADDR       0x1B      /* serial port5circuit control register address */
+#define REG_MCR5_ADDR       0x1C      /* serial port5MODEM controls register address */
+#define REG_LSR5_ADDR       0x1D      /* serial port5line status register address */
+#define REG_MSR5_ADDR       0x1E      /* serial port5address of MODEM status register */
+#define REG_SCR5_ADDR       0x1F      /* serial port5the user can define the register address */
+#define REG_DLL5_ADDR       0x18      /* Baud rate divisor latch low 8-bit byte address */
+#define REG_DLM5_ADDR       0x19      /* Baud rate divisor latch high 8-bit byte address */
 
-/* IIR寄存器的位 */
+
+/* CH438serial port6 register address */
+
+#define REG_RBR6_ADDR       0x28      /* serial port6receive buffer register address */
+#define REG_THR6_ADDR       0x28      /* serial port6send hold register address */
+#define REG_IER6_ADDR       0x29      /* serial port6interrupt enable register address */
+#define REG_IIR6_ADDR       0x2A      /* serial port6interrupt identifies register address */
+#define REG_FCR6_ADDR       0x2A      /* serial port6FIFO controls register address */
+#define REG_LCR6_ADDR       0x2B      /* serial port6circuit control register address */
+#define REG_MCR6_ADDR       0x2C      /* serial port6MODEM controls register address */
+#define REG_LSR6_ADDR       0x2D      /* serial port6line status register address */
+#define REG_MSR6_ADDR       0x2E      /* serial port6address of MODEM status register */
+#define REG_SCR6_ADDR       0x2F      /* serial port6the user can define the register address */
+#define REG_DLL6_ADDR       0x28      /* Baud rate divisor latch low 8-bit byte address */
+#define REG_DLM6_ADDR       0x29      /* Baud rate divisor latch high 8-bit byte address */
+
+
+/* CH438serial port7 register address */
+
+#define REG_RBR7_ADDR       0x38      /* serial port7receive buffer register address */
+#define REG_THR7_ADDR       0x38      /* serial port7send hold register address */
+#define REG_IER7_ADDR       0x39      /* serial port7interrupt enable register address */
+#define REG_IIR7_ADDR       0x3A      /* serial port7interrupt identifies register address */
+#define REG_FCR7_ADDR       0x3A      /* serial port7FIFO controls register address */
+#define REG_LCR7_ADDR       0x3B      /* serial port7circuit control register address */
+#define REG_MCR7_ADDR       0x3C      /* serial port7MODEM controls register address */
+#define REG_LSR7_ADDR       0x3D      /* serial port7line status register address */
+#define REG_MSR7_ADDR       0x3E      /* serial port7address of MODEM status register */
+#define REG_SCR7_ADDR       0x3F      /* serial port7the user can define the register address */
+#define REG_DLL7_ADDR       0x38      /* Baud rate divisor latch low 8-bit byte address */
+#define REG_DLM7_ADDR       0x39      /* Baud rate divisor latch high 8-bit byte address */
+
+
+#define REG_SSR_ADDR        0x4F       /* pecial status register address */
+
+
+/* IER register bit */
+
+#define BIT_IER_RESET       0x80      /* The bit is 1 soft reset serial port */
+#define BIT_IER_LOWPOWER    0x40      /* The bit is 1 close serial port internal reference clock */
+#define BIT_IER_SLP         0x20      /* serial port0 is SLP, 1 close clock vibrator  */
+#define BIT_IER1_CK2X       0x20      /* serial port1 is CK2X, 1 force the external clock signal after 2 times as internal */
+#define BIT_IER_IEMODEM     0x08      /* The bit is 1 allows MODEM input status to interrupt */
+#define BIT_IER_IELINES     0x04      /* The bit is 1 allow receiving line status to be interrupted */
+#define BIT_IER_IETHRE      0x02      /* The bit is 1 allows the send hold register to break in mid-air */
+#define BIT_IER_IERECV      0x01      /* The bit is 1 allows receiving data interrupts */
+
+/* IIR register bit */
 
 #define BIT_IIR_FIFOENS1    0x80
-#define BIT_IIR_FIFOENS0    0x40      /* 该2位为1表示起用FIFO */
+#define BIT_IIR_FIFOENS0    0x40      /* The two is 1 said use FIFO */
 
-/* 中断类型：0001没有中断，0110接收线路状态中断，0100接收数据可用中断，
-1100接收数据超时中断，0010THR寄存器空中断，0000MODEM输入变化中断 */
+/* Interrupt type: 0001 has no interrupt, 0110 receiving line status is interrupted, 0100 receiving data can be interrupted,
+1100 received data timeout interrupt, 0010THR register air interrupt, 0000MODEM input change interrupt */
 #define BIT_IIR_IID3        0x08
 #define BIT_IIR_IID2        0x04
 #define BIT_IIR_IID1        0x02
 #define BIT_IIR_NOINT       0x01
 
-/* FCR寄存器的位 */
+/* FCR register bit */
 
-/* 触发点： 00对应1个字节，01对应16个字节，10对应64个字节，11对应112个字节 */
-#define BIT_FCR_RECVTG1     0x80      /* 设置FIFO的中断和自动硬件流控制的触发点 */
-#define BIT_FCR_RECVTG0     0x40      /* 设置FIFO的中断和自动硬件流控制的触发点 */
+/* Trigger point: 00 corresponds to 1 byte, 01 corresponds to 16 bytes, 10 corresponds to 64 bytes, 11 corresponds to 112 bytes */
+#define BIT_FCR_RECVTG1     0x80      /* Set the trigger point for FIFO interruption and automatic hardware flow control */
+#define BIT_FCR_RECVTG0     0x40      /* Set the trigger point for FIFO interruption and automatic hardware flow control */
+                                      
+#define BIT_FCR_TFIFORST    0x04      /* The bit is 1 empty the data sent in FIFO */
+#define BIT_FCR_RFIFORST    0x02      /* The bit is 1 empty the data sent in FIFO */
+#define BIT_FCR_FIFOEN      0x01      /* The bit is 1 use FIFO, 0 disable FIFO */
 
-#define BIT_FCR_TFIFORST    0x04      /* 该位置1则清空发送FIFO中的数据 */
-#define BIT_FCR_RFIFORST    0x02      /* 该位置1则清空接收FIFO中的数据 */
-#define BIT_FCR_FIFOEN      0x01      /* 该位置1则起用FIFO,为0则禁用FIFO */
+/* LCR register bit */
 
-/* LCR寄存器的位 */
+#define BIT_LCR_DLAB        0x80      /* To access DLL, DLM, 0 to access RBR/THR/IER */
+#define BIT_LCR_BREAKEN     0x40      /* 1 forces a BREAK line interval*/
 
-#define BIT_LCR_DLAB        0x80      /* 为1才能存取DLL，DLM，为0才能存取RBR/THR/IER */
-#define BIT_LCR_BREAKEN     0x40      /* 为1则强制产生BREAK线路间隔*/
+/* Set the check format: when PAREN is 1, 00 odd check, 01 even check, 10 MARK (set 1), 11 blank (SPACE, clear 0) */
+#define BIT_LCR_PARMODE1    0x20      /* Sets the parity bit format */
+#define BIT_LCR_PARMODE0    0x10      /* Sets the parity bit format */
+                                      
+#define BIT_LCR_PAREN       0x08      /* A value of 1 allows you to generate and receive parity bits when sending */
+#define BIT_LCR_STOPBIT     0x04      /* If is 1, then two stop bits, is 0, a stop bit */
 
-/* 设置校验格式：当PAREN为1时，00奇校验，01偶校验，10标志位（MARK，置1)，11空白位（SPACE，清0) */
-#define BIT_LCR_PARMODE1    0x20      /* 设置奇偶校验位格式 */
-#define BIT_LCR_PARMODE0    0x10      /* 设置奇偶校验位格式 */
-
-#define BIT_LCR_PAREN       0x08      /* 为1则允许发送时产生和接收校验奇偶校验位 */
-#define BIT_LCR_STOPBIT     0x04      /* 为1则两个停止位,为0一个停止位 */
-
-/* 设置字长度：00则5个数据位，01则6个数据位，10则7个数据位，11则8个数据位 */
-#define BIT_LCR_WORDSZ1     0x02      /* 设置字长长度 */
+/* Set word length: 00 for 5 data bits, 01 for 6 data bits, 10 for 7 data bits and 11 for 8 data bits */
+#define BIT_LCR_WORDSZ1     0x02      /* Set the word length length */
 #define BIT_LCR_WORDSZ0     0x01
 
-/* MCR寄存器的位 */
+/* MCR register bit */
 
-#define BIT_MCR_AFE         0x20      /* 为1允许CTS和RTS硬件自动流控制 */
-#define BIT_MCR_LOOP        0x10      /* 为1使能内部回路的测试模式 */
-#define BIT_MCR_OUT2        0x08      /* 为1允许该串口的中断请求输出 */
-#define BIT_MCR_OUT1        0x04      /* 为用户定义的MODEM控制位 */
-#define BIT_MCR_RTS         0x02      /* 该位为1则RTS引脚输出有效 */
-#define BIT_MCR_DTR         0x01      /* 该位为1则DTR引脚输出有效 */
+#define BIT_MCR_AFE         0x20      /* For 1 allows automatic flow control of CTS and RTS hardware */
+#define BIT_MCR_LOOP        0x10      /* Is the test mode of 1 enabling internal loop */
+#define BIT_MCR_OUT2        0x08      /* 1 Allows an interrupt request for the serial port output  */
+#define BIT_MCR_OUT1        0x04      /* The MODEM control bit defined for the user */
+#define BIT_MCR_RTS         0x02      /* The bit is 1 RTS pin  output  effective  */
+#define BIT_MCR_DTR         0x01      /* The bit is 1 DTR pin  output  effective  */
 
-/* LSR寄存器的位 */
+/* LSR register bit */
 
-#define BIT_LSR_RFIFOERR    0x80      /* 为1表示在接收FIFO中存在至少一个错误 */
-#define BIT_LSR_TEMT        0x40      /* 为1表示THR和TSR全空 */
-#define BIT_LSR_THRE        0x20      /* 为1表示THR空*/
-#define BIT_LSR_BREAKINT    0x10      /* 该位为1表示检测到BREAK线路间隔 */
-#define BIT_LSR_FRAMEERR    0x08      /* 该位为1表示读取数据帧错误 */
-#define BIT_LSR_PARERR      0x04      /* 该位为1表示奇偶校验错误 */
-#define BIT_LSR_OVERR       0x02      /* 为1表示接收FIFO缓冲区溢出 */
-#define BIT_LSR_DATARDY     0x01      /* 该位为1表示接收FIFO中有接收到的数据 */
+#define BIT_LSR_RFIFOERR    0x80      /* 1 said There is at least one error in receiving FIFO */
+#define BIT_LSR_TEMT        0x40      /* 1 said THR and TSR are empty */
+#define BIT_LSR_THRE        0x20      /* 1 said THR is empty*/
+#define BIT_LSR_BREAKINT    0x10      /* The bit is 1 said the BREAK line interval was detected*/
+#define BIT_LSR_FRAMEERR    0x08      /* The bit is 1 said error reading data frame */
+#define BIT_LSR_PARERR      0x04      /* The bit is 1 said parity error */
+#define BIT_LSR_OVERR       0x02      /*  1 said receive FIFO buffer overflow */
+#define BIT_LSR_DATARDY     0x01      /* The bit is 1 said receive data received in FIFO */
 
-/* MSR寄存器的位 */
+/* MSR register bit */
 
-#define BIT_MSR_DCD         0x80      /* 该位为1表示DCD引脚有效 */
-#define BIT_MSR_RI          0x40      /* 该位为1表示RI引脚有效 */
-#define BIT_MSR_DSR         0x20      /* 该位为1表示DSR引脚有效 */
-#define BIT_MSR_CTS         0x10      /* 该位为1表示CTS引脚有效 */
-#define BIT_MSR_DDCD        0x08      /* 该位为1表示DCD引脚输入状态发生变化过 */
-#define BIT_MSR_TERI        0x04      /* 该位为1表示RI引脚输入状态发生变化过 */
-#define BIT_MSR_DDSR        0x02      /* 该位为1表示DSR引脚输入状态发生变化过 */
-#define BIT_MSR_DCTS        0x01      /* 该位为1表示CTS引脚输入状态发生变化过 */
+#define BIT_MSR_DCD         0x80      /* The bit is 1 said DCD pin  effective  */
+#define BIT_MSR_RI          0x40      /* The bit is 1 said RI pin  effective  */
+#define BIT_MSR_DSR         0x20      /* The bit is 1 said DSR pin  effective  */
+#define BIT_MSR_CTS         0x10      /* The bit is 1 said CTS pin  effective  */
+#define BIT_MSR_DDCD        0x08      /* The bit is 1 said DCD pin The input state has changed */
+#define BIT_MSR_TERI        0x04      /* The bit is 1 said RI pin The input state has changed */
+#define BIT_MSR_DDSR        0x02      /* The bit is 1 said DSR pin The input state has changed */
+#define BIT_MSR_DCTS        0x01      /* The bit is 1 said CTS pin The input state has changed */
 
-/* 中断状态码 */
+/* Interrupt status code */
 
-#define INT_NOINT           0x01      /* 没有中断 */
-#define INT_THR_EMPTY       0x02      /* THR空中断 */
-#define INT_RCV_OVERTIME    0x0C      /* 接收超时中断 */
-#define INT_RCV_SUCCESS     0x04      /* 接收数据可用中断 */
-#define INT_RCV_LINES       0x06      /* 接收线路状态中断 */
-#define INT_MODEM_CHANGE    0x00      /* MODEM输入变化中断 */
+#define INT_NOINT           0x01      /* There is no interruption */
+#define INT_THR_EMPTY       0x02      /* THR empty interruption */
+#define INT_RCV_OVERTIME    0x0C      /* Receive timeout interrupt */
+#define INT_RCV_SUCCESS     0x04      /* Interrupts are available to receive data */
+#define INT_RCV_LINES       0x06      /* Receiving line status interrupted */
+#define INT_MODEM_CHANGE    0x00      /* MODEM input changes interrupt */
 
-#define CH438_IIR_FIFOS_ENABLED 0xC0  /* 起用FIFO */
+#define CH438_IIR_FIFOS_ENABLED 0xC0  /* use FIFO */
 
 
-#define Fpclk           1843200         /* 定义内部时钟频率    */
+#define Fpclk    1843200       /* Define the internal clock frequency*/
 
 
 // #define IOMUX_CH438OUT_DEFAULT 
-#define CH438_D0_PIN_OUT	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT1 | GPIO_PIN25)
-#define CH438_D1_PIN_OUT	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT1 | GPIO_PIN24)
-#define CH438_D2_PIN_OUT	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT1 | GPIO_PIN20)
-#define CH438_D3_PIN_OUT	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT1 | GPIO_PIN21)
-#define CH438_D4_PIN_OUT	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT1 | GPIO_PIN31)
-#define CH438_D5_PIN_OUT	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT1 | GPIO_PIN28)
-#define CH438_D6_PIN_OUT	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT1 | GPIO_PIN30)
-#define CH438_D7_PIN_OUT	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT1 | GPIO_PIN29)
-#define CH438_NWR_PIN	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT3 | GPIO_PIN4)
-#define CH438_NRD_PIN	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT3 | GPIO_PIN5)
-#define CH438_ALE_PIN	(GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
-                            GPIO_PORT3 | GPIO_PIN2)
-#define CH438_INT_PIN	(GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | IOMUX_SW_DEFAULT | \
-                            GPIO_PORT3 | GPIO_PIN3)
+#define CH438_D0_PIN_OUT    (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                             GPIO_PORT1 | GPIO_PIN25)
+#define CH438_D1_PIN_OUT    (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                             GPIO_PORT1 | GPIO_PIN24)
+#define CH438_D2_PIN_OUT    (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                             GPIO_PORT1 | GPIO_PIN20)
+#define CH438_D3_PIN_OUT    (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                             GPIO_PORT1 | GPIO_PIN21)
+#define CH438_D4_PIN_OUT    (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                             GPIO_PORT1 | GPIO_PIN31)
+#define CH438_D5_PIN_OUT    (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                             GPIO_PORT1 | GPIO_PIN28)
+#define CH438_D6_PIN_OUT    (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                             GPIO_PORT1 | GPIO_PIN30)
+#define CH438_D7_PIN_OUT    (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                             GPIO_PORT1 | GPIO_PIN29)
+#define CH438_NWR_PIN   (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                         GPIO_PORT3 | GPIO_PIN4)
+#define CH438_NRD_PIN   (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                         GPIO_PORT3 | GPIO_PIN5)
+#define CH438_ALE_PIN   (GPIO_OUTPUT | IOMUX_GOUT_DEFAULT | \
+                         GPIO_PORT3 | GPIO_PIN2)
+#define CH438_INT_PIN   (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | IOMUX_SW_DEFAULT | \
+                         GPIO_PORT3 | GPIO_PIN3)
 
-#define CH438_D0_PIN_INPUT	(GPIO_INPUT | \
-                            GPIO_PORT1 | GPIO_PIN25)
-#define CH438_D1_PIN_INPUT	(GPIO_INPUT | \
-                            GPIO_PORT1 | GPIO_PIN24)
-#define CH438_D2_PIN_INPUT	(GPIO_INPUT | \
-                            GPIO_PORT1 | GPIO_PIN20)
-#define CH438_D3_PIN_INPUT	(GPIO_INPUT | \
-                            GPIO_PORT1 | GPIO_PIN21)
-#define CH438_D4_PIN_INPUT	(GPIO_INPUT | \
-                            GPIO_PORT1 | GPIO_PIN31)
-#define CH438_D5_PIN_INPUT	(GPIO_INPUT | \
-                            GPIO_PORT1 | GPIO_PIN28)
-#define CH438_D6_PIN_INPUT	(GPIO_INPUT | \
-                            GPIO_PORT1 | GPIO_PIN30)
-#define CH438_D7_PIN_INPUT	(GPIO_INPUT | \
-                            GPIO_PORT1 | GPIO_PIN29)
+#define CH438_D0_PIN_INPUT    (GPIO_INPUT | \
+                               GPIO_PORT1 | GPIO_PIN25)
+#define CH438_D1_PIN_INPUT    (GPIO_INPUT | \
+                               GPIO_PORT1 | GPIO_PIN24)
+#define CH438_D2_PIN_INPUT    (GPIO_INPUT | \
+                               GPIO_PORT1 | GPIO_PIN20)
+#define CH438_D3_PIN_INPUT    (GPIO_INPUT | \
+                               GPIO_PORT1 | GPIO_PIN21)
+#define CH438_D4_PIN_INPUT    (GPIO_INPUT | \
+                               GPIO_PORT1 | GPIO_PIN31)
+#define CH438_D5_PIN_INPUT    (GPIO_INPUT | \
+                               GPIO_PORT1 | GPIO_PIN28)
+#define CH438_D6_PIN_INPUT    (GPIO_INPUT | \
+                               GPIO_PORT1 | GPIO_PIN30)
+#define CH438_D7_PIN_INPUT    (GPIO_INPUT | \
+                               GPIO_PORT1 | GPIO_PIN29)
 
+/* ch438 debug */
 #ifdef CONFIG_DEBUG_CH438_ERROR
-#  define ch438err     _err
+#  define ch438err    _err
 #else
-#  define ch438err     _none
+#  define ch438err    _none
 #endif
 
 #ifdef CONFIG_DEBUG_CH438_WARN
@@ -356,8 +354,9 @@
 #endif
 
 
-#define OPE_INT   0x0000
-#define OPE_CFG   0x0001
+/* ioctl cmd */
+#define OPE_INT    0x0000
+#define OPE_CFG    0x0001
 
 /****************************************************************************
  * Public Function Prototypes
