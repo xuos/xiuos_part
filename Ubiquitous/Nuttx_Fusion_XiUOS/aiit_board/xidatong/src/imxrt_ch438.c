@@ -629,14 +629,38 @@ static void Ch438InitDefault(void)
     }
 
     ImxrtCH438Init();
-    CH438PortInit(0,115200);
-    CH438PortInit(1,115200);
-    CH438PortInit(2,9600);
-    CH438PortInit(3,9600);
-    CH438PortInit(4,115200);
-    CH438PortInit(5,115200);
-    CH438PortInit(6,115200);
-    CH438PortInit(7,115200);
+
+#ifdef CONFIG_CH438_EXTUART0
+    CH438PortInit(0, CONFIG_CH438_EXTUART0_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART1
+    CH438PortInit(1, CONFIG_CH438_EXTUART1_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART2
+    CH438PortInit(2, CONFIG_CH438_EXTUART2_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART3
+    CH438PortInit(3, CONFIG_CH438_EXTUART3_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART4
+    CH438PortInit(4, CONFIG_CH438_EXTUART4_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART5
+    CH438PortInit(5, CONFIG_CH438_EXTUART5_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART6
+    CH438PortInit(6, CONFIG_CH438_EXTUART6_BAUD);
+#endif
+
+#ifdef CONFIG_CH438_EXTUART7
+    CH438PortInit(7, CONFIG_CH438_EXTUART7_BAUD);
+#endif
 
     up_mdelay(10);
 

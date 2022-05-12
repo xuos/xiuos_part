@@ -37,6 +37,7 @@ void CH438Demo(void)
     int readlen;
 
     fd = open("/dev/extuart_dev3", O_RDWR);
+    ioctl(fd, OPE_INT, (unsigned long)9600);
     m0fd = open("/dev/gpout0", O_RDWR);
     m1fd = open("/dev/gpout1", O_RDWR);
     ioctl(m0fd, GPIOC_WRITE, (unsigned long)1);
