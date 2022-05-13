@@ -630,36 +630,54 @@ static void Ch438InitDefault(void)
 
     ImxrtCH438Init();
 
+/* If a port is checked, the port will be initialized. Otherwise, the interrupt of the port will be disabled. */
+
 #ifdef CONFIG_CH438_EXTUART0
     CH438PortInit(0, CONFIG_CH438_EXTUART0_BAUD);
+#else
+    WriteCH438Data(REG_IER0_ADDR, 0x00);
 #endif
 
 #ifdef CONFIG_CH438_EXTUART1
     CH438PortInit(1, CONFIG_CH438_EXTUART1_BAUD);
+#else
+    WriteCH438Data(REG_IER1_ADDR, 0x00);
 #endif
 
 #ifdef CONFIG_CH438_EXTUART2
     CH438PortInit(2, CONFIG_CH438_EXTUART2_BAUD);
+#else
+    WriteCH438Data(REG_IER2_ADDR, 0x00);
 #endif
 
 #ifdef CONFIG_CH438_EXTUART3
     CH438PortInit(3, CONFIG_CH438_EXTUART3_BAUD);
+#else
+    WriteCH438Data(REG_IER3_ADDR, 0x00);
 #endif
 
 #ifdef CONFIG_CH438_EXTUART4
     CH438PortInit(4, CONFIG_CH438_EXTUART4_BAUD);
+#else
+    WriteCH438Data(REG_IER4_ADDR, 0x00);
 #endif
 
 #ifdef CONFIG_CH438_EXTUART5
     CH438PortInit(5, CONFIG_CH438_EXTUART5_BAUD);
+#else
+    WriteCH438Data(REG_IER5_ADDR, 0x00);
 #endif
 
 #ifdef CONFIG_CH438_EXTUART6
     CH438PortInit(6, CONFIG_CH438_EXTUART6_BAUD);
+#else
+    WriteCH438Data(REG_IER6_ADDR, 0x00);
 #endif
 
 #ifdef CONFIG_CH438_EXTUART7
     CH438PortInit(7, CONFIG_CH438_EXTUART7_BAUD);
+#else
+    WriteCH438Data(REG_IER7_ADDR, 0x00);
 #endif
 
     up_mdelay(10);
