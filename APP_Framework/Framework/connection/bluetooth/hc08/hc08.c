@@ -37,6 +37,12 @@
 #define HC08_SET_ADDR_CMD		"AT+ADDR=%s"
 #define HC08_GET_NAME_CMD       "AT+NAME=%s"
 #define HC08_SET_NAME_CMD       "AT+NAME=?"
+#define HC08_GET_LUUID_CMD      "AT+LUUID=?"
+#define HC08_SET_LUUID_CMD      "AT+LUUID=%u"
+#define HC08_GET_SUUID_CMD      "AT+SUUID=?"
+#define HC08_SET_SUUID_CMD      "AT+SUUID=%u"
+#define HC08_GET_TUUID_CMD      "AT+TUUID=?"
+#define HC08_SET_TUUID_CMD      "AT+TUUID=%u"
 
 #define HC08_OK_RESP			"OK"
 
@@ -60,6 +66,12 @@ enum Hc08AtCmd
     HC08_AT_CMD_GET_ADDR,
     HC08_AT_CMD_SET_NAME,
     HC08_AT_CMD_GET_NAME,
+    HC08_AT_CMD_SET_LUUID,
+    HC08_AT_CMD_GET_LUUID,
+    HC08_AT_CMD_SET_SUUID,
+    HC08_AT_CMD_GET_SUUID,
+    HC08_AT_CMD_SET_TUUID,
+    HC08_AT_CMD_GET_TUUID,
     HC08_AT_CMD_END,
 };
 
@@ -85,7 +97,7 @@ static int Hc08AtConfigure(ATAgentType agent, enum Hc08AtCmd hc08_at_cmd, void *
 {
     const char *result_buf;
     char *connectable, *role;
-    unsigned int baudrate;
+    unsigned int baudrate, luuid;
     char reply_ok_flag = 1;
     char cmd_str[HC08_CMD_STR_DEFAULT_SIZE] = {0};
 
@@ -166,6 +178,18 @@ static int Hc08AtConfigure(ATAgentType agent, enum Hc08AtCmd hc08_at_cmd, void *
         ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_GET_NAME_CMD);
         reply_ok_flag = 0;
         break;
+    case HC08_AT_CMD_GET_LUUID:
+        AtSetReplyCharNum(agent, 13);
+        ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_GET_LUUID_CMD);
+        reply_ok_flag = 0;
+        break;
+    case HC08_AT_CMD_SET_LUUID:
+        luuid = *(unsigned int *)param;
+        sprintf(cmd_str, HC08_SET_LUUID_CMD, luuid);
+        AtSetReplyCharNum(agent, 13);
+        ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd_str);
+        reply_ok_flag = 0;
+        break;
     default:
         printf("hc08 do not support no.%d cmd\n", hc08_at_cmd);
         DeleteATReply(reply);
@@ -205,10 +229,29 @@ static int Hc08Open(struct Adapter *adapter)
         return -1;
     }
 
+    struct SerialDataCfg serial_cfg;
+    memset(&serial_cfg, 0 ,sizeof(struct SerialDataCfg));
+    serial_cfg.serial_baud_rate = 9600;
+    serial_cfg.serial_data_bits = DATA_BITS_8;
+    serial_cfg.serial_stop_bits = STOP_BITS_1;
+    serial_cfg.serial_buffer_size = SERIAL_RB_BUFSZ;
+    serial_cfg.serial_parity_mode = PARITY_NONE;
+    serial_cfg.serial_bit_order = STOP_BITS_1;
+    serial_cfg.serial_invert_mode = NRZ_NORMAL;
+#ifdef ADAPTER_HC08_DRIVER_EXT_PORT
+    serial_cfg.ext_uart_no = ADAPTER_HC08_DRIVER_EXT_PORT;
+    serial_cfg.port_configure = PORT_CFG_INIT;
+#endif
+
+    struct PrivIoctlCfg ioctl_cfg;
+    ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
+    ioctl_cfg.args = &serial_cfg;
+    PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
+
     //step2: init AT agent
     if (!adapter->agent) {
         char *agent_name = "bluetooth_uart_client";
-        printf("InitATAgent agent_name %s fd %u\n", agent_name, adapter->fd);
+
         if (0 != InitATAgent(agent_name, adapter->fd, 512)) {
             printf("at agent init failed !\n");
             return -1;
@@ -239,8 +282,8 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
         return -1;
     }
 
-    char hc08_baudrate[HC08_RESP_DEFAULT_SIZE] = {0};
     uint32_t baud_rate = *((uint32_t *)args);
+    uint32_t luuid;
 
     struct SerialDataCfg serial_cfg;
     memset(&serial_cfg, 0 ,sizeof(struct SerialDataCfg));
@@ -255,6 +298,8 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
     serial_cfg.ext_uart_no = ADAPTER_HC08_DRIVER_EXT_PORT;
     serial_cfg.port_configure = PORT_CFG_INIT;
 #endif
+
+    serial_cfg.serial_timeout = -1;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
@@ -271,11 +316,29 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
         return -1;
     }
 
-    PrivTaskDelay(200);
+    //Step3 : clear hc08 configure
+    if (MASTER == adapter->net_role) {
+        PrivTaskDelay(300);
+        if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_CLEAR, NULL, NULL) < 0) {
+            return -1;
+        }
+    }
+
+    PrivTaskDelay(500);
 
     //Step3 : show hc08 device info, hc08_get send "AT+RX" response device info
-    char device_info[HC08_RESP_DEFAULT_SIZE * 2] = {0};
-    if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_GET_DEVICE_INFO, NULL, device_info) < 0) {
+    // char device_info[HC08_RESP_DEFAULT_SIZE * 2] = {0};
+    // if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_GET_DEVICE_INFO, NULL, device_info) < 0) {
+    //     return -1;
+    // }
+
+    //Step4 : set LUUID、SUUID、TUUID, slave and master need to have same uuid param
+    luuid = 1234;
+    if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_SET_LUUID, &luuid, NULL) < 0) {
+        return -1;
+    }
+
+    if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_GET_LUUID, NULL, NULL) < 0) {
         return -1;
     }
 
