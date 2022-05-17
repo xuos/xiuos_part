@@ -21,27 +21,27 @@
 #include <adapter.h>
 #include <at_agent.h>
 
-#define HC08_DETECT_CMD			"AT"
-#define HC08_DEFAULT_CMD		"AT+DEFAULT"
-#define HC08_RESET_CMD			"AT+RESET"
-#define HC08_CLEAR_CMD			"AT+CLEAR"
-#define HC08_GET_DEVICE_INFO    "AT+RX"
+#define HC08_DETECT_CMD        "AT"
+#define HC08_DEFAULT_CMD        "AT+DEFAULT"
+#define HC08_RESET_CMD        "AT+RESET"
+#define HC08_CLEAR_CMD        "AT+CLEAR"
+#define HC08_GET_DEVICE_INFO        "AT+RX"
 
-#define HC08_GET_BAUDRATE_CMD   "AT+BAUD=?"
-#define HC08_SET_BAUDRATE_CMD   "AT+BAUD=%u"
-#define HC08_GET_CONNECTABLE    "AT+CONT=?"
-#define HC08_SET_CONNECTABLE    "AT+CONT=%s"
-#define HC08_GET_ROLE_CMD		"AT+ROLE=?"
-#define HC08_SET_ROLE_CMD		"AT+ROLE=%s"
-#define HC08_GET_ADDR_CMD		"AT+ADDR=?"
-#define HC08_SET_ADDR_CMD		"AT+ADDR=%s"
+#define HC08_GET_BAUDRATE_CMD        "AT+BAUD=?"
+#define HC08_SET_BAUDRATE_CMD        "AT+BAUD=%u"
+#define HC08_GET_CONNECTABLE        "AT+CONT=?"
+#define HC08_SET_CONNECTABLE        "AT+CONT=%s"
+#define HC08_GET_ROLE_CMD        "AT+ROLE=?"
+#define HC08_SET_ROLE_CMD        "AT+ROLE=%s"
+#define HC08_GET_ADDR_CMD        "AT+ADDR=?"
+#define HC08_SET_ADDR_CMD        "AT+ADDR=%s"
 #define HC08_GET_NAME_CMD       "AT+NAME=%s"
 #define HC08_SET_NAME_CMD       "AT+NAME=?"
 
-#define HC08_OK_RESP			"OK"
+#define HC08_OK_RESP        "OK"
 
-#define HC08_CMD_STR_DEFAULT_SIZE	64
-#define HC08_RESP_DEFAULT_SIZE		64
+#define HC08_CMD_STR_DEFAULT_SIZE        64
+#define HC08_RESP_DEFAULT_SIZE        64
 
 enum Hc08AtCmd
 {
@@ -232,6 +232,41 @@ static int Hc08Close(struct Adapter *adapter)
     return 0;
 }
 
+#ifdef ADD_NUTTX_FETURES
+static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
+{
+    if (OPE_INT != cmd) {
+        printf("Hc08Ioctl only support OPE_INT, do not support %d\n", cmd);
+        return -1;
+    }
+
+    uint32_t baud_rate = *((uint32_t *)args);
+
+    PrivIoctl(adapter->fd, OPE_INT, baud_rate);
+
+    //Step1 : detect hc08 serial function
+    if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_DETECT, NULL, NULL) < 0) {
+        return -1;
+    }
+
+    //Step2 : set hc08 device serial baud, hc08_set_baud send "AT+BAUD=%s"
+    if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_SET_BAUDRATE, args, NULL) < 0) {
+        return -1;
+    }
+
+    PrivTaskDelay(200);
+
+    //Step3 : show hc08 device info, hc08_get send "AT+RX" response device info
+    char device_info[HC08_RESP_DEFAULT_SIZE * 2] = {0};
+    if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_GET_DEVICE_INFO, NULL, device_info) < 0) {
+        return -1;
+    }
+
+    ADAPTER_DEBUG("Hc08 ioctl done\n");
+    
+    return 0;
+}
+#else
 static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
 {
     if (OPE_INT != cmd) {
@@ -283,6 +318,7 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
     
     return 0;
 }
+#endif
 
 static int Hc08SetAddr(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask)
 {
@@ -348,7 +384,7 @@ static int Hc08Send(struct Adapter *adapter, const void *buf, size_t len)
         EntmSend(adapter->agent, (const char *)buf, len);
     } else {
         printf("Hc08Send can not find agent\n");
-	}
+    }
     return 0;
 }
 
@@ -358,7 +394,7 @@ static int Hc08Recv(struct Adapter *adapter, void *buf, size_t len)
         return EntmRecv(adapter->agent, (char *)buf, len, 40);
     } else {
         printf("Hc08Recv can not find agent\n");
-	}
+    }
     
     return -1;
 }

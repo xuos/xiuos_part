@@ -33,6 +33,25 @@ endif
 
 if ADD_NUTTX_FETURES
 
+        config ADAPTER_HC08_WORK_ROLE
+                string "HC08 work role M(MASTER) or S(SLAVER)"
+                default "M"
+        
+        config ADAPTER_HC08_DRIVER_EXTUART
+                bool "Using extra uart to support bluetooth"
+                default y
+
+        config ADAPTER_HC08_DRIVER
+                string "HC08 device uart driver path"
+                default "/dev/ttyS2"
+                depends on !ADAPTER_HC08_DRIVER_EXTUART
+
+        if ADAPTER_HC08_DRIVER_EXTUART                    
+                config ADAPTER_HC08_DRIVER
+                        string "HC08 device extra uart driver path"
+                        default "/dev/extuart_dev2"
+        endif
+
 endif
 
 if ADD_RTTHREAD_FETURES

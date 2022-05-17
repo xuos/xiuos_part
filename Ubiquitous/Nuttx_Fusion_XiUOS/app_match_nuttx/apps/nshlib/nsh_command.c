@@ -674,6 +674,9 @@ static const struct cmdmap_s g_cmdmap[] =
   { "E220Send",       cmd_E220LoraSend,       1, 2, "[e220loraSend <message>]" },
 #endif
 
+#if defined(CONFIG_ADAPTER_BLUETOOTH_HC08) && !defined(CONFIG_NSH_DISABLE_ADAPTER_BLUETOOTH_TEST)
+  { "AdapterBlueToothTest",       cmd_AdapterBlueToothTest,       1, 1, "[BlueTooth hc08 test.]" },
+#endif
 
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
   { "fft",       cmd_fft,       1, 1, "[K210 fft function.]" },

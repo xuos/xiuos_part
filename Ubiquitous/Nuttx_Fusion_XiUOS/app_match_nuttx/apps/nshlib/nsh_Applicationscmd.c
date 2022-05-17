@@ -327,6 +327,17 @@ int cmd_E220LoraSend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 }
 #endif
 
+#if defined(CONFIG_ADAPTER_BLUETOOTH_HC08) && !defined(CONFIG_NSH_DISABLE_ADAPTER_BLUETOOTH_TEST)
+extern int AdapterBlueToothTest(void);
+int cmd_AdapterBlueToothTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    AdapterBlueToothTest();
+    return OK;
+}
+#endif
+
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
 extern void nuttx_k210_fft_test(void);
 int cmd_fft(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
