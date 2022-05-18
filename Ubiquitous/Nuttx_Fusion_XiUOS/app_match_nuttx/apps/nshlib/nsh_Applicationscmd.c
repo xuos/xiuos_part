@@ -283,7 +283,7 @@ int cmd_recvzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 }
 #endif
 
-#if defined(CONFIG_ADAPTER_SX1278) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
+#if (defined(CONFIG_ADAPTER_LORA_SX1278) || defined(CONFIG_ADAPTER_LORA_E220)) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
 extern int AdapterLoraTest(void);
 int cmd_AdapterLoraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
