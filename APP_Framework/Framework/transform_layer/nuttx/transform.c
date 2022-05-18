@@ -55,15 +55,17 @@ int PrivSemaphoreDelete(sem_t *sem)
 
 int PrivSemaphoreObtainWait(sem_t *sem, const struct timespec *abstime)
 {
+    /* if the timeout is not set, it will be blocked all the time. */
+    if(!abstime)
+    {
+        return sem_wait(sem);
+    }
+
+    /* if the timeout time is set, it will be executed downward after the timeout, and will not be blocked. */
     struct timespec timeout;
     clock_gettime(CLOCK_REALTIME, &timeout);
     timeout.tv_sec += abstime->tv_sec;
     return sem_timedwait(sem, &timeout);
-}
-
-int PrivSemaphoreObtainWaitForever(sem_t *sem)
-{
-    return sem_wait(sem);
 }
 
 int PrivSemaphoreObtainNoWait(sem_t *sem)
