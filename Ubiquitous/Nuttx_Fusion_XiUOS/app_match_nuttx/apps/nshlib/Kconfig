@@ -672,6 +672,14 @@ config NSH_DISABLE_E220_LORA_SEND
 	bool "Disable e220 Lora send."
 	default n
 
+config NSH_DISABLE_E22_LORA_RECEIVE
+	bool "Disable e22 Lora receive."
+	default n
+
+config NSH_DISABLE_E22_LORA_SEND
+	bool "Disable e22 Lora send."
+	default n
+
 config NSH_DISABLE_ADAPTER_BLUETOOTH_TEST
 	bool "Disable hc08  AdapterBlueToothTest."
 	default n

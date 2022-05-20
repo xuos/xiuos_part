@@ -28,6 +28,10 @@ extern AdapterProductInfoType Sx1278Attach(struct Adapter *adapter);
 extern AdapterProductInfoType E220Attach(struct Adapter *adapter);
 #endif
 
+#ifdef ADAPTER_E22
+extern AdapterProductInfoType E22Attach(struct Adapter *adapter);
+#endif
+
 //#define CLIENT_UPDATE_MODE
 #define GATEWAY_CMD_MODE
 
@@ -871,6 +875,19 @@ int AdapterLoraInit(void)
     AdapterProductInfoType product_info = E220Attach(adapter);
     if (!product_info) {
         printf("AdapterLoraInit e220 attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
+#endif
+
+#ifdef ADAPTER_E22
+    AdapterProductInfoType product_info = E22Attach(adapter);
+    if (!product_info) {
+        printf("AdapterLoraInit e22 attach error\n");
         PrivFree(adapter);
         return -1;
     }
