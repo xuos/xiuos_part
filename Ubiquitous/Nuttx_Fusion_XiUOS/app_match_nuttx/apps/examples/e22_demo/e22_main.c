@@ -24,12 +24,10 @@
 #include <nuttx/config.h>
 
 #include <sys/ioctl.h>
-#include <nuttx/config.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <termios.h>
-
 #include <nuttx/ioexpander/gpio.h>
 
 int main(int argc, FAR char *argv[])
