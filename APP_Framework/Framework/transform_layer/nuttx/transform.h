@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <nuttx/wireless/lpwan/sx127x.h>
 #include <nuttx/ioexpander/gpio.h>
+#include <termios.h>
 
 typedef uint8_t uint8;
 typedef uint16_t uint16;
