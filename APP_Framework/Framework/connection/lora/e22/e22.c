@@ -187,13 +187,17 @@ static int E22SetRegisterParam(struct Adapter *adapter, uint16 address, uint8 ch
         printf("E22SetRegisterParam send failed %d!\n", ret);
     }
 
-    PrivRead(adapter->fd, buffer, 11);
+    PrivTaskDelay(1000);
+    ret = PrivRead(adapter->fd, buffer, 19);
+    if(ret < 0){
+        printf("E22 RegisterParam get failed %d!\n", ret);
+    }
 
     E22LoraModeConfig(DATA_TRANSFER_MODE);
     PrivTaskDelay(1000);
 
     return 0;
-}        
+}
 
 /**
  * @description: Get E22 register, such as address、channel、baud rate...
@@ -203,7 +207,7 @@ static int E22SetRegisterParam(struct Adapter *adapter, uint16 address, uint8 ch
 static int E22GetRegisterParam(uint8 *buf)
 {
     int ret;
-    uint8 buffer[3] = {0};
+    uint8 buffer[20] = {0};
 
     struct Adapter *adapter = AdapterDeviceFindByName(ADAPTER_LORA_NAME);
     if (NULL == adapter) {
@@ -223,13 +227,17 @@ static int E22GetRegisterParam(uint8 *buf)
         printf("E22GetRegisterParam send failed %d!\n", ret);
     }
 
-    PrivRead(adapter->fd, buf, 11);
+    PrivTaskDelay(1000);
+    ret = PrivRead(adapter->fd, buf, 19);
+    if(ret < 0){
+        printf("E22 RegisterParam get failed %d!\n", ret);
+    }
 
     E22LoraModeConfig(DATA_TRANSFER_MODE);
-    PrivTaskDelay(30);
+    PrivTaskDelay(1000);
 
     return 0;
-}  
+}
 
 /**
  * @description: Open E22 uart function
