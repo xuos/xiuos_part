@@ -21,7 +21,7 @@ COMPILER:
                $(MAKE) -C $$dir;          \
     	done; \
 	fi
-	@echo -n $(OBJS) " " >> $(KERNEL_ROOT)/build/make.obj
+	@/bin/echo -n $(OBJS) " " >> $(KERNEL_ROOT)/build/make.obj
 
 
 ################################################
@@ -33,7 +33,7 @@ $(eval OBJS += $(LOCALC)) \
 $(if $(strip $(LOCALC)),$(eval $(LOCALC): $(1)
 	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
 	@echo cc $$<
-	@echo -n $(dir $(LOCALC)) >>$(KERNEL_ROOT)/build/make.dep
+	@/bin/echo -n $(dir $(LOCALC)) >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)gcc -MM $$(CFLAGS) -c $$< >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)gcc $$(CFLAGS) -c $$< -o $$@))
 endef
@@ -46,7 +46,7 @@ $(eval OBJS += $(LOCALCPP)) \
 $(if $(strip $(LOCALCPP)),$(eval $(LOCALCPP): $(1)
 	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
 	@echo cc $$<
-	@echo -n $(dir $(LOCALCPP)) >>$(KERNEL_ROOT)/build/make.dep
+	@/bin/echo -n $(dir $(LOCALCPP)) >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)g++ -MM $$(CXXFLAGS) -c $$< >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)g++ $$(CXXFLAGS) -c $$< -o $$@))
 endef
@@ -59,7 +59,7 @@ $(eval OBJS += $(LOCALCPP)) \
 $(if $(strip $(LOCALCPP)),$(eval $(LOCALCPP): $(1)
 	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
 	@echo cc $$<
-	@echo -n $(dir $(LOCALCPP)) >>$(KERNEL_ROOT)/build/make.dep
+	@/bin/echo -n $(dir $(LOCALCPP)) >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)g++ -MM $$(CXXFLAGS) -c $$< >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)g++ $$(CXXFLAGS) -c $$< -o $$@))
 endef
@@ -72,7 +72,7 @@ $(eval OBJS += $(LOCALS)) \
 $(if $(strip $(LOCALS)),$(eval $(LOCALS): $(1)
 	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
 	@echo cc $$<
-	@echo -n $(dir $(LOCALC)) >>$(KERNEL_ROOT)/build/make.dep
+	@/bin/echo -n $(dir $(LOCALC)) >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)gcc -MM $$(CFLAGS) -c $$< >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)gcc $$(AFLAGS) -c $$< -o $$@))
 endef
