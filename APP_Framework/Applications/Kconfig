@@ -19,4 +19,5 @@ menu "Applications"
     source "$APP_DIR/Applications/knowing_app/Kconfig"
     source "$APP_DIR/Applications/sensor_app/Kconfig"
     source "$APP_DIR/Applications/embedded_database_app/Kconfig"
+    source "$APP_DIR/Applications/WebNet_XiUOS/Kconfig"
 endmenu
