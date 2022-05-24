@@ -45,23 +45,23 @@ typedef int64_t int64;
 extern "C" {
 #endif
 
-#define OPE_INT             0x0000
-#define OPE_CFG             0x0001
+#define OPE_INT        0x0000
+#define OPE_CFG        0x0001
 
-#define NAME_NUM_MAX        32
+#define NAME_NUM_MAX   32
 
 
 /*********************GPIO define*********************/
 #define GPIO_LOW    0x00
 #define GPIO_HIGH   0x01
 
-#define GPIO_CFG_OUTPUT                          0x00
-#define GPIO_CFG_INPUT                               0x01
-#define GPIO_CFG_INPUT_PULLUP            0x02
+#define GPIO_CFG_OUTPUT             0x00
+#define GPIO_CFG_INPUT              0x01
+#define GPIO_CFG_INPUT_PULLUP       0x02
 #define GPIO_CFG_INPUT_PULLDOWN     0x03
-#define GPIO_CFG_OUTPUT_OD                  0x04
+#define GPIO_CFG_OUTPUT_OD          0x04
 
-#define GPIO_CONFIG_MODE                 0xffffffff
+#define GPIO_CONFIG_MODE            0xffffffff
 
 /********************SERIAL define*******************/
 #define BAUD_RATE_2400          2400
@@ -174,9 +174,6 @@ int PrivMutexCreate(pthread_mutex_t *p_mutex, const pthread_mutexattr_t *attr);
 int PrivMutexDelete(pthread_mutex_t *p_mutex);
 int PrivMutexObtain(pthread_mutex_t *p_mutex);
 int PrivMutexAbandon(pthread_mutex_t *p_mutex);
-
-
-
 
 /*********************semaphore**********************/
 

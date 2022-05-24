@@ -54,6 +54,8 @@ extern AdapterProductInfoType E22Attach(struct Adapter *adapter);
 
 #define ADAPTER_LORA_RECEIVE_ERROR_CNT    1
 
+#define DEFAULT_SEM_TIMEOUT     10
+
 //need to change status if the lora client wants to quit the net when timeout or a certain event
 //eg.can also use sem to trigger quit function
 static int g_adapter_lora_quit_flag = 0;
@@ -457,7 +459,10 @@ static int LoraClientDataAnalyze(struct Adapter *adapter, void *send_buf, int le
     int ret = 0;
     uint8_t client_id = adapter->net_role_id;
 
-    ret = PrivSemaphoreObtainWait(&adapter->sem, NULL);
+    struct timespec abstime;
+    abstime.tv_sec = DEFAULT_SEM_TIMEOUT;
+
+    ret = PrivSemaphoreObtainWait(&adapter->sem, &abstime);
     if (0 == ret) {
         //only handle this client_id information from gateway
         if ((client_recv_data_format[client_id - 1].client_id == adapter->net_role_id) && 
@@ -685,6 +690,8 @@ static void *LoraReceiveTask(void *parameter)
 void LoraGatewayProcess(struct Adapter *lora_adapter, struct LoraGatewayParam *gateway)
 {
     int i, ret = 0;
+    struct timespec abstime;
+    abstime.tv_sec = DEFAULT_SEM_TIMEOUT;
 
 #ifdef GATEWAY_CMD_MODE
     for (i = 0; i < gateway->client_num; i ++) {
@@ -696,7 +703,7 @@ void LoraGatewayProcess(struct Adapter *lora_adapter, struct LoraGatewayParam *g
                 continue;
             }
 
-            ret = PrivSemaphoreObtainWait(&gateway_recv_data_sem, NULL);
+            ret = PrivSemaphoreObtainWait(&gateway_recv_data_sem, &abstime);
             if (0 == ret) {
                 printf("LoraGatewayProcess receive client %d data done\n", gateway->client_id[i]);
             }
