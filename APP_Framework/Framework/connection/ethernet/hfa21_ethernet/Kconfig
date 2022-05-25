@@ -29,5 +29,7 @@ if ADD_NUTTX_FETURES
 endif
 
 if ADD_RTTHREAD_FETURES
-
+        config ADAPTER_HFA21_DRIVER
+                string "HFA21 device uart driver path"
+                default "/dev/uart3"
 endif
