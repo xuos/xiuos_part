@@ -446,11 +446,13 @@ int DeleteATAgent(ATAgentType agent)
         PrivMutexDelete(&agent->lock);
     }
 #endif
-
+#ifdef ADD_XIZI_FETURES
     if (agent->entm_rx_notice) {
         printf("delete agent entm_rx_notice = %d\n",agent->entm_rx_notice);
         PrivSemaphoreDelete(&agent->entm_rx_notice);
     }
+#else
+#endif
 #ifdef ADD_XIZI_FETURES
      if (agent->rsp_sem) {
          printf("delete agent rsp_sem = %d\n",agent->rsp_sem);
