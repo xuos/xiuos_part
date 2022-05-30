@@ -1,12 +1,3 @@
-/*
- * Copyright (c) 2006-2021, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Change Logs:
- * Date           Author        Notes
- * 2021-10-17     Meco Man      First version
- */
 #include <lvgl.h>
 #include <lv_port_indev_template.h>
 #include "lv_demo_calendar.h"
@@ -40,7 +31,7 @@ static int lvgl_demo_init(void)
 {
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 25;
-    attr.stacksize = 4096;
+    attr.stacksize = 8192;
 
     PrivTaskCreate(&lvgl_task, &attr, lvgl_thread, NULL);
 
