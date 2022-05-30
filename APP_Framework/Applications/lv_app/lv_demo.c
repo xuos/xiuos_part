@@ -31,7 +31,7 @@ static int lvgl_demo_init(void)
 {
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 25;
-    attr.stacksize = 8192;
+    attr.stacksize = 4096;
 
     PrivTaskCreate(&lvgl_task, &attr, lvgl_thread, NULL);
 
