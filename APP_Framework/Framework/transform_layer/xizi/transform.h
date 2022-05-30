@@ -183,8 +183,16 @@ typedef struct
     LcdStringParam string_info;
 }LcdWriteParam;
 
+typedef struct
+{
+    uint16_t x;
+    uint16_t y;
+    uint16_t press;
+}TouchDataParam;
+
 #define PRIV_SYSTICK_GET (CurrentTicksGain())
 #define PRIV_LCD_DEV "/dev/lcd_dev"
+#define PRIV_TOUCH_DEV "/dev/touch_dev"
 #define MY_DISP_HOR_RES BSP_LCD_Y_MAX
 #define MY_DISP_VER_RES BSP_LCD_X_MAX
 /**********************mutex**************************/

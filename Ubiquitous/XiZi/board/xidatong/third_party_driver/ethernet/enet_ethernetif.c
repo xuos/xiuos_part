@@ -99,7 +99,6 @@ void ethernetif_clk_init(void)
 {
     const clock_enet_pll_config_t config = {.enableClkOutput = true, .enableClkOutput25M = false, .loopDivider = 1};
     CLOCK_InitEnetPll(&config);
-    SysTick_Config(USEC_TO_COUNT(1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)));
 }
 
 void ethernetif_gpio_init(void)

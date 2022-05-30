@@ -1,6 +1,6 @@
 /**
 * @file connect_lcd.c
-* @brief support aiit-arm32-board lcd function and register to bus framework
+* @brief support xidatong lcd function and register to bus framework
 * @version 2.0 
 * @author AIIT XiUOS Lab
 * @date 2022-04-25
