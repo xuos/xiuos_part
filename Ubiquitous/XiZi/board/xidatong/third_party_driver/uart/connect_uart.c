@@ -98,6 +98,10 @@ static void SerialCfgParamCheck(struct SerialCfgParam *serial_cfg_default, struc
     if ((data_cfg_default->serial_stop_bits != data_cfg_new->serial_stop_bits) && (data_cfg_new->serial_stop_bits)) {
         data_cfg_default->serial_stop_bits = data_cfg_new->serial_stop_bits;
     }
+
+    if ((data_cfg_default->serial_timeout != data_cfg_new->serial_timeout) && (data_cfg_new->serial_timeout)) {
+        data_cfg_default->serial_timeout = data_cfg_new->serial_timeout;
+    }
 }
 
 static void UartIsr(struct SerialBus *serial, struct SerialDriver *serial_drv, struct SerialHardwareDevice *serial_dev)
@@ -143,6 +147,12 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
         SerialCfgParamCheck(serial_cfg, serial_cfg_new);
     }
 
+	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)serial_drv->driver.owner_bus->owner_haldev;
+	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
+
+	// config serial receive sem timeout
+	dev_param->serial_timeout = serial_cfg->data_cfg.serial_timeout;
+
     lpuart_config_t config;
     LPUART_GetDefaultConfig(&config);
     config.baudRate_Bps = serial_cfg->data_cfg.serial_baud_rate;
@@ -186,6 +196,13 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
 
     LPUART_Init(uart_base, &config, GetUartSrcFreq());
 
+    if (configure_info->private_data) {
+        DisableIRQ(serial_cfg->hw_cfg.serial_irq_interrupt);
+        LPUART_EnableInterrupts(uart_base, kLPUART_RxDataRegFullInterruptEnable);
+        NVIC_SetPriority(serial_cfg->hw_cfg.serial_irq_interrupt, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 0));
+        EnableIRQ(serial_cfg->hw_cfg.serial_irq_interrupt);
+    }
+
     return EOK;
 }
 
@@ -195,6 +212,10 @@ static uint32 SerialConfigure(struct SerialDriver *serial_drv, int serial_operat
 
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
     LPUART_Type *uart_base = (LPUART_Type *)serial_cfg->hw_cfg.private_data;
+    struct BusConfigureInfo configure_info;
+    configure_info.private_data = NONE;
+
+    SerialInit(serial_drv, &configure_info);
 
     switch (serial_operation_cmd)
     {
@@ -270,6 +291,7 @@ static const struct SerialDataCfg data_cfg_init =
     .serial_bit_order = BIT_ORDER_LSB,
     .serial_invert_mode = NRZ_NORMAL,
     .serial_buffer_size = SERIAL_RB_BUFSZ,
+    .serial_timeout = WAITING_FOREVER,
 };
 
 /*manage the serial device operations*/

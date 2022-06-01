@@ -25,8 +25,6 @@
 extern AdapterProductInfoType Hfa21EthercatAttach(struct Adapter *adapter);
 #endif
 
-#define ADAPTER_ETHERCAT_NAME "ethercat"
-
 /**
  * @description: clear the datagram in ethercat frame, do not free the frame itself, since it may be a memory space on stack
  * @param frame - ethercat frame pointer

@@ -92,7 +92,7 @@ static int Hc08AtConfigure(ATAgentType agent, enum Hc08AtCmd hc08_at_cmd, void *
     ATReplyType reply = CreateATReply(64);
     if (NULL == reply) {
         printf("Hc08AtConfigure CreateATReply failed !\n");
-        return -ENOMEMORY;
+        return -5;
     }
     
     switch (hc08_at_cmd)
@@ -152,20 +152,20 @@ static int Hc08AtConfigure(ATAgentType agent, enum Hc08AtCmd hc08_at_cmd, void *
         ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_GET_ROLE_CMD);
         reply_ok_flag = 0;
         break;
-    // case HC08_AT_CMD_SET_ADDR:
-    //     ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_SET_ROLE_CMD);
-    //     break;
-    // case HC08_AT_CMD_GET_ADDR:
-    //     ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_GET_ROLE_CMD);
-    //     reply_ok_flag = 0;
-    //     break;
-    // case HC08_AT_CMD_SET_NAME:
-    //     ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_SET_NAME_CMD);
-    //     break;
-    // case HC08_AT_CMD_GET_NAME:
-    //     ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_GET_NAME_CMD);
-    //     reply_ok_flag = 0;
-    //     break;
+    case HC08_AT_CMD_SET_ADDR:
+        ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_SET_ROLE_CMD);
+        break;
+    case HC08_AT_CMD_GET_ADDR:
+        ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_GET_ROLE_CMD);
+        reply_ok_flag = 0;
+        break;
+    case HC08_AT_CMD_SET_NAME:
+        ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_SET_NAME_CMD);
+        break;
+    case HC08_AT_CMD_GET_NAME:
+        ATOrderSend(agent, REPLY_TIME_OUT, reply, HC08_GET_NAME_CMD);
+        reply_ok_flag = 0;
+        break;
     default:
         printf("hc08 do not support no.%d cmd\n", hc08_at_cmd);
         DeleteATReply(reply);
@@ -209,7 +209,7 @@ static int Hc08Open(struct Adapter *adapter)
     if (!adapter->agent) {
         char *agent_name = "bluetooth_uart_client";
         printf("InitATAgent agent_name %s fd %u\n", agent_name, adapter->fd);
-        if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+        if (0 != InitATAgent(agent_name, adapter->fd, 512)) {
             printf("at agent init failed !\n");
             return -1;
         }
@@ -343,7 +343,7 @@ static int Hc08Connect(struct Adapter *adapter, enum NetRoleType net_role, const
 
 static int Hc08Send(struct Adapter *adapter, const void *buf, size_t len)
 {
-    x_err_t result = EOK;
+    long result = 0;
     if (adapter->agent) {
         EntmSend(adapter->agent, (const char *)buf, len);
     } else {

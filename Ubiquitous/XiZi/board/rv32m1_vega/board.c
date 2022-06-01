@@ -63,10 +63,12 @@ void InitBoardHardware(void)
 
     InitHwUart();
     InitHwTick();
+
+    InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
+
     InstallConsole("uart0", "uart0_drv", "uart0_dev0");
 	KPrintf("console init completed.\n");
 
-    InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
     KPrintf("memory address range: [0x%08x - 0x%08x], size: %d\n", (x_ubase) MEMORY_START_ADDRESS, (x_ubase) MEMORY_END_ADDRESS, RV32M1VEGA_SRAM_SIZE);
     KPrintf("board init done.\n");
 	KPrintf("start kernel...\n");

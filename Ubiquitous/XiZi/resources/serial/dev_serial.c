@@ -630,7 +630,7 @@ static uint32 SerialDevRead(void *dev, struct BusBlockReadParam *read_param)
     struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)dev;
     struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
 
-    if (EOK == KSemaphoreObtain(serial_dev->haldev.dev_sem, WAITING_FOREVER)) {
+    if (EOK == KSemaphoreObtain(serial_dev->haldev.dev_sem, serial_dev_param->serial_timeout)) {
         if (serial_dev_param->serial_work_mode & SIGN_OPER_INT_RX) {
             ret = SerialDevIntRead(serial_dev, read_param);
             if (EOK != ret) {
@@ -654,6 +654,8 @@ static uint32 SerialDevRead(void *dev, struct BusBlockReadParam *read_param)
                 return ERROR;
             }
         }
+    } else {
+        return ERROR;
     }
     return EOK;
 }

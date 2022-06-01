@@ -20,7 +20,8 @@
 
 #include <adapter.h>
 #include <at_agent.h>
-
+#include <transform.h>
+#include <string.h>
 #define LEN_PARA_BUF 128
 
 static int Hfa21WifiSetDown(struct Adapter *adapter_at);
@@ -28,10 +29,11 @@ static int Hfa21WifiSetDown(struct Adapter *adapter_at);
 /**
  * @description: enter AT command mode
  * @param at_agent - wifi device agent pointer
- * @return success: EOK
+ * @return success: 0
  */
 static int Hfa21WifiInitAtCmd(ATAgentType at_agent)
 {
+    
     ATOrderSend(at_agent, REPLY_TIME_OUT, NULL, "+++");
     PrivTaskDelay(100);
 
@@ -44,7 +46,7 @@ static int Hfa21WifiInitAtCmd(ATAgentType at_agent)
 /**
  * @description: Open wifi
  * @param adapter - wifi device pointer
- * @return success: EOK, failure: ENOMEMORY
+ * @return success: 0, failure: 5
  */
 static int Hfa21WifiOpen(struct Adapter *adapter)
 {
@@ -58,7 +60,7 @@ static int Hfa21WifiOpen(struct Adapter *adapter)
     /*step2: init AT agent*/
     if (!adapter->agent) {
         char *agent_name = "wifi_uart_client";
-        if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+        if (0 != InitATAgent(agent_name, adapter->fd, 512)) {
             printf("at agent init failed !\n");
             return -1;
         }
@@ -75,7 +77,7 @@ static int Hfa21WifiOpen(struct Adapter *adapter)
 /**
  * @description: Close wifi
  * @param adapter - wifi device pointer
- * @return success: EOK
+ * @return success: 0
  */
 static int Hfa21WifiClose(struct Adapter *adapter)
 {
@@ -87,11 +89,11 @@ static int Hfa21WifiClose(struct Adapter *adapter)
  * @param adapter - wifi device pointer
  * @param data - data buffer
  * @param data - data length
- * @return success: EOK
+ * @return success: 0
  */
 static int Hfa21WifiSend(struct Adapter *adapter, const void *data, size_t len)
 {
-    x_err_t result = EOK;
+    long result = 0;
     if (adapter->agent) {
         EntmSend(adapter->agent, (const char *)data, len);
     }else {
@@ -108,11 +110,11 @@ __exit:
  * @param adapter - wifi device pointer
  * @param data - data buffer
  * @param data - data length
- * @return success: EOK
+ * @return success: 0
  */
 static int Hfa21WifiReceive(struct Adapter *adapter, void *rev_buffer, size_t buffer_len)
 {
-    x_err_t result = EOK;
+    long result = 0;
     printf("hfa21 receive waiting ... \n");
 
     if (adapter->agent) {
@@ -129,20 +131,19 @@ __exit:
 /**
  * @description: connnect wifi to internet
  * @param adapter - wifi device pointer
- * @return success: EOK
+ * @return success: 0
  */
 static int Hfa21WifiSetUp(struct Adapter *adapter)
 {
     uint8 wifi_ssid[LEN_PARA_BUF] = "AIIT-Guest";
     uint8 wifi_pwd[LEN_PARA_BUF] = "";
     char cmd[LEN_PARA_BUF];
-
+    
     struct ATAgent *agent = adapter->agent;
-
+   
     /* wait hfa21 device startup finish */
     PrivTaskDelay(5000);
-
-    Hfa21WifiInitAtCmd(agent);
+    Hfa21WifiInitAtCmd(agent);//err
 
     memset(cmd,0,sizeof(cmd));
     strcpy(cmd,"AT+FCLR\r");
@@ -181,7 +182,7 @@ static int Hfa21WifiSetUp(struct Adapter *adapter)
 /**
  * @description: disconnnect wifi from internet
  * @param adapter - wifi device pointer
- * @return success: EOK
+ * @return success: 0
  */
 static int Hfa21WifiSetDown(struct Adapter *adapter)
 {
@@ -199,7 +200,7 @@ static int Hfa21WifiSetDown(struct Adapter *adapter)
  * @param ip - ip address
  * @param gateway - gateway address
  * @param netmask - netmask address
- * @return success: EOK, failure: ENOMEMORY
+ * @return success: 0, failure: 5
  */
 static int Hfa21WifiSetAddr(struct Adapter *adapter, const char *ip, const char *gateway, const char *netmask)
 {
@@ -216,12 +217,12 @@ static int Hfa21WifiSetAddr(struct Adapter *adapter, const char *ip, const char 
 
     Hfa21WifiInitAtCmd(adapter->agent);
 
-    x_err_t result = EOK;
+    long result = 0;
 
     ATReplyType reply = CreateATReply(64);
     if (NULL == reply) {
         printf("at_create_resp failed ! \n");
-        result = ENOMEMORY;
+        result = 5;
         goto __exit;
     }
 
@@ -253,12 +254,12 @@ __exit:
  * @description: wifi ping function
  * @param adapter - wifi device pointer
  * @param destination - domain name or ip address
- * @return success: EOK, failure: ENOMEMORY
+ * @return success: 0, failure: 5
  */
 static int Hfa21WifiPing(struct Adapter *adapter, const char *destination)
 {
-    char *ping_result = NONE;
-    char *dst = NONE;
+    char *ping_result = (0);
+    char *dst = (0);
     ping_result = (char *) PrivCalloc(1, 17);
     dst = (char *) PrivCalloc(1, 17);
     strcpy(dst, destination);
@@ -266,12 +267,12 @@ static int Hfa21WifiPing(struct Adapter *adapter, const char *destination)
 
     Hfa21WifiInitAtCmd(adapter->agent);
 
-    uint32 result = EOK;
+    uint32 result = 0;
 
     ATReplyType reply = CreateATReply(64);
     if (NULL == reply) {
         printf("at_create_resp failed ! \n");
-        result = ENOMEMORY;
+        result = 5;
         goto __exit;
     }
 
@@ -302,7 +303,7 @@ __exit:
 /**
  * @description: display wifi network configuration
  * @param adapter - wifi device pointer
- * @return success: EOK, failure: ENOMEMORY
+ * @return success: 0, failure: 5
  */
 static int Hfa21WifiNetstat(struct Adapter *adapter)
 {
@@ -334,7 +335,7 @@ static int Hfa21WifiNetstat(struct Adapter *adapter)
 
     reply = CreateATReply(HFA21_NETSTAT_RESP_SIZE);
     if (reply == NULL) {
-        result = ENOMEMORY;
+        result = 5;
         goto __exit;
     }
 
@@ -384,7 +385,7 @@ static int Hfa21WifiNetstat(struct Adapter *adapter)
     else
         printf("local ip: %s\nnetmask: %s\n", local_ipaddr, netmask);
 
-    return EOK;
+    return 0;
 
 __exit:
     if (reply)
@@ -410,15 +411,15 @@ __exit:
  */
 static int Hfa21WifiConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)
 {
-    int result = EOK;
-    ATReplyType reply = NONE;
+    int result = 0;
+    ATReplyType reply = (0);
     char cmd[LEN_PARA_BUF];
     struct ATAgent *agent = adapter->agent;
 
     reply = CreateATReply(64);
-    if (reply == NONE) {
+    if (reply == (0)) {
         printf("no memory for reply struct.");
-        return ENOMEMORY;
+        return 5;
     }
 
     Hfa21WifiInitAtCmd(adapter->agent);
@@ -505,7 +506,7 @@ static const struct IpProtocolDone hfa21_wifi_done =
 
 /**
  * @description: Register wifi device hfa21
- * @return success: EOK, failure: ERROR
+ * @return success: 0, failure: ERROR
  */
 AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter)
 {

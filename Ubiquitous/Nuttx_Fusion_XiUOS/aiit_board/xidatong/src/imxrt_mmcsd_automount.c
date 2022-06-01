@@ -94,11 +94,11 @@ static const struct imxrt_automount_config_s g_sdhc_config =
 {
   .lower        =
     {
-    .fstype     = CONFIG_XIDATONG_SDHC_AUTOMOUNT_FSTYPE,
-    .blockdev   = CONFIG_XIDATONG_SDHC_AUTOMOUNT_BLKDEV,
-    .mountpoint = CONFIG_XIDATONG_SDHC_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(CONFIG_XIDATONG_SDHC_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(CONFIG_XIDATONG_SDHC_AUTOMOUNT_UDELAY),
+    .fstype     = CONFIG_XIDATONG_SDIO_AUTOMOUNT_FSTYPE,
+    .blockdev   = CONFIG_XIDATONG_SDIO_AUTOMOUNT_BLKDEV,
+    .mountpoint = CONFIG_XIDATONG_SDIO_AUTOMOUNT_MOUNTPOINT,
+    .ddelay     = MSEC2TICK(CONFIG_XIDATONG_SDIO_AUTOMOUNT_DDELAY),
+    .udelay     = MSEC2TICK(CONFIG_XIDATONG_SDIO_AUTOMOUNT_UDELAY),
     .attach     = imxrt_sdhc_attach,
     .enable     = imxrt_sdhc_enable,
     .inserted   = imxrt_sdhc_inserted

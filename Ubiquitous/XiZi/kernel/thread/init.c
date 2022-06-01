@@ -31,6 +31,10 @@
 #include "connect_usb.h"
 #endif
 
+#ifdef BSP_USING_WDT
+#include "connect_wdt.h"
+#endif
+
 #ifdef KERNEL_USER_MAIN
 #ifndef MAIN_KTASK_STACK_SIZE
 #define MAIN_KTASK_STACK_SIZE     2048
@@ -95,6 +99,9 @@ struct InitSequenceDesc components_init[] =
 #endif
 #ifdef FS_CH376
 	{ "ch376", Ch376fsInit },
+#endif
+#ifdef FS_LWEXT4
+	{ "lwext4", Lwext4Init },
 #endif
 	{ "libc_system", LibcSystemInit },
 #ifdef RTC_SYNC_USING_NTP
@@ -237,6 +244,10 @@ extern int InitUserspace(void);
 
 #ifdef ARCH_SMP
 	HwLockSpinlock(&AssignSpinLock);
+#endif
+
+#ifdef BSP_USING_WDT
+    StartWatchdog();
 #endif
 
     StartupOsAssign();

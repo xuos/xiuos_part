@@ -29,24 +29,6 @@ Modification:
 #include "board.h"
 #include "pin_mux.h"
 
-#if defined(FS_VFS) && defined(MOUNT_SDCARD)
-#include <iot-vfs.h>
-
-/**
- * @description: Mount SD card
- * @return 0
- */
-int MountSDCard(void)
-{
-    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, FSTYPE_FATFS, "/") == 0)
-        KPrintf("sd card mount to '/'");
-    else
-        KPrintf("sd card mount to '/' failed!");
-    
-    return 0;
-}
-#endif
-
 #if defined(SDK_I2C_BASED_COMPONENT_USED) && SDK_I2C_BASED_COMPONENT_USED
 #include "fsl_lpi2c.h"
 #endif /* SDK_I2C_BASED_COMPONENT_USED */
@@ -68,6 +50,10 @@ int MountSDCard(void)
 
 #ifdef BSP_USING_SDIO
 #include <connect_sdio.h>
+#endif
+
+#ifdef BSP_USING_WDT
+#include <connect_wdt.h>
 #endif
 
 #ifdef BSP_USING_SEMC
@@ -349,5 +335,8 @@ void InitBoardHardware()
     Imxrt1052HwSdioInit();
 #endif
 
+#ifdef BSP_USING_WDT 
+    Imxrt1052HwWdgInit();
+#endif
 }
 

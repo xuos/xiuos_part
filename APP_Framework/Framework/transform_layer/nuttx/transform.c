@@ -55,7 +55,15 @@ int PrivSemaphoreDelete(sem_t *sem)
 
 int PrivSemaphoreObtainWait(sem_t *sem, const struct timespec *abstime)
 {
-    return sem_timedwait(sem, abstime);
+    struct timespec timeout;
+    clock_gettime(CLOCK_REALTIME, &timeout);
+    timeout.tv_sec += abstime->tv_sec;
+    return sem_timedwait(sem, &timeout);
+}
+
+int PrivSemaphoreObtainWaitForever(sem_t *sem)
+{
+    return sem_wait(sem);
 }
 
 int PrivSemaphoreObtainNoWait(sem_t *sem)
@@ -92,10 +100,11 @@ void PrivTaskQuit(void *value_ptr)
 
 int PrivTaskDelay(int32_t ms)
 {
-    return usleep(ms);
+    return usleep(1000 * ms);
 }
 
-uint32_t PrivGetTickTime(){
+uint32_t PrivGetTickTime(void)
+{
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;

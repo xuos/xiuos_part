@@ -629,7 +629,7 @@ void WriteCH438Block(uint8 maddr, uint8 mlen, uint8 *mbuf)
 ** date:
 **-------------------------------------------------------------------------------------------------------
 ********************************************************************************************************/
-void  Ch438UartSend( uint8	ext_uart_no,uint8 *data, uint8 Num )
+void Ch438UartSend(uint8 ext_uart_no, uint8 *data, uint16 Num)
 {
 	uint8 REG_LSR_ADDR,REG_THR_ADDR;
 	
@@ -939,7 +939,12 @@ static uint32 Ch438DrvConfigure(void *drv, struct BusConfigureInfo *configure_in
     x_err_t ret = EOK;
 
     struct SerialDriver *serial_drv = (struct SerialDriver *)drv;
+	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)serial_drv->driver.owner_bus->owner_haldev;
 	struct SerialCfgParam *ext_serial_cfg = (struct SerialCfgParam *)configure_info->private_data;
+	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
+
+	//config serial receive sem timeout
+	dev_param->serial_timeout = ext_serial_cfg->data_cfg.serial_timeout;
 
     switch (configure_info->configure_cmd)
     {
@@ -958,10 +963,35 @@ static uint32 ImxrtCh438WriteData(void *dev, struct BusBlockWriteParam *write_pa
 	NULL_PARAM_CHECK(dev);
 	NULL_PARAM_CHECK(write_param);
 
+	int write_len, write_len_continue;
+	int i, write_index;
+	uint8 *write_buffer;
+
 	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)dev;
 	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
 
-	Ch438UartSend(dev_param->ext_uart_no, (uint8 *)write_param->buffer, write_param->size);
+	write_len = write_param->size;
+	write_len_continue = write_param->size;
+	write_buffer = (uint8 *)write_param->buffer;
+
+	if (write_len > 256) {
+		if (0 == write_len % 256) {
+			write_index = write_len / 256;
+			for (i = 0; i < write_index; i ++) {
+				Ch438UartSend(dev_param->ext_uart_no, write_buffer + i * 256, 256);
+			}
+		} else {
+			write_index = 0;
+			while (write_len_continue > 256) {
+				Ch438UartSend(dev_param->ext_uart_no, write_buffer + write_index * 256, 256);
+				write_index++;
+				write_len_continue = write_len - write_index * 256;
+			}
+			Ch438UartSend(dev_param->ext_uart_no, write_buffer + write_index * 256, write_len_continue);
+		}
+	} else {
+		Ch438UartSend(dev_param->ext_uart_no, write_buffer, write_len);
+	}
 
 	return EOK;
 }
@@ -974,6 +1004,7 @@ static uint32 ImxrtCh438ReadData(void *dev, struct BusBlockReadParam *read_param
 	x_err_t result;
 	uint8 rcv_num = 0;
 	uint8 gInterruptStatus;
+	uint8 interrupt_done = 0;
 	uint8 InterruptStatus;
 	static uint8 dat;
 	uint8 REG_LCR_ADDR;
@@ -991,56 +1022,55 @@ static uint32 ImxrtCh438ReadData(void *dev, struct BusBlockReadParam *read_param
 	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)dev;
 	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
 
-	result = KSemaphoreObtain(ch438_sem, WAITING_FOREVER);
-	if (EOK == result) {
-		gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);		
-		if (!gInterruptStatus) { 
-			dat = ReadCH438Data(REG_LCR0_ADDR);	
-			dat = ReadCH438Data(REG_IER0_ADDR);	
-			dat = ReadCH438Data(REG_MCR0_ADDR);	
-			dat = ReadCH438Data(REG_LSR0_ADDR);	
-			dat = ReadCH438Data(REG_MSR0_ADDR);	
-			dat = ReadCH438Data(REG_RBR0_ADDR);	
-			dat = ReadCH438Data(REG_THR0_ADDR);	
-			dat = ReadCH438Data(REG_IIR0_ADDR);	
-			dat = dat ;	
-		} else {
-			if (gInterruptStatus & interrupt_num[dev_param->ext_uart_no]) {   /* check which uart port triggers interrupt*/
-				REG_LCR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_LCR0_ADDR;
-				REG_DLL_ADDR = offset_addr[dev_param->ext_uart_no] | REG_DLL0_ADDR;
-				REG_DLM_ADDR = offset_addr[dev_param->ext_uart_no] | REG_DLM0_ADDR;
-				REG_IER_ADDR = offset_addr[dev_param->ext_uart_no] | REG_IER0_ADDR;
-				REG_MCR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_MCR0_ADDR;
-				REG_FCR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_FCR0_ADDR;
-				REG_RBR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_RBR0_ADDR;
-				REG_THR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_THR0_ADDR;
-				REG_IIR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_IIR0_ADDR;
-				REG_LSR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_LSR0_ADDR;
-				REG_MSR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_MSR0_ADDR;				
-							
-				InterruptStatus = ReadCH438Data( REG_IIR_ADDR ) & 0x0f;    /* read the status of the uart port*/
+	while (!interrupt_done) {
+		result = KSemaphoreObtain(ch438_sem, dev_param->serial_timeout);
+		if (EOK == result) {
+			gInterruptStatus = ReadCH438Data(REG_SSR_ADDR);
+			if (!gInterruptStatus) { 
+				// dat = ReadCH438Data(REG_LCR0_ADDR);	
+				// dat = ReadCH438Data(REG_IER0_ADDR);	
+				// dat = ReadCH438Data(REG_MCR0_ADDR);	
+				// dat = ReadCH438Data(REG_LSR0_ADDR);	
+				// dat = ReadCH438Data(REG_MSR0_ADDR);	
+				// dat = ReadCH438Data(REG_RBR0_ADDR);	
+				// dat = ReadCH438Data(REG_THR0_ADDR);	
+				// dat = ReadCH438Data(REG_IIR0_ADDR);	
+				// dat = dat;	
+				interrupt_done = 0;
+			} else {
+				if (gInterruptStatus & interrupt_num[dev_param->ext_uart_no]) {   /* check which uart port triggers interrupt*/
+					REG_LCR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_LCR0_ADDR;
+					REG_DLL_ADDR = offset_addr[dev_param->ext_uart_no] | REG_DLL0_ADDR;
+					REG_DLM_ADDR = offset_addr[dev_param->ext_uart_no] | REG_DLM0_ADDR;
+					REG_IER_ADDR = offset_addr[dev_param->ext_uart_no] | REG_IER0_ADDR;
+					REG_MCR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_MCR0_ADDR;
+					REG_FCR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_FCR0_ADDR;
+					REG_RBR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_RBR0_ADDR;
+					REG_THR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_THR0_ADDR;
+					REG_IIR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_IIR0_ADDR;
+					REG_LSR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_LSR0_ADDR;
+					REG_MSR_ADDR = offset_addr[dev_param->ext_uart_no] | REG_MSR0_ADDR;				
+								
+					InterruptStatus = ReadCH438Data( REG_IIR_ADDR ) & 0x0f;    /* read the status of the uart port*/
 
-				switch( InterruptStatus )
-				{
-					case INT_NOINT:			/* NO INTERRUPT */					
-						break;
-					case INT_THR_EMPTY:		/* THR EMPTY INTERRUPT*/							
-						break;
-					case INT_RCV_OVERTIME:	/* RECV OVERTIME INTERRUPT*/
-					case INT_RCV_SUCCESS:	/* RECV INTERRUPT SUCCESSFULLY*/
+					if ((INT_RCV_OVERTIME == InterruptStatus) || (INT_RCV_SUCCESS == InterruptStatus)) {
 						rcv_num = Ch438UartRcv(dev_param->ext_uart_no, (uint8 *)read_param->buffer, read_param->size);
 						read_param->read_length = rcv_num;
-						break;
-					case INT_RCV_LINES:		/* RECV LINES INTERRUPT */
-						ReadCH438Data( REG_LSR_ADDR );
-						break;
-					case INT_MODEM_CHANGE:	/* MODEM CHANGE INTERRUPT */
-						ReadCH438Data( REG_MSR_ADDR );
-						break;
-					default:
-						break;
+
+						interrupt_done = 1;
+
+						// int i;
+						// uint8 *buffer = (uint8 *)read_param->buffer;
+						// for (i = 0; i < rcv_num; i ++) {
+						// 	KPrintf("Ch438UartRcv i %u data 0x%x\n", i, buffer[i]);
+						// }
+					}
 				}
 			}
+		} else {
+			//Wait serial sem timeout, break and return 0
+			rcv_num = 0;
+			break;
 		}
 	}
 	return rcv_num;

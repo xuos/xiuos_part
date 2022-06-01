@@ -89,6 +89,8 @@ void InitBoardHardware()
   __set_PRIMASK(1);
   
   InitHwUart();
-	InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
+
 	InitBoardMemory((void*)HEAP_START, (void*)HEAP_END);
+	InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
+
 }

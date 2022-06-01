@@ -15,8 +15,8 @@
 */
 
 /*************************************************
-File name: usb_misc.h
-Description: modify usb_echo to KPrintf
+File name: host_msd_command.c
+Description: modify usb msd command test function
 Others: take SDK_2.6.1_MIMXRT1052xxxxB/boards/evkbimxrt1050/usb_examples/usb_host_msd_command for references
 History: 
 1. Date: 2022-02-10

@@ -180,6 +180,7 @@ int PrivMutexAbandon(pthread_mutex_t *p_mutex);
 int PrivSemaphoreCreate(sem_t *sem, int pshared, unsigned int value);
 int PrivSemaphoreDelete(sem_t *sem);
 int PrivSemaphoreObtainWait(sem_t *sem, const struct timespec *abstime);
+int PrivSemaphoreObtainWaitForever(sem_t *sem);
 int PrivSemaphoreObtainNoWait(sem_t *sem);
 int PrivSemaphoreAbandon(sem_t *sem);
 int32_t PrivSemaphoreSetValue(int32_t sem, uint16_t val);
@@ -192,7 +193,7 @@ int PrivTaskStartup(pthread_t *thread);
 int PrivTaskDelete(pthread_t thread, int sig);
 void PrivTaskQuit(void *value_ptr);
 int PrivTaskDelay(int32_t ms);
-uint32_t PrivGetTickTime();
+uint32_t PrivGetTickTime(void);
 
 /*********************driver*************************/
 
