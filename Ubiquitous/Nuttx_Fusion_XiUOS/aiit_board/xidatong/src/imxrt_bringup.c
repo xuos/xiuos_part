@@ -51,6 +51,10 @@
 #  include "imxrt_ch438.h"
 #endif
 
+#ifdef CONFIG_INPUT_GT9XX
+#include "imxrt_gt9xx.h"
+#endif
+
 #include "xidatong.h"
 
 #include <arch/board/board.h>  /* Must always be included last */
@@ -185,6 +189,19 @@ int imxrt_bringup(void)
 
 #ifdef CONFIG_BSP_USING_CH438
   board_ch438_initialize();
+#endif
+
+#ifdef CONFIG_INPUT_GT9XX
+    /* Initialize the GT9XX touchscreen driver */
+
+  ret = imxrt_gt9xx_register();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imxrt_ft5x06_register() failed: %d\n", ret);
+    }
+
+  syslog(LOG_NOTICE, "Start initialize %d ok ...\n", ret);
+
 #endif
 
   UNUSED(ret);

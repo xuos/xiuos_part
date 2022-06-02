@@ -82,6 +82,10 @@ ifeq ($(CONFIG_XIDATONG_SDIO_AUTOMOUNT),y)
 CSRCS += imxrt_mmcsd_automount.c
 endif
 
+ifeq ($(CONFIG_INPUT_GT9XX),y)
+CSRCS += imxrt_gt9xx.c
+endif
+
 ifeq ($(CONFIG_BSP_USING_CH438),y)
 CSRCS += imxrt_ch438.c ch438_demo.c
 endif
