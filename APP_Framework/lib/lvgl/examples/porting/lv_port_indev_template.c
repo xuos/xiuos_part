@@ -226,7 +226,12 @@ void lv_port_indev_init(void)
 static void touchpad_init(void)
 {
     touch_fd = PrivOpen(PRIV_TOUCH_DEV,O_RDWR);
-    printf("touch fd = %d\n",touch_fd);
+    if(touch_fd >= 0) {
+        printf("touch fd = %d\n",touch_fd);
+    } else {
+        printf("open %s touch fd = %d\n",PRIV_TOUCH_DEV,touch_fd);
+    }
+        
     /*Your code comes here*/
 }
 
@@ -256,8 +261,9 @@ static bool touchpad_is_pressed(void)
     /*Your code comes here*/
     memset(&touch_data, 0 ,sizeof(TouchDataParam));
     ret = PrivRead(touch_fd, &touch_data, 1);
-    if(ret && touch_data.x >= 0 && touch_data.x <= 480 && touch_data.y >= 0 && touch_data.y <= 272)
+    if(ret && touch_data.x >= 0 && touch_data.x < MY_INDEV_X && touch_data.y >= 0 && touch_data.y < MY_INDEV_Y)
     {
+        // printf("touch x %d touch y %d\n",touch_data.x,touch_data.y);
         return true;
     }
     

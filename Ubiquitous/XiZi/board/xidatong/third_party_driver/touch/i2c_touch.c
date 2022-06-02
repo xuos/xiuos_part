@@ -154,7 +154,7 @@ uint32_t I2C_ReadBytes(uint8_t ClientAddr,uint8_t* pBuffer, uint16_t NumByteToRe
 {
 	lpi2c_master_transfer_t masterXfer = {0};
 	status_t reVal = kStatus_Fail;
-  uint32_t i2c_timeout = I2CT_LONG_TIMEOUT;
+    uint32_t i2c_timeout = I2CT_LONG_TIMEOUT;
 
 
 	/* subAddress = 0x00, data = pBuffer 自从机处接收
@@ -169,20 +169,22 @@ uint32_t I2C_ReadBytes(uint8_t ClientAddr,uint8_t* pBuffer, uint16_t NumByteToRe
 	masterXfer.dataSize = NumByteToRead;
 	masterXfer.flags = kLPI2C_TransferDefaultFlag;
 
-	reVal = LPI2C_MasterTransferNonBlocking(GTP_I2C_MASTER, &g_m_handle, &masterXfer);
-	if (reVal != kStatus_Success)
-	{
-			return 1;
-	}
 	/* 复位传输完成标志 */
 	g_MasterCompletionFlag = false;
 
+	reVal = LPI2C_MasterTransferNonBlocking(GTP_I2C_MASTER, &g_m_handle, &masterXfer);
+	if (reVal != kStatus_Success)
+	{
+		return 1;
+	}
+	
 	/* 等待传输完成 */
 	while (!g_MasterCompletionFlag)
 	{
-    if((i2c_timeout--) == 0) return I2C_Timeout_Callback(0);
-
+		if((i2c_timeout--) == 0) 
+			return I2C_Timeout_Callback(0);
 	}
+	
 	g_MasterCompletionFlag = false;
 	
 	return 0;
@@ -200,7 +202,7 @@ uint32_t I2C_WriteBytes(uint8_t ClientAddr,uint8_t* pBuffer,  uint8_t NumByteToW
 {
 	lpi2c_master_transfer_t masterXfer = {0};
 	status_t reVal = kStatus_Fail;
-  uint32_t i2c_timeout = I2CT_LONG_TIMEOUT;
+    uint32_t i2c_timeout = I2CT_LONG_TIMEOUT;
 
 
 	/* subAddress = 0x00, data = pBuffer 发送至从机
@@ -215,18 +217,20 @@ uint32_t I2C_WriteBytes(uint8_t ClientAddr,uint8_t* pBuffer,  uint8_t NumByteToW
 	masterXfer.dataSize = NumByteToWrite;
 	masterXfer.flags = kLPI2C_TransferDefaultFlag;
 
+	/* 复位传输完成标志 */
+	g_MasterCompletionFlag = false;
+
 	reVal = LPI2C_MasterTransferNonBlocking(GTP_I2C_MASTER, &g_m_handle, &masterXfer);
 	if (reVal != kStatus_Success)
 	{
-			return 1;
+		return 1;
 	}
-	/* 复位传输完成标志 */
-	g_MasterCompletionFlag = false;
 
 	/* 等待传输完成 */
 	while (!g_MasterCompletionFlag)
 	{
-    if((i2c_timeout--) == 0) return I2C_Timeout_Callback(1);
+    	if((i2c_timeout--) == 0)
+			return I2C_Timeout_Callback(1);
 	}
 	g_MasterCompletionFlag = false;
 	
@@ -241,10 +245,10 @@ uint32_t I2C_WriteBytes(uint8_t ClientAddr,uint8_t* pBuffer,  uint8_t NumByteToW
   */
 static  uint32_t I2C_Timeout_Callback(uint8_t errorCode)
 {
-  /* Block communication and all processes */
-  KPrintf("I2C timeout!errorCode = %d",errorCode);
-  
-  return 0xFF;
+	/* Block communication and all processes */
+	KPrintf("I2C timeout!errorCode = %d\n",errorCode);
+
+	return 0xFF;
 }
 
 /**
@@ -300,6 +304,7 @@ void GT9xx_PEN_IRQHandler(int irqn, void *arg)
       g_TouchPadInputSignal = true;
 	  if(!SemReleaseFlag) 
 	  {
+		KPrintf("touch irq in release sem\n");
 		KSemaphoreAbandon(touch_sem);
 		SemReleaseFlag = true;
 	  }

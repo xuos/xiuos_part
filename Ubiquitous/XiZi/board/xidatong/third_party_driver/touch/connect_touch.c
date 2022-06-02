@@ -106,7 +106,7 @@ static int32_t GtpI2cRead(uint8_t client_addr, uint8_t *buf, int32_t len)
     }
     if((retries >= 5))
     {
-        KPrintf("I2C Read: 0x%04X, %d bytes failed, errcode: %d! Process reset.\n", (((uint16_t)(buf[0] << 8)) | buf[1]), len-2, ret);
+        KPrintf("I2C Read: 0x%04X, %d bytes %d times failed, errcode: %d! Process reset.\n", (((uint16_t)(buf[0] << 8)) | buf[1]), len-2, retries,ret);
         ret = -1;
     }
     return ret;
@@ -180,17 +180,20 @@ bool GetTouchEvent(POINT *touch_point,touch_event_t *touch_event)
 
     if (finger == 0x00)		//没有数据，退出
     {
-        return 0;
+        ret = 0;
+        goto exit_work_func;
     }
 
     if((finger & 0x80) == 0)//判断buffer status位
     {
+        ret = 0;
         goto exit_work_func;//坐标未就绪，数据无效
     }
 
     touch_num = finger & 0x0f;//坐标点数
     if (touch_num > GTP_MAX_TOUCH)
     {
+        ret = 0;
         goto exit_work_func;//大于最大支持点数，错误退出
     }
 
@@ -220,10 +223,11 @@ exit_work_func:
         ret = GtpI2cWrite(client_addr, end_cmd, 3);
         if (ret < 0)
         {
-            KPrintf("I2C write end_cmd error!");
+            KPrintf("I2C write end_cmd error!\n");
+            ret = 0;
         }
     }
-	return 1;
+	return ret;
 }
 
 int32_t GtpReadVersion(void)
@@ -251,6 +255,7 @@ int32_t GtpReadVersion(void)
 
 static int32_t GtpGetInfo(void)
 {
+    uint8_t end_cmd[3] = {GTP_READ_COOR_ADDR >> 8, GTP_READ_COOR_ADDR & 0xFF, 0};
     uint8_t opr_buf[6] = {0};
     int32_t ret = 0;
 
@@ -285,7 +290,13 @@ static int32_t GtpGetInfo(void)
     
     KPrintf("X_MAX = %d, Y_MAX = %d, TRIGGER = 0x%02x\n",
             abs_x_max,abs_y_max,int_trigger_type);
-    
+
+    ret = GtpI2cWrite(GTP_ADDRESS, end_cmd, 3);
+    if (ret < 0)
+    {
+        KPrintf("I2C write end_cmd error!\n");
+        ret = 0;
+    }
     return 0;    
 }
 
@@ -294,7 +305,6 @@ static uint32 TouchOpen(void *dev)
     int32_t ret = -1;
 
     I2C_Touch_Init();
-
     ret = GtpReadVersion();
     if(ret < 0)
     {
@@ -339,6 +349,7 @@ static uint32 TouchRead(void *dev, struct BusBlockReadParam *read_param)
 	touch_event_t touch_event;
 
     struct TouchDataStandard *data = (struct TouchDataStandard*)read_param->buffer;
+    read_param->read_length = 0;
     result = KSemaphoreObtain(touch_sem, 1000);
     if (EOK == result)
     {
@@ -349,11 +360,11 @@ static uint32 TouchRead(void *dev, struct BusBlockReadParam *read_param)
             data->x = touch_point.X;
             data->y = touch_point.Y;
             g_TouchPadInputSignal = 0;
-            SemReleaseFlag = 0;
 
             read_param->read_length = read_param->size;
             ret = EOK;
         }
+        SemReleaseFlag = 0;
     }
 
     return ret;

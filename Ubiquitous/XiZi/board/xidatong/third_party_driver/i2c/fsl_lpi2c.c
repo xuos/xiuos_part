@@ -1396,7 +1396,7 @@ void LPI2C_MasterTransferHandleIRQ(LPI2C_Type *base, lpi2c_master_handle_t *hand
     }
 
     result = LPI2C_RunTransferStateMachine(base, handle, &isDone);
-
+    
     if (isDone || (result != kStatus_Success))
     {
         /* XXX need to handle data that may be in rx fifo below watermark level? */
@@ -2113,7 +2113,9 @@ void LPI2C0_DriverIRQHandler(void)
 /* Implementation of LPI2C1 handler named in startup code. */
 void LPI2C1_DriverIRQHandler(int irqn, void *arg)
 {
+    DisableIRQ(LPI2C1_IRQn);
     LPI2C_CommonIRQHandler(LPI2C1, 1);
+    EnableIRQ(LPI2C1_IRQn);
 }
 DECLARE_HW_IRQ(LPI2C1_IRQn, LPI2C1_DriverIRQHandler, NONE);
 #endif
