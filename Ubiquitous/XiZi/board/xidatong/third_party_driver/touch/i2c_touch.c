@@ -304,7 +304,6 @@ void GT9xx_PEN_IRQHandler(int irqn, void *arg)
       g_TouchPadInputSignal = true;
 	  if(!SemReleaseFlag) 
 	  {
-		KPrintf("touch irq in release sem\n");
 		KSemaphoreAbandon(touch_sem);
 		SemReleaseFlag = true;
 	  }
