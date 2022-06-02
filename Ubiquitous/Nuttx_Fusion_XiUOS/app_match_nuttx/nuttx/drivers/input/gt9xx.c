@@ -287,10 +287,10 @@ static int gt9xx_read_reg(FAR struct gt9xx_dev_s *priv, uint8_t *reg_addr, uint8
         retries ++;
     }
     if (ret < 0)
-      {
+    {
         ierr("gt: [%s] failed freq %ld addr %x ret %d\n", __func__, priv->frequency, config->address, ret);
         return ret;
-      }
+    }
     return ret;
 }
 
@@ -302,7 +302,7 @@ static int gt9xx_write_config(FAR struct gt9xx_dev_s *priv)
 {
     int i, ret = -1;
     uint8_t check_sum = 0;
-    uint8_t offet = 0x80FE - 0x8047 + 1 ;
+    uint8_t offet = GT9XX_REG_CONFIG_CHKSUM - GT9XX_REG_CONFIG_DATA;
 
     const uint8_t* cfg_info = gt9xx_cfg_data;
     uint8_t cfg_info_len = sizeof(gt9xx_cfg_data) / sizeof(gt9xx_cfg_data[0]);
@@ -313,8 +313,6 @@ static int gt9xx_write_config(FAR struct gt9xx_dev_s *priv)
     memset(&reg_data[GT9XX_ADDR_LENGTH], 0, GT9XX_CONFIG_MAX_LENGTH);
     memcpy(&reg_data[GT9XX_ADDR_LENGTH], cfg_info, cfg_info_len);
 
-    check_sum = 0;
-
     for (i = GT9XX_ADDR_LENGTH; i < offet + GT9XX_ADDR_LENGTH; i++)
     {
         check_sum += reg_data[i];
@@ -323,7 +321,7 @@ static int gt9xx_write_config(FAR struct gt9xx_dev_s *priv)
     reg_data[offet + GT9XX_ADDR_LENGTH] = (~check_sum) + 1; //checksum
     reg_data[offet + GT9XX_ADDR_LENGTH + 1] =  1; //refresh
 
-    gt_print("Driver send config.");
+    gt_print("Driver send config.\n");
 
     ret = gt9xx_write_reg(priv, reg_data, offet + GT9XX_ADDR_LENGTH + 2);
 
@@ -420,14 +418,14 @@ static void gt9xx_data_worker(FAR void *arg)
        */
 
       if(priv->touchbuf[0] & 0xf)
-      {
-        gt_print("gt: [%s] get i2c %x reg %x %x ret %d\n", __func__, config->address, regaddr[0], regaddr[1], ret);
-        for(int i = 0; i < 10; i ++)
-          {
-              gt_print("%x ", priv->touchbuf[i]);
-          }
-        gt_print("\n");
-      }
+        {
+          gt_print("get i2c %x reg %x %x ret %d ", config->address, regaddr[0], regaddr[1], ret);
+          for(int i = 0; i < GT9XX_TOUCH_DATA_LEN; i ++)
+            {
+                gt_print("%x ", priv->touchbuf[i]);
+            }
+          gt_print("\n");
+        }
 
       sample = (FAR struct gt9xx_touch_data_s *)priv->touchbuf;
 
