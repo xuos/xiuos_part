@@ -229,7 +229,7 @@ static void touchpad_init(void)
     if(touch_fd >= 0) {
         printf("touch fd = %d\n",touch_fd);
     } else {
-        printf("open %s touch fd = %d\n",PRIV_TOUCH_DEV,touch_fd);
+        printf("open %s touch fd = %d failed.\n",PRIV_TOUCH_DEV,touch_fd);
     }
         
     /*Your code comes here*/
