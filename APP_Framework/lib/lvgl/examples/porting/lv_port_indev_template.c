@@ -12,9 +12,18 @@
 #include "lv_port_indev_template.h"
 #include "../../lvgl.h"
 
+static int touch_fd = 0;
+static TouchDataParam touch_data;
 /*********************
  *      DEFINES
  *********************/
+#define LV_USE_INDEV_TOUCHPAD 0x1u
+#define LV_USE_INDEV_MOUSE    0x2u
+#define LV_USE_INDEV_KEYPAD   0x4u
+#define LV_USE_INDEV_ENCODER  0x8u
+#define LV_USE_INDEV_BUTTUN   0x10u
+
+#define LV_USE_INDEV  LV_USE_INDEV_TOUCHPAD  ///< modify this DEFINE to enable the indev device. e.g #define LV_USE_INDEV  LV_USE_INDEV_TOUCHPAD | LV_USE_INDEV_KEYPAD
 
 /**********************
  *      TYPEDEFS
@@ -23,38 +32,61 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-
+#if (LV_USE_INDEV & LV_USE_INDEV_TOUCHPAD) == LV_USE_INDEV_TOUCHPAD
 static void touchpad_init(void);
 static void touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
 static bool touchpad_is_pressed(void);
 static void touchpad_get_xy(lv_coord_t * x, lv_coord_t * y);
+#endif
 
+#if (LV_USE_INDEV & LV_USE_INDEV_MOUSE) == LV_USE_INDEV_MOUSE
 static void mouse_init(void);
 static void mouse_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
 static bool mouse_is_pressed(void);
 static void mouse_get_xy(lv_coord_t * x, lv_coord_t * y);
+#endif
 
+#if (LV_USE_INDEV & LV_USE_INDEV_KEYPAD) == LV_USE_INDEV_KEYPAD
 static void keypad_init(void);
 static void keypad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
 static uint32_t keypad_get_key(void);
+#endif
 
+#if (LV_USE_INDEV & LV_USE_INDEV_ENCODER) == LV_USE_INDEV_ENCODER
 static void encoder_init(void);
 static void encoder_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
 static void encoder_handler(void);
+#endif
 
+#if (LV_USE_INDEV & LV_USE_INDEV_BUTTUN) == LV_USE_INDEV_BUTTUN
 static void button_init(void);
 static void button_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
 static int8_t button_get_pressed_id(void);
 static bool button_is_pressed(uint8_t id);
+#endif
 
 /**********************
  *  STATIC VARIABLES
  **********************/
+#if (LV_USE_INDEV & LV_USE_INDEV_TOUCHPAD) == LV_USE_INDEV_TOUCHPAD
 lv_indev_t * indev_touchpad;
+#endif
+
+#if (LV_USE_INDEV & LV_USE_INDEV_MOUSE) == LV_USE_INDEV_MOUSE
 lv_indev_t * indev_mouse;
+#endif
+
+#if (LV_USE_INDEV & LV_USE_INDEV_KEYPAD) == LV_USE_INDEV_KEYPAD
 lv_indev_t * indev_keypad;
+#endif
+
+#if (LV_USE_INDEV & LV_USE_INDEV_ENCODER) == LV_USE_INDEV_ENCODER
 lv_indev_t * indev_encoder;
+#endif
+
+#if (LV_USE_INDEV & LV_USE_INDEV_BUTTUN) == LV_USE_INDEV_BUTTUN
 lv_indev_t * indev_button;
+#endif
 
 static int32_t encoder_diff;
 static lv_indev_state_t encoder_state;
@@ -82,7 +114,7 @@ void lv_port_indev_init(void)
      */
 
     static lv_indev_drv_t indev_drv;
-
+#if (LV_USE_INDEV & LV_USE_INDEV_TOUCHPAD) == LV_USE_INDEV_TOUCHPAD
     /*------------------
      * Touchpad
      * -----------------*/
@@ -95,7 +127,9 @@ void lv_port_indev_init(void)
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     indev_drv.read_cb = touchpad_read;
     indev_touchpad = lv_indev_drv_register(&indev_drv);
+#endif
 
+#if (LV_USE_INDEV & LV_USE_INDEV_MOUSE) == LV_USE_INDEV_MOUSE
     /*------------------
      * Mouse
      * -----------------*/
@@ -113,7 +147,9 @@ void lv_port_indev_init(void)
     lv_obj_t * mouse_cursor = lv_img_create(lv_scr_act());
     lv_img_set_src(mouse_cursor, LV_SYMBOL_HOME);
     lv_indev_set_cursor(indev_mouse, mouse_cursor);
+#endif
 
+#if (LV_USE_INDEV & LV_USE_INDEV_KEYPAD) == LV_USE_INDEV_KEYPAD
     /*------------------
      * Keypad
      * -----------------*/
@@ -131,7 +167,11 @@ void lv_port_indev_init(void)
      *add objects to the group with `lv_group_add_obj(group, obj)`
      *and assign this input device to group to navigate in it:
      *`lv_indev_set_group(indev_keypad, group);`*/
+#endif
 
+
+
+#if (LV_USE_INDEV & LV_USE_INDEV_ENCODER) == LV_USE_INDEV_ENCODER
     /*------------------
      * Encoder
      * -----------------*/
@@ -149,7 +189,9 @@ void lv_port_indev_init(void)
      *add objects to the group with `lv_group_add_obj(group, obj)`
      *and assign this input device to group to navigate in it:
      *`lv_indev_set_group(indev_encoder, group);`*/
+#endif
 
+#if (LV_USE_INDEV & LV_USE_INDEV_BUTTUN) == LV_USE_INDEV_BUTTUN
     /*------------------
      * Button
      * -----------------*/
@@ -169,12 +211,13 @@ void lv_port_indev_init(void)
             {40, 100},  /*Button 1 -> x:40; y:100*/
     };
     lv_indev_set_button_points(indev_button, btn_points);
+#endif
 }
 
 /**********************
  *   STATIC FUNCTIONS
  **********************/
-
+#if (LV_USE_INDEV & LV_USE_INDEV_TOUCHPAD) == LV_USE_INDEV_TOUCHPAD
 /*------------------
  * Touchpad
  * -----------------*/
@@ -182,6 +225,13 @@ void lv_port_indev_init(void)
 /*Initialize your touchpad*/
 static void touchpad_init(void)
 {
+    touch_fd = PrivOpen(PRIV_TOUCH_DEV,O_RDWR);
+    if(touch_fd >= 0) {
+        printf("touch fd = %d\n",touch_fd);
+    } else {
+        printf("open %s touch fd = %d\n",PRIV_TOUCH_DEV,touch_fd);
+    }
+        
     /*Your code comes here*/
 }
 
@@ -207,8 +257,16 @@ static void touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 /*Return true is the touchpad is pressed*/
 static bool touchpad_is_pressed(void)
 {
+    int ret;
     /*Your code comes here*/
-
+    memset(&touch_data, 0 ,sizeof(TouchDataParam));
+    ret = PrivRead(touch_fd, &touch_data, 1);
+    if(ret && touch_data.x >= 0 && touch_data.x < MY_INDEV_X && touch_data.y >= 0 && touch_data.y < MY_INDEV_Y)
+    {
+        // printf("touch x %d touch y %d\n",touch_data.x,touch_data.y);
+        return true;
+    }
+    
     return false;
 }
 
@@ -217,10 +275,12 @@ static void touchpad_get_xy(lv_coord_t * x, lv_coord_t * y)
 {
     /*Your code comes here*/
 
-    (*x) = 0;
-    (*y) = 0;
+    (*x) = touch_data.x;
+    (*y) = touch_data.y;
 }
+#endif
 
+#if (LV_USE_INDEV & LV_USE_INDEV_MOUSE) == LV_USE_INDEV_MOUSE
 /*------------------
  * Mouse
  * -----------------*/
@@ -261,7 +321,11 @@ static void mouse_get_xy(lv_coord_t * x, lv_coord_t * y)
     (*x) = 0;
     (*y) = 0;
 }
+#endif
 
+
+
+#if (LV_USE_INDEV & LV_USE_INDEV_KEYPAD) == LV_USE_INDEV_KEYPAD
 /*------------------
  * Keypad
  * -----------------*/
@@ -319,7 +383,11 @@ static uint32_t keypad_get_key(void)
 
     return 0;
 }
+#endif
 
+
+
+#if (LV_USE_INDEV & LV_USE_INDEV_ENCODER) == LV_USE_INDEV_ENCODER
 /*------------------
  * Encoder
  * -----------------*/
@@ -346,7 +414,9 @@ static void encoder_handler(void)
     encoder_diff += 0;
     encoder_state = LV_INDEV_STATE_REL;
 }
+#endif
 
+#if (LV_USE_INDEV & LV_USE_INDEV_BUTTUN) == LV_USE_INDEV_BUTTUN
 /*------------------
  * Button
  * -----------------*/
@@ -402,7 +472,7 @@ static bool button_is_pressed(uint8_t id)
 
     return false;
 }
-
+#endif
 #else /*Enable this file at the top*/
 
 /*This dummy typedef exists purely to silence -Wpedantic.*/
