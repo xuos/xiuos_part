@@ -31,10 +31,6 @@
 #include "connect_usb.h"
 #endif
 
-#ifdef BSP_USING_WDT
-#include "connect_wdt.h"
-#endif
-
 #ifdef KERNEL_USER_MAIN
 #ifndef MAIN_KTASK_STACK_SIZE
 #define MAIN_KTASK_STACK_SIZE     2048
@@ -42,6 +38,10 @@
 #ifndef MAIN_KTASK_PRIORITY
 #define MAIN_KTASK_PRIORITY       (KTASK_PRIORITY_MAX / 3)
 #endif
+#endif
+
+#ifdef BSP_USING_WDT
+extern int StartWatchdog(void);
 #endif
 
 extern void CreateKServiceKTask(void);

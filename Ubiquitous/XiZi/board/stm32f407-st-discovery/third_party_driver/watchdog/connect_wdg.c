@@ -87,6 +87,17 @@ static const struct WdtDevDone dev_done =
 };
 
 /**
+ * @description: Watchdog function
+ * @return success: EOK, failure: other
+ */
+int StartWatchdog(void)
+{
+    //add feed watchdog task function
+
+    return EOK;
+}
+
+/**
  * This function                            Watchdog initialization
  *
  * @return                                      EOK
