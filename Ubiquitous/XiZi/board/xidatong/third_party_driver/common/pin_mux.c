@@ -995,6 +995,21 @@ void BOARD_InitUartPins(void)
         IOMUXC_GPIO_AD_B1_03_LPUART2_RX,
         0x10B0u);
 #endif
+
+#ifdef BSP_USING_LPUART8
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_10_LPUART8_TX,
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_11_LPUART8_RX,
+        0U);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_10_LPUART8_TX,
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_11_LPUART8_RX,
+        0x10B0u);
+#endif
 }
 
 /***********************************************************************************************************************

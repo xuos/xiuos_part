@@ -43,6 +43,7 @@ static void Ec200tPowerSet(void){ return; }
 #else
 static void Ec200tPowerSet(void)
 {
+#ifdef ADAPTER_EC200T_USING_PWRKEY
     int pin_fd;
     pin_fd = PrivOpen(ADAPTER_EC200T_PIN_DRIVER, O_RDWR);
     if (pin_fd < 0) {
@@ -73,6 +74,7 @@ static void Ec200tPowerSet(void)
     PrivClose(pin_fd);
 
     PrivTaskDelay(10000);
+#endif
 }
 #endif
 
