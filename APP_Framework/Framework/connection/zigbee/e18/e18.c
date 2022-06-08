@@ -45,7 +45,7 @@ static int E18HardwareModeGet()
     int ret = 0;
     int pin_fd;
 
-    pin_fd = PrivOpen(ADAPTER_BC28_PIN_DRIVER, O_RDWR);
+    pin_fd = PrivOpen(ADAPTER_E18_PIN_DRIVER, O_RDWR);
 
     struct PinStat pin_stat;
     pin_stat.pin = ADAPTER_E18_MODEPIN;
@@ -175,7 +175,7 @@ static int E18NetworkModeConfig(struct Adapter *adapter)
     }
 
 out:
-    if(E18_AS_HEX_MODE == mode){
+    if(E18_AS_AT_MODE == mode){
         AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
     }
     
@@ -203,7 +203,9 @@ static int E18NetRoleConfig(struct Adapter *adapter)
             goto out;
         }
     }
-    
+
+    //wait 2second
+    PrivTaskDelay(2000);
 
     switch (adapter->net_role)
     {
@@ -240,7 +242,7 @@ static int E18NetRoleConfig(struct Adapter *adapter)
     }
 
 out:
-    if(E18_AS_HEX_MODE == mode) {
+    if(E18_AS_AT_MODE == mode) {
         AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
     }
 
@@ -382,7 +384,7 @@ static int E18Join(struct Adapter *adapter, unsigned char *priv_net_group)
 
     // }
     if(!ret){
-        if(E18_AS_HEX_MODE == mode) {
+        if(E18_AS_AT_MODE == mode) {
             ret = AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
             if(ret < 0) {
                 printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_exit);

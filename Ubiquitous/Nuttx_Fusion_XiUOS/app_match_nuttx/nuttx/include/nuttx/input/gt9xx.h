@@ -40,12 +40,14 @@
 #define GT9XX_CONFIG_MAX_LENGTH  240
 
 #define GT9XX_REG_BAK_REF        0x99D0
-#define GT9XX_REG_MAIN_CLK       0x8020
 #define GT9XX_REG_CHIP_TYPE      0x8000
-#define GT9XX_REG_HAVE_KEY       0x804E
-#define GT9XX_REG_MATRIX_DRVNUM  0x8069
-#define GT9XX_REG_MATRIX_SENNUM  0x806A
+#define GT9XX_REG_MAIN_CLK       0x8020
 #define GT9XX_REG_COMMAND        0x8040
+#define GT9XX_REG_CONFIG_DATA    0x8047
+#define GT9XX_REG_CONFIG_CHKSUM  0x80FF
+#define GT9XX_REG_VERSION        0x8140
+#define GT9XX_REG_SENSOR_ID      0x814A
+#define GT9XX_REG_READ_COOR      0x814E
 
 #define GT9XX_COMMAND_READSTATUS 0
 #define GT9XX_COMMAND_DIFFERENCE 1
@@ -53,16 +55,6 @@
 #define GT9XX_COMMAND_UPDATE     3
 #define GT9XX_COMMAND_CALCULATE  4
 #define GT9XX_COMMAND_TURNOFF    5
-
-#define GT9XX_REG_READ_COOR      0x814E
-#define GT9XX_REG_SLEEP          0x8040
-#define GT9XX_REG_SENSOR_ID      0x814A
-#define GT9XX_REG_CONFIG_DATA    0x8047
-#define GT9XX_REG_VERSION        0x8140
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
 
 enum touch_event_e
 {
@@ -76,10 +68,10 @@ enum touch_event_e
 
 struct gt9xx_touch_point_s
 {
-  uint8_t xl;
   uint8_t xh;
-  uint8_t yl;
+  uint8_t xl;
   uint8_t yh;
+  uint8_t yl;
   uint8_t weight;
   uint8_t area;
 };
@@ -92,59 +84,16 @@ struct gt9xx_touch_data_s
   struct gt9xx_touch_point_s touch[GT9XX_MAX_TOUCHES];
 };
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration ************************************************************/
-
 /* Maximum number of threads than can be waiting for POLL events */
 
 #ifndef CONFIG_GT9XX_NPOLLWAITERS
 #  define CONFIG_GT9XX_NPOLLWAITERS 2
 #endif
 
-/* Check for some required settings.  This can save the user a lot of time
- * in getting the right configuration.
- */
-
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
-#endif
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* A reference to a structure of this type must be passed to the GT9XX
- * driver.  This structure provides information about the configuration
- * of the FT5x06 and provides some board-specific hooks.
- *
- * Memory for this structure is provided by the caller.  It is not copied
- * by the driver and is presumed to persist while the driver is active. The
- * memory must be writeable because, under certain circumstances, the driver
- * may modify frequency or X plate resistance values.
- */
-
 struct gt9xx_config_s
 {
-  /* Device characterization */
-
   uint8_t  address;    /* 7-bit I2C address (only bits 0-6 used) */
   uint32_t frequency;  /* Default I2C frequency */
-
-  /* IRQ/GPIO access callbacks.  These operations all hidden behind
-   * callbacks to isolate the GT9XX driver from differences in GPIO
-   * interrupt handling by varying boards and MCUs.
-   *
-   * attach  - Attach an FT5x06 interrupt handler to a GPIO interrupt
-   * enable  - Enable or disable a GPIO interrupt
-   * clear   - Acknowledge/clear any pending GPIO interrupt
-   * wakeup  - Issue WAKE interrupt to FT5x06 to change the FT5x06 from
-   *           Hibernate to Active mode.
-   * nreset  - Control the chip reset pin (active low)
-
-   */
 
 #ifndef CONFIG_GT9XX_POLLMODE
   int  (*attach)(FAR const struct gt9xx_config_s *config, xcpt_t isr,
@@ -156,7 +105,6 @@ struct gt9xx_config_s
   void (*nreset)(FAR const struct gt9xx_config_s *config,
                  bool state);
 };
-
 
 int gt9xx_register(FAR struct i2c_master_s *i2c,
                     FAR const struct gt9xx_config_s *config, int minor);
