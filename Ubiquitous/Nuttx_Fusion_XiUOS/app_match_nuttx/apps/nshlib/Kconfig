@@ -684,6 +684,10 @@ config NSH_DISABLE_ADAPTER_BLUETOOTH_TEST
 	bool "Disable hc08  AdapterBlueToothTest."
 	default n
 
+config NSH_DISABLE_ADAPTER_WIFI_TEST
+	bool "Disable esp07s  AdapterWIFITest."
+	default n
+
 config NSH_DISABLE_K210_FFT
 	bool "Disable the K210 fft device."
 	default n
