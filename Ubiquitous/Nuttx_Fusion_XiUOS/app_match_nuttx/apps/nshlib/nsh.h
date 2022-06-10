@@ -22,7 +22,7 @@
 * @file nsh.h
 * @brief nuttx source code
 *                 https://github.com/apache/incubator-nuttx-apps
-* @version 10.2.0 
+* @version 10.2.0
 * @author AIIT XUOS Lab
 * @date 2022-03-17
 */
@@ -1504,6 +1504,10 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
 
 #if defined(CONFIG_ADAPTER_BLUETOOTH_HC08) && !defined(CONFIG_NSH_DISABLE_ADAPTER_BLUETOOTH_TEST)
   int cmd_AdapterBlueToothTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_ADAPTER_ESP07S_WIFI) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
+  int cmd_AdapterWifiTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
