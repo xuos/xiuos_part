@@ -2,7 +2,7 @@
 
 current_path=$(pwd)
 xizi_path=Ubiquitous/XiZi
-board=cortex-m4-emulator
+board=ok1052-c
 qemu_machine=netduinoplus2
 
 run_in_docker() {

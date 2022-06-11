@@ -137,7 +137,7 @@ milliseconds has elapsed.
 //------------------------------------------------------------------------------
 void target_msleep(UINT32 milliSeconds_p)
 {
-    DelayKTask(milliSeconds_p);
+    MdelayKTask(milliSeconds_p);
 }
 
 //------------------------------------------------------------------------------

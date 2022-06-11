@@ -177,7 +177,7 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
         return kErrorEdrvInit;
     }
 
-    edrvInstance_l.sock = open(ETHERNET_UART_NAME, O_RDWR);
+    edrvInstance_l.sock = open("/dev/uart2_dev2", O_RDWR);
     if (edrvInstance_l.sock < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() cannot open socket. Error = %s\n", __func__, strerror(errno));

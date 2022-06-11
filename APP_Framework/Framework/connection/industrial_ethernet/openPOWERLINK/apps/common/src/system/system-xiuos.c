@@ -195,37 +195,7 @@ milliseconds has elapsed.
 //------------------------------------------------------------------------------
 void system_msleep(unsigned int milliSeconds_p)
 {
-    struct  timeval timeout;
-    fd_set          readFds;
-    int             maxFd;
-    int             selectRetVal;
-    unsigned int    seconds;
-    unsigned int    microSeconds;
-
-    // initialize file descriptor set
-    maxFd = 0 + 1;
-    FD_ZERO(&readFds);
-
-    // Calculate timeout values
-    seconds = milliSeconds_p / 1000;
-    microSeconds = (milliSeconds_p - (seconds * 1000)) * 1000;
-
-    // initialize timeout value
-    timeout.tv_sec = seconds;
-    timeout.tv_usec = microSeconds;
-
-    selectRetVal = select(maxFd, &readFds, NULL, NULL, &timeout);
-    switch (selectRetVal)
-    {
-        case 0:     // select timeout occurred, no packet received
-            break;
-
-        case -1:    // select error occurred
-            break;
-
-        default:    // packet available for receive
-            break;
-    }
+    MdelayKTask(milliSeconds_p);
 }
 
 #if defined(CONFIG_USE_SYNCTHREAD)
@@ -387,7 +357,7 @@ static void* firmwareManagerThread(void* arg)
     {
         pInstance->pfnFwmCb();
 
-        DelayKTask(pInstance->interval * 1000);
+        MdelayKTask(pInstance->interval * 1000);
     }
 
     return NULL;
