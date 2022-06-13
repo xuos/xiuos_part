@@ -7,6 +7,9 @@ endif
 ifeq ($(CONFIG_BSP_USING_SEMC),y)
   SRC_DIR += semc
 endif
+ifeq ($(CONFIG_BSP_USING_I2C),y)
+  SRC_DIR += i2c
+endif
 
 ifeq ($(CONFIG_BSP_USING_LPUART),y)
   SRC_DIR += uart
@@ -22,6 +25,14 @@ endif
 
 ifeq ($(CONFIG_BSP_USING_USB),y)
   SRC_DIR += usb
+endif
+
+ifeq ($(CONFIG_BSP_USING_LCD),y)
+  SRC_DIR += lcd
+endif
+
+ifeq ($(CONFIG_BSP_USING_TOUCH),y)
+  SRC_DIR += touch
 endif
 
 ifeq ($(CONFIG_BSP_USING_WDT),y)
