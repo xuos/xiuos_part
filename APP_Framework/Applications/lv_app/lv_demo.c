@@ -1,12 +1,3 @@
-/*
- * Copyright (c) 2006-2021, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Change Logs:
- * Date           Author        Notes
- * 2021-10-17     Meco Man      First version
- */
 #include <lvgl.h>
 #include <lv_port_indev_template.h>
 #include "lv_demo_calendar.h"
@@ -22,11 +13,11 @@ extern void lv_example_aoteman(void);
 void* lvgl_thread(void *parameter)
 {
     /* display demo; you may replace with your LVGL application at here */
-    // lv_demo_calendar();
+    lv_demo_calendar();
     // lv_example_img_1();
     // lv_example_chart_2();
     // lv_example_line_1();
-    lv_example_aoteman();
+    // lv_example_aoteman();
     /* handle the tasks of LVGL */
     while(1)
     {

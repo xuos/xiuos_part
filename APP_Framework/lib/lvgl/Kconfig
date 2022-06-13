@@ -1,7 +1,13 @@
 # Kconfig file for LVGL v8.0
 menuconfig LIB_LV
     bool "Enable LittleVGL "
-default n
+    default n
+
+    menu "LVGL configuration"
+       config LV_CONF_MINIMAL
+            bool "LVGL minimal configuration."
+            default n
+    endmenu 
 
 if 0
     menu "LVGL configuration"
