@@ -1812,6 +1812,38 @@ config DEBUG_VIDEO_INFO
                 Enable video informational output to SYSLOG.
 
 endif # DEBUG_VIDEO
+
+config DEBUG_CH438
+	bool "CH438 Debug Features"
+	default n
+	---help---
+		Enable CH438 debug features.
+
+if DEBUG_CH438
+
+config DEBUG_CH438_ERROR
+	bool "CH438 Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable CH438 error output to SYSLOG.
+
+config DEBUG_CH438_WARN
+	bool "CH438 Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable CH438 warning output to SYSLOG.
+
+config DEBUG_CH438_INFO
+	bool "CH438 Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable CH438 informational output to SYSLOG.
+
+endif # DEBUG_CH438
+
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK

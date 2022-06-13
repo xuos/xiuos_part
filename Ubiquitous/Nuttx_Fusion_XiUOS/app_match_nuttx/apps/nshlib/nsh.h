@@ -22,7 +22,7 @@
 * @file nsh.h
 * @brief nuttx source code
 *                 https://github.com/apache/incubator-nuttx-apps
-* @version 10.2.0 
+* @version 10.2.0
 * @author AIIT XUOS Lab
 * @date 2022-03-17
 */
@@ -1417,6 +1417,10 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
                     FAR void *arg);
 #endif
 
+#if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)
+  int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
   int cmd_Hcho1os(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
@@ -1482,12 +1486,28 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
   int cmd_recvzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
-#if defined(CONFIG_ADAPTER_SX1278) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
+#if (defined(CONFIG_ADAPTER_LORA_SX1278) || defined(CONFIG_ADAPTER_LORA_E220)) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
   int cmd_AdapterLoraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
 #if defined(CONFIG_ADAPTER_4G_EC200T) && !defined(CONFIG_NSH_DISABLE_ADAPTER_4GTEST)
   int cmd_Adapter4GTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_RECEIVE)
+  int cmd_E220LoraReceive(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_SEND)
+  int cmd_E220LoraSend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_ADAPTER_BLUETOOTH_HC08) && !defined(CONFIG_NSH_DISABLE_ADAPTER_BLUETOOTH_TEST)
+  int cmd_AdapterBlueToothTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_ADAPTER_ESP07S_WIFI) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
+  int cmd_AdapterWifiTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)

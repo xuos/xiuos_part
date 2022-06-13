@@ -25,6 +25,11 @@
 
 #define LEN_PARA_BUF 128
 
+#ifdef ADD_NUTTX_FETURES
+#define EOK 0
+#define x_err_t int
+#endif
+
 static int Esp07sWifiSetDown(struct Adapter *adapter_at);
 
 /**
@@ -116,7 +121,7 @@ static int Esp07sWifiOpen(struct Adapter *adapter)
 
     AtSetReplyEndChar(adapter->agent,'O','K');
 
-    ADAPTER_DEBUG("Esp07sWifi open done\n"); 
+    ADAPTER_DEBUG("Esp07sWifi open done\n");
 
     return 0;
 }
@@ -196,13 +201,13 @@ static int Esp07sWifiSetUp(struct Adapter *adapter)
     }
     PrivTaskDelay(2000);
     /* config as softAP+station mode */
-    ret = AtCmdConfigAndCheck(agent, "AT+CWMODE=3\r\n", "OK"); 
+    ret = AtCmdConfigAndCheck(agent, "AT+CWMODE=3\r\n", "OK");
     if(ret < 0) {
         printf("%s %d cmd[AT+CWMODE=3] config failed!\n",__func__,__LINE__);
         return -1;
     }
     PrivTaskDelay(2000);
-    /* connect the router */ 
+    /* connect the router */
     memset(cmd,0,sizeof(cmd));
     strncpy(cmd,"AT+CWJAP=",strlen("AT+CWJAP="));
     strncat(cmd,"\"",1);
@@ -222,7 +227,7 @@ static int Esp07sWifiSetUp(struct Adapter *adapter)
         return -1;
     }
 
-    /* check the wifi ip address */ 
+    /* check the wifi ip address */
     ATReplyType reply = CreateATReply(256);
     if (NULL == reply) {
         printf("%s %d at_create_resp failed!\n",__func__,__LINE__);
@@ -291,7 +296,7 @@ static int Esp07sWifiSetAddr(struct Adapter *adapter, const char *ip, const char
     strncat(cmd,"\"",1);
     strcat(cmd,"\r\n");
 
-    ret = AtCmdConfigAndCheck(adapter->agent, cmd, "OK"); 
+    ret = AtCmdConfigAndCheck(adapter->agent, cmd, "OK");
     if(ret < 0) {
         printf("%s %d cmd[%s] config ip failed!\n",__func__,__LINE__,cmd);
         return -1;
@@ -339,7 +344,7 @@ static int Esp07sWifiNetstat(struct Adapter *adapter)
     int ret = 0;
     char *result = NULL;
 
-    /* check the wifi ip address */ 
+    /* check the wifi ip address */
     ATReplyType reply = CreateATReply(256);
     if (NULL == reply) {
         printf("%s %d at_create_resp failed!\n",__func__,__LINE__);
@@ -359,7 +364,7 @@ static int Esp07sWifiNetstat(struct Adapter *adapter)
         goto __exit;
     }
     printf("[%s]\n", result);
-    
+
 __exit:
     DeleteATReply(reply);
 
@@ -380,7 +385,7 @@ static int Esp07sWifiConnect(struct Adapter *adapter, enum NetRoleType net_role,
     int ret = EOK;
     char cmd[LEN_PARA_BUF];
     struct ATAgent *agent = adapter->agent;
-    
+
     memset(cmd,0,sizeof(cmd));
     if(adapter->socket.protocal == SOCKET_PROTOCOL_TCP && net_role == CLIENT) //esp07s as tcp client to connect server
     {
@@ -397,13 +402,13 @@ static int Esp07sWifiConnect(struct Adapter *adapter, enum NetRoleType net_role,
         strncat(cmd, port, strlen(port));
         strcat(cmd,"\r\n");
 
-        ret = AtCmdConfigAndCheck(agent, cmd, "OK"); 
+        ret = AtCmdConfigAndCheck(agent, cmd, "OK");
         if(ret < 0) {
             printf("%s %d tcp connect [%s] failed!\n",__func__,__LINE__,ip);
             return -1;
         }
-    } 
-    else if(adapter->socket.protocal == SOCKET_PROTOCOL_UDP) 
+    }
+    else if(adapter->socket.protocal == SOCKET_PROTOCOL_UDP)
     {
         //e.g. AT+CIPSTART="UDP","192.168.3.116",8080,2233,0  UDP protocol, server IP, port,local port,udp mode
         strncpy(cmd,"AT+CIPSTART=",strlen("AT+CIPSTART="));
@@ -422,7 +427,7 @@ static int Esp07sWifiConnect(struct Adapter *adapter, enum NetRoleType net_role,
         strncat(cmd, "0", 1); ///< udp transparent transmission mode must be 0
         strcat(cmd,"\r\n");
 
-        ret = AtCmdConfigAndCheck(agent, cmd, "OK"); 
+        ret = AtCmdConfigAndCheck(agent, cmd, "OK");
         if(ret < 0) {
             printf("%s %d udp connect [%s] failed!\n",__func__,__LINE__,ip);
             return -1;
@@ -455,17 +460,17 @@ static int Esp07sWifiDisconnect(struct Adapter *adapter)
     memset(cmd,0,sizeof(cmd));
 
     /* step1: stop transparent transmission mode */
-    ATOrderSend(agent, REPLY_TIME_OUT, NULL, "+++\r\n"); 
+    ATOrderSend(agent, REPLY_TIME_OUT, NULL, "+++\r\n");
 
     /* step2: exit transparent transmission mode */
-    ret = AtCmdConfigAndCheck(agent, "AT+CIPMODE=0\r\n", "OK"); 
+    ret = AtCmdConfigAndCheck(agent, "AT+CIPMODE=0\r\n", "OK");
     if(ret < 0) {
         printf("%s %d cmd[AT+CIPMODE=0] exit failed!\n",__func__,__LINE__);
         return -1;
     }
 
     /* step3: disconnect */
-    ret = AtCmdConfigAndCheck(agent, "AT+CIPCLOSE\r\n", "OK"); 
+    ret = AtCmdConfigAndCheck(agent, "AT+CIPCLOSE\r\n", "OK");
     if(ret < 0) {
         printf("%s %d cmd [AT+CIPCLOSE] disconnect failed!\n",__func__,__LINE__);
         return -1;
@@ -490,7 +495,7 @@ static int Esp07sWifiIoctl(struct Adapter *adapter, int cmd, void *args)
         case CONFIG_WIFI_RESTORE: /* resore wifi */
             ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "AT+RESTORE\r\n");
             break;
-        case CONFIG_WIFI_BAUDRATE: 
+        case CONFIG_WIFI_BAUDRATE:
             /* step1: config mcu uart*/
             baud_rate = *((uint32_t *)args);
 
@@ -525,14 +530,14 @@ static int Esp07sWifiIoctl(struct Adapter *adapter, int cmd, void *args)
             strncat(at_cmd, ",", 1);
             strncat(at_cmd, "8", 1);
             strncat(at_cmd, ",", 1);
-            strncat(at_cmd, "1", 1); 
+            strncat(at_cmd, "1", 1);
             strncat(at_cmd, ",", 1);
             strncat(at_cmd, "0", 1);
             strncat(at_cmd, ",", 1);
             strncat(at_cmd, "3", 1);
             strcat(at_cmd,"\r\n");
 
-            ret = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK"); 
+            ret = AtCmdConfigAndCheck(adapter->agent, at_cmd, "OK");
             if(ret < 0) {
                 printf("%s %d cmd [%s] config uart failed!\n",__func__,__LINE__,at_cmd);
                 ret = -1;
@@ -541,7 +546,7 @@ static int Esp07sWifiIoctl(struct Adapter *adapter, int cmd, void *args)
             break;
         default:
             ret = -1;
-            break;  
+            break;
     }
 
     return ret;
@@ -572,7 +577,7 @@ static const struct IpProtocolDone esp07s_wifi_done =
 AdapterProductInfoType Esp07sWifiAttach(struct Adapter *adapter)
 {
     struct AdapterProductInfo *product_info = PrivMalloc(sizeof(struct AdapterProductInfo));
-    if (!product_info) 
+    if (!product_info)
     {
         printf("Esp07sWifiAttach Attach malloc product_info error\n");
         PrivFree(product_info);

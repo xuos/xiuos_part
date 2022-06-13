@@ -89,7 +89,7 @@ int Adapter4GTest(void)
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_4G_NAME);
 
 #ifdef ADAPTER_EC200T
-    //Using Hang Xiao server to test 4G Socket connection
+    /* Using Public TCP server to  test 4G Socket connection */
     uint8 server_addr[64] = "120.76.100.197";
     uint8 server_port[64] = "10002";
 

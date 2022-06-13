@@ -37,6 +37,30 @@ endif
 
 if ADD_NUTTX_FETURES
 
+        config ADAPTER_E220_M0_PATH
+                string "E220 M0 pin device"
+                default "/dev/gpout0"
+
+        config ADAPTER_E220_M1_PATH
+                string "E220 M1 pin device"
+                default "/dev/gpout1"
+        
+        config ADAPTER_E220_DRIVER_EXTUART
+                bool "Using extra uart to support lora"
+                default y
+
+        config ADAPTER_E220_DRIVER
+                string "E220 device uart driver path"
+                default "/dev/ttyS3"
+                depends on !ADAPTER_E220_DRIVER_EXTUART
+
+        if ADAPTER_E220_DRIVER_EXTUART                    
+                config ADAPTER_E220_DRIVER
+                string "E220 device extra uart driver path"
+                default "/dev/extuart_dev3"
+
+        endif
+
 endif
 
 if ADD_RTTHREAD_FETURES

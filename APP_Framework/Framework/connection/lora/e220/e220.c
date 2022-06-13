@@ -21,7 +21,7 @@
 #include <adapter.h>
 
 #define E220_GATEWAY_ADDRESS 0xFFFF
-#define E220_CHANNEL 0x04
+#define E220_CHANNEL 0x05
 
 #ifdef AS_LORA_GATEWAY_ROLE
 #define E220_ADDRESS E220_GATEWAY_ADDRESS
@@ -46,6 +46,60 @@ enum E220LoraMode
  * @param mode Lora working mode
  * @return NULL
  */
+#ifdef ADD_NUTTX_FETURES
+static void E220LoraModeConfig(enum E220LoraMode mode)
+{
+    int m0_fd, m1_fd;
+
+    //delay 1s , wait AUX ready
+    PrivTaskDelay(1000);
+    m0_fd = PrivOpen(ADAPTER_E220_M0_PATH, O_RDWR);
+    if (m0_fd < 0) {
+        printf("open %s error\n", ADAPTER_E220_M0_PATH);
+        return;
+    }
+
+    m1_fd = PrivOpen(ADAPTER_E220_M1_PATH, O_RDWR);
+    if (m1_fd < 0) {
+        printf("open %s error\n", ADAPTER_E220_M1_PATH);
+        return;
+    }
+
+    //Both M0 and M1 GPIO are outputs mode, set M0 and M1 high or low
+    switch (mode)
+    {
+    case DATA_TRANSFER_MODE:
+        PrivIoctl(m1_fd, GPIOC_WRITE, (unsigned long)GPIO_LOW);
+        PrivIoctl(m0_fd, GPIOC_WRITE, (unsigned long)GPIO_LOW);
+        break;
+
+    case WOR_SEND_MODE:
+        PrivIoctl(m1_fd, GPIOC_WRITE, (unsigned long)GPIO_LOW);
+        PrivIoctl(m0_fd, GPIOC_WRITE, (unsigned long)GPIO_HIGH);
+        break;
+    
+    case WOR_RECEIVE_MODE:
+        PrivIoctl(m1_fd, GPIOC_WRITE, (unsigned long)GPIO_HIGH);
+
+        PrivIoctl(m0_fd, GPIOC_WRITE,(unsigned long)GPIO_LOW);
+        break;
+
+    case CONFIGURE_MODE_MODE:
+        PrivIoctl(m1_fd, GPIOC_WRITE, (unsigned long)GPIO_HIGH);
+        PrivIoctl(m0_fd, GPIOC_WRITE, (unsigned long)GPIO_HIGH);
+        break;
+    
+    default:
+        break;
+    }
+
+    PrivClose(m0_fd);
+    PrivClose(m1_fd);
+
+    //delay 20ms , wait mode switch done
+    PrivTaskDelay(20);
+}
+#else
 static void E220LoraModeConfig(enum E220LoraMode mode)
 {
     //delay 1s , wait AUX ready
@@ -126,6 +180,7 @@ static void E220LoraModeConfig(enum E220LoraMode mode)
     //delay 20ms , wait mode switch done
     PrivTaskDelay(20);
 }
+#endif
 
 /**
  * @description: Switch baud rate to register bit
@@ -263,6 +318,25 @@ static int E220GetRegisterParam(uint8 *buf)
  * @param adapter - Lora device pointer
  * @return success: 0, failure: -1
  */
+#ifdef ADD_NUTTX_FETURES
+static int E220Open(struct Adapter *adapter)
+{
+    /*step1: open e220 uart port*/
+    adapter->fd = PrivOpen(ADAPTER_E220_DRIVER, O_RDWR);
+    if (adapter->fd < 0) {
+        printf("E220Open get uart %s fd error\n", ADAPTER_E220_DRIVER);
+        return -1;
+    }
+
+    PrivIoctl(adapter->fd, OPE_INT, (unsigned long)BAUD_RATE_9600);
+    E220SetRegisterParam(adapter, E220_ADDRESS, E220_CHANNEL, E220_UART_BAUD_RATE);
+    PrivIoctl(adapter->fd, OPE_INT, (unsigned long)E220_UART_BAUD_RATE);
+
+    ADAPTER_DEBUG("E220Open done\n");
+
+    return 0;
+}
+#else
 static int E220Open(struct Adapter *adapter)
 {
     /*step1: open e220 uart port*/
@@ -316,6 +390,7 @@ static int E220Open(struct Adapter *adapter)
 
     return 0;
 }
+#endif
 
 /**
  * @description: Close E220 uart function
@@ -520,6 +595,7 @@ static void LoraRead(void *parameter)
 	}
 }
 
+#ifdef ADD_XIZI_FETURES
 static void LoraTest(void)
 {
     int ret;
@@ -554,3 +630,40 @@ static void LoraSend(int argc, char *argv[])
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
 LoraSend, LoraSend, lora send message);
+#endif
+
+#ifdef ADD_NUTTX_FETURES
+void E220LoraReceive(void)
+{
+    int ret;
+    pthread_t thread; 
+    pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
+    attr.priority = 80;
+    attr.stacksize = 2048;
+
+    LoraOpen(); 
+
+    ret = PrivTaskCreate(&thread, &attr, (void*)LoraRead, NULL);
+    if (ret < 0) {
+        printf("task lora read create failed, status=%d\n", ret);
+		return;
+	} 
+}
+void E220LoraSend(int argc, char *argv[])
+{
+    struct Adapter *adapter = AdapterDeviceFindByName(ADAPTER_LORA_NAME);
+    if (NULL == adapter) {
+        printf("LoraRead find lora adapter error\n");
+        return;
+    }
+
+    if (argc == 2) {
+        char Msg[256] = {0};
+        strncpy(Msg, argv[1], 256);
+
+        E220Open(adapter);
+        E220Send(adapter, Msg, strlen(Msg));
+        E220Close(adapter);
+    }
+}
+#endif
