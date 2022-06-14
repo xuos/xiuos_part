@@ -22,7 +22,7 @@
 * @file nsh_command.c
 * @brief nuttx source code
 *                 https://github.com/apache/incubator-nuttx-apps
-* @version 10.2.0 
+* @version 10.2.0
 * @author AIIT XUOS Lab
 * @date 2022-03-17
 */
@@ -590,6 +590,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
 #endif
 
+#if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)
+  { "ch438",    cmd_Ch438,     1, 1, "[ch438 demo cmd.]" },
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
   { "hcho1os",       cmd_Hcho1os,       1, 1, "[get the concentration of formaldehyde with sensor tb600b_wq_hcho1os.]" },
 #endif
@@ -654,12 +658,28 @@ static const struct cmdmap_s g_cmdmap[] =
   { "recvzigbee",       cmd_recvzigbee,       1, 1, "[receive message.]" },
 #endif
 
-#if defined(CONFIG_ADAPTER_SX1278) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
+#if (defined(CONFIG_ADAPTER_LORA_SX1278) || defined(CONFIG_ADAPTER_LORA_E220)) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
   { "AdapterLoraTest",       cmd_AdapterLoraTest,       1, 1, "[Lora sx128 test.]" },
 #endif
 
 #if defined(CONFIG_ADAPTER_4G_EC200T) && !defined(CONFIG_NSH_DISABLE_ADAPTER_4GTEST)
   { "Adapter4GTest",       cmd_Adapter4GTest,       1, 1, "[4G ec200t test.]" },
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_RECEIVE)
+  { "E220Receive",       cmd_E220LoraReceive,       1, 1, "[e220 lora receive.]" },
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_SEND)
+  { "E220Send",       cmd_E220LoraSend,       1, 2, "[e220loraSend <message>]" },
+#endif
+
+#if defined(CONFIG_ADAPTER_BLUETOOTH_HC08) && !defined(CONFIG_NSH_DISABLE_ADAPTER_BLUETOOTH_TEST)
+  { "AdapterBlueToothTest",       cmd_AdapterBlueToothTest,       1, 1, "[BlueTooth hc08 test.]" },
+#endif
+
+#if defined(CONFIG_ADAPTER_ESP07S_WIFI) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
+  { "wifitest",       cmd_AdapterWifiTest,       1, 8, "[WIFI test.]" },
 #endif
 
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)

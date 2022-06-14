@@ -36,7 +36,18 @@
 #include "nsh.h"
 #include "nsh_console.h"
 
-extern int FrameworkInit(void);
+/****************************************************************************
+ * Name: cmd_Ch438
+ ****************************************************************************/
+#if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)
+extern void CH438Demo(void);
+int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    CH438Demo();
+    return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: cmd_Hcho1os
@@ -272,7 +283,18 @@ int cmd_recvzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 }
 #endif
 
-#if defined(CONFIG_ADAPTER_SX1278) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
+#if defined(CONFIG_ADAPTER_ESP07S_WIFI) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
+extern int AdapterWifiTest(int argc, char *argv[]);
+int cmd_AdapterWifiTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    AdapterWifiTest(argc, argv);
+    return OK;
+}
+#endif
+
+#if (defined(CONFIG_ADAPTER_LORA_SX1278) || defined(CONFIG_ADAPTER_LORA_E220)) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
 extern int AdapterLoraTest(void);
 int cmd_AdapterLoraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
@@ -290,6 +312,39 @@ int cmd_Adapter4GTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
     Adapter4GTest();
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_RECEIVE)
+void E220LoraReceive(void);
+int cmd_E220LoraReceive(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    E220LoraReceive();
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_SEND)
+extern void E220LoraSend(int argc, char *argv[]);
+int cmd_E220LoraSend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    E220LoraSend(argc,argv);
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_ADAPTER_BLUETOOTH_HC08) && !defined(CONFIG_NSH_DISABLE_ADAPTER_BLUETOOTH_TEST)
+extern int AdapterBlueToothTest(void);
+int cmd_AdapterBlueToothTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    AdapterBlueToothTest();
     return OK;
 }
 #endif

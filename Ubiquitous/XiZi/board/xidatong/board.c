@@ -44,6 +44,10 @@ Modification:
 #include <connect_uart.h>
 #endif
 
+#ifdef BSP_USING_I2C
+#include <connect_i2c.h>
+#endif
+
 #ifdef BSP_USING_CH438
 #include <connect_ch438.h>
 #endif
@@ -65,6 +69,14 @@ extern int ExtSramInit(void);
 
 #ifdef BSP_USING_LWIP
 extern int ETH_BSP_Config();
+#endif
+
+#ifdef BSP_USING_LCD
+extern int Imxrt1052HwLcdInit(void);
+#endif
+
+#ifdef BSP_USING_TOUCH
+extern int HwTouchInit();
 #endif
 
 void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength)
@@ -277,27 +289,56 @@ void SysTick_Handler(int irqn, void *arg)
 }
 DECLARE_HW_IRQ(SYSTICK_IRQN, SysTick_Handler, NONE);
 
+struct InitSequenceDesc _board_init[] = 
+{
+#ifdef BSP_USING_GPIO
+    { "hw_pin", Imxrt1052HwGpioInit },
+#endif
+
+#ifdef BSP_USING_CH438
+    {"ch438", Imxrt1052HwCh438Init()},
+#endif
+
+#ifdef BSP_USING_SDIO
+	{ "sdio", Imxrt1052HwSdioInit },
+#endif
+
+#ifdef BSP_USING_I2C
+    { "hw_i2c", Imxrt1052HwI2cInit },
+#endif
+
+#ifdef BSP_USING_LCD
+	{ "hw_lcd", Imxrt1052HwLcdInit },
+#endif
+
+#ifdef BSP_USING_TOUCH
+    {"touch", HwTouchInit },
+#endif
+
+#ifdef BSP_USING_LWIP
+    {"ETH_BSP", ETH_BSP_Config},
+#endif
+
+#ifdef BSP_USING_WDT
+    { "hw_wdt", Imxrt1052HwWdgInit },
+#endif
+	{ " NONE ",NONE },
+};
+
 /**
  * This function will initial imxrt1050 board.
  */
 void InitBoardHardware()
 {
+    int i = 0;
+	int ret = 0;
+
     BOARD_ConfigMPU();
     BOARD_InitPins();
     BOARD_BootClockRUN();
 
-#ifndef BSP_USING_LWIP
     NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
     SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
-#endif
-
-#ifdef BSP_USING_GPIO
-    Imxrt1052HwGpioInit();
-#endif
-
-#ifdef BSP_USING_LPUART
-    BOARD_InitUartPins();
-#endif
 
     InitBoardMemory((void *)HEAP_BEGIN, (void *)HEAP_END);
 
@@ -317,26 +358,19 @@ void InitBoardHardware()
 #endif
 #endif
 
-#ifdef BSP_USING_LWIP
-    ETH_BSP_Config();
-#endif
-
 #ifdef BSP_USING_LPUART
     Imxrt1052HwUartInit();
 #endif
 
     InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
+    KPrintf("\nconsole init completed.\n");
+    KPrintf("board initialization......\n");
 
-#ifdef BSP_USING_CH438
-    Imxrt1052HwCh438Init();
-#endif
-
-#ifdef BSP_USING_SDIO
-    Imxrt1052HwSdioInit();
-#endif
-
-#ifdef BSP_USING_WDT 
-    Imxrt1052HwWdgInit();
-#endif
+    for(i = 0; _board_init[i].fn != NONE; i++) {
+		ret = _board_init[i].fn();
+		KPrintf("initialize %s %s\n",_board_init[i].fn_name, ret == 0 ? "success" : "failed");
+	}
+    KPrintf("board init done.\n");
+	KPrintf("start kernel...\n");
 }
 
