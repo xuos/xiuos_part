@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 
 #include <xsconfig.h>
+#include <sys_arch.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -97,11 +98,8 @@ typedef struct
     tEdrvTxBuffer*      pTransmittedTxBufferLastEntry;   ///< Pointer to the last entry of the transmitted TX buffer
     tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;  ///< Pointer to the first entry of the transmitted Tx buffer
     pthread_mutex_t     mutex;                           ///< Mutex for locking of critical sections
-    sem_t               syncSem;                         ///< Semaphore for signaling the start of the worker thread
-    int                 sock;                            ///< Raw socket handle
-    pthread_t           hThread;                         ///< Handle of the worker thread
     BOOL                fStartCommunication;             ///< Flag to indicate, that communication is started. Set to false on exit
-    BOOL                fThreadIsExited;                 ///< Set by thread if already exited
+    struct netif*       pNetif;
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -115,8 +113,7 @@ static tEdrvInstance edrvInstance_l;
 static void     packetHandler(void* pParam_p,
                               const int frameSize_p,
                               void* pPktData_p);
-static void*    workerThread(void* pArgument_p);
-static void     getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p);
+static err_t    ethernetInput(struct pbuf* pPbuf_p, struct netif *pNetif_p);
 static BOOL     getLinkStatus(const char* pIfName_p);
 
 //------------------------------------------------------------------------------
@@ -142,8 +139,6 @@ This function initializes the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
-    struct sched_param  schedParam;
-
     // Check parameter validity
     ASSERT(pEdrvInitParam_p != NULL);
 
@@ -157,7 +152,10 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
     edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     edrvInstance_l.fStartCommunication = TRUE;
-    edrvInstance_l.fThreadIsExited = FALSE;
+
+    lwip_config_net(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    gnetif.input = ethernetInput;
+    edrvInstance_l.pNetif = &gnetif;
 
     // If no MAC address was specified read MAC address of used
     // Ethernet interface
@@ -167,48 +165,14 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
         (edrvInstance_l.initParam.aMacAddr[3] == 0) &&
         (edrvInstance_l.initParam.aMacAddr[4] == 0) &&
         (edrvInstance_l.initParam.aMacAddr[5] == 0))
-    {   // read MAC address from controller
-        getMacAdrs(edrvInstance_l.initParam.pDevName,
-                   edrvInstance_l.initParam.aMacAddr);
+    {
+        OPLK_MEMCPY(edrvInstance_l.initParam.aMacAddr, gnetif.hwaddr, 6);
     }
     if (pthread_mutex_init(&edrvInstance_l.mutex, NULL) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
         return kErrorEdrvInit;
     }
-
-    edrvInstance_l.sock = open("/dev/uart2_dev2", O_RDWR);
-    if (edrvInstance_l.sock < 0)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() cannot open socket. Error = %s\n", __func__, strerror(errno));
-        return kErrorEdrvInit;
-    }
-
-    if (sem_init(&edrvInstance_l.syncSem, 0, 0) != 0)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
-        return kErrorEdrvInit;
-    }
-
-    if (pthread_create(&edrvInstance_l.hThread, NULL,
-                       workerThread, &edrvInstance_l) != 0)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() Couldn't create worker thread!\n", __func__);
-        return kErrorEdrvInit;
-    }
-
-    schedParam.sched_priority = CONFIG_THREAD_PRIORITY_MEDIUM;
-    if (pthread_setschedparam(edrvInstance_l.hThread, SCHED_FIFO, &schedParam) != 0)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n", __func__);
-    }
-
-#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
-    pthread_setname_np(edrvInstance_l.hThread, "oplk-edrvrawsock");
-#endif
-
-    // wait until thread is started
-    sem_wait(&edrvInstance_l.syncSem);
 
     return kErrorOk;
 }
@@ -227,17 +191,6 @@ This function shuts down the Ethernet driver.
 tOplkError edrv_exit(void)
 {
     edrvInstance_l.fStartCommunication = FALSE;
-
-    // Wait to terminate thread safely
-    target_msleep(100);
-
-    if (edrvInstance_l.fThreadIsExited)
-        pthread_cancel(edrvInstance_l.hThread);
-
-    pthread_mutex_destroy(&edrvInstance_l.mutex);
-
-    // Close the socket
-    close(edrvInstance_l.sock);
 
     // Clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
@@ -276,7 +229,8 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    int    sockRet;
+    err_t         netifRet;
+    struct pbuf*  pPbuf;
 
     // Check parameter validity
     ASSERT(pBuffer_p != NULL);
@@ -310,15 +264,21 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         }
         pthread_mutex_unlock(&edrvInstance_l.mutex);
 
-        sockRet = write(edrvInstance_l.sock, (u_char*)pBuffer_p->pBuffer, (int)pBuffer_p->txFrameSize);
-        if (sockRet < 0)
+        pPbuf = pbuf_alloc_reference(pBuffer_p->pBuffer, pBuffer_p->txFrameSize, PBUF_REF);
+        ASSERT(pPbuf != NULL);
+        
+        netifRet = edrvInstance_l.pNetif->linkoutput(edrvInstance_l.pNetif, pPbuf);
+        
+        pbuf_free(pPbuf);
+        
+        if (netifRet < 0)
         {
-            DEBUG_LVL_EDRV_TRACE("%s() send() returned %d\n", __func__, sockRet);
+            DEBUG_LVL_EDRV_TRACE("%s() linkoutput() returned %d\n", __func__, netifRet);
             return kErrorInvalidOperation;
         }
         else
         {
-            packetHandler((u_char*)&edrvInstance_l, sockRet, pBuffer_p->pBuffer);
+            packetHandler((u_char*)&edrvInstance_l, pBuffer_p->txFrameSize, pBuffer_p->pBuffer);
         }
     }
 
@@ -558,60 +518,27 @@ static void packetHandler(void* pParam_p,
     }
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Edrv worker thread
-
-This function implements the edrv worker thread. It is responsible to receive frames
-
-\param[in,out]  pArgument_p         User specific pointer pointing to the instance structure
-
-\return The function returns a thread error code.
-*/
-//------------------------------------------------------------------------------
-static void* workerThread(void* pArgument_p)
+static err_t ethernetInput(struct pbuf* pPbuf_p, struct netif* pNetif_p)
 {
-    tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
-    int             rawSockRet;
-    u_char          aBuffer[EDRV_MAX_FRAME_SIZE];
+    int           frameSize;
+    struct pbuf*  pPbuf;
 
-    // signal that thread is successfully started
-    sem_post(&pInstance->syncSem);
+    UNUSED_PARAMETER(pNetif_p);
 
-    while (edrvInstance_l.fStartCommunication)
+    if (edrvInstance_l.fStartCommunication == FALSE)
     {
-        rawSockRet = read(edrvInstance_l.sock, aBuffer, EDRV_MAX_FRAME_SIZE);
-        if (rawSockRet > 0)
-        {
-            packetHandler(pInstance, rawSockRet, aBuffer);
-        }
+        return ERR_ARG;
     }
-    edrvInstance_l.fThreadIsExited = TRUE;
 
-    return NULL;
-}
+    frameSize = pPbuf_p->tot_len;
+    pPbuf = pbuf_coalesce(pPbuf_p, PBUF_RAW);
+    ASSERT(pPbuf->len == frameSize);
+    
+    packetHandler(&edrvInstance_l, frameSize, pPbuf->payload);
+    
+    pbuf_free(pPbuf);
 
-//------------------------------------------------------------------------------
-/**
-\brief  Get Edrv MAC address
-
-This function gets the interface's MAC address.
-
-\param[in]      pIfName_p           Ethernet interface device name
-\param[out]     pMacAddr_p          Pointer to store MAC address
-*/
-//------------------------------------------------------------------------------
-static void getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p)
-{
-    UNUSED_PARAMETER(pIfName_p);
-
-    /* Generate a MAC address randomly */
-    pMacAddr_p[0] = 0x52;
-    pMacAddr_p[1] = 0x54;
-    pMacAddr_p[2] = 0x98;
-    pMacAddr_p[3] = 0x76;
-    pMacAddr_p[4] = 0x54;
-    pMacAddr_p[5] = target_getTickCount();
+    return ERR_OK;
 }
 
 //------------------------------------------------------------------------------

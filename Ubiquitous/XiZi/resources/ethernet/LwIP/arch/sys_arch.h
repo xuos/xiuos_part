@@ -45,7 +45,7 @@
 #include <lwip/arch.h>
 #include <lwip/netif.h>
 
-#include "tcpip.h"
+// #include "tcpip.h"
 
 #include <xs_base.h>
 
