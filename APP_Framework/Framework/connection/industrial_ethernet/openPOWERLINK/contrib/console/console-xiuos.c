@@ -40,12 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-// #include <strings.h>
-
-#include <xsconfig.h>
+#include <dev_serial.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -65,7 +60,15 @@ termios library.
 //------------------------------------------------------------------------------
 int console_getch(void)
 {
-    return 'p';
+    char ch, len;
+
+    extern char userShellRead(char *data);
+
+    do {
+        len = userShellRead(&ch);
+    } while (!len);
+
+    return ch;
 }
 
 //------------------------------------------------------------------------------
@@ -82,5 +85,16 @@ The function checks the console for a keystroke.
 //------------------------------------------------------------------------------
 int console_kbhit(void)
 {
-    return 0;
+    extern HardwareDevType console;
+    struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)console;
+    int ret;
+
+    ret = KSemaphoreObtain(serial_dev->haldev.dev_sem, 0);
+
+    if (ret == EOK) {
+        KSemaphoreAbandon(serial_dev->haldev.dev_sem);
+        return 1;
+    } else {
+        return 0;
+    }
 }
