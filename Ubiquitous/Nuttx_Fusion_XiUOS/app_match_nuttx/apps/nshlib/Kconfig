@@ -587,6 +587,11 @@ config NSH_DISABLE_XD
 	bool "Disable xd"
 	default y if DEFAULT_SMALL
 	default n if !DEFAULT_SMALL
+
+config NSH_DISABLE_CH438
+	bool "Disable the ch438 demo."
+	default n
+
 config NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS
 	bool "Disable the sensor tb600b_wq_hcho1os."
 	default n
@@ -657,6 +662,22 @@ config NSH_DISABLE_ADAPTER_LORATEST
 
 config NSH_DISABLE_ADAPTER_4GTEST
 	bool "Disable ec200t Adapter4GTest."
+	default n
+
+config NSH_DISABLE_E220_LORA_RECEIVE
+	bool "Disable e220 Lora receive."
+	default n
+
+config NSH_DISABLE_E220_LORA_SEND
+	bool "Disable e220 Lora send."
+	default n
+
+config NSH_DISABLE_ADAPTER_BLUETOOTH_TEST
+	bool "Disable hc08  AdapterBlueToothTest."
+	default n
+
+config NSH_DISABLE_ADAPTER_WIFI_TEST
+	bool "Disable esp07s  AdapterWIFITest."
 	default n
 
 config NSH_DISABLE_K210_FFT

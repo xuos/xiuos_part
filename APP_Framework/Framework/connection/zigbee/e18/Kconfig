@@ -1,8 +1,8 @@
 config ADAPTER_ZIGBEE_E18
         string "E18 adapter name"
         default "e18"
-        
-choice 
+
+choice
         prompt "E18 adapter select net role type "
         default AS_END_DEVICE_ROLE
 
@@ -11,7 +11,7 @@ choice
 
         config AS_ROUTER_ROLE
                 bool "config as a router"
-        
+
         config AS_END_DEVICE_ROLE
                 bool "config as an end device"
 endchoice
@@ -22,8 +22,8 @@ if ADD_XIZI_FETURES
                 int "E18 MODE pin number"
                 default "61"
 
-        config ADAPTER_BC28_PIN_DRIVER
-                string "BC28 device pin driver path"
+        config ADAPTER_E18_PIN_DRIVER
+                string "E18 device pin driver path"
                 default "/dev/pin_dev"
 
         config ADAPTER_E18_DRIVER_EXTUART
@@ -35,7 +35,7 @@ if ADD_XIZI_FETURES
                 default "/dev/uart2_dev2"
                 depends on !ADAPTER_E18_DRIVER_EXTUART
 
-        if ADAPTER_E18_DRIVER_EXTUART                    
+        if ADAPTER_E18_DRIVER_EXTUART
                 config ADAPTER_E18_DRIVER
                         string "E18 device extra uart driver path"
                         default "/dev/extuart_dev0"
@@ -47,11 +47,31 @@ if ADD_XIZI_FETURES
 endif
 
 if ADD_NUTTX_FETURES
+    config ADAPTER_E18_MODEPIN
+            int "E18 MODE pin number"
+            default "61"
+
+    config ADAPTER_E18_PIN_DRIVER
+            string "E18 device pin driver path"
+            default "/dev/pin_dev"
+
     config ADAPTER_E18_DRIVER
             string "E18 device uart driver path"
             default "/dev/ttyS1"
+            depends on !ADAPTER_E18_DRIVER_EXTUART
            ---help---
                If USART1 is selected, then fill in /dev/ttyS1 here.
+
+    if ADAPTER_E18_DRIVER_EXTUART
+            config ADAPTER_E18_DRIVER
+                    string "E18 device extra uart driver path"
+                    default "/dev/extuart_dev1"
+
+            config ADAPTER_E18_DRIVER_EXT_PORT
+                    int "if E18 device using extuart, choose port"
+                    default "1"
+    endif
+
 endif
 
 if ADD_RTTHREAD_FETURES

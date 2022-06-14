@@ -28,6 +28,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <nuttx/wireless/lpwan/sx127x.h>
+#include <nuttx/ioexpander/gpio.h>
+#include <termios.h>
 
 typedef uint8_t uint8;
 typedef uint16_t uint16;
@@ -43,22 +45,23 @@ typedef int64_t int64;
 extern "C" {
 #endif
 
-#define OPE_INT                  0x0000
-#define OPE_CFG                 0x0001
+#define OPE_INT        0x0000
+#define OPE_CFG        0x0001
 
-#define NAME_NUM_MAX            32
+#define NAME_NUM_MAX   32
+
 
 /*********************GPIO define*********************/
 #define GPIO_LOW    0x00
 #define GPIO_HIGH   0x01
 
-#define GPIO_CFG_OUTPUT                          0x00
-#define GPIO_CFG_INPUT                               0x01
-#define GPIO_CFG_INPUT_PULLUP            0x02
+#define GPIO_CFG_OUTPUT             0x00
+#define GPIO_CFG_INPUT              0x01
+#define GPIO_CFG_INPUT_PULLUP       0x02
 #define GPIO_CFG_INPUT_PULLDOWN     0x03
-#define GPIO_CFG_OUTPUT_OD                  0x04
+#define GPIO_CFG_OUTPUT_OD          0x04
 
-#define GPIO_CONFIG_MODE                 0xffffffff
+#define GPIO_CONFIG_MODE            0xffffffff
 
 /********************SERIAL define*******************/
 #define BAUD_RATE_2400          2400
@@ -172,15 +175,11 @@ int PrivMutexDelete(pthread_mutex_t *p_mutex);
 int PrivMutexObtain(pthread_mutex_t *p_mutex);
 int PrivMutexAbandon(pthread_mutex_t *p_mutex);
 
-
-
-
 /*********************semaphore**********************/
 
 int PrivSemaphoreCreate(sem_t *sem, int pshared, unsigned int value);
 int PrivSemaphoreDelete(sem_t *sem);
 int PrivSemaphoreObtainWait(sem_t *sem, const struct timespec *abstime);
-int PrivSemaphoreObtainWaitForever(sem_t *sem);
 int PrivSemaphoreObtainNoWait(sem_t *sem);
 int PrivSemaphoreAbandon(sem_t *sem);
 int32_t PrivSemaphoreSetValue(int32_t sem, uint16_t val);
@@ -201,7 +200,7 @@ int PrivOpen(const char *path, int flags);
 int PrivRead(int fd, void *buf, size_t len);
 int PrivWrite(int fd, const void *buf, size_t len);
 int PrivClose(int fd);
-int PrivIoctl(int fd, int cmd, void *args);
+int PrivIoctl(int fd, int cmd, unsigned long args);
 
 /*********************memory***********************/
 
