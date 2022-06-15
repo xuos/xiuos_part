@@ -114,7 +114,7 @@ static int32 _MutexObtain(struct Mutex *mutex, int32 msec)
                     KTaskPrioSet(mutex->holder->id.id, task->task_dync_sched_member.cur_prio);
                 }
 
-                LinklistSuspend(&(mutex->pend_list), task, LINKLIST_FLAG_FIFO);
+                LinklistSuspend(&(mutex->pend_list), task, LINKLIST_FLAG_PRIO);
 
                 if (wait_time > 0) {
                     SYS_KDEBUG_LOG(KDBG_IPC,
