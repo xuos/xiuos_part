@@ -18,15 +18,6 @@
  *
  ****************************************************************************/
 
-/**
-* @file imxrt_serial.c
-* @brief nuttx source code
-*                https://github.com/apache/incubator-nuttx.git
-* @version 10.2.0 
-* @author AIIT XUOS Lab
-* @date 2022-03-23
-*/
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -57,9 +48,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/imxrt_lpuart.h"
 #include "imxrt_gpio.h"
 #include "hardware/imxrt_pinmux.h"
@@ -1779,6 +1768,7 @@ void arm_serialinit(void)
 #ifdef CONFIG_IMXRT_LPUART8
   uart_register("/dev/ttyS8", &g_uart8port);
 #endif
+}
 }
 
 /****************************************************************************

@@ -18,15 +18,6 @@
  *
  ****************************************************************************/
 
-/**
-* @file chip.h
-* @brief nuttx source code
-*                https://github.com/apache/incubator-nuttx.git
-* @version 10.2.0 
-* @author AIIT XUOS Lab
-* @date 2022-03-23
-*/
-
 #ifndef __ARCH_ARM_INCLUDE_IMXRT_CHIP_H
 #define __ARCH_ARM_INCLUDE_IMXRT_CHIP_H
 

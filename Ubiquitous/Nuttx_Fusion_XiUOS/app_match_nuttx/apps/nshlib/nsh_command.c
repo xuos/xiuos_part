@@ -18,15 +18,6 @@
  *
  ****************************************************************************/
 
-/**
-* @file nsh_command.c
-* @brief nuttx source code
-*                 https://github.com/apache/incubator-nuttx-apps
-* @version 10.2.0
-* @author AIIT XUOS Lab
-* @date 2022-03-17
-*/
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -223,6 +214,12 @@ static const struct cmdmap_s g_cmdmap[] =
 
 #ifndef CONFIG_NSH_DISABLE_FREE
   { "free",     cmd_free,     1, 1, NULL },
+#endif
+
+#ifdef CONFIG_DEBUG_MM
+# ifndef CONFIG_NSH_DISABLE_MEMDUMP
+  { "memdump",  cmd_memdump,  1, 3, "[pid/used/free]" },
+# endif
 #endif
 
 #ifdef CONFIG_NET_UDP
