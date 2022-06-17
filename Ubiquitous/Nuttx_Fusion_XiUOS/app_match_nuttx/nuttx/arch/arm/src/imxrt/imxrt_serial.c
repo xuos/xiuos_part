@@ -1769,7 +1769,6 @@ void arm_serialinit(void)
   uart_register("/dev/ttyS8", &g_uart8port);
 #endif
 }
-}
 
 /****************************************************************************
  * Name: up_putc
