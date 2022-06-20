@@ -12,7 +12,7 @@
 
 /**
  * @file k210_ch438.c
- * @brief K210 board sd card automount
+ * @brief xidatong-riscv64 k210_ch438.c
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2022.06.08

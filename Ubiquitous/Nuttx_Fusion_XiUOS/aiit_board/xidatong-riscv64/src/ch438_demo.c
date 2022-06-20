@@ -1,6 +1,6 @@
 /*
 * Copyright (c) 2020 AIIT XUOS Lab
-* XiOS is licensed under Mulan PSL v2.
+* XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
 *        http://license.coscl.org.cn/MulanPSL2
@@ -12,10 +12,10 @@
 
 /**
  * @file ch438_demo.c
- * @brief imxrt board sd card automount
+ * @brief xidatong-riscv64 ch438_demo.c
  * @version 1.0
  * @author AIIT XUOS Lab
- * @date 2022.06.08
+ * @date 2022.03.17
  */
 
 /****************************************************************************

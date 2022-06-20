@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file k210_fpioa.h
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-03-23
+*/
+
 #ifndef __ARCH_RISCV_SRC_K210_K210_FPIOA_H
 #define __ARCH_RISCV_SRC_K210_K210_FPIOA_H
 
