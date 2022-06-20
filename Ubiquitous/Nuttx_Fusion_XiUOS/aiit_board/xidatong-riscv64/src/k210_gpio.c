@@ -51,6 +51,9 @@
 #define GPIO_E220_M0  44
 #define GPIO_E220_M1  45
 
+#define FPIOA_E220_M0  1
+#define FPIOA_E220_M1  2
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -87,7 +90,14 @@ static const struct gpio_operations_s gpout_ops =
 
 static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
-  GPIO_E220_M0, GPIO_E220_M1
+  GPIO_E220_M0, 
+  GPIO_E220_M1
+};
+
+static const uint32_t g_fpioa[BOARD_NGPIOOUT] =
+{
+  FPIOA_E220_M0, 
+  FPIOA_E220_M1
 };
 
 static struct k210gpio_dev_s g_gpout[BOARD_NGPIOOUT];
@@ -111,7 +121,7 @@ static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   DEBUGASSERT(k210gpio->id < BOARD_NGPIOOUT);
   gpioinfo("Reading...\n");
 
-  *value = (int) k210_gpiohs_get_value(k210gpio->id + 1);
+  *value = (int) k210_gpiohs_get_value(g_fpioa[k210gpio->id]);
   return OK;
 }
 
@@ -128,7 +138,7 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
   DEBUGASSERT(k210gpio->id < BOARD_NGPIOOUT);
   gpioinfo("Writing %d\n", (int)value);
 
-  k210_gpiohs_set_value(k210gpio->id + 1, !value);
+  k210_gpiohs_set_value(g_fpioa[k210gpio->id], value);
 
   return OK;
 }
@@ -160,9 +170,9 @@ int k210_gpio_init(void)
       /* Configure the pins that will be used as output */
 
       k210_fpioa_config(g_gpiooutputs[i],
-                        (K210_IO_FUNC_GPIOHS1 + i) | K210_IOFLAG_GPIOHS);
-      k210_gpiohs_set_direction(i + 1, GPIO_DM_OUTPUT);
-      k210_gpiohs_set_value(i + 1, true);
+                        (K210_IO_FUNC_GPIOHS0 + g_fpioa[i]) | K210_IOFLAG_GPIOHS);
+      k210_gpiohs_set_direction(g_fpioa[i], GPIO_DM_OUTPUT);
+      k210_gpiohs_set_value(g_fpioa[i], true);
 
       pincount++;
     }
