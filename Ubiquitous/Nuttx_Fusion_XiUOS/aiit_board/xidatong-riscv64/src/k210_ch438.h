@@ -316,7 +316,7 @@
 #define FPIOA_CH438_D2    16
 #define FPIOA_CH438_D3    17
 #define FPIOA_CH438_D4    18
-#define FPIOA_CH438_D5    19
+#define FPIOA_CH438_D5    29
 #define FPIOA_CH438_D6    20
 #define FPIOA_CH438_D7    31
 
