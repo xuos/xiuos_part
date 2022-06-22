@@ -118,6 +118,7 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
 
 	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)serial_drv->driver.owner_bus->owner_haldev;
 	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
+    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
 
 	// config serial receive sem timeout
 	dev_param->serial_timeout = serial_cfg->data_cfg.serial_timeout;

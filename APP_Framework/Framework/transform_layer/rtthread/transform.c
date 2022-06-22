@@ -195,3 +195,12 @@ void PrivFree(void *pointer)
     free(pointer);
 }
 
+/*********************kernel**********************/
+void PrivTaskenterCritical()
+{
+    rt_enter_critical();
+}
+void PrivTaskexitCritical()
+{
+     rt_exit_critical();
+}

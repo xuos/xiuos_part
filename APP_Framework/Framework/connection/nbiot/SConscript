@@ -2,12 +2,12 @@ import os
 Import('RTT_ROOT')
 from building import *
 SOURCES = []
-if GetDepend(['CONNECTION_ADAPTER_BLUETOOTH']):
-    SOURCES = ['adapter_bluetooth.c'] + SOURCES
+if GetDepend(['CONNECTION_ADAPTER_NB']):
+    SOURCES = ['adapter_nbiot.c'] + SOURCES
 objs = []
 cwd = GetCurrentDir()
 path =  [cwd]
-group = DefineGroup('bluetooth', SOURCES, depend = [], CPPPATH = [cwd])
+group = DefineGroup('nb', SOURCES, depend = [], CPPPATH = [cwd])
 objs =  objs + group
 list = os.listdir(cwd)
 

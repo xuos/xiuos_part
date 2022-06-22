@@ -72,7 +72,7 @@ static int Hfa21EthernetOpen(struct Adapter *adapter)
     /*step2: init AT agent*/
     if (!adapter->agent) {
         char *agent_name = "ethernet_uart_client";
-        if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+        if (0 != InitATAgent(agent_name, adapter->fd, 512)) {
             printf("at agent init failed !\n");
             return -1;
         }
@@ -168,19 +168,20 @@ static int Hfa21EthernetSetUp(struct Adapter *adapter)
 
     Hfa21EthernetInitAtCmd(adapter->agent);
 
-    /*Step3 : FEPHY enable phy function*/
+      /*Step3 : FEPHY enable phy function*/
     ret = AtCmdConfigAndCheck(adapter->agent, HFA21_ETHERNET_AT_FEPHY_CMD, HFA21_ETHERNET_OK_REPLY);
     if (ret < 0) {
         goto __exit;
     }
 
+    PrivTaskDelay(2000);
     /*Step4 : FVEW disable WANN function, ethernet work at LANN mode*/
     ret = AtCmdConfigAndCheck(adapter->agent, HFA21_ETHERNET_AT_DISABLE_WANN_CMD, HFA21_ETHERNET_OK_REPLY);
     if (ret < 0) {
         goto __exit;
     }
-
     /*Step5 : RELD enable F-AT cmd*/
+    PrivTaskDelay(2000);
     ret = AtCmdConfigAndCheck(adapter->agent, HFA21_ETHERNET_AT_RELD_CMD, HFA21_ETHERNET_OK_REPLY);
     if (ret < 0) {
         goto __exit;
@@ -195,13 +196,13 @@ static int Hfa21EthernetSetUp(struct Adapter *adapter)
     if (ret < 0) {
         goto __exit;
     }
-
+    PrivTaskDelay(2000);
     /*Step7 : AT+WANN check if get ip、netmask、gateway*/
     ret = AtCmdConfigAndCheck(adapter->agent, HFA21_ETHERNET_AT_WANN_CMD, HFA21_ETHERNET_OK_REPLY);
     if (ret < 0) {
         goto __exit;
     }
-
+    PrivTaskDelay(2000);
     /*Step8 : AT+Z reboot hfa21 device*/
     ret = AtCmdConfigAndCheck(adapter->agent, HFA21_ETHERNET_AT_REBOOT_CMD, HFA21_ETHERNET_OK_REPLY);
     if (ret < 0) {
@@ -209,7 +210,6 @@ static int Hfa21EthernetSetUp(struct Adapter *adapter)
     }
 
     PrivTaskDelay(10000);
-
     return ret;
 
 __exit:
@@ -365,6 +365,7 @@ static int Hfa21EthernetConnect(struct Adapter *adapter, enum NetRoleType net_ro
     }
 
     adapter->net_role = net_role;
+     PrivTaskDelay(2000);
 
     /*Step3 : AT+Z reboot hfa21 device*/
     ret = AtCmdConfigAndCheck(adapter->agent, HFA21_ETHERNET_AT_REBOOT_CMD, HFA21_ETHERNET_OK_REPLY);
