@@ -35,7 +35,7 @@
 * @file imxrt_sdram_ini_dcd.c
 * @brief nuttx source code
 *                https://github.com/apache/incubator-nuttx.git
-* @version 10.2.0 
+* @version 10.3.0 
 * @author AIIT XUOS Lab
 * @date 2022-03-23
 */

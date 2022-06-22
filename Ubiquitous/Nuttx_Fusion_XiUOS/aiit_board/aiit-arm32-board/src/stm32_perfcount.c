@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/aiit-arm32-board/src/stm32_critmon.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_perfcount.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,14 +19,13 @@
  ****************************************************************************/
 
 /**
-* @file stm32_critmon.c
+* @file stm32_perfcount.c
 * @brief nuttx source code
 *                https://github.com/apache/incubator-nuttx.git
-* @version 10.2.0 
+* @version 10.3.0 
 * @author AIIT XUOS Lab
 * @date 2022-03-17
 */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -37,32 +36,39 @@
 #include <fixedmath.h>
 
 #include "dwt.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include <nuttx/clock.h>
 
 #include <arch/board/board.h>
-
-#ifdef CONFIG_SCHED_CRITMONITOR
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_critmon_gettime
+ * Name: up_perf_gettime
  ****************************************************************************/
 
-uint32_t up_critmon_gettime(void)
+uint32_t up_perf_gettime(void)
 {
   return getreg32(DWT_CYCCNT);
 }
 
 /****************************************************************************
- * Name: up_critmon_gettime
+ * Name: up_perf_getfreq
  ****************************************************************************/
 
-void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts)
+uint32_t up_perf_getfreq(void)
+{
+  return STM32_SYSCLK_FREQUENCY;
+}
+
+/****************************************************************************
+ * Name: up_perf_convert
+ ****************************************************************************/
+
+void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts)
 {
   b32_t b32elapsed;
 
@@ -70,5 +76,3 @@ void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts)
   ts->tv_sec  = b32toi(b32elapsed);
   ts->tv_nsec = NSEC_PER_SEC * b32frac(b32elapsed) / b32ONE;
 }
-
-#endif /* CONFIG_SCHED_CRITMONITOR */

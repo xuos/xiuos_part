@@ -11,8 +11,8 @@
 */
 
 /**
- * @file imxrt_ch438.h
- * @brief imxrt board sd card automount
+ * @file k210_ch438.h
+ * @brief xidatong-riscv64 k210_ch438.h
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2022.04.26
