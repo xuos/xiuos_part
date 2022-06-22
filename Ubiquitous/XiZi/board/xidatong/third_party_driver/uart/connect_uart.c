@@ -43,7 +43,7 @@ void LPUART1_IRQHandler(int irqn, void *arg)
     DisableIRQ(UART1_IRQn);
 
     UartIsr(&serial_bus_1, &serial_driver_1, &serial_device_1);
-     EnableIRQ(UART1_IRQn);
+    EnableIRQ(UART1_IRQn);
 
 }
 DECLARE_HW_IRQ(UART1_IRQn, LPUART1_IRQHandler, NONE);
@@ -64,6 +64,23 @@ void LPUART2_IRQHandler(int irqn, void *arg)
 
 }
 DECLARE_HW_IRQ(UART2_IRQn, LPUART2_IRQHandler, NONE);
+#endif
+
+#ifdef BSP_USING_LPUART8
+struct SerialBus serial_bus_8;
+struct SerialDriver serial_driver_8;
+struct SerialHardwareDevice serial_device_8;
+
+void LPUART8_IRQHandler(int irqn, void *arg)
+{
+
+    DisableIRQ(LPUART8_IRQn);
+
+    UartIsr(&serial_bus_8, &serial_driver_8, &serial_device_8);
+    EnableIRQ(LPUART8_IRQn);
+
+}
+DECLARE_HW_IRQ(LPUART8_IRQn, LPUART8_IRQHandler, NONE);
 #endif
 
 static void SerialCfgParamCheck(struct SerialCfgParam *serial_cfg_default, struct SerialCfgParam *serial_cfg_new)
@@ -420,6 +437,39 @@ int Imxrt1052HwUartInit(void)
     }
 
     ret = BoardSerialDevBend(&serial_device_2, (void *)&serial_cfg_2, SERIAL_BUS_NAME_2, SERIAL_2_DEVICE_NAME_0);
+    if (EOK != ret) {
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
+        return ERROR;
+    }  
+#endif
+
+#ifdef BSP_USING_LPUART8
+    static struct SerialCfgParam serial_cfg_8;
+    memset(&serial_cfg_8, 0, sizeof(struct SerialCfgParam));
+
+    static struct SerialDevParam serial_dev_param_8;
+    memset(&serial_dev_param_8, 0, sizeof(struct SerialDevParam));
+    
+    serial_driver_8.drv_done = &drv_done;
+    serial_driver_8.configure = &SerialDrvConfigure;
+    serial_device_8.hwdev_done = &hwdev_done;
+
+    serial_cfg_8.data_cfg = data_cfg_init;
+
+    serial_cfg_8.hw_cfg.private_data = (void *)LPUART8;
+    serial_cfg_8.hw_cfg.serial_irq_interrupt = LPUART8_IRQn;
+    serial_driver_8.private_data = (void *)&serial_cfg_8;
+
+    serial_dev_param_8.serial_work_mode = SIGN_OPER_INT_RX;
+    serial_device_8.haldev.private_data = (void *)&serial_dev_param_8;
+
+    ret = BoardSerialBusInit(&serial_bus_8, &serial_driver_8, SERIAL_BUS_NAME_8, SERIAL_DRV_NAME_8);
+    if (EOK != ret) {
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
+        return ERROR;
+    }
+
+    ret = BoardSerialDevBend(&serial_device_8, (void *)&serial_cfg_8, SERIAL_BUS_NAME_8, SERIAL_8_DEVICE_NAME_0);
     if (EOK != ret) {
         KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
         return ERROR;

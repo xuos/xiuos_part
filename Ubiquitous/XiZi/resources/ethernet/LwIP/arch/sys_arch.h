@@ -39,7 +39,7 @@
 */
 
 #ifndef __SYS_ARCH__
-#define __SYS_ATCH__
+#define __SYS_ARCH__
 
 #include <lwip/opt.h>
 #include <lwip/arch.h>
