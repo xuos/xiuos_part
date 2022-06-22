@@ -21,7 +21,7 @@ SRC_DIR +=gap8
 endif
 
 ifeq ($(CONFIG_BOARD_GD32VF103RVSTAR),y)
-SRC_DIR +=gd32vf103_rvstar
+SRC_DIR +=gd32vf103-rvstar
 endif
 
 ifeq ($(CONFIG_BOARD_RV32M1_VEGA),y)

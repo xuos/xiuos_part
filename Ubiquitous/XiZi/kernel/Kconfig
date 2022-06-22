@@ -97,7 +97,6 @@ menu "Kernel feature"
 
             config KERNEL_SOFTTIMER
                 bool "Enable softtimer "
-                select KERNEL_WORKQUEUE
                 default y
         endmenu
 
@@ -210,6 +209,7 @@ menu "Kernel feature"
                 config KERNEL_WORKQUEUE
                     bool "Config kernel work queue"
                     default y
+                    select KERNEL_SOFTTIMER
 
                     if KERNEL_WORKQUEUE
                         config WORKQUEUE_KTASK_STACKSIZE

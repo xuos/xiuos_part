@@ -109,9 +109,9 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/include #
 endif
 
-ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/gd32vf103_rvstar)
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/gd32vf103-rvstar)
 KERNELPATHS :=-I$(BSP_ROOT) \
-	-I$(KERNEL_ROOT)/arch/risc-v/gd32vf103_rvstar \
+	-I$(KERNEL_ROOT)/arch/risc-v/gd32vf103-rvstar \
 	-I$(BSP_ROOT)/include \
 	-I$(BSP_ROOT)/third_party_driver \
 	-I$(BSP_ROOT)/third_party_driver/include \
