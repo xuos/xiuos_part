@@ -175,11 +175,10 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
 
 int imxrt_gpio_initialize(void)
 {
-  int pincount;
+  int pincount = 0;
   int i;
 
 #if BOARD_NGPIOIN > 0
-  pincount = 0;
   for (i = 0; i < BOARD_NGPIOIN; i++)
     {
       /* Setup and register the GPIO pin */
@@ -199,7 +198,6 @@ int imxrt_gpio_initialize(void)
 #endif
 
 #if BOARD_NGPIOOUT > 0
-  pincount = 0;
   for (i = 0; i < BOARD_NGPIOOUT; i++)
     {
       /* Setup and register the GPIO pin */
