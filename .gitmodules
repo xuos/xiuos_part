@@ -16,3 +16,6 @@
 [submodule "Ubiquitous/Nuttx_Fusion_XiUOS/apps"]
 	path = Ubiquitous/Nuttx_Fusion_XiUOS/apps
 	url = https://code.gitlink.org.cn/wgzAIIT/incubator-nuttx-apps.git
+[submodule "APP_Framework/Applications/webnet/WebNet_XiUOS"]
+	path = APP_Framework/Applications/webnet/WebNet_XiUOS
+	url = https://gitlink.org.cn/xuos/WebNet_XiUOS.git

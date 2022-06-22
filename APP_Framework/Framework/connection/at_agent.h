@@ -74,7 +74,11 @@ struct ATAgent
     char entm_recv_buf[ENTM_RECV_MAX];
     uint32 entm_recv_len;
     enum ReceiveMode receive_mode;
+#ifdef ADD_XIZI_FETURES
     int entm_rx_notice;
+#else
+    sem_t entm_rx_notice;
+#endif
 };
 typedef struct ATAgent *ATAgentType;
 

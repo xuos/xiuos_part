@@ -97,28 +97,33 @@ int AdapterEthernetTest(void)
 
     AdapterDeviceSetUp(adapter);
     
-    const char *ip = "10.10.100.50";
-    const char *port = "12345";
+    const char *ip = "192.168.131.26";
+    const char *port = "9999";
     enum NetRoleType net_role = CLIENT;//SERVER
     enum IpType ip_type = IPV4;
     AdapterDeviceConnect(adapter, net_role, ip, port, ip_type);
 
     printf("ready to test data transfer\n");
-
+    PrivTaskDelay(2000);
     len = strlen(ethernet_msg);
     for (i = 0;i < 10; i ++) {
         printf("AdapterEthernetTest send %s\n", ethernet_msg);
         AdapterDeviceSend(adapter, ethernet_msg, len);
         PrivTaskDelay(4000);
     }
-
+    
     while (1) {
         AdapterDeviceRecv(adapter, ethernet_recv_msg, 128);
         printf("AdapterEthernetTest recv %s\n", ethernet_recv_msg);
         memset(ethernet_recv_msg, 0, 128);
     }
+    
 #endif
     
     return 0;
 }
+#ifdef ADD_RTTHREAD_FETURES
+MSH_CMD_EXPORT(AdapterEthernetTest,a ethernet adpter sample);
+#elif definded ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterEthernetTest, AdapterEthernetTest, show adapter ethernet information);
+#endif
