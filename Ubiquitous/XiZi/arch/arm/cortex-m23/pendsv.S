@@ -76,7 +76,6 @@ PendSV_Handler:
     MOV     R7, R11
     STMIA   R1!, {R4 - R7}          /* push thread {R8 - R11} high register to thread stack */
 switch_to_task:
-    BL       UpdateRunningTask
 
     LDR     R1, =InterruptToKtask
     LDR     R1, [R1]
