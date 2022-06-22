@@ -118,9 +118,9 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/include #
 endif
 
-ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rv32m1_vega)
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rv32m1-vega)
 KERNELPATHS :=-I$(BSP_ROOT) \
-	-I$(KERNEL_ROOT)/arch/risc-v/rv32m1_vega \
+	-I$(KERNEL_ROOT)/arch/risc-v/rv32m1-vega \
 	-I$(BSP_ROOT)/include \
 	-I$(BSP_ROOT)/third_party_driver \
 	-I$(BSP_ROOT)/third_party_driver/include \
@@ -393,6 +393,6 @@ COMPILE_KERNEL:
                $(MAKE) -C $$dir;          \
        done
 	@cp link.mk build/Makefile
-	@$(MAKE) -C build COMPILE_TYPE="_kernel" TARGET=XiZi_$(BOARD)_kernel.elf LINK_FLAGS=LFLAGS
+	@$(MAKE) -C build COMPILE_TYPE="_kernel" TARGET=XiZi-$(BOARD)_kernel.elf LINK_FLAGS=LFLAGS
 	@rm build/Makefile build/make.obj
 

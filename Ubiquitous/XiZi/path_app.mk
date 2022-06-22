@@ -39,6 +39,6 @@ COMPILE_APP:
                $(MAKE) -C $$dir;          \
        done
 	@cp link.mk build/Makefile
-	@$(MAKE) -C build COMPILE_TYPE="_app" TARGET=XiZi_$(BOARD)_app.elf LINK_FLAGS=APPLFLAGS
+	@$(MAKE) -C build COMPILE_TYPE="_app" TARGET=XiZi-$(BOARD)_app.elf LINK_FLAGS=APPLFLAGS
 	@rm build/Makefile build/make.obj
 

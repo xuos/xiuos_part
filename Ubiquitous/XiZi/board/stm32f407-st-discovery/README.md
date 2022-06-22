@@ -159,7 +159,7 @@ make BOARD=stm32f407-st-discovery menuconfig
 make BOARD=stm32f407-st-discovery
 ```
 
-4.如果编译正确无误，会产生XiZi_stm32f407-st-discovery.elf、XiZi_stm32f407-st-discovery.bin文件。其中XiZi_stm32f407-st-discovery.bin需要烧写到设备中进行运行。
+4.如果编译正确无误，会产生XiZi-stm32f407-st-discovery.elf、XiZi-stm32f407-st-discovery.bin文件。其中XiZi-stm32f407-st-discovery.bin需要烧写到设备中进行运行。
 
 ## 3. 烧写及执行
 
@@ -189,7 +189,7 @@ cd build/Release && make install DESTDIR=_install
 代码根目录下执行st-flash工具烧录
 
 ```
-sudo st-flash write build/XiZi_stm32f407-st-discovery.bin 0x8000000
+sudo st-flash write build/XiZi-stm32f407-st-discovery.bin 0x8000000
 ```
 
 此外，推荐用户使用putty作为终端工具，安装命令如下：

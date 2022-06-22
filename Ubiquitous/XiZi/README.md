@@ -29,7 +29,7 @@ ARM架构系列的开发板有
 
 RISC-V架构系列的开发板有
 
-	aiit-riscv64-board gapuino gd32vf103_rvstar hifive1-rev-B kd233 maix-go rv32m1_vega
+	aiit-riscv64-board gapuino gd32vf103_rvstar hifive1-rev-B kd233 maix-go rv32m1-vega
 
 ## 开发环境
 

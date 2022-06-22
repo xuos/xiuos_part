@@ -1,4 +1,4 @@
-# 从零开始构建矽璓工业物联操作系统：使用risc-v架构的rv32m1_vega 开发板
+# 从零开始构建矽璓工业物联操作系统：使用risc-v架构的rv32m1-vega 开发板
 
 [XiUOS](http://xuos.io/) (X Industrial Ubiquitous Operating System) 矽璓工业物联操作系统是一款面向工业物联场景的泛在操作系统，来自泛在操作系统研究计划。所谓泛在操作系统(UOS: Ubiquitous Operating Systems)，是支持互联网时代人机物融合泛在计算应用模式的新型操作系统，是传统操作系统概念的泛化与延伸。在泛在操作系统技术体系中，不同的泛在计算设备和泛在应用场景需要符合各自特性的不同UOS，XiUOS即是面向工业物联场景的一种UOS，主要由一个极简的微型实时操作系统(RTOS)内核和其上的智能工业物联框架构成，支持工业物联网(IIoT: Industrial Internet of Things)应用。
 
@@ -73,7 +73,7 @@ RISC-V: riscv-none-embed-，默认安装到Ubuntu的/opt/，下载并解压。[�
 
 
 
-将上述解压的编译工具链的路径添加到board/rv32m1_vega/config.mk文件当中，例如：
+将上述解压的编译工具链的路径添加到board/rv32m1-vega/config.mk文件当中，例如：
 
 ```
 export CROSS_COMPILE ?=/opt/gnu-mcu-eclipse/riscv-none-gcc/8.2.0-2.1-20190425-1021/bin/riscv-none-embed-
@@ -81,9 +81,9 @@ export CROSS_COMPILE ?=/opt/gnu-mcu-eclipse/riscv-none-gcc/8.2.0-2.1-20190425-10
 
 若已存在`export CROSS_COMPILE ?=xxxx`   应该将原有的语句注释，再写入上面的语句。
 
-# 在rv32m1_vega board 上创建第一个应用
+# rv32m1-vega board 上创建第一个应用
 
-## 1.rv32m1_vega board 简介
+## 1.rv32m1-vega board 简介
 
 | 硬件 | 描述 |
 | -- | -- |
@@ -125,19 +125,19 @@ make BOARD=rm32v1_vega menuconfig
 3.继续执行以下命令，进行编译
 
 ```
-make BOARD=rv32m1_vega
+make BOARD=rv32m1-vega
 ```
 
-4.如果编译正确无误，build文件夹下会产生XiZi_rv32m1_vega.elf、XiZi_rv32m1_vega.bin文件。
+4.如果编译正确无误，build文件夹下会产生XiZi-rv32m1-vega.elf、XiZi-rv32m1-vega.bin文件。
 
 >注：最后可以执行以下命令，清除配置文件和编译生成的文件
 
 ```
-make BOARD=rv32m1_vega distclean
+make BOARD=rv32m1-vega distclean
 ```
 
 ## 3. 烧写及调试执行
-rv32m1_vega开发板启动模式说明:参考文档[RV32M1_VEGA_Quick_Start_Guide.pdf](./doc/RV32M1_VEGA_Board_User_Guide.pdf)
+rv32m1-vega开发板启动模式说明:参考文档[RV32M1_VEGA_Quick_Start_Guide.pdf](./doc/RV32M1_VEGA_Board_User_Guide.pdf)
 ![openocd](./img/multicore.jpg)
 
 
@@ -145,7 +145,7 @@ rv32m1_vega开发板启动模式说明:参考文档[RV32M1_VEGA_Quick_Start_Guid
 请使用JLink接入到RV32M1_VEGA开发板的RISC-V核的JTAG接口上，同时把JLink在PC上的驱动更改为WinUSB模式。JTAG接口位于RV32M1芯片和天线座子旁边，小的20pin JTAG接口。
 参考文档：[RV32M1_VEGA_Quick_Start_Guide.pdf](./doc/RV32M1_VEGA_Quick_Start_Guide.pdf)
 
-rv32m1_vega支持openocd，可以通过openocd和gdb进行调试。
+rv32m1-vega支持openocd，可以通过openocd和gdb进行调试。
 调试需要下载openocd和sdk,下载配置方法参见以下文档：
 https://github.com/open-isa-org/open-isa.org/blob/master/RV32M1_Vega_Develop_Environment_Setup.pdf
 
@@ -163,7 +163,7 @@ cd ~/xiuos/Ubiquitous/XiZi
 ```
 cd /vega_rv32/sdk
 
-Openocd -f <install_dir>\boards\rv32m1_vega\vega_ri5cy.cfg
+Openocd -f <install_dir>\boards\rv32m1-vega\vega_ri5cy.cfg
 ```
 在当前终端连接openocd，连接如下图所示：
 ![openocd](./img/openocd.png)
@@ -176,7 +176,7 @@ screen /dev/ttyUSB0 115200
 
 5、打开一个新的终端，进入编译生成的elf路径,输入例如：
 ```
-riscv-none-embed-gdb build/XiZi_rv32m1_vega.elf -ex "target remote localhost:3333"
+riscv-none-embed-gdb build/XiZi-rv32m1-vega.elf -ex "target remote localhost:3333"
 ```
 结果如下图所示：
 ![gdb](./img/gdb_load.png)

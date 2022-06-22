@@ -1,7 +1,7 @@
 
 export CFLAGS :=  -march=rv32imac -mabi=ilp32 -fno-builtin -fno-exceptions -ffunction-sections  -O0 -ggdb -Werror
 export AFLAGS :=  -c -march=rv32imac -mabi=ilp32 -x assembler-with-cpp -ggdb
-export LFLAGS :=  -march=rv32imac -mabi=ilp32 -nostartfiles -Wl,--gc-sections,-Map=XiZi_rv32m1_vega.map,-cref,-u,Reset_Handler -T $(BSP_ROOT)/link.lds
+export LFLAGS :=  -march=rv32imac -mabi=ilp32 -nostartfiles -Wl,--gc-sections,-Map=XiZi-rv32m1-vega.map,-cref,-u,Reset_Handler -T $(BSP_ROOT)/link.lds
 
 export CXXFLAGS :=  -march=rv32imac -mabi=ilp32 -fno-builtin -fno-exceptions -ffunction-sections  -O0 -ggdb -Werror
 

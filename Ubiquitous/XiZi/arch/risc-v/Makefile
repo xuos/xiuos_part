@@ -25,7 +25,7 @@ SRC_DIR +=gd32vf103_rvstar
 endif
 
 ifeq ($(CONFIG_BOARD_RV32M1_VEGA),y)
-SRC_DIR +=rv32m1_vega
+SRC_DIR +=rv32m1-vega
 endif
 
 include $(KERNEL_ROOT)/compiler.mk

@@ -130,7 +130,7 @@ make BOARD=gd32vf103_rvstar menuconfig
 make BOARD=gd32vf103_rvstar
 ```
 
-4.如果编译正确无误，build文件夹下会产生XiZi_gd32vf103_rvstar.elf、XiZi_gd32vf103_rvstar.bin文件。
+4.如果编译正确无误，build文件夹下会产生XiZi-gd32vf103_rvstar.elf、XiZi-gd32vf103_rvstar.bin文件。
 
 >注：最后可以执行以下命令，清除配置文件和编译生成的文件
 
@@ -177,7 +177,7 @@ screen /dev/ttyUSB0 115200
 
 5、打开一个新的终端，进入编译生成的elf路径,输入例如：
 ```
-riscv-nuclei-elf-gdb build/XiZi_gd32vf103_rvstar.elf -ex "target remote localhost:3333"
+riscv-nuclei-elf-gdb build/XiZi-gd32vf103_rvstar.elf -ex "target remote localhost:3333"
 ```
 结果如下图所示：
 ![gdb](./img/gdb_load.png)

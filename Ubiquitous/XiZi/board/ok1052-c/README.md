@@ -151,7 +151,7 @@ make BOARD=ok1052-c menuconfig
 make BOARD=ok1052-c
 ```
 
-4.如果编译正确无误，会产生XiZi_ok1052-c.elf、XiZi_ok1052-c.bin文件。
+4.如果编译正确无误，会产生XiZi-ok1052-c.elf、XiZi-ok1052-c.bin文件。
 
 ## 3. 烧写及运行
 
@@ -164,7 +164,7 @@ make BOARD=ok1052-c
 3、同时需要匹配ok1052-c开发板所使用的Flash型号，点击Boot Device Configuration，在Use Typical Device中选择Winbond_W25QxxxJV，然后点击ok。如下图所示：
 ![flashconfig](./img/flashconfig.png)
 
-4、选择编译生成的XiZi_ok1052-c.elf或bin文件路径，按照图示步骤，将文件烧写至Flash中（link.lds中已构造Flash Bootable image，如有修改Flash相关配置需求，可修改/xip目录内相关文件，无需NXPBootUtility再次构造），若烧写无误，则下列绿色进度条会执行到底。如下图所示：
+4、选择编译生成的XiZi-ok1052-c.elf或bin文件路径，按照图示步骤，将文件烧写至Flash中（link.lds中已构造Flash Bootable image，如有修改Flash相关配置需求，可修改/xip目录内相关文件，无需NXPBootUtility再次构造），若烧写无误，则下列绿色进度条会执行到底。如下图所示：
 ![NXPBootUtility_2](./img/NXPBootUtility_2.png)
 
 ### 3.2 运行结果
