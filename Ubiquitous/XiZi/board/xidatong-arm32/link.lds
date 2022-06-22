@@ -28,7 +28,7 @@
 
 /**
 * @file link.lds
-* @brief xidatong Linker script
+* @brief xidatong-arm32 Linker script
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-28
@@ -36,7 +36,7 @@
 
 /*************************************************
 File name: link.lds
-Description: xidatong Linker script
+Description: xidatong-arm32 Linker script
 Others: take MIMXRT1052xxxxx_flexspi_nor.ld for references
 History:
 1. Date: 2021-05-28
@@ -55,12 +55,15 @@ STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x1000;
 MEMORY
 {
   m_boot_data           (RX)  : ORIGIN = 0x60000000, LENGTH = 0x00001000
-  m_image_vertor_table  (RX)  : ORIGIN = 0x60001000, LENGTH = 0x00001000    
-
+  m_image_vertor_table  (RX)  : ORIGIN = 0x60001000, LENGTH = 0x00001000  
+    
   m_interrupts          (RX)  : ORIGIN = 0x60002000, LENGTH = 0x00000400
   m_text                (RX)  : ORIGIN = 0x60002400, LENGTH = 0x03FFDC00
   m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00020000
   m_data2               (RW)  : ORIGIN = 0x20200000, LENGTH = 0x00060000
+
+  m_sdram               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x01E00000
+  m_nocache             (RW)  : ORIGIN = 0x81E00000, LENGTH = 0x00200000
 }
 
 /* Define output sections */
@@ -77,7 +80,7 @@ SECTIONS
     KEEP(*(.boot_hdr.boot_data))
     KEEP(*(.boot_hdr.dcd_data))
   } > m_image_vertor_table
-
+  
   /* The startup code goes first into internal RAM */
   .interrupts :
   {
@@ -217,14 +220,14 @@ SECTIONS
     *(NonCacheable.init)
     . = ALIGN(4);
     __noncachedata_init_end__ = .;   /* create a global symbol at initialized ncache data end */
-  } > m_data
+  } > m_nocache
   . = __noncachedata_init_end__;
   .ncache :
   {
     *(NonCacheable)
     . = ALIGN(4);
     __noncachedata_end__ = .;     /* define a global symbol at ncache data end */
-  } > m_data
+  } > m_nocache
 
   __DATA_END = __NDATA_ROM + (__noncachedata_init_end__ - __noncachedata_start__);
   text_end = ORIGIN(m_text) + LENGTH(m_text);
@@ -253,9 +256,9 @@ SECTIONS
     stack_end = .;
     __StackTop = .;
     heap_start = .;
-  } > m_data
+  } > m_data2
 
-  PROVIDE(heap_end = ORIGIN(m_data) + LENGTH(m_data));
+  PROVIDE(heap_end = ORIGIN(m_data2) + LENGTH(m_data2));
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }

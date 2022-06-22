@@ -1,6 +1,6 @@
 # 从零开始构建矽璓工业物联操作系统：使用ARM架构的矽达通
 
-# xidatong
+# xidatong-arm32
 
 [XiUOS](http://xuos.io/) (X Industrial Ubiquitous Operating System) 矽璓XiUOS是一款面向智慧车间的工业物联网操作系统，主要由一个极简的微型实时操作系统内核和其上的工业物联框架构成，通过高效管理工业物联网设备、支撑工业物联应用，在生产车间内实现智能化的“感知环境、联网传输、知悉识别、控制调整”，促进以工业设备和工业控制系统为核心的人、机、物深度互联，帮助提升生产线的数字化和智能化水平。
 
@@ -133,8 +133,8 @@ $ sudo apt install gcc-arm-none-eabi
 
 ```c
 cd ./Ubiquitous/XiZi
-make BOARD=xidatong distclean
-make BOARD=xidatong menuconfig
+make BOARD=xidatong-arm32 distclean
+make BOARD=xidatong-arm32 menuconfig
 ```
 
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）
@@ -148,7 +148,7 @@ make BOARD=xidatong menuconfig
 3.继续执行以下命令，进行编译
 
 ```
-make BOARD=xidatong
+make BOARD=xidatong-arm32
 ```
 
 4.如果编译正确无误，会产生XiZi_xidatong.elf、XiZi_xidatong.bin文件。

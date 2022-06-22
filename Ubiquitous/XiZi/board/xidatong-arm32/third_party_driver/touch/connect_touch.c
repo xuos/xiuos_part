@@ -12,7 +12,7 @@
 
 /**
 * @file connect_touch.c
-* @brief support xidatong touch function and register to bus framework
+* @brief support xidatong-arm32 touch function and register to bus framework
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2022-05-15

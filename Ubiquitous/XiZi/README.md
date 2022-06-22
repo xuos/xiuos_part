@@ -23,7 +23,7 @@
 
 ARM架构系列的开发板有
 
-	aiit-arm32-board nuvoton-m2354 ok1052-c stm32f103-nano stm32f407-st-discovery stm32f407zgt6 xidatong
+	aiit-arm32-board nuvoton-m2354 ok1052-c stm32f103-nano stm32f407-st-discovery stm32f407zgt6 xidatong-arm32
 
 ### RISC-V
 

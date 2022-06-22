@@ -1,7 +1,7 @@
 
 export KERNELPATHS:=
 
-ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong)
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong-arm32)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
 	-I$(BSP_ROOT)/third_party_driver \
