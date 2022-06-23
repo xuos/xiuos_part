@@ -67,7 +67,10 @@ int PrivSemaphoreAbandon(sem_t *sem)
 {
     return sem_post(sem);
 }
-
+int PrivSemaphoreObtainWaitForever(sem_t *sem)
+{
+    return sem_wait(sem);
+}
 /**************************task*************************/
 int PrivTaskCreate(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*start_routine)(void *), void *arg)
