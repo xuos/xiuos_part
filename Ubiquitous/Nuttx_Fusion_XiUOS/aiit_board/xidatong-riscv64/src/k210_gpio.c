@@ -48,11 +48,13 @@
 
 /* Pin 1 and 2 are used for this example as GPIO outputs. */
 
-#define GPIO_E220_M0  44
-#define GPIO_E220_M1  45
+#define GPIO_E220_M0   44
+#define GPIO_E220_M1   45
+#define GPIO_E18_MODE  46
 
-#define FPIOA_E220_M0  1
-#define FPIOA_E220_M1  2
+#define FPIOA_E220_M0   1
+#define FPIOA_E220_M1   2
+#define FPIOA_E18_MODE  3
 
 /****************************************************************************
  * Private Types
@@ -91,13 +93,15 @@ static const struct gpio_operations_s gpout_ops =
 static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
   GPIO_E220_M0, 
-  GPIO_E220_M1
+  GPIO_E220_M1,
+  GPIO_E18_MODE
 };
 
 static const uint32_t g_fpioa[BOARD_NGPIOOUT] =
 {
   FPIOA_E220_M0, 
-  FPIOA_E220_M1
+  FPIOA_E220_M1,
+  FPIOA_E18_MODE
 };
 
 static struct k210gpio_dev_s g_gpout[BOARD_NGPIOOUT];
@@ -172,7 +176,7 @@ int k210_gpio_init(void)
       k210_fpioa_config(g_gpiooutputs[i],
                         (K210_IO_FUNC_GPIOHS0 + g_fpioa[i]) | K210_IOFLAG_GPIOHS);
       k210_gpiohs_set_direction(g_fpioa[i], GPIO_DM_OUTPUT);
-      k210_gpiohs_set_value(g_fpioa[i], true);
+      k210_gpiohs_set_value(g_fpioa[i], false);
 
       pincount++;
     }
