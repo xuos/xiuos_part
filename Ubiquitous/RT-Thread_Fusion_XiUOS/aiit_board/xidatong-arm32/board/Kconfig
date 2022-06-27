@@ -221,6 +221,14 @@ menu "Onboard Peripheral Drivers"
         select RT_USING_DFS
         select RT_USING_DFS_ELMFAT
 	    default n 
+    
+    config BSP_USB0_HOST
+        bool "Enable USB0 Host"
+        default n
+
+    config BSP_USB1_HOST
+        bool "Enable USB1 Host"
+        default n
 
     menuconfig BSP_USING_ETH
 	bool "Enable Ethernet"
