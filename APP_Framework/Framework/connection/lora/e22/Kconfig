@@ -10,11 +10,11 @@ if ADD_NUTTX_FETURES
 
     config ADAPTER_E22_M0_PATH
         string "E22 M0 pin device"
-        default "/dev/gpout0"
+        default "/dev/gpio0"
 
     config ADAPTER_E22_M1_PATH
         string "E22 M1 pin device"
-        default "/dev/gpout1"
+        default "/dev/gpio1"
     
 
     config ADAPTER_E22_DRIVER
