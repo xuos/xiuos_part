@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_gpiohs.c
+ * arch/risc-v/src/k210/k210_gpio.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,12 +19,12 @@
  ****************************************************************************/
 
 /**
-* @file k210_gpiohs.c
+* @file k210_gpio.c
 * @brief nuttx source code
 *                https://github.com/apache/incubator-nuttx.git
 * @version 10.3.0 
 * @author AIIT XUOS Lab
-* @date 2022-03-23
+* @date 2022-06-30
 */
 
 /****************************************************************************
@@ -37,32 +37,32 @@
 
 #include "riscv_internal.h"
 #include "k210_memorymap.h"
-#include "k210_gpiohs.h"
+#include "k210_gpio.h"
 #include "k210_fpioa.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define GPIOHS_INPUT_VAL_OFFSET    0x00
-#define GPIOHS_INPUT_EN_OFFSET     0x04
-#define GPIOHS_OUTPUT_EN_OFFSET    0x08
-#define GPIOHS_OUTPUT_VAL_OFFSET   0x0c
-#define GPIOHS_PULLUP_EN_OFFSET    0x10
-#define GPIOHS_DRIVE_OFFSET        0x14
+#define GPIO_INPUT_VAL_OFFSET    0x00
+#define GPIO_INPUT_EN_OFFSET     0x04
+#define GPIO_OUTPUT_EN_OFFSET    0x08
+#define GPIO_OUTPUT_VAL_OFFSET   0x0c
+#define GPIO_PULLUP_EN_OFFSET    0x10
+#define GPIO_DRIVE_OFFSET        0x14
 
-#define GPIOHS_INPUT      (K210_GPIOHS_BASE + GPIOHS_INPUT_VAL_OFFSET)
-#define GPIOHS_INPUT_EN   (K210_GPIOHS_BASE + GPIOHS_INPUT_EN_OFFSET)
-#define GPIOHS_OUTPUT     (K210_GPIOHS_BASE + GPIOHS_OUTPUT_VAL_OFFSET)
-#define GPIOHS_OUTPUT_EN  (K210_GPIOHS_BASE + GPIOHS_OUTPUT_EN_OFFSET)
+#define GPIO_INPUT      (K210_GPIO_BASE + GPIO_INPUT_VAL_OFFSET)
+#define GPIO_INPUT_EN   (K210_GPIO_BASE + GPIO_INPUT_EN_OFFSET)
+#define GPIO_OUTPUT     (K210_GPIO_BASE + GPIO_OUTPUT_VAL_OFFSET)
+#define GPIO_OUTPUT_EN  (K210_GPIO_BASE + GPIO_OUTPUT_EN_OFFSET)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-void k210_gpiohs_set_direction(uint32_t io, gpio_drive_mode_t mode)
+void k210_gpio_set_direction(uint32_t io, gpio_drive_mode_t mode)
 {
-  DEBUGASSERT(io < K210_GPIOHS_MAX_PINNO);
-  int io_number = k210_fpioa_get_io_by_function(K210_IO_FUNC_GPIOHS0 + io);
+  DEBUGASSERT(io < K210_GPIO_MAX_PINNO);
+  int io_number = fpioa_get_io_by_function(K210_IO_FUNC_GPIO0 + io);
   DEBUGASSERT(io_number >= 0);
 
   fpioa_pull_t pull = FPIOA_PULL_NONE;
@@ -94,20 +94,20 @@ void k210_gpiohs_set_direction(uint32_t io, gpio_drive_mode_t mode)
   fpioa_set_io_pull(io_number, pull);
   uint32_t outbit = dir << io;
   uint32_t inbit  = (!dir) << io;
-  modifyreg32(GPIOHS_OUTPUT_EN, inbit, outbit);
-  modifyreg32(GPIOHS_INPUT_EN, outbit, inbit);
+  modifyreg32(GPIO_OUTPUT_EN, inbit, outbit);
+  modifyreg32(GPIO_INPUT_EN, outbit, inbit);
 }
 
-void k210_gpiohs_set_value(uint32_t io, bool val)
+void k210_gpio_set_value(uint32_t io, bool val)
 {
   uint32_t setbit = val << io;
   uint32_t clrbit  = (!val) << io;
-  modifyreg32(GPIOHS_OUTPUT, clrbit, setbit);
+  modifyreg32(GPIO_OUTPUT, clrbit, setbit);
 }
 
-bool k210_gpiohs_get_value(uint32_t io)
+bool k210_gpio_get_value(uint32_t io)
 {
-  uint32_t reg = getreg32(GPIOHS_INPUT);
+  uint32_t reg = getreg32(GPIO_INPUT);
 
   if (reg & (1 << io))
     {
@@ -118,3 +118,4 @@ bool k210_gpiohs_get_value(uint32_t io)
       return false;
     }
 }
+

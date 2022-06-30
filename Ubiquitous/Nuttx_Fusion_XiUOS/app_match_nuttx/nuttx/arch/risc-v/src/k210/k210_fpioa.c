@@ -45,52 +45,52 @@
  ****************************************************************************/
 int k210_fpioa_get_io_by_function(uint8_t function)
 {
-    int index = 0;
-    uint32_t RegValue = 0x0000;
-    uint32_t *fpioa = (uint32_t *)K210_FPIOA_BASE;
+  int index = 0;
+  uint32_t RegValue = 0x0000;
+  uint32_t *fpioa = (uint32_t *)K210_FPIOA_BASE;
 
-    for (index = 0; index < K210_IO_NUMBER; index++)
-    {
-        RegValue = getreg32(&fpioa[index]);
-        if ((RegValue & 0xFF) == function)
-            return index;
-    }
-    return -1;
+  for (index = 0; index < K210_IO_NUMBER; index++)
+  {
+      RegValue = getreg32(&fpioa[index]);
+      if ((RegValue & 0xFF) == function)
+          return index;
+  }
+  return -1;
 }
 
 int fpioa_set_io_pull(int number, fpioa_pull_t pull)
 {
-    /* Check parameters */
-    if (number < 0 || number >= K210_IO_NUMBER || pull >= FPIOA_PULL_MAX)
-        return -1;
+  /* Check parameters */
+  if (number < 0 || number >= K210_IO_NUMBER || pull >= FPIOA_PULL_MAX)
+      return -1;
 
-    /* read register */
-    uint32_t *fpioa = (uint32_t *)K210_FPIOA_BASE;
-    fpioa_io_config_t cfg = *(fpioa_io_config_t *)(&fpioa[number]);
-    uint32_t ioflags = 0x0000;
+  /* read register */
+  uint32_t *fpioa = (uint32_t *)K210_FPIOA_BASE;
+  fpioa_io_config_t cfg = *(fpioa_io_config_t *)(&fpioa[number]);
+  uint32_t ioflags = 0x0000;
 
-    switch (pull)
-    {
-        case FPIOA_PULL_NONE:
-            cfg.pu = 0;
-            cfg.pd = 0;
-            break;
-        case FPIOA_PULL_DOWN:
-            cfg.pu = 0;
-            cfg.pd = 1;
-            break;
-        case FPIOA_PULL_UP:
-            cfg.pu = 1;
-            cfg.pd = 0;
-            break;
-        default:
-            break;
-    }
+  switch (pull)
+  {
+      case FPIOA_PULL_NONE:
+          cfg.pu = 0;
+          cfg.pd = 0;
+          break;
+      case FPIOA_PULL_DOWN:
+          cfg.pu = 0;
+          cfg.pd = 1;
+          break;
+      case FPIOA_PULL_UP:
+          cfg.pu = 1;
+          cfg.pd = 0;
+          break;
+      default:
+          break;
+  }
 
-    /* write register */
-    ioflags = *(uint32_t*)(&cfg);
-    putreg32(ioflags, &fpioa[number]);
-    return 0;
+  /* write register */
+  ioflags = *(uint32_t*)(&cfg);
+  putreg32(ioflags, &fpioa[number]);
+  return 0;
 }
 
 void k210_fpioa_config(uint32_t io, uint32_t ioflags)

@@ -42,6 +42,7 @@
 
 #define K210_IO_NUMBER 48
 #define K210_GPIOHS_MAX_PINNO  32
+#define K210_GPIO_MAX_PINNO    8
 
 #define K210_IO_FUNC_UARTHS_RX 18  /* UART High speed Receiver */
 #define K210_IO_FUNC_UARTHS_TX 19  /* UART High speed Transmitter */
@@ -77,6 +78,14 @@
 #define K210_IO_FUNC_GPIOHS29  53  /* GPIO High speed 29 */
 #define K210_IO_FUNC_GPIOHS30  54  /* GPIO High speed 30 */
 #define K210_IO_FUNC_GPIOHS31  55  /* GPIO High speed 31 */
+#define K210_IO_FUNC_GPIO0     56  /* GPIO pin 0 */
+#define K210_IO_FUNC_GPIO1     57  /* GPIO pin 1 */
+#define K210_IO_FUNC_GPIO2     58  /* GPIO pin 2 */
+#define K210_IO_FUNC_GPIO3     59  /* GPIO pin 3 */
+#define K210_IO_FUNC_GPIO4     60  /* GPIO pin 4 */
+#define K210_IO_FUNC_GPIO5     61  /* GPIO pin 5 */
+#define K210_IO_FUNC_GPIO6     62  /* GPIO pin 6 */
+#define K210_IO_FUNC_GPIO7     63  /* GPIO pin 7 */
 
 #define K210_IO_DS(x)  (x << 8) /* Driving Selector */
 
