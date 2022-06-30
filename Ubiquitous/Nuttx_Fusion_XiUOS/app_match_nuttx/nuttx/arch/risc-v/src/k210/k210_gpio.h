@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_gpiohs.h
+ * arch/risc-v/src/k210/k210_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,16 +19,16 @@
  ****************************************************************************/
 
 /**
-* @file k210_gpiohs.h
+* @file k210_gpio.h
 * @brief nuttx source code
 *                https://github.com/apache/incubator-nuttx.git
 * @version 10.3.0 
 * @author AIIT XUOS Lab
-* @date 2022-03-23
+* @date 2022-06-30
 */
 
-#ifndef __ARCH_RISCV_SRC_K210_K210_GPIOHS_H
-#define __ARCH_RISCV_SRC_K210_K210_GPIOHS_H
+#ifndef __ARCH_RISCV_SRC_K210_K210_GPIO_H
+#define __ARCH_RISCV_SRC_K210_K210_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: k210_gpiohs_set_direction
+ * Name: k210_gpio_set_direction
  *
  * Description:
  *   Set gpiohs direction
@@ -54,10 +54,10 @@
  *
  ****************************************************************************/
 
-void k210_gpiohs_set_direction(uint32_t io, gpio_drive_mode_t mode);
+void k210_gpio_set_direction(uint32_t io, gpio_drive_mode_t mode);
 
 /****************************************************************************
- * Name: k210_gpiohs_set_value
+ * Name: k210_gpio_set_value
  *
  * Description:
  *   Set gpiohs direction
@@ -68,10 +68,10 @@ void k210_gpiohs_set_direction(uint32_t io, gpio_drive_mode_t mode);
  *
  ****************************************************************************/
 
-void k210_gpiohs_set_value(uint32_t io, bool val);
+void k210_gpio_set_value(uint32_t io, bool val);
 
 /****************************************************************************
- * Name: k210_gpiohs_get_value
+ * Name: k210_gpio_get_value
  *
  * Description:
  *   Get gpiohs level
@@ -84,6 +84,6 @@ void k210_gpiohs_set_value(uint32_t io, bool val);
  *
  ****************************************************************************/
 
-bool k210_gpiohs_get_value(uint32_t io);
+bool k210_gpio_get_value(uint32_t io);
 
-#endif /* __ARCH_RISCV_SRC_K210_K210_GPIOHS_H */
+#endif /* __ARCH_RISCV_SRC_K210_K210_GPIO_H */
