@@ -281,4 +281,7 @@
 
 #define APP_SELECT_NEWLIB
 
+/* LVGL configuration */
+
+
 #endif
