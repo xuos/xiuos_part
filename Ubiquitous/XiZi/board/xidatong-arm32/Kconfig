@@ -18,7 +18,7 @@ config BOARD_CORTEX_M7_EVB
 
 source "$KERNEL_DIR/arch/Kconfig"
 
-menu "xidatong feature"
+menu "xidatong-arm32 feature"
     source "$BSP_DIR/third_party_driver/Kconfig"
 
     menu "config default board resources"

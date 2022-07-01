@@ -7,7 +7,7 @@
 
 /**
  * @file board.c
- * @brief relative configure for xidatong
+ * @brief relative configure for xidatong-arm32
  * @version 2.0
  * @author AIIT XUOS Lab
  * @date 2022.03.15

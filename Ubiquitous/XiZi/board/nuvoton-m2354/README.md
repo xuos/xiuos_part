@@ -152,7 +152,7 @@ make BOARD=nuvoton-m2354 menuconfig
 make BOARD=nuvoton-m2354
 ```
 
-4.如果编译正确无误，会产生XiZi_nuvoton-m2354.elf、XiZi_nuvoton-m2354.bin文件。
+4.如果编译正确无误，会产生XiZi-nuvoton-m2354.elf、XiZi-nuvoton-m2354.bin文件。
 
 ## 3. 烧写及运行
 

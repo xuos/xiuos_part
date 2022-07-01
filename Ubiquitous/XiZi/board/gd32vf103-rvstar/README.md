@@ -1,4 +1,4 @@
-# 从零开始构建矽璓工业物联操作系统：使用risc-v架构的gd32vf103_rvstar 开发板
+# 从零开始构建矽璓工业物联操作系统：使用risc-v架构的gd32vf103-rvstar 开发板
 
 [XiUOS](http://xuos.io/) (X Industrial Ubiquitous Operating System) 矽璓工业物联操作系统是一款面向工业物联场景的泛在操作系统，来自泛在操作系统研究计划。所谓泛在操作系统(UOS: Ubiquitous Operating Systems)，是支持互联网时代人机物融合泛在计算应用模式的新型操作系统，是传统操作系统概念的泛化与延伸。在泛在操作系统技术体系中，不同的泛在计算设备和泛在应用场景需要符合各自特性的不同UOS，XiUOS即是面向工业物联场景的一种UOS，主要由一个极简的微型实时操作系统(RTOS)内核和其上的智能工业物联框架构成，支持工业物联网(IIoT: Industrial Internet of Things)应用。
 
@@ -83,9 +83,9 @@ export CROSS_COMPILE ?=/opt/Nuclei/gcc/bin/riscv-nuclei-elf-
 
 若已存在`export CROSS_COMPILE ?=xxxx`   应该将原有的语句注释，再写入上面的语句。
 
-# 在gd32vf103_rvstar board 上创建第一个应用
+# 在gd32vf103-rvstar board 上创建第一个应用
 
-## 1.gd32vf103_rvstar board 简介
+## 1.gd32vf103-rvstar board 简介
 
 | 硬件 | 描述 |
 | -- | -- |
@@ -116,8 +116,8 @@ XiUOS板级当前支持使用UART。
 
 ```
 cd ./Ubiquitous/XiZi
-make BOARD=gd32vf103_rvstar distclean
-make BOARD=gd32vf103_rvstar menuconfig
+make BOARD=gd32vf103-rvstar distclean
+make BOARD=gd32vf103-rvstar menuconfig
 ```
 
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后选择Exit保存并退出
@@ -127,15 +127,15 @@ make BOARD=gd32vf103_rvstar menuconfig
 3.继续执行以下命令，进行编译
 
 ```
-make BOARD=gd32vf103_rvstar
+make BOARD=gd32vf103-rvstar
 ```
 
-4.如果编译正确无误，build文件夹下会产生XiZi_gd32vf103_rvstar.elf、XiZi_gd32vf103_rvstar.bin文件。
+4.如果编译正确无误，build文件夹下会产生XiZi-gd32vf103-rvstar.elf、XiZi-gd32vf103-rvstar.bin文件。
 
 >注：最后可以执行以下命令，清除配置文件和编译生成的文件
 
 ```
-make BOARD=gd32vf103_rvstar distclean
+make BOARD=gd32vf103-rvstar distclean
 ```
 
 ## 3. 烧写及调试执行
@@ -177,7 +177,7 @@ screen /dev/ttyUSB0 115200
 
 5、打开一个新的终端，进入编译生成的elf路径,输入例如：
 ```
-riscv-nuclei-elf-gdb build/XiZi_gd32vf103_rvstar.elf -ex "target remote localhost:3333"
+riscv-nuclei-elf-gdb build/XiZi-gd32vf103-rvstar.elf -ex "target remote localhost:3333"
 ```
 结果如下图所示：
 ![gdb](./img/gdb_load.png)

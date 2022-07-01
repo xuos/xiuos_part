@@ -1,6 +1,6 @@
 /**
 * @file connect_lcd.h
-* @brief define xidatong lcd function
+* @brief define xidatong-arm32 lcd function
 * @version 1.0 
 * @author AIIT XiUOS Lab
 * @date 2022-04-25

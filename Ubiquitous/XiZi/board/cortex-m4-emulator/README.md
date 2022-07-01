@@ -161,7 +161,7 @@ make BOARD=cortex-m4-emulator menuconfig
 make BOARD=cortex-m4-emulator
 ```
 
-4.如果编译正确无误，会产生XiZi_cortex-m4-emulator.elf、XiZi_cortex-m4-emulator.bin文件。
+4.如果编译正确无误，会产生XiZi-cortex-m4-emulator.elf、XiZi-cortex-m4-emulator.bin文件。
 
 
 
@@ -178,7 +178,7 @@ sudo apt install qemu-system-arm
 通过以下命令启动Q‎EMU并加载XiUOS ELF文件
 
 ```
-qemu-system-arm -machine netduinoplus2  -nographic -kernel build/XiZi_cortex-m4-emulator.elf
+qemu-system-arm -machine netduinoplus2  -nographic -kernel build/XiZi-cortex-m4-emulator.elf
 ```
 
 QEMU运行起来后将会在终端上看到信息打印输出
@@ -198,11 +198,11 @@ sudo apt install gdb-multiarch
 并通过以下命令启动Q‎EMU
 
 ```
-qemu-system-arm -machine netduinoplus2  -nographic -kernel build/XiZi_cortex-m4-emulator.elf -s -S
+qemu-system-arm -machine netduinoplus2  -nographic -kernel build/XiZi-cortex-m4-emulator.elf -s -S
 ```
 
 然后要重新开启另一个linux系统终端一个终端，执行`riscv-none-embed-gdb`命令
 
 ```
-gdb-multiarch build/XiZi_cortex-m4-emulator.elf -ex "target remote localhost:1234" 
+gdb-multiarch build/XiZi-cortex-m4-emulator.elf -ex "target remote localhost:1234" 
 ```

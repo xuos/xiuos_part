@@ -1,6 +1,6 @@
 # 从零开始构建矽璓工业物联操作系统：使用ARM架构的矽达通
 
-# xidatong
+# xidatong-arm32
 
 [XiUOS](http://xuos.io/) (X Industrial Ubiquitous Operating System) 矽璓XiUOS是一款面向智慧车间的工业物联网操作系统，主要由一个极简的微型实时操作系统内核和其上的工业物联框架构成，通过高效管理工业物联网设备、支撑工业物联应用，在生产车间内实现智能化的“感知环境、联网传输、知悉识别、控制调整”，促进以工业设备和工业控制系统为核心的人、机、物深度互联，帮助提升生产线的数字化和智能化水平。
 
@@ -133,8 +133,8 @@ $ sudo apt install gcc-arm-none-eabi
 
 ```c
 cd ./Ubiquitous/XiZi
-make BOARD=xidatong distclean
-make BOARD=xidatong menuconfig
+make BOARD=xidatong-arm32 distclean
+make BOARD=xidatong-arm32 menuconfig
 ```
 
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）
@@ -148,23 +148,23 @@ make BOARD=xidatong menuconfig
 3.继续执行以下命令，进行编译
 
 ```
-make BOARD=xidatong
+make BOARD=xidatong-arm32
 ```
 
-4.如果编译正确无误，会产生XiZi_xidatong.elf、XiZi_xidatong.bin文件。
+4.如果编译正确无误，会产生XiZi-xidatong-arm32.elf、XiZi-xidatong-arm32.bin文件。
 
 ## 3. 烧写及运行
 
 ### 3.1 烧写
 1、烧写工具：NXP MCU Boot Utility，可参考[https://github.com/JayHeng/NXP-MCUBootUtility](https://github.com/JayHeng/NXP-MCUBootUtility)
 
-2、xidatong开发板支持UART串口烧写程序，打开NXP MCU Boot Utility后，选择好芯片类型为i.MXRT105x，开发板上电，使用串口转USB线将开发板和PC连接，拨码开关设置为1 on 2 on 3 off 4 off，重新上电，选择对应的COM口和波特率（需关闭串口终端连接，确保该COM口空闲，否则会导致Utility工具连接失败），连接成功后，点击reconnect，等待NXP MCU Boot Utility中红色显示变成蓝色显示，则表示已正确识别并连接到了开发板。如下图所示：
+2、xidatong-arm32开发板支持UART串口烧写程序，打开NXP MCU Boot Utility后，选择好芯片类型为i.MXRT105x，开发板上电，使用串口转USB线将开发板和PC连接，拨码开关设置为1 on 2 on 3 off 4 off，重新上电，选择对应的COM口和波特率（需关闭串口终端连接，确保该COM口空闲，否则会导致Utility工具连接失败），连接成功后，点击reconnect，等待NXP MCU Boot Utility中红色显示变成蓝色显示，则表示已正确识别并连接到了开发板。如下图所示：
 ![NXPBootUtility_1](./img/NXPBootUtility_1.png)
 
-3、同时需要匹配xidatong开发板所使用的Flash型号，点击Boot Device Configuration，在Use Typical Device中选择Winbond_W25QxxxJV，然后点击ok。如下图所示：
+3、同时需要匹配xidatong-arm32开发板所使用的Flash型号，点击Boot Device Configuration，在Use Typical Device中选择Winbond_W25QxxxJV，然后点击ok。如下图所示：
 ![flashconfig](./img/flashconfig.png)
 
-4、选择编译生成的XiZi_xidatong.elf或bin文件路径，按照图示步骤，将文件烧写至Flash中（link.lds中已构造Flash Bootable image，如有修改Flash相关配置需求，可修改/xip目录内相关文件，无需NXPBootUtility再次构造），若烧写无误，则下列绿色进度条会执行到底。如下图所示：
+4、选择编译生成的XiZi-xidatong-arm32.elf或bin文件路径，按照图示步骤，将文件烧写至Flash中（link.lds中已构造Flash Bootable image，如有修改Flash相关配置需求，可修改/xip目录内相关文件，无需NXPBootUtility再次构造），若烧写无误，则下列绿色进度条会执行到底。如下图所示：
 ![NXPBootUtility_2](./img/NXPBootUtility_2.png)
 ### 3.2 运行结果
 

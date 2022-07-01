@@ -17,7 +17,7 @@ config BOARD_GD32VF103RVSTAR
 
 source "$KERNEL_DIR/arch/Kconfig"
 
-menu "gd32vf103_rvstar feature"
+menu "gd32vf103-rvstar feature"
     source "$BSP_DIR/third_party_driver/Kconfig"
 endmenu
 

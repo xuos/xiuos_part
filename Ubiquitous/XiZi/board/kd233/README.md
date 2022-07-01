@@ -143,7 +143,7 @@ make BOARD=kd233 menuconfig
 make BOARD=kd233
 ```
 
-4.如果编译正确无误，会在build文件夹下生成XiZi_kd233.elf、XiZi_kd233.bin文件。其中XiZi_kd233.bin需要烧写到设备中进行运行。
+4.如果编译正确无误，会在build文件夹下生成XiZi-kd233.elf、XiZi-kd233.bin文件。其中XiZi-kd233.bin需要烧写到设备中进行运行。
 
 >注：最后可以执行以下命令，清除配置文件和编译生成的文件
 
@@ -178,7 +178,7 @@ sudo pip2 install kflash
 代码根目录下执行K-Flash工具烧录，-p为USB端口号，视实际情况而定
 
 ```
-sudo kflash -t build/XiZi_kd233.bin -p /dev/ttyUSB0
+sudo kflash -t build/XiZi-kd233.bin -p /dev/ttyUSB0
 ```
 
 ### 3.1 运行结果
