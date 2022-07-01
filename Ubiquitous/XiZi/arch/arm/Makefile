@@ -5,6 +5,11 @@ SRC_DIR := shared
 SRC_DIR += cortex-m3
 endif
 
+ifeq ($(CONFIG_BOARD_CORTEX_M4_EVB),y)
+SRC_DIR := shared
+SRC_DIR += cortex-m4
+endif
+
 ifeq ($(CONFIG_BOARD_STM32F103_NANO),y)
 SRC_DIR := shared
 SRC_DIR += cortex-m3
