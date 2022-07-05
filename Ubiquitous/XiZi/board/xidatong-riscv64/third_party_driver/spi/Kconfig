@@ -1,0 +1,34 @@
+config BSP_USING_SPI1
+bool "Using spi1  "
+default y
+
+
+if BSP_USING_SPI1
+    config SPI_BUS_NAME_1
+        string "spi bus 1 name"
+        default "spi1"
+    config SPI_1_DRV_NAME
+        string "spi bus 1 driver name"
+        default "spi1_drv"
+    config BSP_SPI1_CLK_PIN
+        int "spi1 clk pin number"
+        default 9
+    config BSP_SPI1_D0_PIN
+        int "spi1 MOSI d0 pin number"
+        default 11
+    config BSP_SPI1_D1_PIN
+        int "spi1 MISO d1 pin number"
+        default 10
+    menuconfig BSP_SPI1_USING_SS0
+        bool "SPI1 Enable SS0"
+        default y
+    if BSP_SPI1_USING_SS0
+        config SPI_1_DEVICE_NAME_0
+            string "spi bus 1 device 0 name"
+            default "spi1_dev0"
+        config BSP_SPI1_SS0_PIN
+            int "spi1 ss0 pin number"
+            default 12
+    endif
+endif
+

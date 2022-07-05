@@ -33,6 +33,17 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/xip #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong-riscv64)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(BSP_ROOT)/include \
+    -I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/camera \
+	-I$(BSP_ROOT)/third_party_driver/drivers \
+	-I$(BSP_ROOT)/third_party_driver/lcd \
+	-I$(KERNEL_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/kd233)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/include \
