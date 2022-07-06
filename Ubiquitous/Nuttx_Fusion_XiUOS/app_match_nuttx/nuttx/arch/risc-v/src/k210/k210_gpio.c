@@ -118,4 +118,3 @@ bool k210_gpio_get_value(uint32_t io)
       return false;
     }
 }
-

@@ -33,7 +33,7 @@
 #include "riscv_internal.h"
 #include "hardware/k210_memorymap.h"
  
- typedef struct _k210_soft_reset
+typedef struct _k210_soft_reset
 {
   uint32_t soft_reset : 1;
   uint32_t reserved : 31;
@@ -61,4 +61,3 @@ void up_systemreset(void)
 
   for (; ; );
 }
-
