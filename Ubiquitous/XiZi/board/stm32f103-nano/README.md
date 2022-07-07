@@ -191,7 +191,7 @@ make BOARD=stm32f103-nano menuconfig
 make BOARD=stm32f103-nano
 ```
 
-5.如果编译正确无误，会产生XiZi_stm32f103-nano.elf、XiZi_stm32f103-nano.bin文件。其中XiZi_stm32f103-nano.bin需要烧写到设备中进行运行。
+5.如果编译正确无误，会产生XiZi-stm32f103-nano.elf、XiZi-stm32f103-nano.bin文件。其中XiZi-stm32f103-nano.bin需要烧写到设备中进行运行。
 
 ## 3. 烧写及执行
 
@@ -219,7 +219,7 @@ cd build/Release && make install DESTDIR=_install
 代码根目录下执行st-flash工具烧录
 
 ```
-sudo st-flash write build/XiZi_stm32f103-nano.bin 0x8000000
+sudo st-flash write build/XiZi-stm32f103-nano.bin 0x8000000
 ```
 
 ### 3.1 运行结果

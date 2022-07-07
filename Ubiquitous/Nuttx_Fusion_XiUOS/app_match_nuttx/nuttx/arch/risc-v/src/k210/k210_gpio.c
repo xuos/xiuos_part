@@ -62,7 +62,7 @@
 void k210_gpio_set_direction(uint32_t io, gpio_drive_mode_t mode)
 {
   DEBUGASSERT(io < K210_GPIO_MAX_PINNO);
-  int io_number = fpioa_get_io_by_function(K210_IO_FUNC_GPIO0 + io);
+  int io_number = k210_fpioa_get_io_by_function(K210_IO_FUNC_GPIO0 + io);
   DEBUGASSERT(io_number >= 0);
 
   fpioa_pull_t pull = FPIOA_PULL_NONE;
@@ -118,4 +118,3 @@ bool k210_gpio_get_value(uint32_t io)
       return false;
     }
 }
-

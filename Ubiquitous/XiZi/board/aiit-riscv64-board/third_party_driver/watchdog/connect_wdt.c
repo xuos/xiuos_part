@@ -65,6 +65,17 @@ static const struct WdtDevDone dev_done =
     NONE,
 };
 
+/**
+ * @description: Watchdog function
+ * @return success: EOK, failure: other
+ */
+int StartWatchdog(void)
+{
+    //add feed watchdog task function
+
+    return EOK;
+}
+
 int HwWdtInit(void)
 {
     wdt_device_number_t id;

@@ -2,7 +2,7 @@ export CFLAGS := -mcmodel=medany -march=rv32imac -mabi=ilp32 -fno-common -ffunct
 export AFLAGS := -c -mcmodel=medany -march=rv32imac -mabi=ilp32 -x assembler-with-cpp -ggdb
 export LFLAGS := -mcmodel=medany -march=rv32imac -mabi=ilp32 -nostartfiles -Wl,--gc-sections,-Map=XiZi.map,-cref,-u,_start -T $(BSP_ROOT)/link.lds
 
-export APPLFLAGS := -mcmodel=medany -march=rv32imac -mabi=ilp32 -nostartfiles -Wl,--gc-sections,-Map=XiZi_app.map,-cref,-u, -T $(BSP_ROOT)/link_userspace.lds
+export APPLFLAGS := -mcmodel=medany -march=rv32imac -mabi=ilp32 -nostartfiles -Wl,--gc-sections,-Map=XiZi-app.map,-cref,-u, -T $(BSP_ROOT)/link_userspace.lds
 
 export CXXFLAGS := -mcmodel=medany -march=rv32imac -mabi=ilp32 -fno-common -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -O0 -ggdb -Werror
 

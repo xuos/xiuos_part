@@ -35,6 +35,12 @@ config SENSOR_HS300X_HUMIDITY
                 endif
 
                 if ADD_RTTHREAD_FETURES
+                        config SENSOR_DEVICE_HS300X_DEV
+                                string "HS300x device name"
+                                default "/dev/i2c1"
+                        config SENSOR_DEVICE_HS300X_I2C_ADDR
+                                hex "HS300x device i2c address"
+                                default 0x44
 
                 endif
         endif

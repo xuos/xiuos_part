@@ -1,8 +1,8 @@
 export CFLAGS := -mcmodel=medany -march=rv64imac -mabi=lp64 -fno-common -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -O0 -Wa,-g -ggdb -fgnu89-inline -Werror
 export AFLAGS := -c -mcmodel=medany -march=rv64imac -mabi=lp64  -Wa,-g -ggdb
-export LFLAGS := -mcmodel=medany -march=rv64imac -mabi=lp64 -nostartfiles -Wl,--gc-sections,-Map=XiZi_kd233.map,-cref,-u,_start -T $(BSP_ROOT)/link.lds
+export LFLAGS := -mcmodel=medany -march=rv64imac -mabi=lp64 -nostartfiles -Wl,--gc-sections,-Map=XiZi-kd233.map,-cref,-u,_start -T $(BSP_ROOT)/link.lds
 
-export APPLFLAGS := -mcmodel=medany -march=rv64imac -mabi=lp64 -nostartfiles -Wl,--gc-sections,-Map=XiZi_app.map,-cref,-u, -T $(BSP_ROOT)/link_userspace.lds
+export APPLFLAGS := -mcmodel=medany -march=rv64imac -mabi=lp64 -nostartfiles -Wl,--gc-sections,-Map=XiZi-app.map,-cref,-u, -T $(BSP_ROOT)/link_userspace.lds
 
 
 export CXXFLAGS := -mcmodel=medany -march=rv64imac -mabi=lp64 -fno-common -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -O0 -Wa,-g -ggdb -Werror

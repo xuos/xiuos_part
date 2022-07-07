@@ -24,31 +24,31 @@ void PollAdd(WaitQueueType *wq, pollreqType *req)
 }
 
 
-struct rt_poll_node;
+struct poll_node;
 
-struct rt_poll_table
+struct poll_table
 {
     pollreqType req;
     uint32 triggered; 
     KTaskDescriptorType polling_thread;
-    struct rt_poll_node *nodes;
+    struct poll_node *nodes;
 };
 
-struct rt_poll_node
+struct poll_node
 {
     struct WaitqueueNode wqn;
-    struct rt_poll_table *pt;
-    struct rt_poll_node *next;
+    struct poll_table *pt;
+    struct poll_node *next;
 };
 
 static int WqueuePollWake(struct WaitqueueNode *wait, void *key)
 {
-    struct rt_poll_node *pn;
+    struct poll_node *pn;
 
     if (key && !((x_ubase)key & wait->key))
         return -1;
 
-    pn =CONTAINER_OF(wait, struct rt_poll_node, wqn);
+    pn =CONTAINER_OF(wait, struct poll_node, wqn);
     pn->pt->triggered = 1;
 
     return 0;
@@ -56,14 +56,14 @@ static int WqueuePollWake(struct WaitqueueNode *wait, void *key)
 
 static void _poll_add(WaitQueueType *wq, pollreqType *req)
 {
-    struct rt_poll_table *pt;
-    struct rt_poll_node *node;
+    struct poll_table *pt;
+    struct poll_node *node;
 
-    node = (struct rt_poll_node *)x_malloc(sizeof(struct rt_poll_node));
+    node = (struct poll_node *)x_malloc(sizeof(struct poll_node));
     if (node == NONE)
         return;
 
-    pt =CONTAINER_OF(req, struct rt_poll_table, req);
+    pt =CONTAINER_OF(req, struct poll_table, req);
 
     node->wqn.key = req->_key;
     InitDoubleLinkList(&(node->wqn.list));
@@ -77,7 +77,7 @@ static void _poll_add(WaitQueueType *wq, pollreqType *req)
 
 
 
-static int PollWaitTimeout(struct rt_poll_table *pt, int msec)
+static int PollWaitTimeout(struct poll_table *pt, int msec)
 {
     int32 timeout;
     int ret = 0;
@@ -135,7 +135,7 @@ static int DoPollFd(struct pollfd *pollfd, pollreqType *req)
     return mask;
 }
 
-static int PollDo(struct pollfd *fds, NfdsType nfds, struct rt_poll_table *pt, int msec)
+static int PollDo(struct pollfd *fds, NfdsType nfds, struct poll_table *pt, int msec)
 {
     int num;
     int istimeout = 0;
@@ -175,8 +175,8 @@ static int PollDo(struct pollfd *fds, NfdsType nfds, struct rt_poll_table *pt, i
 int poll(struct pollfd *fds, NfdsType nfds, int timeout)
 {
     int num;
-    struct rt_poll_table table;
-    struct rt_poll_node *node, *temp;
+    struct poll_table table;
+    struct poll_node *node, *temp;
 
     table.req._proc = _poll_add;
     table.triggered = 0;

@@ -41,9 +41,9 @@ make BOARD=stm32f407zgt6 menuconfig
 ```
 make BOARD=stm32f407zgt6
 ```
->5.如果编译正确无误，会产生XiZi_stm32f407zgt6.elf、XiZi_stm32f407zgt6.bin文件。其中XiZi_stm32f407zgt6.bin需要烧写到设备中进行运行。
+>5.如果编译正确无误，会产生XiZi-stm32f407zgt6.elf、XiZi-stm32f407zgt6.bin文件。其中XiZi-stm32f407zgt6.bin需要烧写到设备中进行运行。
 ```
-sudo write build/XiZi_stm32f407zgt6.bin 0x8000000
+sudo write build/XiZi-stm32f407zgt6.bin 0x8000000
 ```
 >6.最后可以执行以下命令，清除配置文件和编译生成的文件
 ```
@@ -71,7 +71,7 @@ git clone https://github.com/texane/stlink.git
 
 在代码根目录下执行st-flash工具烧录
 ```
-sudo st-flash write build/XiZi_stm32f407zgt6.bin 0x8000000
+sudo st-flash write build/XiZi-stm32f407zgt6.bin 0x8000000
 ```
 ### 3.1 运行结果
 

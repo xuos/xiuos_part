@@ -129,7 +129,7 @@ make BOARD=gapuino menuconfig
 make BOARD=gapuino
 ```
 
-4.如果编译正确无误，build文件夹下会产生XiZi_gapuino.elf、XiZi_gapuino.bin文件。
+4.如果编译正确无误，build文件夹下会产生XiZi-gapuino.elf、XiZi-gapuino.bin文件。
 
 >注：最后可以执行以下命令，清除配置文件和编译生成的文件
 
@@ -172,7 +172,7 @@ screen /dev/ttyUSB0 115200
 
 5、打开一个新的终端，进入编译生成的elf路径,输入例如：
 ```
-riscv32-unknown-elf-gdb build/XiZi_gapuino.elf -ex "target remote localhost:3333"
+riscv32-unknown-elf-gdb build/XiZi-gapuino.elf -ex "target remote localhost:3333"
 ```
 结果如下图所示：
 ![gdb](./img/gdb_load.png)

@@ -25,6 +25,8 @@
 extern AdapterProductInfoType BC28Attach(struct Adapter *adapter);
 #endif
 
+#define ADAPTER_NBIOT_NAME "nbiot"
+
 static int AdapterNbiotRegister(struct Adapter *adapter)
 {
     int ret = 0;
@@ -95,7 +97,13 @@ int opennb(void)
 
      return 0;    
  }
-//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, opennb, opennb, show adapter nb information);
+#ifdef ADD_RTTHREAD_FETURES
+MSH_CMD_EXPORT(opennb,open nb sample);
+#endif
+#ifdef ADD_XIZI_FETURES 
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, opennb, opennb, show adapter nb information);
+#endif
+
 int closenb(void)
 {
     int ret = 0;
@@ -113,8 +121,13 @@ int closenb(void)
 
      return 0;    
  }
-//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, closenb, closenb, show adapter nb information);
- 
+#ifdef ADD_RTTHREAD_FETURES
+MSH_CMD_EXPORT(closenb,close nb sample);
+#endif
+#ifdef ADD_XIZI_FETURES
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, closenb, closenb, show adapter nb information);
+#endif
+
  int connectnb(int argc, char *argv[])
  {
      const char *send_msg = argv[1];
@@ -133,7 +146,12 @@ int closenb(void)
 
      return 0;    
  }
-//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, connectnb, connectnb, show adapter nb information);
+#ifdef ADD_RTTHREAD_FETURES
+MSH_CMD_EXPORT(connectnb,connect nb test);
+#endif
+#ifdef ADD_XIZI_FETURES
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, connectnb, connectnb, show adapter nb information);
+#endif
 
  int sendnb(int argc, char *argv[])
  {
@@ -154,7 +172,12 @@ int closenb(void)
 
      return 0;    
  }
-//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, sendnb, sendnb, show adapter nb information);
+#ifdef ADD_RTTHREAD_FETURES
+MSH_CMD_EXPORT(sendnb,send nb test);
+#endif
+#ifdef ADD_XIZI_FETURES
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_PARAM_NUM(2)|SHELL_CMD_DISABLE_RETURN, sendnb, sendnb, show adapter nb information);
+#endif
 
  int recvnb(void)
  {
@@ -167,5 +190,9 @@ int closenb(void)
 
      return 0;    
  }
-//  SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, recvnb, recvnb, show adapter nb information);
-
+#ifdef ADD_RTTHREAD_FETURES
+MSH_CMD_EXPORT(recvnb,receive nb test);
+#endif
+#ifdef ADD_XIZI_FETURES
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, recvnb, recvnb, show adapter nb information);
+#endif

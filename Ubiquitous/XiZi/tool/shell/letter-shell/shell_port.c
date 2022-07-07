@@ -48,10 +48,13 @@ signed char userShellRead(char *data)
 {
     char read_length = 0;
     struct BusBlockReadParam read_param;
-    read_param.read_length = 0;
-    read_param.size = 1;
-    read_param.buffer = data;
 
+    memset(&read_param,0, sizeof(read_param));
+
+    read_param.read_length = 0;
+    read_param.size = KEY_LENGTH;
+    read_param.buffer = data;
+    
     BusDevReadData(console, &read_param);
 
     read_length = (char)read_param.read_length;
@@ -120,7 +123,7 @@ int userShellInit(void)
     tid = KTaskCreate("letter-shell",
                            shellTask, &shell,
                            SHELL_TASK_STACK_SIZE, SHELL_TASK_PRIORITY);
-        
+
         StartupKTask(tid);
         return 0;
 }
