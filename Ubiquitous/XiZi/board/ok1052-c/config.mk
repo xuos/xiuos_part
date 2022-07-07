@@ -6,14 +6,14 @@ export AFLAGS := -c -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections 
 ### if use USB function, use special lds file because USB uses ITCM
 
 ifeq ($(CONFIG_BSP_USING_USB),y)
-export LFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Wl,--gc-sections,-Map=XiZi_ok1052-c.map,-cref,-u,Reset_Handler -T $(BSP_ROOT)/link-usb.lds
+export LFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Wl,--gc-sections,-Map=XiZi-ok1052-c.map,-cref,-u,Reset_Handler -T $(BSP_ROOT)/link-usb.lds
 else
-export LFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Wl,--gc-sections,-Map=XiZi_ok1052-c.map,-cref,-u,Reset_Handler -T $(BSP_ROOT)/link.lds
+export LFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Wl,--gc-sections,-Map=XiZi-ok1052-c.map,-cref,-u,Reset_Handler -T $(BSP_ROOT)/link.lds
 endif
 
 export CXXFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Dgcc -O0 -gdwarf-2 -g
 
-export APPLFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Wl,--gc-sections,-Map=XiZi_app.map,-cref,-u, -T $(BSP_ROOT)/link_userspace.lds
+export APPLFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Wl,--gc-sections,-Map=XiZi-app.map,-cref,-u, -T $(BSP_ROOT)/link_userspace.lds
 
 
 export DEFINES := -DHAVE_CCONFIG_H  -DCPU_MIMXRT1052CVL5B -DSKIP_SYSCLK_INIT -DEVK_MCIMXRM -DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1 -DXIP_EXTERNAL_FLASH=1 -D__STARTUP_INITIALIZE_NONCACHEDATA -D__STARTUP_CLEAR_BSS

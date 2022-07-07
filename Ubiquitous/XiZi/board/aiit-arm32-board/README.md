@@ -42,9 +42,9 @@ make BOARD=aiit-arm32-board menuconfig
 ```
 make BOARD=aiit-arm32-board
 ```
->5.如果编译正确无误，会产生XiZi_aiit-arm32-board.elf、XiZi_aiit-arm32-board.bin文件。其中XiZi_aiit-arm32-board.bin需要烧写到设备中进行运行。
+>5.如果编译正确无误，会产生XiZi-aiit-arm32-board.elf、XiZi-aiit-arm32-board.bin文件。其中XiZi-aiit-arm32-board.bin需要烧写到设备中进行运行。
 ```
-sudo write build/XiZi_aiit-arm32-board.bin 0x8000000
+sudo write build/XiZi-aiit-arm32-board.bin 0x8000000
 ```
 >6.最后可以执行以下命令，清除配置文件和编译生成的文件
 ```
@@ -73,7 +73,7 @@ aiit-arm32-board下载连接示意图如下：
 
 代码根目录下执行st-flash工具烧录
 ```
-sudo st-flash write build/XiZi_aiit-arm32-board.bin 0x8000000
+sudo st-flash write build/XiZi-aiit-arm32-board.bin 0x8000000
 ```
 ### 3.1 运行结果
 

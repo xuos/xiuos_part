@@ -70,9 +70,6 @@ PendSV_Handler:
 
 switch_to_task:
 
-    PUSH    {lr}
-    BL      UpdateRunningTask
-    POP     {lr}
 
 #ifdef TASK_ISOLATION
     PUSH    {lr}

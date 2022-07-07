@@ -5,8 +5,8 @@ MAKEFLAGS += --no-print-directory
 .PHONY:COMPILE_APP COMPILE_KERNEL
 
 
-support :=kd233 stm32f407-st-discovery maix-go stm32f407zgt6 aiit-riscv64-board aiit-arm32-board hifive1-rev-B hifive1-emulator k210-emulator cortex-m3-emulator cortex-m4-emulator ok1052-c gapuino stm32f103-nano gd32vf103_rvstar cortex-m0-emulator rv32m1_vega nuvoton-m2354
-support += xidatong xiwangtong-arm32
+support :=kd233 stm32f407-st-discovery maix-go stm32f407zgt6 aiit-riscv64-board aiit-arm32-board hifive1-rev-B hifive1-emulator k210-emulator cortex-m3-emulator cortex-m4-emulator ok1052-c gapuino stm32f103-nano gd32vf103-rvstar cortex-m0-emulator rv32m1-vega nuvoton-m2354
+support += xidatong-arm32 xidatong-riscv64 xiwangtong-arm32
 SRC_DIR :=
 
 export BOARD ?=kd233
@@ -75,7 +75,7 @@ COMPILE_ALL:
                $(MAKE) -C $$dir;          \
        done
 	@cp link.mk build/Makefile
-	@$(MAKE) -C build TARGET=XiZi_$(BOARD).elf LINK_FLAGS=LFLAGS
+	@$(MAKE) -C build TARGET=XiZi-$(BOARD).elf LINK_FLAGS=LFLAGS
 	@rm build/Makefile build/make.obj
 
 

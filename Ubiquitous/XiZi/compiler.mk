@@ -77,6 +77,16 @@ $(if $(strip $(LOCALS)),$(eval $(LOCALS): $(1)
 	@$(CROSS_COMPILE)gcc $$(AFLAGS) -c $$< -o $$@))
 endef
 
+define add_a_file
+$(eval SOBJ := $(1:%.a=%.a)) \
+$(eval SOBJ := $(subst $(subst $(APP_DIR),,$(KERNEL_ROOT)),,$(SOBJ))) \
+$(eval LOCALA := $(addprefix $(BUILD_DIR)/,$(SOBJ))) \
+$(eval OBJS += $(LOCALA)) \
+$(if $(strip $(LOCALA)),$(eval $(LOCALA): $(1)
+	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
+	@echo cp $$<
+	@cp $$< $$@))
+endef
 
 
 
@@ -92,7 +102,8 @@ $(if $(SRCS),$(foreach f,$(SRCS),$(call add_cc_file,$(addprefix $(CUR_DIR)/,$(f)
 SRCS := $(strip $(filter %.S,$(SRC_FILES)))
 $(if $(SRCS),$(foreach f,$(SRCS),$(call add_S_file,$(addprefix $(CUR_DIR)/,$(f)))))
 
-
+SRCS := $(strip $(filter %.a,$(SRC_FILES)))
+$(if $(SRCS),$(foreach f,$(SRCS),$(call add_a_file,$(addprefix $(CUR_DIR)/,$(f)))))
 
 COMPILER:$(OBJS) 
 

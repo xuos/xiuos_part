@@ -16,5 +16,8 @@ if ADD_NUTTX_FETURES
 endif
 
 if ADD_RTTHREAD_FETURES
+        config ADAPTER_SX1278_DRIVER
+        string "SX1278 device spi driver path"
+        default "/dev/sx1278"
 
 endif

@@ -3,7 +3,7 @@ menuconfig USING_EMBEDDED_DATABASE_FLASHDB
     default n
 
 if USING_EMBEDDED_DATABASE_FLASHDB
-    comment " fal io is not supported so far"
+    comment "fal io is not supported so far"
     choice
         prompt "select io mode"
         default FDB_USING_FILE_POSIX_MODE

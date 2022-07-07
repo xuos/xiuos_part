@@ -173,6 +173,7 @@ int PrivSemaphoreDelete(sem_t *sem);
 int PrivSemaphoreObtainWait(sem_t *sem, const struct timespec *abstime);
 int PrivSemaphoreObtainNoWait(sem_t *sem);
 int PrivSemaphoreAbandon(sem_t *sem);
+int PrivSemaphoreObtainWaitForever(sem_t *sem);
 int32_t PrivSemaphoreSetValue(int32_t sem, uint16_t val);
 
 /*********************task**************************/
