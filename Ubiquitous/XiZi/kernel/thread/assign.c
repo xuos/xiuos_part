@@ -87,6 +87,7 @@ SWITCH:
 
         Assign.ready_vector_done->remove(new_task);
         KTaskStatSetAsRunning(new_task);
+        Assign.os_running_task = new_task;
 
         SYS_KDEBUG_LOG(KDBG_SCHED,
                 ("[%d]switch to priority#%d "
@@ -162,6 +163,7 @@ SWITCH:
 
         Assign.ready_vector_done->remove(new_task);
         KTaskStatSetAsRunning(new_task);
+        Assign.os_running_task = new_task;
 
         SYS_KDEBUG_LOG(KDBG_SCHED,
                 ("[%d]switch to priority#%d "
@@ -327,6 +329,7 @@ x_err_t YieldOsAssign(void)
 
         Assign.ready_vector_done->remove(new_task);
         KTaskStatSetAsRunning(new_task);
+        Assign.os_running_task = new_task;
 
         SYS_KDEBUG_LOG(KDBG_SCHED,
                 ("[%d]switch to priority#%d "

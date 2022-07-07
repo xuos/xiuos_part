@@ -490,7 +490,7 @@ static int BC28Open(struct Adapter *adapter)
      /*step2: init AT agent*/
     if (!adapter->agent) {
         char *agent_name = "niot_device";
-        if (EOK != InitATAgent(agent_name, adapter->fd, 512)) {
+        if (0 != InitATAgent(agent_name, adapter->fd, 512)) {
             PrivClose(adapter->fd);
             PrivMutexDelete(&nbiot_lock);
             printf("at agent init failed !\n");

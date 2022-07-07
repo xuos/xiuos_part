@@ -130,7 +130,7 @@ make BOARD=hifive1-emulator menuconfig
 make BOARD=hifive1-emulator
 ```
 
-4.如果编译正确无误，会在build目录下产生XiZi_hifive1-emulator.elf、XiZi_hifive1-emulator.bin文件。
+4.如果编译正确无误，会在build目录下产生XiZi-hifive1-emulator.elf、XiZi-hifive1-emulator.bin文件。
 
 ## 3. 运行
 
@@ -153,7 +153,7 @@ sudo make install
 通过以下命令启动Q‎EMU并加载XiUOS ELF文件
 
 ```
-qemu-system-riscv32 -nographic -machine sifive_e -kernel build/XiZi_hifive1-emulator.elf
+qemu-system-riscv32 -nographic -machine sifive_e -kernel build/XiZi-hifive1-emulator.elf
 ```
 
 QEMU运行起来后将会在终端上看到信息打印输出
@@ -165,11 +165,11 @@ QEMU运行起来后将会在终端上看到信息打印输出
 利用Q‎EMU可以方便的对XiUOS进行调试，首先通过以下命令启动Q‎EMU
 
 ```
-qemu-system-riscv32 -nographic -machine sifive_e -kernel build/XiZi_hifive1-emulator.elf -s -S
+qemu-system-riscv32 -nographic -machine sifive_e -kernel build/XiZi-hifive1-emulator.elf -s -S
 ```
 
 然后要重新开启另一个linux系统终端一个终端，执行`riscv-none-embed-gdb`命令
 
 ```
-riscv-none-embed-gdb build/XiZi_hifive1-emulator.elf -ex "target remote localhost:1234"
+riscv-none-embed-gdb build/XiZi-hifive1-emulator.elf -ex "target remote localhost:1234"
 ```

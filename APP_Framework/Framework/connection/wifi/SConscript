@@ -2,7 +2,8 @@ import os
 Import('RTT_ROOT')
 from building import *
 SOURCES = []
-SOURCES = ['adapter_wifi.c'] + SOURCES
+if GetDepend(['CONNECTION_ADAPTER_WIFI']):
+    SOURCES = ['adapter_wifi.c'] + SOURCES
 objs = []
 cwd = GetCurrentDir()
 path =  [cwd]

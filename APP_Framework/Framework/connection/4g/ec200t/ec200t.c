@@ -40,9 +40,12 @@
 
 #ifdef ADD_NUTTX_FETURES
 static void Ec200tPowerSet(void){ return; }
-#else
-static void Ec200tPowerSet(void)
-{
+#else  
+    #ifdef ADD_RTTHREAD_FETURES
+    static void Ec200tPowerSet(void){ return; }
+    #else
+    static void Ec200tPowerSet(void)
+    {
     int pin_fd;
     pin_fd = PrivOpen(ADAPTER_EC200T_PIN_DRIVER, O_RDWR);
     if (pin_fd < 0) {
@@ -73,7 +76,8 @@ static void Ec200tPowerSet(void)
     PrivClose(pin_fd);
 
     PrivTaskDelay(10000);
-}
+    }
+    #endif
 #endif
 
 static int Ec200tOpen(struct Adapter *adapter)
@@ -148,6 +152,9 @@ out:
 #ifdef ADD_NUTTX_FETURES
 static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args){ return 0;}
 #else
+#ifdef ADD_RTTHREAD_FETURES
+static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args){ return 0;}
+#else
 static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
 {
     if (OPE_INT != cmd) {
@@ -175,11 +182,13 @@ static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
     ioctl_cfg.args = &serial_cfg;
     PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
+    
 
     Ec200tPowerSet();
     
     return 0;
 }
+#endif
 #endif
 
 static int Ec200tConnect(struct Adapter *adapter, enum NetRoleType net_role, const char *ip, const char *port, enum IpType ip_type)

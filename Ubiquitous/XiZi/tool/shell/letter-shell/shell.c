@@ -1647,9 +1647,17 @@ void shellTask(void *param)
     while(RET_TRUE)
     {
         if (shell->read) {
+            memset(data, 0, KEY_LENGTH);
+            data_len = 0;
+            x_base lock;
+
             data_len = shell->read(data);
-            for (i = 0; i < data_len; i++) {
-                shellHandler(shell, data[i]);
+            if(data_len > 0) {
+                int lock = CriticalAreaLock();
+                for (i = 0; i < data_len; i++) {
+                    shellHandler(shell, data[i]);
+                }
+                CriticalAreaUnLock(lock);
             }
         }
     }
