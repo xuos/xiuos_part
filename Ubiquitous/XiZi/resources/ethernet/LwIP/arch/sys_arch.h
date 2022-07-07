@@ -39,13 +39,13 @@
 */
 
 #ifndef __SYS_ARCH__
-#define __SYS_ATCH__
+#define __SYS_ARCH__
 
 #include <lwip/opt.h>
 #include <lwip/arch.h>
 #include <lwip/netif.h>
 
-#include "tcpip.h"
+// #include "tcpip.h"
 
 #include <xs_base.h>
 

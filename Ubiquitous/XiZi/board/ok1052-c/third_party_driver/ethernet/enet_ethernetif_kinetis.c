@@ -312,6 +312,7 @@ void ethernetif_enet_init(struct netif *netif, struct ethernetif *ethernetif,
 
     ENET_GetDefaultConfig(&config);
     config.ringNum = ENET_RING_NUM;
+    config.macSpecialConfig |= kENET_ControlPromiscuousEnable;
 
     ethernetif_phy_init(ethernetif, ethernetifConfig, &config);
 

@@ -90,12 +90,15 @@ int AdapterBlueToothTest(void)
 
 #ifdef ADAPTER_HC08
     AdapterDeviceOpen(adapter);
+
+    //if bluetooth master and slave have already match, no need to AdapterDeviceControl and AdapterDeviceConnect
     AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+    //AdapterDeviceConnect(adapter, adapter->net_role, NULL, NULL, 0);
 
     len = strlen(bluetooth_msg);
 
     while (1) {
-        AdapterDeviceRecv(adapter, bluetooth_recv_msg, 128);
+        AdapterDeviceRecv(adapter, bluetooth_recv_msg, 8);
         printf("bluetooth_recv_msg %s\n", bluetooth_recv_msg);
         AdapterDeviceSend(adapter, bluetooth_msg, len);
         printf("send %s after recv\n", bluetooth_msg);
@@ -111,5 +114,5 @@ int AdapterBlueToothTest(void)
 MSH_CMD_EXPORT(AdapterBlueToothTest,a bt adpter sample);
 #endif
 #ifdef ADD_XIZI_FETURES
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterWifiTest, AdapterWifiTest, show adapter wifi information);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, AdapterBlueToothTest, AdapterBlueToothTest, show adapter bluetooth information);
 #endif

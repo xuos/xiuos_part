@@ -1,7 +1,7 @@
 
 export KERNELPATHS:=
 
-ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong)
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong-arm32)
 KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
 	-I$(BSP_ROOT)/third_party_driver \
@@ -31,6 +31,17 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/include \
 	-I$(BSP_ROOT)/include \
 	-I$(BSP_ROOT)/xip #
+endif
+
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong-riscv64)
+KERNELPATHS :=-I$(BSP_ROOT) \
+	-I$(BSP_ROOT)/include \
+    -I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/camera \
+	-I$(BSP_ROOT)/third_party_driver/drivers \
+	-I$(BSP_ROOT)/third_party_driver/lcd \
+	-I$(KERNEL_ROOT)/include #
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/kd233)
@@ -109,18 +120,18 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/include #
 endif
 
-ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/gd32vf103_rvstar)
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/gd32vf103-rvstar)
 KERNELPATHS :=-I$(BSP_ROOT) \
-	-I$(KERNEL_ROOT)/arch/risc-v/gd32vf103_rvstar \
+	-I$(KERNEL_ROOT)/arch/risc-v/gd32vf103-rvstar \
 	-I$(BSP_ROOT)/include \
 	-I$(BSP_ROOT)/third_party_driver \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(KERNEL_ROOT)/include #
 endif
 
-ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rv32m1_vega)
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rv32m1-vega)
 KERNELPATHS :=-I$(BSP_ROOT) \
-	-I$(KERNEL_ROOT)/arch/risc-v/rv32m1_vega \
+	-I$(KERNEL_ROOT)/arch/risc-v/rv32m1-vega \
 	-I$(BSP_ROOT)/include \
 	-I$(BSP_ROOT)/third_party_driver \
 	-I$(BSP_ROOT)/third_party_driver/include \
@@ -393,6 +404,6 @@ COMPILE_KERNEL:
                $(MAKE) -C $$dir;          \
        done
 	@cp link.mk build/Makefile
-	@$(MAKE) -C build COMPILE_TYPE="_kernel" TARGET=XiZi_$(BOARD)_kernel.elf LINK_FLAGS=LFLAGS
+	@$(MAKE) -C build COMPILE_TYPE="_kernel" TARGET=XiZi-$(BOARD)_kernel.elf LINK_FLAGS=LFLAGS
 	@rm build/Makefile build/make.obj
 

@@ -38,6 +38,7 @@
 #include <dfs_posix.h>
 #include <dfs.h>
 #include<sys/ioctl.h>
+#include <sys/select.h>
 #ifdef RT_USING_POSIX_TERMIOS
 #include <posix_termios.h>
 #endif
@@ -60,7 +61,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+typedef signed   char                   bool;  
 typedef signed   char                   int8;      
 typedef signed   short                  int16;    
 typedef signed   int                    int32;     
@@ -77,7 +78,7 @@ typedef unsigned long long              uint64;
 #endif
 
 #define OPE_INT                  0x0000
-#define OPE_CFG                 0x0001
+#define OPE_CFG                  0x0001
 
 #define NAME_NUM_MAX            32
 
@@ -95,6 +96,9 @@ typedef unsigned long long              uint64;
 #ifndef SERIAL_RB_BUFSZ
 #define SERIAL_RB_BUFSZ         128
 #endif
+
+#define TRUE                (1)
+#define FALSE               (0)
 
 struct PinDevIrq
 {
@@ -169,6 +173,7 @@ int PrivSemaphoreDelete(sem_t *sem);
 int PrivSemaphoreObtainWait(sem_t *sem, const struct timespec *abstime);
 int PrivSemaphoreObtainNoWait(sem_t *sem);
 int PrivSemaphoreAbandon(sem_t *sem);
+int PrivSemaphoreObtainWaitForever(sem_t *sem);
 int32_t PrivSemaphoreSetValue(int32_t sem, uint16_t val);
 
 /*********************task**************************/
@@ -195,6 +200,13 @@ void *PrivMalloc(size_t size);
 void *PrivRealloc(void *pointer, size_t size);
 void *PrivCalloc(size_t  count, size_t size);
 void PrivFree(void *pointer);
+
+
+
+/*********************kernel**********************/
+void PrivTaskenterCritical();
+void PrivTaskexitCritical();
+
 
 
 #ifdef __cplusplus

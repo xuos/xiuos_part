@@ -36,7 +36,7 @@ make BOARD=aiit-riscv64-board menuconfig
 ```
 make BOARD=aiit-riscv64-board
 ```
->5.如果编译正确无误，会产生XiZi_aiit-riscv64-board.elf、XiZi_aiit-riscv64-board.bin文件。其中XiZi_aiit-riscv64-board.bin需要烧写到设备中进行运行。
+>5.如果编译正确无误，会产生XiZi-aiit-riscv64-board.elf、XiZi-aiit-riscv64-board.bin文件。其中XiZi-aiit-riscv64-board.bin需要烧写到设备中进行运行。
 >注：最后可以执行以下命令，清除配置文件和编译生成的文件
 ```
 make BOARD=aiit-riscv64-board distclean
@@ -64,7 +64,7 @@ sudo pip2 install kflash
 ```
 代码根目录下执行K-Flash工具烧录，-p为USB端口号，视实际情况而定
 ```
-kflash -t build/XiZi_aiit-riscv64-board.bin -p /dev/ttyUSB0
+kflash -t build/XiZi-aiit-riscv64-board.bin -p /dev/ttyUSB0
 ```
 ### 3.1 运行结果
 

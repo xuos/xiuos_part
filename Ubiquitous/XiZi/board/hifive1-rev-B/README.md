@@ -133,7 +133,7 @@ make BOARD=hifive1-rev-B menuconfig
 make BOARD=hifive1-rev-B
 ```
 
-4.如果编译正确无误，build文件夹下会产生XiZi_hifive1-rev-B.elf、XiZi_hifive1-rev-B.bin文件。其中XiZi_hifive1-rev-B.bin需要烧写到设备中进行运行。
+4.如果编译正确无误，build文件夹下会产生XiZi-hifive1-rev-B.elf、XiZi-hifive1-rev-B.bin文件。其中XiZi-hifive1-rev-B.bin需要烧写到设备中进行运行。
 
 >注：最后可以执行以下命令，清除配置文件和编译生成的文件
 

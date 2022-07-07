@@ -128,7 +128,7 @@ make BOARD=k210-emulator menuconfig
 make BOARD=k210-emulator
 ```
 
-4.如果编译正确无误，会在build目录下产生XiZi_k210-emulator.elf、XiZi_k210-emulator.bin文件。
+4.如果编译正确无误，会在build目录下产生XiZi-k210-emulator.elf、XiZi-k210-emulator.bin文件。
 
 ## 3. 运行
 
@@ -150,7 +150,7 @@ sudo make install
 通过以下命令启动Q‎EMU并加载XiUOS ELF文件
 
 ```
-qemu-system-riscv64 -nographic -machine sifive_u -bios build/XiZi_k210-emulator.elf
+qemu-system-riscv64 -nographic -machine sifive_u -bios build/XiZi-k210-emulator.elf
 ```
 
 QEMU运行起来后将会在终端上看到信息打印输出
@@ -162,11 +162,11 @@ QEMU运行起来后将会在终端上看到信息打印输出
 利用Q‎EMU可以方便的对XiUOS进行调试，首先通过以下命令启动Q‎EMU
 
 ```
-qemu-system-riscv64 -nographic -machine sifive_u -bios build/XiZi_k210-emulator.elf -s -S
+qemu-system-riscv64 -nographic -machine sifive_u -bios build/XiZi-k210-emulator.elf -s -S
 ```
 
 然后要重新开启另一个linux系统终端一个终端，执行`riscv-none-embed-gdb`命令
 
 ```
-riscv-none-embed-gdb build/XiZi_k210-emulator.elf -ex "target remote localhost:1234"
+riscv-none-embed-gdb build/XiZi-k210-emulator.elf -ex "target remote localhost:1234"
 ```

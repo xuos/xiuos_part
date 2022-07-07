@@ -42,6 +42,9 @@ char *cmd_set_ch = "AT+CH=11";    /*set channel as 11*/
 
 static int E18HardwareModeGet()
 {
+#ifdef ADD_NUTTX_FETURES
+    return E18_AS_HEX_MODE;
+#else
     int ret = 0;
     int pin_fd;
 
@@ -62,7 +65,8 @@ static int E18HardwareModeGet()
     } else {
         printf(" E18 as HEX mode\n");
         return E18_AS_HEX_MODE;
-    } 
+    }
+#endif 
 }
 
 #ifdef ADD_NUTTX_FETURES
@@ -175,9 +179,15 @@ static int E18NetworkModeConfig(struct Adapter *adapter)
     }
 
 out:
-    if(E18_AS_AT_MODE == mode){
+#ifdef ADD_NUTTX_FETURES
+    if(E18_AS_HEX_MODE == mode)
+#else
+    if(E18_AS_AT_MODE == mode)
+#endif
+    {
         AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
     }
+
     
     return ret;
 }
@@ -242,7 +252,12 @@ static int E18NetRoleConfig(struct Adapter *adapter)
     }
 
 out:
-    if(E18_AS_AT_MODE == mode) {
+#ifdef ADD_NUTTX_FETURES
+    if(E18_AS_HEX_MODE == mode)
+#else
+    if(E18_AS_AT_MODE == mode)
+#endif
+    {
         AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
     }
 
@@ -384,7 +399,12 @@ static int E18Join(struct Adapter *adapter, unsigned char *priv_net_group)
 
     // }
     if(!ret){
-        if(E18_AS_AT_MODE == mode) {
+#ifdef ADD_NUTTX_FETURES
+        if(E18_AS_HEX_MODE == mode)
+#else
+        if(E18_AS_AT_MODE == mode)
+#endif
+        {
             ret = AtCmdConfigAndCheck(adapter->agent, cmd_exit, "+OK");
             if(ret < 0) {
                 printf("%s %d cmd[%s] config failed!\n",__func__,__LINE__,cmd_exit);

@@ -95,7 +95,7 @@ uint16 GetOsAssignLockLevel(void)
 
 #include <xs_hook.h>
 
-static int16 KTaskOsAssignLockNest;
+static uint16 KTaskOsAssignLockNest;
 
 /**
  * This function will get critical lock  level.
