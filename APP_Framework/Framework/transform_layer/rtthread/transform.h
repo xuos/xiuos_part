@@ -32,6 +32,8 @@
 #include <pthread.h>
 #include <pthread_internal.h>
 #include <semaphore.h>
+#include <sys/signal.h>
+#include <mqueue.h>
 #include <sched.h>
 #include <unistd.h>
 #include <dfs_poll.h>
@@ -187,6 +189,14 @@ int PrivTaskDelete(pthread_t thread, int sig);
 void PrivTaskQuit(void *value_ptr);
 int PrivTaskDelay(int32_t ms);
 uint32_t PrivGetTickTime();
+
+/****************message queue***********************/
+mqd_t PrivMqueueOpen(const char *name, int oflag);
+mqd_t PrivMqueueCreate(const char *name, int oflag, mode_t mode,struct mq_attr *attr);
+int  PrivMqueueSend(mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio);
+int PrivMqueueUnlink(const char *name);
+int PrivMqueueClose(mqd_t mqdes);
+ssize_t  PrivMqueueReceive(mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio);
 
 /*********************driver*************************/
 
