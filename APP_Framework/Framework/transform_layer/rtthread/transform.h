@@ -61,7 +61,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifndef _STDBOOL_H
 typedef signed   char                   bool;  
+#endif
 typedef signed   char                   int8;      
 typedef signed   short                  int16;    
 typedef signed   int                    int32;     
@@ -87,10 +89,10 @@ typedef unsigned long long              uint64;
 #define GPIO_HIGH   0x01
 
 #define GPIO_CFG_OUTPUT                          0x00
-#define GPIO_CFG_INPUT                               0x01
-#define GPIO_CFG_INPUT_PULLUP            0x02
-#define GPIO_CFG_INPUT_PULLDOWN     0x03
-#define GPIO_CFG_OUTPUT_OD                  0x04
+#define GPIO_CFG_INPUT                           0x01
+#define GPIO_CFG_INPUT_PULLUP                    0x02
+#define GPIO_CFG_INPUT_PULLDOWN                  0x03
+#define GPIO_CFG_OUTPUT_OD                       0x04
 
 #define GPIO_CONFIG_MODE                 0xffffffff
 #ifndef SERIAL_RB_BUFSZ
