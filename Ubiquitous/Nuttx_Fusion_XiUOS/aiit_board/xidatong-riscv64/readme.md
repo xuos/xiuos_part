@@ -62,13 +62,14 @@ $ sudo apt install build-essential pkg-config  git
 $ sudo apt install gcc make libncurses5-dev openssl libssl-dev bison flex libelf-dev autoconf libtool gperf libc6-dev
 ```
 
-**XiUOS操作系统源码下载：** XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
+**XiUOS操作系统源码下载，这个仓里的代码可能不是最新的，最好git clone自己仓里的代码：** XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
 
 新建一个空文件夹并进入文件夹中，并下载源码，具体命令如下：
 
 ```c
 mkdir test  &&  cd test
 git clone https://gitlink.org.cn/xuos/xiuos.git
+git checkout origin/prepare_for_master  (以实际分支为准)
 ```
 
 打开XiUOS源码文件包可以看到以下目录：
