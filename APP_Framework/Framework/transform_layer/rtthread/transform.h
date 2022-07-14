@@ -58,7 +58,8 @@
 #include <dmac.h>
 #include <dmalock.h>
 #endif
-
+#include <netdev_ipaddr.h>
+#include <netdev.h>
 
 #ifdef __cplusplus
 extern "C" {
