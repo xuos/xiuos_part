@@ -8,24 +8,24 @@
  * 2019-03-19     ZYH          first version
  */
 
-/**
-* @file drv_io_config.c
-* @brief support xidatong-riscv64-board io configure
-* @version 1.0 
-* @author AIIT XUOS Lab
-* @date 2022-07-25
-*/
+ /**
+ * @file drv_io_config.c
+ * @brief support xidatong-riscv64-board io configure
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-07-25
+ */
 
-/*************************************************
-File name: drv_io_config.c
-Description: support kd233-board io configure
-Others: take RT-Thread v4.0.2/bsp/k210/driver/drv_io_config.c for references
-                https://github.com/RT-Thread/rt-thread/tree/v4.0.2
-History: 
-1. Date: 2022-07-25
-Author: AIIT XUOS Lab
-Modification: support kd233-board io configure
-*************************************************/
+ /*************************************************
+ File name: drv_io_config.c
+ Description: support kd233-board io configure
+ Others: take RT-Thread v4.0.2/bsp/k210/driver/drv_io_config.c for references
+                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
+ History:
+ 1. Date: 2022-07-25
+ Author: AIIT XUOS Lab
+ Modification: support kd233-board io configure
+ *************************************************/
 
 #include <xizi.h>
 #include <fpioa.h>
@@ -40,13 +40,13 @@ static struct io_config
 {
     int io_num;
     fpioa_function_t func;
-    const char * FuncName;
-} io_config[] = 
+    const char* FuncName;
+} io_config[] =
 {
 #ifdef BSP_USING_LCD
-    IOCONFIG(BSP_LCD_CS_PIN, FUNC_SPI0_SS0),                
-    IOCONFIG(BSP_LCD_WR_PIN, FUNC_SPI0_SCLK),                
-    IOCONFIG(BSP_LCD_DC_PIN, HS_GPIO(LCD_DC_PIN)),     
+    IOCONFIG(BSP_LCD_CS_PIN, FUNC_SPI0_SS0),
+    IOCONFIG(BSP_LCD_WR_PIN, FUNC_SPI0_SCLK),
+    IOCONFIG(BSP_LCD_DC_PIN, HS_GPIO(LCD_DC_PIN)),
 #endif
 
 #ifdef BSP_USING_SPI1
@@ -78,7 +78,9 @@ static struct io_config
     IOCONFIG(BSP_I2C_SDA, FUNC_GPIO3),
     IOCONFIG(BSP_I2C_SCL, FUNC_GPIO4),
 #endif
-
+#ifdef BSP_USING_TOUCH
+    IOCONFIG(BSP_TOUCH_TP_INT, HS_GPIO(FPIOA_TOUCH_TP_INT))
+#endif
 };
 
 static int PrintIoConfig()
@@ -88,7 +90,7 @@ static int PrintIoConfig()
     KPrintf("┌───────┬────────────────────────┐\n");
     KPrintf("│Pin    │Function                │\n");
     KPrintf("├───────┼────────────────────────┤\n");
-    for(i = 0; i < sizeof io_config / sizeof io_config[0]; i++)
+    for (i = 0; i < sizeof io_config / sizeof io_config[0]; i++)
     {
         KPrintf("│%-2d     │%-24.24s│\n", io_config[i].io_num, io_config[i].FuncName);
     }
@@ -98,8 +100,8 @@ static int PrintIoConfig()
 
 
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),
-                                                io,PrintIoConfig,print io config);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_PARAM_NUM(0),
+    io, PrintIoConfig, print io config);
 
 
 int IoConfigInit(void)
@@ -120,10 +122,10 @@ int IoConfigInit(void)
     sysctl_set_power_mode(SYSCTL_POWER_BANK3, SYSCTL_POWER_V33);
 #endif
 
-    for(i = 0; i < count; i++)
+    for (i = 0; i < count; i++)
     {
         ret = FpioaSetFunction(io_config[i].io_num, io_config[i].func);
-        if(ret != 0)
+        if (ret != 0)
             return ret;
     }
 

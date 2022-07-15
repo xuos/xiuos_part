@@ -8,30 +8,30 @@
  * 2012-04-25     weety         first version
  */
 
-/**
-* @file connect_i2c.c
-* @brief support kd233-board i2c function and register to bus framework
-* @version 1.0 
-* @author AIIT XUOS Lab
-* @date 2022-07-25
-*/
+ /**
+ * @file connect_i2c.c
+ * @brief support kd233-board i2c function and register to bus framework
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-07-25
+ */
 
-/*************************************************
-File name: connect_i2c.c
-Description: support xidatong-riscv64-board i2c configure and i2c bus register function
-Others: take RT-Thread v4.0.2/components/drivers/i2c/i2c-bit-ops.c for references
-                https://github.com/RT-Thread/rt-thread/tree/v4.0.2
-History: 
-1. Date: 2022-07-25
-Author: AIIT XUOS Lab
-Modification: 
-1. support xidatong-riscv64-board i2c bit configure, write and read
-2. support xidatong-riscv64-board i2c bus device and driver register
-*************************************************/
+ /*************************************************
+ File name: connect_i2c.c
+ Description: support xidatong-riscv64-board i2c configure and i2c bus register function
+ Others: take RT-Thread v4.0.2/components/drivers/i2c/i2c-bit-ops.c for references
+                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
+ History:
+ 1. Date: 2022-07-25
+ Author: AIIT XUOS Lab
+ Modification:
+ 1. support xidatong-riscv64-board i2c bit configure, write and read
+ 2. support xidatong-riscv64-board i2c bus device and driver register
+ *************************************************/
 
 #include <board.h>
- #include "gpio_common.h"
- #include"fpioa.h"
+#include "gpio_common.h"
+#include"fpioa.h"
 #include "connect_i2c.h"
 #include <sleep.h>
 #include "sysctl.h"
@@ -58,52 +58,54 @@ static I2cBusParam i2c_bus_param =
 #define SdaHigh(done)           SET_SDA(done, 1)
 #define SclLow(done)              SET_SCL(done, 0)
 
-void I2cGpioInit(const I2cBusParam *bus_param)
+void I2cGpioInit(const I2cBusParam* bus_param)
 {
-    gpio_init ();
-    FpioaSetFunction(BSP_I2C_SDA , FUNC_GPIO3 );//RISC-V FPIOA CFG
-    FpioaSetFunction(BSP_I2C_SCL , FUNC_GPIO4 );//RISC-V FPIOA CFG
-    gpio_set_drive_mode(bus_param->i2c_sda_pin , GPIO_DM_OUTPUT );
-    gpio_set_drive_mode(bus_param->i2c_scl_pin, GPIO_DM_OUTPUT );
-    gpio_set_pin(bus_param->i2c_sda_pin , GPIO_PV_HIGH );
-    gpio_set_pin(bus_param->i2c_scl_pin , GPIO_PV_HIGH );    
+    gpio_init();
+    FpioaSetFunction(BSP_I2C_SDA, FUNC_GPIO3);//RISC-V FPIOA CFG
+    FpioaSetFunction(BSP_I2C_SCL, FUNC_GPIO4);//RISC-V FPIOA CFG
+    gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_OUTPUT);
+    gpio_set_drive_mode(bus_param->i2c_scl_pin, GPIO_DM_OUTPUT);
+    gpio_set_pin(bus_param->i2c_sda_pin, GPIO_PV_HIGH);
+    gpio_set_pin(bus_param->i2c_scl_pin, GPIO_PV_HIGH);
 }
 
-static void SetSdaState(void *data, uint8 sda_state)
+static void SetSdaState(void* data, uint8 sda_state)
 {
-    I2cBusParam *bus_param = (I2cBusParam *)data;
+    I2cBusParam* bus_param = (I2cBusParam*)data;
     if (sda_state) {
-       gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_OUTPUT );
-       gpio_set_pin(bus_param->i2c_sda_pin , GPIO_PV_HIGH );  
-    } else {
-       gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_OUTPUT );
-       gpio_set_pin(bus_param->i2c_sda_pin , GPIO_PV_LOW );  
+        gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_OUTPUT);
+        gpio_set_pin(bus_param->i2c_sda_pin, GPIO_PV_HIGH);
+    }
+    else {
+        gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_OUTPUT);
+        gpio_set_pin(bus_param->i2c_sda_pin, GPIO_PV_LOW);
     }
 }
 
-static void SetSclState(void *data, uint8 scl_state)
+static void SetSclState(void* data, uint8 scl_state)
 {
-    I2cBusParam *bus_param = (I2cBusParam *)data;
+    I2cBusParam* bus_param = (I2cBusParam*)data;
     if (scl_state) {
-        gpio_set_drive_mode(bus_param->i2c_scl_pin, GPIO_DM_OUTPUT );
-        gpio_set_pin(bus_param->i2c_scl_pin , GPIO_PV_HIGH ); 
-    } else {
-        gpio_set_drive_mode(bus_param->i2c_scl_pin, GPIO_DM_OUTPUT );
-        gpio_set_pin(bus_param->i2c_scl_pin , GPIO_PV_LOW ); 
+        gpio_set_drive_mode(bus_param->i2c_scl_pin, GPIO_DM_OUTPUT);
+        gpio_set_pin(bus_param->i2c_scl_pin, GPIO_PV_HIGH);
+    }
+    else {
+        gpio_set_drive_mode(bus_param->i2c_scl_pin, GPIO_DM_OUTPUT);
+        gpio_set_pin(bus_param->i2c_scl_pin, GPIO_PV_LOW);
     }
 }
 
-static uint8 GetSdaState(void *data)
+static uint8 GetSdaState(void* data)
 {
-    I2cBusParam *bus_param = (I2cBusParam *)data;
-    gpio_set_drive_mode (bus_param->i2c_sda_pin, GPIO_DM_INPUT_PULL_UP );  
+    I2cBusParam* bus_param = (I2cBusParam*)data;
+    gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_INPUT_PULL_UP);
     return gpio_get_pin(bus_param->i2c_sda_pin);
 }
 
-static uint8 GetSclState(void *data)
+static uint8 GetSclState(void* data)
 {
-    I2cBusParam *bus_param = (I2cBusParam *)data;
-    gpio_set_drive_mode (bus_param->i2c_scl_pin, GPIO_DM_INPUT_PULL_UP );
+    I2cBusParam* bus_param = (I2cBusParam*)data;
+    gpio_set_drive_mode(bus_param->i2c_scl_pin, GPIO_DM_INPUT_PULL_UP);
     return gpio_get_pin(bus_param->i2c_scl_pin);
 }
 
@@ -119,37 +121,37 @@ static const struct I2cHalDrvDone I2cDrvDone =
     .timeout = 100
 };
 
-static x_err_t I2cBusReset(const I2cBusParam *bus_param)
+static x_err_t I2cBusReset(const I2cBusParam* bus_param)
 {
     int32 i = 0;
-    gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_INPUT_PULL_UP );   
+    gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_INPUT_PULL_UP);
     if (GPIO_LOW == gpio_get_pin(bus_param->i2c_sda_pin)) {
         while (i++ < 9) {
-            gpio_set_drive_mode(bus_param->i2c_scl_pin, GPIO_DM_OUTPUT );
-            gpio_set_pin(bus_param->i2c_scl_pin , GPIO_PV_HIGH ); 
+            gpio_set_drive_mode(bus_param->i2c_scl_pin, GPIO_DM_OUTPUT);
+            gpio_set_pin(bus_param->i2c_scl_pin, GPIO_PV_HIGH);
             usleep(100);
-            gpio_set_pin(bus_param->i2c_scl_pin , GPIO_PV_LOW ); 
+            gpio_set_pin(bus_param->i2c_scl_pin, GPIO_PV_LOW);
             usleep(100);
         }
     }
-    gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_INPUT_PULL_UP );   
+    gpio_set_drive_mode(bus_param->i2c_sda_pin, GPIO_DM_INPUT_PULL_UP);
     if (GPIO_LOW == gpio_get_pin(bus_param->i2c_sda_pin)) {
         return -ERROR;
     }
     return EOK;
 }
 
-static __inline void I2cDelay(struct I2cHalDrvDone *done)
+static __inline void I2cDelay(struct I2cHalDrvDone* done)
 {
     done->udelay((done->delay_us + 1) >> 1);
 }
 
-static __inline void I2cDelay2(struct I2cHalDrvDone *done)
+static __inline void I2cDelay2(struct I2cHalDrvDone* done)
 {
     done->udelay(done->delay_us);
 }
 
-static x_err_t SclHigh(struct I2cHalDrvDone *done)
+static x_err_t SclHigh(struct I2cHalDrvDone* done)
 {
     x_ticks_t start;
 
@@ -171,14 +173,14 @@ done:
     return EOK;
 }
 
-static void I2cStart(struct I2cHalDrvDone *done)
+static void I2cStart(struct I2cHalDrvDone* done)
 {
     SdaLow(done);
     I2cDelay(done);
     SclLow(done);
 }
 
-static void I2cRestart(struct I2cHalDrvDone *done)
+static void I2cRestart(struct I2cHalDrvDone* done)
 {
     SdaHigh(done);
     SclHigh(done);
@@ -188,7 +190,7 @@ static void I2cRestart(struct I2cHalDrvDone *done)
     SclLow(done);
 }
 
-static void I2cStop(struct I2cHalDrvDone *done)
+static void I2cStop(struct I2cHalDrvDone* done)
 {
     SdaLow(done);
     I2cDelay(done);
@@ -198,12 +200,12 @@ static void I2cStop(struct I2cHalDrvDone *done)
     I2cDelay2(done);
 }
 
-static __inline x_bool I2cWaitack(struct I2cHalDrvDone *done)
+static __inline x_bool I2cWaitack(struct I2cHalDrvDone* done)
 {
     x_bool ack;
 
     SdaHigh(done);
-     GET_SDA(done);    
+    GET_SDA(done);
     I2cDelay(done);
 
     if (SclHigh(done) < 0) {
@@ -218,12 +220,12 @@ static __inline x_bool I2cWaitack(struct I2cHalDrvDone *done)
     return ack;
 }
 
-static int32 I2cWriteb(struct I2cBus *bus, uint8 data)
+static int32 I2cWriteb(struct I2cBus* bus, uint8 data)
 {
     int32 i;
     uint8 bit;
 
-    struct I2cHalDrvDone *done = (struct I2cHalDrvDone *)bus->private_data;
+    struct I2cHalDrvDone* done = (struct I2cHalDrvDone*)bus->private_data;
 
     for (i = 7; i >= 0; i--) {
         SclLow(done);
@@ -232,8 +234,8 @@ static int32 I2cWriteb(struct I2cBus *bus, uint8 data)
         I2cDelay(done);
         if (SclHigh(done) < 0) {
             KPrintf("I2cWriteb: 0x%02x, "
-                    "wait scl pin high timeout at bit %d",
-                    data, i);
+                "wait scl pin high timeout at bit %d",
+                data, i);
 
             return -ETIMEOUT;
         }
@@ -244,11 +246,11 @@ static int32 I2cWriteb(struct I2cBus *bus, uint8 data)
     return I2cWaitack(done);
 }
 
-static int32 I2cReadb(struct I2cBus *bus)
+static int32 I2cReadb(struct I2cBus* bus)
 {
     uint8 i;
     uint8 data = 0;
-    struct I2cHalDrvDone *done = (struct I2cHalDrvDone *)bus->private_data;
+    struct I2cHalDrvDone* done = (struct I2cHalDrvDone*)bus->private_data;
 
     SdaHigh(done);
     GET_SDA(done);
@@ -258,7 +260,7 @@ static int32 I2cReadb(struct I2cBus *bus)
 
         if (SclHigh(done) < 0) {
             KPrintf("I2cReadb: wait scl pin high "
-                    "timeout at bit %d", 7 - i);
+                "timeout at bit %d", 7 - i);
 
             return -ETIMEOUT;
         }
@@ -272,11 +274,11 @@ static int32 I2cReadb(struct I2cBus *bus)
     return data;
 }
 
-static x_size_t I2cSendBytes(struct I2cBus *bus, struct I2cDataStandard *msg)
+static x_size_t I2cSendBytes(struct I2cBus* bus, struct I2cDataStandard* msg)
 {
     int32 ret;
     x_size_t bytes = 0;
-    const uint8 *ptr = msg->buf;
+    const uint8* ptr = msg->buf;
     int32 count = msg->len;
     uint16 ignore_nack = msg->flags & I2C_IGNORE_NACK;
 
@@ -284,12 +286,14 @@ static x_size_t I2cSendBytes(struct I2cBus *bus, struct I2cDataStandard *msg)
         ret = I2cWriteb(bus, *ptr);
 
         if ((ret > 0) || (ignore_nack && (ret == 0))) {
-            count --;
-            ptr ++;
-            bytes ++;
-        } else if (ret == 0) {
+            count--;
+            ptr++;
+            bytes++;
+        }
+        else if (ret == 0) {
             return 0;
-        } else {
+        }
+        else {
             KPrintf("send bytes: error %d", ret);
 
             return ret;
@@ -299,9 +303,9 @@ static x_size_t I2cSendBytes(struct I2cBus *bus, struct I2cDataStandard *msg)
     return bytes;
 }
 
-static x_err_t I2cSendAckOrNack(struct I2cBus *bus, int ack)
+static x_err_t I2cSendAckOrNack(struct I2cBus* bus, int ack)
 {
-    struct I2cHalDrvDone *done = (struct I2cHalDrvDone *)bus->private_data;
+    struct I2cHalDrvDone* done = (struct I2cHalDrvDone*)bus->private_data;
 
     if (ack)
         SET_SDA(done, 0);
@@ -316,11 +320,11 @@ static x_err_t I2cSendAckOrNack(struct I2cBus *bus, int ack)
     return EOK;
 }
 
-static x_size_t I2cRecvBytes(struct I2cBus *bus, struct I2cDataStandard *msg)
+static x_size_t I2cRecvBytes(struct I2cBus* bus, struct I2cDataStandard* msg)
 {
     int32 val;
     int32 bytes = 0;
-    uint8 *ptr = msg->buf;
+    uint8* ptr = msg->buf;
     int32 count = msg->len;
     const uint32 flags = msg->flags;
 
@@ -328,13 +332,14 @@ static x_size_t I2cRecvBytes(struct I2cBus *bus, struct I2cDataStandard *msg)
         val = I2cReadb(bus);
         if (val >= 0) {
             *ptr = val;
-            bytes ++;
-        } else {
+            bytes++;
+        }
+        else {
             break;
         }
 
-        ptr ++;
-        count --;
+        ptr++;
+        count--;
 
         if (!(flags & I2C_NO_READ_ACK)) {
             val = I2cSendAckOrNack(bus, count);
@@ -346,9 +351,9 @@ static x_size_t I2cRecvBytes(struct I2cBus *bus, struct I2cDataStandard *msg)
     return bytes;
 }
 
-static int32 I2cSendAddress(struct I2cBus *bus, uint8 addr, int32 retries)
+static int32 I2cSendAddress(struct I2cBus* bus, uint8 addr, int32 retries)
 {
-    struct I2cHalDrvDone *done = (struct I2cHalDrvDone *)bus->private_data;
+    struct I2cHalDrvDone* done = (struct I2cHalDrvDone*)bus->private_data;
     int32 i;
     x_err_t ret = 0;
 
@@ -364,11 +369,11 @@ static int32 I2cSendAddress(struct I2cBus *bus, uint8 addr, int32 retries)
     return ret;
 }
 
-static x_err_t I2cBitSendAddress(struct I2cBus *bus, struct I2cDataStandard *msg)
+static x_err_t I2cBitSendAddress(struct I2cBus* bus, struct I2cDataStandard* msg)
 {
     uint16 flags = msg->flags;
     uint16 ignore_nack = msg->flags & I2C_IGNORE_NACK;
-    struct I2cHalDrvDone *done = (struct I2cHalDrvDone *)bus->private_data;
+    struct I2cHalDrvDone* done = (struct I2cHalDrvDone*)bus->private_data;
 
     uint8 addr1, addr2;
     int32 retries;
@@ -401,7 +406,8 @@ static x_err_t I2cBitSendAddress(struct I2cBus *bus, struct I2cDataStandard *msg
                 return -EPIO;
             }
         }
-    } else {
+    }
+    else {
         addr1 = msg->addr << 1;
         if (flags & I2C_RD)
             addr1 |= 1;
@@ -413,11 +419,11 @@ static x_err_t I2cBitSendAddress(struct I2cBus *bus, struct I2cDataStandard *msg
     return EOK;
 }
 
-static uint32 I2cWriteData(struct I2cHardwareDevice *i2c_dev, struct I2cDataStandard *msg)
+static uint32 I2cWriteData(struct I2cHardwareDevice* i2c_dev, struct I2cDataStandard* msg)
 {
-    struct I2cBus *bus = (struct I2cBus *)i2c_dev->haldev.owner_bus;
+    struct I2cBus* bus = (struct I2cBus*)i2c_dev->haldev.owner_bus;
     bus->private_data = i2c_dev->haldev.owner_bus->private_data;
-    struct I2cHalDrvDone *done = (struct I2cHalDrvDone *)bus->private_data;
+    struct I2cHalDrvDone* done = (struct I2cHalDrvDone*)bus->private_data;
     int32 ret;
     int32 i = 0;
     uint16 ignore_nack;
@@ -435,15 +441,15 @@ static uint32 I2cWriteData(struct I2cHardwareDevice *i2c_dev, struct I2cDataStan
             }
         }
 
-        if (msg->flags & I2C_WR) {
+        if (msg->flags == I2C_WR) {
             ret = I2cSendBytes(bus, msg);
             if (ret >= 1)
                 //KPrintf("write %d byte%s", ret, ret == 1 ? "" : "s");
-            if (ret < msg->len) {
-                if (ret >= 0)
-                    ret = -ERROR;
-                goto out;
-            }
+                if (ret < msg->len) {
+                    if (ret >= 0)
+                        ret = -ERROR;
+                    goto out;
+                }
         }
         msg = msg->next;
         i++;
@@ -456,11 +462,11 @@ out:
     return ret;
 }
 
-static uint32 I2cReadData(struct I2cHardwareDevice *i2c_dev, struct I2cDataStandard *msg)
+static uint32 I2cReadData(struct I2cHardwareDevice* i2c_dev, struct I2cDataStandard* msg)
 {
-    struct I2cBus *bus = (struct I2cBus *)i2c_dev->haldev.owner_bus;
+    struct I2cBus* bus = (struct I2cBus*)i2c_dev->haldev.owner_bus;
     bus->private_data = i2c_dev->haldev.owner_bus->private_data;
-    struct I2cHalDrvDone *done = (struct I2cHalDrvDone *)bus->private_data;
+    struct I2cHalDrvDone* done = (struct I2cHalDrvDone*)bus->private_data;
     int32 ret;
     int32 i = 0;
     uint16 ignore_nack;
@@ -483,11 +489,11 @@ static uint32 I2cReadData(struct I2cHardwareDevice *i2c_dev, struct I2cDataStand
             ret = I2cRecvBytes(bus, msg);
             if (ret >= 1)
                 //KPrintf("read %d byte%s", ret, ret == 1 ? "" : "s");
-            if (ret < msg->len) {
-                if (ret >= 0)
-                    ret = -EPIO;
-                goto out;
-            }
+                if (ret < msg->len) {
+                    if (ret >= 0)
+                        ret = -EPIO;
+                    goto out;
+                }
         }
         msg = msg->next;
         i++;
@@ -500,36 +506,36 @@ out:
     return ret;
 }
 
-static uint32 I2cInit(struct I2cDriver *i2c_drv, struct BusConfigureInfo *configure_info)
+static uint32 I2cInit(struct I2cDriver* i2c_drv, struct BusConfigureInfo* configure_info)
 {
     NULL_PARAM_CHECK(i2c_drv);
 
-    struct I2cHardwareDevice *i2c_dev = (struct I2cHardwareDevice *)i2c_drv->driver.owner_bus->owner_haldev;
+    struct I2cHardwareDevice* i2c_dev = (struct I2cHardwareDevice*)i2c_drv->driver.owner_bus->owner_haldev;
 
     if (configure_info->private_data) {
-        i2c_dev->i2c_dev_addr = *((uint16 *)configure_info->private_data);
+        i2c_dev->i2c_dev_addr = *((uint16*)configure_info->private_data);
         return EOK;
     }
-    
+
     KPrintf("I2cInit need set i2c dev addr\n");
     return ERROR;
 }
 
-static uint32 I2cDrvConfigure(void *drv, struct BusConfigureInfo *configure_info)
+static uint32 I2cDrvConfigure(void* drv, struct BusConfigureInfo* configure_info)
 {
     NULL_PARAM_CHECK(drv);
     NULL_PARAM_CHECK(configure_info);
 
     x_err_t ret = EOK;
-    struct I2cDriver *i2c_drv = (struct I2cDriver *)drv;
+    struct I2cDriver* i2c_drv = (struct I2cDriver*)drv;
 
     switch (configure_info->configure_cmd)
     {
-        case OPE_INT:
-            ret = I2cInit(i2c_drv, configure_info);
-            break;
-        default:
-            break;
+    case OPE_INT:
+        ret = I2cInit(i2c_drv, configure_info);
+        break;
+    default:
+        break;
     }
 
     return ret;
@@ -545,12 +551,12 @@ static const struct I2cDevDone i2c_dev_done =
 };
 
 /*Init i2c bus*/
-static int BoardI2cBusInit(struct I2cBus *i2c_bus, struct I2cDriver *i2c_driver)
+static int BoardI2cBusInit(struct I2cBus* i2c_bus, struct I2cDriver* i2c_driver)
 {
     x_err_t ret = EOK;
 
     /*Init the i2c bus */
-    i2c_bus->private_data = (void *)&I2cDrvDone;
+    i2c_bus->private_data = (void*)&I2cDrvDone;
     ret = I2cBusInit(i2c_bus, I2C_BUS_NAME_1);
     if (EOK != ret) {
         KPrintf("board_i2c_init I2cBusInit error %d\n", ret);
@@ -558,7 +564,7 @@ static int BoardI2cBusInit(struct I2cBus *i2c_bus, struct I2cDriver *i2c_driver)
     }
 
     /*Init the i2c driver*/
-    i2c_driver->private_data = (void *)&I2cDrvDone;
+    i2c_driver->private_data = (void*)&I2cDrvDone;
     ret = I2cDriverInit(i2c_driver, I2C_DRV_NAME_1);
     if (EOK != ret) {
         KPrintf("board_i2c_init I2cDriverInit error %d\n", ret);
@@ -570,7 +576,7 @@ static int BoardI2cBusInit(struct I2cBus *i2c_bus, struct I2cDriver *i2c_driver)
     if (EOK != ret) {
         KPrintf("board_i2c_init I2cDriverAttachToBus error %d\n", ret);
         return ERROR;
-    } 
+    }
 
     return ret;
 }
@@ -588,13 +594,13 @@ static int BoardI2cDevBend(void)
     if (EOK != ret) {
         KPrintf("board_i2c_init I2cDeviceInit device %s error %d\n", I2C_1_DEVICE_NAME_0, ret);
         return ERROR;
-    }  
+    }
 
     ret = I2cDeviceAttachToBus(I2C_1_DEVICE_NAME_0, I2C_BUS_NAME_1);
     if (EOK != ret) {
         KPrintf("board_i2c_init I2cDeviceAttachToBus device %s error %d\n", I2C_1_DEVICE_NAME_0, ret);
         return ERROR;
-    }  
+    }
 
     return ret;
 }
@@ -624,7 +630,7 @@ int HwI2cInit(void)
     if (EOK != ret) {
         KPrintf("board_i2c_Init error ret %u\n", ret);
         return ERROR;
-    }   
+    }
 
     I2cBusReset(&i2c_bus_param);
 #endif

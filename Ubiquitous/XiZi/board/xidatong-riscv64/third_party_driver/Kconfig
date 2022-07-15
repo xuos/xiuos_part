@@ -21,6 +21,15 @@ if BSP_USING_I2C
 source "$BSP_DIR/third_party_driver/i2c/Kconfig"
 endif
 
+menuconfig BSP_USING_TOUCH
+bool "Using TOUCH device"
+default n
+select RESOURCES_TOUCH
+select BSP_USING_I2C
+if BSP_USING_TOUCH
+source "$BSP_DIR/third_party_driver/touch/Kconfig"
+endif
+
 menuconfig BSP_USING_PLIC
 bool "Using PLIC device"
 default y

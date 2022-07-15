@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-/**
-* @file board.c
-* @brief support kd233-board init configure and start-up
-* @version 1.0 
-* @author AIIT XUOS Lab
-* @date 2022-07-25
-*/
+ /**
+ * @file board.c
+ * @brief support kd233-board init configure and start-up
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-07-25
+ */
 
-/*************************************************
-File name: board.c
-Description: support xidatong-riscv64-board init configure and driver/task/... init
-Others: https://canaan-creative.com/developer
-History: 
-1. Date: 2022-07-25
-Author: AIIT XUOS Lab
-Modification: 
-1. support xidatong-riscv64-board InitBoardHardware
-2. support xidatong-riscv64-board Kd233Start
-3. support xidatong-riscv64-board shell cmd, include reboot, shutdown
-*************************************************/
+ /*************************************************
+ File name: board.c
+ Description: support xidatong-riscv64-board init configure and driver/task/... init
+ Others: https://canaan-creative.com/developer
+ History:
+ 1. Date: 2022-07-25
+ Author: AIIT XUOS Lab
+ Modification:
+ 1. support xidatong-riscv64-board InitBoardHardware
+ 2. support xidatong-riscv64-board Kd233Start
+ 3. support xidatong-riscv64-board shell cmd, include reboot, shutdown
+ *************************************************/
 
 #include <xizi.h>
 #include <clint.h>
@@ -60,12 +60,13 @@ extern int HwI2cInit(void);
 extern int HwRtcInit(void);
 extern int HwWdtInit(void);
 extern int HwLcdInit(void);
+extern int HwTouchInit(void);
 extern int HwTimerInit(void);
 
 #if defined(FS_VFS) && defined (MOUNT_SDCARD)
 #include <iot-vfs.h>
 #include <sd_spi.h>
-extern SpiSdDeviceType SpiSdInit(struct Bus *bus, const char *dev_name, const char *drv_name, const char *sd_name);
+extern SpiSdDeviceType SpiSdInit(struct Bus* bus, const char* dev_name, const char* drv_name, const char* sd_name);
 
 /**
  * @description: Mount SD card
@@ -73,14 +74,14 @@ extern SpiSdDeviceType SpiSdInit(struct Bus *bus, const char *dev_name, const ch
  */
 int MountSDCard(void)
 {
-    struct Bus *spi_bus;
+    struct Bus* spi_bus;
     spi_bus = BusFind(SPI_BUS_NAME_1);
 
     if (NONE == SpiSdInit(spi_bus, SPI_1_DEVICE_NAME_0, SPI_1_DRV_NAME, SPI_SD_NAME)) {
         KPrintf("MountSDCard SpiSdInit error!\n");
         return 0;
     }
-    
+
     if (EOK == MountFilesystem(SPI_BUS_NAME_1, SPI_SD_NAME, SPI_1_DRV_NAME, FSTYPE_FATFS, "/"))
         KPrintf("SPI SD card fatfs mounted\n");
 
@@ -90,37 +91,37 @@ int MountSDCard(void)
 
 void InitBss(void)
 {
-    unsigned int *dst;
+    unsigned int* dst;
 
     dst = &__bss_start;
-    while (dst < &__bss_end){
+    while (dst < &__bss_end) {
         *dst++ = 0;
     }
 }
 
 void Kd233Start(uint32_t mhartid)
 {
-	switch(mhartid) {
-		case CPU0:
-    		InitBss();
+    switch (mhartid) {
+    case CPU0:
+        InitBss();
 
-			/*kernel start entry*/
-    		entry();
-			break;
-		case CPU1:
-			while(0x2018050420191010 != cpu2_boot_flag) { ///< waiting for boot flag ,then start cpu1 core
+        /*kernel start entry*/
+        entry();
+        break;
+    case CPU1:
+        while (0x2018050420191010 != cpu2_boot_flag) { ///< waiting for boot flag ,then start cpu1 core
 #ifndef ARCH_SMP
-				asm volatile("wfi");
+            asm volatile("wfi");
 #endif
-			}
+        }
 #ifdef ARCH_SMP
-			SecondaryCpuCStart();
+        SecondaryCpuCStart();
 #endif
-			break;
+        break;
 
-		default:
-			break;
-	}
+    default:
+        break;
+    }
 }
 
 int Freq(void)
@@ -149,26 +150,26 @@ int Freq(void)
 
     return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),Freq, Freq, show frequency information );
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_PARAM_NUM(0), Freq, Freq, show frequency information);
 
 #ifdef ARCH_SMP
 extern int EnableHwclintIpi(void);
 #endif
 
-struct InitSequenceDesc _board_init[] = 
+struct InitSequenceDesc _board_init[] =
 {
 #ifdef BSP_USING_GPIO
     { "hw_pin", HwGpioInit },
-	{ "io_config", IoConfigInit },
+    { "io_config", IoConfigInit },
 #endif
 #ifdef BSP_USING_SPI
-	{ "hw_spi", HwSpiInit },
+    { "hw_spi", HwSpiInit },
 #endif
 #ifdef BSP_USING_I2C
     { "hw_i2c", HwI2cInit },
 #endif
 #ifdef BSP_USING_LCD
-	{ "hw_lcd", HwLcdInit },
+    { "hw_lcd", HwLcdInit },
 #endif
 #ifdef BSP_USING_HWTIMER
     { "hw_timer" , HwTimerInit },
@@ -179,14 +180,17 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_RTC
     {"hw_rtc", HwRtcInit },
 #endif
-	{ " NONE ",NONE },
+#ifdef BSP_USING_TOUCH
+    {"touch", HwTouchInit },
+#endif
+    { " NONE ",NONE },
 };
 
 void InitBoardHardware(void)
 {
-	int i = 0;
-	int ret = 0;
-	
+    int i = 0;
+    int ret = 0;
+
     SysctlPllSetFreq(SYSCTL_PLL0, 800000000UL);
     SysctlPllSetFreq(SYSCTL_PLL1, 400000000UL);
 #ifdef BSP_USING_GPIO
@@ -204,12 +208,12 @@ void InitBoardHardware(void)
 #endif
 
     /* initialize memory system */
-	InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
+    InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
 
 #ifdef KERNEL_CONSOLE
     /* set console device */
     InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
-	KPrintf("\nconsole init completed.\n");
+    KPrintf("\nconsole init completed.\n");
     KPrintf("board initialization......\n");
 #endif /* KERNEL_CONSOLE */
 
@@ -220,21 +224,21 @@ void InitBoardHardware(void)
 #endif
 
 #ifdef KERNEL_COMPONENTS_INIT
-	for(i = 0; _board_init[i].fn != NONE; i++) {
-		ret = _board_init[i].fn();
-		KPrintf("initialize %s %s\n",_board_init[i].fn_name, ret == 0 ? "success" : "failed");
-	}
+    for (i = 0; _board_init[i].fn != NONE; i++) {
+        ret = _board_init[i].fn();
+        KPrintf("initialize %s %s\n", _board_init[i].fn_name, ret == 0 ? "success" : "failed");
+    }
 #endif
-	KPrintf("board init done.\n");
-	KPrintf("start kernel...\n");
+    KPrintf("board init done.\n");
+    KPrintf("start kernel...\n");
 }
 
 void HwCpuReset(void)
 {
     sysctl->soft_reset.soft_reset = 1;
-    while(RET_TRUE);
+    while (RET_TRUE);
 }
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),Reboot, HwCpuReset,  reset machine );
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_PARAM_NUM(0), Reboot, HwCpuReset, reset machine);
 
 
