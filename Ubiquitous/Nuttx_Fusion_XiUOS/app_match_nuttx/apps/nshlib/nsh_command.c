@@ -600,6 +600,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "ch438",    cmd_Ch438,     1, 1, "[ch438 demo cmd.]" },
 #endif
 
+#if defined(CONFIG_K210_LCD) && !defined(CONFIG_NSH_DISABLE_LCD)
+  { "lcd",      cmd_Lcd,     1, 1, "[LCD demo cmd.]" },
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
   { "hcho1os",       cmd_Hcho1os,       1, 1, "[get the concentration of formaldehyde with sensor tb600b_wq_hcho1os.]" },
 #endif
