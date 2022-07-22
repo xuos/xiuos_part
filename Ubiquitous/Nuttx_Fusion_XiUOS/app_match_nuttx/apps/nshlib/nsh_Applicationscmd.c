@@ -50,6 +50,19 @@ int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 #endif
 
 /****************************************************************************
+ * Name: cmd_lcd
+ ****************************************************************************/
+#if defined(CONFIG_K210_LCD) && !defined(CONFIG_NSH_DISABLE_LCD)
+extern void LcdDemo(void);
+int cmd_Lcd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, LCD!\n");
+    LcdDemo();
+    return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_Hcho1os
  ****************************************************************************/
 
