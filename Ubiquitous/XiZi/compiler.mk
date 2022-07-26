@@ -1,5 +1,21 @@
-SRC_DIR_TEMP :=$(SRC_DIR)
-SRC_DIR:=
+ifeq ($(COMPILE_TYPE), COMPILE_MUSL) 
+SRC_DIR_TEMP := $(MUSL_DIR)
+else ifeq ($(COMPILE_TYPE), COMPILE_LWIP) 
+SRC_DIR_TEMP := $(LWIP_DIR)
+else
+SRC_DIR_TEMP := $(SRC_DIR) 
+endif
+
+SRC_DIR :=
+MUSL_DIR :=
+LWIP_DIR :=
+
+ifeq ($(USE_APP_INCLUDEPATH), y)
+	include $(KERNEL_ROOT)/path_app.mk
+else 
+	include $(KERNEL_ROOT)/path_kernel.mk
+endif
+export CPPPATHS := $(KERNELPATHS)
 
 CUR_DIR :=$(shell pwd)
 
@@ -34,7 +50,7 @@ $(if $(strip $(LOCALC)),$(eval $(LOCALC): $(1)
 	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
 	@echo cc $$<
 	@/bin/echo -n $(dir $(LOCALC)) >>$(KERNEL_ROOT)/build/make.dep
-	@$(CROSS_COMPILE)gcc -MM $$(CFLAGS) -c $$< >>$(KERNEL_ROOT)/build/make.dep
+	@($(CROSS_COMPILE)gcc -MM $$(CFLAGS) -c $$<) >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)gcc $$(CFLAGS) -c $$< -o $$@))
 endef
 

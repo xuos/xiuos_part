@@ -27,7 +27,7 @@
 #include "lwip/timeouts.h"
 #include "lwip/init.h"
 #include "netif/ethernet.h"
-
+#include <shell.h>
 #include "board.h"
 #include "pin_mux.h"
 #include "clock_config.h"

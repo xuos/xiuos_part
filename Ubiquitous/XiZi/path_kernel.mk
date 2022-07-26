@@ -18,7 +18,13 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052 \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052/drivers \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/Include \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/xip \
 	-I$(KERNEL_ROOT)/include \
+	-I$(KERNEL_ROOT)/resources/include 
+
+ifeq ($(CONFIG_RESOURCES_LWIP),y)
+KERNELPATHS +=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/compat \
@@ -27,10 +33,8 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/apps \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
-	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch \
-	-I$(KERNEL_ROOT)/resources/include \
-	-I$(BSP_ROOT)/include \
-	-I$(BSP_ROOT)/xip #
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+endif 
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong-riscv64)
@@ -75,6 +79,9 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/third_party_driver/usb/STM32_USB_OTG_Driver/inc \
 	-I$(KERNEL_ROOT)/include \
+
+ifeq ($(CONFIG_RESOURCES_LWIP),y)
+KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/compat \
@@ -83,8 +90,8 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/apps \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
-	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch \
-	-I$(BSP_ROOT)/include #
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+endif
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/aiit-arm32-board)
@@ -237,7 +244,13 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052 \
 	-I$(BSP_ROOT)/third_party_driver/MIMXRT1052/drivers \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/Include \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/xip \
 	-I$(KERNEL_ROOT)/include \
+	-I$(KERNEL_ROOT)/resources/include 
+
+ifeq ($(CONFIG_RESOURCES_LWIP),y)
+KERNELPATHS +=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/compat \
@@ -246,10 +259,8 @@ KERNELPATHS :=-I$(BSP_ROOT) \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/apps \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
-	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch \
-	-I$(KERNEL_ROOT)/resources/include \
-	-I$(BSP_ROOT)/include \
-	-I$(BSP_ROOT)/xip #
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+endif
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32f103-nano)
@@ -290,7 +301,9 @@ endif
 
 ifeq ($(CONFIG_TRANSFORM_LAYER_ATTRIUBUTE), y)
 ifeq ($(CONFIG_ADD_XIZI_FETURES), y)
+ifeq ($(CONFIG_LIB_MUSLLIB), )
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi/user_api/posix_support/include #
+endif
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi #
 endif
 
@@ -365,6 +378,12 @@ ifeq ($(CONFIG_LIB_NEWLIB),y)
 KERNELPATHS += -I$(KERNEL_ROOT)/lib/newlib/include #
 endif
 
+ifeq ($(CONFIG_LIB_MUSLLIB), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/lib/musllib/src/include #
+KERNELPATHS += -I$(KERNEL_ROOT)/lib/musllib/include #
+KERNELPATHS += -I$(KERNEL_ROOT)/lib/musllib/src/internal #
+endif 
+
 ifeq ($(CONFIG_FS_LWEXT4),y)
 KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/blockdev/xiuos #
 KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/include #
@@ -398,12 +417,12 @@ endif
 KERNELPATHS += -I$(KERNEL_ROOT)/kernel/include #
 
 
-COMPILE_KERNEL:
-	@$(eval CPPPATHS=$(KERNELPATHS))
-	@for dir in $(SRC_KERNEL_DIR);do    \
-               $(MAKE) -C $$dir;          \
-       done
-	@cp link.mk build/Makefile
-	@$(MAKE) -C build COMPILE_TYPE="_kernel" TARGET=XiZi-$(BOARD)_kernel.elf LINK_FLAGS=LFLAGS
-	@rm build/Makefile build/make.obj
+# COMPILE_KERNEL:
+# 	@$(eval CPPPATHS=$(KERNELPATHS))
+# 	@for dir in $(SRC_KERNEL_DIR);do    \
+#                $(MAKE) -C $$dir;          \
+#        done
+# 	@cp link.mk build/Makefile
+# 	@$(MAKE) -C build COMPILE_TYPE="_kernel" TARGET=XiZi-$(BOARD)_kernel.elf LINK_FLAGS=LFLAGS
+# 	@rm build/Makefile build/make.obj
 

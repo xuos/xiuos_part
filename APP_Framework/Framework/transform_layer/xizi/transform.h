@@ -22,6 +22,7 @@
 #define TRANSFORM_H
 
 #include <pthread.h>
+#include <signal.h>
 #include <semaphore.h>
 #include <stddef.h>
 #include <stdint.h>

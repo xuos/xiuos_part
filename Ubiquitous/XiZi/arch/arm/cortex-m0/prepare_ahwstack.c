@@ -155,13 +155,15 @@ uint8 KTaskStackSetup(struct TaskDescriptor *task)
         StackContex->ExErrorStackContex.lr  = (unsigned long)KTaskQuit; 
     }
 #else
-    StackContex->ExErrorStackContex.lr  = (unsigned long)KTaskQuit; 
+    StackContex->ExErrorStackContex.lr = (unsigned long)KTaskQuit;
+    KPrintf("DEBUG: ExErrorStackContex.lr set KTaskQuit..\n");
 #endif
 
 #if USE_FPU
     StackContex->flag = 0;
 #endif
 
+    KPrintf("DEBUG: KTaskStackSetup end, task: %i.\n", task->id.id);
     return EOK;
 }
 

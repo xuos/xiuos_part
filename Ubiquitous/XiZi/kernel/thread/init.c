@@ -155,9 +155,10 @@ void _InitSubCmpts(struct InitSequenceDesc sub_cmpts[])
 #ifdef KERNEL_COMPONENTS_INIT
 void EnvInitKTask(void *parameter)
 {
+	KPrintf("DEBUG: RUNNING ENV TASK\n");
 	x_base lock = 0;
 	lock = DISABLE_INTERRUPT();
-    _InitSubCmpts(prev_cmpts_init);
+	_InitSubCmpts(prev_cmpts_init);
 	_InitSubCmpts(device_init);
 	_InitSubCmpts(components_init);
 	_InitSubCmpts(env_init);
@@ -186,13 +187,15 @@ void CreateEnvInitTask(void)
     int32 env_init = 0;
 
     env_init = KTaskCreate("env_init", EnvInitKTask, NONE,
-                           ENV_INIT_KTASK_STACK_SIZE, KTASK_PRIORITY_MAX - 1);
-    if(env_init < 0) {		
+		ENV_INIT_KTASK_STACK_SIZE, KTASK_PRIORITY_MAX - 1);
+	KPrintf("DEBUG: Env KTaskCreate end. env_init: %i.\n", env_init);
+	if (env_init < 0) {
 		KPrintf("env_init create failed ...%s %d.\n",__FUNCTION__,__LINE__);
 		return;
 	}
 
-    StartupKTask(env_init);
+	StartupKTask(env_init);
+	KPrintf("DEBUG: Env StartupTask end.\n");
 }
 #endif   /* KERNEL_COMPONENTS_INIT */
 
@@ -250,8 +253,8 @@ extern int InitUserspace(void);
     StartWatchdog();
 #endif
 
-    StartupOsAssign();
-	
+	KPrintf("DEBUG: calling StartipOsAssign.\n");
+	StartupOsAssign();
     return 0;
 }
 

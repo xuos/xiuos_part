@@ -170,7 +170,7 @@ int32 UTaskCreate(const char *name,
 
 void KUpdateExstatus(x_err_t no);
 int *KObtainExstatus(void);
-#if !defined(LIB_NEWLIB) && !defined(_WIN32)
+#if !defined(LIB_NEWLIB) && !defined(LIB_MUSLLIB) && !defined(_WIN32)
 #ifndef errno
 #define errno    *KObtainExstatus()
 #endif
