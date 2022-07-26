@@ -23,6 +23,10 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
         CSRCS += co2_zg09.c
     endif
 
+    ifeq ($(CONFIG_APPLICATION_SENSOR_CO2_G8S), y)
+        CSRCS += co2_g8s.c
+    endif
+
     ifeq ($(CONFIG_APPLICATION_SENSOR_PM1_0_PS5308), y)
         CSRCS += pm1_0_ps5308.c
     endif

@@ -126,6 +126,21 @@ int cmd_Co2Zg09(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 #endif
 
 /****************************************************************************
+ * Name: cmd_Co2g8s
+ ****************************************************************************/
+
+#if defined(CONFIG_APPLICATION_SENSOR_CO2_G8S) && !defined(CONFIG_NSH_DISABLE_CO2G8S)
+extern void Co2G8s(void);
+int cmd_Co2G8S(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    FrameworkInit();
+    Co2G8s();
+    return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_Pm10Ps5308
  ****************************************************************************/
 

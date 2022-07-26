@@ -620,6 +620,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "zg09",       cmd_Co2Zg09,       1, 1, "[get the concentration of co2  with sensor ZG09.]" },
 #endif
 
+#if defined(CONFIG_APPLICATION_SENSOR_CO2_G8S) && !defined(CONFIG_NSH_DISABLE_CO2G8S)
+  { "g8s",       cmd_Co2G8S,       1, 1, "[get the concentration of co2  with sensor G8S.]" },
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_PM1_0_PS5308) && !defined(CONFIG_NSH_DISABLE_PM1_0PS5308)
   { "pm1.0",       cmd_Pm10Ps5308,       1, 1, "[get pm1.0 with sensor Ps5308.]" },
 #endif

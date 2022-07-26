@@ -37,6 +37,7 @@ static struct SensorProductInfo info =
  * @param sdev - sensor device pointer
  * @return success: 1 , failure: other
  */
+#ifdef ADD_NUTTX_FETURES
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     int result = 0;
@@ -47,6 +48,26 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
         return -1;
     }
     
+
+    result = sdev->done->ioctl(sdev, SENSOR_DEVICE_PASSIVE);
+    if (result != 0){
+        printf("SensorDeviceOpen:ioctl failed, status=%d\n", result);
+    }
+
+    return result;
+}
+#else
+static int SensorDeviceOpen(struct SensorDevice *sdev)
+{
+    int result = 0;
+
+    sdev->fd = PrivOpen(SENSOR_DEVICE_G8S_DEV, O_RDWR);
+    if (sdev->fd < 0) {
+        printf("open %s error\n", SENSOR_DEVICE_G8S_DEV);
+        return -1;
+    }    
+
+
     struct SerialDataCfg cfg;
     cfg.serial_baud_rate    = BAUD_RATE_9600;
     cfg.serial_data_bits    = DATA_BITS_8;
@@ -67,7 +88,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
 
     return result;
 }
-
+#endif
 /**
  * @description: Read sensor device
  * @param sdev - sensor device pointer
