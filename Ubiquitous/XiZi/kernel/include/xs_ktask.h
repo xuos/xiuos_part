@@ -75,7 +75,7 @@ struct TaskDyncSchedMember {
     void                *isolation;            ///< task isolation pointer
     uint8               isolation_status;
 #if defined(ARCH_ARM)
-    uint32_t            svc_return;
+    uint32            svc_return;
 #endif
 #endif
 

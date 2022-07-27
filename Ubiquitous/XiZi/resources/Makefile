@@ -50,7 +50,7 @@ ifeq ($(CONFIG_RESOURCES_USB),y)
 endif
 
 ifeq ($(CONFIG_RESOURCES_LWIP),y)
-	# SRC_DIR += ethernet
+	SRC_DIR += ethernet
 endif
 
 ifeq ($(CONFIG_RESOURCES_WDT),y)

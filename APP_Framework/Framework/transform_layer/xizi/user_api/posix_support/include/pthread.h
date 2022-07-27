@@ -31,7 +31,8 @@ extern "C" {
 
 #if defined(ARCH_ARM) && !defined(LIB_MUSLLIB)
 #include "pthread arm.h"
-
+#endif
+    
 // enum {
 //     PTHREAD_BARRIER_SERIAL_THREAD,
 //     PTHREAD_CANCEL_ASYNCHRONOUS,
@@ -105,7 +106,6 @@ int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
 int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
 int pthread_mutexattr_setpshared(pthread_mutexattr_t *attr, int pshared);
 int pthread_mutexattr_getpshared(const pthread_mutexattr_t *attr, int *pshared);
-#endif
 
 #ifdef __cplusplus
 }

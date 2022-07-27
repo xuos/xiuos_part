@@ -1,4 +1,4 @@
-export CFLAGS := -mcmodel=medany -march=rv64imafdc -mabi=lp64d -fno-common -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -O0 -ggdb -fgnu89-inline -Werror 
+export CFLAGS := -mcmodel=medany -march=rv64imafdc -mabi=lp64d -fno-common -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -O0 -ggdb -fgnu89-inline #-Werror 
 # $(warning, "DEBUG, here add cflags.")
 # export CFLAGS += -nostdlib -nostdinc -fno-builtin
 export AFLAGS := -c -mcmodel=medany -march=rv64imafdc -mabi=lp64d -x assembler-with-cpp -ggdb
@@ -6,6 +6,15 @@ export LFLAGS := -mcmodel=medany -march=rv64imafdc -mabi=lp64d -nostartfiles -Wl
 
 export APPLFLAGS := -mcmodel=medany -march=rv64imafdc -mabi=lp64d -nostartfiles -Wl,--gc-sections,-Map=XiZi-app.map,-cref,-u, -T $(BSP_ROOT)/link_userspace.lds
 
+ifeq ($(CONFIG_LIB_MUSLLIB), y)
+export LFLAGS += -nostdlib -nostdinc -fno-builtin -nodefaultlibs
+export LIBCC := -lgcc
+export LINK_MUSLLIB := $(KERNEL_ROOT)/lib/musllib/libmusl.a
+endif
+
+ifeq ($(CONFIG_RESOURCES_LWIP), y)
+export LINK_LWIP := $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
+endif
 
 export CXXFLAGS := -mcmodel=medany -march=rv64imafdc -mabi=lp64d -fno-common -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -O0 -ggdb -Werror
 

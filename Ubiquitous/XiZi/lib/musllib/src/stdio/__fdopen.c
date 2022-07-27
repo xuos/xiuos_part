@@ -13,7 +13,7 @@ int ioctl(int fd, int req, ...)
 
 FILE *__fdopen(int fd, const char *mode)
 {
-	FILE *f;
+	FILE* f;
 	struct winsize wsz;
 	pthread_mutex_t filelockinit = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 

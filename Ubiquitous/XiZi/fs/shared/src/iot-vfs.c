@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <xizi.h>
 #include <iot-vfs.h>
 #include <iot-vfs_posix.h>
@@ -592,7 +593,7 @@ int ioctl(int fd, int cmd, ...)
 
     va_list ap;
     va_start(ap, cmd);
-    ret = fdp->mntp->fs->ioctl(fdp, cmd, (void*)va_arg(ap, int));
+    ret = fdp->mntp->fs->ioctl(fdp, cmd, (void*)va_arg(ap, long));
     va_end(ap);
     if (ret < 0) {
         SYS_ERR("%s: ioctl file failed\n", __func__);

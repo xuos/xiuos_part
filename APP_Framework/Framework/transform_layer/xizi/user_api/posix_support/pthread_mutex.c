@@ -24,7 +24,8 @@
 #include <pthread.h>
 #include <string.h>
 
-#if defined(ARCH_ARM) && defined(LIB_MUSLLIB)
+// #if defined(ARCH_ARM) && defined(LIB_MUSLLIB)
+#if defined(LIB_MUSLLIB)
 int pthread_mutex_init(pthread_mutex_t* p_mutex, const pthread_mutexattr_t* attr)
 {
     pthread_mutexattr_t mutexAttr;

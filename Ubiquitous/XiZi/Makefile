@@ -2,7 +2,7 @@ MAKEFLAGS += --no-print-directory
 
 
 .PHONY:all clean distclean show_info  menuconfig
-.PHONY:COMPILE_APP COMPILE_KERNEL 
+.PHONY:COMPILE_APP COMPILE_KERNEL
 
 
 support :=kd233 stm32f407-st-discovery maix-go stm32f407zgt6 aiit-riscv64-board aiit-arm32-board hifive1-rev-B hifive1-emulator k210-emulator cortex-m3-emulator cortex-m4-emulator ok1052-c gapuino stm32f103-nano gd32vf103-rvstar cortex-m0-emulator rv32m1-vega nuvoton-m2354
@@ -61,11 +61,11 @@ else
 PART := 
 
 ifeq ($(CONFIG_LIB_MUSLLIB), y)
-PART += COMPILE_MUSL clean
+PART += COMPILE_MUSL
 endif
 
 ifeq ($(CONFIG_RESOURCES_LWIP), y)
-PART += COMPILE_LWIP clean
+PART += COMPILE_LWIP
 endif
 
 PART += COMPILE_ALL
@@ -85,11 +85,11 @@ COMPILE_ALL:
 
 COMPILE_MUSL:
 	@for dir in $(MUSL_DIR);do    \
-               $(MAKE) -C $$dir  CONFIG_RESOURCES_LWIP=n;          \
+               $(MAKE) -C $$dir COMPILE_TYPE=$@ CONFIG_RESOURCES_LWIP=n;          \
        done
 	@cp link_libc.mk build/Makefile
 	@$(MAKE) -C build TARGET=libmusl.a LINK_FLAGS=LFLAGS
-	@cp build/libmusl.a $(KERNEL_ROOT)/lib/musllib/libmusl.a 
+	@cp build/libmusl.a $(KERNEL_ROOT)/lib/musllib/libmusl.a
 	@rm build/Makefile build/make.obj
 
 COMPILE_LWIP: 
@@ -112,10 +112,10 @@ COMPILE_KERNEL:
 COMPILE_APP:
 	@echo $(SRC_APP_DIR)
 	@for dir in $(SRC_APP_DIR);do    \
-               $(MAKE) -C $$dir;          \
+               $(MAKE) -C $$dir USE_APP_INCLUDEPATH=y;          \
        done
 	@cp link.mk build/Makefile
-	@$(MAKE) -C build COMPILE_TYPE="_app" TARGET=XiZi-$(BOARD)_app.elf LINK_FLAGS=APPLFLAGS USE_APP_INCLUDEPATH=y
+	@$(MAKE) -C build COMPILE_TYPE="_app" TARGET=XiZi-$(BOARD)_app.elf LINK_FLAGS=APPLFLAGS
 	@rm build/Makefile build/make.obj
 
 show_info:
@@ -175,4 +175,6 @@ distclean:
 	@echo Clean all configuration
 	@make clean
 	@rm -f .config*
+	@rm -f $(KERNEL_ROOT)/lib/musllib/libmusl.a
+	@rm -f $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
 	@rm -f $(KERNEL_ROOT)/board/*/.config

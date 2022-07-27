@@ -2,7 +2,7 @@
 
 FILE *__ofl_add(FILE *f)
 {
-	FILE **head = __ofl_lock();
+	FILE** head = __ofl_lock();
 	f->next = *head;
 	if (*head) (*head)->prev = f;
 	*head = f;

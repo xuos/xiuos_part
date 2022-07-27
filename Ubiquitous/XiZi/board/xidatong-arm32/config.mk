@@ -6,7 +6,7 @@ export AFLAGS := -c -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections 
 ### if use USB function, use special lds file because USB uses ITCM
 
 ifeq ($(CONFIG_LIB_MUSLLIB), y)
-export LFLAGS += -nostdlib -nostdinc -fno-builtin -nodefaultlibs
+export LFLAGS += -nostdlib -nostdinc # -fno-builtin -nodefaultlibs
 export LIBCC := -lgcc
 export LINK_MUSLLIB := $(KERNEL_ROOT)/lib/musllib/libmusl.a
 endif

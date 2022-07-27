@@ -270,7 +270,6 @@ static inline void SwitchToFirstRunningTask(struct TaskDescriptor* task)
 
     Assign.ready_vector_done->remove(task);
     KTaskStatSetAsRunning(task);
-    KPrintf("DEBUG: calling SwitchKtaskContextTo, task: %i.\n", task->id.id);
     SwitchKtaskContextTo((x_ubase)&task->stack_point, task);
 }
 
@@ -373,7 +372,6 @@ void StartupOsAssign(void)
     FirstRunningTask = ChooseTaskWithHighestPrio(&Assign.os_assign_read_vector);
 
     SetSystemRunningTask(FirstRunningTask);
-    KPrintf("DEBUG: calling SwitchToFirstRunningTask.\n");
     SwitchToFirstRunningTask(FirstRunningTask);
 }
 
