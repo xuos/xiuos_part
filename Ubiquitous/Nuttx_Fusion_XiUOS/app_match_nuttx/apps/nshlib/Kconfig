@@ -571,6 +571,10 @@ config NSH_DISABLE_CO2ZG09
 	bool "Disable the sensor zg09."
 	default n
 
+config NSH_DISABLE_CO2G8S
+	bool "Disable the sensor g8-s."
+	default n
+
 config NSH_DISABLE_PM1_0PS5308
 	bool "Disable the pm1.0 function of the sensor ps5308."
 	default n
