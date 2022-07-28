@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_gpiohs.h
+ * arch/risc-v/src/k210/k210_clockconfig.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,74 +18,50 @@
  *
  ****************************************************************************/
 
-/**
-* @file k210_gpiohs.h
-* @brief nuttx source code
-*                https://github.com/apache/incubator-nuttx.git
-* @version 10.3.0 
-* @author AIIT XUOS Lab
-* @date 2022-03-23
-*/
-
-#ifndef __ARCH_RISCV_SRC_K210_K210_GPIOHS_H
-#define __ARCH_RISCV_SRC_K210_K210_GPIOHS_H
+#ifndef __ARCH_RISCV_SRC_K210_K210_CLOCKCONFIG_H
+#define __ARCH_RISCV_SRC_K210_K210_CLOCKCONFIG_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
-#include <stdbool.h>
-#include "k210_gpio_common.h"
-
-#define HS_GPIO(n) (K210_IO_FUNC_GPIOHS0 + n)
+#include "k210_memorymap.h"
 
 /****************************************************************************
- * Public Functions Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: k210_gpiohs_set_direction
- *
- * Description:
- *   Set gpiohs direction
- *
- * Input Parameters:
- *   io  - IO number
- *   dir - true for output, false for input
- *
+ * Public Types
  ****************************************************************************/
 
-void k210_gpiohs_set_direction(uint32_t io, gpio_drive_mode_t mode);
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Name: k210_gpiohs_set_value
- *
- * Description:
- *   Set gpiohs direction
- *
- * Input Parameters:
- *   io  - IO number
- *   dir - true for high level, false for low level
- *
+ * Public Data
  ****************************************************************************/
 
-void k210_gpiohs_set_value(uint32_t io, bool val);
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Name: k210_gpiohs_get_value
- *
- * Description:
- *   Get gpiohs level
- *
- * Input Parameters:
- *   io  - IO number
- *
- * Returned Value:
- *   true for high level, false for low level
- *
+ * Public Function Prototypes
  ****************************************************************************/
 
-bool k210_gpiohs_get_value(uint32_t io);
+EXTERN uint32_t k210_get_cpuclk(void);
+EXTERN uint32_t k210_get_pll0clk(void);
+EXTERN void k210_clockconfig(void);
+EXTERN void k210_sysctl_init(void);
 
-#endif /* __ARCH_RISCV_SRC_K210_K210_GPIOHS_H */
+#if defined(__cplusplus)
+}
+#endif
+#undef EXTERN
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_K210_K210_CLOCKCONFIG_H */

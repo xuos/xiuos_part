@@ -34,6 +34,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "k210.h"
+#include "k210_clockconfig.h"
 #include "xidatong-riscv64.h"
 
 #ifdef CONFIG_BSP_USING_CH438
@@ -73,6 +74,15 @@ int k210_bringup(void)
 
 #ifdef CONFIG_BSP_USING_CH438
   board_ch438_initialize();
+#endif
+
+#ifdef CONFIG_K210_LCD
+  k210_sysctl_init();
+  ret = board_lcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_NOTICE, "board lcd initialize %d\n", ret);
+    }
 #endif
 
   return ret;
