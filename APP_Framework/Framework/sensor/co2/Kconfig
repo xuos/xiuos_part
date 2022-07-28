@@ -102,29 +102,12 @@ config SENSOR_G8S
                 if ADD_NUTTX_FETURES
                        config SENSOR_DEVICE_G8S_DEV
                                string "CO2 device name"
-                               default "/dev/ttyS1"
+                               default "/dev/ttyS3"
                                ---help---
                                    If USART1 is selected, then fill in /dev/ttyS1 here.
                 endif
 
                 if ADD_RTTHREAD_FETURES
-                        config SENSOR_G8S_DRIVER_EXTUART
-                                bool "Using extra uart to support g8-s"
-                                default y
 
-                        config SENSOR_DEVICE_G8S_DEV
-                                string "g8-s device uart path"
-                                default "/dev/uart2_dev2"
-                                depends on !SENSOR_G8S_DRIVER_EXTUART
-
-                        if SENSOR_G8S_DRIVER_EXTUART
-                                config SENSOR_DEVICE_G8S_DEV
-                                        string "g8-s device extra uart path"
-                                        default "/dev/extuart_dev4"
-
-                                config SENSOR_DEVICE_G8S_DEV_EXT_PORT
-                                        int "if G8S device using extuart, choose port"
-                                        default "4"
-                        endif
                 endif                
         endif
