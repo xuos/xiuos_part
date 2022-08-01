@@ -111,6 +111,36 @@ uint32_t PrivGetTickTime()
 
 /*********************fs**************************/
 
+/*********************message queue***********************************/
+mqd_t PrivMqueueOpen(const char *name, int oflag)
+{
+    return mq_open(name, oflag);
+}
+mqd_t PrivMqueueCreate(const char *name, int oflag, mode_t mode,struct mq_attr *attr)
+{
+    return mq_open(name, oflag,mode,attr);
+}
+
+int  PrivMqueueSend(mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio)
+{
+    return mq_send(mqdes,msg_ptr,msg_len, msg_prio);
+}
+
+int PrivMqueueUnlink(const char *name)
+{
+    return mq_unlink(name);
+}
+
+int PrivMqueueClose(mqd_t mqdes)
+{
+   return mq_close(mqdes);
+}
+
+ssize_t  PrivMqueueReceive(mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio)
+{
+    return mq_receive(mqdes, msg_ptr,msg_len, msg_prio);
+}
+
 /************************Driver Posix Transform***********************/
 int PrivOpen(const char *path, int flags)
 {
