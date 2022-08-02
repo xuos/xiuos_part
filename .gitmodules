@@ -19,3 +19,6 @@
 [submodule "APP_Framework/Applications/webnet/WebNet_XiUOS"]
 	path = APP_Framework/Applications/webnet/WebNet_XiUOS
 	url = https://gitlink.org.cn/xuos/WebNet_XiUOS.git
+[submodule "Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/xidatong-riscv64/kendryte-sdk/kendryte-sdk-source"]
+	path = Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/xidatong-riscv64/kendryte-sdk/kendryte-sdk-source
+	url = https://code.gitlink.org.cn/chunyexixiaoyu/kendryte-sdk-source.git
