@@ -2051,6 +2051,18 @@ source "binfmt/Kconfig"
 endmenu
 
 menu "Library Routines"
+
+choice
+	prompt "Selcet C library,built-in libc or musl libc."
+	default NUTTX_BUILT_IN_LIBC
+
+config NUTTX_BUILT_IN_LIBC
+	bool "nuttx built-in libc"
+
+config MUSL_LIBC
+	bool "musl libc"
+endchoice
+
 source "libs/libc/Kconfig"
 source "libs/libxx/Kconfig"
 source "libs/libdsp/Kconfig"
