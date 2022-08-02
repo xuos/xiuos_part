@@ -60,6 +60,7 @@ extern int HwI2cInit(void);
 extern int HwRtcInit(void);
 extern int HwWdtInit(void);
 extern int HwLcdInit(void);
+extern int HwTouchInit(void);
 extern int HwTimerInit(void);
 
 #if defined(FS_VFS) && defined (MOUNT_SDCARD)
@@ -179,7 +180,10 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_RTC
     {"hw_rtc", HwRtcInit },
 #endif
-	{ " NONE ",NONE },
+#ifdef BSP_USING_TOUCH
+    {"touch", HwTouchInit },
+#endif
+    { " NONE ",NONE },
 };
 
 void InitBoardHardware(void)
