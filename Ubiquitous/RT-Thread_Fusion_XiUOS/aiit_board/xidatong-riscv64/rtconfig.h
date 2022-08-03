@@ -25,6 +25,9 @@
 #define RT_IDLE_HOOK_LIST_SIZE 4
 #define IDLE_THREAD_STACK_SIZE 4096
 #define SYSTEM_THREAD_STACK_SIZE 4096
+#define RT_USING_TIMER_SOFT
+#define RT_TIMER_THREAD_PRIO 4
+#define RT_TIMER_THREAD_STACK_SIZE 2048
 
 /* kservice optimization */
 
@@ -143,9 +146,19 @@
 
 /* Socket abstraction layer */
 
+#define RT_USING_SAL
+#define SAL_INTERNET_CHECK
+#define SAL_SOCKETS_NUM 16
 
 /* Network interface device */
 
+#define RT_USING_NETDEV
+#define NETDEV_USING_IFCONFIG
+#define NETDEV_USING_PING
+#define NETDEV_USING_NETSTAT
+#define NETDEV_USING_AUTO_DEFAULT
+#define NETDEV_IPV4 1
+#define NETDEV_IPV6 0
 
 /* light weight TCP/IP stack */
 
@@ -168,20 +181,15 @@
 
 #define __STACKSIZE__ 4096
 #define BSP_USING_UART_HS
+#define BSP_USING_SPI1
+#define BSP_SPI1_CLK_PIN 9
+#define BSP_SPI1_D0_PIN 11
+#define BSP_SPI1_D1_PIN 10
+#define BSP_SPI1_USING_SS0
+#define BSP_SPI1_SS0_PIN 12
 
 /* Onboard Peripheral Drivers */
 
-#define BSP_USING_LCD
-#define BSP_LCD_CS_PIN 41
-#define BSP_LCD_WR_PIN 38
-#define BSP_LCD_DC_PIN 39
-#define BSP_LCD_RST_PIN 37
-#define BSP_LCD_BACKLIGHT_PIN -1
-#define BSP_LCD_BACKLIGHT_ACTIVE_LOW
-#define BSP_LCD_CLK_FREQ 15000000
-#define BSP_BOARD_K210_OPENMV_TEST
-#define BSP_LCD_X_MAX 272
-#define BSP_LCD_Y_MAX 480
 
 /* Kendryte SDK Config */
 
@@ -192,6 +200,17 @@
 
 /* More Drivers */
 
+#define PKG_USING_WIZNET
+#define WIZ_USING_W5500
+
+/* WIZnet device configure */
+
+#define WIZ_SPI_DEVICE "spi10"
+#define WIZ_RST_PIN 13
+#define WIZ_IRQ_PIN 14
+#define WIZ_USING_DHCP
+#define WIZ_USING_PING
+#define PKG_USING_WIZNET_LATEST_VERSION
 
 /* APP_Framework */
 
