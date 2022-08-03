@@ -1,9 +1,18 @@
 from building import *
 
 cwd     = GetCurrentDir()
-src     = Glob('*.c') + Glob('*.cpp')
+src     = [
+    'main.c'
+]
 CPPPATH = [cwd]
+
+## 设置 lcd_test.c 的依赖宏
+if GetDepend('BSP_USING_LCD'):
+    src += ['lcd_test.c']
 
 group = DefineGroup('Applications', src, depend = [''], CPPPATH = CPPPATH)
 
 Return('group')
+
+
+
