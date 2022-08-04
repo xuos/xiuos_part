@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file lib_netdb.h
+* @brief nuttx source code
+*        https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-08-04
+*/
+
 #ifndef __LIBS_LIBC_NETDB_LIB_NETDB_H
 #define __LIBS_LIBC_NETDB_LIB_NETDB_H
 

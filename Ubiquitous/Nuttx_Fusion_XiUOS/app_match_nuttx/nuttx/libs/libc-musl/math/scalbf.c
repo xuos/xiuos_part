@@ -1,3 +1,12 @@
+/**
+ * @file scalbf.c
+ * @brief musl source code
+ *        https://github.com/bminor/musl.git
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-08-04
+ */
+
 /* origin: FreeBSD /usr/src/lib/msun/src/e_scalbf.c */
 /*
  * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com.

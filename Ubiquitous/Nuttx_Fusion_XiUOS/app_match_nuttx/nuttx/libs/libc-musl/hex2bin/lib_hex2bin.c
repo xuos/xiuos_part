@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file lib_hex2bin.c
+* @brief nuttx source code
+*        https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-08-04
+*/
+
 /****************************************************************************
  * References:
  *   - http://en.wikipedia.org/wiki/Intel_HEX

@@ -105,6 +105,15 @@
  *              lgamma(-inf) = inf (bug for bug compatible with C99!?)
  */
 
+/**
+* @file lib_lgamma.c
+* @brief nuttx source code
+*        https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-08-04
+*/
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/

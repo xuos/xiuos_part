@@ -1,3 +1,12 @@
+/**
+ * @file powf_data.h
+ * @brief musl source code
+ *        https://github.com/bminor/musl.git
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-08-04
+ */
+
 /*
  * Copyright (c) 2017-2018, Arm Limited.
  * SPDX-License-Identifier: MIT

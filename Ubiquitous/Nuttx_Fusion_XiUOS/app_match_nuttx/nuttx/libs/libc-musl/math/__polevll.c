@@ -54,6 +54,15 @@
  *
  */
 
+/**
+* @file __polevll.c
+* @brief nuttx source code
+*        https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-08-04
+*/
+
 #include "libm.h"
 
 #if LDBL_MANT_DIG == 53 && LDBL_MAX_EXP == 1024

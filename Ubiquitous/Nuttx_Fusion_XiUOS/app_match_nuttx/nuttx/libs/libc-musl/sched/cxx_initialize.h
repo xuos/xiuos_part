@@ -18,4 +18,13 @@
  *
  ****************************************************************************/
 
+/**
+* @file cxx_initialize.h
+* @brief nuttx source code
+*        https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-08-04
+*/
+
 void cxx_initialize(void);

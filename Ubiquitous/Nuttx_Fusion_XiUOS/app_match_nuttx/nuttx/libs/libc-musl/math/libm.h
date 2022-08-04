@@ -1,3 +1,12 @@
+/**
+ * @file libm.h
+ * @brief musl source code
+ *        https://github.com/bminor/musl.git
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-08-04
+ */
+
 #ifndef _LIBM_H
 #define _LIBM_H
 

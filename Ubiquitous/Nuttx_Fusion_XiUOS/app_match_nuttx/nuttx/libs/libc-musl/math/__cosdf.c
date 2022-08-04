@@ -1,3 +1,12 @@
+/**
+ * @file __cosdf.c
+ * @brief musl source code
+ *        https://github.com/bminor/musl.git
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-08-04
+ */
+
 /* origin: FreeBSD /usr/src/lib/msun/src/k_cosf.c */
 /*
  * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com.

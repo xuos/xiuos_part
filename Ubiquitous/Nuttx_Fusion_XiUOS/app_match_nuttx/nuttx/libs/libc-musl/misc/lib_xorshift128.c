@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file lib_xorshift128.c
+* @brief nuttx source code
+*        https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-08-04
+*/
+
 /* This random number generator is simple, fast and portable.
  *      Ref:  https://en.wikipedia.org/wiki/Xorshift
  */

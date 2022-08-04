@@ -1,3 +1,12 @@
+/**
+ * @file iswprint.c
+ * @brief musl source code
+ *        https://github.com/bminor/musl.git
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-08-04
+ */
+
 #include <wctype.h>
 
 /* Consider all legal codepoints as printable except for:

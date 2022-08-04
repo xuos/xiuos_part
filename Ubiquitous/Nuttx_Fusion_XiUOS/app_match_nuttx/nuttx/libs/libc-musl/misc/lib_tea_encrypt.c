@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file lib_tea_encrypt.c
+* @brief nuttx source code
+*        https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-08-04
+*/
+
 /* https://en.wikipedia.org/wiki/Tiny_Encryption_Algorithm:  "Following is
  * an adaptation of the reference encryption and decryption routines in C,
  * released into the public domain by David Wheeler and Roger Needham."

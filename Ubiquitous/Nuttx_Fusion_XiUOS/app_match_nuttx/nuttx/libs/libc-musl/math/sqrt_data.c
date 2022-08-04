@@ -1,3 +1,12 @@
+/**
+ * @file sqrt_data.c
+ * @brief musl source code
+ *        https://github.com/bminor/musl.git
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-08-04
+ */
+
 #include "sqrt_data.h"
 const uint16_t __rsqrt_tab[128] = {
 0xb451,0xb2f0,0xb196,0xb044,0xaef9,0xadb6,0xac79,0xab43,

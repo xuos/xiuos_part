@@ -18,6 +18,15 @@
  *
  ****************************************************************************/
 
+/**
+* @file arch_elf64.c
+* @brief nuttx source code
+*        https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-08-04
+*/
+
 /* References:
  *    AMD64 ABI Draft 0.98
  *    http://refspecs.linuxbase.org/elf/x86_64-abi-0.98.pdf

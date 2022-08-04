@@ -1,3 +1,12 @@
+/**
+ * @file exp2f_data.c
+ * @brief musl source code
+ *        https://github.com/bminor/musl.git
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-08-04
+ */
+
 /*
  * Shared data between expf, exp2f and powf.
  *

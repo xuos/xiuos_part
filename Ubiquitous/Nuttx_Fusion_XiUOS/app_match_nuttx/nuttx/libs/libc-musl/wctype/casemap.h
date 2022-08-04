@@ -1,3 +1,12 @@
+/**
+ * @file casemap.h
+ * @brief musl source code
+ *        https://github.com/bminor/musl.git
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-08-04
+ */
+
 static const unsigned char tab[] = {
 	7, 8, 9, 10, 11, 12, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
 	13, 6, 6, 14, 6, 6, 6, 6, 6, 6, 6, 6, 15, 16, 17, 18,

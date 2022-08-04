@@ -1,3 +1,12 @@
+/**
+ * @file __expo2f.c
+ * @brief musl source code
+ *        https://github.com/bminor/musl.git
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2022-08-04
+ */
+
 #include "libm.h"
 
 /* k is such that k*ln2 has minimal relative error and x - kln2 > log(FLT_MIN) */
