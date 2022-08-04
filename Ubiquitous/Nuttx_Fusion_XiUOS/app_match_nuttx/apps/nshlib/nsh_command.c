@@ -672,8 +672,9 @@ static const struct cmdmap_s g_cmdmap[] =
   { "recvzigbee",       cmd_recvzigbee,       1, 1, "[receive message.]" },
 #endif
 
-#if (defined(CONFIG_ADAPTER_LORA_SX1278) || defined(CONFIG_ADAPTER_LORA_E220)) && !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
-  { "AdapterLoraTest",       cmd_AdapterLoraTest,       1, 1, "[Lora sx128 test.]" },
+#if (defined(CONFIG_ADAPTER_LORA_SX1278) || defined(CONFIG_ADAPTER_LORA_E220) || defined(CONFIG_ADAPTER_LORA_E22)) && \
+    !defined(CONFIG_NSH_DISABLE_ADAPTER_LORATEST)
+  { "AdapterLoraTest",       cmd_AdapterLoraTest,       1, 1, "[Lora test.]" },
 #endif
 
 #if defined(CONFIG_ADAPTER_4G_EC200T) && !defined(CONFIG_NSH_DISABLE_ADAPTER_4GTEST)
@@ -686,6 +687,14 @@ static const struct cmdmap_s g_cmdmap[] =
 
 #if defined(CONFIG_ADAPTER_LORA_E220) && !defined(CONFIG_NSH_DISABLE_E220_LORA_SEND)
   { "E220Send",       cmd_E220LoraSend,       1, 2, "[e220loraSend <message>]" },
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E22) && !defined(CONFIG_NSH_DISABLE_E22_LORA_RECEIVE)
+  { "E22Receive",       cmd_E22LoraReceive,       1, 1, "[e22 lora receive.]" },
+#endif
+
+#if defined(CONFIG_ADAPTER_LORA_E22) && !defined(CONFIG_NSH_DISABLE_E22_LORA_SEND)
+  { "E22Send",       cmd_E22LoraSend,       1, 2, "[e22loraSend <message>]" },
 #endif
 
 #if defined(CONFIG_ADAPTER_BLUETOOTH_HC08) && !defined(CONFIG_NSH_DISABLE_ADAPTER_BLUETOOTH_TEST)
