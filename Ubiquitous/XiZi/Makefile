@@ -41,30 +41,35 @@ export CPPPATHS
 export SRC_APP_DIR := ../../APP_Framework
 export SRC_KERNEL_DIR := arch board lib fs kernel resources tool
 export SRC_DIR:= $(SRC_APP_DIR) $(SRC_KERNEL_DIR)
+export LIBCC 
+export MUSL_DIR := $(KERNEL_ROOT)/lib/musllib
+export LWIP_DIR := $(KERNEL_ROOT)/resources/ethernet
 
 PART:=
 
 all:
-
 ifeq ($(CONFIG_COMPILER_APP)_$(CONFIG_COMPILER_KERNEL),y_)
-include path_app.mk
 PART += COMPILE_APP
 
 else ifeq ($(CONFIG_COMPILER_APP)_$(CONFIG_COMPILER_KERNEL),_y)
-include path_kernel.mk
 PART += COMPILE_KERNEL
 
 else ifeq ($(CONFIG_COMPILER_APP)_$(CONFIG_COMPILER_KERNEL),y_y)
-include path_app.mk
-include path_kernel.mk
 PART := COMPILE_APP COMPILE_KERNEL
 
 else
-include path_kernel.mk
-CPPPATHS := $(KERNELPATHS)
-PART := COMPILE_ALL
+PART := 
+
+ifeq ($(CONFIG_LIB_MUSLLIB), y)
+PART += COMPILE_MUSL
 endif
 
+ifeq ($(CONFIG_RESOURCES_LWIP), y)
+PART += COMPILE_LWIP
+endif
+
+PART += COMPILE_ALL
+endif
 
 
 all: $(PART)
@@ -78,7 +83,40 @@ COMPILE_ALL:
 	@$(MAKE) -C build TARGET=XiZi-$(BOARD).elf LINK_FLAGS=LFLAGS
 	@rm build/Makefile build/make.obj
 
+COMPILE_MUSL:
+	@for dir in $(MUSL_DIR);do    \
+               $(MAKE) -C $$dir COMPILE_TYPE=$@ CONFIG_RESOURCES_LWIP=n;          \
+       done
+	@cp link_libc.mk build/Makefile
+	@$(MAKE) -C build TARGET=libmusl.a LINK_FLAGS=LFLAGS
+	@cp build/libmusl.a $(KERNEL_ROOT)/lib/musllib/libmusl.a
+	@rm build/Makefile build/make.obj
 
+COMPILE_LWIP: 
+	@for dir in $(LWIP_DIR);do    \
+               $(MAKE) -C $$dir COMPILE_TYPE=$@;          \
+       done
+	@cp link_lwip.mk build/Makefile
+	@$(MAKE) -C build TARGET=liblwip.a LINK_FLAGS=LFLAGS
+	@cp build/liblwip.a $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
+	@rm build/Makefile build/make.obj
+
+COMPILE_KERNEL:
+	@for dir in $(SRC_KERNEL_DIR);do    \
+               $(MAKE) -C $$dir;          \
+       done
+	@cp link.mk build/Makefile
+	@$(MAKE) -C build COMPILE_TYPE="_kernel" TARGET=XiZi-$(BOARD)_kernel.elf LINK_FLAGS=LFLAGS
+	@rm build/Makefile build/make.obj
+
+COMPILE_APP:
+	@echo $(SRC_APP_DIR)
+	@for dir in $(SRC_APP_DIR);do    \
+               $(MAKE) -C $$dir USE_APP_INCLUDEPATH=y;          \
+       done
+	@cp link.mk build/Makefile
+	@$(MAKE) -C build COMPILE_TYPE="_app" TARGET=XiZi-$(BOARD)_app.elf LINK_FLAGS=APPLFLAGS
+	@rm build/Makefile build/make.obj
 
 show_info:
 	@echo "CONFIG_COMPILER_APP is :" $(CONFIG_COMPILER_APP)
@@ -137,4 +175,6 @@ distclean:
 	@echo Clean all configuration
 	@make clean
 	@rm -f .config*
+	@rm -f $(KERNEL_ROOT)/lib/musllib/libmusl.a
+	@rm -f $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
 	@rm -f $(KERNEL_ROOT)/board/*/.config
