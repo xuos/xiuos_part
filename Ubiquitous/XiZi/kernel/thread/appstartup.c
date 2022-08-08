@@ -64,8 +64,8 @@ void CreateMainTask(void)
     if(main < 0) {		
 		KPrintf("main create failed ...%s %d.\n",__FUNCTION__,__LINE__);
 		return;
-	}
-
+    }
+    
     StartupKTask(main);
 }
 

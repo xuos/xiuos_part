@@ -10,7 +10,7 @@
 * See the Mulan PSL v2 for more details.
 */
 
-#include "register_para.h"
+#include "cpuport.h"
 #include <board.h>
 #include <xs_base.h>
 #include <xs_ktask.h>
@@ -20,6 +20,10 @@
 #include <stdint.h>
 #include <xs_isolation.h>
 #endif
+
+volatile x_ubase interrupt_from_sp = 0;
+volatile x_ubase interrupt_to_sp = 0;
+volatile x_ubase interrupt_new_task = 0;
 
 struct StackRegisterContext
 {
@@ -99,9 +103,7 @@ uint8 KTaskStackSetup(struct TaskDescriptor *task)
     int  i;
 
     task->stack_point  = (uint8 *)ALIGN_MEN_DOWN((x_ubase)(task->task_base_info.stack_start + task->task_base_info.stack_depth), RegLength);
-
     task->stack_point -= sizeof(struct StackRegisterContext);
-    
     stack_contex = (struct StackRegisterContext *)task->stack_point;
 
     for (i = 0; i < sizeof(struct StackRegisterContext) / sizeof(x_ubase); i++)
