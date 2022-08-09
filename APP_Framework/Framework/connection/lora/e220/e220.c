@@ -21,7 +21,6 @@
 #include <adapter.h>
 
 #define E220_GATEWAY_ADDRESS 0xFFFF
-
 #ifdef ADD_RTTHREAD_FETURES
 #define E220_CHANNEL 0x02
 #else
@@ -281,7 +280,7 @@ static int E220SetRegisterParam(struct Adapter *adapter, uint16 address, uint8 c
 
 
     PrivRead(adapter->fd, buffer, 11);
-		E220LoraModeConfig(DATA_TRANSFER_MODE);
+	E220LoraModeConfig(DATA_TRANSFER_MODE);
 
     
     PrivTaskDelay(1000);
@@ -392,9 +391,7 @@ static int E220Open(struct Adapter *adapter)
 
     PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
     
-		
-
-    cfg.serial_baud_rate = E220_UART_BAUD_RATE;
+	cfg.serial_baud_rate = E220_UART_BAUD_RATE;
     ioctl_cfg.args = &cfg;
 
     PrivIoctl(adapter->fd, OPE_INT, &ioctl_cfg);
