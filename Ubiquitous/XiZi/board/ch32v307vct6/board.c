@@ -31,7 +31,7 @@
 #include <xizi.h>
 #include <stdint.h>
 #include <device.h>
-
+#include "connect_uart.h"
 #include "xsconfig.h"
 #include "ch32v30x.h"
 #include "core_riscv.h"
@@ -59,17 +59,16 @@ static uint32_t _SysTick_Config(uint32_t ticks)
  */
 void InitBoardHardware()
 {
+    USART_Printf_Init(115200);
     /* System Tick Configuration */
     _SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
     /* initialize memory system */
     InitBoardMemory(MEMORY_START_ADDRESS, (void*)MEMORY_END_ADDRESS);
-
     InitHwUart();
     InstallConsole("uart1", "uart1_drv", "uart1_dev1");
-    
+
     KPrintf("consle init completed.\n");
     KPrintf("board initialization......\n");
-
     // KPrintf("memory address range: [0x%08x - 0x%08x], size: %d\n", (x_ubase) MEMORY_START_ADDRESS, (x_ubase) MEMORY_END_ADDRESS, gd32vf103_SRAM_SIZE);
     /* initialize memory system */
 	

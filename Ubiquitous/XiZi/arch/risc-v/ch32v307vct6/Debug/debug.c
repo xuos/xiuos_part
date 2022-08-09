@@ -8,6 +8,14 @@
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
+/*************************************************
+File name: debug.c
+Description: support some basic functions for ch32v30x 
+History: 
+1. Date: 2022-08-09
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
 #include "debug.h"
 
 static uint8_t  p_us = 0;

@@ -12,7 +12,7 @@
 
 /**
 * @file connect_usart.c
-* @brief supportrvstar-board uart function and register to bus framework
+* @brief support ch32v307 vct6 uart function and register to bus framework
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-08-01
@@ -20,6 +20,7 @@
 
 #include <xizi.h>
 #include "ch32v30x.h"
+#include "xsconfig.h"
 #include "connect_uart.h"
 #include "ch32v30x_usart.h"
 
@@ -92,70 +93,66 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
 	dev_param->serial_timeout = serial_cfg->data_cfg.serial_timeout;
 
     // init usart type def
-    // USART_DeInit((USART_TypeDef *)serial_cfg->hw_cfg.serial_register_base);
-    USART_InitTypeDef usart_init_struct;
-    usart_init_struct.USART_BaudRate = serial_cfg->data_cfg.serial_baud_rate;
+    GPIO_InitTypeDef  GPIO_InitStructure;
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_GPIOA, ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    USART_InitTypeDef USART_InitStructure;
+    USART_InitStructure.USART_BaudRate = serial_cfg->data_cfg.serial_baud_rate;
 
     switch (serial_cfg->data_cfg.serial_data_bits)
     {
     case DATA_BITS_8:
-        usart_init_struct.USART_WordLength = USART_WordLength_8b;
+        USART_InitStructure.USART_WordLength = USART_WordLength_8b;
         break;
 
     case DATA_BITS_9:
-        usart_init_struct.USART_WordLength = USART_WordLength_9b;
+        USART_InitStructure.USART_WordLength = USART_WordLength_9b;
         break;
     default:
-        usart_init_struct.USART_WordLength = USART_WordLength_8b;
+        USART_InitStructure.USART_WordLength = USART_WordLength_8b;
         break;
     }
     
     switch (serial_cfg->data_cfg.serial_stop_bits)
     {
     case STOP_BITS_1:
-        usart_init_struct.USART_StopBits = USART_StopBits_1;
+        USART_InitStructure.USART_StopBits = USART_StopBits_1;
         break;
     case STOP_BITS_2:
-        usart_init_struct.USART_StopBits = USART_StopBits_2;
+        USART_InitStructure.USART_StopBits = USART_StopBits_2;
         break;
     default:
-        usart_init_struct.USART_StopBits = USART_StopBits_1;
+        USART_InitStructure.USART_StopBits = USART_StopBits_1;
         break;
     }
     
     switch (serial_cfg->data_cfg.serial_parity_mode)
     {
     case PARITY_NONE:
-        usart_init_struct.USART_Parity = USART_Parity_No;
+        USART_InitStructure.USART_Parity = USART_Parity_No;
         break;
     case PARITY_ODD:
-        usart_init_struct.USART_Parity = USART_Parity_Odd;
+        USART_InitStructure.USART_Parity = USART_Parity_Odd;
         break;
     case PARITY_EVEN:
-        usart_init_struct.USART_Parity = USART_Parity_Even;
+        USART_InitStructure.USART_Parity = USART_Parity_Even;
         break;
     default:
-        usart_init_struct.USART_Parity = USART_Parity_No;
+        USART_InitStructure.USART_Parity = USART_Parity_No;
         break;
     }
 
-    usart_init_struct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 
-    if (serial_cfg->hw_cfg.serial_register_base == USART1) {
-        // GPIO_InitTypeDef gpio_init_struct;
-        // RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_GPIOA, ENABLE);
-        // gpio_init_struct.GPIO_Pin = GPIO_Pin_9;
-        // gpio_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
-        // gpio_init_struct.GPIO_Mode = GPIO_Mode_AF_PP;
-        // GPIO_Init(GPIOA, &gpio_init_struct);
-        // gpio_init_struct.GPIO_Pin = GPIO_Pin_10;
-        // gpio_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
-        // gpio_init_struct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-        // GPIO_Init(GPIOA, &gpio_init_struct);
-        // USART_Init((USART_TypeDef*)serial_cfg->hw_cfg.serial_register_base, &usart_init_struct);
-        // USART_Cmd(serial_cfg->hw_cfg.serial_register_base, ENABLE);
-    }
-    
+    USART_Init(USART1, &USART_InitStructure);
+    USART_Cmd(USART1, ENABLE);
     // usart_hardware_flow_rts_config(serial_cfg->hw_cfg.serial_register_base, USART_RTS_DISABLE);
     // usart_hardware_flow_cts_config(serial_cfg->hw_cfg.serial_register_base, USART_CTS_DISABLE);
 
@@ -330,7 +327,6 @@ int InitHwUart(void)
 {
     x_err_t ret = EOK;
 
-#ifdef BSP_USING_UART1
     static struct SerialBus serial_bus;
     memset(&serial_bus, 0, sizeof(struct SerialBus));
     
@@ -350,10 +346,12 @@ int InitHwUart(void)
 
     serial_cfg.data_cfg = data_cfg_init;
 
-    serial_cfg.hw_cfg.serial_register_base = USART1;
+#ifdef BSP_USING_UART1
+    serial_cfg.hw_cfg.serial_register_base = (uint32)USART1;
     serial_cfg.hw_cfg.serial_irq_interrupt = USART1_IRQn;
-
-    serial_driver_1.private_data = (void *)&serial_cfg;
+#endif
+    
+    serial_driver_1.private_data = (void*)&serial_cfg;
 
     serial_dev_param.serial_work_mode = SIGN_OPER_INT_RX;
     serial_device_1.haldev.private_data = (void *)&serial_dev_param;
@@ -389,8 +387,7 @@ int InitHwUart(void)
     usart_init_struct.USART_StopBits             = USART_StopBits_1;
     usart_init_struct.USART_Parity               = USART_Parity_No;
     USART_Init((USART_TypeDef *)serial_cfg.hw_cfg.serial_register_base, &usart_init_struct);
-    USART_Cmd((USART_TypeDef *)serial_cfg.hw_cfg.serial_register_base, ENABLE);
-#endif
-
+    USART_Cmd((USART_TypeDef*)serial_cfg.hw_cfg.serial_register_base, ENABLE);
+    
     return ret;
 }

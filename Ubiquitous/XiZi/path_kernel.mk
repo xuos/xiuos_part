@@ -160,9 +160,9 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/risc-v/ch32v307vct6/Core \
 	-I$(KERNEL_ROOT)/arch/risc-v/ch32v307vct6/Debug \
 	-I$(KERNEL_ROOT)/arch/risc-v/ch32v307vct6/User \
-	-I$(KERNEL_ROOT)/arch/risc-v/ch32v307vct6/Peripheral/inc \
 	-I$(KERNEL_ROOT)/arch/risc-v/ch32v307vct6 \
 	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/Peripheral/inc \
 	-I$(BSP_ROOT)/include \
 	-I$(KERNEL_ROOT)/include #
 endif

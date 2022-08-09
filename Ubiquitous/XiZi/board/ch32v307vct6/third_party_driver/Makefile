@@ -1,5 +1,5 @@
 SRC_FILES := 
-SRC_DIR := 
+SRC_DIR := Peripheral
 
 ifeq ($(CONFIG_BSP_USING_UART),y)
   SRC_DIR += uart

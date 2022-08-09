@@ -17,6 +17,8 @@
 #include "ch32v30x_it.h"
 #include "core_riscv.h"
 
+extern void KTaskOsAssignAfterIrq(void *);
+
 void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void SysTick_Handler(void)
 {

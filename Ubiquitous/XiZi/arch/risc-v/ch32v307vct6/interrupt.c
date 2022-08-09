@@ -135,8 +135,8 @@ void PrintStackFrame(uintptr_t * sp)
 }
 
 void HwInterruptcontextSwitch(x_ubase from_sp, x_ubase to_sp, struct TaskDescriptor* new_task, void* context) {
-    interrupt_from_sp = from_sp;
-    interrupt_to_sp = to_sp;
-    interrupt_new_task = new_task;
+    interrupt_from_sp = (x_ubase)from_sp;
+    interrupt_to_sp = (x_ubase)to_sp;
+    interrupt_new_task = (x_ubase)new_task;
     sw_setpend();
 }

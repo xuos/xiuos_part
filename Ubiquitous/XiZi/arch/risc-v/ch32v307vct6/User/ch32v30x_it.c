@@ -7,6 +7,15 @@
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
+/*************************************************
+File name: ch32v30x_it.c
+Description: include peripheral supports for ch32v30x 
+History: 
+1. Date: 2022-08-09
+Author: AIIT XUOS Lab
+Modification:
+1. add HardFault interrupt implementation.
+*************************************************/
 #include "ch32v30x_it.h"
 #include "board.h"
 #include <xs_isr.h>
@@ -15,7 +24,6 @@
 
 void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void UART4_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
 /*********************************************************************
  * @fn      NMI_Handler

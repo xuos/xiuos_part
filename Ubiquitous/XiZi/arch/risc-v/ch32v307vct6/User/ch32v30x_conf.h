@@ -7,6 +7,14 @@
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/ 
+/*************************************************
+File name: ch32v30x_conf.h
+Description: include peripheral supports for ch32v30x 
+History: 
+1. Date: 2022-08-09
+Author: AIIT XUOS Lab
+Modification:  
+*************************************************/
 #ifndef __CH32V30x_CONF_H
 #define __CH32V30x_CONF_H
 

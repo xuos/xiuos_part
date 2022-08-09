@@ -12,7 +12,7 @@
 
 /**
 * @file board.h
-* @brief define rvstar-board init configure and start-up function
+* @brief define ch32v307 init configure and start-up function
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2021-09-02
@@ -20,14 +20,13 @@
 
 /*************************************************
 File name: board.h
-Description: define ch32v307-board init configure and start-up function
+Description: define ch32v307 vct6 init configure and start-up function
 Others: 
 History: 
 1. Date: 2022-08-08
 Author: AIIT XUOS Lab
 Modification: 
-1. define rvstar-board InitBoardHardware
-2. define rvstar-board data and bss struct
+1. define ch32v307 vct6 InitBoardHardware
 *************************************************/
 #ifndef __BOARD_H__
 #define __BOARD_H__
