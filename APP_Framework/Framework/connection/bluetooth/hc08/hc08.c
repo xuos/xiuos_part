@@ -393,12 +393,8 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
      }
     #endif
     //Step4 : set LUUID、SUUID、TUUID, slave and master need to have same uuid param
-    #ifdef ADD_RTTHREAD_FETURES
-		luuid = 1233;
-		#else
-		luuid = 1234;
-		#endif
-    if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_SET_LUUID, &luuid, NULL) < 0) {
+    luuid = 1234;
+	if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_SET_LUUID, &luuid, NULL) < 0) {
         return -1;
     }
 
@@ -406,7 +402,7 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
         return -1;
     }
     #ifdef ADD_RTTHREAD_FETURES
-		uint32_t suuid=1233;
+		uint32_t suuid=1234;
 		if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_SET_SUUID, &luuid, NULL) < 0) {
         return -1;
     }
@@ -414,7 +410,7 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
     if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_GET_SUUID, NULL, NULL) < 0) {
         return -1;
     }
-	  uint32_t tuuid=1233;
+	  uint32_t tuuid=1234;
 		if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_SET_TUUID, &tuuid, NULL) < 0) {
         return -1;
     }
