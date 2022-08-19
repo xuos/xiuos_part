@@ -78,7 +78,9 @@ static struct io_config
     IOCONFIG(BSP_I2C_SDA, FUNC_GPIO3),
     IOCONFIG(BSP_I2C_SCL, FUNC_GPIO4),
 #endif
-
+#ifdef BSP_USING_TOUCH
+    IOCONFIG(BSP_TOUCH_TP_INT, HS_GPIO(FPIOA_TOUCH_TP_INT))
+#endif
 };
 
 static int PrintIoConfig()
