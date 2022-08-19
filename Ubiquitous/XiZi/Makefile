@@ -5,8 +5,10 @@ MAKEFLAGS += --no-print-directory
 .PHONY:COMPILE_APP COMPILE_KERNEL
 
 
-support :=kd233 stm32f407-st-discovery maix-go stm32f407zgt6 aiit-riscv64-board aiit-arm32-board hifive1-rev-B hifive1-emulator k210-emulator cortex-m3-emulator cortex-m4-emulator ok1052-c gapuino stm32f103-nano gd32vf103-rvstar cortex-m0-emulator rv32m1-vega nuvoton-m2354
-support += xidatong-arm32 xidatong-riscv64
+riscv_support := kd233 maix-go hifive1-rev-B gapuino gd32vf103-rvstar rv32m1-vega aiit-riscv64-board xidatong-riscv64
+arm_support += stm32f407-st-discovery stm32f407zgt6 stm32f103-nano nuvoton-m2354 ok1052-c imxrt1176-sbc aiit-arm32-board xidatong-arm32 
+emulator_support += hifive1-emulator k210-emulator cortex-m0-emulator cortex-m3-emulator cortex-m4-emulator
+support := $(riscv_support) $(arm_support) $(emulator_support) 
 SRC_DIR :=
 
 export BOARD ?=kd233
@@ -16,7 +18,10 @@ export KCONFIG_CONFIG ?= .config
 ifeq ($(filter $(BOARD),$(support)),)
 $(warning "You should choose board like this:make BOARD=kd233")
 $(warning "This is what we support:")
-$(warning "$(support)")
+$(warning "RISCV EVB:    $(riscv_support)")
+$(warning "ARM EVB:      $(arm_support)")
+$(warning "EMULATORS:    $(emulator_support)")
+# $(warning "$(support)")
 $(error "break" )
 endif
 
