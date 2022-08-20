@@ -21,4 +21,8 @@ if CRYPTO
         default n
 endif
 
+menuconfig MBEDTLS
+    bool "using mbedtls"
+    default n
+
 endmenu
