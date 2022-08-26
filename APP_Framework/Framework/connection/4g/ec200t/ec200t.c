@@ -167,6 +167,7 @@ static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
     serial_cfg.serial_bit_order = STOP_BITS_1;
     serial_cfg.serial_invert_mode = NRZ_NORMAL;
 #ifdef ADAPTER_EC200T_DRIVER_EXT_PORT
+    serial_cfg.is_ext_uart = 1;
     serial_cfg.ext_uart_no = ADAPTER_EC200T_DRIVER_EXT_PORT;
     serial_cfg.port_configure = PORT_CFG_INIT;
 #endif
