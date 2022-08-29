@@ -21,11 +21,11 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <stdio.h>
-#define LED_G   12
+//#define LED_G   12
 
 int main(void)
 {
-    rt_pin_mode(LED_G, PIN_MODE_OUTPUT);
+    //rt_pin_mode(LED_G, PIN_MODE_OUTPUT);
     rt_thread_mdelay(100);
     char info1[25] ={0};
     char info2[25] ={0};
@@ -39,10 +39,10 @@ int main(void)
     #endif
     while(1)
     {
-        rt_pin_write(LED_G, PIN_HIGH);
+        //rt_pin_write(LED_G, PIN_HIGH);
         rt_thread_mdelay(500);
-        rt_pin_write(LED_G, PIN_LOW);
-        rt_thread_mdelay(500);
+        //rt_pin_write(LED_G, PIN_LOW);
+        //rt_thread_mdelay(500);
     }
     return 0;
 }
