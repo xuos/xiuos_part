@@ -21,32 +21,32 @@
 #include <adapter.h>
 #include <at_agent.h>
 
-#define HC08_DETECT_CMD        "AT"
-#define HC08_DEFAULT_CMD        "AT+DEFAULT"
-#define HC08_RESET_CMD        "AT+RESET"
-#define HC08_CLEAR_CMD        "AT+CLEAR"
+#define HC08_DETECT_CMD             "AT"
+#define HC08_DEFAULT_CMD            "AT+DEFAULT"
+#define HC08_RESET_CMD              "AT+RESET"
+#define HC08_CLEAR_CMD              "AT+CLEAR"
 #define HC08_GET_DEVICE_INFO        "AT+RX"
 
-#define HC08_GET_BAUDRATE_CMD        "AT+BAUD=?"
-#define HC08_SET_BAUDRATE_CMD        "AT+BAUD=%u"
+#define HC08_GET_BAUDRATE_CMD       "AT+BAUD=?"
+#define HC08_SET_BAUDRATE_CMD       "AT+BAUD=%u"
 #define HC08_GET_CONNECTABLE        "AT+CONT=?"
 #define HC08_SET_CONNECTABLE        "AT+CONT=%s"
-#define HC08_GET_ROLE_CMD        "AT+ROLE=?"
-#define HC08_SET_ROLE_CMD        "AT+ROLE=%s"
-#define HC08_GET_ADDR_CMD        "AT+ADDR=?"
-#define HC08_SET_ADDR_CMD        "AT+ADDR=%s"
-#define HC08_GET_NAME_CMD       "AT+NAME=%s"
-#define HC08_SET_NAME_CMD       "AT+NAME=?"
-#define HC08_GET_LUUID_CMD      "AT+LUUID=?"
-#define HC08_SET_LUUID_CMD      "AT+LUUID=%u"
-#define HC08_GET_SUUID_CMD      "AT+SUUID=?"
-#define HC08_SET_SUUID_CMD      "AT+SUUID=%u"
-#define HC08_GET_TUUID_CMD      "AT+TUUID=?"
-#define HC08_SET_TUUID_CMD      "AT+TUUID=%u"
+#define HC08_GET_ROLE_CMD           "AT+ROLE=?"
+#define HC08_SET_ROLE_CMD           "AT+ROLE=%s"
+#define HC08_GET_ADDR_CMD           "AT+ADDR=?"
+#define HC08_SET_ADDR_CMD           "AT+ADDR=%s"
+#define HC08_GET_NAME_CMD           "AT+NAME=%s"
+#define HC08_SET_NAME_CMD           "AT+NAME=?"
+#define HC08_GET_LUUID_CMD          "AT+LUUID=?"
+#define HC08_SET_LUUID_CMD          "AT+LUUID=%u"
+#define HC08_GET_SUUID_CMD          "AT+SUUID=?"
+#define HC08_SET_SUUID_CMD          "AT+SUUID=%u"
+#define HC08_GET_TUUID_CMD          "AT+TUUID=?"
+#define HC08_SET_TUUID_CMD          "AT+TUUID=%u"
 
-#define HC08_OK_RESP        "OK"
+#define HC08_OK_RESP                "OK"
 
-#define HC08_CMD_STR_DEFAULT_SIZE        64
+#define HC08_CMD_STR_DEFAULT_SIZE     64
 #define HC08_RESP_DEFAULT_SIZE        64
 
 enum Hc08AtCmd
@@ -239,6 +239,7 @@ static int Hc08Open(struct Adapter *adapter)
     serial_cfg.serial_bit_order = STOP_BITS_1;
     serial_cfg.serial_invert_mode = NRZ_NORMAL;
 #ifdef ADAPTER_HC08_DRIVER_EXT_PORT
+    serial_cfg.is_ext_uart = 1;
     serial_cfg.ext_uart_no = ADAPTER_HC08_DRIVER_EXT_PORT;
     serial_cfg.port_configure = PORT_CFG_INIT;
 #endif
@@ -330,6 +331,7 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
     serial_cfg.serial_bit_order = STOP_BITS_1;
     serial_cfg.serial_invert_mode = NRZ_NORMAL;
 #ifdef ADAPTER_HC08_DRIVER_EXT_PORT
+    serial_cfg.is_ext_uart = 1;
     serial_cfg.ext_uart_no = ADAPTER_HC08_DRIVER_EXT_PORT;
     serial_cfg.port_configure = PORT_CFG_INIT;
 #endif
