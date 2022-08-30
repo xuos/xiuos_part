@@ -44,20 +44,6 @@ menu "kd233 feature"
                 default 0x80100000
         endmenu
 
-        menu "config hardware resources for connection"
-            if CONNECTION_INDUSTRIAL_ETHERNET
-                config ETHERNET_UART_NAME
-                    string "ethernet uart name"
-                    default "/dev/uart3_dev3"
-            endif
-            if CONNECTION_COMMUNICATION_WIFI
-                config WIFI_UART_NAME
-                    string "wifi uart name"
-                    default "/dev/uart3_dev3"
-            endif
-
-        endmenu
-
         menu "config board peripheral"
             config MOUNT_SDCARD
                 bool "mount cd card"
