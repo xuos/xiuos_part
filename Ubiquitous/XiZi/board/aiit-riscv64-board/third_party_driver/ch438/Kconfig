@@ -92,45 +92,5 @@ if BSP_USING_CH438
         int "485 direction pin number for ch438"
         default 18
         
-
-    menuconfig BSP_USING_4G_OR_NB
-        bool "Select using the ec200t(4G) or bc28(NB-IOT)"
-        default y
-        if BSP_USING_4G_OR_NB
-            choice
-                prompt "Select using the ec200t(4G) or bc28(NB-IOT)"
-                default BSP_USING_4G
-                config BSP_USING_4G
-                    bool "Using ec200t(4G)"
-                config BSP_USING_NBIOT
-                    bool "Using bc26(NB-IOT)"
-            endchoice
-
-
-            if BSP_USING_4G
-                config BSP_4G_STATUS
-                    int "STATUS pin number for ec200t"
-                    default 21
-                config BSP_4G_POWERKEY
-                    int "POWERKEY pin number for ec200t"
-                    default 37
-            endif
-
-            if BSP_USING_NBIOT
-                config BSP_NB_RESET
-                    int "RESET pin number for bc28"
-                    default 21
-            endif
-        endif
-
-    menuconfig BSP_USING_WIFI_HFA21
-        bool "Using the hfa21(WIFI)"
-        default y
-        if BSP_USING_WIFI_HFA21
-            config BSP_WIFI_RST
-                int "RESET pin number for hfa21"
-                default 22
-        endif
-
 endif
 
