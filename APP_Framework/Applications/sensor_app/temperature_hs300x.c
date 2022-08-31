@@ -35,7 +35,7 @@ void TempHs300x(void)
     struct SensorQuantity *temp = SensorQuantityFind(SENSOR_QUANTITY_HS300X_TEMPERATURE, SENSOR_QUANTITY_TEMP);
     SensorQuantityOpen(temp);
     for (i = 0; i < 100; i ++) {
-        temperature = SensorQuantityRead(temp);
+        temperature = SensorQuantityReadValue(temp);
         if (temperature > 0)
             printf("Temperature : %d.%d ℃\n", temperature/10, temperature%10);
         else

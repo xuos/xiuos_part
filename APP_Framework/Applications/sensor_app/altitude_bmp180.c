@@ -30,7 +30,7 @@ void AltitudeBmp180(void)
     int32 altitude;
     struct SensorQuantity *p_altitude = SensorQuantityFind(SENSOR_QUANTITY_BMP180_ALTITUDE, SENSOR_QUANTITY_ALTITUDE);
     SensorQuantityOpen(p_altitude);
-    altitude = SensorQuantityRead(p_altitude);
+    altitude = SensorQuantityReadValue(p_altitude);
 
     printf("Altitude Pressure : %d Pa\n", altitude);
 

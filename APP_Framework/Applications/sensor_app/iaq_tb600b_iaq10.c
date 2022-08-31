@@ -40,7 +40,7 @@ void IaqTb600bIaq10(void)
     SensorQuantityOpen(iaq);
     int32_t result = 0;
 
-    result = SensorQuantityRead(iaq);
+    result = SensorQuantityReadValue(iaq);
 
     printf("Gas concentration is : %dppb\n", result);
     SensorQuantityClose(iaq);

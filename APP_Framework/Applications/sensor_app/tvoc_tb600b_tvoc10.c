@@ -34,7 +34,7 @@ void TvocTb600bTvoc10(void)
     SensorQuantityOpen(tvoc);
     int32_t result = 0;
 
-    result = SensorQuantityRead(tvoc);
+    result = SensorQuantityReadValue(tvoc);
 
     printf("tvoc concentration is : %dppb\n", result);
     SensorQuantityClose(tvoc);

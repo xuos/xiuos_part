@@ -33,6 +33,6 @@ void Pm100Ps5308(void)
     struct SensorQuantity *pm10_0 = SensorQuantityFind(SENSOR_QUANTITY_PS5308_PM10, SENSOR_QUANTITY_PM);
     SensorQuantityOpen(pm10_0);
     PrivTaskDelay(2000);
-    printf("PM10 : %d ug/m³\n", SensorQuantityRead(pm10_0));
+    printf("PM10 : %d ug/m³\n", SensorQuantityReadValue(pm10_0));
     SensorQuantityClose(pm10_0);
 }

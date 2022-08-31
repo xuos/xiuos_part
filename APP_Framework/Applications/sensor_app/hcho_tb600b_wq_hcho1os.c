@@ -34,7 +34,7 @@ void HchoTb600bHcho1os(void)
     SensorQuantityOpen(hcho);
     int32_t result = 0;
 
-    result = SensorQuantityRead(hcho);
+    result = SensorQuantityReadValue(hcho);
 
     printf("tvoc concentration is : %dppb\n", result);
     SensorQuantityClose(hcho);
