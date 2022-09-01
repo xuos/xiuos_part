@@ -55,13 +55,9 @@ extern x_base cpu2_boot_flag;
 extern void entry(void);
 extern void SecondaryCpuCStart(void);
 extern int IoConfigInit(void);
-extern int HwSpiInit(void);
 extern int HwI2cInit(void);
-extern int HwRtcInit(void);
-extern int HwWdtInit(void);
 extern int HwLcdInit(void);
 extern int HwTouchInit(void);
-extern int HwTimerInit(void);
 
 #if defined(FS_VFS) && defined (MOUNT_SDCARD)
 #include <iot-vfs.h>
@@ -162,23 +158,11 @@ struct InitSequenceDesc _board_init[] =
     { "hw_pin", HwGpioInit },
 	{ "io_config", IoConfigInit },
 #endif
-#ifdef BSP_USING_SPI
-	{ "hw_spi", HwSpiInit },
-#endif
 #ifdef BSP_USING_I2C
     { "hw_i2c", HwI2cInit },
 #endif
 #ifdef BSP_USING_LCD
 	{ "hw_lcd", HwLcdInit },
-#endif
-#ifdef BSP_USING_HWTIMER
-    { "hw_timer" , HwTimerInit },
-#endif
-#ifdef BSP_USING_WDT
-    { "hw_wdt", HwWdtInit },
-#endif
-#ifdef BSP_USING_RTC
-    {"hw_rtc", HwRtcInit },
 #endif
 #ifdef BSP_USING_TOUCH
     {"touch", HwTouchInit },

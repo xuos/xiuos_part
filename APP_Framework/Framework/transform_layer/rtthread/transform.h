@@ -32,6 +32,8 @@
 #include <pthread.h>
 #include <pthread_internal.h>
 #include <semaphore.h>
+#include <sys/signal.h>
+#include <mqueue.h>
 #include <sched.h>
 #include <unistd.h>
 #include <dfs_poll.h>
@@ -56,12 +58,15 @@
 #include <dmac.h>
 #include <dmalock.h>
 #endif
-
+#include <netdev_ipaddr.h>
+#include <netdev.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifndef _STDBOOL_H
 typedef signed   char                   bool;  
+#endif
 typedef signed   char                   int8;      
 typedef signed   short                  int16;    
 typedef signed   int                    int32;     
@@ -87,10 +92,10 @@ typedef unsigned long long              uint64;
 #define GPIO_HIGH   0x01
 
 #define GPIO_CFG_OUTPUT                          0x00
-#define GPIO_CFG_INPUT                               0x01
-#define GPIO_CFG_INPUT_PULLUP            0x02
-#define GPIO_CFG_INPUT_PULLDOWN     0x03
-#define GPIO_CFG_OUTPUT_OD                  0x04
+#define GPIO_CFG_INPUT                           0x01
+#define GPIO_CFG_INPUT_PULLUP                    0x02
+#define GPIO_CFG_INPUT_PULLDOWN                  0x03
+#define GPIO_CFG_OUTPUT_OD                       0x04
 
 #define GPIO_CONFIG_MODE                 0xffffffff
 #ifndef SERIAL_RB_BUFSZ
@@ -140,6 +145,7 @@ struct SerialDataCfg
     uint8_t serial_invert_mode;
     uint16_t serial_buffer_size;
 
+    uint8_t is_ext_uart;
     uint8_t ext_uart_no;
     enum ExtSerialPortConfigure port_configure;
 };
@@ -185,6 +191,14 @@ int PrivTaskDelete(pthread_t thread, int sig);
 void PrivTaskQuit(void *value_ptr);
 int PrivTaskDelay(int32_t ms);
 uint32_t PrivGetTickTime();
+
+/****************message queue***********************/
+mqd_t PrivMqueueOpen(const char *name, int oflag);
+mqd_t PrivMqueueCreate(const char *name, int oflag, mode_t mode,struct mq_attr *attr);
+int  PrivMqueueSend(mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio);
+int PrivMqueueUnlink(const char *name);
+int PrivMqueueClose(mqd_t mqdes);
+ssize_t  PrivMqueueReceive(mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio);
 
 /*********************driver*************************/
 
