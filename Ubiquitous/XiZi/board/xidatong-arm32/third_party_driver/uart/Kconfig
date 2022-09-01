@@ -28,6 +28,36 @@ config BSP_USING_LPUART2
                 default "uart2_dev2"   
     endif
 
+config BSP_USING_LPUART3
+    bool "Enable LPUART3"
+    default y
+    if BSP_USING_LPUART3
+        config SERIAL_BUS_NAME_3
+            string "serial bus 3 name"
+            default "uart3"
+        config SERIAL_DRV_NAME_3
+            string "serial bus 3 driver name"
+            default "uart3_drv"
+        config SERIAL_3_DEVICE_NAME_0
+                string "serial bus 3 device name"
+                default "uart3_dev3"   
+    endif
+
+config BSP_USING_LPUART4
+    bool "Enable LPUART4"
+    default n
+    if BSP_USING_LPUART4
+        config SERIAL_BUS_NAME_4
+            string "serial bus 4 name"
+            default "uart4"
+        config SERIAL_DRV_NAME_4
+            string "serial bus 4 driver name"
+            default "uart4_drv"
+        config SERIAL_4_DEVICE_NAME_0
+                string "serial bus 4 device name"
+                default "uart4_dev4"   
+    endif
+
 config BSP_USING_LPUART8
     bool "Enable LPUART8"
     default n

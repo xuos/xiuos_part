@@ -1095,6 +1095,37 @@ void BOARD_InitUartPins(void)
         0x10B0u);
 #endif
 
+#ifdef BSP_USING_LPUART3
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_06_LPUART3_TX,
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_AD_B1_07_LPUART3_RX,
+        0U);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_06_LPUART3_TX,
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_AD_B1_07_LPUART3_RX,
+        0x10B0u);
+#endif
+
+
+#ifdef BSP_USING_LPUART4
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_SD_B1_00_LPUART4_TX,
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_SD_B1_01_LPUART4_RX,
+        0U);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_SD_B1_00_LPUART4_TX,
+        0x10B0u);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_SD_B1_01_LPUART4_RX,
+        0x10B0u);
+#endif
+
 #ifdef BSP_USING_LPUART8
     IOMUXC_SetPinMux(
         IOMUXC_GPIO_AD_B1_10_LPUART8_TX,
