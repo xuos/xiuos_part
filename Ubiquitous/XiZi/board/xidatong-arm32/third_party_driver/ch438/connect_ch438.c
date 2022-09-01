@@ -33,7 +33,7 @@ static void Ch438Irq(void *parameter)
 /**
  * The time delay function.
  *
- * @param microseconds.
+ * @param us.
  */
 static void ImxrtUdelay(uint32 us)
 {

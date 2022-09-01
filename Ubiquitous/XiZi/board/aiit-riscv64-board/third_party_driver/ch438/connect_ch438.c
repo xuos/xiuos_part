@@ -917,7 +917,7 @@ static uint32 Ch438Init(struct SerialDriver *serial_drv, struct SerialCfgParam *
         return ERROR;
     }
 
-	/* config ALE pin as output*/
+	/* config 485 DIR pin as output*/
 	pin_cfg.pin = BSP_485_dir;
 	ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);
     if (ret != EOK) {
@@ -925,7 +925,7 @@ static uint32 Ch438Init(struct SerialDriver *serial_drv, struct SerialCfgParam *
         return ERROR;
     }
 
-	/* config ALE pin as input pullup*/
+	/* config INT pin as input pullup*/
 	pin_cfg.pin = BSP_CH438_INT_PIN;
 	pin_cfg.mode = GPIO_CFG_INPUT_PULLUP;
 	ret = BusDrvConfigure(ch438_pin->owner_driver, &configure_info);

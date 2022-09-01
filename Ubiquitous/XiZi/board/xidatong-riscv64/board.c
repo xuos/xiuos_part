@@ -56,8 +56,8 @@ extern void entry(void);
 extern void SecondaryCpuCStart(void);
 extern int IoConfigInit(void);
 extern int HwI2cInit(void);
-extern int HwLcdInit(void);
 extern int HwTouchInit(void);
+extern int HwCh438Init(void);
 
 #if defined(FS_VFS) && defined (MOUNT_SDCARD)
 #include <iot-vfs.h>
@@ -158,11 +158,11 @@ struct InitSequenceDesc _board_init[] =
     { "hw_pin", HwGpioInit },
 	{ "io_config", IoConfigInit },
 #endif
+#ifdef BSP_USING_CH438
+    { "hw_extuart", HwCh438Init },
+#endif
 #ifdef BSP_USING_I2C
     { "hw_i2c", HwI2cInit },
-#endif
-#ifdef BSP_USING_LCD
-	{ "hw_lcd", HwLcdInit },
 #endif
 #ifdef BSP_USING_TOUCH
     {"touch", HwTouchInit },
@@ -222,7 +222,4 @@ void HwCpuReset(void)
     sysctl->soft_reset.soft_reset = 1;
     while(RET_TRUE);
 }
-
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),Reboot, HwCpuReset,  reset machine );
-
-

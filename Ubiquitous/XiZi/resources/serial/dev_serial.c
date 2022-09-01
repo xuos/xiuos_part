@@ -829,9 +829,8 @@ int SerialDeviceRegister(struct SerialHardwareDevice *serial_device, void *seria
             serial_device->haldev.dev_done = (struct HalDevDone *)serial_device->dev_done;
         } else {
             serial_device->haldev.dev_done = (struct HalDevDone *)&dev_done;
+            serial_device->private_data = serial_param;
         }
-        
-        serial_device->private_data = serial_param;
 
         DoubleLinkListInsertNodeAfter(&serialdev_linklist, &(serial_device->haldev.dev_link));
     } else {
