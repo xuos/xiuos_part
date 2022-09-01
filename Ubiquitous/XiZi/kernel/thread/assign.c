@@ -101,7 +101,6 @@ SWITCH:
         _KTaskOsAssignStackCheck(new_task);
 #endif
 
-
         SwitchKtaskContext((x_ubase)&from_task->stack_point,
                     (x_ubase)&new_task->stack_point, new_task);
 

@@ -27,7 +27,6 @@
 extern "C" {
 #endif
 
-
 typedef struct Stm32I2c
 {
     LPI2C_Type* base;

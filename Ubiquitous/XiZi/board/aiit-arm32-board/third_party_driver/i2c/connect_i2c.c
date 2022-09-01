@@ -42,7 +42,7 @@ Modification:
 
 static I2cBusParam i2c_bus_param =
 {
-    I2C_SDA_FUNC_GPIO,
+    _FUNC_GPIO,
     I2C_SCL_FUNC_GPIO,
 };
 static BusType pin;

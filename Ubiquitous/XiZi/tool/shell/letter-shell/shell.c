@@ -1653,11 +1653,11 @@ void shellTask(void *param)
 
             data_len = shell->read(data);
             if(data_len > 0) {
-                int lock = CriticalAreaLock();
+                // int lock = CriticalAreaLock();
                 for (i = 0; i < data_len; i++) {
                     shellHandler(shell, data[i]);
                 }
-                CriticalAreaUnLock(lock);
+                // CriticalAreaUnLock(lock);
             }
         }
     }

@@ -1256,7 +1256,7 @@ status_t LPI2C_MasterTransferNonBlocking(LPI2C_Type *base,
 
     /* Return an error if the bus is already in use not by us. */
     result = LPI2C_CheckForBusyBus(base);
-    if (result)
+    if (result != kStatus_Success)
     {
         return result;
     }

@@ -72,17 +72,18 @@ static int32_t GtpI2cWrite(uint8_t client_addr,uint8_t *buf,int32_t len)
     while(retries < 5)
     {
         ret = I2C_Transfer(&msg, 1);
-        if (ret == 1)break;
+        if (ret == 1) { break; }
         retries++;
     }
-    if((retries >= 5))
+    if (retries >= 5)
     {
         KPrintf("I2C Write: 0x%04X, %d bytes failed, errcode: %d! Process reset.", (((uint16_t)(buf[0] << 8)) | buf[1]), len-2, ret);
         ret = -1;
     }
     return ret;
 }
-static int32_t GtpI2cRead(uint8_t client_addr, uint8_t *buf, int32_t len)
+
+static int32_t GtpI2cRead(uint8_t client_addr, uint8_t* buf, int32_t len)
 {
     struct i2c_msg msgs[2];
     int32_t ret = -1;
@@ -100,8 +101,8 @@ static int32_t GtpI2cRead(uint8_t client_addr, uint8_t *buf, int32_t len)
     
     while(retries < 5)
     {
-        ret = I2C_Transfer( msgs, 2);
-        if(ret == 2)break;
+        ret = I2C_Transfer(msgs, 2);
+        if (ret == 2)break;
         retries++;
     }
     if((retries >= 5))
@@ -111,6 +112,7 @@ static int32_t GtpI2cRead(uint8_t client_addr, uint8_t *buf, int32_t len)
     }
     return ret;
 }
+
 static int32_t gt91xx_Config_Write_Proc()
 {
     int32_t ret = -1;
@@ -154,8 +156,12 @@ static int32_t gt91xx_Config_Write_Proc()
   */
 bool GetTouchEvent(POINT *touch_point,touch_event_t *touch_event)
 {
-
-    uint8_t  end_cmd[3] = {GTP_READ_COOR_ADDR >> 8, GTP_READ_COOR_ADDR & 0xFF, 0};
+    if (touch_point == NULL || touch_event == NULL) {
+        KPrintf("error: touch event error params.\n");
+        return false;
+    }
+    
+    uint8_t  end_cmd[3] = { GTP_READ_COOR_ADDR >> 8, GTP_READ_COOR_ADDR & 0xFF, 0 };
     uint8_t  point_data[2 + 1 + 8 * GTP_MAX_TOUCH + 1]={GTP_READ_COOR_ADDR >> 8, GTP_READ_COOR_ADDR & 0xFF};
     uint8_t  touch_num = 0;
     uint8_t  finger = 0;
@@ -168,7 +174,7 @@ bool GetTouchEvent(POINT *touch_point,touch_event_t *touch_event)
     int32_t input_w = 0;
 
     int32_t ret = -1;
-
+    
     ret = GtpI2cRead(client_addr, point_data, 12);//10字节寄存器加2字节地址
     if (ret < 0)
     {
@@ -217,7 +223,7 @@ bool GetTouchEvent(POINT *touch_point,touch_event_t *touch_event)
 			  Pre_Touch_Point.Y = -1;
     }
     pre_touch = touch_num;
-    
+
 exit_work_func:
     {
         ret = GtpI2cWrite(client_addr, end_cmd, 3);
