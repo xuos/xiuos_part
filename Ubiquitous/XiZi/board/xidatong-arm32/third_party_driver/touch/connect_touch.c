@@ -77,7 +77,7 @@ static int32_t GtpI2cWrite(uint8_t client_addr,uint8_t *buf,int32_t len)
     }
     if (retries >= 5)
     {
-        KPrintf("I2C Write: 0x%04X, %d bytes failed, errcode: %d! Process reset.", (((uint16_t)(buf[0] << 8)) | buf[1]), len-2, ret);
+        // KPrintf("I2C Write: 0x%04X, %d bytes failed, errcode: %d! Process reset.", (((uint16_t)(buf[0] << 8)) | buf[1]), len-2, ret);
         ret = -1;
     }
     return ret;
@@ -107,7 +107,7 @@ static int32_t GtpI2cRead(uint8_t client_addr, uint8_t* buf, int32_t len)
     }
     if((retries >= 5))
     {
-        KPrintf("I2C Read: 0x%04X, %d bytes %d times failed, errcode: %d! Process reset.\n", (((uint16_t)(buf[0] << 8)) | buf[1]), len-2, retries,ret);
+        // KPrintf("I2C Read: 0x%04X, %d bytes %d times failed, errcode: %d! Process reset.\n", (((uint16_t)(buf[0] << 8)) | buf[1]), len-2, retries,ret);
         ret = -1;
     }
     return ret;
@@ -137,7 +137,7 @@ static int32_t gt91xx_Config_Write_Proc()
     }
     config[ cfg_num+GTP_ADDR_LENGTH] = (~check_sum) + 1; 	//checksum
     config[ cfg_num+GTP_ADDR_LENGTH+1] =  1; 				//refresh ??????
-    KPrintf("Driver send config check_sum 0x%x\n",check_sum);
+    // KPrintf("Driver send config check_sum 0x%x\n",check_sum);
     for (retry = 0; retry < 5; retry++)
     {
         ret = GtpI2cWrite(GTP_ADDRESS, config , cfg_num + GTP_ADDR_LENGTH+2);
@@ -178,7 +178,7 @@ bool GetTouchEvent(POINT *touch_point,touch_event_t *touch_event)
     ret = GtpI2cRead(client_addr, point_data, 12);//10字节寄存器加2字节地址
     if (ret < 0)
     {
-        KPrintf("I2C transfer error. errno:%d\n ", ret);
+        // KPrintf("I2C transfer error. errno:%d\n ", ret);
         return 0;
     }
     
@@ -244,17 +244,17 @@ int32_t GtpReadVersion(void)
     ret = GtpI2cRead(GTP_ADDRESS, buf, sizeof(buf));
     if (ret < 0)
     {
-        KPrintf("GTP read version failed.\n");
+        // KPrintf("GTP read version failed.\n");
         return ret;
     }
 
     if (buf[5] == 0x00)
     {
-        KPrintf("IC1 Version: %c%c%c_%02x%02x\n", buf[2], buf[3], buf[4], buf[7], buf[6]);		
+        // KPrintf("IC1 Version: %c%c%c_%02x%02x\n", buf[2], buf[3], buf[4], buf[7], buf[6]);		
     }
     else
     {
-        KPrintf("IC2 Version: %c%c%c%c_%02x%02x\n", buf[2], buf[3], buf[4], buf[5], buf[7], buf[6]);		
+        // KPrintf("IC2 Version: %c%c%c%c_%02x%02x\n", buf[2], buf[3], buf[4], buf[5], buf[7], buf[6]);		
 	}
     return ret;
 }
@@ -294,13 +294,13 @@ static int32_t GtpGetInfo(void)
     }
     int_trigger_type = opr_buf[2] & 0x03;
     
-    KPrintf("X_MAX = %d, Y_MAX = %d, TRIGGER = 0x%02x\n",
-            abs_x_max,abs_y_max,int_trigger_type);
+    // KPrintf("X_MAX = %d, Y_MAX = %d, TRIGGER = 0x%02x\n",
+            // abs_x_max,abs_y_max,int_trigger_type);
 
     ret = GtpI2cWrite(GTP_ADDRESS, end_cmd, 3);
     if (ret < 0)
     {
-        KPrintf("I2C write end_cmd error!\n");
+        // KPrintf("I2C write end_cmd error!\n");
         ret = 0;
     }
     return 0;    
