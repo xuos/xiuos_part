@@ -8,6 +8,7 @@
 extern lv_obj_t* lv_ssr_tb;
 pthread_mutex_t ssr_val_lock;
 
+// number of sensor values showed in one line
 #define NR_VAL_PERLINE 3
 
 static char* sensor_names[nr_sensors] = {
@@ -20,7 +21,8 @@ static char* sensor_names[nr_sensors] = {
 static char* seneor_denominations[nr_sensors] = {
     "ppb", "ppm", "ppb", "ppb", "ppm",
     "ppm", "ppm", "ppm", "%VOL", "%VOL", "ug/m³", "ug/m³",
-    "°C", "%RH", "m/s", "m/s", "mbar", "dB(A)"
+    "°C", "%RH",
+    "m/s", "m/s", "mbar", "dB(A)"
 };
 
 static double lv_sensor_vals[nr_sensors];

@@ -26,11 +26,6 @@ int main(void)
 #ifdef APPLICATION_OTA
 	ApplicationOtaTaskInit();
 #endif
-    // while (1) {
-    //     ShowTask();
-    //     ShowMemory();
-    //     PrivTaskDelay(1500);
-    // }
     return 0;
 }
 // int cppmain(void);

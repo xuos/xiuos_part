@@ -230,7 +230,7 @@ static void touchpad_init(void)
 {
     touch_fd = PrivOpen(PRIV_TOUCH_DEV,O_RDWR);
     if(touch_fd >= 0) {
-        printf("touch fd = %d\n",touch_fd);
+        // printf("touch fd = %d\n",touch_fd);
     } else {
         printf("open %s touch fd = %d failed.\n",PRIV_TOUCH_DEV,touch_fd);
     }

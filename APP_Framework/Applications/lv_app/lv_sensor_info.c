@@ -67,6 +67,7 @@ void lv_sensor_info(void) {
     }
     lv_obj_set_style_text_font(lv_ssr_tb, &lvgl_font_chinese, 0);
 
+    // set width of cells in table
     for (uint32_t i = 0; i < 2 * NR_VAL_PERLINE; ++i) {
         if (i % 2 == 0) {
             lv_table_set_col_width(lv_ssr_tb, i, 75);
