@@ -253,6 +253,8 @@
 
 #define Fpclk 1843200         /* Define the internal clock frequency  */
 
+#define CH438_RECV_TIMEOUT 1000000 * 1000
+
 void Set485Input(uint8 ch_no);
 void Set485Output(uint8 ch_no);
 
