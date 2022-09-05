@@ -113,6 +113,7 @@ int Adapter4GTest(void)
 
 #ifdef ADD_RTTHREAD_FETURES     
 MSH_CMD_EXPORT(Adapter4GTest,a EC200T adpter sample);
-#else
+#endif
+#ifdef ADD_XIZI_FETURES
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0)|SHELL_CMD_DISABLE_RETURN, Adapter4GTest, Adapter4GTest, show adapter 4G information);
 #endif
