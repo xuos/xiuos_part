@@ -283,7 +283,7 @@ endif
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/imxrt1176-sbc)
-KERNELPATHS :=-I$(BSP_ROOT) \
+KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
 	-I$(BSP_ROOT)/include \
 	-I$(BSP_ROOT)/third_party_driver \
