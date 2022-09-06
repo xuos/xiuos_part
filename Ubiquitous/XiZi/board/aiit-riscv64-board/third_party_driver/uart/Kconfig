@@ -13,10 +13,30 @@ menuconfig BSP_USING_UART_HS
             default "uart0_dev0"   
     endif
 
+menuconfig BSP_USING_UART1
+    bool "Enable UART1"
+    default n
+    if BSP_USING_UART1
+        config BSP_UART1_TXD_PIN
+            int "uart1 TXD pin number"
+            default 19
+        config BSP_UART1_RXD_PIN
+            int "uart1 RXD pin number"
+            default 18
+        config SERIAL_BUS_NAME_1
+            string "serial bus 1 name"
+            default "uart1"
+        config SERIAL_DRV_NAME_1
+            string "serial bus 1 driver name"
+            default "uart1_drv"
+        config SERIAL_1_DEVICE_NAME_0
+                string "serial bus 1 device 0 name"
+                default "uart1_dev1"   
+    endif
 
 menuconfig BSP_USING_UART2
     bool "Enable UART2"
-    default y
+    default n
     if BSP_USING_UART2
         config BSP_UART2_TXD_PIN
             int "uart2 TXD pin number"
@@ -37,7 +57,7 @@ menuconfig BSP_USING_UART2
 
 menuconfig BSP_USING_UART3
     bool "Enable UART3"
-    default y
+    default n
     if BSP_USING_UART3
         config BSP_UART3_TXD_PIN
             int "uart3 TXD pin number"
