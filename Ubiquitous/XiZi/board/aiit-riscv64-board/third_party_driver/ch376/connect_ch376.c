@@ -21,7 +21,7 @@
 #include <ch376fs.h>
 #include <connect_ch376.h>
 
-static struct HwCh376 sdio;
+static struct HwCh376 ch376;
 
 static uint32 Ch376Configure(void *drv, struct BusConfigureInfo *configure_info)
 {
@@ -37,20 +37,20 @@ static uint32 Ch376Configure(void *drv, struct BusConfigureInfo *configure_info)
     write_param.pos = 0;
     write_param.buffer = (void *)temp;
     write_param.size = 2;
-    BusDevWriteData(sdio.dev, &write_param);
+    BusDevWriteData(ch376.dev, &write_param);
 
     write_param.pos = 0;
     write_param.buffer = &configure_info->configure_cmd;
     write_param.size = 1;
-    BusDevWriteData(sdio.dev, &write_param);
+    BusDevWriteData(ch376.dev, &write_param);
 
     return EOK;
 }
 
 static int HwCh376RxInd(void *dev, x_size_t length)
 {
-    sdio.msg_len += length;
-    KSemaphoreAbandon(sdio.sem);
+    ch376.msg_len += length;
+    KSemaphoreAbandon(ch376.sem);
 
     return EOK;
 }
@@ -59,16 +59,16 @@ static uint32 Ch376Open(void *dev)
 {
     NULL_PARAM_CHECK(dev);
 
-    sdio.sem = KSemaphoreCreate(0);
-    if (sdio.sem < 0) {
+    ch376.sem = KSemaphoreCreate(0);
+    if (ch376.sem < 0) {
         KPrintf("CH376 open fail\n");
         return -ERROR;
     }
 
-    struct Bus *bus = BusFind(SERIAL_BUS_NAME_2);
-    struct Driver *bus_driver = BusFindDriver(bus, SERIAL_DRV_NAME_2);
-    sdio.dev = BusFindDevice(bus, SERIAL_2_DEVICE_NAME_0);
-    if (!sdio.dev) {
+    struct Bus *bus = BusFind(SERIAL_BUS_NAME_3);
+    struct Driver *bus_driver = BusFindDriver(bus, SERIAL_DRV_NAME_3);
+    ch376.dev = BusFindDevice(bus, SERIAL_3_DEVICE_NAME_0);
+    if (!ch376.dev) {
         KPrintf("CH376 open fail\n");
         return -ERROR;
     }
@@ -82,13 +82,13 @@ static uint32 Ch376Open(void *dev)
 
     BusDrvConfigure(bus_driver, &cfg);
 
-    bus->match(bus_driver, sdio.dev);
+    bus->match(bus_driver, ch376.dev);
 
-    struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)sdio.dev->private_data;
+    struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)ch376.dev->private_data;
     serial_dev_param->serial_set_mode = SIGN_OPER_INT_RX;
-    BusDevOpen(sdio.dev);
+    BusDevOpen(ch376.dev);
 
-    BusDevRecvCallback(sdio.dev, HwCh376RxInd);
+    BusDevRecvCallback(ch376.dev, HwCh376RxInd);
 
     KPrintf("CH376 open done\n");
 
@@ -97,15 +97,15 @@ static uint32 Ch376Open(void *dev)
 
 static uint32 Ch376Close(void *dev)
 {
-    BusDevClose(sdio.dev);
-    KSemaphoreDelete(sdio.sem);
+    BusDevClose(ch376.dev);
+    KSemaphoreDelete(ch376.sem);
 
     return EOK;
 }
 
 static uint32 Ch376Write(void *dev, struct BusBlockWriteParam *write_param)
 {
-    if (EOK == BusDevWriteData(sdio.dev, write_param))
+    if (EOK == BusDevWriteData(ch376.dev, write_param))
         return EOK;
 
     return -ERROR;
@@ -113,11 +113,11 @@ static uint32 Ch376Write(void *dev, struct BusBlockWriteParam *write_param)
 
 static uint32 Ch376Read(void *dev, struct BusBlockReadParam *read_param)
 {
-    if (KSemaphoreObtain(sdio.sem, WAITING_FOREVER) == EOK) {
-        while(KSemaphoreObtain(sdio.sem, TICK_PER_SECOND) != -ETIMEOUT);
-        read_param->size = sdio.msg_len;
-        BusDevReadData(sdio.dev, read_param);
-        sdio.msg_len = 0;
+    if (KSemaphoreObtain(ch376.sem, WAITING_FOREVER) == EOK) {
+        while(KSemaphoreObtain(ch376.sem, TICK_PER_SECOND) != -ETIMEOUT);
+        read_param->size = ch376.msg_len;
+        BusDevReadData(ch376.dev, read_param);
+        ch376.msg_len = 0;
     }
     
     return read_param->read_length;

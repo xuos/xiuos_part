@@ -1,7 +1,13 @@
-SRC_FILES := system_init.c boot.S interrupt_vector.S coreclock.c interrupt.c svc_entry.S
+ifeq ($(CONFIG_BOARD_CORTEX_M4_EVB)_$(CONFIG_BOARD_STM32F407_EVB)),y_y)
+SRC_FILES := interrupt.c system_init.c boot.S interrupt_vector.S coreclock.c svc_entry.S
 
 ifeq ($(CONFIG_TASK_ISOLATION),y)
 SRC_FILES += svc_handle.c mpu.c
+endif
+endif
+
+ifeq ($(CONFIG_BOARD_HC32F4A0_EVB),y)
+SRC_DIR += hc32f4a0
 endif
 
 include $(KERNEL_ROOT)/compiler.mk

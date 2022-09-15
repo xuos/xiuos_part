@@ -359,6 +359,18 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/hc32f4a0)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m4/hc32f4a0 \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/common/hc32_ll_driver/inc \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/CMSIS/include \
+	-I$(KERNEL_ROOT)/include #
+endif
+
 KERNELPATHS += -I$(KERNEL_ROOT)/arch \
             -I$(KERNEL_ROOT)/arch/risc-v/shared/kernel_service #
 
