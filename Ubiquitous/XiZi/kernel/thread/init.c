@@ -28,7 +28,9 @@
 #include <board.h>
 
 #ifdef BSP_USING_USB
+#ifndef BSP_USING_CH376
 #include "connect_usb.h"
+#endif
 #endif
 
 #ifdef KERNEL_USER_MAIN

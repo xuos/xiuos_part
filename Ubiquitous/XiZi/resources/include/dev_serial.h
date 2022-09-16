@@ -27,53 +27,53 @@
 extern "C" {
 #endif
 
-#define BAUD_RATE_2400                       2400
-#define BAUD_RATE_4800                       4800
-#define BAUD_RATE_9600                       9600
-#define BAUD_RATE_19200                  19200
-#define BAUD_RATE_38400                  38400
-#define BAUD_RATE_57600                  57600
+#define BAUD_RATE_2400               2400
+#define BAUD_RATE_4800               4800
+#define BAUD_RATE_9600               9600
+#define BAUD_RATE_19200              19200
+#define BAUD_RATE_38400              38400
+#define BAUD_RATE_57600              57600
 #define BAUD_RATE_115200             115200
 #define BAUD_RATE_230400             230400
 #define BAUD_RATE_460800             460800
 #define BAUD_RATE_921600             921600
-#define BAUD_RATE_2000000        2000000
-#define BAUD_RATE_3000000        3000000
+#define BAUD_RATE_2000000            2000000
+#define BAUD_RATE_3000000            3000000
 
-#define DATA_BITS_5                     5
-#define DATA_BITS_6                     6
-#define DATA_BITS_7                     7
-#define DATA_BITS_8                     8
-#define DATA_BITS_9                     9
+#define DATA_BITS_5                       5
+#define DATA_BITS_6                       6
+#define DATA_BITS_7                       7
+#define DATA_BITS_8                       8
+#define DATA_BITS_9                       9
 
-#define STOP_BITS_1                     1
-#define STOP_BITS_2                     2
-#define STOP_BITS_3                     3
-#define STOP_BITS_4                     4
+#define STOP_BITS_1                       1
+#define STOP_BITS_2                       2
+#define STOP_BITS_3                       3
+#define STOP_BITS_4                       4
 
-#define PARITY_NONE                     1
+#define PARITY_NONE                       1
 #define PARITY_ODD                        2
-#define PARITY_EVEN                      3
+#define PARITY_EVEN                       3
 
-#define BIT_ORDER_LSB                   1
-#define BIT_ORDER_MSB                  2
+#define BIT_ORDER_LSB                     1
+#define BIT_ORDER_MSB                     2
 
-#define NRZ_NORMAL                      1     
-#define NRZ_INVERTED                   2    
+#define NRZ_NORMAL                        1     
+#define NRZ_INVERTED                      2    
 
 #ifndef SERIAL_RB_BUFSZ
-#define SERIAL_RB_BUFSZ              128
+#define SERIAL_RB_BUFSZ                 128
 #endif
 
-#define SERIAL_EVENT_RX_IND                     0x01 
-#define SERIAL_event_id_tX_DONE             0x02 
-#define SERIAL_EVENT_RX_DMADONE       0x03   
-#define SERIAL_event_id_tX_DMADONE    0x04  
+#define SERIAL_EVENT_RX_IND             0x01 
+#define SERIAL_event_id_tX_DONE         0x02 
+#define SERIAL_EVENT_RX_DMADONE         0x03   
+#define SERIAL_event_id_tX_DMADONE      0x04  
 #define SERIAL_EVENT_RX_TIMEOUT         0x05   
 
-#define SERIAL_DMA_RX                0x01
-#define SERIAL_DMA_TX                0x02
-#define KEY_LENGTH                      8
+#define SERIAL_DMA_RX                   0x01
+#define SERIAL_DMA_TX                   0x02
+#define KEY_LENGTH                         8
 
 struct SerialTx
 {
