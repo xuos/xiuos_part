@@ -58,6 +58,7 @@ enum E220LoraMode
 static void E220LoraModeConfig(enum E220LoraMode mode)
 {
     int m0_fd, m1_fd;
+    char value0, value1;
 
     //delay 1s , wait AUX ready
     PrivTaskDelay(1000);
@@ -77,24 +78,31 @@ static void E220LoraModeConfig(enum E220LoraMode mode)
     switch (mode)
     {
     case DATA_TRANSFER_MODE:
-        PrivIoctl(m1_fd, GPIOC_WRITE, (unsigned long)GPIO_LOW);
-        PrivIoctl(m0_fd, GPIOC_WRITE, (unsigned long)GPIO_LOW);
+        value1 = '0';
+        value0 = '0';
+        PrivWrite(m1_fd, &value1, 1);
+        PrivWrite(m0_fd, &value0, 1);
         break;
 
     case WOR_SEND_MODE:
-        PrivIoctl(m1_fd, GPIOC_WRITE, (unsigned long)GPIO_LOW);
-        PrivIoctl(m0_fd, GPIOC_WRITE, (unsigned long)GPIO_HIGH);
+        value1 = '0';
+        value0 = '1';
+        PrivWrite(m1_fd, &value1, 1);
+        PrivWrite(m0_fd, &value0, 1);
         break;
     
     case WOR_RECEIVE_MODE:
-        PrivIoctl(m1_fd, GPIOC_WRITE, (unsigned long)GPIO_HIGH);
-
-        PrivIoctl(m0_fd, GPIOC_WRITE,(unsigned long)GPIO_LOW);
+        value1 = '1';
+        value0 = '0';
+        PrivWrite(m1_fd, &value1, 1);
+        PrivWrite(m0_fd, &value0, 1);
         break;
 
     case CONFIGURE_MODE_MODE:
-        PrivIoctl(m1_fd, GPIOC_WRITE, (unsigned long)GPIO_HIGH);
-        PrivIoctl(m0_fd, GPIOC_WRITE, (unsigned long)GPIO_HIGH);
+        value1 = '1';
+        value0 = '1';
+        PrivWrite(m1_fd, &value1, 1);
+        PrivWrite(m0_fd, &value0, 1);
         break;
     
     default:
@@ -329,25 +337,6 @@ static int E220GetRegisterParam(uint8 *buf)
  * @param adapter - Lora device pointer
  * @return success: 0, failure: -1
  */
-#ifdef ADD_NUTTX_FETURES
-static int E220Open(struct Adapter *adapter)
-{
-    /*step1: open e220 uart port*/
-    adapter->fd = PrivOpen(ADAPTER_E220_DRIVER, O_RDWR);
-    if (adapter->fd < 0) {
-        printf("E220Open get uart %s fd error\n", ADAPTER_E220_DRIVER);
-        return -1;
-    }
-
-    PrivIoctl(adapter->fd, OPE_INT, (unsigned long)BAUD_RATE_9600);
-    E220SetRegisterParam(adapter, E220_ADDRESS, E220_CHANNEL, E220_UART_BAUD_RATE);
-    PrivIoctl(adapter->fd, OPE_INT, (unsigned long)E220_UART_BAUD_RATE);
-
-    ADAPTER_DEBUG("E220Open done\n");
-
-    return 0;
-}
-#else
 #ifdef ADD_RTTHREAD_FETURES
 static int E220Open(struct Adapter *adapter)
 {
@@ -420,12 +409,13 @@ static int E220Open(struct Adapter *adapter)
     cfg.serial_bit_order = BIT_ORDER_LSB;
     cfg.serial_invert_mode = NRZ_NORMAL;
     cfg.serial_buffer_size = SERIAL_RB_BUFSZ;
+    cfg.is_ext_uart = 0;
 
     /*aiit board use ch438, so it needs more serial configuration*/
 #ifdef ADAPTER_E220_DRIVER_EXTUART
     cfg.is_ext_uart = 1;
-    cfg.ext_uart_no         = ADAPTER_E220_DRIVER_EXT_PORT;
-    cfg.port_configure      = PORT_CFG_INIT;
+    cfg.ext_uart_no = ADAPTER_E220_DRIVER_EXT_PORT;
+    cfg.port_configure = PORT_CFG_INIT;
 #endif
 
 #ifdef AS_LORA_GATEWAY_ROLE
@@ -455,7 +445,6 @@ static int E220Open(struct Adapter *adapter)
 
     return 0;
 }
-#endif
 #endif
 
 /**
