@@ -155,6 +155,18 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/ch32v307vct6)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch32v307vct6/Core \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch32v307vct6/Debug \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch32v307vct6/User \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch32v307vct6 \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/Peripheral/inc \
+	-I$(BSP_ROOT)/include \
+	-I$(KERNEL_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rv32m1-vega)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/risc-v/rv32m1-vega \
@@ -421,14 +433,17 @@ endif
 
 
 ifeq ($(ARCH), risc-v)
-KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
+# KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
 ifeq ($(MCU), k210)
+	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/k210
 endif
 ifeq ($(MCU), FE310)
+	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/fe310
 endif
 ifeq ($(MCU), GAP8)
+	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/gap8
 endif
 ifeq ($(MCU), GD32VF103)

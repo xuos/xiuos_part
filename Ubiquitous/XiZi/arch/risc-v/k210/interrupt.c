@@ -115,7 +115,7 @@ void InitHwinterrupt(void)
     SET_CSR(mie, MIP_MEIP);
 }
 
-void InitHwScondaryInterrupt(void)
+void InitHwSecondaryInterrupt(void)
 {
     int idx;
     int cpuid;

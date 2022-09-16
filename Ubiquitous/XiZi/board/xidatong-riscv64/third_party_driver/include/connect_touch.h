@@ -7,8 +7,8 @@
 * @date 2022-04-25
 */
 
-#ifndef CONNECT_TOUCH_H
-#define CONNECT_TOUCH_H
+#ifndef __CONNECT_TOUCH_H__
+#define __CONNECT_TOUCH_H__
 
 #include <device.h>	 
 

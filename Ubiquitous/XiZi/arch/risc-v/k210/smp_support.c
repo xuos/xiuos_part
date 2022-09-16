@@ -65,14 +65,14 @@ void StartupSecondaryCpu(void)
     cpu2_boot_flag = 0x2018050420191010;
 }
 
-extern void InitHwScondaryInterrupt(void);
+extern void InitHwSecondaryInterrupt(void);
 extern int InitHwTick(void);
 extern int EnableHwclintIpi(void);
 
 void SecondaryCpuCStart(void)
 {
     HwLockSpinlock(&AssignSpinLock);
-    InitHwScondaryInterrupt();
+    InitHwSecondaryInterrupt();
 
     InitHwTick();
 

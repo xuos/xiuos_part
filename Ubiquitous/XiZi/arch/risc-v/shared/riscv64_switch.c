@@ -59,11 +59,86 @@ void __attribute__((naked)) SwitchKTaskContextExit()
     asm volatile (LoadDS " t5,  30 * " RegLengthS "(sp)");
     asm volatile (LoadDS " t6,  31 * " RegLengthS "(sp)");
     asm volatile ("addi sp,  sp, 32 * " RegLengthS "");
+
+#ifdef ARCH_RISCV_FPU
+    asm volatile (FLOAD  " f0, 0 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f1, 1 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f2, 2 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f3, 3 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f4, 4 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f5, 5 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f6, 6 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f7, 7 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f8, 8 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f9, 9 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f10, 10 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f11, 11 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f12, 12 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f13, 13 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f14, 14 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f15, 15 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f16, 16 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f17, 17 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f18, 18 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f19, 19 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f20, 20 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f21, 21 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f22, 22 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f23, 23 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f24, 24 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f25, 25 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f26, 26 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f27, 27 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f28, 28 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f29, 29 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f30, 30 *" FREGBYTES "(sp)");
+    asm volatile (FLOAD  " f31, 31 *" FREGBYTES "(sp)");
+    asm volatile ("addi sp, sp, 32 *" FREGBYTES);
+#endif
+
     asm volatile ("mret");
 }
 
 void __attribute__((naked)) SaveMpie()
 {
+    
+#ifdef ARCH_RISCV_FPV
+    asm volatile ("addi sp, sp, -32 *" FREGBYTES);
+
+    asm volatile (FSTORE  " f0, 0 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f1, 1 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f2, 2 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f3, 3 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f4, 4 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f5, 5 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f6, 6 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f7, 7 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f8, 8 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f9, 9 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f10, 10 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f11, 11 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f12, 12 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f13, 13 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f14, 14 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f15, 15 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f16, 16 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f17, 17 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f18, 18 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f19, 19 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f20, 20 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f21, 21 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f22, 22 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f23, 23 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f24, 24 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f25, 25 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f26, 26 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f27, 27 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f28, 28 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f29, 29 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f30, 30 *" FREGBYTES "(sp)");
+    asm volatile (FSTORE  " f31, 31 *" FREGBYTES "(sp)");
+#endif
+
     asm volatile (StoreDS " a0,   2 * " RegLengthS "(sp)");
     asm volatile (StoreDS " tp,   4 * " RegLengthS "(sp)");
     asm volatile (StoreDS " t0,   5 * " RegLengthS "(sp)");

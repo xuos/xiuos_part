@@ -338,7 +338,7 @@ static void* BigMemMalloc(struct DynamicBuddyMemory *dynamic_buddy, x_size_t siz
 
 	NULL_PARAM_CHECK(dynamic_buddy);
 
-  	/* calculate the real size */
+	/* calculate the real size */
 	allocsize = size + SIZEOF_DYNAMICALLOCNODE_MEM;
     /* if the size exceeds the upper limit, return MEM_LINKNRS - 1 */
 	if (allocsize >= MEM_HIGH_RANGE) {
@@ -393,7 +393,7 @@ static void* BigMemMalloc(struct DynamicBuddyMemory *dynamic_buddy, x_size_t siz
 	/* failure allocation */
 	if(result == NONE) {
 #ifndef MEM_EXTERN_SRAM
-	    KPrintf("%s: allocation failed, size %d.\n", __func__,allocsize);
+	    KPrintf("%s: allocation failed, size %d.\n", __func__, size);
 #endif
         return result;
 	}

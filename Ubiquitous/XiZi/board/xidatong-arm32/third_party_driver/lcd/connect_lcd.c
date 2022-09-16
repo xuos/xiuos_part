@@ -24,7 +24,7 @@
 #define LCD_HEIGHT  BSP_LCD_X_MAX
 #define LCD_WIDTH   BSP_LCD_Y_MAX
 
-
+// static uint16_t frame_buffer[LCD_HEIGHT][LCD_WIDTH];
 static uint16_t frame_buffer[LCD_HEIGHT][LCD_WIDTH] SECTION("NonCacheable.init");
 static void InitLcdifPixelClock(void)
 {

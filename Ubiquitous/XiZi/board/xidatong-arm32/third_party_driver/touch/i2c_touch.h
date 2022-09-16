@@ -26,12 +26,13 @@ extern volatile bool SemReleaseFlag;
 
 #define GTP_I2C_BAUDRATE 400000U
 
-/* µÈ´ý³¬Ê±Ê±¼ä */
+/* ï¿½È´ï¿½ï¿½ï¿½Ê±Ê±ï¿½ï¿½ */
 #define I2CT_FLAG_TIMEOUT         ((uint32_t)0x10000)
 #define I2CT_LONG_TIMEOUT         ((uint32_t)(10 * I2CT_FLAG_TIMEOUT))
 
+#define I2C_BUSY_LIMIT            5
 
-/*! @brief ´¥ÃþÐ¾Æ¬Òý½Å¶¨Òå */
+/*! @brief ï¿½ï¿½ï¿½ï¿½Ð¾Æ¬ï¿½ï¿½ï¿½Å¶ï¿½ï¿½ï¿½ */
 
 #define TOUCH_PAD_SCL_IOMUXC			  IOMUXC_GPIO_AD_B1_00_LPI2C1_SCL
 #define TOUCH_PAD_SDA_IOMUXC			  IOMUXC_GPIO_AD_B1_01_LPI2C1_SDA
@@ -48,9 +49,18 @@ extern volatile bool SemReleaseFlag;
 #define GT9xx_PEN_IRQ           GPIO2_Combined_16_31_IRQn
 #define GT9xx_PEN_IRQHandler    GPIO2_Combined_16_31_IRQHandler
 
+#define TOUCH_PAD_RECOVER_SCL_GPIO          GPIO1
+#define TOUCH_PAD_RECOVER_SCL_GPIO_PIN      (16U)
+#define TOUCH_PAD_RECOVER_SDA_GPIO          GPIO1
+#define TOUCH_PAD_RECOVER_SDA_GPIO_PIN      (17U)
+#define TOUCH_PAD_RECOVER_SCL_IOMUXC    IOMUXC_GPIO_AD_B1_00_GPIO1_IO16
+#define TOUCH_PAD_RECOVER_SDA_IOMUXC    IOMUXC_GPIO_AD_B1_01_GPIO1_IO17
+
+#define I2C_RECOVER_NUM_CLOCKS      10U     /* # clock cycles for recovery  */
+#define I2C_RECOVER_CLOCK_FREQ      50000U  /* clock frequency for recovery */
 
 
-//º¯Êý½Ó¿Ú
+//ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½
 int32_t GTP_I2C_ReadBytes(uint8_t client_addr, uint8_t *buf, int32_t len);
 
 void I2C_Touch_Init(void);

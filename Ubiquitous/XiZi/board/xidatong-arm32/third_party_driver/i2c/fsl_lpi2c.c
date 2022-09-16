@@ -11,6 +11,8 @@
 #include <string.h>
 #include <xs_isr.h>
 
+
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -982,6 +984,8 @@ void LPI2C_MasterTransferCreateHandle(LPI2C_Type *base,
     EnableIRQ(kLpi2cIrqs[instance]);
 }
 
+
+uint32_t failed_times = 0;
 /*!
  * @brief Execute states until FIFOs are exhausted.
  * @param handle Master nonblocking driver handle.
@@ -1018,6 +1022,13 @@ static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_han
 
     /* Get fifo counts and compute room in tx fifo. */
     LPI2C_MasterGetFifoCounts(base, &rxCount, &txCount);
+    if (txCount == 0 && rxCount == 0) {
+        failed_times++;
+        if (failed_times > 100) {
+            handle->state = kStopState;
+            failed_times = 0;
+        }
+    }
     txCount = txFifoSize - txCount;
 
     while (!state_complete)
@@ -1148,6 +1159,7 @@ static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_han
                 if (status & kLPI2C_MasterStopDetectFlag)
                 {
                     *isDone = true;
+                    failed_times = 0;
                 }
                 state_complete = true;
                 break;
@@ -1372,6 +1384,7 @@ void LPI2C_MasterTransferAbort(LPI2C_Type *base, lpi2c_master_handle_t *handle)
     }
 }
 
+
 /*!
  * brief Reusable routine to handle master interrupts.
  * note This function does not need to be called unless you are reimplementing the
@@ -1396,11 +1409,11 @@ void LPI2C_MasterTransferHandleIRQ(LPI2C_Type *base, lpi2c_master_handle_t *hand
     }
 
     result = LPI2C_RunTransferStateMachine(base, handle, &isDone);
-    
+
     if (isDone || (result != kStatus_Success))
     {
         /* XXX need to handle data that may be in rx fifo below watermark level? */
-
+        
         /* XXX handle error, terminate xfer */
 
         /* Disable internal IRQ enables. */
@@ -2113,9 +2126,7 @@ void LPI2C0_DriverIRQHandler(void)
 /* Implementation of LPI2C1 handler named in startup code. */
 void LPI2C1_DriverIRQHandler(int irqn, void *arg)
 {
-    DisableIRQ(LPI2C1_IRQn);
     LPI2C_CommonIRQHandler(LPI2C1, 1);
-    EnableIRQ(LPI2C1_IRQn);
 }
 DECLARE_HW_IRQ(LPI2C1_IRQn, LPI2C1_DriverIRQHandler, NONE);
 #endif

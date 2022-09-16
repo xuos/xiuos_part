@@ -54,7 +54,43 @@ struct StackRegisterContext
     x_ubase t3;       
     x_ubase t4;     
     x_ubase t5;         
-    x_ubase t6;       
+    x_ubase t6;
+
+/* float register */
+#ifdef ARCH_RISCV_FPU
+    x_ubase f0;      /* f0  */
+    x_ubase f1;      /* f1  */
+    x_ubase f2;      /* f2  */
+    x_ubase f3;      /* f3  */
+    x_ubase f4;      /* f4  */
+    x_ubase f5;      /* f5  */
+    x_ubase f6;      /* f6  */
+    x_ubase f7;      /* f7  */
+    x_ubase f8;      /* f8  */
+    x_ubase f9;      /* f9  */
+    x_ubase f10;     /* f10 */
+    x_ubase f11;     /* f11 */
+    x_ubase f12;     /* f12 */
+    x_ubase f13;     /* f13 */
+    x_ubase f14;     /* f14 */
+    x_ubase f15;     /* f15 */
+    x_ubase f16;     /* f16 */
+    x_ubase f17;     /* f17 */
+    x_ubase f18;     /* f18 */
+    x_ubase f19;     /* f19 */
+    x_ubase f20;     /* f20 */
+    x_ubase f21;     /* f21 */
+    x_ubase f22;     /* f22 */
+    x_ubase f23;     /* f23 */
+    x_ubase f24;     /* f24 */
+    x_ubase f25;     /* f25 */
+    x_ubase f26;     /* f26 */
+    x_ubase f27;     /* f27 */
+    x_ubase f28;     /* f28 */
+    x_ubase f29;     /* f29 */
+    x_ubase f30;     /* f30 */
+    x_ubase f31;     /* f31 */
+#endif
 };
 
 uint8 KTaskStackSetup(struct TaskDescriptor *task)
