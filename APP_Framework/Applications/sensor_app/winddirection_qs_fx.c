@@ -30,7 +30,7 @@ void WindDirectionQsFx(void)
     struct SensorQuantity *wind_direction = SensorQuantityFind(SENSOR_QUANTITY_QS_FX_WINDDIRECTION, SENSOR_QUANTITY_WINDDIRECTION);
     SensorQuantityOpen(wind_direction);
     PrivTaskDelay(2000);
-    uint16 result = SensorQuantityRead(wind_direction);
+    uint16 result = SensorQuantityReadValue(wind_direction);
     printf("wind direction : %d degree\n", result);
     SensorQuantityClose(wind_direction);
 }

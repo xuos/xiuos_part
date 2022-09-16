@@ -35,7 +35,7 @@ void HumiHs300x(void)
     struct SensorQuantity *humi = SensorQuantityFind(SENSOR_QUANTITY_HS300X_HUMIDITY, SENSOR_QUANTITY_HUMI);
     SensorQuantityOpen(humi);
     for (i = 0; i < 100; i ++) {
-        humidity = SensorQuantityRead(humi);
+        humidity = SensorQuantityReadValue(humi);
         printf("Humidity : %d.%d %%RH\n", humidity/10, humidity%10);
         PrivTaskDelay(5000);
     }

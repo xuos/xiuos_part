@@ -11,7 +11,7 @@
 /**
 * @file drv_io_config.c
 * @brief support xidatong-riscv64-board io configure
-* @version 1.0 
+* @version 2.0 
 * @author AIIT XUOS Lab
 * @date 2022-07-25
 */
@@ -79,7 +79,22 @@ static struct io_config
     IOCONFIG(BSP_I2C_SCL, FUNC_GPIO4),
 #endif
 #ifdef BSP_USING_TOUCH
-    IOCONFIG(BSP_TOUCH_TP_INT, HS_GPIO(FPIOA_TOUCH_TP_INT))
+    IOCONFIG(BSP_TOUCH_TP_INT, HS_GPIO(FPIOA_TOUCH_TP_INT)),
+#endif
+
+#ifdef BSP_USING_CH438
+    IOCONFIG(BSP_CH438_ALE_PIN,  HS_GPIO(FPIOA_CH438_ALE)),      
+    IOCONFIG(BSP_CH438_NWR_PIN,  HS_GPIO(FPIOA_CH438_NWR)),      
+    IOCONFIG(BSP_CH438_NRD_PIN,  HS_GPIO(FPIOA_CH438_NRD)),      
+    IOCONFIG(BSP_CH438_INT_PIN,  HS_GPIO(FPIOA_CH438_INT)),      
+    IOCONFIG(BSP_CH438_D0_PIN,  HS_GPIO(FPIOA_CH438_D0)),      
+    IOCONFIG(BSP_CH438_D1_PIN,  HS_GPIO(FPIOA_CH438_D1)),      
+    IOCONFIG(BSP_CH438_D2_PIN,  HS_GPIO(FPIOA_CH438_D2)),      
+    IOCONFIG(BSP_CH438_D3_PIN,  HS_GPIO(FPIOA_CH438_D3)),      
+    IOCONFIG(BSP_CH438_D4_PIN,  HS_GPIO(FPIOA_CH438_D4)),      
+    IOCONFIG(BSP_CH438_D5_PIN,  HS_GPIO(FPIOA_CH438_D5)),      
+    IOCONFIG(BSP_CH438_D6_PIN,  HS_GPIO(FPIOA_CH438_D6)),      
+    IOCONFIG(BSP_CH438_D7_PIN,  HS_GPIO(FPIOA_CH438_D7))
 #endif
 };
 
@@ -97,12 +112,8 @@ static int PrintIoConfig()
     KPrintf("└───────┴────────────────────────┘\n");
     return 0;
 }
-
-
-
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),
                                                 io,PrintIoConfig,print io config);
-
 
 int IoConfigInit(void)
 {

@@ -12,10 +12,10 @@
  
 /**
 * @file connect_ch438.h
-* @brief define aiit-riscv64-board ch438 function and struct
-* @version 1.0 
+* @brief define xidatong-riscv64-board ch438 function and struct
+* @version 2.0 
 * @author AIIT XUOS Lab
-* @date 2021-04-25
+* @date 2022-08-26
 */
 
 #ifndef CONNECT_CH438_H
@@ -250,12 +250,8 @@
 
 #define CH438_IIR_FIFOS_ENABLED 0xC0      /* use FIFO */
 
-
 #define Fpclk 1843200         /* Define the internal clock frequency  */
 
 #define CH438_RECV_TIMEOUT 1000000 * 1000
-
-void Set485Input(uint8 ch_no);
-void Set485Output(uint8 ch_no);
 
 #endif

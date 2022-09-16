@@ -624,9 +624,9 @@ static void LoraOpen(void)
 
     E220Open(adapter);
 }
+#ifdef ADD_RTTHREAD_FETURES
 MSH_CMD_EXPORT(LoraOpen,Lora open test sample);
 
-#ifdef ADD_RTTHREAD_FETURES
 static void LoraRead(void *parameter)
 {
 	int RevLen;

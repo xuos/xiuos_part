@@ -78,11 +78,13 @@ int MountSDCard(void)
 
     if (NONE == SpiSdInit(spi_bus, SPI_1_DEVICE_NAME_0, SPI_1_DRV_NAME, SPI_SD_NAME)) {
         KPrintf("MountSDCard SpiSdInit error!\n");
-        return 0;
+        return -1;
     }
     
-    if (EOK == MountFilesystem(SPI_BUS_NAME_1, SPI_SD_NAME, SPI_1_DRV_NAME, FSTYPE_FATFS, "/"))
+    if (EOK == MountFilesystem(SPI_BUS_NAME_1, SPI_SD_NAME, SPI_1_DRV_NAME, FSTYPE_FATFS, "/")) {
         KPrintf("SPI SD card fatfs mounted\n");
+        return -1;
+    }
 
     return 0;
 }

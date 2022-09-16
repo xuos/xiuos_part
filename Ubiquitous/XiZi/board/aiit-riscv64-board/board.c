@@ -173,7 +173,6 @@ struct InitSequenceDesc _board_init[] =
 	{ "io_config", IoConfigInit },
 #endif
 #ifdef BSP_USING_CH438
-
     { "hw_extuart", HwCh438Init },
 #endif
 #ifdef BSP_USING_SPI

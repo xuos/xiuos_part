@@ -12,8 +12,8 @@
 
 /**
 * @file connect_i2c.h
-* @brief define kd233-board i2c function and struct
-* @version 1.0 
+* @brief define xidatong-riscv64-board i2c function and struct
+* @version 2.0 
 * @author AIIT XUOS Lab
 * @date 2022-07-25
 */

@@ -66,6 +66,40 @@ void LPUART2_IRQHandler(int irqn, void *arg)
 DECLARE_HW_IRQ(UART2_IRQn, LPUART2_IRQHandler, NONE);
 #endif
 
+#ifdef BSP_USING_LPUART3
+struct SerialBus serial_bus_3;
+struct SerialDriver serial_driver_3;
+struct SerialHardwareDevice serial_device_3;
+
+void LPUART3_IRQHandler(int irqn, void* arg)
+{
+
+    DisableIRQ(LPUART3_IRQn);
+
+    UartIsr(&serial_bus_3, &serial_driver_3, &serial_device_3);
+    EnableIRQ(LPUART3_IRQn);
+
+}
+DECLARE_HW_IRQ(LPUART3_IRQn, LPUART3_IRQHandler, NONE);
+#endif
+
+#ifdef BSP_USING_LPUART4
+struct SerialBus serial_bus_4;
+struct SerialDriver serial_driver_4;
+struct SerialHardwareDevice serial_device_4;
+
+void LPUART4_IRQHandler(int irqn, void* arg)
+{
+
+    DisableIRQ(LPUART4_IRQn);
+
+    UartIsr(&serial_bus_4, &serial_driver_4, &serial_device_4);
+    EnableIRQ(LPUART4_IRQn);
+
+}
+DECLARE_HW_IRQ(LPUART4_IRQn, LPUART4_IRQHandler, NONE);
+#endif
+
 #ifdef BSP_USING_LPUART8
 struct SerialBus serial_bus_8;
 struct SerialDriver serial_driver_8;
@@ -441,6 +475,72 @@ int Imxrt1052HwUartInit(void)
         KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
         return ERROR;
     }  
+#endif
+
+#ifdef BSP_USING_LPUART3
+    static struct SerialCfgParam serial_cfg_3;
+    memset(&serial_cfg_3, 0, sizeof(struct SerialCfgParam));
+
+    static struct SerialDevParam serial_dev_param_3;
+    memset(&serial_dev_param_3, 0, sizeof(struct SerialDevParam));
+
+    serial_driver_3.drv_done = &drv_done;
+    serial_driver_3.configure = &SerialDrvConfigure;
+    serial_device_3.hwdev_done = &hwdev_done;
+
+    serial_cfg_3.data_cfg = data_cfg_init;
+
+    serial_cfg_3.hw_cfg.private_data = (void*)LPUART3;
+    serial_cfg_3.hw_cfg.serial_irq_interrupt = LPUART3_IRQn;
+    serial_driver_3.private_data = (void*)&serial_cfg_3;
+
+    serial_dev_param_3.serial_work_mode = SIGN_OPER_INT_RX;
+    serial_device_3.haldev.private_data = (void*)&serial_dev_param_3;
+
+    ret = BoardSerialBusInit(&serial_bus_3, &serial_driver_3, SERIAL_BUS_NAME_3, SERIAL_DRV_NAME_3);
+    if (EOK != ret) {
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
+        return ERROR;
+    }
+
+    ret = BoardSerialDevBend(&serial_device_3, (void*)&serial_cfg_3, SERIAL_BUS_NAME_3, SERIAL_3_DEVICE_NAME_0);
+    if (EOK != ret) {
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
+        return ERROR;
+    }
+#endif
+
+#ifdef BSP_USING_LPUART4
+    static struct SerialCfgParam serial_cfg_4;
+    memset(&serial_cfg_4, 0, sizeof(struct SerialCfgParam));
+
+    static struct SerialDevParam serial_dev_param_4;
+    memset(&serial_dev_param_4, 0, sizeof(struct SerialDevParam));
+
+    serial_driver_4.drv_done = &drv_done;
+    serial_driver_4.configure = &SerialDrvConfigure;
+    serial_device_4.hwdev_done = &hwdev_done;
+
+    serial_cfg_4.data_cfg = data_cfg_init;
+
+    serial_cfg_4.hw_cfg.private_data = (void*)LPUART4;
+    serial_cfg_4.hw_cfg.serial_irq_interrupt = LPUART4_IRQn;
+    serial_driver_4.private_data = (void*)&serial_cfg_4;
+
+    serial_dev_param_4.serial_work_mode = SIGN_OPER_INT_RX;
+    serial_device_4.haldev.private_data = (void*)&serial_dev_param_4;
+
+    ret = BoardSerialBusInit(&serial_bus_4, &serial_driver_4, SERIAL_BUS_NAME_4, SERIAL_DRV_NAME_4);
+    if (EOK != ret) {
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
+        return ERROR;
+    }
+
+    ret = BoardSerialDevBend(&serial_device_4, (void*)&serial_cfg_4, SERIAL_BUS_NAME_4, SERIAL_4_DEVICE_NAME_0);
+    if (EOK != ret) {
+        KPrintf("Imxrt1052HwUartInit uart error ret %u\n", ret);
+        return ERROR;
+    }
 #endif
 
 #ifdef BSP_USING_LPUART8

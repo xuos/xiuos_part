@@ -31,6 +31,6 @@ void Co2G8s(void)
 {
     struct SensorQuantity *co2 = SensorQuantityFind(SENSOR_QUANTITY_G8S_CO2, SENSOR_QUANTITY_CO2);
     SensorQuantityOpen(co2);
-    printf("CO2 : %d ppm\n", SensorQuantityRead(co2));
+    printf("CO2 : %d ppm\n", SensorQuantityReadValue(co2));
     SensorQuantityClose(co2);
 }
