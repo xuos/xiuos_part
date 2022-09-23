@@ -18,13 +18,39 @@
 * @date 2022-03-21
 */
 #include <transform.h>
+
+#ifdef ADD_XIZI_FETURES
 #include "sys_arch.h"
 #include "lwip/sockets.h"
+#endif
+
+#ifdef ADD_NUTTX_FETURES
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+
+#define LWIP_DEMO_TIMES 3
+#define LWIP_LOCAL_PORT 6000
+
+#define lw_error printf
+#define lw_notice printf
+#define lw_print printf
+
+/** Create u32_t value from bytes */
+#define LWIP_MAKEU32(a,b,c,d) (((uint32_t)((a) & 0xff) << 24) | \
+                               ((uint32_t)((b) & 0xff) << 16) | \
+                               ((uint32_t)((c) & 0xff) << 8)  | \
+                                (uint32_t)((d) & 0xff))
+
+#define PP_HTONL(x)   ((uint32_t)(x))
+
+#endif
 
 #define UDP_BUF_SIZE 65536
 
 char udp_socket_ip[] = {192, 168, 250, 252};
-u16_t udp_socket_port = LWIP_LOCAL_PORT;
+uint16_t udp_socket_port = LWIP_LOCAL_PORT;
 
 /*****************************************************************************/
 
@@ -61,7 +87,7 @@ static void UdpSocketRecvTask(void *arg)
         if(bind(fd, (struct sockaddr *)&udp_addr, sizeof(struct sockaddr)) == -1)
         {
             lw_error("Unable to bind\n");
-            closesocket(fd);
+            close(fd);
             free(recv_buf);
             continue;
         }
@@ -81,11 +107,12 @@ static void UdpSocketRecvTask(void *arg)
             sendto(fd, recv_buf, recv_len, 0, (struct sockaddr*)&server_addr, addr_len);
         }
 
-        closesocket(fd);
+        close(fd);
         free(recv_buf);
     }
 }
 
+#ifdef ADD_XIZI_FETURES
 void UdpSocketRecvTest(int argc, char *argv[])
 {
     if(argc >= 2)
@@ -103,6 +130,7 @@ void UdpSocketRecvTest(int argc, char *argv[])
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
      UDPSocketRecv, UdpSocketRecvTest, UDP Receive DEMO);
+#endif
 
 static void UdpSocketSendTask(void *arg)
 {
@@ -128,7 +156,7 @@ static void UdpSocketSendTask(void *arg)
     if(connect(fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
     {
         lw_error("Unable to connect\n");
-        closesocket(fd);
+        close(fd);
         return;
     }
 
@@ -140,13 +168,14 @@ static void UdpSocketSendTask(void *arg)
         snprintf(send_str, sizeof(send_str), "UDP test package times %d\r\n", cnt);
         sendto(fd, send_str, strlen(send_str), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
         lw_notice("Send UDP msg: %s ", send_str);
-        MdelayKTask(1000);
+        PrivTaskDelay(1000);
     }
 
-    closesocket(fd);
+    close(fd);
     return;
 }
 
+#ifdef ADD_XIZI_FETURES
 void UdpSocketSendTest(int argc, char *argv[])
 {
     if(argc >= 2)
@@ -164,4 +193,16 @@ void UdpSocketSendTest(int argc, char *argv[])
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
      UDPSocketSend, UdpSocketSendTest, UDP send echo);
+#endif
 
+#ifdef ADD_NUTTX_FETURES
+void udp_recv_demo(void)
+{
+    UdpSocketRecvTask(NULL);
+}
+
+void udp_send_demo(void)
+{
+    UdpSocketSendTask(NULL);
+}
+#endif

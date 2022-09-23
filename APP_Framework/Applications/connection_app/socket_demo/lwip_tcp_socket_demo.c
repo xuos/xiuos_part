@@ -19,14 +19,41 @@
 */
 
 #include <transform.h>
+
+#ifdef ADD_XIZI_FETURES
 #include "sys_arch.h"
 #include <lwip/sockets.h>
 #include "lwip/sys.h"
+#endif
+
+#ifdef ADD_NUTTX_FETURES
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include "stdio.h"
+#endif
 
 #define TCP_DEMO_BUF_SIZE 65535
 
 char tcp_socket_ip[] = {192, 168, 250, 252};
-u16_t tcp_socket_port = LWIP_TARGET_PORT;
+
+#ifdef ADD_NUTTX_FETURES
+#define lw_print printf
+#define lw_notice printf
+#define lw_error printf
+
+#define LWIP_DEMO_TIMES 3
+
+/** Create u32_t value from bytes */
+#define LWIP_MAKEU32(a,b,c,d) (((uint32_t)((a) & 0xff) << 24) | \
+                               ((uint32_t)((b) & 0xff) << 16) | \
+                               ((uint32_t)((c) & 0xff) << 8)  | \
+                                (uint32_t)((d) & 0xff))
+
+#define PP_HTONL(x)   ((uint32_t)(x))
+#define LWIP_TARGET_PORT 6000
+#endif
+
+uint16_t tcp_socket_port = LWIP_TARGET_PORT;
 
 /******************************************************************************/
 
@@ -63,7 +90,7 @@ static void TCPSocketRecvTask(void *arg)
         if (bind(fd, (struct sockaddr *)&tcp_addr, sizeof(struct sockaddr)) == -1)
         {
             lw_error("Unable to bind\n");
-            closesocket(fd);
+            close(fd);
             free(recv_buf);
             continue;
         }
@@ -75,7 +102,7 @@ static void TCPSocketRecvTask(void *arg)
         if (listen(fd, 5) != 0 )
         {
             lw_error("Unable to listen\n");
-            closesocket(fd);
+            close(fd);
             free(recv_buf);
             continue;
         }
@@ -97,10 +124,11 @@ static void TCPSocketRecvTask(void *arg)
         }
     }
 
-    closesocket(fd);
+    close(fd);
     free(recv_buf);
 }
 
+#ifdef ADD_XIZI_FETURES
 void TCPSocketRecvTest(int argc, char *argv[])
 {
     int result = 0;
@@ -120,6 +148,8 @@ void TCPSocketRecvTest(int argc, char *argv[])
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
      TCPSocketRecv, TCPSocketRecvTest, TCP recv echo);
+#endif
+
 
 static void TCPSocketSendTask(void *arg)
 {
@@ -146,7 +176,7 @@ static void TCPSocketSendTask(void *arg)
     if (connect(fd, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr)))
     {
         lw_print("Unable to connect\n");
-        closesocket(fd);
+        close(fd);
         return;
     }
 
@@ -158,14 +188,15 @@ static void TCPSocketSendTask(void *arg)
         snprintf(send_msg, sizeof(send_msg), "TCP test package times %d\r\n", cnt);
         sendto(fd, send_msg, strlen(send_msg), 0, (struct sockaddr*)&tcp_sock, sizeof(struct sockaddr));
         lw_notice("Send tcp msg: %s ", send_msg);
-        MdelayKTask(1000);
+        PrivTaskDelay(1000);
     }
 
-    closesocket(fd);
+    close(fd);
     return;
 }
 
 
+#ifdef ADD_XIZI_FETURES
 void TCPSocketSendTest(int argc, char *argv[])
 {
     if(argc >= 2)
@@ -183,4 +214,18 @@ void TCPSocketSendTest(int argc, char *argv[])
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
      TCPSocketSend, TCPSocketSendTest, TCP send demo);
+#endif
+
+
+#ifdef ADD_NUTTX_FETURES
+void tcp_recv_demo(void)
+{
+    TCPSocketRecvTask(NULL);
+}
+
+void tcp_send_demo(void)
+{
+    TCPSocketSendTask(NULL);
+}
+#endif
 
