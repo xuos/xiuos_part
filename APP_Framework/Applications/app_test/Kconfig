@@ -29,5 +29,9 @@ menu "test app"
                             default "/dev/dac_dev"
                     endif
                 endif
+
+            config USER_TEST_SEMC
+                bool "Config test semc sdram"
+                default n
         endif
 endmenu
