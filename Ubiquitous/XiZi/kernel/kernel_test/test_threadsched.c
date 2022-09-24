@@ -13,7 +13,7 @@
 /**
 * @file test_threadsched.c
 * @brief support to test thread sched function
-* @version 1.0 
+* @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-04-24
 */
@@ -25,11 +25,14 @@
 extern long ShowTask(void);
 extern unsigned int msleep(uint64_t msec);
 
+#define BATCH_TEST_TASK_SIZE 100
+
 static int32 tid1 = NONE;
 static int32 tid2 = NONE;
 static int32 tid3 = NONE;
 static int32 tid4 = NONE;
 static int32 tid5 = NONE;
+static int32 tids[BATCH_TEST_TASK_SIZE];
 
 #define DYNAMIC_TASK_STACK_SIZE     3072
 #define PRIORITY         15
@@ -56,12 +59,12 @@ static void Task1Entry(void *parameter)
 		ShowTask();
 #endif
 		KPrintf("\n");
-		
+
 		DOUBLE_LINKLIST_FOR_EACH(node, head) {
 			tmp = SYS_DOUBLE_LINKLIST_ENTRY(node, struct TaskDyncSchedMember, sched_link);
 			obj =CONTAINER_OF(tmp,struct TaskDescriptor, task_dync_sched_member);
-			KPrintf("task ready table node name = %s node remaining_tick= %d node advance_cnt =%d\n",obj->task_base_info.name, 
-			obj->task_dync_sched_member.rest_timeslice, obj->task_dync_sched_member.advance_cnt); 
+			KPrintf("task ready table node name = %s node remaining_tick= %d node advance_cnt =%d\n",obj->task_base_info.name,
+			obj->task_dync_sched_member.rest_timeslice, obj->task_dync_sched_member.advance_cnt);
 		}
 #ifdef ARCH_SMP
 #ifdef SCHED_POLICY_FIFO
@@ -120,15 +123,8 @@ void DynamicTaskSchedTest(char* parm)
 	if (0 == strncmp("-b", parm, strlen("-b")) || 0 == strncmp("-bind", parm, strlen("-bind"))){
 		strncpy(t_parm,"-b", 4);
 	}
-#endif	
-	tid1 = KTaskCreate("d_tid1",
-							Task1Entry,
-							t_parm,
-							DYNAMIC_TASK_STACK_SIZE,
-							16);
-	if (tid1 >= 0)
-		StartupKTask(tid1);
-	
+#endif
+
 	tid2 = KTaskCreate("d_tid2",
 							Task2Entry,
 							"d_tid2",
@@ -141,7 +137,7 @@ void DynamicTaskSchedTest(char* parm)
 #endif
 	if (tid2 >= 0)
 		StartupKTask(tid2);
-	
+
 	tid3 = KTaskCreate("d_tid3",
 							Task3Entry,
 							"d_tid3",
@@ -154,7 +150,7 @@ void DynamicTaskSchedTest(char* parm)
 #endif
 	if (tid3 >= 0)
 		StartupKTask(tid3);
-	
+
 	tid4 = KTaskCreate("d_tid4",
 							Task4Entry,
 							"d_tid4",
@@ -167,7 +163,7 @@ void DynamicTaskSchedTest(char* parm)
 #endif
 	if (tid4 >= 0)
 		StartupKTask(tid4);
-	
+
 	tid5 = KTaskCreate("d_tid5",
 							Task5Entry,
 							"d_tid5",
@@ -183,8 +179,24 @@ void DynamicTaskSchedTest(char* parm)
 		StartupKTask(tid5);
 }
 
+static void BatchTaskSchedTest(char* parm)
+{
+	memset(tids, 0, sizeof(int32) * BATCH_TEST_TASK_SIZE);
+	char task_name[20] = "batch_tid_";
+	for(int i = 0; i < BATCH_TEST_TASK_SIZE;i++){
+		task_name[9] = (char)(i / 100 + '0');
+		task_name[10] = (char)((i / 10) % 10 + '0');
+		task_name[11] = (char)(i % 10 + '0');
+		task_name[12] = 0;
+		tids[i] = KTaskCreate(task_name, Task2Entry, task_name, 128, 15);
+		if(tids[i] >= 0){
+			StartupKTask(tids[i]);
+		}
+	}
+}
+
 /********************************************************************/
-static void UsageHelp(void) 
+static void UsageHelp(void)
 {
 	KPrintf("test_task_ready_usage.\n");
 }
@@ -192,8 +204,7 @@ static void UsageHelp(void)
 int TestTaskReadyAndSched(int argc, char * argv[])
 {
 	DynamicTaskSchedTest(argv[0]);
-	
+	BatchTaskSchedTest(argv[0]);
 	return 0;
 }
-
 
