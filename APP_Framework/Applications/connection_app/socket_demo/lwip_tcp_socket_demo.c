@@ -29,6 +29,7 @@
 #ifdef ADD_NUTTX_FETURES
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include "stdio.h"
 #endif
 
@@ -218,6 +219,17 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
 
 
 #ifdef ADD_NUTTX_FETURES
+
+void tcp_set_ip(char *ip_str)
+{
+    char ip[4] = {0};
+    if(sscanf(ip_str, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]))
+    {
+        printf("config ip %s\n", ip_str);
+        memcpy(tcp_socket_ip, ip, 4);
+    }
+}
+
 void tcp_recv_demo(void)
 {
     TCPSocketRecvTask(NULL);
