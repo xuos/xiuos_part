@@ -18,10 +18,10 @@
  * @date 2022.2.22
  */
 
-#include "transform.h"
-#include "open62541.h"
-#include "ua_api.h"
-#include "sys_arch.h"
+#include <transform.h>
+#include <open62541.h>
+#include <ua_api.h>
+#include <sys_arch.h>
 #include "plc_demo.h"
 
 #define PLC_NS_FORMAT "n%d,%s"
@@ -41,8 +41,7 @@ UA_NodeId test_nodeid = {4, UA_NODEIDTYPE_NUMERIC, 5};
 void PlcDelay(int sec)
 {
     volatile uint32_t i = 0;
-    for (i = 0; i < 100000000 * sec; ++i)
-    {
+    for (i = 0; i < 100000000 * sec; ++i) {
         __asm("NOP"); /* delay */
     }
 }
@@ -55,16 +54,12 @@ void PlcGetTestNodeId(char *str, UA_NodeId *id)
 
     plc_print("plc: arg %s\n", str);
 
-    if(sscanf(str, PLC_NS_FORMAT, &id->namespaceIndex, node_str) != EOF)
-    {
-        if(isdigit(node_str[0]))
-        {
+    if(sscanf(str, PLC_NS_FORMAT, &id->namespaceIndex, node_str) != EOF) {
+        if(isdigit(node_str[0])) {
             id->identifierType = UA_NODEIDTYPE_NUMERIC;
             id->identifier.numeric = atoi(node_str);
             plc_print("ns %d num %d\n", id->namespaceIndex, id->identifier.numeric);
-        }
-        else
-        {
+        } else {
             id->identifierType = UA_NODEIDTYPE_STRING;
             id->identifier.string.length = strlen(node_str);
             id->identifier.string.data = node_str;
@@ -82,8 +77,7 @@ void PlcDemoChannelDrvInit(void)
 
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, test_ua_ip);
     PlcChannelInit(&plc_demo_ch, PLC_CH_NAME);
-    if(PlcDriverInit(&plc_demo_drv, PLC_DRV_NAME) == EOK)
-    {
+    if(PlcDriverInit(&plc_demo_drv, PLC_DRV_NAME) == 0) {
         PlcDriverAttachToChannel(PLC_DRV_NAME, PLC_CH_NAME);
     }
     memset(&plc_demo_dev, 0, sizeof(plc_demo_dev));
@@ -101,8 +95,7 @@ static void PlcGetDemoDev(PlcDeviceType *dev, UA_NodeId *id)
     dev->net = PLC_IND_ENET_OPCUA;
 
     // register UA parameter
-    if(!dev->priv_data)
-    {
+    if(!dev->priv_data) {
         dev->priv_data = (UaParamType*)malloc(sizeof(UaParamType));
     }
     UaParamType* ua_ptr = dev->priv_data;
@@ -121,14 +114,12 @@ static void PlcCtrlDemoInit(void)
     // register plc device
     PlcGetDemoDev(&plc_demo_dev, &test_nodeid);
 
-    if(init_flag)
-    {
+    if(init_flag){
         return;
     }
     init_flag = 1;
 
-    if(PlcDevRegister(&plc_demo_dev, NULL, plc_demo_dev.name) != EOK)
-    {
+    if(PlcDevRegister(&plc_demo_dev, NULL, plc_demo_dev.name) != 0) {
         return;
     }
     PlcDeviceAttachToChannel(plc_demo_dev.name, PLC_CH_NAME);
@@ -144,16 +135,14 @@ void PlcReadUATask(void* arg)
     ops = plc_demo_dev.ops;
     ret = ops->open(&plc_demo_dev);
 
-    if(EOK != ret)
-    {
+    if(0 != ret) {
         plc_print("plc: [%s] open failed %#x\n", __func__, ret);
         return;
     }
 
     ret = ops->read(&plc_demo_dev, buf, PLC_BUF_SIZE);
 
-    if(EOK != ret)
-    {
+    if(0 != ret) {
         plc_print("plc: [%s] read failed %x\n", __func__, ret);
     }
 
@@ -165,16 +154,13 @@ void PlcReadTestShell(int argc, char* argv[])
     static char node_str[UA_NODE_LEN];
     memset(node_str, 0, sizeof(node_str));
 
-    if(argc > 1)
-    {
+    if(argc > 1) {
         PlcGetTestNodeId(argv[1], &test_nodeid);
     }
 
     sys_thread_new("plc read", PlcReadUATask, NULL, PLC_STACK_SIZE, PLC_TASK_PRIO);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 PlcRead, PlcReadTestShell, Read PLC);
+PRIV_SHELL_CMD_FUNCTION(PlcReadTestShell, a plc read sample, PRIV_SHELL_CMD_MAIN_ATTR);
 
 void PlcWriteUATask(void* arg)
 {
@@ -187,16 +173,14 @@ void PlcWriteUATask(void* arg)
     ops = plc_demo_dev.ops;
     ret = ops->open(&plc_demo_dev);
 
-    if(EOK != ret)
-    {
+    if(0 != ret) {
         plc_print("plc: [%s] open failed %#x\n", __func__, ret);
         return;
     }
 
     ret = ops->write(&plc_demo_dev, arg, PLC_BUF_SIZE);
 
-    if(EOK != ret)
-    {
+    if(0 != ret) {
         plc_print("plc: [%s] write failed\n", __func__);
     }
 
@@ -210,22 +194,18 @@ void PlcWriteTestShell(int argc, char* argv[])
     memset(node_str, 0, sizeof(node_str));
     memset(val_param, 0, sizeof(val_param));
 
-    if(argc > 1)
-    {
+    if(argc > 1) {
         PlcGetTestNodeId(argv[1], &test_nodeid);
     }
 
-    if(argc > 2)
-    {
+    if(argc > 2) {
         strcpy(val_param, argv[2]);
         plc_print("write value %s\n", val_param);
     }
 
     sys_thread_new("plc write", PlcWriteUATask, val_param, PLC_STACK_SIZE, PLC_TASK_PRIO);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 PlcWrite, PlcWriteTestShell, Read PLC);
+PRIV_SHELL_CMD_FUNCTION(PlcWriteTestShell, a plc write sample, PRIV_SHELL_CMD_MAIN_ATTR);
 
 // test motor
 // clear parameter
@@ -267,8 +247,7 @@ void PlcMotorTestTask(void* arg)
     ops = plc_demo_dev.ops;
     ret = ops->open(&plc_demo_dev);
 
-    if(EOK != ret)
-    {
+    if(0 != ret) {
         plc_print("plc: [%s] open failed %#x\n", __func__, ret);
         return;
     }
@@ -276,38 +255,32 @@ void PlcMotorTestTask(void* arg)
     UaParamType* ua_ptr = plc_demo_dev.priv_data;
 
     // initialize step
-    for(int i = 0; i < 5; i++)
-    {
+    for(int i = 0; i < 5; i++) {
         plc_print("###\n### Clear %s\n###\n", test_notice[i]);
         PlcGetTestNodeId(test_nodeid[i], &ua_ptr->ua_id);
         ret = ops->write(&plc_demo_dev, "0b", PLC_BUF_SIZE);
-        if(EOK != ret)
-        {
+        if(0 != ret) {
             plc_print("plc: [%s] %d write failed\n", __func__, __LINE__);
         }
         PlcDelay(1);
     }
 
-    if(plc_test_speed != 50)
-    {
+    if(plc_test_speed != 50) {
         snprintf(test_cmd[1], 4, "%d", plc_test_speed);
     }
 
     if(plc_test_dir == 0) // if not postive, next running
         test_sort[2] = 3;
 
-    for(int i = 0; i < sizeof(test_sort)/sizeof(test_sort[0]); i++)
-    {
+    for(int i = 0; i < sizeof(test_sort)/sizeof(test_sort[0]); i++) {
         PlcGetTestNodeId(test_nodeid[test_sort[i]], &ua_ptr->ua_id);
         plc_print("###\n### %s\n###\n", test_notice[i]);
         ret = ops->write(&plc_demo_dev, test_cmd[i], PLC_BUF_SIZE);
-        if(EOK != ret)
-        {
+        if(0 != ret) {
             plc_print("plc: [%s] %d write failed\n", __func__, __LINE__);
         }
         PlcDelay(1);
-        if(i == 2) // postive
-        {
+        if(i == 2) {// postive 
             PlcDelay(10);
         }
     }
@@ -331,24 +304,18 @@ void PlcGetMotorParam(char *str)
 
 void PlcMotorTestShell(int argc, char* argv[])
 {
-    if(plc_test_flag)
-    {
+    if(plc_test_flag) {
         plc_print("PLC Motor testing!\n");
         return;
     }
     plc_test_flag = 1;
 
-    if(argc > 1)
-    {
-        for(int i = 0; i < argc; i++)
-        {
+    if(argc > 1) {
+        for(int i = 0; i < argc; i++) {
             PlcGetMotorParam(argv[i]);
         }
     }
 
     sys_thread_new("plc motor", PlcMotorTestTask, NULL, PLC_STACK_SIZE, PLC_TASK_PRIO);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 PlcMotorTest, PlcMotorTestShell, Run motor);
-
+PRIV_SHELL_CMD_FUNCTION(PlcMotorTestShell, a plc motor sample, PRIV_SHELL_CMD_MAIN_ATTR);

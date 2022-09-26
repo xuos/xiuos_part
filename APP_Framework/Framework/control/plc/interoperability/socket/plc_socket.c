@@ -358,7 +358,3 @@ void PlcSocketTask(int argc, char *argv[])
     lwip_config_net(lwip_ipaddr, lwip_netmask, param->ip);
     PrivTaskCreate(&th_id, &attr, PlcSocketStart, param);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     PlcSocket, PlcSocketTask, Test PLC Socket);
-

@@ -177,6 +177,22 @@ FAR void *realloc(FAR void *oldmem, size_t size);
 FAR void *calloc(size_t n, size_t elem_size);
 void free(FAR void *mem);
 
+/*********************shell***********************/
+//for int func(int argc, char *agrv[])
+#define PRIV_SHELL_CMD_MAIN_ATTR 
+
+//for int func(int i, char ch, char *str)
+#define PRIV_SHELL_CMD_FUNC_ATTR 
+
+/**
+ * @brief Priv-shell Command definition 
+ * 
+ * @param _func Command function 
+ * @param _desc Command description 
+ * @param _attr Command attributes if need
+ */
+#define PRIV_SHELL_CMD_FUNCTION(_func, _desc, _attr) 
+
 /**********************mutex**************************/
 
 int PrivMutexCreate(pthread_mutex_t *p_mutex, const pthread_mutexattr_t *attr);

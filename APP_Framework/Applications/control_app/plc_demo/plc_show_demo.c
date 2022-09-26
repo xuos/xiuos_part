@@ -18,14 +18,13 @@
  * @date 2022.02.24
  */
 
-#include "transform.h"
-#include "list.h"
+#include <transform.h>
+#include <list.h>
 
-#include "open62541.h"
-#include "ua_api.h"
-#include "sys_arch.h"
-#include "plc_demo.h"
-
+#include <open62541.h>
+#include <ua_api.h>
+#include <sys_arch.h>
+#include <plc_demo.h>
 
 #define PLC_DEMO_NUM 5
 
@@ -62,36 +61,31 @@ extern DoublelistType ch_linklist;
 void PlcShowTitle(const char* item_array[])
 {
     int i = 0, max_len = 65;
-    KPrintf(" %-15s%-15s%-15s%-15s%-20s\n", item_array[0], item_array[1], item_array[2], item_array[3], item_array[4]);
+    printf(" %-15s%-15s%-15s%-15s%-20s\n", item_array[0], item_array[1], item_array[2], item_array[3], item_array[4]);
 
-    while(i < max_len)
-    {
+    while(i < max_len) {
         i++;
 
-        if(max_len == i)
-        {
-            KPrintf("-\n");
-        }
-        else
-        {
-            KPrintf("-");
+        if(max_len == i) {
+            printf("-\n");
+        } else {
+            printf("-");
         }
     }
 }
 
 static ChDrvType ShowChannelFindDriver(struct Channel* ch)
 {
-    struct ChDrv* driver = NONE;
-    DoublelistType* node = NONE;
+    struct ChDrv* driver = NULL;
+    DoublelistType* node = NULL;
     DoublelistType* head = &ch->ch_drvlink;
 
-    for(node = head->node_next; node != head; node = node->node_next)
-    {
+    for(node = head->node_next; node != head; node = node->node_next) {
         driver = DOUBLE_LIST_ENTRY(node, struct ChDrv, driver_link);
         return driver;
     }
 
-    return NONE;
+    return NULL;
 }
 
 static void PlcShowDemoInit(void)
@@ -100,8 +94,7 @@ static void PlcShowDemoInit(void)
     int i;
     PlcDemoChannelDrvInit();
 
-    for(i = 0; i < PLC_DEMO_NUM; i++)
-    {
+    for(i = 0; i < PLC_DEMO_NUM; i++) {
         // register plc device
         plc_demo_array[i].state = CHDEV_INIT;
         snprintf(plc_demo_array[i].name, PLC_NAME_SIZE, "PLC Demo %d", i);
@@ -116,10 +109,8 @@ static void PlcShowDemoInit(void)
         return;
     init_flag = 1;
 
-    for(i = 0; i < PLC_DEMO_NUM; i++)
-    {
-        if(PlcDevRegister(&plc_demo_array[i], NULL, plc_demo_array[i].name) == EOK)
-        {
+    for(i = 0; i < PLC_DEMO_NUM; i++) {
+        if(PlcDevRegister(&plc_demo_array[i], NULL, plc_demo_array[i].name) == 0) {
             PlcDeviceAttachToChannel(plc_demo_array[i].name, PLC_CH_NAME);
         }
     }
@@ -131,78 +122,60 @@ void PlcShowChannel(void)
     ChDrvType driver;
     ChDevType device;
     int dev_cnt;
-    DoublelistType* ch_node = NONE;
+    DoublelistType* ch_node = NULL;
     DoublelistType* ch_head = &ch_linklist;
     const char* item_array[] = {"ch_type", "ch_name", "drv_name", "dev_name", "cnt"};
     PlcShowDemoInit();
     PlcShowTitle(item_array);
     ch_node = ch_head->node_next;
 
-    do
-    {
+    do {
         ch = DOUBLE_LIST_ENTRY(ch_node, struct Channel, ch_link);
 
-        if((ch) && (ch->ch_type == CH_PLC_TYPE))
-        {
-            KPrintf("%s", " ");
-            KPrintf("%-15s%-15s",
+        if((ch) && (ch->ch_type == CH_PLC_TYPE)) {
+            printf("%s", " ");
+            printf("%-15s%-15s",
                     channel_type_str[ch->ch_type],
                     ch->ch_name);
 
             driver = ShowChannelFindDriver(ch);
 
-            if(driver)
-            {
-                KPrintf("%-15s", driver->drv_name);
-            }
-            else
-            {
-                KPrintf("%-15s", "nil");
+            if(driver) {
+                printf("%-15s", driver->drv_name);
+            } else {
+                printf("%-15s", "nil");
             }
 
-            if(ch->haldev_cnt)
-            {
-                DoublelistType* dev_node = NONE;
+            if(ch->haldev_cnt) {
+                DoublelistType* dev_node = NULL;
                 DoublelistType* dev_head = &ch->ch_devlink;
                 dev_node = dev_head->node_next;
                 dev_cnt = 1;
 
-                while(dev_node != dev_head)
-                {
+                while(dev_node != dev_head) {
                     device = DOUBLE_LIST_ENTRY(dev_node, struct ChDev, dev_link);
 
-                    if(1 == dev_cnt)
-                    {
-                        if(device)
-                        {
-                            KPrintf("%-16s%-4d\n", device->dev_name, dev_cnt);
+                    if(1 == dev_cnt) {
+                        if(device) {
+                            printf("%-16s%-4d\n", device->dev_name, dev_cnt);
+                        } else {
+                            printf("%-16s%-4d\n", "nil", dev_cnt);
                         }
-                        else
-                        {
-                            KPrintf("%-16s%-4d\n", "nil", dev_cnt);
-                        }
-                    }
-                    else
-                    {
-                        KPrintf("%46s", " ");
+                    } else {
+                        printf("%46s", " ");
 
-                        if(device)
-                        {
-                            KPrintf("%-16s%-4d\n", device->dev_name, dev_cnt);
-                        }
-                        else
-                        {
-                            KPrintf("%-16s%-4d\n", "nil", dev_cnt);
+                        if(device) {
+                            printf("%-16s%-4d\n", device->dev_name, dev_cnt);
+                        } else {
+                            printf("%-16s%-4d\n", "nil", dev_cnt);
                         }
                     }
 
                     dev_cnt++;
                     dev_node = dev_node->node_next;
                 }
-            }
-            else
-            {
-                KPrintf("\n");
+            } else {
+                printf("\n");
             }
         }
 
@@ -212,36 +185,32 @@ void PlcShowChannel(void)
 
     return;
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 ShowChannel, PlcShowChannel, Show PLC information);
+PRIV_SHELL_CMD_FUNCTION(PlcShowChannel, a plc show channel sample, PRIV_SHELL_CMD_MAIN_ATTR);
 
 void PlcShowDev(void)
 {
     PlcDeviceType* plc_dev;
     ChDrvType driver;
     ChDevType device;
-    DoublelistType* plc_node = NONE;
+    DoublelistType* plc_node = NULL;
     DoublelistType* plc_head = &plcdev_list;
     const char* item_array[] = {"device", "vendor", "model", "product", "id"};
     PlcShowDemoInit();
     PlcShowTitle(item_array);
     plc_node = plc_head->node_next;
 
-    do
-    {
+    do {
         plc_dev = DOUBLE_LIST_ENTRY(plc_node, struct PlcDevice, link);
 
-        if(plc_dev)
-        {
-            KPrintf("%s", " ");
-            KPrintf("%-15s%-15s%-15s%-15s%-20d",
+        if(plc_dev) {
+            printf("%s", " ");
+            printf("%-15s%-15s%-15s%-15s%-20d",
                     plc_dev->name,
                     plc_dev->info.vendor,
                     plc_dev->info.model,
                     plc_dev->info.product,
                     plc_dev->info.id);
-            KPrintf("\n");
+            printf("\n");
         }
 
         plc_node = plc_node->node_next;
@@ -250,8 +219,4 @@ void PlcShowDev(void)
 
     return;
 }
-
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-                 ShowPlc, PlcShowDev, Show PLC information);
-
+PRIV_SHELL_CMD_FUNCTION(PlcShowDev, a plc show dev sample, PRIV_SHELL_CMD_MAIN_ATTR);

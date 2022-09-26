@@ -18,9 +18,7 @@
  * @date 2021.12.23
  */
 //
-#ifdef ADD_XIZI_FETURES
-# include <user_api.h>
-#endif
+
 #include <sensor.h>
 
 /**

@@ -4,25 +4,11 @@
 #ifdef POWERLINK_MN
 extern int OplkDemoMnConsole(int argc, char *argv[]);
 
-SHELL_EXPORT_CMD(
-    SHELL_CMD_PERMISSION(0) |
-    SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
-    SHELL_CMD_PARAM_NUM(0) |
-    SHELL_CMD_DISABLE_RETURN,
-    OplkDemoMnConsole,
-    OplkDemoMnConsole,
-    openPOWERLINK demo MN (console version));
+PRIV_SHELL_CMD_FUNCTION(OplkDemoMnConsole, a openPOWERLINK MN sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
 
 #ifdef POWERLINK_CN
 extern int OplkDemoCnConsole(int argc, char *argv[]);
 
-SHELL_EXPORT_CMD(
-    SHELL_CMD_PERMISSION(0) |
-    SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
-    SHELL_CMD_PARAM_NUM(0) |
-    SHELL_CMD_DISABLE_RETURN,
-    OplkDemoCnConsole,
-    OplkDemoCnConsole,
-    openPOWERLINK demo CN (console version));
+PRIV_SHELL_CMD_FUNCTION(OplkDemoCnConsole, a openPOWERLINK CN sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif

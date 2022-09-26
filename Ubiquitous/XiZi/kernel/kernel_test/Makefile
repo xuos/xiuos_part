@@ -88,4 +88,8 @@ ifeq ($(CONFIG_KERNEL_TEST_RISC_CAN),y)
 	SRC_FILES += riscv_test_can.c 
 endif
 
+ifeq ($(CONFIG_KERNEL_TEST_SPI_FLASH),y)
+	SRC_FILES += test_spi_flash.c 
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

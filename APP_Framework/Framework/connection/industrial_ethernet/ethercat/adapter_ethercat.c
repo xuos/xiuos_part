@@ -205,4 +205,4 @@ int AdapterEthercatTest(void)
 
     return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_PARAM_NUM(0) | SHELL_CMD_DISABLE_RETURN, AdapterEthercatTest, AdapterEthercatTest, show adapter ethercat information);
+PRIV_SHELL_CMD_FUNCTION(AdapterEthercatTest, a ethercat test sample, PRIV_SHELL_CMD_MAIN_ATTR);

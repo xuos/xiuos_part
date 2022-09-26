@@ -57,6 +57,9 @@ menuconfig KERNEL_TEST
             bool "Config test i2c"
             default n
         config KERNEL_TEST_RISC_CAN
-            bool "Config test riscv can "
+            bool "Config test riscv can"
+            default n
+        config KERNEL_TEST_SPI_FLASH
+            bool "Config test spi flash"
             default n
     endif

@@ -112,9 +112,6 @@ void CtlCreateFileTest(void)
     CtlFileClose(fd);
 }
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-    CtlCreateFile, CtlCreateFileTest, Test control file);
-
 #ifdef LIB_USING_CJSON
 
 void CtlParseJsonArray(cJSON *dat, int *cmd_len, char *cmd)
@@ -205,9 +202,5 @@ void CtlParseFileTest(void)
     CtlParseJsonData(file_buf);
     free(file_buf);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-    CtlParseFile, CtlParseFileTest, Parse control file);
-
 #endif
 
