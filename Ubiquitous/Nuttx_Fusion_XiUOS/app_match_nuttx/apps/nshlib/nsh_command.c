@@ -608,6 +608,13 @@ static const struct cmdmap_s g_cmdmap[] =
   { "sram",      cmd_Extsram,     1, 1, "[Extra sdram demo cmd.]" },
 #endif
 
+#if defined(CONFIG_SOCKET_DEMO) && !defined(CONFIG_NSH_DISABLE_SOCKET_DEMO)
+  { "udpsend",      cmd_Udpsend,     1, 2, "[Udp send demo cmd.]" },
+  { "udprecv",      cmd_Udprecv,     1, 2, "[Udp recv demo cmd.]" },
+  { "tcpsend",      cmd_Tcpsend,     1, 2, "[Tcp send demo cmd.]" },
+  { "tcprecv",      cmd_Tcprecv,     1, 2, "[Tcp recv demo cmd.]" },
+#endif
+
 #if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
   { "hcho1os",       cmd_Hcho1os,       1, 1, "[get the concentration of formaldehyde with sensor tb600b_wq_hcho1os.]" },
 #endif
