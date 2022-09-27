@@ -35,7 +35,7 @@
 
 void LcdDemo(void)
 {
-    int x1 = 100, y1 = 100, x2 = 200, y2 = 200;
+    int x1 = 50, y1 = 50, x2 = LCD_XSIZE_TFT - 50, y2 = LCD_YSIZE_TFT - 50;
 
     Main_Image_Start_Address(LCD_START_ADDR);
     Main_Image_Width(LCD_XSIZE_TFT);
@@ -49,11 +49,23 @@ void LcdDemo(void)
 
     for(int i = 0; i < 3; i++)
     {
-        syslog(LOG_NOTICE, "Disp_demo %d\n", i);
+        x1 = 50;
+        y1 = 50;
+        x2 = LCD_XSIZE_TFT - 50;
+        y2 = LCD_YSIZE_TFT - 50;
+        syslog(LOG_NOTICE, "Disp_demo %d (%d,%d - %d,%d)\n", i, x1, y1, x2, y2);
         LT768_DrawSquare_Fill(x1, y1, x2, y2, Red);
         up_mdelay(2000);
+        x1 += 20;
+        y1 += 20;
+        x2 -= 20;
+        y2 -= 20;
         LT768_DrawSquare_Fill(x1, y1, x2, y2, Green);
         up_mdelay(2000);
+        x1 += 20;
+        y1 += 20;
+        x2 -= 20;
+        y2 -= 20;
         LT768_DrawSquare_Fill(x1, y1, x2, y2, Blue);
         up_mdelay(2000);
     }
