@@ -128,8 +128,6 @@ void k210_clockconfig(void)
     {
       /* PLL0 selected */
       g_cpu_clock = k210_get_pll0clk() / 2;
-
-      syslog(LOG_NOTICE, "g_cpu clock = %d sel %#x\r\n", g_cpu_clock, clksel0);
     }
   else
     {
@@ -142,12 +140,18 @@ void k210_clockconfig(void)
 
 void k210_sysctl_init(void)
 {
-//    sysctl_pll_set_freq(SYSCTL_PLL0, 800000000UL);
-//    sysctl_pll_set_freq(SYSCTL_PLL1, 400000000UL);
-//    sysctl_pll_set_freq(SYSCTL_PLL2, 45158400UL);
+    sysctl_pll_set_freq(SYSCTL_PLL0, 800000000UL);
+    sysctl_pll_set_freq(SYSCTL_PLL1, 400000000UL);
+    sysctl_pll_set_freq(SYSCTL_PLL2, 45158400UL);
+
     sysctl_clock_set_threshold(SYSCTL_THRESHOLD_APB1, 2);
 
-//    sysctl_set_power_mode(SYSCTL_POWER_BANK0, SYSCTL_POWER_V18);
-//    sysctl_set_power_mode(SYSCTL_POWER_BANK1, SYSCTL_POWER_V18);
-//    sysctl_set_power_mode(SYSCTL_POWER_BANK2, SYSCTL_POWER_V18);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK0, SYSCTL_POWER_V18);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK1, SYSCTL_POWER_V18);
+    sysctl_set_power_mode(SYSCTL_POWER_BANK2, SYSCTL_POWER_V18);
+
+    // for IO-27/28
+    sysctl_set_power_mode(SYSCTL_POWER_BANK4, SYSCTL_POWER_V33);
+    // for IO-20~23
+    sysctl_set_power_mode(SYSCTL_POWER_BANK3, SYSCTL_POWER_V33);
 }

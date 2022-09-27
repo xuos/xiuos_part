@@ -79,6 +79,26 @@ extern "C"
 #define EXTERN extern
 #endif
 
+
+#define GPIO_CAN_RXD       18
+#define GPIO_CAN_TXD       19
+
+#define GPIO_EC200T_RXD     21
+#define GPIO_EC200T_TXD     20
+
+#define GPIO_CH376T_RXD      22
+#define GPIO_CH376T_TXD      23
+
+
+#define FPOA_USART1_RX        K210_IO_FUNC_UART1_RX
+#define FPOA_USART1_TX        K210_IO_FUNC_UART1_TX
+
+#define FPOA_USART2_RX        K210_IO_FUNC_UART2_RX
+#define FPOA_USART2_TX        K210_IO_FUNC_UART2_TX
+
+#define FPOA_USART3_RX        K210_IO_FUNC_UART3_RX
+#define FPOA_USART3_TX        K210_IO_FUNC_UART3_TX
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

@@ -36,6 +36,8 @@
 #include "k210.h"
 #include "k210_clockconfig.h"
 #include "xidatong-riscv64.h"
+#include <arch/board/board.h>
+#include "k210_sysctl.h"
 
 #ifdef CONFIG_BSP_USING_CH438
 #  include "k210_ch438.h"
@@ -83,6 +85,32 @@ int k210_bringup(void)
     {
       syslog(LOG_NOTICE, "board lcd initialize %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_K210_16550_UART1
+  sysctl_clock_enable(SYSCTL_CLOCK_UART1);
+  sysctl_reset(SYSCTL_RESET_UART1);
+  fpioa_set_function(GPIO_CAN_RXD, FPOA_USART1_RX);
+  fpioa_set_function(GPIO_CAN_TXD, FPOA_USART1_TX);
+#endif
+
+#ifdef CONFIG_K210_16550_UART2
+  sysctl_clock_enable(SYSCTL_CLOCK_UART2);
+  sysctl_reset(SYSCTL_RESET_UART2);
+  fpioa_set_function(GPIO_EC200T_RXD, FPOA_USART2_RX);
+  fpioa_set_function(GPIO_EC200T_TXD, FPOA_USART2_TX);
+#endif
+
+#ifdef CONFIG_K210_16550_UART3
+  sysctl_clock_enable(SYSCTL_CLOCK_UART3);
+  sysctl_reset(SYSCTL_RESET_UART3);
+  fpioa_set_function(GPIO_CH376T_RXD, FPOA_USART3_RX);
+  fpioa_set_function(GPIO_CH376T_TXD, FPOA_USART3_TX);
+#endif
+
+#ifdef CONFIG_BSP_USING_ENET
+  k210_sysctl_init();
+  board_enet_initialize();
 #endif
 
   return ret;
