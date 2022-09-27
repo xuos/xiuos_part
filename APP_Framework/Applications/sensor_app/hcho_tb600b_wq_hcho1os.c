@@ -18,11 +18,7 @@
  * @date 2021.12.15
  */
 
-#ifdef ADD_XIZI_FETURES
-# include <user_api.h>
-#endif
 #include <sensor.h>
-
 
 /**
  * @description: Read a hcho

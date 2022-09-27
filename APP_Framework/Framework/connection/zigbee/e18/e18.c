@@ -460,7 +460,7 @@ static int E18Recv(struct Adapter *adapter, void *buf, size_t len)
     return 0;
 }
 
-static int E18Quit(struct Adapter *adapter)
+static int E18Quit(struct Adapter *adapter, unsigned char *priv_net_group)
 {
 
     return 0;

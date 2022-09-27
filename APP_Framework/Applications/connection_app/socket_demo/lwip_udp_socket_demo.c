@@ -53,7 +53,6 @@ char udp_socket_ip[] = {192, 168, 250, 252};
 uint16_t udp_socket_port = LWIP_LOCAL_PORT;
 
 /*****************************************************************************/
-
 static void UdpSocketRecvTask(void *arg)
 {
     int fd = -1;
@@ -62,18 +61,15 @@ static void UdpSocketRecvTask(void *arg)
     int recv_len;
     socklen_t addr_len;
 
-    while(1)
-    {
+    while(1) {
         recv_buf = (char *)malloc(UDP_BUF_SIZE);
-        if(recv_buf == NULL)
-        {
+        if(recv_buf == NULL) {
             lw_error("No memory\n");
             continue;
         }
 
         fd = socket(AF_INET, SOCK_DGRAM, 0);
-        if(fd < 0)
-        {
+        if(fd < 0) {
             lw_error("Socket error\n");
             free(recv_buf);
             continue;
@@ -84,8 +80,7 @@ static void UdpSocketRecvTask(void *arg)
         udp_addr.sin_port = htons(udp_socket_port);
         memset(&(udp_addr.sin_zero), 0, sizeof(udp_addr.sin_zero));
 
-        if(bind(fd, (struct sockaddr *)&udp_addr, sizeof(struct sockaddr)) == -1)
-        {
+        if(bind(fd, (struct sockaddr *)&udp_addr, sizeof(struct sockaddr)) == -1) {
             lw_error("Unable to bind\n");
             close(fd);
             free(recv_buf);
@@ -95,8 +90,7 @@ static void UdpSocketRecvTask(void *arg)
         lw_notice("UDP bind sucess, start to receive.\n");
         lw_notice("\n\nLocal Port:%d\n\n", udp_socket_port);
 
-        while(1)
-        {
+        while(1) {
             memset(recv_buf, 0, UDP_BUF_SIZE);
             recv_len = recvfrom(fd, recv_buf, UDP_BUF_SIZE, 0, (struct sockaddr *)&server_addr, &addr_len);
             if(recv_len > 0)
@@ -115,11 +109,9 @@ static void UdpSocketRecvTask(void *arg)
 #ifdef ADD_XIZI_FETURES
 void UdpSocketRecvTest(int argc, char *argv[])
 {
-    if(argc >= 2)
-    {
+    if(argc >= 2) {
         lw_notice("lw: [%s] target ip %s\n", __func__, argv[1]);
-        if(sscanf(argv[1], "%d.%d.%d.%d:%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3], &udp_socket_port) == EOK)
-        {
+        if(sscanf(argv[1], "%d.%d.%d.%d:%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3], &udp_socket_port) == 0) {
             sscanf(argv[1], "%d.%d.%d.%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3]);
         }
     }
@@ -127,9 +119,7 @@ void UdpSocketRecvTest(int argc, char *argv[])
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, udp_socket_ip);
     sys_thread_new("UdpSocketRecvTask", UdpSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     UDPSocketRecv, UdpSocketRecvTest, UDP Receive DEMO);
+PRIV_SHELL_CMD_FUNCTION(UdpSocketRecvTest, a udp receive sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
 
 static void UdpSocketSendTask(void *arg)
@@ -141,8 +131,7 @@ static void UdpSocketSendTask(void *arg)
     memset(send_str, 0, sizeof(send_str));
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if(fd < 0)
-    {
+    if(fd < 0) {
         lw_error("Socket error\n");
         return;
     }
@@ -153,8 +142,7 @@ static void UdpSocketSendTask(void *arg)
     udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_socket_ip[0], udp_socket_ip[1], udp_socket_ip[2], udp_socket_ip[3]));
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
-    if(connect(fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
-    {
+    if(connect(fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr))) {
         lw_error("Unable to connect\n");
         close(fd);
         return;
@@ -163,8 +151,7 @@ static void UdpSocketSendTask(void *arg)
     lw_print("UDP connect success, start to send.\n");
     lw_notice("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
 
-    while (cnt --)
-    {
+    while (cnt --) {
         snprintf(send_str, sizeof(send_str), "UDP test package times %d\r\n", cnt);
         sendto(fd, send_str, strlen(send_str), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
         lw_notice("Send UDP msg: %s ", send_str);
@@ -178,11 +165,9 @@ static void UdpSocketSendTask(void *arg)
 #ifdef ADD_XIZI_FETURES
 void UdpSocketSendTest(int argc, char *argv[])
 {
-    if(argc >= 2)
-    {
+    if(argc >= 2) {
         lw_notice("lw: [%s] target ip %s\n", __func__, argv[1]);
-        if(sscanf(argv[1], "%d.%d.%d.%d:%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3], &udp_socket_port) == EOK)
-        {
+        if(sscanf(argv[1], "%d.%d.%d.%d:%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3], &udp_socket_port) == 0) {
             sscanf(argv[1], "%d.%d.%d.%d", &udp_socket_ip[0], &udp_socket_ip[1], &udp_socket_ip[2], &udp_socket_ip[3]);
         }
     }
@@ -190,9 +175,7 @@ void UdpSocketSendTest(int argc, char *argv[])
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, udp_socket_ip);
     sys_thread_new("UdpSocketSendTask", UdpSocketSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     UDPSocketSend, UdpSocketSendTest, UDP send echo);
+PRIV_SHELL_CMD_FUNCTION(UdpSocketSendTest, a udp send sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
 
 #ifdef ADD_NUTTX_FETURES
