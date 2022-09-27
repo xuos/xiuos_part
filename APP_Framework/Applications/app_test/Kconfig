@@ -33,5 +33,9 @@ menu "test app"
             config USER_TEST_SEMC
                 bool "Config test semc sdram"
                 default n
+
+            config USER_TEST_LCD
+                bool "Config test lcd device"
+                default n
         endif
 endmenu

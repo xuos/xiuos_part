@@ -600,8 +600,8 @@ static const struct cmdmap_s g_cmdmap[] =
   { "ch438",    cmd_Ch438,     1, 1, "[ch438 demo cmd.]" },
 #endif
 
-#if defined(CONFIG_K210_LCD) && !defined(CONFIG_NSH_DISABLE_LCD)
-  { "lcd",      cmd_Lcd,     1, 1, "[LCD demo cmd.]" },
+#if defined(CONFIG_USER_TEST_LCD) && !defined(CONFIG_NSH_DISABLE_USER_TEST_LCD)
+  { "lcd",      cmd_Lcd,      1, 1, "[LCD demo cmd.]" },
 #endif
 
 #if defined(CONFIG_USER_TEST_SEMC) && !defined(CONFIG_NSH_DISABLE_USER_TEST_SEMC)
