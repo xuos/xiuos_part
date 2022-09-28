@@ -45,7 +45,7 @@ char udp_ip_str[128] = {0};
 uint16_t udp_socket_port = LWIP_LOCAL_PORT;
 
 /*****************************************************************************/
-void udp_set_ip(char *ip_str)
+void UdpSocketConfigParam(char *ip_str)
 {
     int ip1, ip2, ip3, ip4, port = 0;
 
@@ -115,7 +115,7 @@ static void UdpSocketRecvTask(void *arg)
             continue;
         }
 
-        lw_notice("UDP bind sucess, start to receive.\n");
+        lw_notice("UDP bind success, start to receive.\n");
         lw_notice("\n\nLocal Port:%d\n\n", udp_socket_port);
 
         while(1)
@@ -135,21 +135,24 @@ static void UdpSocketRecvTask(void *arg)
     }
 }
 
-#ifdef ADD_XIZI_FETURES
 void UdpSocketRecvTest(int argc, char *argv[])
 {
     if(argc >= 2)
     {
         lw_notice("lw: [%s] target ip %s\n", __func__, argv[1]);
-        udp_set_ip(argv[1]);
+        UdpSocketConfigParam(argv[1]);
     }
 
+#ifdef ADD_XIZI_FETURES
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, udp_socket_ip);
     sys_thread_new("UdpSocketRecvTask", UdpSocketRecvTask, NULL,
         LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+#endif
+#ifdef ADD_NUTTX_FETURES
+    UdpSocketRecvTask(NULL);
+#endif
 }
 PRIV_SHELL_CMD_FUNCTION(UdpSocketRecvTest, a udp receive sample, PRIV_SHELL_CMD_MAIN_ATTR);
-#endif
 
 static void UdpSocketSendTask(void *arg)
 {
@@ -195,32 +198,22 @@ static void UdpSocketSendTask(void *arg)
     return;
 }
 
-#ifdef ADD_XIZI_FETURES
 void UdpSocketSendTest(int argc, char *argv[])
 {
     if(argc >= 2)
     {
         lw_notice("lw: [%s] target ip %s\n", __func__, argv[1]);
-        udp_set_ip(argv[1]);
+        UdpSocketConfigParam(argv[1]);
     }
 
+#ifdef ADD_XIZI_FETURES
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, udp_socket_ip);
     sys_thread_new("UdpSocketSendTask", UdpSocketSendTask, NULL, LWIP_TASK_STACK_SIZE,
-        sLWIP_DEMO_TASK_PRIO);
+        LWIP_DEMO_TASK_PRIO);
+#endif
+#ifdef ADD_NUTTX_FETURES
+    UdpSocketSendTask(NULL);
+#endif
 }
 PRIV_SHELL_CMD_FUNCTION(UdpSocketSendTest, a udp send sample, PRIV_SHELL_CMD_MAIN_ATTR);
-#endif
 
-#ifdef ADD_NUTTX_FETURES
-void udp_recv_demo(char *ip_str)
-{
-    udp_set_ip(ip_str);
-    UdpSocketRecvTask(NULL);
-}
-
-void udp_send_demo(char *ip_str)
-{
-    udp_set_ip(ip_str);
-    UdpSocketSendTask(NULL);
-}
-#endif

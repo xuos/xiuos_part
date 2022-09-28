@@ -50,7 +50,7 @@ uint16_t tcp_socket_port = LWIP_TARGET_PORT;
 char tcp_ip_str[128] = {0};
 
 /******************************************************************************/
-void tcp_set_ip(char *ip_str)
+void TcpSocketConfigParam(char *ip_str)
 {
     int ip1, ip2, ip3, ip4, port = 0;
 
@@ -83,7 +83,7 @@ void tcp_set_ip(char *ip_str)
     }
 }
 
-static void TCPSocketRecvTask(void *arg)
+static void TcpSocketRecvTask(void *arg)
 {
     int fd = -1, clientfd;
     int recv_len;
@@ -155,24 +155,26 @@ static void TCPSocketRecvTask(void *arg)
     free(recv_buf);
 }
 
-#ifdef ADD_XIZI_FETURES
-void TCPSocketRecvTest(int argc, char *argv[])
+void TcpSocketRecvTest(int argc, char *argv[])
 {
-    int result = 0;
-
     if(argc >= 2)
     {
         lw_print("lw: [%s] target ip %s\n", __func__, argv[1]);
-        tcp_set_ip(argv[1]);
+        TcpSocketConfigParam(argv[1]);
     }
 
+#ifdef ADD_XIZI_FETURES
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
-    sys_thread_new("TCPSocketRecvTask", TCPSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
-}
-PRIV_SHELL_CMD_FUNCTION(TCPSocketRecvTest, a tcp receive sample, PRIV_SHELL_CMD_MAIN_ATTR);
+    sys_thread_new("TcpSocketRecvTask", TcpSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 #endif
 
-static void TCPSocketSendTask(void *arg)
+#ifdef ADD_NUTTX_FETURES
+    TcpSocketRecvTask(NULL);
+#endif
+}
+PRIV_SHELL_CMD_FUNCTION(TcpSocketRecvTest, a tcp receive sample, PRIV_SHELL_CMD_MAIN_ATTR);
+
+static void TcpSocketSendTask(void *arg)
 {
     int cnt = LWIP_DEMO_TIMES;
     int fd = -1;
@@ -219,32 +221,21 @@ static void TCPSocketSendTask(void *arg)
     return;
 }
 
-#ifdef ADD_XIZI_FETURES
-void TCPSocketSendTest(int argc, char *argv[])
+void TcpSocketSendTest(int argc, char *argv[])
 {
     if(argc >= 2)
     {
         lw_print("lw: [%s] target ip %s\n", __func__, argv[1]);
-        tcp_set_ip(argv[1]);
+        TcpSocketConfigParam(argv[1]);
     }
 
+#ifdef ADD_XIZI_FETURES
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
-    sys_thread_new("TCP Socket Send", TCPSocketSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
-}
-PRIV_SHELL_CMD_FUNCTION(TCPSocketSendTest, a tcp send sample, PRIV_SHELL_CMD_MAIN_ATTR);
+    sys_thread_new("Tcp Socket Send", TcpSocketSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 #endif
-
 #ifdef ADD_NUTTX_FETURES
-void tcp_recv_demo(char *ip_str)
-{
-    tcp_set_ip(ip_str);
-    TCPSocketRecvTask(NULL);
-}
-
-void tcp_send_demo(char *ip_str)
-{
-    tcp_set_ip(ip_str);
-    TCPSocketSendTask(NULL);
-}
+    TcpSocketSendTask(NULL);
 #endif
+}
+PRIV_SHELL_CMD_FUNCTION(TcpSocketSendTest, a tcp send sample, PRIV_SHELL_CMD_MAIN_ATTR);
 

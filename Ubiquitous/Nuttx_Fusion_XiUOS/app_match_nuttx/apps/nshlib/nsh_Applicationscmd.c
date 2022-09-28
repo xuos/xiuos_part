@@ -81,45 +81,35 @@ int cmd_Extsram(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: socket test
  ****************************************************************************/
 #if defined(CONFIG_SOCKET_DEMO) && !defined(CONFIG_NSH_DISABLE_SOCKET_DEMO)
-extern void udp_set_ip(char *ip_str);
-extern int udp_recv_demo(void);
+void UdpSocketRecvTest(int argc, char *argv[]);
 int cmd_Udprecv(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, UDP receive!\n");
-    if(argc == 2)
-        udp_set_ip(argv[1]);
-    udp_recv_demo();
+    UdpSocketRecvTest(argc, argv);
     return OK;
 }
 
-extern int udp_send_demo(void);
+void UdpSocketSendTest(int argc, char *argv[]);
 int cmd_Udpsend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, UDP send!\n");
-    if(argc == 2)
-        udp_set_ip(argv[1]);
-    udp_send_demo();
+    UdpSocketSendTest(argc, argv);
     return OK;
 }
 
-extern void tcp_set_ip(char *ip_str);
-extern int tcp_recv_demo(void);
+void TcpSocketRecvTest(int argc, char *argv[]);
 int cmd_Tcprecv(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, TCP receive!\n");
-    if(argc == 2)
-        tcp_set_ip(argv[1]);
-    tcp_recv_demo();
+    TcpSocketRecvTest(argc, argv);
     return OK;
 }
 
-extern int tcp_send_demo(void);
+void TcpSocketSendTest(int argc, char *argv[]);
 int cmd_Tcpsend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, TCP send!\n");
-    if(argc == 2)
-        tcp_set_ip(argv[1]);
-    tcp_send_demo();
+    TcpSocketSendTest(argc, argv);
     return OK;
 }
 #endif
