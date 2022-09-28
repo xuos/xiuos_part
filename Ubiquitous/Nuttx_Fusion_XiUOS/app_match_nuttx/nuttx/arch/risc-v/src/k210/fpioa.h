@@ -1,322 +1,43 @@
-/* Copyright 2018 Canaan Inc.
+/****************************************************************************
+ * arch/risc-v/src/k210/fpioa.h
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
 /**
- * @file
- * @brief      Field Programmable GPIO Array (FPIOA)
- *
- *             The FPIOA peripheral supports the following features:
- *
- *             - 48 IO with 256 functions
- *
- *             - Schmitt trigger
- *
- *             - Invert input and output
- *
- *             - Pull up and pull down
- *
- *             - Driving selector
- *
- *             - Static input and output
- *
- */
+* @file fpioa.h
+* @brief nuttx source code
+*                https://github.com/apache/incubator-nuttx.git
+* @version 10.3.0 
+* @author AIIT XUOS Lab
+* @date 2022-09-28
+*/
 
 #ifndef _DRIVER_FPIOA_H
 #define _DRIVER_FPIOA_H
 
 #include <stdint.h>
-//#include "platform.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* clang-format off */
-/* Pad number settings */
 #define FPIOA_NUM_IO    (48)
-/* clang-format on */
 
-/**
- * @brief      FPIOA IO functions
- *
- * @note       FPIOA pin function table
- *
- * | Function  | Name             | Description                       |
- * |-----------|------------------|-----------------------------------|
- * | 0         | JTAG_TCLK        | JTAG Test Clock                   |
- * | 1         | JTAG_TDI         | JTAG Test Data In                 |
- * | 2         | JTAG_TMS         | JTAG Test Mode Select             |
- * | 3         | JTAG_TDO         | JTAG Test Data Out                |
- * | 4         | SPI0_D0          | SPI0 Data 0                       |
- * | 5         | SPI0_D1          | SPI0 Data 1                       |
- * | 6         | SPI0_D2          | SPI0 Data 2                       |
- * | 7         | SPI0_D3          | SPI0 Data 3                       |
- * | 8         | SPI0_D4          | SPI0 Data 4                       |
- * | 9         | SPI0_D5          | SPI0 Data 5                       |
- * | 10        | SPI0_D6          | SPI0 Data 6                       |
- * | 11        | SPI0_D7          | SPI0 Data 7                       |
- * | 12        | SPI0_SS0         | SPI0 Chip Select 0                |
- * | 13        | SPI0_SS1         | SPI0 Chip Select 1                |
- * | 14        | SPI0_SS2         | SPI0 Chip Select 2                |
- * | 15        | SPI0_SS3         | SPI0 Chip Select 3                |
- * | 16        | SPI0_ARB         | SPI0 Arbitration                  |
- * | 17        | SPI0_SCLK        | SPI0 Serial Clock                 |
- * | 18        | UARTHS_RX        | UART High speed Receiver          |
- * | 19        | UARTHS_TX        | UART High speed Transmitter       |
- * | 20        | RESV6            | Reserved function                 |
- * | 21        | RESV7            | Reserved function                 |
- * | 22        | CLK_SPI1         | Clock SPI1                        |
- * | 23        | CLK_I2C1         | Clock I2C1                        |
- * | 24        | GPIOHS0          | GPIO High speed 0                 |
- * | 25        | GPIOHS1          | GPIO High speed 1                 |
- * | 26        | GPIOHS2          | GPIO High speed 2                 |
- * | 27        | GPIOHS3          | GPIO High speed 3                 |
- * | 28        | GPIOHS4          | GPIO High speed 4                 |
- * | 29        | GPIOHS5          | GPIO High speed 5                 |
- * | 30        | GPIOHS6          | GPIO High speed 6                 |
- * | 31        | GPIOHS7          | GPIO High speed 7                 |
- * | 32        | GPIOHS8          | GPIO High speed 8                 |
- * | 33        | GPIOHS9          | GPIO High speed 9                 |
- * | 34        | GPIOHS10         | GPIO High speed 10                |
- * | 35        | GPIOHS11         | GPIO High speed 11                |
- * | 36        | GPIOHS12         | GPIO High speed 12                |
- * | 37        | GPIOHS13         | GPIO High speed 13                |
- * | 38        | GPIOHS14         | GPIO High speed 14                |
- * | 39        | GPIOHS15         | GPIO High speed 15                |
- * | 40        | GPIOHS16         | GPIO High speed 16                |
- * | 41        | GPIOHS17         | GPIO High speed 17                |
- * | 42        | GPIOHS18         | GPIO High speed 18                |
- * | 43        | GPIOHS19         | GPIO High speed 19                |
- * | 44        | GPIOHS20         | GPIO High speed 20                |
- * | 45        | GPIOHS21         | GPIO High speed 21                |
- * | 46        | GPIOHS22         | GPIO High speed 22                |
- * | 47        | GPIOHS23         | GPIO High speed 23                |
- * | 48        | GPIOHS24         | GPIO High speed 24                |
- * | 49        | GPIOHS25         | GPIO High speed 25                |
- * | 50        | GPIOHS26         | GPIO High speed 26                |
- * | 51        | GPIOHS27         | GPIO High speed 27                |
- * | 52        | GPIOHS28         | GPIO High speed 28                |
- * | 53        | GPIOHS29         | GPIO High speed 29                |
- * | 54        | GPIOHS30         | GPIO High speed 30                |
- * | 55        | GPIOHS31         | GPIO High speed 31                |
- * | 56        | GPIO0            | GPIO pin 0                        |
- * | 57        | GPIO1            | GPIO pin 1                        |
- * | 58        | GPIO2            | GPIO pin 2                        |
- * | 59        | GPIO3            | GPIO pin 3                        |
- * | 60        | GPIO4            | GPIO pin 4                        |
- * | 61        | GPIO5            | GPIO pin 5                        |
- * | 62        | GPIO6            | GPIO pin 6                        |
- * | 63        | GPIO7            | GPIO pin 7                        |
- * | 64        | UART1_RX         | UART1 Receiver                    |
- * | 65        | UART1_TX         | UART1 Transmitter                 |
- * | 66        | UART2_RX         | UART2 Receiver                    |
- * | 67        | UART2_TX         | UART2 Transmitter                 |
- * | 68        | UART3_RX         | UART3 Receiver                    |
- * | 69        | UART3_TX         | UART3 Transmitter                 |
- * | 70        | SPI1_D0          | SPI1 Data 0                       |
- * | 71        | SPI1_D1          | SPI1 Data 1                       |
- * | 72        | SPI1_D2          | SPI1 Data 2                       |
- * | 73        | SPI1_D3          | SPI1 Data 3                       |
- * | 74        | SPI1_D4          | SPI1 Data 4                       |
- * | 75        | SPI1_D5          | SPI1 Data 5                       |
- * | 76        | SPI1_D6          | SPI1 Data 6                       |
- * | 77        | SPI1_D7          | SPI1 Data 7                       |
- * | 78        | SPI1_SS0         | SPI1 Chip Select 0                |
- * | 79        | SPI1_SS1         | SPI1 Chip Select 1                |
- * | 80        | SPI1_SS2         | SPI1 Chip Select 2                |
- * | 81        | SPI1_SS3         | SPI1 Chip Select 3                |
- * | 82        | SPI1_ARB         | SPI1 Arbitration                  |
- * | 83        | SPI1_SCLK        | SPI1 Serial Clock                 |
- * | 84        | SPI_SLAVE_D0     | SPI Slave Data 0                  |
- * | 85        | SPI_SLAVE_SS     | SPI Slave Select                  |
- * | 86        | SPI_SLAVE_SCLK   | SPI Slave Serial Clock            |
- * | 87        | I2S0_MCLK        | I2S0 Master Clock                 |
- * | 88        | I2S0_SCLK        | I2S0 Serial Clock(BCLK)           |
- * | 89        | I2S0_WS          | I2S0 Word Select(LRCLK)           |
- * | 90        | I2S0_IN_D0       | I2S0 Serial Data Input 0          |
- * | 91        | I2S0_IN_D1       | I2S0 Serial Data Input 1          |
- * | 92        | I2S0_IN_D2       | I2S0 Serial Data Input 2          |
- * | 93        | I2S0_IN_D3       | I2S0 Serial Data Input 3          |
- * | 94        | I2S0_OUT_D0      | I2S0 Serial Data Output 0         |
- * | 95        | I2S0_OUT_D1      | I2S0 Serial Data Output 1         |
- * | 96        | I2S0_OUT_D2      | I2S0 Serial Data Output 2         |
- * | 97        | I2S0_OUT_D3      | I2S0 Serial Data Output 3         |
- * | 98        | I2S1_MCLK        | I2S1 Master Clock                 |
- * | 99        | I2S1_SCLK        | I2S1 Serial Clock(BCLK)           |
- * | 100       | I2S1_WS          | I2S1 Word Select(LRCLK)           |
- * | 101       | I2S1_IN_D0       | I2S1 Serial Data Input 0          |
- * | 102       | I2S1_IN_D1       | I2S1 Serial Data Input 1          |
- * | 103       | I2S1_IN_D2       | I2S1 Serial Data Input 2          |
- * | 104       | I2S1_IN_D3       | I2S1 Serial Data Input 3          |
- * | 105       | I2S1_OUT_D0      | I2S1 Serial Data Output 0         |
- * | 106       | I2S1_OUT_D1      | I2S1 Serial Data Output 1         |
- * | 107       | I2S1_OUT_D2      | I2S1 Serial Data Output 2         |
- * | 108       | I2S1_OUT_D3      | I2S1 Serial Data Output 3         |
- * | 109       | I2S2_MCLK        | I2S2 Master Clock                 |
- * | 110       | I2S2_SCLK        | I2S2 Serial Clock(BCLK)           |
- * | 111       | I2S2_WS          | I2S2 Word Select(LRCLK)           |
- * | 112       | I2S2_IN_D0       | I2S2 Serial Data Input 0          |
- * | 113       | I2S2_IN_D1       | I2S2 Serial Data Input 1          |
- * | 114       | I2S2_IN_D2       | I2S2 Serial Data Input 2          |
- * | 115       | I2S2_IN_D3       | I2S2 Serial Data Input 3          |
- * | 116       | I2S2_OUT_D0      | I2S2 Serial Data Output 0         |
- * | 117       | I2S2_OUT_D1      | I2S2 Serial Data Output 1         |
- * | 118       | I2S2_OUT_D2      | I2S2 Serial Data Output 2         |
- * | 119       | I2S2_OUT_D3      | I2S2 Serial Data Output 3         |
- * | 120       | RESV0            | Reserved function                 |
- * | 121       | RESV1            | Reserved function                 |
- * | 122       | RESV2            | Reserved function                 |
- * | 123       | RESV3            | Reserved function                 |
- * | 124       | RESV4            | Reserved function                 |
- * | 125       | RESV5            | Reserved function                 |
- * | 126       | I2C0_SCLK        | I2C0 Serial Clock                 |
- * | 127       | I2C0_SDA         | I2C0 Serial Data                  |
- * | 128       | I2C1_SCLK        | I2C1 Serial Clock                 |
- * | 129       | I2C1_SDA         | I2C1 Serial Data                  |
- * | 130       | I2C2_SCLK        | I2C2 Serial Clock                 |
- * | 131       | I2C2_SDA         | I2C2 Serial Data                  |
- * | 132       | CMOS_XCLK        | DVP System Clock                  |
- * | 133       | CMOS_RST         | DVP System Reset                  |
- * | 134       | CMOS_PWDN        | DVP Power Down Mode               |
- * | 135       | CMOS_VSYNC       | DVP Vertical Sync                 |
- * | 136       | CMOS_HREF        | DVP Horizontal Reference output   |
- * | 137       | CMOS_PCLK        | Pixel Clock                       |
- * | 138       | CMOS_D0          | Data Bit 0                        |
- * | 139       | CMOS_D1          | Data Bit 1                        |
- * | 140       | CMOS_D2          | Data Bit 2                        |
- * | 141       | CMOS_D3          | Data Bit 3                        |
- * | 142       | CMOS_D4          | Data Bit 4                        |
- * | 143       | CMOS_D5          | Data Bit 5                        |
- * | 144       | CMOS_D6          | Data Bit 6                        |
- * | 145       | CMOS_D7          | Data Bit 7                        |
- * | 146       | SCCB_SCLK        | SCCB Serial Clock                 |
- * | 147       | SCCB_SDA         | SCCB Serial Data                  |
- * | 148       | UART1_CTS        | UART1 Clear To Send               |
- * | 149       | UART1_DSR        | UART1 Data Set Ready              |
- * | 150       | UART1_DCD        | UART1 Data Carrier Detect         |
- * | 151       | UART1_RI         | UART1 Ring Indicator              |
- * | 152       | UART1_SIR_IN     | UART1 Serial Infrared Input       |
- * | 153       | UART1_DTR        | UART1 Data Terminal Ready         |
- * | 154       | UART1_RTS        | UART1 Request To Send             |
- * | 155       | UART1_OUT2       | UART1 User-designated Output 2    |
- * | 156       | UART1_OUT1       | UART1 User-designated Output 1    |
- * | 157       | UART1_SIR_OUT    | UART1 Serial Infrared Output      |
- * | 158       | UART1_BAUD       | UART1 Transmit Clock Output       |
- * | 159       | UART1_RE         | UART1 Receiver Output Enable      |
- * | 160       | UART1_DE         | UART1 Driver Output Enable        |
- * | 161       | UART1_RS485_EN   | UART1 RS485 Enable                |
- * | 162       | UART2_CTS        | UART2 Clear To Send               |
- * | 163       | UART2_DSR        | UART2 Data Set Ready              |
- * | 164       | UART2_DCD        | UART2 Data Carrier Detect         |
- * | 165       | UART2_RI         | UART2 Ring Indicator              |
- * | 166       | UART2_SIR_IN     | UART2 Serial Infrared Input       |
- * | 167       | UART2_DTR        | UART2 Data Terminal Ready         |
- * | 168       | UART2_RTS        | UART2 Request To Send             |
- * | 169       | UART2_OUT2       | UART2 User-designated Output 2    |
- * | 170       | UART2_OUT1       | UART2 User-designated Output 1    |
- * | 171       | UART2_SIR_OUT    | UART2 Serial Infrared Output      |
- * | 172       | UART2_BAUD       | UART2 Transmit Clock Output       |
- * | 173       | UART2_RE         | UART2 Receiver Output Enable      |
- * | 174       | UART2_DE         | UART2 Driver Output Enable        |
- * | 175       | UART2_RS485_EN   | UART2 RS485 Enable                |
- * | 176       | UART3_CTS        | UART3 Clear To Send               |
- * | 177       | UART3_DSR        | UART3 Data Set Ready              |
- * | 178       | UART3_DCD        | UART3 Data Carrier Detect         |
- * | 179       | UART3_RI         | UART3 Ring Indicator              |
- * | 180       | UART3_SIR_IN     | UART3 Serial Infrared Input       |
- * | 181       | UART3_DTR        | UART3 Data Terminal Ready         |
- * | 182       | UART3_RTS        | UART3 Request To Send             |
- * | 183       | UART3_OUT2       | UART3 User-designated Output 2    |
- * | 184       | UART3_OUT1       | UART3 User-designated Output 1    |
- * | 185       | UART3_SIR_OUT    | UART3 Serial Infrared Output      |
- * | 186       | UART3_BAUD       | UART3 Transmit Clock Output       |
- * | 187       | UART3_RE         | UART3 Receiver Output Enable      |
- * | 188       | UART3_DE         | UART3 Driver Output Enable        |
- * | 189       | UART3_RS485_EN   | UART3 RS485 Enable                |
- * | 190       | TIMER0_TOGGLE1   | TIMER0 Toggle Output 1            |
- * | 191       | TIMER0_TOGGLE2   | TIMER0 Toggle Output 2            |
- * | 192       | TIMER0_TOGGLE3   | TIMER0 Toggle Output 3            |
- * | 193       | TIMER0_TOGGLE4   | TIMER0 Toggle Output 4            |
- * | 194       | TIMER1_TOGGLE1   | TIMER1 Toggle Output 1            |
- * | 195       | TIMER1_TOGGLE2   | TIMER1 Toggle Output 2            |
- * | 196       | TIMER1_TOGGLE3   | TIMER1 Toggle Output 3            |
- * | 197       | TIMER1_TOGGLE4   | TIMER1 Toggle Output 4            |
- * | 198       | TIMER2_TOGGLE1   | TIMER2 Toggle Output 1            |
- * | 199       | TIMER2_TOGGLE2   | TIMER2 Toggle Output 2            |
- * | 200       | TIMER2_TOGGLE3   | TIMER2 Toggle Output 3            |
- * | 201       | TIMER2_TOGGLE4   | TIMER2 Toggle Output 4            |
- * | 202       | CLK_SPI2         | Clock SPI2                        |
- * | 203       | CLK_I2C2         | Clock I2C2                        |
- * | 204       | INTERNAL0        | Internal function signal 0        |
- * | 205       | INTERNAL1        | Internal function signal 1        |
- * | 206       | INTERNAL2        | Internal function signal 2        |
- * | 207       | INTERNAL3        | Internal function signal 3        |
- * | 208       | INTERNAL4        | Internal function signal 4        |
- * | 209       | INTERNAL5        | Internal function signal 5        |
- * | 210       | INTERNAL6        | Internal function signal 6        |
- * | 211       | INTERNAL7        | Internal function signal 7        |
- * | 212       | INTERNAL8        | Internal function signal 8        |
- * | 213       | INTERNAL9        | Internal function signal 9        |
- * | 214       | INTERNAL10       | Internal function signal 10       |
- * | 215       | INTERNAL11       | Internal function signal 11       |
- * | 216       | INTERNAL12       | Internal function signal 12       |
- * | 217       | INTERNAL13       | Internal function signal 13       |
- * | 218       | INTERNAL14       | Internal function signal 14       |
- * | 219       | INTERNAL15       | Internal function signal 15       |
- * | 220       | INTERNAL16       | Internal function signal 16       |
- * | 221       | INTERNAL17       | Internal function signal 17       |
- * | 222       | CONSTANT         | Constant function                 |
- * | 223       | INTERNAL18       | Internal function signal 18       |
- * | 224       | DEBUG0           | Debug function 0                  |
- * | 225       | DEBUG1           | Debug function 1                  |
- * | 226       | DEBUG2           | Debug function 2                  |
- * | 227       | DEBUG3           | Debug function 3                  |
- * | 228       | DEBUG4           | Debug function 4                  |
- * | 229       | DEBUG5           | Debug function 5                  |
- * | 230       | DEBUG6           | Debug function 6                  |
- * | 231       | DEBUG7           | Debug function 7                  |
- * | 232       | DEBUG8           | Debug function 8                  |
- * | 233       | DEBUG9           | Debug function 9                  |
- * | 234       | DEBUG10          | Debug function 10                 |
- * | 235       | DEBUG11          | Debug function 11                 |
- * | 236       | DEBUG12          | Debug function 12                 |
- * | 237       | DEBUG13          | Debug function 13                 |
- * | 238       | DEBUG14          | Debug function 14                 |
- * | 239       | DEBUG15          | Debug function 15                 |
- * | 240       | DEBUG16          | Debug function 16                 |
- * | 241       | DEBUG17          | Debug function 17                 |
- * | 242       | DEBUG18          | Debug function 18                 |
- * | 243       | DEBUG19          | Debug function 19                 |
- * | 244       | DEBUG20          | Debug function 20                 |
- * | 245       | DEBUG21          | Debug function 21                 |
- * | 246       | DEBUG22          | Debug function 22                 |
- * | 247       | DEBUG23          | Debug function 23                 |
- * | 248       | DEBUG24          | Debug function 24                 |
- * | 249       | DEBUG25          | Debug function 25                 |
- * | 250       | DEBUG26          | Debug function 26                 |
- * | 251       | DEBUG27          | Debug function 27                 |
- * | 252       | DEBUG28          | Debug function 28                 |
- * | 253       | DEBUG29          | Debug function 29                 |
- * | 254       | DEBUG30          | Debug function 30                 |
- * | 255       | DEBUG31          | Debug function 31                 |
- *
- * Any IO of FPIOA have 256 functions, it is a IO-function matrix.
- * All IO have default reset function, after reset, re-configure
- * IO function is required.
- */
-
-/* clang-format off */
 typedef enum _fpioa_function
 {
     FUNC_JTAG_TCLK        = 0,  /*!< JTAG Test Clock */
