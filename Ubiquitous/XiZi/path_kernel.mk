@@ -289,6 +289,12 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/third_party_driver \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/Include \
+	-I$(BSP_ROOT)/third_party_driver/ethernet \
+	-I$(BSP_ROOT)/third_party_driver/ethernet/mdio/enet \
+	-I$(BSP_ROOT)/third_party_driver/ethernet/mdio/enet_qos \
+	-I$(BSP_ROOT)/third_party_driver/ethernet/phy/ksz8081 \
+	-I$(BSP_ROOT)/third_party_driver/ethernet/phy/ksz9131rnx \
+	-I$(BSP_ROOT)/third_party_driver/cm7 \
 	-I$(BSP_ROOT)/xip \
 	-I$(KERNEL_ROOT)/include \
 	-I$(KERNEL_ROOT)/resources/include \

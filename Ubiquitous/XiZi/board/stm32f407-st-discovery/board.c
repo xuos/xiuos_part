@@ -50,6 +50,9 @@ extern int Stm32HwRtcInit();
 extern int HwSdioInit();
 extern int Stm32HwAdcInit(void);
 extern int Stm32HwDacInit(void);
+#ifdef BSP_USING_LWIP
+extern int ETH_BSP_Config();
+#endif
 
 static void ClockConfiguration()
 {
@@ -142,6 +145,10 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_DAC
     {"hw dac init", Stm32HwDacInit},
 #endif
+#ifdef BSP_USING_LWIP
+    {"ETH_BSP", ETH_BSP_Config},
+#endif
+
 	{ " NONE ",NONE },
 };
 void InitBoardHardware()
