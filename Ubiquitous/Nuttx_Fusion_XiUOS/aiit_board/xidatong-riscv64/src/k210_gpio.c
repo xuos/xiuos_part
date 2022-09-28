@@ -51,10 +51,12 @@
 #define GPIO_E220_M0   44
 #define GPIO_E220_M1   45
 #define GPIO_E18_MODE  46
+#define GPIO_WIFI_EN   8
 
 #define FPIOA_E220_M0   1
 #define FPIOA_E220_M1   2
 #define FPIOA_E18_MODE  3
+#define FPIOA_WIFI_EN   4
 
 /****************************************************************************
  * Private Types
@@ -94,14 +96,16 @@ static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
   GPIO_E220_M0, 
   GPIO_E220_M1,
-  GPIO_E18_MODE
+  GPIO_E18_MODE,
+  GPIO_WIFI_EN
 };
 
 static const uint32_t g_fpioa[BOARD_NGPIOOUT] =
 {
   FPIOA_E220_M0, 
   FPIOA_E220_M1,
-  FPIOA_E18_MODE
+  FPIOA_E18_MODE,
+  FPIOA_WIFI_EN
 };
 
 static struct k210gpio_dev_s g_gpout[BOARD_NGPIOOUT];
