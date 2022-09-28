@@ -99,8 +99,8 @@ int AdapterWifiInit(void)
 /******************wifi TEST*********************/
 int AdapterWifiTest(void)
 {
-    char cmd[64];
-    int baud_rate = BAUD_RATE_57600;
+//    char cmd[64];
+//    int baud_rate = BAUD_RATE_57600;
 
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
 
@@ -338,7 +338,7 @@ void AdapterWifiGetParam(int argc, char *argv[])
 }
 
 
-int AdapterWifiTest(int argc, char *argv[])
+int AdapterWifiTestWithParam(int argc, char *argv[])
 {
     int i, ret;
 
