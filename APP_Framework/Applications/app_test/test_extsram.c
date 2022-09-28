@@ -1,11 +1,26 @@
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
 
-#ifdef ADD_XIZI_FETURES
-#include <xizi.h>
-#endif
+/**
+* @file:    test_extsram.c
+* @brief:   a extsram test application
+* @version: 2.0
+* @author:  AIIT XUOS Lab
+* @date:    2022/9/26
+*
+*/
 
-#include <stdio.h>
-#include <stdint.h>
-#include "transform.h"
+#include <transform.h>
+#include "stdio.h"
 
 /* parameters for sram peripheral */
 // /* stm32f4 Bank3:0X68000000 */
@@ -22,7 +37,7 @@
 
 #define TICK_PER_SECOND 100
 
-int extsram_test(void)
+int ExtsramTest(void)
 {
     int i = 0;
     uint32_t start_time = 0, time_cast = 0;
@@ -89,9 +104,4 @@ int extsram_test(void)
 
     return 0;
 }
-
-#ifdef ADD_XIZI_FETURES
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),
-    sram_test, sram_test, sram_test);
-#endif
-
+PRIV_SHELL_CMD_FUNCTION(ExtsramTest, a extsram test sample, PRIV_SHELL_CMD_MAIN_ATTR);

@@ -1,8 +1,4 @@
-SRC_FILES :=
-
-ifeq ($(CONFIG_USER_TEST_SPI_FLASH),y)
-	SRC_FILES += test_spi_flash.c
-endif
+SRC_FILES := test_shell.c
 
 ifeq ($(CONFIG_USER_TEST_ADC),y)
 	SRC_FILES += test_adc.c

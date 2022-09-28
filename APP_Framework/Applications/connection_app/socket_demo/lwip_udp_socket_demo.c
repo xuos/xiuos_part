@@ -45,7 +45,6 @@ char udp_ip_str[128] = {0};
 uint16_t udp_socket_port = LWIP_LOCAL_PORT;
 
 /*****************************************************************************/
-
 void udp_set_ip(char *ip_str)
 {
     int ip1, ip2, ip3, ip4, port = 0;
@@ -149,9 +148,7 @@ void UdpSocketRecvTest(int argc, char *argv[])
     sys_thread_new("UdpSocketRecvTask", UdpSocketRecvTask, NULL,
         LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     UDPSocketRecv, UdpSocketRecvTest, UDP Receive DEMO);
+PRIV_SHELL_CMD_FUNCTION(UdpSocketRecvTest, a udp receive sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
 
 static void UdpSocketSendTask(void *arg)
@@ -211,9 +208,7 @@ void UdpSocketSendTest(int argc, char *argv[])
     sys_thread_new("UdpSocketSendTask", UdpSocketSendTask, NULL, LWIP_TASK_STACK_SIZE,
         sLWIP_DEMO_TASK_PRIO);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     UDPSocketSend, UdpSocketSendTest, UDP send echo);
+PRIV_SHELL_CMD_FUNCTION(UdpSocketSendTest, a udp send sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
 
 #ifdef ADD_NUTTX_FETURES

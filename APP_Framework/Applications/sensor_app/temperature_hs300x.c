@@ -18,10 +18,6 @@
  * @date 2021.04.23
  */
 
-#ifdef ADD_XIZI_FETURES
-# include <user_api.h>
-#endif
-
 #include <sensor.h>
 
 /**
@@ -31,7 +27,7 @@
 void TempHs300x(void)
 {
     int i = 0;
-    int32 temperature;
+    int32_t temperature;
     struct SensorQuantity *temp = SensorQuantityFind(SENSOR_QUANTITY_HS300X_TEMPERATURE, SENSOR_QUANTITY_TEMP);
     SensorQuantityOpen(temp);
     for (i = 0; i < 100; i ++) {

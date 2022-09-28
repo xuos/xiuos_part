@@ -50,7 +50,6 @@ uint16_t tcp_socket_port = LWIP_TARGET_PORT;
 char tcp_ip_str[128] = {0};
 
 /******************************************************************************/
-
 void tcp_set_ip(char *ip_str)
 {
     int ip1, ip2, ip3, ip4, port = 0;
@@ -170,9 +169,7 @@ void TCPSocketRecvTest(int argc, char *argv[])
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
     sys_thread_new("TCPSocketRecvTask", TCPSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     TCPSocketRecv, TCPSocketRecvTest, TCP recv echo);
+PRIV_SHELL_CMD_FUNCTION(TCPSocketRecvTest, a tcp receive sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
 
 static void TCPSocketSendTask(void *arg)
@@ -234,11 +231,8 @@ void TCPSocketSendTest(int argc, char *argv[])
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
     sys_thread_new("TCP Socket Send", TCPSocketSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     TCPSocketSend, TCPSocketSendTest, TCP send demo);
+PRIV_SHELL_CMD_FUNCTION(TCPSocketSendTest, a tcp send sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
-
 
 #ifdef ADD_NUTTX_FETURES
 void tcp_recv_demo(char *ip_str)
