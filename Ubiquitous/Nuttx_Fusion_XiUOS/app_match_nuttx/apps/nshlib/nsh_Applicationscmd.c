@@ -330,35 +330,35 @@ int cmd_WindSpeedQsFs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_OPENZIGBEE)
-extern int openzigbee(void);
+extern int OpenZigbee(void);
 int cmd_openzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
-    openzigbee();
+    OpenZigbee();
     return OK;
 }
 #endif
 
 
 #if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_SENDZIGBEE)
-extern int sendzigbee(int argc, char *argv[]);
+extern int SendZigbee(int argc, char *argv[]);
 int cmd_sendzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
-    sendzigbee(argc,argv);
+    SendZigbee(argc,argv);
     return OK;
 }
 #endif
 
 #if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_RECVZIGBEE)
-extern int recvzigbee(void);
+extern int RecvZigbee(void);
 int cmd_recvzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
-    recvzigbee();
+    RecvZigbee();
     return OK;
 }
 #endif
