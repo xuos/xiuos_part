@@ -4,7 +4,7 @@
  * \brief Consistency checks for configuration options
  */
 /*
- *  Copyright (C) 2006-2018, ARM Limited, All Rights Reserved
+ *  Copyright (C) 2006-2016, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -74,16 +74,6 @@
 #error "MBEDTLS_CTR_DRBG_C defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_CTR_DRBG_C) && defined(MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH) && !defined(MBEDTLS_CTR_DRBG_USE_128_BIT_KEY)
-#error "MBEDTLS_CTR_DRBG_C and MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH defined, but MBEDTLS_CTR_DRBG_USE_128_BIT_KEY is not defined"
-#endif
-
-#if defined(MBEDTLS_AES_128_BIT_MASKED) && ( !defined(MBEDTLS_AES_SCA_COUNTERMEASURES) || \
-                                             !defined(MBEDTLS_AES_ONLY_ENCRYPT) || \
-                                             !defined(MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH) )
-#error "MBEDTLS_AES_128_BIT_MASKED defined, but not all prerequisites"
-#endif
-
 #if defined(MBEDTLS_DHM_C) && !defined(MBEDTLS_BIGNUM_C)
 #error "MBEDTLS_DHM_C defined, but not all prerequisites"
 #endif
@@ -95,56 +85,6 @@
 #if defined(MBEDTLS_CMAC_C) && \
     !defined(MBEDTLS_AES_C) && !defined(MBEDTLS_DES_C)
 #error "MBEDTLS_CMAC_C defined, but not all prerequisites"
-#endif
-
-#if defined(MBEDTLS_SSL_CONF_SINGLE_EC) &&                 \
-    ( !defined(MBEDTLS_SSL_CONF_SINGLE_EC_TLS_ID)       || \
-      ( defined(MBEDTLS_USE_TINYCRYPT) &&                  \
-        !defined(MBEDTLS_SSL_CONF_SINGLE_UECC_GRP_ID) ) || \
-      ( defined(MBEDTLS_ECP_C) &&                          \
-        !defined(MBEDTLS_SSL_CONF_SINGLE_EC_GRP_ID) ) )
-#error "MBEDTLS_SSL_CONF_SINGLE_EC defined, but not all prerequesites"
-#endif
-
-#if defined(MBEDTLS_SSL_CONF_SINGLE_SIG_HASH) &&           \
-    ( !defined(MBEDTLS_SSL_CONF_SINGLE_SIG_HASH_MD_ID) || \
-      !defined(MBEDTLS_SSL_CONF_SINGLE_SIG_HASH_TLS_ID) )
-#error "MBEDTLS_SSL_CONF_SINGLE_SIG_HASH defined, but not all prerequesites"
-#endif
-
-#if defined(MBEDTLS_USE_TINYCRYPT) && defined(MBEDTLS_NO_64BIT_MULTIPLICATION)
-#error "MBEDTLS_USE_TINYCRYPT defined, but it cannot be defined with MBEDTLS_NO_64BIT_MULTIPLICATION"
-#endif
-
-#if defined(MBEDTLS_USE_TINYCRYPT) && !defined(MBEDTLS_SHA256_C)
-#error "MBEDTLS_USE_TINYCRYPT defined, but not MBEDTLS_SHA256_C"
-#endif
-
-#if defined(MBEDTLS_USE_TINYCRYPT) &&                                    \
-    !( defined(MBEDTLS_SSL_CONF_SINGLE_EC)       &&                      \
-       MBEDTLS_SSL_CONF_SINGLE_EC_TLS_ID   == 23 &&                      \
-       MBEDTLS_SSL_CONF_SINGLE_UECC_GRP_ID == MBEDTLS_UECC_DP_SECP256R1 )
-#error "MBEDTLS_USE_TINYCRYPT requires the use of MBEDTLS_SSL_CONF_SINGLE_UECC_GRP_ID to hardcode the choice of Secp256r1"
-#endif
-
-#if defined(MBEDTLS_USE_TINYCRYPT) && defined(MBEDTLS_ECP_C)
-#error "MBEDTLS_USE_TINYCRYPT and MBEDTLS_ECP_C cannot be used simultaneously"
-#endif
-
-#if defined(MBEDTLS_USE_TINYCRYPT) && \
-    !defined(MBEDTLS_SSL_CONF_RNG)
-#error "MBEDTLS_USE_TINYCRYPT defined, but not all prerequesites"
-#endif
-
-#if defined(MBEDTLS_OPTIMIZE_TINYCRYPT_ASM) &&           \
-    ( !defined(MBEDTLS_HAVE_ASM) || \
-      !defined(MBEDTLS_USE_TINYCRYPT) )
-#error "MBEDTLS_OPTIMIZE_TINYCRYPT_ASM defined, but not all prerequesites"
-#endif
-
-#if defined(MBEDTLS_NIST_KW_C) && \
-    ( !defined(MBEDTLS_AES_C) || !defined(MBEDTLS_CIPHER_C) )
-#error "MBEDTLS_NIST_KW_C defined, but not all prerequisites"
 #endif
 
 #if defined(MBEDTLS_ECDH_C) && !defined(MBEDTLS_ECP_C)
@@ -163,22 +103,11 @@
 #error "MBEDTLS_ECJPAKE_C defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_ECP_RESTARTABLE)           && \
-    ( defined(MBEDTLS_ECDH_COMPUTE_SHARED_ALT) || \
-      defined(MBEDTLS_ECDH_GEN_PUBLIC_ALT)     || \
-      defined(MBEDTLS_ECDSA_SIGN_ALT)          || \
-      defined(MBEDTLS_ECDSA_VERIFY_ALT)        || \
-      defined(MBEDTLS_ECDSA_GENKEY_ALT)        || \
-      defined(MBEDTLS_ECP_INTERNAL_ALT)        || \
-      defined(MBEDTLS_ECP_ALT) )
-#error "MBEDTLS_ECP_RESTARTABLE defined, but it cannot coexist with an alternative ECP implementation"
-#endif
-
 #if defined(MBEDTLS_ECDSA_DETERMINISTIC) && !defined(MBEDTLS_HMAC_DRBG_C)
 #error "MBEDTLS_ECDSA_DETERMINISTIC defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_ECP_C) && ( !defined(MBEDTLS_BIGNUM_C) || (    \
+#if defined(MBEDTLS_ECP_C) && ( !defined(MBEDTLS_BIGNUM_C) || (   \
     !defined(MBEDTLS_ECP_DP_SECP192R1_ENABLED) &&                  \
     !defined(MBEDTLS_ECP_DP_SECP224R1_ENABLED) &&                  \
     !defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED) &&                  \
@@ -189,25 +118,8 @@
     !defined(MBEDTLS_ECP_DP_BP512R1_ENABLED)   &&                  \
     !defined(MBEDTLS_ECP_DP_SECP192K1_ENABLED) &&                  \
     !defined(MBEDTLS_ECP_DP_SECP224K1_ENABLED) &&                  \
-    !defined(MBEDTLS_ECP_DP_SECP256K1_ENABLED) &&                  \
-    !defined(MBEDTLS_ECP_DP_CURVE25519_ENABLED) &&                 \
-    !defined(MBEDTLS_ECP_DP_CURVE448_ENABLED) ) )
+    !defined(MBEDTLS_ECP_DP_SECP256K1_ENABLED) ) )
 #error "MBEDTLS_ECP_C defined, but not all prerequisites"
-#endif
-
-#if ( defined(MBEDTLS_ECP_DP_SECP192R1_ENABLED) ||                  \
-      defined(MBEDTLS_ECP_DP_SECP224R1_ENABLED) ||                  \
-      defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED) ||                  \
-      defined(MBEDTLS_ECP_DP_SECP384R1_ENABLED) ||                  \
-      defined(MBEDTLS_ECP_DP_SECP521R1_ENABLED) ||                  \
-      defined(MBEDTLS_ECP_DP_BP256R1_ENABLED)   ||                  \
-      defined(MBEDTLS_ECP_DP_BP384R1_ENABLED)   ||                  \
-      defined(MBEDTLS_ECP_DP_BP512R1_ENABLED)   ||                  \
-      defined(MBEDTLS_ECP_DP_SECP192K1_ENABLED) ||                  \
-      defined(MBEDTLS_ECP_DP_SECP224K1_ENABLED) ||                  \
-      defined(MBEDTLS_ECP_DP_SECP256K1_ENABLED) ) &&                \
-    !defined(MBEDTLS_ECP_C)
-#error "At least one ECP curve enabled, but not all prerequesites"
 #endif
 
 #if defined(MBEDTLS_PK_PARSE_C) && !defined(MBEDTLS_ASN1_PARSE_C)
@@ -283,23 +195,17 @@
 #error "MBEDTLS_HAVEGE_C defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_HKDF_C) && !defined(MBEDTLS_MD_C)
-#error "MBEDTLS_HKDF_C defined, but not all prerequisites"
-#endif
-
 #if defined(MBEDTLS_HMAC_DRBG_C) && !defined(MBEDTLS_MD_C)
 #error "MBEDTLS_HMAC_DRBG_C defined, but not all prerequisites"
 #endif
 
 #if defined(MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED) &&                 \
-    ( !( defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_USE_TINYCRYPT) ) || \
-      !defined(MBEDTLS_X509_CRT_PARSE_C) )
+    ( !defined(MBEDTLS_ECDH_C) || !defined(MBEDTLS_X509_CRT_PARSE_C) )
 #error "MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED) &&                   \
-    ( !( defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_USE_TINYCRYPT) ) || \
-      !defined(MBEDTLS_X509_CRT_PARSE_C) )
+#if defined(MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED) &&                 \
+    ( !defined(MBEDTLS_ECDH_C) || !defined(MBEDTLS_X509_CRT_PARSE_C) )
 #error "MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED defined, but not all prerequisites"
 #endif
 
@@ -308,7 +214,7 @@
 #endif
 
 #if defined(MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED) &&                     \
-    !(defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_USE_TINYCRYPT) )
+    !defined(MBEDTLS_ECDH_C)
 #error "MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED defined, but not all prerequisites"
 #endif
 
@@ -318,17 +224,14 @@
 #error "MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED) &&                  \
-    ( !( defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_USE_TINYCRYPT) ) || \
-      !defined(MBEDTLS_RSA_C)                                        || \
-      !defined(MBEDTLS_X509_CRT_PARSE_C)                             || \
-      !defined(MBEDTLS_PKCS1_V15) )
+#if defined(MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED) &&                 \
+    ( !defined(MBEDTLS_ECDH_C) || !defined(MBEDTLS_RSA_C) ||          \
+      !defined(MBEDTLS_X509_CRT_PARSE_C) || !defined(MBEDTLS_PKCS1_V15) )
 #error "MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED defined, but not all prerequisites"
 #endif
 
 #if defined(MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED) &&                 \
-    ( !( defined(MBEDTLS_ECDH_C)  || defined(MBEDTLS_USE_TINYCRYPT) ) || \
-      !( defined(MBEDTLS_ECDSA_C) || defined(MBEDTLS_USE_TINYCRYPT) ) || \
+    ( !defined(MBEDTLS_ECDH_C) || !defined(MBEDTLS_ECDSA_C) ||          \
       !defined(MBEDTLS_X509_CRT_PARSE_C) )
 #error "MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED defined, but not all prerequisites"
 #endif
@@ -351,25 +254,9 @@
 #error "MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_KEY_EXCHANGE__WITH_CERT__ENABLED) &&        \
-    !defined(MBEDTLS_SSL_KEEP_PEER_CERTIFICATE) &&              \
-    ( !defined(MBEDTLS_SHA256_C) &&                             \
-      !defined(MBEDTLS_SHA512_C) &&                             \
-      !defined(MBEDTLS_SHA1_C) )
-#error "MBEDTLS_SSL_KEEP_PEER_CERTIFICATE defined, but not all prerequesites"
-#endif
-
 #if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C) &&                          \
     ( !defined(MBEDTLS_PLATFORM_C) || !defined(MBEDTLS_PLATFORM_MEMORY) )
 #error "MBEDTLS_MEMORY_BUFFER_ALLOC_C defined, but not all prerequisites"
-#endif
-
-#if defined(MBEDTLS_MEMORY_BACKTRACE) && !defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
-#error "MBEDTLS_MEMORY_BACKTRACE defined, but not all prerequesites"
-#endif
-
-#if defined(MBEDTLS_MEMORY_DEBUG) && !defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
-#error "MBEDTLS_MEMORY_DEBUG defined, but not all prerequesites"
 #endif
 
 #if defined(MBEDTLS_PADLOCK_C) && !defined(MBEDTLS_HAVE_ASM)
@@ -384,10 +271,8 @@
 #error "MBEDTLS_PEM_WRITE_C defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_PK_C) &&                    \
-    ( !defined(MBEDTLS_RSA_C) &&                \
-      !defined(MBEDTLS_ECP_C) &&                \
-      !defined(MBEDTLS_USE_TINYCRYPT) )
+#if defined(MBEDTLS_PK_C) && \
+    ( !defined(MBEDTLS_RSA_C) && !defined(MBEDTLS_ECP_C) )
 #error "MBEDTLS_PK_C defined, but not all prerequisites"
 #endif
 
@@ -631,23 +516,6 @@
 #error "MBEDTLS_SSL_PROTO_TLS1_2 defined, but not all prerequisites"
 #endif
 
-#if (defined(MBEDTLS_SSL_PROTO_SSL3) || defined(MBEDTLS_SSL_PROTO_TLS1) ||  \
-     defined(MBEDTLS_SSL_PROTO_TLS1_1) || defined(MBEDTLS_SSL_PROTO_TLS1_2)) && \
-    !(defined(MBEDTLS_KEY_EXCHANGE_RSA_ENABLED) ||                          \
-      defined(MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED) ||                      \
-      defined(MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED) ||                    \
-      defined(MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED) ||                  \
-      defined(MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED) ||                     \
-      defined(MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED) ||                   \
-      defined(MBEDTLS_KEY_EXCHANGE_PSK_ENABLED) ||                          \
-      defined(MBEDTLS_KEY_EXCHANGE_DHE_PSK_ENABLED) ||                      \
-      defined(MBEDTLS_KEY_EXCHANGE_RSA_PSK_ENABLED) ||                      \
-      defined(MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED) ||                    \
-      defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED) )
-#error "One or more versions of the TLS protocol are enabled " \
-        "but no key exchange methods defined with MBEDTLS_KEY_EXCHANGE_xxxx"
-#endif
-
 #if defined(MBEDTLS_SSL_PROTO_DTLS)     && \
     !defined(MBEDTLS_SSL_PROTO_TLS1_1)  && \
     !defined(MBEDTLS_SSL_PROTO_TLS1_2)
@@ -670,28 +538,7 @@
 #if defined(MBEDTLS_SSL_TLS_C) && (!defined(MBEDTLS_SSL_PROTO_SSL3) && \
     !defined(MBEDTLS_SSL_PROTO_TLS1) && !defined(MBEDTLS_SSL_PROTO_TLS1_1) && \
     !defined(MBEDTLS_SSL_PROTO_TLS1_2))
-#error "MBEDTLS_SSL_TLS_C defined, but no protocol version is active"
-#endif
-
-/* PROTO_TLS is not a documented option so far, but still check for conflicts
- * involving it, in preparation for making it the documented option later */
-#if defined(MBEDTLS_SSL_PROTO_TLS) && defined(MBEDTLS_SSL_PROTO_NO_TLS)
-#error "MBEDTLS_SSL_PROTO_TLS and MBEDTLS_SSL_PROTO_NO_TLS both defined"
-#endif
-
-#if defined(MBEDTLS_SSL_TLS_C) && \
-    ( defined(MBEDTLS_SSL_PROTO_NO_TLS) && !defined(MBEDTLS_SSL_PROTO_DTLS) )
-#error "MBEDTLS_SSL_TLS_C defined, but neither TLS or DTLS is active"
-#endif
-
-#if defined(MBEDTLS_SSL_TLS_C) && defined(MBEDTLS_SSL_TRANSFORM_OPTIMIZE_CIPHERS) && \
-    defined(MBEDTLS_ARC4_C)
-#error "MBEDTLS_ARC4_C cannot be defined with MBEDTLS_SSL_TRANSFORM_OPTIMIZE_CIPHERS on"
-#endif
-
-#if defined(MBEDTLS_VALIDATE_SSL_KEYS_INTEGRITY) && !defined(MBEDTLS_SSL_TRANSFORM_OPTIMIZE_CIPHERS) && \
-    defined(MBEDTLS_ARC4_C)
-#error "MBEDTLS_VALIDATE_SSL_KEYS_INTEGRITY requires MBEDTLS_SSL_TRANSFORM_OPTIMIZE_CIPHERS to be defined."
+#error "MBEDTLS_SSL_TLS_C defined, but no protocols are active"
 #endif
 
 #if defined(MBEDTLS_SSL_TLS_C) && (defined(MBEDTLS_SSL_PROTO_SSL3) && \
@@ -724,49 +571,6 @@
 #error "MBEDTLS_SSL_DTLS_ANTI_REPLAY  defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_SSL_CONF_MIN_MINOR_VER) || \
-    defined(MBEDTLS_SSL_CONF_MAX_MINOR_VER) || \
-    defined(MBEDTLS_SSL_CONF_MIN_MAJOR_VER) || \
-    defined(MBEDTLS_SSL_CONF_MAX_MAJOR_VER)
-#if !( defined(MBEDTLS_SSL_CONF_MIN_MINOR_VER) &&        \
-       defined(MBEDTLS_SSL_CONF_MAX_MINOR_VER) &&        \
-       defined(MBEDTLS_SSL_CONF_MIN_MAJOR_VER) &&        \
-       defined(MBEDTLS_SSL_CONF_MAX_MAJOR_VER) )
-#error "MBEDTLS_SSL_CONF_MIN_MINOR_VER, MBEDTLS_SSL_CONF_MAX_MINOR_VER, MBEDTLS_SSL_CONF_MIN_MAJOR_VER, MBEDTLS_SSL_CONF_MAX_MAJOR_VER must be defined simultaneously"
-#endif
-#endif
-
-#if defined(MBEDTLS_SSL_DTLS_CONNECTION_ID) &&                              \
-    ( !defined(MBEDTLS_SSL_TLS_C) || !defined(MBEDTLS_SSL_PROTO_DTLS) )
-#error "MBEDTLS_SSL_DTLS_CONNECTION_ID  defined, but not all prerequisites"
-#endif
-
-#if defined(MBEDTLS_SSL_DTLS_CONNECTION_ID)            &&                 \
-    defined(MBEDTLS_SSL_CID_IN_LEN_MAX) &&                 \
-    MBEDTLS_SSL_CID_IN_LEN_MAX > 255
-#error "MBEDTLS_SSL_CID_IN_LEN_MAX too large (max 255)"
-#endif
-
-#if defined(MBEDTLS_SSL_DTLS_CONNECTION_ID)            &&                  \
-    defined(MBEDTLS_SSL_CID_OUT_LEN_MAX) &&                 \
-    MBEDTLS_SSL_CID_OUT_LEN_MAX > 255
-#error "MBEDTLS_SSL_CID_OUT_LEN_MAX too large (max 255)"
-#endif
-
-#if (  defined(MBEDTLS_SSL_CONF_CID_LEN) &&                     \
-      !defined(MBEDTLS_SSL_CONF_IGNORE_UNEXPECTED_CID) ) ||     \
-    ( !defined(MBEDTLS_SSL_CONF_CID_LEN) &&                     \
-       defined(MBEDTLS_SSL_CONF_IGNORE_UNEXPECTED_CID) )
-#error "MBEDTLS_SSL_CONF_CID_LEN and MBEDTLS_SSL_CONF_IGNORE_UNEXPECTED_CID must be defined simultaneously"
-#endif
-
-#if (  defined(MBEDTLS_SSL_CONF_HS_TIMEOUT_MIN) &&       \
-      !defined(MBEDTLS_SSL_CONF_HS_TIMEOUT_MAX) ) ||    \
-    ( !defined(MBEDTLS_SSL_CONF_HS_TIMEOUT_MIN) &&       \
-       defined(MBEDTLS_SSL_CONF_HS_TIMEOUT_MAX) )
-#error "MBEDTLS_SSL_CONF_HS_TIMEOUT_MIN and MBEDTLS_SSL_CONF_HS_TIMEOUT_MAX must be defined simultaneously"
-#endif
-
 #if defined(MBEDTLS_SSL_DTLS_BADMAC_LIMIT) &&                              \
     ( !defined(MBEDTLS_SSL_TLS_C) || !defined(MBEDTLS_SSL_PROTO_DTLS) )
 #error "MBEDTLS_SSL_DTLS_BADMAC_LIMIT  defined, but not all prerequisites"
@@ -786,32 +590,6 @@
 #error "MBEDTLS_SSL_EXTENDED_MASTER_SECRET defined, but not all prerequsites"
 #endif
 
-#if ( defined(MBEDTLS_SSL_CONF_EXTENDED_MASTER_SECRET) &&            \
-      !defined(MBEDTLS_SSL_CONF_ENFORCE_EXTENDED_MASTER_SECRET) ) || \
-    ( !defined(MBEDTLS_SSL_CONF_EXTENDED_MASTER_SECRET) &&           \
-      defined(MBEDTLS_SSL_CONF_ENFORCE_EXTENDED_MASTER_SECRET) )
-#error "MBEDTLS_SSL_CONF_EXTENDED_MASTER_SECRET and MBEDTLS_SSL_CONF_ENFORCE_EXTENDED_MASTER_SECRET must be defined together."
-#endif
-
-#if ( defined(MBEDTLS_SSL_CONF_SEND) &&                 \
-      !( defined(MBEDTLS_SSL_CONF_RECV) &&              \
-         defined(MBEDTLS_SSL_CONF_RECV_TIMEOUT) ) ) ||  \
-    ( defined(MBEDTLS_SSL_CONF_RECV) &&                 \
-      !( defined(MBEDTLS_SSL_CONF_SEND) &&              \
-         defined(MBEDTLS_SSL_CONF_RECV_TIMEOUT) ) ) ||  \
-    ( defined(MBEDTLS_SSL_CONF_RECV_TIMEOUT) &&         \
-      !( defined(MBEDTLS_SSL_CONF_SEND) &&              \
-         defined(MBEDTLS_SSL_CONF_RECV) ) )
-#error "MBEDTLS_SSL_CONF_SEND/RECV/RECV_TIMEOUT must be defined simultaneously"
-#endif
-
-#if ( defined(MBEDTLS_SSL_CONF_GET_TIMER) &&            \
-      !defined(MBEDTLS_SSL_CONF_SET_TIMER) ) || \
-    ( !defined(MBEDTLS_SSL_CONF_GET_TIMER) &&           \
-      defined(MBEDTLS_SSL_CONF_SET_TIMER) )
-#error "MBEDTLS_SSL_CONF_GET_TIMER and MBEDTLS_SSL_CONF_SET_TIMER must be defined together."
-#endif
-
 #if defined(MBEDTLS_SSL_TICKET_C) && !defined(MBEDTLS_CIPHER_C)
 #error "MBEDTLS_SSL_TICKET_C defined, but not all prerequisites"
 #endif
@@ -826,128 +604,11 @@
 #error "MBEDTLS_SSL_SERVER_NAME_INDICATION defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_SSL_SESSION_TICKETS) &&  \
-    defined(MBEDTLS_SSL_NO_SESSION_RESUMPTION)
-#error "MBEDTLS_SSL_SESSION_TICKETS cannot be defined with MBEDTLS_SSL_NO_SESSION_RESUMPTION"
-#endif
-
-#if !defined(MBEDTLS_SSL_NO_SESSION_CACHE) &&  \
-    defined(MBEDTLS_SSL_NO_SESSION_RESUMPTION)
-#error "MBEDTLS_SSL_NO_SESSION_CACHE needs to be defined with MBEDTLS_SSL_NO_SESSION_RESUMPTION"
-#endif
-
 #if defined(MBEDTLS_THREADING_PTHREAD)
 #if !defined(MBEDTLS_THREADING_C) || defined(MBEDTLS_THREADING_IMPL)
 #error "MBEDTLS_THREADING_PTHREAD defined, but not all prerequisites"
 #endif
 #define MBEDTLS_THREADING_IMPL
-#endif
-
-/* Ensure that precisely one hash is enabled. */
-#if defined(MBEDTLS_MD_SINGLE_HASH)
-
-#if defined(MBEDTLS_SHA256_C)
-#define MBEDTLS_SHA256_ENABLED 1
-#else
-#define MBEDTLS_SHA256_ENABLED 0
-#endif /* MBEDTLS_SHA256_C */
-
-#if defined(MBEDTLS_SHA256_C) && !defined(MBEDTLS_SHA256_NO_SHA224)
-#define MBEDTLS_SHA224_ENABLED 1
-#else
-#define MBEDTLS_SHA224_ENABLED 0
-#endif /* MBEDTLS_SHA256_C && !MBEDTLS_SHA256_NO_SHA224 */
-
-#if defined(MBEDTLS_SHA512_C)
-#define MBEDTLS_SHA512_ENABLED 2
-#else
-#define MBEDTLS_SHA512_ENABLED 0
-#endif /* MBEDTLS_SHA512_C */
-
-#if defined(MBEDTLS_SHA1_C)
-#define MBEDTLS_SHA1_ENABLED 1
-#else
-#define MBEDTLS_SHA1_ENABLED 0
-#endif /* MBEDTLS_SHA1_C */
-
-#if defined(MBEDTLS_MD2_C)
-#define MBEDTLS_MD2_ENABLED 1
-#else
-#define MBEDTLS_MD2_ENABLED 0
-#endif /* MBEDTLS_MD2_C */
-
-#if defined(MBEDTLS_MD4_C)
-#define MBEDTLS_MD4_ENABLED 1
-#else
-#define MBEDTLS_MD4_ENABLED 0
-#endif /* MBEDTLS_MD4_C */
-
-#if defined(MBEDTLS_MD5_C)
-#define MBEDTLS_MD5_ENABLED 1
-#else
-#define MBEDTLS_MD5_ENABLED 0
-#endif /* MBEDTLS_MD5_C */
-
-#if defined(MBEDTLS_RIPEMD160_C)
-#define MBEDTLS_RIPEMD160_ENABLED 1
-#else
-#define MBEDTLS_RIPEMD160_ENABLED 0
-#endif /* MBEDTLS_RIPEMD160_C */
-
-#define MBEDTLS_HASHES_ENABLED             \
-     ( MBEDTLS_MD2_ENABLED       +         \
-       MBEDTLS_MD4_ENABLED       +         \
-       MBEDTLS_MD5_ENABLED       +         \
-       MBEDTLS_RIPEMD160_ENABLED +         \
-       MBEDTLS_SHA1_ENABLED      +         \
-       MBEDTLS_SHA256_ENABLED    +         \
-       MBEDTLS_SHA512_ENABLED )
-
-#if MBEDTLS_HASHES_ENABLED != 1
-#error "MBEDTLS_MD_SINGLE_HASH must be used with precisely one hash algorithm enabled."
-#endif
-
-#undef MBEDTLS_HASHES_ENABLED
-#endif /* MBEDTLS_MD_SINGLE_HASH */
-
-#if defined(MBEDTLS_SSL_DELAYED_SERVER_CERT_VERIFICATION) && !defined(MBEDTLS_SSL_KEEP_PEER_CERTIFICATE)
-#error "MBEDTLS_SSL_DELAYED_SERVER_CERT_VERIFICATION can only be used with MBEDTLS_SSL_KEEP_PEER_CERTIFICATE"
-#endif
-
-
-#if defined(MBEDTLS_SSL_EARLY_KEY_COMPUTATION) && !defined(MBEDTLS_USE_TINYCRYPT)
-#error "MBEDTLS_SSL_EARLY_KEY_COMPUTATION can only be used with MBEDTLS_USE_TINYCRYPT"
-#endif
-
-/*
- * Note: the dependency on TinyCrypt is reflected in several ways in the code:
- *
- *  1. We only define the various MBEDTLS_PK_INFO_{TYPE}_{FIELD} macros for
- *     TYPE == ECKEY, resolving to the TinyCrypt version.
- *  2. In pk_init() and pk_free() we assume that zeroization is a proper way
- *     to init/free the context, which is true of mbedtls_uecc_keypair, but
- *     might not always hold otherwise (think hardware-accelerated ECP_ALT).
- *  3. We rely on the fact that MBEDTLS_ECP_RESTARTABLE is disabled - code
- *     paths (and pk_info fields) that are guarded by this are currently not
- *     handled by the internal abstraction layers enabling PK_SINGLE_TYPE.
- *
- * If this dependency is ever removed, the above points need to be addressed
- * in the code.
- */
-#if defined(MBEDTLS_PK_SINGLE_TYPE) && !defined(MBEDTLS_USE_TINYCRYPT)
-#error "MBEDTLS_PK_SINGLE_TYPE can only be used with MBEDTLS_USE_TINYCRYPT"
-#endif
-
-/* Note: code paths that depend on MBEDTLS_PK_RSA_ALT_SUPPORT are not ported
- * to the internal abstraction layers that enable PK_SINGLE_TYPE. */
-#if defined(MBEDTLS_PK_SINGLE_TYPE) && defined(MBEDTLS_PK_RSA_ALT_SUPPORT)
-#error "MBEDTLS_PK_SINGLE_TYPE is not compatible with MBEDTLS_PK_RSA_ALT_SUPPORT"
-#endif
-
-/* This is to avoid a situation where RSA is available, but not through the PK
- * layer, which might surprise user code. */
-#if defined(MBEDTLS_PK_SINGLE_TYPE) && defined(MBEDTLS_RSA_C)
-#error "MBEDTLS_PK_SINGLE_TYPE is not compatible with MBEDTLS_RSA_C"
 #endif
 
 #if defined(MBEDTLS_THREADING_ALT)
@@ -966,10 +627,9 @@
 #error "MBEDTLS_VERSION_FEATURES defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_X509_USE_C) &&              \
-    ( !defined(MBEDTLS_OID_C)        ||         \
-      !defined(MBEDTLS_ASN1_PARSE_C) ||         \
-      !defined(MBEDTLS_PK_PARSE_C) )
+#if defined(MBEDTLS_X509_USE_C) && ( !defined(MBEDTLS_BIGNUM_C) ||  \
+    !defined(MBEDTLS_OID_C) || !defined(MBEDTLS_ASN1_PARSE_C) ||      \
+    !defined(MBEDTLS_PK_PARSE_C) )
 #error "MBEDTLS_X509_USE_C defined, but not all prerequisites"
 #endif
 
@@ -977,10 +637,6 @@
     !defined(MBEDTLS_OID_C) || !defined(MBEDTLS_ASN1_WRITE_C) ||       \
     !defined(MBEDTLS_PK_WRITE_C) )
 #error "MBEDTLS_X509_CREATE_C defined, but not all prerequisites"
-#endif
-
-#if defined(MBEDTLS_CERTS_C) && !defined(MBEDTLS_X509_USE_C)
-#error "MBEDTLS_CERTS_C defined, but not all prerequisites"
 #endif
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C) && ( !defined(MBEDTLS_X509_USE_C) )
@@ -1003,11 +659,6 @@
 #error "MBEDTLS_X509_CSR_WRITE_C defined, but not all prerequisites"
 #endif
 
-#if defined(MBEDTLS_X509_CRT_REMOVE_TIME) && \
-    defined(MBEDTLS_HAVE_TIME_DATE)
-#error "MBEDTLS_X509_CRT_REMOVE_TIME and MBEDTLS_HAVE_TIME_DATE cannot be defined simultaneously"
-#endif
-
 #if defined(MBEDTLS_HAVE_INT32) && defined(MBEDTLS_HAVE_INT64)
 #error "MBEDTLS_HAVE_INT32 and MBEDTLS_HAVE_INT64 cannot be defined simultaneously"
 #endif /* MBEDTLS_HAVE_INT32 && MBEDTLS_HAVE_INT64 */
@@ -1020,7 +671,7 @@
 /*
  * Avoid warning from -pedantic. This is a convenient place for this
  * workaround since this is included by every single file before the
- * #if defined(MBEDTLS_xxx_C) that results in empty translation units.
+ * #if defined(MBEDTLS_xxx_C) that results in emtpy translation units.
  */
 typedef int mbedtls_iso_c_forbids_empty_translation_units;
 

@@ -38,9 +38,7 @@
 #if defined(MBEDTLS_X509_CRL_PARSE_C)
 
 #include "x509_crl.h"
-#include "x509_internal.h"
 #include "oid.h"
-#include "platform_util.h"
 
 #include <string.h>
 
@@ -67,6 +65,11 @@
 #if defined(MBEDTLS_FS_IO) || defined(EFIX64) || defined(EFI32)
 #include <stdio.h>
 #endif
+
+/* Implementation that should never be optimized out by the compiler */
+static void mbedtls_zeroize( void *v, size_t n ) {
+    volatile unsigned char *p = v; while( n-- ) *p++ = 0;
+}
 
 /*
  *  Version  ::=  INTEGER  {  v1(0), v2(1)  }
@@ -104,17 +107,17 @@ static int x509_get_crl_ext( unsigned char **p,
 {
     int ret;
 
-    if( *p == end )
-        return( 0 );
-
     /*
      * crlExtensions           [0]  EXPLICIT Extensions OPTIONAL
      *                              -- if present, version MUST be v2
      */
     if( ( ret = mbedtls_x509_get_ext( p, end, ext, 0 ) ) != 0 )
-        return( ret );
+    {
+        if( ret == MBEDTLS_ERR_ASN1_UNEXPECTED_TAG )
+            return( 0 );
 
-    end = ext->p + ext->len;
+        return( ret );
+    }
 
     while( *p < end )
     {
@@ -313,9 +316,9 @@ int mbedtls_x509_crl_parse_der( mbedtls_x509_crl *chain,
     if( crl == NULL || buf == NULL )
         return( MBEDTLS_ERR_X509_BAD_INPUT_DATA );
 
-    mbedtls_platform_memset( &sig_params1, 0, sizeof( mbedtls_x509_buf ) );
-    mbedtls_platform_memset( &sig_params2, 0, sizeof( mbedtls_x509_buf ) );
-    mbedtls_platform_memset( &sig_oid2, 0, sizeof( mbedtls_x509_buf ) );
+    memset( &sig_params1, 0, sizeof( mbedtls_x509_buf ) );
+    memset( &sig_params2, 0, sizeof( mbedtls_x509_buf ) );
+    memset( &sig_oid2, 0, sizeof( mbedtls_x509_buf ) );
 
     /*
      * Add new CRL on the end of the chain if needed.
@@ -347,7 +350,7 @@ int mbedtls_x509_crl_parse_der( mbedtls_x509_crl *chain,
     if( p == NULL )
         return( MBEDTLS_ERR_X509_ALLOC_FAILED );
 
-    mbedtls_platform_memcpy( p, buf, buflen );
+    memcpy( p, buf, buflen );
 
     crl->raw.p = p;
     crl->raw.len = buflen;
@@ -429,16 +432,14 @@ int mbedtls_x509_crl_parse_der( mbedtls_x509_crl *chain,
         mbedtls_x509_crl_free( crl );
         return( MBEDTLS_ERR_X509_INVALID_FORMAT + ret );
     }
-    p += len;
-    crl->issuer_raw.len = p - crl->issuer_raw.p;
 
-    if( ( ret = mbedtls_x509_get_name( crl->issuer_raw.p,
-                                       crl->issuer_raw.len,
-                                       &crl->issuer ) ) != 0 )
+    if( ( ret = mbedtls_x509_get_name( &p, p + len, &crl->issuer ) ) != 0 )
     {
         mbedtls_x509_crl_free( crl );
         return( ret );
     }
+
+    crl->issuer_raw.len = p - crl->issuer_raw.p;
 
     /*
      * thisUpdate          Time
@@ -511,10 +512,10 @@ int mbedtls_x509_crl_parse_der( mbedtls_x509_crl *chain,
     }
 
     if( crl->sig_oid.len != sig_oid2.len ||
-        mbedtls_platform_memequal( crl->sig_oid.p, sig_oid2.p, crl->sig_oid.len ) != 0 ||
+        memcmp( crl->sig_oid.p, sig_oid2.p, crl->sig_oid.len ) != 0 ||
         sig_params1.len != sig_params2.len ||
         ( sig_params1.len != 0 &&
-          mbedtls_platform_memequal( sig_params1.p, sig_params2.p, sig_params1.len ) != 0 ) )
+          memcmp( sig_params1.p, sig_params2.p, sig_params1.len ) != 0 ) )
     {
         mbedtls_x509_crl_free( crl );
         return( MBEDTLS_ERR_X509_SIG_MISMATCH );
@@ -615,14 +616,18 @@ int mbedtls_x509_crl_parse_file( mbedtls_x509_crl *chain, const char *path )
 
     ret = mbedtls_x509_crl_parse( chain, buf, n );
 
-    mbedtls_platform_zeroize( buf, n );
+    mbedtls_zeroize( buf, n );
     mbedtls_free( buf );
 
     return( ret );
 }
 #endif /* MBEDTLS_FS_IO */
 
-#if !defined(MBEDTLS_X509_REMOVE_INFO)
+/*
+ * Return an informational string about the certificate.
+ */
+#define BEFORE_COLON    14
+#define BC              "14"
 /*
  * Return an informational string about the CRL.
  */
@@ -688,8 +693,8 @@ int mbedtls_x509_crl_info( char *buf, size_t size, const char *prefix,
     ret = mbedtls_snprintf( p, n, "\n%ssigned using  : ", prefix );
     MBEDTLS_X509_SAFE_SNPRINTF;
 
-    ret = mbedtls_x509_sig_alg_gets( p, n, crl->sig_pk,
-                                     crl->sig_md, crl->sig_opts );
+    ret = mbedtls_x509_sig_alg_gets( p, n, &crl->sig_oid, crl->sig_pk, crl->sig_md,
+                             crl->sig_opts );
     MBEDTLS_X509_SAFE_SNPRINTF;
 
     ret = mbedtls_snprintf( p, n, "\n" );
@@ -697,14 +702,13 @@ int mbedtls_x509_crl_info( char *buf, size_t size, const char *prefix,
 
     return( (int) ( size - n ) );
 }
-#endif /* !MBEDTLS_X509_REMOVE_INFO */
 
 /*
  * Initialize a CRL chain
  */
 void mbedtls_x509_crl_init( mbedtls_x509_crl *crl )
 {
-    mbedtls_platform_memset( crl, 0, sizeof(mbedtls_x509_crl) );
+    memset( crl, 0, sizeof(mbedtls_x509_crl) );
 }
 
 /*
@@ -733,7 +737,7 @@ void mbedtls_x509_crl_free( mbedtls_x509_crl *crl )
         {
             name_prv = name_cur;
             name_cur = name_cur->next;
-            mbedtls_platform_zeroize( name_prv, sizeof( mbedtls_x509_name ) );
+            mbedtls_zeroize( name_prv, sizeof( mbedtls_x509_name ) );
             mbedtls_free( name_prv );
         }
 
@@ -742,14 +746,13 @@ void mbedtls_x509_crl_free( mbedtls_x509_crl *crl )
         {
             entry_prv = entry_cur;
             entry_cur = entry_cur->next;
-            mbedtls_platform_zeroize( entry_prv,
-                                      sizeof( mbedtls_x509_crl_entry ) );
+            mbedtls_zeroize( entry_prv, sizeof( mbedtls_x509_crl_entry ) );
             mbedtls_free( entry_prv );
         }
 
         if( crl_cur->raw.p != NULL )
         {
-            mbedtls_platform_zeroize( crl_cur->raw.p, crl_cur->raw.len );
+            mbedtls_zeroize( crl_cur->raw.p, crl_cur->raw.len );
             mbedtls_free( crl_cur->raw.p );
         }
 
@@ -763,7 +766,7 @@ void mbedtls_x509_crl_free( mbedtls_x509_crl *crl )
         crl_prv = crl_cur;
         crl_cur = crl_cur->next;
 
-        mbedtls_platform_zeroize( crl_prv, sizeof( mbedtls_x509_crl ) );
+        mbedtls_zeroize( crl_prv, sizeof( mbedtls_x509_crl ) );
         if( crl_prv != crl )
             mbedtls_free( crl_prv );
     }

@@ -36,10 +36,6 @@
 #include "ecp.h"
 #endif
 
-#if defined(MBEDTLS_ECDH_C)
-#include "ecdh.h"
-#endif
-
 #if defined(MBEDTLS_DEBUG_C)
 
 #define MBEDTLS_DEBUG_STRIP_PARENS( ... )   __VA_ARGS__
@@ -65,17 +61,8 @@
 #endif
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
-#if !defined(MBEDTLS_X509_REMOVE_INFO)
 #define MBEDTLS_SSL_DEBUG_CRT( level, text, crt )                \
     mbedtls_debug_print_crt( ssl, level, __FILE__, __LINE__, text, crt )
-#else
-#define MBEDTLS_SSL_DEBUG_CRT( level, text, crt )       do { } while( 0 )
-#endif /* !MBEDTLS_X509_REMOVE_INFO */
-#endif /* MBEDTLS_X509_CRT_PARSE_C */
-
-#if defined(MBEDTLS_ECDH_C)
-#define MBEDTLS_SSL_DEBUG_ECDH( level, ecdh, attr )               \
-    mbedtls_debug_printf_ecdh( ssl, level, __FILE__, __LINE__, ecdh, attr )
 #endif
 
 #else /* MBEDTLS_DEBUG_C */
@@ -86,7 +73,6 @@
 #define MBEDTLS_SSL_DEBUG_MPI( level, text, X )         do { } while( 0 )
 #define MBEDTLS_SSL_DEBUG_ECP( level, text, X )         do { } while( 0 )
 #define MBEDTLS_SSL_DEBUG_CRT( level, text, crt )       do { } while( 0 )
-#define MBEDTLS_SSL_DEBUG_ECDH( level, ecdh, attr )     do { } while( 0 )
 
 #endif /* MBEDTLS_DEBUG_C */
 
@@ -214,7 +200,7 @@ void mbedtls_debug_print_ecp( const mbedtls_ssl_context *ssl, int level,
                       const char *text, const mbedtls_ecp_point *X );
 #endif
 
-#if defined(MBEDTLS_X509_CRT_PARSE_C) && !defined(MBEDTLS_X509_REMOVE_INFO)
+#if defined(MBEDTLS_X509_CRT_PARSE_C)
 /**
  * \brief   Print a X.509 certificate structure to the debug output. This
  *          function is always used through the MBEDTLS_SSL_DEBUG_CRT() macro,
@@ -235,38 +221,9 @@ void mbedtls_debug_print_crt( const mbedtls_ssl_context *ssl, int level,
                       const char *text, const mbedtls_x509_crt *crt );
 #endif
 
-#if defined(MBEDTLS_ECDH_C)
-typedef enum
-{
-    MBEDTLS_DEBUG_ECDH_Q,
-    MBEDTLS_DEBUG_ECDH_QP,
-    MBEDTLS_DEBUG_ECDH_Z,
-} mbedtls_debug_ecdh_attr;
-
-/**
- * \brief   Print a field of the ECDH structure in the SSL context to the debug
- *          output. This function is always used through the
- *          MBEDTLS_SSL_DEBUG_ECDH() macro, which supplies the ssl context, file
- *          and line number parameters.
- *
- * \param ssl       SSL context
- * \param level     error level of the debug message
- * \param file      file the error has occurred in
- * \param line      line number the error has occurred in
- * \param ecdh      the ECDH context
- * \param attr      the identifier of the attribute being output
- *
- * \attention       This function is intended for INTERNAL usage within the
- *                  library only.
- */
-void mbedtls_debug_printf_ecdh( const mbedtls_ssl_context *ssl, int level,
-                                const char *file, int line,
-                                const mbedtls_ecdh_context *ecdh,
-                                mbedtls_debug_ecdh_attr attr );
-#endif
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* debug.h */
+

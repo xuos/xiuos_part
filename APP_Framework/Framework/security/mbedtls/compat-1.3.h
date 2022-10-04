@@ -1384,8 +1384,7 @@
 #define SSL_ANTI_REPLAY_ENABLED MBEDTLS_SSL_ANTI_REPLAY_ENABLED
 #define SSL_ARC4_DISABLED MBEDTLS_SSL_ARC4_DISABLED
 #define SSL_ARC4_ENABLED MBEDTLS_SSL_ARC4_ENABLED
-#define SSL_BUFFER_LEN ( ( ( MBEDTLS_SSL_IN_BUFFER_LEN ) < ( MBEDTLS_SSL_OUT_BUFFER_LEN ) ) \
-                         ? ( MBEDTLS_SSL_IN_BUFFER_LEN ) : ( MBEDTLS_SSL_OUT_BUFFER_LEN ) )
+#define SSL_BUFFER_LEN MBEDTLS_SSL_BUFFER_LEN
 #define SSL_CACHE_DEFAULT_MAX_ENTRIES MBEDTLS_SSL_CACHE_DEFAULT_MAX_ENTRIES
 #define SSL_CACHE_DEFAULT_TIMEOUT MBEDTLS_SSL_CACHE_DEFAULT_TIMEOUT
 #define SSL_CBC_RECORD_SPLITTING_DISABLED MBEDTLS_SSL_CBC_RECORD_SPLITTING_DISABLED
@@ -2231,7 +2230,7 @@
 #define rsa_rsassa_pss_verify_ext mbedtls_rsa_rsassa_pss_verify_ext
 #define rsa_self_test mbedtls_rsa_self_test
 #define rsa_set_padding mbedtls_rsa_set_padding
-#define safer_memcmp mbedtls_platform_memequal
+#define safer_memcmp mbedtls_ssl_safer_memcmp
 #define set_alarm mbedtls_set_alarm
 #define sha1 mbedtls_sha1
 #define sha1_context mbedtls_sha1_context

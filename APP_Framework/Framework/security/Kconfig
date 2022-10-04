@@ -24,5 +24,11 @@ endif
 menuconfig MBEDTLS
     bool "using mbedtls"
     default n
+    select MBEDTLS_ENABLE
+if MBEDTLS
+    menuconfig ENABLE_MBEDTLS_TEST
+        bool "enable test"
+        default n
+endif
 
 endmenu

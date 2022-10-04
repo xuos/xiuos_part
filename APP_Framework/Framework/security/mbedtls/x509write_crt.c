@@ -34,11 +34,9 @@
 #if defined(MBEDTLS_X509_CRT_WRITE_C)
 
 #include "x509_crt.h"
-#include "x509_internal.h"
 #include "oid.h"
 #include "asn1write.h"
 #include "sha1.h"
-#include "platform_util.h"
 
 #include <string.h>
 
@@ -46,19 +44,14 @@
 #include "pem.h"
 #endif /* MBEDTLS_PEM_WRITE_C */
 
-/*
- * For the currently used signature algorithms the buffer to store any signature
- * must be at least of size MAX(MBEDTLS_ECDSA_MAX_LEN, MBEDTLS_MPI_MAX_SIZE)
- */
-#if MBEDTLS_ECDSA_MAX_LEN > MBEDTLS_MPI_MAX_SIZE
-#define SIGNATURE_MAX_SIZE MBEDTLS_ECDSA_MAX_LEN
-#else
-#define SIGNATURE_MAX_SIZE MBEDTLS_MPI_MAX_SIZE
-#endif
+/* Implementation that should never be optimized out by the compiler */
+static void mbedtls_zeroize( void *v, size_t n ) {
+    volatile unsigned char *p = v; while( n-- ) *p++ = 0;
+}
 
 void mbedtls_x509write_crt_init( mbedtls_x509write_cert *ctx )
 {
-    mbedtls_platform_memset( ctx, 0, sizeof( mbedtls_x509write_cert ) );
+    memset( ctx, 0, sizeof( mbedtls_x509write_cert ) );
 
     mbedtls_mpi_init( &ctx->serial );
     ctx->version = MBEDTLS_X509_CRT_VERSION_3;
@@ -72,7 +65,7 @@ void mbedtls_x509write_crt_free( mbedtls_x509write_cert *ctx )
     mbedtls_asn1_free_named_data_list( &ctx->issuer );
     mbedtls_asn1_free_named_data_list( &ctx->extensions );
 
-    mbedtls_platform_zeroize( ctx, sizeof( mbedtls_x509write_cert ) );
+    mbedtls_zeroize( ctx, sizeof( mbedtls_x509write_cert ) );
 }
 
 void mbedtls_x509write_crt_set_version( mbedtls_x509write_cert *ctx, int version )
@@ -150,7 +143,7 @@ int mbedtls_x509write_crt_set_basic_constraints( mbedtls_x509write_cert *ctx,
     unsigned char *c = buf + sizeof(buf);
     size_t len = 0;
 
-    mbedtls_platform_memset( buf, 0, sizeof(buf) );
+    memset( buf, 0, sizeof(buf) );
 
     if( is_ca && max_pathlen > 127 )
         return( MBEDTLS_ERR_X509_BAD_INPUT_DATA );
@@ -181,7 +174,7 @@ int mbedtls_x509write_crt_set_subject_key_identifier( mbedtls_x509write_cert *ct
     unsigned char *c = buf + sizeof(buf);
     size_t len = 0;
 
-    mbedtls_platform_memset( buf, 0, sizeof(buf) );
+    memset( buf, 0, sizeof(buf) );
     MBEDTLS_ASN1_CHK_ADD( len, mbedtls_pk_write_pubkey( &c, buf, ctx->subject_key ) );
 
     ret = mbedtls_sha1_ret( buf + sizeof( buf ) - len, len,
@@ -206,7 +199,7 @@ int mbedtls_x509write_crt_set_authority_key_identifier( mbedtls_x509write_cert *
     unsigned char *c = buf + sizeof( buf );
     size_t len = 0;
 
-    mbedtls_platform_memset( buf, 0, sizeof(buf) );
+    memset( buf, 0, sizeof(buf) );
     MBEDTLS_ASN1_CHK_ADD( len, mbedtls_pk_write_pubkey( &c, buf, ctx->issuer_key ) );
 
     ret = mbedtls_sha1_ret( buf + sizeof( buf ) - len, len,
@@ -345,7 +338,7 @@ int mbedtls_x509write_crt_der( mbedtls_x509write_cert *ctx, unsigned char *buf, 
     size_t sig_oid_len = 0;
     unsigned char *c, *c2;
     unsigned char hash[64];
-    unsigned char sig[SIGNATURE_MAX_SIZE];
+    unsigned char sig[MBEDTLS_MPI_MAX_SIZE];
     unsigned char tmp_buf[2048];
     size_t sub_len = 0, pub_len = 0, sig_and_oid_len = 0, sig_len;
     size_t len = 0;
@@ -481,7 +474,7 @@ int mbedtls_x509write_crt_der( mbedtls_x509write_cert *ctx, unsigned char *buf, 
         return( MBEDTLS_ERR_ASN1_BUF_TOO_SMALL );
 
     c2 -= len;
-    mbedtls_platform_memcpy( c2, c, len );
+    memcpy( c2, c, len );
 
     len += sig_and_oid_len;
     MBEDTLS_ASN1_CHK_ADD( len, mbedtls_asn1_write_len( &c2, buf, len ) );

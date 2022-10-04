@@ -32,8 +32,7 @@
 #if defined(MBEDTLS_MD_C)
 
 #include "md.h"
-#include "platform.h"
-#include "platform_util.h"
+#include "md_internal.h"
 
 #if defined(MBEDTLS_PLATFORM_C)
 #include "platform.h"
@@ -49,176 +48,10 @@
 #include <stdio.h>
 #endif
 
-#if !defined(MBEDTLS_MD_SINGLE_HASH)
-/*
- *
- * Definitions of MD information structures for various digests.
- *
- */
-
-/*
- * MD-2
- */
-#if defined(MBEDTLS_MD2_C)
-static const mbedtls_md_info_t mbedtls_md2_info = {
-    MBEDTLS_MD_MD2,
-    "MD2",
-    16,
-    16,
-    mbedtls_md2_starts_wrap,
-    mbedtls_md2_update_wrap,
-    mbedtls_md2_finish_wrap,
-    mbedtls_md2_ret,
-    mbedtls_md2_ctx_alloc,
-    mbedtls_md2_ctx_free,
-    mbedtls_md2_clone_wrap,
-    mbedtls_md2_process_wrap,
-};
-#endif /* MBEDTLS_MD2_C */
-
-/*
- * MD-4
- */
-
-#if defined(MBEDTLS_MD4_C)
-static const mbedtls_md_info_t mbedtls_md4_info = {
-    MBEDTLS_MD_MD4,
-    "MD4",
-    16,
-    64,
-    mbedtls_md4_starts_wrap,
-    mbedtls_md4_update_wrap,
-    mbedtls_md4_finish_wrap,
-    mbedtls_md4_ret,
-    mbedtls_md4_ctx_alloc,
-    mbedtls_md4_ctx_free,
-    mbedtls_md4_clone_wrap,
-    mbedtls_md4_process_wrap,
-};
-#endif /* MBEDTLS_MD4_C */
-
-/*
- * MD-5
- */
-
-#if defined(MBEDTLS_MD5_C)
-static const mbedtls_md_info_t mbedtls_md5_info = {
-    MBEDTLS_MD_MD5,
-    "MD5",
-    16,
-    64,
-    mbedtls_md5_starts_wrap,
-    mbedtls_md5_update_wrap,
-    mbedtls_md5_finish_wrap,
-    mbedtls_md5_ret,
-    mbedtls_md5_ctx_alloc,
-    mbedtls_md5_ctx_free,
-    mbedtls_md5_clone_wrap,
-    mbedtls_md5_process_wrap,
-};
-#endif /* MBEDTLS_MD5_C */
-
-/*
- * RIPEMD-160
- */
-
-#if defined(MBEDTLS_RIPEMD160_C)
-static const mbedtls_md_info_t mbedtls_ripemd160_info = {
-    MBEDTLS_MD_RIPEMD160,
-    "RIPEMD160",
-    20,
-    64,
-    mbedtls_ripemd160_starts_wrap,
-    mbedtls_ripemd160_update_wrap,
-    mbedtls_ripemd160_finish_wrap,
-    mbedtls_ripemd160_ret,
-    mbedtls_ripemd160_ctx_alloc,
-    mbedtls_ripemd160_ctx_free,
-    mbedtls_ripemd160_clone_wrap,
-    mbedtls_ripemd160_process_wrap,
-};
-#endif /* MBEDTLS_RIPEMD160_C */
-
-/*
- * SHA-1
- */
-
-#if defined(MBEDTLS_SHA1_C)
-static const mbedtls_md_info_t mbedtls_sha1_info = {
-    MBEDTLS_MD_SHA1,
-    "SHA1",
-    20,
-    64,
-    mbedtls_sha1_starts_wrap,
-    mbedtls_sha1_update_wrap,
-    mbedtls_sha1_finish_wrap,
-    mbedtls_sha1_ret,
-    mbedtls_sha1_ctx_alloc,
-    mbedtls_sha1_ctx_free,
-    mbedtls_sha1_clone_wrap,
-    mbedtls_sha1_process_wrap,
-};
-#endif /* MBEDTLS_SHA1_C */
-
-/*
- * SHA-224 and SHA-256
- */
-
-#if defined(MBEDTLS_SHA256_C)
-#if !defined(MBEDTLS_SHA256_NO_SHA224)
-static const mbedtls_md_info_t mbedtls_sha224_info = {
-    MBEDTLS_MD_SHA224,
-    "SHA224",
-    28,
-    64,
-    mbedtls_sha224_starts_wrap,
-    mbedtls_sha224_update_wrap,
-    mbedtls_sha224_finish_wrap,
-    mbedtls_sha224_wrap,
-    mbedtls_sha224_ctx_alloc,
-    mbedtls_sha224_ctx_free,
-    mbedtls_sha224_clone_wrap,
-    mbedtls_sha224_process_wrap,
-};
-#endif /* !MBEDTLS_SHA256_NO_SHA224 */
-static const mbedtls_md_info_t mbedtls_sha256_info =
-    MBEDTLS_MD_INFO( MBEDTLS_MD_INFO_SHA256 );
-#endif /* MBEDTLS_SHA256_C */
-
-/*
- * SHA-384 and SHA-512
- */
-
-#if defined(MBEDTLS_SHA512_C)
-static const mbedtls_md_info_t mbedtls_sha384_info = {
-    MBEDTLS_MD_SHA384,
-    "SHA384",
-    48,
-    128,
-    mbedtls_sha384_starts_wrap,
-    mbedtls_sha384_update_wrap,
-    mbedtls_sha384_finish_wrap,
-    mbedtls_sha384_wrap,
-    mbedtls_sha384_ctx_alloc,
-    mbedtls_sha384_ctx_free,
-    mbedtls_sha384_clone_wrap,
-    mbedtls_sha384_process_wrap,
-};
-static const mbedtls_md_info_t mbedtls_sha512_info = {
-    MBEDTLS_MD_SHA512,
-    "SHA512",
-    64,
-    128,
-    mbedtls_sha512_starts_wrap,
-    mbedtls_sha384_update_wrap,
-    mbedtls_sha384_finish_wrap,
-    mbedtls_sha512_wrap,
-    mbedtls_sha384_ctx_alloc,
-    mbedtls_sha384_ctx_free,
-    mbedtls_sha384_clone_wrap,
-    mbedtls_sha384_process_wrap,
-};
-#endif /* MBEDTLS_SHA512_C */
+/* Implementation that should never be optimized out by the compiler */
+static void mbedtls_zeroize( void *v, size_t n ) {
+    volatile unsigned char *p = v; while( n-- ) *p++ = 0;
+}
 
 /*
  * Reminder: update profiles in x509_crt.c when adding a new hash!
@@ -232,10 +65,8 @@ static const int supported_digests[] = {
 
 #if defined(MBEDTLS_SHA256_C)
         MBEDTLS_MD_SHA256,
-#if !defined(MBEDTLS_SHA256_NO_SHA224)
         MBEDTLS_MD_SHA224,
 #endif
-#endif /* MBEDTLS_SHA256_C */
 
 #if defined(MBEDTLS_SHA1_C)
         MBEDTLS_MD_SHA1,
@@ -265,7 +96,7 @@ const int *mbedtls_md_list( void )
     return( supported_digests );
 }
 
-mbedtls_md_handle_t mbedtls_md_info_from_string( const char *md_name )
+const mbedtls_md_info_t *mbedtls_md_info_from_string( const char *md_name )
 {
     if( NULL == md_name )
         return( NULL );
@@ -292,13 +123,11 @@ mbedtls_md_handle_t mbedtls_md_info_from_string( const char *md_name )
         return mbedtls_md_info_from_type( MBEDTLS_MD_SHA1 );
 #endif
 #if defined(MBEDTLS_SHA256_C)
-#if !defined(MBEDTLS_SHA256_NO_SHA224)
     if( !strcmp( "SHA224", md_name ) )
         return mbedtls_md_info_from_type( MBEDTLS_MD_SHA224 );
-#endif
     if( !strcmp( "SHA256", md_name ) )
         return mbedtls_md_info_from_type( MBEDTLS_MD_SHA256 );
-#endif /* MBEDTLS_SHA256_C */
+#endif
 #if defined(MBEDTLS_SHA512_C)
     if( !strcmp( "SHA384", md_name ) )
         return mbedtls_md_info_from_type( MBEDTLS_MD_SHA384 );
@@ -308,7 +137,7 @@ mbedtls_md_handle_t mbedtls_md_info_from_string( const char *md_name )
     return( NULL );
 }
 
-mbedtls_md_handle_t mbedtls_md_info_from_type( mbedtls_md_type_t md_type )
+const mbedtls_md_info_t *mbedtls_md_info_from_type( mbedtls_md_type_t md_type )
 {
     switch( md_type )
     {
@@ -333,13 +162,11 @@ mbedtls_md_handle_t mbedtls_md_info_from_type( mbedtls_md_type_t md_type )
             return( &mbedtls_sha1_info );
 #endif
 #if defined(MBEDTLS_SHA256_C)
-#if !defined(MBEDTLS_SHA256_NO_SHA224)
         case MBEDTLS_MD_SHA224:
             return( &mbedtls_sha224_info );
-#endif
         case MBEDTLS_MD_SHA256:
             return( &mbedtls_sha256_info );
-#endif /* MBEDTLS_SHA256_C */
+#endif
 #if defined(MBEDTLS_SHA512_C)
         case MBEDTLS_MD_SHA384:
             return( &mbedtls_sha384_info );
@@ -351,127 +178,108 @@ mbedtls_md_handle_t mbedtls_md_info_from_type( mbedtls_md_type_t md_type )
     }
 }
 
-#else /* MBEDTLS_MD_SINGLE_HASH */
-
-const int *mbedtls_md_list( void )
-{
-    static int single_hash[2] =
-        { MBEDTLS_MD_INFO_TYPE( MBEDTLS_MD_SINGLE_HASH ),
-          MBEDTLS_MD_INVALID_HANDLE };
-
-    return( single_hash );
-}
-
-mbedtls_md_handle_t mbedtls_md_info_from_string( const char *md_name )
-{
-    static const char * const hash_name =
-        MBEDTLS_MD_INFO_NAME( MBEDTLS_MD_SINGLE_HASH );
-
-    if( md_name != NULL && strcmp( hash_name, md_name ) == 0 )
-        return( MBEDTLS_MD_UNIQUE_VALID_HANDLE );
-
-    return( MBEDTLS_MD_INVALID_HANDLE );
-}
-
-mbedtls_md_handle_t mbedtls_md_info_from_type( mbedtls_md_type_t md_type )
-{
-    static const mbedtls_md_type_t hash_type =
-        MBEDTLS_MD_INFO_TYPE( MBEDTLS_MD_SINGLE_HASH );
-
-    if( hash_type == md_type )
-        return( MBEDTLS_MD_UNIQUE_VALID_HANDLE );
-
-    return( MBEDTLS_MD_INVALID_HANDLE );
-}
-
-#endif /* MBEDTLS_MD_SINGLE_HASH */
-
 void mbedtls_md_init( mbedtls_md_context_t *ctx )
 {
     memset( ctx, 0, sizeof( mbedtls_md_context_t ) );
-
-#if defined(MBEDTLS_MD_SINGLE_HASH)
-    mbedtls_md_info_init( mbedtls_md_get_handle( ctx ),
-                          ctx->md_ctx );
-#endif
 }
 
 void mbedtls_md_free( mbedtls_md_context_t *ctx )
 {
-    if( ctx == NULL || mbedtls_md_get_handle( ctx ) == MBEDTLS_MD_INVALID_HANDLE )
+    if( ctx == NULL || ctx->md_info == NULL )
         return;
 
-#if !defined(MBEDTLS_MD_SINGLE_HASH)
     if( ctx->md_ctx != NULL )
-    {
-        mbedtls_md_info_ctx_free( mbedtls_md_get_handle( ctx ), ctx->md_ctx );
-    }
+        ctx->md_info->ctx_free_func( ctx->md_ctx );
 
     if( ctx->hmac_ctx != NULL )
     {
-        mbedtls_platform_zeroize( ctx->hmac_ctx,
-            2 * mbedtls_md_info_block_size( mbedtls_md_get_handle( ctx ) ) );
+        mbedtls_zeroize( ctx->hmac_ctx, 2 * ctx->md_info->block_size );
         mbedtls_free( ctx->hmac_ctx );
     }
-#endif /* MBEDTLS_MD_SINGLE_HASH */
 
-    mbedtls_platform_zeroize( ctx, sizeof( mbedtls_md_context_t ) );
+    mbedtls_zeroize( ctx, sizeof( mbedtls_md_context_t ) );
 }
 
 int mbedtls_md_clone( mbedtls_md_context_t *dst,
                       const mbedtls_md_context_t *src )
 {
-    if( dst == NULL || mbedtls_md_get_handle( dst ) == MBEDTLS_MD_INVALID_HANDLE ||
-        src == NULL || mbedtls_md_get_handle( src ) == MBEDTLS_MD_INVALID_HANDLE ||
-        mbedtls_md_get_handle( dst ) != mbedtls_md_get_handle( src ) )
+    if( dst == NULL || dst->md_info == NULL ||
+        src == NULL || src->md_info == NULL ||
+        dst->md_info != src->md_info )
     {
         return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
     }
 
-    mbedtls_md_info_clone( mbedtls_md_get_handle( dst ),
-                           dst->md_ctx, src->md_ctx );
+    dst->md_info->clone_func( dst->md_ctx, src->md_ctx );
+
     return( 0 );
 }
 
 #if ! defined(MBEDTLS_DEPRECATED_REMOVED)
-int mbedtls_md_init_ctx( mbedtls_md_context_t *ctx, mbedtls_md_handle_t md_info )
+int mbedtls_md_init_ctx( mbedtls_md_context_t *ctx, const mbedtls_md_info_t *md_info )
 {
     return mbedtls_md_setup( ctx, md_info, 1 );
 }
 #endif
 
-#if !defined(MBEDTLS_MD_SINGLE_HASH)
-int mbedtls_md_setup( mbedtls_md_context_t *ctx, mbedtls_md_handle_t md_info, int hmac )
+int mbedtls_md_setup( mbedtls_md_context_t *ctx, const mbedtls_md_info_t *md_info, int hmac )
 {
-    return( mbedtls_md_setup_internal( ctx, md_info, hmac ) );
+    if( md_info == NULL || ctx == NULL )
+        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
+
+    if( ( ctx->md_ctx = md_info->ctx_alloc_func() ) == NULL )
+        return( MBEDTLS_ERR_MD_ALLOC_FAILED );
+
+    if( hmac != 0 )
+    {
+        ctx->hmac_ctx = mbedtls_calloc( 2, md_info->block_size );
+        if( ctx->hmac_ctx == NULL )
+        {
+            md_info->ctx_free_func( ctx->md_ctx );
+            return( MBEDTLS_ERR_MD_ALLOC_FAILED );
+        }
+    }
+
+    ctx->md_info = md_info;
+
+    return( 0 );
 }
 
 int mbedtls_md_starts( mbedtls_md_context_t *ctx )
 {
-    return( mbedtls_md_starts_internal( ctx ) );
+    if( ctx == NULL || ctx->md_info == NULL )
+        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
+
+    return( ctx->md_info->starts_func( ctx->md_ctx ) );
 }
 
-int mbedtls_md_update( mbedtls_md_context_t *ctx,
-                       const unsigned char *input,
-                       size_t ilen )
+int mbedtls_md_update( mbedtls_md_context_t *ctx, const unsigned char *input, size_t ilen )
 {
-    return( mbedtls_md_update_internal( ctx, input, ilen ) );
+    if( ctx == NULL || ctx->md_info == NULL )
+        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
+
+    return( ctx->md_info->update_func( ctx->md_ctx, input, ilen ) );
 }
 
 int mbedtls_md_finish( mbedtls_md_context_t *ctx, unsigned char *output )
 {
-    return( mbedtls_md_finish_internal( ctx, output ) );
+    if( ctx == NULL || ctx->md_info == NULL )
+        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
+
+    return( ctx->md_info->finish_func( ctx->md_ctx, output ) );
 }
 
-int mbedtls_md( mbedtls_md_handle_t md_info, const unsigned char *input, size_t ilen,
+int mbedtls_md( const mbedtls_md_info_t *md_info, const unsigned char *input, size_t ilen,
             unsigned char *output )
 {
-    return( mbedtls_md_internal( md_info, input, ilen, output ) );
+    if( md_info == NULL )
+        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
+
+    return( md_info->digest_func( input, ilen, output ) );
 }
-#endif /* !MBEDTLS_MD_SINGLE_HASH */
 
 #if defined(MBEDTLS_FS_IO)
-int mbedtls_md_file( mbedtls_md_handle_t md_info, const char *path, unsigned char *output )
+int mbedtls_md_file( const mbedtls_md_info_t *md_info, const char *path, unsigned char *output )
 {
     int ret;
     FILE *f;
@@ -479,7 +287,7 @@ int mbedtls_md_file( mbedtls_md_handle_t md_info, const char *path, unsigned cha
     mbedtls_md_context_t ctx;
     unsigned char buf[1024];
 
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
+    if( md_info == NULL )
         return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
 
     if( ( f = fopen( path, "rb" ) ) == NULL )
@@ -490,30 +298,20 @@ int mbedtls_md_file( mbedtls_md_handle_t md_info, const char *path, unsigned cha
     if( ( ret = mbedtls_md_setup( &ctx, md_info, 0 ) ) != 0 )
         goto cleanup;
 
-    ret = mbedtls_md_info_starts( md_info, ctx.md_ctx );
-    if( ret != 0 )
+    if( ( ret = md_info->starts_func( ctx.md_ctx ) ) != 0 )
         goto cleanup;
 
     while( ( n = fread( buf, 1, sizeof( buf ), f ) ) > 0 )
-    {
-        ret = mbedtls_md_info_update( md_info, ctx.md_ctx,
-                                      buf, n );
-        if( ret != 0 )
+        if( ( ret = md_info->update_func( ctx.md_ctx, buf, n ) ) != 0 )
             goto cleanup;
-    }
 
     if( ferror( f ) != 0 )
-    {
         ret = MBEDTLS_ERR_MD_FILE_IO_ERROR;
-    }
     else
-    {
-        ret = mbedtls_md_info_finish( md_info, ctx.md_ctx,
-                                      output );
-    }
+        ret = md_info->finish_func( ctx.md_ctx, output );
 
 cleanup:
-    mbedtls_platform_zeroize( buf, sizeof( buf ) );
+    mbedtls_zeroize( buf, sizeof( buf ) );
     fclose( f );
     mbedtls_md_free( &ctx );
 
@@ -526,46 +324,29 @@ int mbedtls_md_hmac_starts( mbedtls_md_context_t *ctx, const unsigned char *key,
     int ret;
     unsigned char sum[MBEDTLS_MD_MAX_SIZE];
     unsigned char *ipad, *opad;
-    size_t i = 0;
+    size_t i;
 
-    mbedtls_md_handle_t md_info;
-
-    if( ctx == NULL )
+    if( ctx == NULL || ctx->md_info == NULL || ctx->hmac_ctx == NULL )
         return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
 
-#if !defined(MBEDTLS_MD_SINGLE_HASH)
-    if( ctx->hmac_ctx == NULL )
-        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
-#endif /* !MBEDTLS_MD_SINGLE_HASH */
-
-    md_info = mbedtls_md_get_handle( ctx );
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
-        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
-
-    if( keylen > (size_t) mbedtls_md_info_block_size( md_info ) )
+    if( keylen > (size_t) ctx->md_info->block_size )
     {
-        if( ( ret = mbedtls_md_info_starts( md_info, ctx->md_ctx ) ) != 0 )
+        if( ( ret = ctx->md_info->starts_func( ctx->md_ctx ) ) != 0 )
+            goto cleanup;
+        if( ( ret = ctx->md_info->update_func( ctx->md_ctx, key, keylen ) ) != 0 )
+            goto cleanup;
+        if( ( ret = ctx->md_info->finish_func( ctx->md_ctx, sum ) ) != 0 )
             goto cleanup;
 
-        if( ( ret = mbedtls_md_info_update( md_info, ctx->md_ctx,
-                                            key, keylen ) ) != 0 )
-        {
-            goto cleanup;
-        }
-
-        if( ( ret = mbedtls_md_info_finish( md_info, ctx->md_ctx, sum ) ) != 0 )
-            goto cleanup;
-
-        keylen = mbedtls_md_info_size( md_info );
+        keylen = ctx->md_info->size;
         key = sum;
     }
 
     ipad = (unsigned char *) ctx->hmac_ctx;
-    opad = (unsigned char *) ctx->hmac_ctx +
-        mbedtls_md_info_block_size( md_info );
+    opad = (unsigned char *) ctx->hmac_ctx + ctx->md_info->block_size;
 
-    mbedtls_platform_memset( ipad, 0x36, mbedtls_md_info_block_size( md_info ) );
-    mbedtls_platform_memset( opad, 0x5C, mbedtls_md_info_block_size( md_info ) );
+    memset( ipad, 0x36, ctx->md_info->block_size );
+    memset( opad, 0x5C, ctx->md_info->block_size );
 
     for( i = 0; i < keylen; i++ )
     {
@@ -573,52 +354,24 @@ int mbedtls_md_hmac_starts( mbedtls_md_context_t *ctx, const unsigned char *key,
         opad[i] = (unsigned char)( opad[i] ^ key[i] );
     }
 
-    if( ( ret = mbedtls_md_info_starts( md_info, ctx->md_ctx ) ) != 0 )
+    if( ( ret = ctx->md_info->starts_func( ctx->md_ctx ) ) != 0 )
         goto cleanup;
-
-    i++;    // Use i as flow control
-
-    if( ( ret = mbedtls_md_info_update( md_info, ctx->md_ctx, ipad,
-           mbedtls_md_info_block_size( md_info ) ) ) != 0 )
-    {
+    if( ( ret = ctx->md_info->update_func( ctx->md_ctx, ipad,
+                                           ctx->md_info->block_size ) ) != 0 )
         goto cleanup;
-    }
-
-    i++;    // Use i as flow control now
 
 cleanup:
-    mbedtls_platform_zeroize( sum, sizeof( sum ) );
+    mbedtls_zeroize( sum, sizeof( sum ) );
 
-    if ( ret != 0 )
-        return ret;
-
-    /* Check possible fault injection */
-    if ( ( i - 2 ) == keylen )
-        return ret; // success, return 0 from ret
-
-    return( MBEDTLS_ERR_PLATFORM_FAULT_DETECTED );
+    return( ret );
 }
 
-int mbedtls_md_hmac_update( mbedtls_md_context_t *ctx,
-                            const unsigned char *input, size_t ilen )
+int mbedtls_md_hmac_update( mbedtls_md_context_t *ctx, const unsigned char *input, size_t ilen )
 {
-    mbedtls_md_handle_t md_info;
-
-    if( ctx == NULL )
+    if( ctx == NULL || ctx->md_info == NULL || ctx->hmac_ctx == NULL )
         return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
 
-#if !defined(MBEDTLS_MD_SINGLE_HASH)
-    if( ctx->hmac_ctx == NULL )
-        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
-#endif /* !MBEDTLS_MD_SINGLE_HASH */
-
-    md_info = mbedtls_md_get_handle( ctx );
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
-        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
-
-    return( mbedtls_md_info_update( md_info,
-                                    ctx->md_ctx, input,
-                                    ilen ) );
+    return( ctx->md_info->update_func( ctx->md_ctx, input, ilen ) );
 }
 
 int mbedtls_md_hmac_finish( mbedtls_md_context_t *ctx, unsigned char *output )
@@ -627,45 +380,22 @@ int mbedtls_md_hmac_finish( mbedtls_md_context_t *ctx, unsigned char *output )
     unsigned char tmp[MBEDTLS_MD_MAX_SIZE];
     unsigned char *opad;
 
-    mbedtls_md_handle_t md_info;
-
-    if( ctx == NULL )
+    if( ctx == NULL || ctx->md_info == NULL || ctx->hmac_ctx == NULL )
         return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
 
-#if !defined(MBEDTLS_MD_SINGLE_HASH)
-    if( ctx->hmac_ctx == NULL )
-        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
-#endif /* !MBEDTLS_MD_SINGLE_HASH */
+    opad = (unsigned char *) ctx->hmac_ctx + ctx->md_info->block_size;
 
-    md_info = mbedtls_md_get_handle( ctx );
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
-        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
-
-    opad = (unsigned char *) ctx->hmac_ctx +
-        mbedtls_md_info_block_size( md_info );
-
-    if( ( ret = mbedtls_md_info_finish( md_info, ctx->md_ctx, tmp ) ) != 0 )
+    if( ( ret = ctx->md_info->finish_func( ctx->md_ctx, tmp ) ) != 0 )
         return( ret );
-
-    if( ( ret = mbedtls_md_info_starts( md_info, ctx->md_ctx ) ) != 0 )
+    if( ( ret = ctx->md_info->starts_func( ctx->md_ctx ) ) != 0 )
         return( ret );
-
-    if( ( ret = mbedtls_md_info_update( md_info, ctx->md_ctx, opad,
-                       mbedtls_md_info_block_size( md_info ) ) ) != 0 )
-    {
+    if( ( ret = ctx->md_info->update_func( ctx->md_ctx, opad,
+                                           ctx->md_info->block_size ) ) != 0 )
         return( ret );
-    }
-
-    if( ( ret = mbedtls_md_info_update( md_info, ctx->md_ctx, tmp,
-                        mbedtls_md_info_size( md_info ) ) ) != 0 )
-    {
+    if( ( ret = ctx->md_info->update_func( ctx->md_ctx, tmp,
+                                           ctx->md_info->size ) ) != 0 )
         return( ret );
-    }
-
-    if( ( ret = mbedtls_md_info_finish( md_info, ctx->md_ctx, output ) ) != 0 )
-        return( ret );
-
-    return( ret );
+    return( ctx->md_info->finish_func( ctx->md_ctx, output ) );
 }
 
 int mbedtls_md_hmac_reset( mbedtls_md_context_t *ctx )
@@ -673,33 +403,18 @@ int mbedtls_md_hmac_reset( mbedtls_md_context_t *ctx )
     int ret;
     unsigned char *ipad;
 
-    mbedtls_md_handle_t md_info;
-
-    if( ctx == NULL )
-        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
-
-#if !defined(MBEDTLS_MD_SINGLE_HASH)
-    if( ctx->hmac_ctx == NULL )
-        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
-#endif /* !MBEDTLS_MD_SINGLE_HASH */
-
-    md_info = mbedtls_md_get_handle( ctx );
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
+    if( ctx == NULL || ctx->md_info == NULL || ctx->hmac_ctx == NULL )
         return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
 
     ipad = (unsigned char *) ctx->hmac_ctx;
 
-    ret = mbedtls_md_info_starts( md_info, ctx->md_ctx );
-    if( ret != 0 )
+    if( ( ret = ctx->md_info->starts_func( ctx->md_ctx ) ) != 0 )
         return( ret );
-
-    ret = mbedtls_md_info_update( md_info,
-                                  ctx->md_ctx, ipad,
-                                  mbedtls_md_info_block_size( md_info ) );
-    return( ret );
+    return( ctx->md_info->update_func( ctx->md_ctx, ipad,
+                                       ctx->md_info->block_size ) );
 }
 
-int mbedtls_md_hmac( mbedtls_md_handle_t md_info,
+int mbedtls_md_hmac( const mbedtls_md_info_t *md_info,
                      const unsigned char *key, size_t keylen,
                      const unsigned char *input, size_t ilen,
                      unsigned char *output )
@@ -707,7 +422,7 @@ int mbedtls_md_hmac( mbedtls_md_handle_t md_info,
     mbedtls_md_context_t ctx;
     int ret;
 
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
+    if( md_info == NULL )
         return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
 
     mbedtls_md_init( &ctx );
@@ -728,35 +443,36 @@ cleanup:
     return( ret );
 }
 
-#if !defined(MBEDTLS_MD_SINGLE_HASH)
 int mbedtls_md_process( mbedtls_md_context_t *ctx, const unsigned char *data )
 {
-    return( mbedtls_md_process_internal( ctx, data ) );
-}
-#endif /* !MBEDTLS_MD_SINGLE_HASH */
+    if( ctx == NULL || ctx->md_info == NULL )
+        return( MBEDTLS_ERR_MD_BAD_INPUT_DATA );
 
-unsigned char mbedtls_md_get_size( mbedtls_md_handle_t md_info )
+    return( ctx->md_info->process_func( ctx->md_ctx, data ) );
+}
+
+unsigned char mbedtls_md_get_size( const mbedtls_md_info_t *md_info )
 {
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
+    if( md_info == NULL )
         return( 0 );
 
-    return mbedtls_md_info_size( md_info );
+    return md_info->size;
 }
 
-mbedtls_md_type_t mbedtls_md_get_type( mbedtls_md_handle_t md_info )
+mbedtls_md_type_t mbedtls_md_get_type( const mbedtls_md_info_t *md_info )
 {
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
+    if( md_info == NULL )
         return( MBEDTLS_MD_NONE );
 
-    return mbedtls_md_info_type( md_info );
+    return md_info->type;
 }
 
-const char *mbedtls_md_get_name( mbedtls_md_handle_t md_info )
+const char *mbedtls_md_get_name( const mbedtls_md_info_t *md_info )
 {
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
+    if( md_info == NULL )
         return( NULL );
 
-    return mbedtls_md_info_name( md_info );
+    return md_info->name;
 }
 
 #endif /* MBEDTLS_MD_C */

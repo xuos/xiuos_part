@@ -46,7 +46,6 @@
 #endif /* MBEDTLS_ASN1_PARSE_C */
 
 #include <string.h>
-#include "platform_util.h"
 
 #if defined(MBEDTLS_PLATFORM_C)
 #include "platform.h"
@@ -123,7 +122,7 @@ int mbedtls_pkcs5_pbes2( const mbedtls_asn1_buf *pbe_params, int mode,
     mbedtls_md_type_t md_type = MBEDTLS_MD_SHA1;
     unsigned char key[32], iv[32];
     size_t olen = 0;
-    mbedtls_md_handle_t md_info;
+    const mbedtls_md_info_t *md_info;
     const mbedtls_cipher_info_t *cipher_info;
     mbedtls_md_context_t md_ctx;
     mbedtls_cipher_type_t cipher_alg;
@@ -158,7 +157,7 @@ int mbedtls_pkcs5_pbes2( const mbedtls_asn1_buf *pbe_params, int mode,
     }
 
     md_info = mbedtls_md_info_from_type( md_type );
-    if( md_info == MBEDTLS_MD_INVALID_HANDLE )
+    if( md_info == NULL )
         return( MBEDTLS_ERR_PKCS5_FEATURE_UNAVAILABLE );
 
     if( ( ret = mbedtls_asn1_get_alg( &p, end, &enc_scheme_oid,
@@ -189,7 +188,7 @@ int mbedtls_pkcs5_pbes2( const mbedtls_asn1_buf *pbe_params, int mode,
     mbedtls_md_init( &md_ctx );
     mbedtls_cipher_init( &cipher_ctx );
 
-    mbedtls_platform_memcpy( iv, enc_scheme_params.p, enc_scheme_params.len );
+    memcpy( iv, enc_scheme_params.p, enc_scheme_params.len );
 
     if( ( ret = mbedtls_md_setup( &md_ctx, md_info, 1 ) ) != 0 )
         goto exit;
@@ -227,12 +226,12 @@ int mbedtls_pkcs5_pbkdf2_hmac( mbedtls_md_context_t *ctx, const unsigned char *p
     unsigned int i;
     unsigned char md1[MBEDTLS_MD_MAX_SIZE];
     unsigned char work[MBEDTLS_MD_MAX_SIZE];
-    unsigned char md_size = mbedtls_md_get_size( mbedtls_md_get_handle( ctx ) );
+    unsigned char md_size = mbedtls_md_get_size( ctx->md_info );
     size_t use_len;
     unsigned char *out_p = output;
     unsigned char counter[4];
 
-    mbedtls_platform_memset( counter, 0, 4 );
+    memset( counter, 0, 4 );
     counter[3] = 1;
 
 #if UINT_MAX > 0xFFFFFFFF
@@ -256,7 +255,7 @@ int mbedtls_pkcs5_pbkdf2_hmac( mbedtls_md_context_t *ctx, const unsigned char *p
         if( ( ret = mbedtls_md_hmac_finish( ctx, work ) ) != 0 )
             return( ret );
 
-        mbedtls_platform_memcpy( md1, work, md_size );
+        memcpy( md1, work, md_size );
 
         for( i = 1; i < iteration_count; i++ )
         {
@@ -278,7 +277,7 @@ int mbedtls_pkcs5_pbkdf2_hmac( mbedtls_md_context_t *ctx, const unsigned char *p
         }
 
         use_len = ( key_length < md_size ) ? key_length : md_size;
-        mbedtls_platform_memcpy( out_p, work, use_len );
+        memcpy( out_p, work, use_len );
 
         key_length -= (uint32_t) use_len;
         out_p += use_len;
@@ -357,14 +356,14 @@ static const unsigned char result_key[MAX_TESTS][32] =
 int mbedtls_pkcs5_self_test( int verbose )
 {
     mbedtls_md_context_t sha1_ctx;
-    mbedtls_md_handle_t info_sha1;
+    const mbedtls_md_info_t *info_sha1;
     int ret, i;
     unsigned char key[64];
 
     mbedtls_md_init( &sha1_ctx );
 
     info_sha1 = mbedtls_md_info_from_type( MBEDTLS_MD_SHA1 );
-    if( info_sha1 == MBEDTLS_MD_INVALID_HANDLE )
+    if( info_sha1 == NULL )
     {
         ret = 1;
         goto exit;
@@ -384,7 +383,7 @@ int mbedtls_pkcs5_self_test( int verbose )
         ret = mbedtls_pkcs5_pbkdf2_hmac( &sha1_ctx, password[i], plen[i], salt[i],
                                   slen[i], it_cnt[i], key_len[i], key );
         if( ret != 0 ||
-                memcmp( result_key[i], key, key_len[i] ) != 0 )
+            memcmp( result_key[i], key, key_len[i] ) != 0 )
         {
             if( verbose != 0 )
                 mbedtls_printf( "failed\n" );

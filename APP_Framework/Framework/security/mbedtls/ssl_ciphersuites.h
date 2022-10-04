@@ -33,8 +33,6 @@
 #include "pk.h"
 #include "cipher.h"
 #include "md.h"
-#include "ssl.h"
-#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -177,45 +175,6 @@ extern "C" {
 #define MBEDTLS_TLS_ECDHE_PSK_WITH_NULL_SHA256           0xC03A /**< Weak! No SSL3! */
 #define MBEDTLS_TLS_ECDHE_PSK_WITH_NULL_SHA384           0xC03B /**< Weak! No SSL3! */
 
-#define MBEDTLS_TLS_RSA_WITH_ARIA_128_CBC_SHA256         0xC03C /**< TLS 1.2 */
-#define MBEDTLS_TLS_RSA_WITH_ARIA_256_CBC_SHA384         0xC03D /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256     0xC044 /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384     0xC045 /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_ECDSA_WITH_ARIA_128_CBC_SHA256 0xC048 /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_ECDSA_WITH_ARIA_256_CBC_SHA384 0xC049 /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDH_ECDSA_WITH_ARIA_128_CBC_SHA256  0xC04A /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDH_ECDSA_WITH_ARIA_256_CBC_SHA384  0xC04B /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_RSA_WITH_ARIA_128_CBC_SHA256   0xC04C /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384   0xC04D /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDH_RSA_WITH_ARIA_128_CBC_SHA256    0xC04E /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDH_RSA_WITH_ARIA_256_CBC_SHA384    0xC04F /**< TLS 1.2 */
-#define MBEDTLS_TLS_RSA_WITH_ARIA_128_GCM_SHA256         0xC050 /**< TLS 1.2 */
-#define MBEDTLS_TLS_RSA_WITH_ARIA_256_GCM_SHA384         0xC051 /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256     0xC052 /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384     0xC053 /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256 0xC05C /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384 0xC05D /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDH_ECDSA_WITH_ARIA_128_GCM_SHA256  0xC05E /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDH_ECDSA_WITH_ARIA_256_GCM_SHA384  0xC05F /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256   0xC060 /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384   0xC061 /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDH_RSA_WITH_ARIA_128_GCM_SHA256    0xC062 /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDH_RSA_WITH_ARIA_256_GCM_SHA384    0xC063 /**< TLS 1.2 */
-#define MBEDTLS_TLS_PSK_WITH_ARIA_128_CBC_SHA256         0xC064 /**< TLS 1.2 */
-#define MBEDTLS_TLS_PSK_WITH_ARIA_256_CBC_SHA384         0xC065 /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_PSK_WITH_ARIA_128_CBC_SHA256     0xC066 /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_PSK_WITH_ARIA_256_CBC_SHA384     0xC067 /**< TLS 1.2 */
-#define MBEDTLS_TLS_RSA_PSK_WITH_ARIA_128_CBC_SHA256     0xC068 /**< TLS 1.2 */
-#define MBEDTLS_TLS_RSA_PSK_WITH_ARIA_256_CBC_SHA384     0xC069 /**< TLS 1.2 */
-#define MBEDTLS_TLS_PSK_WITH_ARIA_128_GCM_SHA256         0xC06A /**< TLS 1.2 */
-#define MBEDTLS_TLS_PSK_WITH_ARIA_256_GCM_SHA384         0xC06B /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_PSK_WITH_ARIA_128_GCM_SHA256     0xC06C /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_PSK_WITH_ARIA_256_GCM_SHA384     0xC06D /**< TLS 1.2 */
-#define MBEDTLS_TLS_RSA_PSK_WITH_ARIA_128_GCM_SHA256     0xC06E /**< TLS 1.2 */
-#define MBEDTLS_TLS_RSA_PSK_WITH_ARIA_256_GCM_SHA384     0xC06F /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_PSK_WITH_ARIA_128_CBC_SHA256   0xC070 /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_PSK_WITH_ARIA_256_CBC_SHA384   0xC071 /**< TLS 1.2 */
-
 #define MBEDTLS_TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256 0xC072 /**< Not in SSL3! */
 #define MBEDTLS_TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384 0xC073 /**< Not in SSL3! */
 #define MBEDTLS_TLS_ECDH_ECDSA_WITH_CAMELLIA_128_CBC_SHA256  0xC074 /**< Not in SSL3! */
@@ -279,15 +238,6 @@ extern "C" {
 
 #define MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8          0xC0FF  /**< experimental */
 
-/* RFC 7905 */
-#define MBEDTLS_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256   0xCCA8 /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 0xCCA9 /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256     0xCCAA /**< TLS 1.2 */
-#define MBEDTLS_TLS_PSK_WITH_CHACHA20_POLY1305_SHA256         0xCCAB /**< TLS 1.2 */
-#define MBEDTLS_TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256   0xCCAC /**< TLS 1.2 */
-#define MBEDTLS_TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256     0xCCAD /**< TLS 1.2 */
-#define MBEDTLS_TLS_RSA_PSK_WITH_CHACHA20_POLY1305_SHA256     0xCCAE /**< TLS 1.2 */
-
 /* Reminder: update mbedtls_ssl_premaster_secret when adding a new key exchange.
  * Reminder: update MBEDTLS_KEY_EXCHANGE__xxx below
  */
@@ -306,6 +256,79 @@ typedef enum {
     MBEDTLS_KEY_EXCHANGE_ECJPAKE,
 } mbedtls_key_exchange_type_t;
 
+/* Key exchanges using a certificate */
+#if defined(MBEDTLS_KEY_EXCHANGE_RSA_ENABLED)           || \
+    defined(MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED)       || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED)     || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED)   || \
+    defined(MBEDTLS_KEY_EXCHANGE_RSA_PSK_ENABLED)       || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED)      || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED)
+#define MBEDTLS_KEY_EXCHANGE__WITH_CERT__ENABLED
+#endif
+
+/* Key exchanges allowing client certificate requests */
+#if defined(MBEDTLS_KEY_EXCHANGE_RSA_ENABLED)           ||       \
+    defined(MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED)       ||       \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED)      ||       \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED)     ||       \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED)    ||       \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED)
+#define MBEDTLS_KEY_EXCHANGE__CERT_REQ_ALLOWED__ENABLED
+#endif
+
+/* Key exchanges involving server signature in ServerKeyExchange */
+#if defined(MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED)       || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED)     || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED)
+#define MBEDTLS_KEY_EXCHANGE__WITH_SERVER_SIGNATURE__ENABLED
+#endif
+
+/* Key exchanges using ECDH */
+#if defined(MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED)      || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED)
+#define MBEDTLS_KEY_EXCHANGE__SOME__ECDH_ENABLED
+#endif
+
+/* Key exchanges that don't involve ephemeral keys */
+#if defined(MBEDTLS_KEY_EXCHANGE_RSA_ENABLED)           || \
+    defined(MBEDTLS_KEY_EXCHANGE_PSK_ENABLED)           || \
+    defined(MBEDTLS_KEY_EXCHANGE_RSA_PSK_ENABLED)       || \
+    defined(MBEDTLS_KEY_EXCHANGE__SOME__ECDH_ENABLED)
+#define MBEDTLS_KEY_EXCHANGE__SOME_NON_PFS__ENABLED
+#endif
+
+/* Key exchanges that involve ephemeral keys */
+#if defined(MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED)       || \
+    defined(MBEDTLS_KEY_EXCHANGE_DHE_PSK_ENABLED)       || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED)     || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED)     || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED)   || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
+#define MBEDTLS_KEY_EXCHANGE__SOME_PFS__ENABLED
+#endif
+
+/* Key exchanges using a PSK */
+#if defined(MBEDTLS_KEY_EXCHANGE_PSK_ENABLED)           || \
+    defined(MBEDTLS_KEY_EXCHANGE_RSA_PSK_ENABLED)       || \
+    defined(MBEDTLS_KEY_EXCHANGE_DHE_PSK_ENABLED)       || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED)
+#define MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED
+#endif
+
+/* Key exchanges using DHE */
+#if defined(MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED)       || \
+    defined(MBEDTLS_KEY_EXCHANGE_DHE_PSK_ENABLED)
+#define MBEDTLS_KEY_EXCHANGE__SOME__DHE_ENABLED
+#endif
+
+/* Key exchanges using ECDHE */
+#if defined(MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED)     || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED)   || \
+    defined(MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED)
+#define MBEDTLS_KEY_EXCHANGE__SOME__ECDHE_ENABLED
+#endif
+
 typedef struct mbedtls_ssl_ciphersuite_t mbedtls_ssl_ciphersuite_t;
 
 #define MBEDTLS_CIPHERSUITE_WEAK       0x01    /**< Weak ciphersuite flag  */
@@ -313,61 +336,6 @@ typedef struct mbedtls_ssl_ciphersuite_t mbedtls_ssl_ciphersuite_t;
                                                      eg for CCM_8 */
 #define MBEDTLS_CIPHERSUITE_NODTLS     0x04    /**< Can't be used with DTLS */
 
-/*
- * Ciphersuite macro definitions
- *
- * This is highly incomplete and only contains those ciphersuites for
- * which we need to be able to build the library with support for that
- * ciphersuite only (currently MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8
- * as an example).
- */
-
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_ID              MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_NAME            "TLS-ECDHE-ECDSA-WITH-AES-128-CCM-8"
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_CIPHER          MBEDTLS_CIPHER_AES_128_CCM
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_MAC             MBEDTLS_MD_SHA256
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_KEY_EXCHANGE    MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_MIN_MAJOR_VER   MBEDTLS_SSL_MAJOR_VERSION_3
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_MIN_MINOR_VER   MBEDTLS_SSL_MINOR_VERSION_3
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_MAX_MAJOR_VER   MBEDTLS_SSL_MAJOR_VERSION_3
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_MAX_MINOR_VER   MBEDTLS_SSL_MINOR_VERSION_3
-#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_FLAGS           MBEDTLS_CIPHERSUITE_SHORT_TAG
-
-/* This is just to make check-names.sh happy -- don't uncomment. */
-//#define MBEDTLS_SUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8
-
-/*
- * Helper macros to extract fields from ciphersuites.
- */
-
-#define MBEDTLS_SSL_SUITE_ID_T(            SUITE ) SUITE ## _ID
-#define MBEDTLS_SSL_SUITE_NAME_T(          SUITE ) SUITE ## _NAME
-#define MBEDTLS_SSL_SUITE_CIPHER_T(        SUITE ) SUITE ## _CIPHER
-#define MBEDTLS_SSL_SUITE_MAC_T(           SUITE ) SUITE ## _MAC
-#define MBEDTLS_SSL_SUITE_KEY_EXCHANGE_T(  SUITE ) SUITE ## _KEY_EXCHANGE
-#define MBEDTLS_SSL_SUITE_MIN_MAJOR_VER_T( SUITE ) SUITE ## _MIN_MAJOR_VER
-#define MBEDTLS_SSL_SUITE_MIN_MINOR_VER_T( SUITE ) SUITE ## _MIN_MINOR_VER
-#define MBEDTLS_SSL_SUITE_MAX_MAJOR_VER_T( SUITE ) SUITE ## _MAX_MAJOR_VER
-#define MBEDTLS_SSL_SUITE_MAX_MINOR_VER_T( SUITE ) SUITE ## _MAX_MINOR_VER
-#define MBEDTLS_SSL_SUITE_FLAGS_T(         SUITE ) SUITE ## _FLAGS
-
-/* Wrapper around MBEDTLS_SSL_SUITE_XXX_T() which makes sure that
- * the argument is macro-expanded before concatenated with the
- * field name. This allows to call these macros as
- *    MBEDTLS_SSL_SUITE_XXX( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ),
- * where MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE expands to MBEDTLS_SSL_SUITE_XXX. */
-#define MBEDTLS_SSL_SUITE_ID(            SUITE ) MBEDTLS_SSL_SUITE_ID_T(            SUITE )
-#define MBEDTLS_SSL_SUITE_NAME(          SUITE ) MBEDTLS_SSL_SUITE_NAME_T(          SUITE )
-#define MBEDTLS_SSL_SUITE_CIPHER(        SUITE ) MBEDTLS_SSL_SUITE_CIPHER_T(        SUITE )
-#define MBEDTLS_SSL_SUITE_MAC(           SUITE ) MBEDTLS_SSL_SUITE_MAC_T(           SUITE )
-#define MBEDTLS_SSL_SUITE_KEY_EXCHANGE(  SUITE ) MBEDTLS_SSL_SUITE_KEY_EXCHANGE_T(  SUITE )
-#define MBEDTLS_SSL_SUITE_MIN_MAJOR_VER( SUITE ) MBEDTLS_SSL_SUITE_MIN_MAJOR_VER_T( SUITE )
-#define MBEDTLS_SSL_SUITE_MIN_MINOR_VER( SUITE ) MBEDTLS_SSL_SUITE_MIN_MINOR_VER_T( SUITE )
-#define MBEDTLS_SSL_SUITE_MAX_MAJOR_VER( SUITE ) MBEDTLS_SSL_SUITE_MAX_MAJOR_VER_T( SUITE )
-#define MBEDTLS_SSL_SUITE_MAX_MINOR_VER( SUITE ) MBEDTLS_SSL_SUITE_MAX_MINOR_VER_T( SUITE )
-#define MBEDTLS_SSL_SUITE_FLAGS(         SUITE ) MBEDTLS_SSL_SUITE_FLAGS_T(         SUITE )
-
-#if !defined(MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE)
 /**
  * \brief   This structure is used for storing ciphersuite information
  */
@@ -388,386 +356,23 @@ struct mbedtls_ssl_ciphersuite_t
     unsigned char flags;
 };
 
-typedef mbedtls_ssl_ciphersuite_t const * mbedtls_ssl_ciphersuite_handle_t;
-#define MBEDTLS_SSL_CIPHERSUITE_INVALID_HANDLE ( (mbedtls_ssl_ciphersuite_handle_t) NULL )
-
-/**
- * \brief   This macro builds an instance of ::mbedtls_ssl_ciphersuite_t
- *          from an \c MBEDTLS_SUITE_XXX identifier.
- */
-#define MBEDTLS_SSL_SUITE_INFO( SUITE )           \
-    { MBEDTLS_SSL_SUITE_ID( SUITE ),              \
-      MBEDTLS_SSL_SUITE_NAME( SUITE ),            \
-      MBEDTLS_SSL_SUITE_CIPHER( SUITE ),          \
-      MBEDTLS_SSL_SUITE_MAC( SUITE ),             \
-      MBEDTLS_SSL_SUITE_KEY_EXCHANGE(  SUITE ),   \
-      MBEDTLS_SSL_SUITE_MIN_MAJOR_VER( SUITE ),   \
-      MBEDTLS_SSL_SUITE_MIN_MINOR_VER( SUITE ),   \
-      MBEDTLS_SSL_SUITE_MAX_MAJOR_VER( SUITE ),   \
-      MBEDTLS_SSL_SUITE_MAX_MINOR_VER( SUITE ),   \
-      MBEDTLS_SSL_SUITE_FLAGS( SUITE ) }
-
-#else /* !MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE */
-
-typedef unsigned char mbedtls_ssl_ciphersuite_handle_t;
-#define MBEDTLS_SSL_CIPHERSUITE_INVALID_HANDLE      ( (mbedtls_ssl_ciphersuite_handle_t) 0 )
-#define MBEDTLS_SSL_CIPHERSUITE_UNIQUE_VALID_HANDLE ( (mbedtls_ssl_ciphersuite_handle_t) 1 )
-
-#endif /* MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE */
-
-#if !defined(MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE)
-static inline int mbedtls_ssl_session_get_ciphersuite(
-    mbedtls_ssl_session const * session )
-{
-    return( session->ciphersuite );
-}
-#else /* !MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE */
-static inline int mbedtls_ssl_session_get_ciphersuite(
-    mbedtls_ssl_session const * session )
-{
-    ((void) session);
-    return( MBEDTLS_SSL_SUITE_ID( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-#endif /* MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE */
-
-/*
- * Getter functions for the extraction of ciphersuite attributes
- * from a ciphersuite handle.
- *
- * Warning: These functions have the validity of the handle as a precondition!
- * Their behaviour is undefined when MBEDTLS_SSL_CIPHERSUITE_INVALID_HANDLE
- * is passed.
- */
-
-#if !defined(MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE)
-/*
- * Implementation of getter functions when the ciphersuite handle
- * is a pointer to the ciphersuite information structure.
- *
- * The precondition that the handle is valid means that
- * we don't need to check that info != NULL.
- */
-static inline int mbedtls_ssl_suite_get_id(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->id );
-}
-static inline const char* mbedtls_ssl_suite_get_name(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->name );
-}
-static inline mbedtls_cipher_type_t mbedtls_ssl_suite_get_cipher(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->cipher );
-}
-static inline mbedtls_md_type_t mbedtls_ssl_suite_get_mac(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->mac );
-}
-static inline mbedtls_key_exchange_type_t mbedtls_ssl_suite_get_key_exchange(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->key_exchange );
-}
-static inline int mbedtls_ssl_suite_get_min_major_ver(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->min_major_ver );
-}
-static inline int mbedtls_ssl_suite_get_min_minor_ver(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->min_minor_ver );
-}
-static inline int mbedtls_ssl_suite_get_max_major_ver(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->max_major_ver );
-}
-static inline int mbedtls_ssl_suite_get_max_minor_ver(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->max_minor_ver );
-}
-static inline unsigned char mbedtls_ssl_suite_get_flags(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    return( info->flags );
-}
-#else /* !MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE */
-/*
- * Implementations of getter functions in the case of only a single possible
- * ciphersuite. In this case, the handle is logically a boolean (either the
- * invalid handle or the unique valid handle representing the single enabled
- * ciphersuite), and the precondition that the handle is valid means that we
- * can statically return the hardcoded attribute of the enabled ciphersuite.
- */
-static inline int mbedtls_ssl_suite_get_id(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_ID( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-static inline const char* mbedtls_ssl_suite_get_name(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_NAME( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-static inline mbedtls_cipher_type_t mbedtls_ssl_suite_get_cipher(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_CIPHER( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-static inline mbedtls_md_type_t mbedtls_ssl_suite_get_mac(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_MAC( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-static inline mbedtls_key_exchange_type_t mbedtls_ssl_suite_get_key_exchange(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_KEY_EXCHANGE( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-static inline int mbedtls_ssl_suite_get_min_major_ver(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_MIN_MAJOR_VER( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-static inline int mbedtls_ssl_suite_get_min_minor_ver(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_MIN_MINOR_VER( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-static inline int mbedtls_ssl_suite_get_max_major_ver(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_MAX_MAJOR_VER( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-static inline int mbedtls_ssl_suite_get_max_minor_ver(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_MAX_MINOR_VER( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-static inline unsigned char mbedtls_ssl_suite_get_flags(
-    mbedtls_ssl_ciphersuite_handle_t const info )
-{
-    ((void) info);
-    return( MBEDTLS_SSL_SUITE_FLAGS( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE ) );
-}
-#endif /* MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE */
-
 const int *mbedtls_ssl_list_ciphersuites( void );
 
-/*
- * Various small helper functions for ciphersuites.
- *
- * Like the getter functions, they assume that the provided ciphersuite
- * handle is valid, and hence can be optimized in case there's only one
- * ciphersuite enabled.
- *
- * To avoid code-duplication between inline and non-inline implementations
- * of this, we define internal static inline versions of all functions first,
- * and define wrappers around these either here or in ssl_ciphersuites.c,
- * depending on whether MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE is defined.
- */
+const mbedtls_ssl_ciphersuite_t *mbedtls_ssl_ciphersuite_from_string( const char *ciphersuite_name );
+const mbedtls_ssl_ciphersuite_t *mbedtls_ssl_ciphersuite_from_id( int ciphersuite_id );
 
 #if defined(MBEDTLS_PK_C)
-static inline mbedtls_pk_type_t mbedtls_ssl_get_ciphersuite_sig_pk_alg_internal(
-    mbedtls_ssl_ciphersuite_handle_t info )
+mbedtls_pk_type_t mbedtls_ssl_get_ciphersuite_sig_pk_alg( const mbedtls_ssl_ciphersuite_t *info );
+mbedtls_pk_type_t mbedtls_ssl_get_ciphersuite_sig_alg( const mbedtls_ssl_ciphersuite_t *info );
+#endif
+
+int mbedtls_ssl_ciphersuite_uses_ec( const mbedtls_ssl_ciphersuite_t *info );
+int mbedtls_ssl_ciphersuite_uses_psk( const mbedtls_ssl_ciphersuite_t *info );
+
+#if defined(MBEDTLS_KEY_EXCHANGE__SOME_PFS__ENABLED)
+static inline int mbedtls_ssl_ciphersuite_has_pfs( const mbedtls_ssl_ciphersuite_t *info )
 {
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
-    {
-        case MBEDTLS_KEY_EXCHANGE_RSA:
-        case MBEDTLS_KEY_EXCHANGE_DHE_RSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_RSA:
-        case MBEDTLS_KEY_EXCHANGE_RSA_PSK:
-            return( MBEDTLS_PK_RSA );
-
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA:
-            return( MBEDTLS_PK_ECDSA );
-
-        case MBEDTLS_KEY_EXCHANGE_ECDH_RSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA:
-            return( MBEDTLS_PK_ECKEY );
-
-        default:
-            return( MBEDTLS_PK_NONE );
-    }
-}
-
-static inline mbedtls_pk_type_t mbedtls_ssl_get_ciphersuite_sig_alg_internal(
-    mbedtls_ssl_ciphersuite_handle_t info )
-{
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
-    {
-        case MBEDTLS_KEY_EXCHANGE_RSA:
-        case MBEDTLS_KEY_EXCHANGE_DHE_RSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_RSA:
-            return( MBEDTLS_PK_RSA );
-
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA:
-            return( MBEDTLS_PK_ECDSA );
-
-        default:
-            return( MBEDTLS_PK_NONE );
-    }
-}
-
-#endif /* MBEDTLS_PK_C */
-
-#if defined(MBEDTLS_USE_TINYCRYPT) ||                           \
-    defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_ECDSA_C) ||      \
-    defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
-static inline int mbedtls_ssl_ciphersuite_uses_ec_internal(
-    mbedtls_ssl_ciphersuite_handle_t info )
-{
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
-    {
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_RSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_PSK:
-        case MBEDTLS_KEY_EXCHANGE_ECDH_RSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA:
-        case MBEDTLS_KEY_EXCHANGE_ECJPAKE:
-            return( 1 );
-
-        default:
-            return( 0 );
-    }
-}
-#endif /* MBEDTLS_USE_TINYCRYPT ||
-          MBEDTLS_ECDH_C        ||
-          MBEDTLS_ECDSA_C       ||
-          MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED */
-
-#if defined(MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED)
-static inline int mbedtls_ssl_ciphersuite_uses_psk_internal(
-    mbedtls_ssl_ciphersuite_handle_t info )
-{
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
-    {
-        case MBEDTLS_KEY_EXCHANGE_PSK:
-        case MBEDTLS_KEY_EXCHANGE_RSA_PSK:
-        case MBEDTLS_KEY_EXCHANGE_DHE_PSK:
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_PSK:
-            return( 1 );
-
-        default:
-            return( 0 );
-    }
-}
-#endif /* MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED */
-
-/*
- * Wrappers around internal helper functions to be used by the rest of
- * the library, either defined static inline here or in ssl_ciphersuites.c.
- */
-
-#if !defined(MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE)
-
-mbedtls_ssl_ciphersuite_handle_t mbedtls_ssl_ciphersuite_from_string(
-    const char *ciphersuite_name );
-mbedtls_ssl_ciphersuite_handle_t mbedtls_ssl_ciphersuite_from_id(
-    int ciphersuite_id );
-
-#if defined(MBEDTLS_PK_C)
-mbedtls_pk_type_t mbedtls_ssl_get_ciphersuite_sig_pk_alg(
-    mbedtls_ssl_ciphersuite_handle_t info );
-mbedtls_pk_type_t mbedtls_ssl_get_ciphersuite_sig_alg(
-    mbedtls_ssl_ciphersuite_handle_t info );
-#endif /* MBEDTLS_PK_C */
-
-#if defined(MBEDTLS_USE_TINYCRYPT) ||                           \
-    defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_ECDSA_C) ||      \
-    defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
-int mbedtls_ssl_ciphersuite_uses_ec( mbedtls_ssl_ciphersuite_handle_t info );
-#endif /* MBEDTLS_USE_TINYCRYPT ||
-          MBEDTLS_ECDH_C        ||
-          MBEDTLS_ECDSA_C       ||
-          MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED */
-
-#if defined(MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED)
-int mbedtls_ssl_ciphersuite_uses_psk( mbedtls_ssl_ciphersuite_handle_t info );
-#endif /* MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED */
-
-#else /* !MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE */
-
-#if defined(MBEDTLS_PK_C)
-static inline mbedtls_pk_type_t mbedtls_ssl_get_ciphersuite_sig_pk_alg(
-    mbedtls_ssl_ciphersuite_handle_t info )
-{
-    return( mbedtls_ssl_get_ciphersuite_sig_pk_alg_internal( info ) );
-}
-
-static inline mbedtls_pk_type_t mbedtls_ssl_get_ciphersuite_sig_alg(
-    mbedtls_ssl_ciphersuite_handle_t info )
-{
-    return( mbedtls_ssl_get_ciphersuite_sig_alg_internal( info ) );
-}
-#endif /* MBEDTLS_PK_C */
-
-#if defined(MBEDTLS_USE_TINYCRYPT) ||                           \
-    defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_ECDSA_C) ||      \
-    defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
-static inline int mbedtls_ssl_ciphersuite_uses_ec(
-    mbedtls_ssl_ciphersuite_handle_t info )
-{
-    return( mbedtls_ssl_ciphersuite_uses_ec_internal( info ) );
-}
-#endif /* MBEDTLS_USE_TINYCRYPT ||
-          MBEDTLS_ECDH_C        ||
-          MBEDTLS_ECDSA_C       ||
-          MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED */
-
-#if defined(MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED)
-static inline int mbedtls_ssl_ciphersuite_uses_psk(
-    mbedtls_ssl_ciphersuite_handle_t info )
-{
-    return( mbedtls_ssl_ciphersuite_uses_psk_internal( info ) );
-}
-#endif /* MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED */
-
-static inline mbedtls_ssl_ciphersuite_handle_t mbedtls_ssl_ciphersuite_from_id(
-    int ciphersuite )
-{
-    static const int single_suite_id =
-        MBEDTLS_SSL_SUITE_ID( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE );
-
-    if( ciphersuite == single_suite_id )
-        return( MBEDTLS_SSL_CIPHERSUITE_UNIQUE_VALID_HANDLE );
-
-    return( MBEDTLS_SSL_CIPHERSUITE_INVALID_HANDLE );
-}
-
-static inline mbedtls_ssl_ciphersuite_handle_t mbedtls_ssl_ciphersuite_from_string(
-                                                const char *ciphersuite_name )
-{
-    static const char * const single_suite_name =
-        MBEDTLS_SSL_SUITE_NAME( MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE );
-
-    if( strcmp( ciphersuite_name, single_suite_name ) == 0 )
-        return( MBEDTLS_SSL_CIPHERSUITE_UNIQUE_VALID_HANDLE );
-
-    return( MBEDTLS_SSL_CIPHERSUITE_INVALID_HANDLE );
-}
-
-#endif /* MBEDTLS_SSL_CONF_SINGLE_CIPHERSUITE */
-
-static inline int mbedtls_ssl_ciphersuite_has_pfs(
-    mbedtls_ssl_ciphersuite_handle_t info )
-{
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
+    switch( info->key_exchange )
     {
         case MBEDTLS_KEY_EXCHANGE_DHE_RSA:
         case MBEDTLS_KEY_EXCHANGE_DHE_PSK:
@@ -781,11 +386,12 @@ static inline int mbedtls_ssl_ciphersuite_has_pfs(
             return( 0 );
     }
 }
+#endif /* MBEDTLS_KEY_EXCHANGE__SOME_PFS__ENABLED */
 
-static inline int mbedtls_ssl_ciphersuite_no_pfs(
-    mbedtls_ssl_ciphersuite_handle_t info )
+#if defined(MBEDTLS_KEY_EXCHANGE__SOME_NON_PFS__ENABLED)
+static inline int mbedtls_ssl_ciphersuite_no_pfs( const mbedtls_ssl_ciphersuite_t *info )
 {
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
+    switch( info->key_exchange )
     {
         case MBEDTLS_KEY_EXCHANGE_ECDH_RSA:
         case MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA:
@@ -798,12 +404,12 @@ static inline int mbedtls_ssl_ciphersuite_no_pfs(
             return( 0 );
     }
 }
+#endif /* MBEDTLS_KEY_EXCHANGE__SOME_NON_PFS__ENABLED */
 
-
-static inline int mbedtls_ssl_ciphersuite_uses_ecdh(
-    mbedtls_ssl_ciphersuite_handle_t info )
+#if defined(MBEDTLS_KEY_EXCHANGE__SOME__ECDH_ENABLED)
+static inline int mbedtls_ssl_ciphersuite_uses_ecdh( const mbedtls_ssl_ciphersuite_t *info )
 {
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
+    switch( info->key_exchange )
     {
         case MBEDTLS_KEY_EXCHANGE_ECDH_RSA:
         case MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA:
@@ -813,11 +419,11 @@ static inline int mbedtls_ssl_ciphersuite_uses_ecdh(
             return( 0 );
     }
 }
+#endif /* MBEDTLS_KEY_EXCHANGE__SOME__ECDH_ENABLED */
 
-static inline int mbedtls_ssl_ciphersuite_cert_req_allowed(
-    mbedtls_ssl_ciphersuite_handle_t info )
+static inline int mbedtls_ssl_ciphersuite_cert_req_allowed( const mbedtls_ssl_ciphersuite_t *info )
 {
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
+    switch( info->key_exchange )
     {
         case MBEDTLS_KEY_EXCHANGE_RSA:
         case MBEDTLS_KEY_EXCHANGE_DHE_RSA:
@@ -832,29 +438,10 @@ static inline int mbedtls_ssl_ciphersuite_cert_req_allowed(
     }
 }
 
-static inline int mbedtls_ssl_ciphersuite_uses_srv_cert(
-    mbedtls_ssl_ciphersuite_handle_t info )
+#if defined(MBEDTLS_KEY_EXCHANGE__SOME__DHE_ENABLED)
+static inline int mbedtls_ssl_ciphersuite_uses_dhe( const mbedtls_ssl_ciphersuite_t *info )
 {
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
-    {
-        case MBEDTLS_KEY_EXCHANGE_RSA:
-        case MBEDTLS_KEY_EXCHANGE_RSA_PSK:
-        case MBEDTLS_KEY_EXCHANGE_DHE_RSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDH_RSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_RSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA:
-        case MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA:
-            return( 1 );
-
-        default:
-            return( 0 );
-    }
-}
-
-static inline int mbedtls_ssl_ciphersuite_uses_dhe(
-    mbedtls_ssl_ciphersuite_handle_t info )
-{
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
+    switch( info->key_exchange )
     {
         case MBEDTLS_KEY_EXCHANGE_DHE_RSA:
         case MBEDTLS_KEY_EXCHANGE_DHE_PSK:
@@ -864,11 +451,12 @@ static inline int mbedtls_ssl_ciphersuite_uses_dhe(
             return( 0 );
     }
 }
+#endif /* MBEDTLS_KEY_EXCHANGE__SOME__DHE_ENABLED) */
 
-static inline int mbedtls_ssl_ciphersuite_uses_ecdhe(
-    mbedtls_ssl_ciphersuite_handle_t info )
+#if defined(MBEDTLS_KEY_EXCHANGE__SOME__ECDHE_ENABLED)
+static inline int mbedtls_ssl_ciphersuite_uses_ecdhe( const mbedtls_ssl_ciphersuite_t *info )
 {
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
+    switch( info->key_exchange )
     {
         case MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA:
         case MBEDTLS_KEY_EXCHANGE_ECDHE_RSA:
@@ -879,11 +467,12 @@ static inline int mbedtls_ssl_ciphersuite_uses_ecdhe(
             return( 0 );
     }
 }
+#endif /* MBEDTLS_KEY_EXCHANGE__SOME__ECDHE_ENABLED) */
 
-static inline int mbedtls_ssl_ciphersuite_uses_server_signature(
-    mbedtls_ssl_ciphersuite_handle_t info )
+#if defined(MBEDTLS_KEY_EXCHANGE__WITH_SERVER_SIGNATURE__ENABLED)
+static inline int mbedtls_ssl_ciphersuite_uses_server_signature( const mbedtls_ssl_ciphersuite_t *info )
 {
-    switch( mbedtls_ssl_suite_get_key_exchange( info ) )
+    switch( info->key_exchange )
     {
         case MBEDTLS_KEY_EXCHANGE_DHE_RSA:
         case MBEDTLS_KEY_EXCHANGE_ECDHE_RSA:
@@ -894,6 +483,7 @@ static inline int mbedtls_ssl_ciphersuite_uses_server_signature(
             return( 0 );
     }
 }
+#endif /* MBEDTLS_KEY_EXCHANGE__WITH_SERVER_SIGNATURE__ENABLED */
 
 #ifdef __cplusplus
 }

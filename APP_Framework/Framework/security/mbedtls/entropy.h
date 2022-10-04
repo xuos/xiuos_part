@@ -83,8 +83,8 @@
 #define MBEDTLS_ENTROPY_MAX_SEED_SIZE   1024    /**< Maximum size of seed we read from seed file */
 #define MBEDTLS_ENTROPY_SOURCE_MANUAL   MBEDTLS_ENTROPY_MAX_SOURCES
 
-#define MBEDTLS_ENTROPY_SOURCE_STRONG   0x7F    /**< Entropy source is strong   */
-#define MBEDTLS_ENTROPY_SOURCE_WEAK     0x0     /**< Entropy source is weak     */
+#define MBEDTLS_ENTROPY_SOURCE_STRONG   1       /**< Entropy source is strong   */
+#define MBEDTLS_ENTROPY_SOURCE_WEAK     0       /**< Entropy source is weak     */
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,7 +107,7 @@ typedef int (*mbedtls_entropy_f_source_ptr)(void *data, unsigned char *output, s
 /**
  * \brief           Entropy source state
  */
-typedef struct mbedtls_entropy_source_state
+typedef struct
 {
     mbedtls_entropy_f_source_ptr    f_source;   /**< The entropy source callback */
     void *          p_source;   /**< The callback data pointer */
@@ -120,7 +120,7 @@ mbedtls_entropy_source_state;
 /**
  * \brief           Entropy context structure
  */
-typedef struct mbedtls_entropy_context
+typedef struct
 {
     int accumulator_started;
 #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
@@ -166,7 +166,7 @@ void mbedtls_entropy_free( mbedtls_entropy_context *ctx );
  * \param threshold Minimum required from source before entropy is released
  *                  ( with mbedtls_entropy_func() ) (in bytes)
  * \param strong    MBEDTLS_ENTROPY_SOURCE_STRONG or
- *                  MBEDTLS_ENTROPY_SOURCE_WEAK.
+ *                  MBEDTSL_ENTROPY_SOURCE_WEAK.
  *                  At least one strong source needs to be added.
  *                  Weaker sources (such as the cycle counter) can be used as
  *                  a complement.

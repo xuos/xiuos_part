@@ -3,7 +3,7 @@
  *
  * \brief Deprecated header file that includes net_sockets.h
  *
- * \deprecated Superseded by net_sockets.h
+ * \deprecated Superseded by mbedtls/net_sockets.h
  */
 /*
  *  Copyright (C) 2006-2016, ARM Limited, All Rights Reserved
@@ -32,6 +32,6 @@
 #if !defined(MBEDTLS_DEPRECATED_REMOVED)
 #include "net_sockets.h"
 #if defined(MBEDTLS_DEPRECATED_WARNING)
-#warning "Deprecated header file: Superseded by net_sockets.h"
+#warning "Deprecated header file: Superseded by mbedtls/net_sockets.h"
 #endif /* MBEDTLS_DEPRECATED_WARNING */
 #endif /* !MBEDTLS_DEPRECATED_REMOVED */
