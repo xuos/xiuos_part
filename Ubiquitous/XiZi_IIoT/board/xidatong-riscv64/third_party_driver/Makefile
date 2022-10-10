@@ -1,5 +1,9 @@
 SRC_FILES := sleep.c
 
+ifeq ($(CONFIG_BSP_USING_CH376),y)
+  SRC_DIR += ch376
+endif
+
 ifeq ($(CONFIG_BSP_USING_CH438),y)
   SRC_DIR += ch438
 endif
