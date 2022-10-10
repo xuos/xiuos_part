@@ -701,7 +701,7 @@ static const struct cmdmap_s g_cmdmap[] =
   { "AdapterBlueToothTest",       cmd_AdapterBlueToothTest,       1, 1, "[BlueTooth hc08 test.]" },
 #endif
 
-#if defined(CONFIG_ADAPTER_ESP07S_WIFI) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
+#if (defined(CONFIG_ADAPTER_ESP07S_WIFI) || defined(CONFIG_ADAPTER_ESP8285_WIFI)) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
   { "wifitest",       cmd_AdapterWifiTest,       1, 8, "[WIFI test.]" },
 #endif
 
