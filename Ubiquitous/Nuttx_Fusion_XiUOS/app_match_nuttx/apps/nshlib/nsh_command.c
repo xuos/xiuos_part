@@ -596,6 +596,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
 #endif
 
+#if defined(CONFIG_BSP_USING_CH376) && !defined(CONFIG_NSH_DISABLE_CH376)
+  { "ch376",    cmd_Ch376,     1, 1, "[ch376 demo cmd.]" },
+#endif
+
 #if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)
   { "ch438",    cmd_Ch438,     1, 1, "[ch438 demo cmd.]" },
 #endif

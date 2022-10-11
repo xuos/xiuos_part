@@ -39,6 +39,19 @@
 extern int FrameworkInit(void);
 
 /****************************************************************************
+ * Name: cmd_Ch376
+ ****************************************************************************/
+#if defined(CONFIG_BSP_USING_CH376) && !defined(CONFIG_NSH_DISABLE_CH376)
+extern void CH376Demo(void);
+int cmd_Ch376(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    CH376Demo();
+    return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_Ch438
  ****************************************************************************/
 #if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)

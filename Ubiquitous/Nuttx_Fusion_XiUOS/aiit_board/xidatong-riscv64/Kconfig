@@ -5,6 +5,27 @@
 
 if ARCH_BOARD_XIDATONG_RISCV64
 
+menuconfig BSP_USING_CH376
+    bool "Using ch376 device"
+    default n
+    select K210_16550_UART
+    select K210_16550_UART3
+    
+if BSP_USING_CH376
+
+choice
+	prompt "select ch376 function."
+	default CH376_USB_FUNCTION
+
+config CH376_USB_FUNCTION
+	bool "select ch376 usb function"
+
+config CH376_SD_FUNCTION
+	bool "select ch376 sd function"
+endchoice
+
+endif # BSP_USING_CH376
+
 menuconfig BSP_USING_CH438
     bool "Using CH438 device"
     default n

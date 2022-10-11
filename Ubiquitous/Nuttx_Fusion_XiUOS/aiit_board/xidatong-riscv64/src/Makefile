@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS  = k210_bringup.c k210_boot.c k210_ch376.c
+CSRCS  = k210_bringup.c k210_boot.c
 
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += k210_reset.c
@@ -44,6 +44,10 @@ endif
 
 ifeq ($(CONFIG_BSP_USING_CH438),y)
 CSRCS += k210_ch438.c ch438_demo.c
+endif
+
+ifeq ($(CONFIG_BSP_USING_CH376),y)
+CSRCS += k210_ch376.c ch376_demo.c
 endif
 
 include $(TOPDIR)/boards/Board.mk
