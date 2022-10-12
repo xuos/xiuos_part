@@ -31,11 +31,13 @@ void CH376Demo(void)
 	s = mInitCH376Host();
 	printf ("ch376 init stat=0x%02x\n",(uint16_t)s);
     
+#ifdef CONFIG_CH376_USB_FUNCTION
     printf( "Wait Udisk/SD\n" );
     while ( CH376DiskConnect( ) != USB_INT_SUCCESS ) 
     {
         up_mdelay( 100 );
     }
+#endif
     
     for ( s = 0; s < 10; s ++ ) 
     {
