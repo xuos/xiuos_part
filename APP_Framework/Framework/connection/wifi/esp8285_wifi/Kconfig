@@ -5,6 +5,6 @@ config ADAPTER_WIFI_ESP8285
 if ADD_NUTTX_FETURES
         config ADAPTER_ESP8285_DRIVER
                 string "ESP8285 device uart driver path"
-                default "/dev/ttyS2"
+                default "/dev/ttyS1"
 endif
 

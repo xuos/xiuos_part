@@ -90,8 +90,8 @@ int k210_bringup(void)
 #ifdef CONFIG_K210_16550_UART1
   sysctl_clock_enable(SYSCTL_CLOCK_UART1);
   sysctl_reset(SYSCTL_RESET_UART1);
-  fpioa_set_function(GPIO_CAN_RXD, FPOA_USART1_RX);
-  fpioa_set_function(GPIO_CAN_TXD, FPOA_USART1_TX);
+  fpioa_set_function(GPIO_WIFI_RXD, FPOA_USART1_RX);
+  fpioa_set_function(GPIO_WIFI_TXD, FPOA_USART1_TX);
 #endif
 
 #ifdef CONFIG_K210_16550_UART2
