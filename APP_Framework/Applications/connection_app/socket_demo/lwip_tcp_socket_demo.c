@@ -181,6 +181,7 @@ static void TcpSocketSendTask(void *arg)
     int ret;
     char send_msg[128];
 
+	lw_print("2022-10-14 Mr. Wang commit TCP\n");
     lw_print("%s start\n", __func__);
 
     memset(send_msg, 0, sizeof(send_msg));

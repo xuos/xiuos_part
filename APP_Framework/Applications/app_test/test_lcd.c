@@ -374,7 +374,7 @@ int test_lcd(int argc, FAR char *argv[])
       close(state.fd);
       return EXIT_FAILURE;
     }
-
+  printf("2022-10-14 Mr. Wang commit LCD\n");
   printf("VideoInfo:\n");
   printf("      fmt: %u\n", state.vinfo.fmt);
   printf("     xres: %u\n", state.vinfo.xres);
