@@ -103,6 +103,14 @@ extern "C"
 #define CH438_D7_PIN    34
 #define CH438_INT_PIN   35
 
+/* w5500 IO */
+#define BSP_ENET_SCLK   9
+#define BSP_ENET_MISO   10
+#define BSP_ENET_MOSI   11
+#define BSP_ENET_NCS    12
+#define BSP_ENET_NRST   13
+#define BSP_ENET_NINT   14
+
 /* other mode io */
 #define GPIO_E220_M0   44
 #define GPIO_E220_M1   45
@@ -136,6 +144,14 @@ extern "C"
 #define FPIOA_CH438_D6    20
 #define FPIOA_CH438_D7    31
 #define FPIOA_CH438_INT   22
+
+/* w5500 FPIOA */
+#define FPIOA_ENET_NRST 5
+#define FPIOA_ENET_NINT 6
+#define FPIOA_ENET_SCLK 7
+#define FPIOA_ENET_MISO 8
+#define FPIOA_ENET_MOSI 9
+#define FPIOA_ENET_NCS  10
 
 /* other mode FPIOA */
 #define FPIOA_E220_M0   1

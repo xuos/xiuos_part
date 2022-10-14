@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/board.h>
-#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "k210_fpioa.h"

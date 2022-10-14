@@ -108,10 +108,5 @@ int k210_bringup(void)
   fpioa_set_function(GPIO_CH376T_TXD, FPOA_USART3_TX);
 #endif
 
-#ifdef CONFIG_BSP_USING_ENET
-  k210_sysctl_init();
-  board_enet_initialize();
-#endif
-
   return ret;
 }

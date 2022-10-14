@@ -31,6 +31,10 @@ config CH376_WORK_MODE
 
 endif # BSP_USING_CH376
 
+menuconfig BSP_USING_ENET
+    bool "Using ENET device"
+    default n
+
 menuconfig BSP_USING_CH438
     bool "Using CH438 device"
     default n

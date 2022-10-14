@@ -50,4 +50,7 @@ ifeq ($(CONFIG_BSP_USING_CH376),y)
 CSRCS += k210_ch376.c ch376_demo.c
 endif
 
+ifeq ($(CONFIG_BSP_USING_ENET),y)
+CSRCS += w5500.c
+endif
 include $(TOPDIR)/boards/Board.mk
