@@ -312,7 +312,8 @@ void w5500_irq_process(void);
 void w5500_intialization(void);
 void w5500_load_param(void);
 void w5500_socket_config(void);
-void Process_Socket_Data(socket_t sock);
+uint16_t Process_Socket_Data(socket_t sock);
 void SPI_Configuration(void);
+void w5500_test(void);
 
 #endif

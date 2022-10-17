@@ -27,8 +27,8 @@
  ****************************************************************************/
 w5500_param_t w5500_param;
 
-static uint8_t rx_buf[30];
-static uint8_t tx_buf[30];
+static uint8_t rx_buf[256];
+static uint8_t tx_buf[256];
 
 static uint8_t config_ip_addr[] = {10, 0, 30, 50};
 static uint8_t config_ip_mask[] = {255, 255, 255, 0};
@@ -283,7 +283,7 @@ uint16_t w5500_read_sock_bytes(socket_t sock, uint8_t *dat)
     uint8_t val;
     recv_size = w5500_read_sock_short(sock, W5500_SN_RX_RSR_REG);
 
-    //no receive data
+    /* no receive data */
     if(recv_size == 0)
     {
         return 0;
@@ -297,7 +297,7 @@ uint16_t w5500_read_sock_bytes(socket_t sock, uint8_t *dat)
     recv_addr = w5500_read_sock_short(sock, W5500_SN_RX_RD_REG);
     write_addr = recv_addr;
 
-    //calculate physical address
+    /* calculate physical address */
     recv_addr &= (SOCK_RECV_SIZE - 1);
     NCS_L();
     spi_write_short(recv_addr);
@@ -340,7 +340,7 @@ uint16_t w5500_read_sock_bytes(socket_t sock, uint8_t *dat)
     write_addr += recv_size;
 
     w5500_write_sock_short(sock, W5500_SN_RX_RD_REG, write_addr);
-    //start receive
+    /* start receive */
     w5500_write_sock_byte(sock, W5500_SN_CR_REG, SN_CR_RECV);
     return recv_size;
 }
@@ -357,7 +357,7 @@ void w5500_write_sock_bytes(socket_t sock, uint8_t *dat, uint16_t size)
     uint16_t recv_addr, write_addr;
     uint16_t i;
 
-    // if udp mode, set ip and port
+    /* if udp mode, set ip and port */
     if(w5500_read_sock_byte(sock, W5500_SN_MR_REG) != SOCK_UDP)
     {
         w5500_write_sock_long(sock, W5500_SN_DIPR_REG, w5500_param.udp_ip);
@@ -422,7 +422,7 @@ void w5500_reset(void)
     RST_L();
     RST_H();
 
-    //wait connect ok
+    /* wait connect ok */
     while((dat & LINK) == 0)
     {
         up_mdelay(500);
@@ -442,7 +442,7 @@ void w5500_config_init(void)
 {
     uint8_t i = 0;
 
-    //software reset, set 1 and auto clear 0
+    /* software reset, set 1 and auto clear 0 */
     w5500_write_byte(W5500_MR_REG, MR_RST);
     up_mdelay(100);
 
@@ -451,17 +451,17 @@ void w5500_config_init(void)
     w5500_write_bytes(W5500_SHAR_REG, w5500_param.mac_addr, 6);
     w5500_write_bytes(W5500_SIPR_REG, w5500_param.ip_addr, 4);
 
-    //set socket rx and tx memory size 2k
+    /* set socket rx and tx memory size 2k */
     for(i = 0; i < 8; i++)
     {
         w5500_write_sock_byte(i, W5500_SN_RXBUF_SIZE_REG, 0x02);
         w5500_write_sock_byte(i, W5500_SN_TXBUF_SIZE_REG, 0x02);
     }
 
-    //set retry time 200ms (0x07d0 = 2000)
+    /* set retry time 200ms (0x07d0 = 2000) */
     w5500_write_short(W5500_RTR_REG, 0x07d0);
 
-    //retry time with 8, when exceed it, produce overtime interrupt, set W5500_SN_IR_REG(TIMEOUT)
+    /* retry time with 8, when exceed it, produce overtime interrupt, set W5500_SN_IR_REG(TIMEOUT) */
     w5500_write_byte(W5500_RCR_REG, 8);
 }
 
@@ -476,7 +476,7 @@ uint8_t w5500_detect_gateway(void)
 {
     uint8_t ip_addr[4] = {w5500_param.ip_addr[0] + 1, w5500_param.ip_addr[1] + 1, w5500_param.ip_addr[2] + 1, w5500_param.ip_addr[3] + 1};
 
-    //check gateway and get gateway phyiscal address
+    /* check gateway and get gateway phyiscal address */
     w5500_write_sock_long(0, W5500_SN_DIPR_REG, ip_addr);
     w5500_write_sock_byte(0, W5500_SN_MR_REG, SN_MR_TCP);
     w5500_write_sock_byte(0, W5500_SN_CR_REG, SN_CR_OPEN);
@@ -488,13 +488,13 @@ uint8_t w5500_detect_gateway(void)
         return FALSE;
     }
 
-    //set socket connection mode
+    /* set socket connection mode */
     w5500_write_sock_byte(0, W5500_SN_CR_REG, SN_CR_CONNECT);
 
     do
     {
         uint8_t val = 0;
-        //read socket0 interrupt register
+        /* read socket0 interrupt register */
         val = w5500_read_sock_byte(0, W5500_SN_IR_REG);
 
         if(val != 0)
@@ -510,7 +510,7 @@ uint8_t w5500_detect_gateway(void)
         }
         else if(w5500_read_sock_byte(0, W5500_SN_DHAR_REG) != 0xff)
         {
-            //close socket
+            /* close socket */
             w5500_write_sock_byte(0, W5500_SN_CR_REG, SN_CR_CLOSE);
             return TRUE;
         }
@@ -527,7 +527,7 @@ uint8_t w5500_detect_gateway(void)
 *******************************************************************************/
 void w5500_socket_init(socket_t sock)
 {
-    //max partition bytes = 30
+    /* max partition bytes = 30 */
     w5500_write_sock_short(0, W5500_SN_MSSR_REG, 30);
 
     switch(sock)
@@ -632,7 +632,7 @@ void w5500_irq_process(void)
     ir_flag = w5500_read_byte(W5500_SIR_REG);
     do
     {   
-        //handle socket0 event
+        /* handle socket0 event */
         if((ir_flag & S0_INT) == S0_INT)
         {
             sn_flag = w5500_read_sock_byte(0, W5500_SN_IR_REG);
@@ -640,13 +640,13 @@ void w5500_irq_process(void)
 
             if(sn_flag & IR_CON)
             {
-                //socket connection finished
+                /* socket connection finished */
                 w5500_param.sock.flag |= SOCK_FLAG_CONN;
             }
 
             if(sn_flag & IR_DISCON)
             {
-                //disconnect state
+                /* disconnect state */
                 w5500_write_sock_byte(0, W5500_SN_CR_REG, SN_CR_CLOSE);
                 w5500_socket_init(0);
                 w5500_param.sock.flag = 0;
@@ -654,7 +654,7 @@ void w5500_irq_process(void)
 
             if(sn_flag & IR_SEND_OK)
             {
-                //send one package ok
+                /* send one package ok */
                 w5500_param.sock.state |= SOCK_STAT_SEND;
             }
 
@@ -665,7 +665,7 @@ void w5500_irq_process(void)
 
             if(sn_flag & IR_TIMEOUT)
             {
-                //close socket, connection failed
+                /* close socket, connection failed */
                 w5500_write_sock_byte(0, W5500_SN_CR_REG, SN_CR_CLOSE);
                 w5500_param.sock.flag = 0;
             }
@@ -753,14 +753,17 @@ void w5500_socket_config(void)
 *Description: W5500 receives and sends the received data
 *Input: sock: port number
 *Output: None
-*Return value: None
+*Return value: receive data length
 *******************************************************************************/
-void Process_Socket_Data(socket_t sock)
+uint16_t Process_Socket_Data(socket_t sock)
 {
     uint16_t size;
     size = w5500_read_sock_bytes(sock, rx_buf);
     memcpy(tx_buf, rx_buf, size);
     w5500_write_sock_bytes(sock, tx_buf, size);
+
+    return size;
+
 }
 
 /****************************************************************************
@@ -772,7 +775,7 @@ void Process_Socket_Data(socket_t sock)
  ****************************************************************************/
 void SPI_Configuration(void)
 {
-    /* simluate SPI bus */
+    /* config simluate SPI bus */
     k210_fpioa_config(BSP_ENET_SCLK, HS_GPIO(FPIOA_ENET_SCLK) | K210_IOFLAG_GPIOHS);
     k210_fpioa_config(BSP_ENET_NRST, HS_GPIO(FPIOA_ENET_NRST) | K210_IOFLAG_GPIOHS);
     k210_fpioa_config(BSP_ENET_MOSI, HS_GPIO(FPIOA_ENET_MOSI) | K210_IOFLAG_GPIOHS);
@@ -795,7 +798,8 @@ void SPI_Configuration(void)
 
 void w5500_test(void)
 {
-    uint32_t cnt = 0;
+    uint8_t cnt = 0;
+    uint8_t length = 0;
     SPI_Configuration();
     w5500_load_param();
     w5500_reset();
@@ -805,24 +809,31 @@ void w5500_test(void)
         w5500_socket_config();
         w5500_irq_process();
 
+        /* If Socket0 receives data */
         if((w5500_param.sock.state & SOCK_STAT_RECV) == SOCK_STAT_RECV)
         {
             w5500_param.sock.state &= ~SOCK_STAT_RECV;
-            Process_Socket_Data(0);
+            length = Process_Socket_Data(0);
+            printf("w5500 receive: ");
+            for(int i = 0; i < length; i++)
+            {
+                printf("%x ", rx_buf[i]);
+            }
+            printf("\n");
         }
 
-        else if(cnt >= 10)
+        /* Otherwise, send data regularly */
+        else if(cnt >= 5)
         {
             if(w5500_param.sock.flag == (SOCK_FLAG_INIT|SOCK_FLAG_CONN))
             {
                 w5500_param.sock.state &= ~SOCK_STAT_SEND;
                 memcpy(tx_buf, "\r\nWelcome To internet!\r\n", 21);
                 w5500_write_sock_bytes(0, tx_buf, 21);
-                break;
             }
             cnt = 0;
         }
-        up_mdelay(1000);
+        up_mdelay(100);
         cnt++;
     }
 

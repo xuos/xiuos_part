@@ -52,6 +52,19 @@ int cmd_Ch376(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 #endif
 
 /****************************************************************************
+ * Name: cmd_w5500
+ ****************************************************************************/
+#if defined(CONFIG_BSP_USING_ENET) && !defined(CONFIG_NSH_DISABLE_W5500)
+extern void w5500_test(void);
+int cmd_w5500(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    w5500_test();
+    return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_Ch438
  ****************************************************************************/
 #if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)

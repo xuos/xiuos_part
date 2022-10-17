@@ -146,12 +146,12 @@ extern "C"
 #define FPIOA_CH438_INT   22
 
 /* w5500 FPIOA */
-#define FPIOA_ENET_NRST 5
-#define FPIOA_ENET_NINT 6
-#define FPIOA_ENET_SCLK 7
-#define FPIOA_ENET_MISO 8
-#define FPIOA_ENET_MOSI 9
-#define FPIOA_ENET_NCS  10
+#define FPIOA_ENET_NRST 0
+#define FPIOA_ENET_NINT 9
+#define FPIOA_ENET_SCLK 28
+#define FPIOA_ENET_MISO 29
+#define FPIOA_ENET_MOSI 23
+#define FPIOA_ENET_NCS  31
 
 /* other mode FPIOA */
 #define FPIOA_E220_M0   1

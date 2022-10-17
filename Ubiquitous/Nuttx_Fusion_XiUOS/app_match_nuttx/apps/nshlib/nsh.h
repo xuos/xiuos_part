@@ -1454,6 +1454,10 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
   int cmd_Ch376(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
+#if defined(CONFIG_BSP_USING_ENET) && !defined(CONFIG_NSH_DISABLE_W5500)
+  int cmd_w5500(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
 #if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)
   int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
