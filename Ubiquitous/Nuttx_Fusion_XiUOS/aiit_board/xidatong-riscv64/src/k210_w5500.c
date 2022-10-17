@@ -11,7 +11,7 @@
 */
 
 /**
-* @file w5500.c
+* @file k210_w5500.c
 * @brief w5500 driver based on simulated SPI
 * @version 1.0
 * @author AIIT XUOS Lab
@@ -19,13 +19,25 @@
 */
 
 #include "nuttx/arch.h"
-#include "w5500.h"
+#include "k210_w5500.h"
 #include "k210_gpio_common.h"
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 w5500_param_t w5500_param;
+
+static uint8_t rx_buf[30];
+static uint8_t tx_buf[30];
+
+static uint8_t config_ip_addr[] = {10, 0, 30, 50};
+static uint8_t config_ip_mask[] = {255, 255, 255, 0};
+static uint8_t config_gw_addr[] = {10, 0, 30, 1};
+static uint8_t config_mac_addr[] = {0x0C, 0x29, 0xAB, 0x7C, 0x00, 0x01};
+static uint8_t config_dst_ip[] = {10, 0, 30, 57};
+static uint16_t config_local_port = 5000;
+static uint16_t config_dst_port = 6000;
+static uint8_t config_mode = SOCK_TCP_CLI;
 
 /****************************************************************************
  * Name: spi_read_byte
@@ -663,21 +675,155 @@ void w5500_irq_process(void)
 }
 
 /*******************************************************************************
-*Function name: w5500_load_param
-*Description: load param to  w5500_param
-*Input: src: source param
+*Function name: w5500_intialization
+*Description: W5500 initial configuration
+*Input: None
 *Output: None
 *Return value: None
 *******************************************************************************/
-void w5500_load_param(w5500_param_t *src)
+void w5500_intialization(void)
 {
-    w5500_param_t *dest = &w5500_param;
-    memcpy(dest->ip_addr, src->ip_addr, sizeof(src->ip_addr));
-    memcpy(dest->ip_mask, src->ip_mask, sizeof(src->ip_mask));
-    memcpy(dest->gw_addr, src->gw_addr, sizeof(src->gw_addr));
-    memcpy(dest->mac_addr, src->mac_addr, sizeof(src->mac_addr));
-    memcpy(dest->sock.dst_ip, src->sock.dst_ip, sizeof(src->sock.dst_ip));
-    dest->sock.local_port = src->sock.local_port;
-    dest->sock.dst_port = src->sock.dst_port;
-    dest->sock.mode = src->sock.mode;
+    w5500_config_init();
+    w5500_detect_gateway();
+    w5500_socket_init(0);
+}
+
+/*******************************************************************************
+*Function name: w5500_load_param
+*Description: load param to  w5500_param
+*Input: None
+*Output: None
+*Return value: None
+*******************************************************************************/
+void w5500_load_param(void)
+{
+    w5500_param_t *param = &w5500_param;
+    memcpy(param->ip_addr, config_ip_addr, sizeof(config_ip_addr));
+    memcpy(param->ip_mask, config_ip_mask, sizeof(config_ip_mask));
+    memcpy(param->gw_addr, config_gw_addr, sizeof(config_gw_addr));
+    memcpy(param->mac_addr, config_mac_addr, sizeof(config_mac_addr));
+    memcpy(param->sock.dst_ip, config_dst_ip, sizeof(config_dst_ip));
+    param->sock.local_port = config_local_port;
+    param->sock.dst_port = config_dst_port;
+    param->sock.mode = config_mode;
+}
+
+/*******************************************************************************
+*Function name: w5500_socket_config
+*Description: W5500 port initialization configuration
+*Input: None
+*Output: None
+*Return value: None
+*******************************************************************************/
+void w5500_socket_config(void)
+{
+    if(w5500_param.sock.flag == 0)
+    {
+        /* TCP Sever */
+        if(w5500_param.sock.mode == SOCK_TCP_SVR)
+        {
+            if(w5500_socket_listen(0) == TRUE)
+                w5500_param.sock.flag = SOCK_FLAG_INIT;
+            else
+                w5500_param.sock.flag = 0;
+        }
+
+        /* TCP Client */
+        else if(w5500_param.sock.mode == SOCK_TCP_CLI)
+        {
+            if(w5500_socket_connect(0) == TRUE)
+                w5500_param.sock.flag = SOCK_FLAG_INIT;
+            else
+                w5500_param.sock.flag = 0;
+        }
+
+        /* UDP */
+        else
+        {
+            if(w5500_socket_set_udp(0) == TRUE)
+                w5500_param.sock.flag = SOCK_FLAG_INIT|SOCK_FLAG_CONN;
+            else
+                w5500_param.sock.flag = 0;
+        }
+    }
+}
+
+/*******************************************************************************
+*Function name: Process_Socket_Data
+*Description: W5500 receives and sends the received data
+*Input: sock: port number
+*Output: None
+*Return value: None
+*******************************************************************************/
+void Process_Socket_Data(socket_t sock)
+{
+    uint16_t size;
+    size = w5500_read_sock_bytes(sock, rx_buf);
+    memcpy(tx_buf, rx_buf, size);
+    w5500_write_sock_bytes(sock, tx_buf, size);
+}
+
+/****************************************************************************
+ * Name: SPI_Configuration
+ * Description: spi pin mode configure
+ * input: None
+ * output: None
+ * return:none
+ ****************************************************************************/
+void SPI_Configuration(void)
+{
+    /* simluate SPI bus */
+    k210_fpioa_config(BSP_ENET_SCLK, HS_GPIO(FPIOA_ENET_SCLK) | K210_IOFLAG_GPIOHS);
+    k210_fpioa_config(BSP_ENET_NRST, HS_GPIO(FPIOA_ENET_NRST) | K210_IOFLAG_GPIOHS);
+    k210_fpioa_config(BSP_ENET_MOSI, HS_GPIO(FPIOA_ENET_MOSI) | K210_IOFLAG_GPIOHS);
+    k210_fpioa_config(BSP_ENET_MISO, HS_GPIO(FPIOA_ENET_MISO) | K210_IOFLAG_GPIOHS);
+    k210_fpioa_config(BSP_ENET_NCS,  HS_GPIO(FPIOA_ENET_NCS)  | K210_IOFLAG_GPIOHS);
+    k210_fpioa_config(BSP_ENET_NINT, HS_GPIO(FPIOA_ENET_NINT) | K210_IOFLAG_GPIOHS);
+
+    k210_gpiohs_set_direction(FPIOA_ENET_MISO, GPIO_DM_INPUT);
+    k210_gpiohs_set_direction(FPIOA_ENET_NRST, GPIO_DM_OUTPUT);
+    k210_gpiohs_set_direction(FPIOA_ENET_SCLK, GPIO_DM_OUTPUT);
+    k210_gpiohs_set_direction(FPIOA_ENET_MOSI, GPIO_DM_OUTPUT);
+    k210_gpiohs_set_direction(FPIOA_ENET_NCS,  GPIO_DM_OUTPUT);
+    k210_gpiohs_set_direction(FPIOA_ENET_NINT, GPIO_DM_INPUT);
+
+    k210_gpiohs_set_value(FPIOA_ENET_SCLK, GPIO_PV_HIGH);
+    k210_gpiohs_set_value(FPIOA_ENET_MOSI, GPIO_PV_HIGH);
+    k210_gpiohs_set_value(FPIOA_ENET_NCS,  GPIO_PV_LOW);
+    k210_gpiohs_set_value(FPIOA_ENET_NRST, GPIO_PV_HIGH);
+}
+
+void w5500_test(void)
+{
+    uint32_t cnt = 0;
+    SPI_Configuration();
+    w5500_load_param();
+    w5500_reset();
+    w5500_intialization();
+    while(1)
+    {
+        w5500_socket_config();
+        w5500_irq_process();
+
+        if((w5500_param.sock.state & SOCK_STAT_RECV) == SOCK_STAT_RECV)
+        {
+            w5500_param.sock.state &= ~SOCK_STAT_RECV;
+            Process_Socket_Data(0);
+        }
+
+        else if(cnt >= 10)
+        {
+            if(w5500_param.sock.flag == (SOCK_FLAG_INIT|SOCK_FLAG_CONN))
+            {
+                w5500_param.sock.state &= ~SOCK_STAT_SEND;
+                memcpy(tx_buf, "\r\nWelcome To internet!\r\n", 21);
+                w5500_write_sock_bytes(0, tx_buf, 21);
+                break;
+            }
+            cnt = 0;
+        }
+        up_mdelay(1000);
+        cnt++;
+    }
+
 }

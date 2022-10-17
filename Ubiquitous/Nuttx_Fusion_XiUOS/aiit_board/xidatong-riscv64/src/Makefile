@@ -51,6 +51,6 @@ CSRCS += k210_ch376.c ch376_demo.c
 endif
 
 ifeq ($(CONFIG_BSP_USING_ENET),y)
-CSRCS += w5500.c
+CSRCS += k210_w5500.c
 endif
 include $(TOPDIR)/boards/Board.mk

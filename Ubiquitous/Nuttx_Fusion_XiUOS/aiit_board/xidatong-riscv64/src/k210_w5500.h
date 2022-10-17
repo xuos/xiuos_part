@@ -11,15 +11,15 @@
 */
 
 /**
-* @file w5500.h
+* @file k210_w5500.h
 * @brief w5500 driver
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2022-9-15
 */
 
-#ifndef _W5500_H_
-#define _W5500_H_
+#ifndef _K210_W5500_H_
+#define _K210_W5500_H_
 
 #include <nuttx/config.h>
 #include <nuttx/board.h>
@@ -294,6 +294,25 @@ typedef unsigned char socket_t;
 #define RST_L() k210_gpiohs_set_value(FPIOA_ENET_NRST, GPIO_PV_LOW); up_mdelay(200);
 #define RST_H() k210_gpiohs_set_value(FPIOA_ENET_NRST, GPIO_PV_HIGH); up_mdelay(200);
 
-int w5500_net_test(void);
+void w5500_write_sock_byte(socket_t sock, uint16_t reg, uint8_t dat);
+void w5500_write_sock_short(socket_t sock, uint16_t reg, uint16_t dat);
+void w5500_write_sock_long(socket_t sock, uint16_t reg, uint8_t *dat);
+uint8_t w5500_read_byte(uint16_t reg);
+uint8_t w5500_read_sock_byte(socket_t sock, uint16_t reg);
+uint16_t w5500_read_sock_short(socket_t sock, uint16_t reg);
+void w5500_write_sock_bytes(socket_t sock, uint8_t *dat, uint16_t size);
+void w5500_reset(void);
+void w5500_config_init(void);
+uint8_t w5500_detect_gateway(void);
+void w5500_socket_init(socket_t sock);
+uint8_t w5500_socket_connect(socket_t sock);
+uint8_t w5500_socket_listen(socket_t sock);
+uint8_t w5500_socket_set_udp(socket_t sock);
+void w5500_irq_process(void);
+void w5500_intialization(void);
+void w5500_load_param(void);
+void w5500_socket_config(void);
+void Process_Socket_Data(socket_t sock);
+void SPI_Configuration(void);
 
 #endif
