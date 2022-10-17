@@ -1,3 +1,24 @@
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
+
+/**
+* @file:    lv_sensor_info_update_demo.c
+* @brief:   a sensor info update application using littleVgl
+* @version: 2.0
+* @author:  AIIT XUOS Lab
+* @date:    2022/9/26
+*
+*/
+
 #include "lv_sensor_info.h"
 
 void* lvgl_thd_sensor_info_update_demo(void *parameter)
@@ -28,5 +49,4 @@ static int lvgl_sensor_info_update_demo(void)
 
     return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),lvgl_sensor_info_update_demo, lvgl_sensor_info_update_demo, lvgl_sensor_info_update_demo );
-
+PRIV_SHELL_CMD_FUNCTION(lvgl_sensor_info_update_demo, a littlevgl sensor infor update sample, PRIV_SHELL_CMD_MAIN_ATTR);

@@ -18,7 +18,6 @@
  * @date 2021.12.23
  */
 
-#include <user_api.h>
 #include <sensor.h>
 
 /**

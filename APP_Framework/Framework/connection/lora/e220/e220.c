@@ -705,8 +705,7 @@ static void LoraTest(void)
 		return;
 	} 
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
-LoraTest, LoraTest, lora send and receive message);
+PRIV_SHELL_CMD_FUNCTION(LoraTest, a lora test init sample, PRIV_SHELL_CMD_MAIN_ATTR);
 
 static void LoraSend(int argc, char *argv[])
 {
@@ -724,8 +723,7 @@ static void LoraSend(int argc, char *argv[])
         E220Send(adapter, Msg, strlen(Msg));
     }
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
-LoraSend, LoraSend, lora send message);
+PRIV_SHELL_CMD_FUNCTION(LoraSend, a lora test send sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
 
 #ifdef ADD_NUTTX_FETURES
@@ -765,39 +763,40 @@ void E220LoraSend(int argc, char *argv[])
 #endif
 
 #ifdef ADD_RTTHREAD_FETURES
-
 static void LoraReadStart(void)
 {
     int ret;
 
     LoraOpen();
 
-	rt_thread_t tid= rt_thread_create("LoraReadStart", LoraRead, RT_NULL,2048,10,5); 
-	if(tid!=RT_NULL){
+	rt_thread_t tid = rt_thread_create("LoraReadStart", LoraRead, RT_NULL,2048,10,5); 
+	if(tid!=RT_NULL) {
 		rt_thread_startup(tid);
-	}else{
+	} else {
 		rt_kprintf("LoraReadStart task_lora_read failed \r\n");
 		return;
 	}
-
 }
-MSH_CMD_EXPORT(LoraReadStart,Lora read task start sample);
+PRIV_SHELL_CMD_FUNCTION(LoraReadStart, a lora test start sample, PRIV_SHELL_CMD_MAIN_ATTR);
+
 #define E22400T_M1_PIN (11U)
 #define E22400T_M0_PIN (9U)
 static void LoraSend(int argc, char *argv[])
 {
-	  int8_t cmd[10]={0xFF,0xFF,0x02,0xAA,0XBB,0xCC};   //sned AA BB CC to address 01 channel05
-		LoraOpen();
+	int8_t cmd[10]={0xFF,0xFF,0x02,0xAA,0XBB,0xCC};   //sned AA BB CC to address 01 channel05
+	
+    LoraOpen();
     struct Adapter *adapter = AdapterDeviceFindByName(ADAPTER_LORA_NAME);
     if (NULL == adapter) {
         printf("LoraRead find lora adapter error\n");
         return;
     }
-		rt_pin_mode (E22400T_M1_PIN, PIN_MODE_OUTPUT);
-	  rt_pin_mode (E22400T_M0_PIN, PIN_MODE_OUTPUT);
+
+	rt_pin_mode (E22400T_M1_PIN, PIN_MODE_OUTPUT);
+	rt_pin_mode (E22400T_M0_PIN, PIN_MODE_OUTPUT);
     rt_pin_write(E22400T_M1_PIN, PIN_LOW);
-	  rt_pin_write(E22400T_M0_PIN, PIN_HIGH);
+	rt_pin_write(E22400T_M0_PIN, PIN_HIGH);
     E220Send(adapter, cmd, 6);
 }
-MSH_CMD_EXPORT(LoraSend,Lora send sample);
+PRIV_SHELL_CMD_FUNCTION(LoraSend, a lora test send sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
