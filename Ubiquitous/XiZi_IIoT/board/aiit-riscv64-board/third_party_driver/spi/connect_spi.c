@@ -221,7 +221,7 @@ static uint32 SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStand
 {
     SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_dev->haldev.private_data);
 
-    uint32 spi_read_length = 0;;
+    uint32 spi_read_length = 0;
     uint8 device_id = dev_param->spi_slave_param->spi_slave_id;
     uint8 device_master_id = dev_param->spi_dma_param->spi_master_id;
     uint8 cs_gpio_pin = dev_param->spi_slave_param->spi_cs_gpio_pin;
