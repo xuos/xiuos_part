@@ -8,4 +8,8 @@ ifeq ($(CONFIG_BSP_USING_SPI),y)
   SRC_DIR += spi
 endif
 
+ifeq ($(CONFIG_BSP_USING_SDIO),y)
+  SRC_DIR += sdio
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

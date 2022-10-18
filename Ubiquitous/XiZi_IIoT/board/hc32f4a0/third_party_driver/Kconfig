@@ -8,8 +8,16 @@ menuconfig BSP_USING_UART
 
 menuconfig BSP_USING_SPI
     bool "Using SPI device"
-    default y
+    default n
     select RESOURCES_SPI
     if BSP_USING_SPI
         source "$BSP_DIR/third_party_driver/spi/Kconfig"
+    endif
+
+menuconfig BSP_USING_SDIO
+    bool "Using SD CARD device"
+    default n
+    select RESOURCES_SDIO
+    if BSP_USING_SDIO
+        source "$BSP_DIR/third_party_driver/sdio/Kconfig"
     endif

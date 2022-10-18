@@ -13,7 +13,7 @@ if BSP_USING_SDIO
 
     config MOUNT_SDCARD_FS
         bool "mount sd card file system"
-        default n
+        default y
         select MOUNT_SDCARD
 
     if MOUNT_SDCARD_FS
