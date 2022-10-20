@@ -12,6 +12,10 @@ ifeq ($(CONFIG_USER_TEST_SEMC),y)
 	SRC_FILES += test_extsram.c
 endif
 
+ifeq ($(CONFIG_USER_TEST_LCD),y)
+	SRC_FILES +=
+endif
+
 ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
 include $(KERNEL_ROOT)/compiler.mk
 endif
@@ -19,7 +23,7 @@ endif
 include $(KERNEL_ROOT)/.config
 ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
     include $(APPDIR)/Make.defs
-    CSRCS += test_extsram.c
+    CSRCS += test_extsram.c test_lcd.c
     include $(APPDIR)/Application.mk
 endif
 

@@ -54,7 +54,7 @@ int cmd_Ch438(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 /****************************************************************************
  * Name: cmd_lcd
  ****************************************************************************/
-#if defined(CONFIG_K210_LCD) && !defined(CONFIG_NSH_DISABLE_LCD)
+#if defined(CONFIG_USER_TEST_LCD) && !defined(CONFIG_NSH_DISABLE_USER_TEST_LCD)
 extern void LcdDemo(void);
 int cmd_Lcd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
@@ -68,11 +68,48 @@ int cmd_Lcd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_Extsram
  ****************************************************************************/
 #if defined(CONFIG_USER_TEST_SEMC) && !defined(CONFIG_NSH_DISABLE_USER_TEST_SEMC)
-extern int extsram_test(void);
+extern int ExtsramTest(void);
 int cmd_Extsram(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, extra sdram!\n");
-    extsram_test();
+    ExtsramTest();
+    return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: socket test
+ ****************************************************************************/
+#if defined(CONFIG_SOCKET_DEMO) && !defined(CONFIG_NSH_DISABLE_SOCKET_DEMO)
+void UdpSocketRecvTest(int argc, char *argv[]);
+int cmd_Udprecv(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, UDP receive!\n");
+    UdpSocketRecvTest(argc, argv);
+    return OK;
+}
+
+void UdpSocketSendTest(int argc, char *argv[]);
+int cmd_Udpsend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, UDP send!\n");
+    UdpSocketSendTest(argc, argv);
+    return OK;
+}
+
+void TcpSocketRecvTest(int argc, char *argv[]);
+int cmd_Tcprecv(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, TCP receive!\n");
+    TcpSocketRecvTest(argc, argv);
+    return OK;
+}
+
+void TcpSocketSendTest(int argc, char *argv[]);
+int cmd_Tcpsend(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, TCP send!\n");
+    TcpSocketSendTest(argc, argv);
     return OK;
 }
 #endif
@@ -293,46 +330,46 @@ int cmd_WindSpeedQsFs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_OPENZIGBEE)
-extern int openzigbee(void);
+extern int OpenZigbee(void);
 int cmd_openzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
-    openzigbee();
+    OpenZigbee();
     return OK;
 }
 #endif
 
 
 #if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_SENDZIGBEE)
-extern int sendzigbee(int argc, char *argv[]);
+extern int SendZigbee(int argc, char *argv[]);
 int cmd_sendzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
-    sendzigbee(argc,argv);
+    SendZigbee(argc,argv);
     return OK;
 }
 #endif
 
 #if defined(CONFIG_CONNECTION_ADAPTER_ZIGBEE) && !defined(CONFIG_NSH_DISABLE_RECVZIGBEE)
-extern int recvzigbee(void);
+extern int RecvZigbee(void);
 int cmd_recvzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
-    recvzigbee();
+    RecvZigbee();
     return OK;
 }
 #endif
 
 #if defined(CONFIG_ADAPTER_ESP07S_WIFI) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
-extern int AdapterWifiTest(int argc, char *argv[]);
+extern int AdapterWifiTestWithParam(int argc, char *argv[]);
 int cmd_AdapterWifiTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
     FrameworkInit();
-    AdapterWifiTest(argc, argv);
+    AdapterWifiTestWithParam(argc, argv);
     return OK;
 }
 #endif
