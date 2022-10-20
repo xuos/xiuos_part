@@ -352,7 +352,7 @@ int cmd_recvzigbee(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 }
 #endif
 
-#if (defined(CONFIG_ADAPTER_ESP07S_WIFI) || defined(CONFIG_ADAPTER_ESP8285_WIFI)) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
+#if defined(CONFIG_ADAPTER_ESP07S_WIFI) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
 extern int AdapterWifiTest(int argc, char *argv[]);
 int cmd_AdapterWifiTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
