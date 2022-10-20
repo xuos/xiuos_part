@@ -119,8 +119,8 @@ int AdapterWifiInit(void)
 /******************wifi TEST*********************/
 int AdapterWifiTest(void)
 {
-    char cmd[64];
-    int baud_rate = BAUD_RATE_57600;
+//    char cmd[64];
+//    int baud_rate = BAUD_RATE_57600;
 
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
 
@@ -188,13 +188,13 @@ int AdapterWifiTest(void)
 
     const char *wifi_msg = "Wifi Test";
     int len = strlen(wifi_msg);
-    for(int i = 0;i < 10; ++i) {
+    for(int i = 0; i < 10; ++i) {
         AdapterDeviceSend(adapter, wifi_msg, len);
         PrivTaskDelay(4000);
     }
 
     char wifi_recv_msg[128];
-    for(int j=0;j<10;++j){
+    for(int j = 0; j < 10; ++j){
         AdapterDeviceRecv(adapter, wifi_recv_msg, 128);
         PrivTaskDelay(1000);
     }
@@ -218,7 +218,7 @@ PRIV_SHELL_CMD_FUNCTION(WifiClose, a WiFi close sample, PRIV_SHELL_CMD_MAIN_ATTR
 int WifiSetup(int argc, char *argv[])
 {
     struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
-    struct WifiParam param;
+    static struct WifiParam param;
     memset(&param,0,sizeof(struct WifiParam));
     strncpy((char *)param.wifi_ssid, argv[1], strlen(argv[1]));
     strncpy((char *)param.wifi_pwd, argv[2], strlen(argv[2]));
@@ -312,7 +312,7 @@ enum
     APT_WIFI_PARAM_NUM
 };
 
-#define APT_WIFI_PARAM_LEN 20
+#define APT_WIFI_PARAM_LEN 128
 
 char wifi_param[APT_WIFI_PARAM_NUM][APT_WIFI_PARAM_LEN] = {0};
 
@@ -321,6 +321,7 @@ ret = __func; \
 if(ret != 0){ \
     printf("%s %d failed\n", __func__, __LINE__); \
     AdapterDeviceClose(adapter); \
+    free(adapter->adapter_param); \
     return ret; \
 };
 
@@ -329,7 +330,16 @@ void AdapterWifiGetParam(int argc, char *argv[])
     int i, j;
     char *param_str[] = {"ip", "port", "ssid", "pwd", "gw", "server", "mask", "ping"};
     char *default_str[] =
-    {"192.168.137.34", "12345", "test", "tttttttt", "192.168.137.71", "192.168.137.1", "255.255.255.0", "220.181.38.251"};
+    {
+        "192.168.137.34",
+        "12345",
+        "test",
+        "tttttttt",
+        "192.168.137.71",
+        "192.168.137.1",
+        "255.255.255.0",
+        "220.181.38.251"
+    };
 
     for(i = 0; i < APT_WIFI_PARAM_NUM; i ++)
     {
@@ -358,21 +368,24 @@ void AdapterWifiGetParam(int argc, char *argv[])
 }
 
 
-int AdapterWifiTest(int argc, char *argv[])
+int AdapterWifiTestWithParam(int argc, char *argv[])
 {
     int i, ret;
 
-    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
+    struct Adapter* adapter = AdapterDeviceFindByName(ADAPTER_WIFI_NAME);
     AdapterWifiGetParam(argc, argv);
 
     enum NetRoleType net_role = CLIENT;
     enum IpType ip_type = IPV4;
-    struct WifiParam param;
-    memset(&param, 0, sizeof(struct WifiParam));
-    strncpy((char *)param.wifi_ssid, wifi_param[APT_WIFI_PARAM_SSID], strlen(wifi_param[APT_WIFI_PARAM_SSID]));
-    strncpy((char *)param.wifi_pwd, wifi_param[APT_WIFI_PARAM_PWD], strlen(wifi_param[APT_WIFI_PARAM_PWD]));
 
-    adapter->adapter_param = &param;
+    adapter->adapter_param = malloc(sizeof(struct WifiParam));
+    memset(adapter->adapter_param, 0, sizeof(struct WifiParam));
+    struct WifiParam *apt_param = (struct WifiParam *)adapter->adapter_param;
+    strcpy(apt_param->wifi_ssid, wifi_param[APT_WIFI_PARAM_SSID]);
+    strcpy(apt_param->wifi_pwd, wifi_param[APT_WIFI_PARAM_PWD]);
+
+	printf("2022-10-14 Mr. Wang commit Wifi\n");
+	printf("apt %p ssid %p %s\n", apt_param, apt_param->wifi_ssid);
 
     CHECK_RET(AdapterDeviceOpen(adapter));
     CHECK_RET(AdapterDeviceSetUp(adapter));
@@ -393,8 +406,9 @@ int AdapterWifiTest(int argc, char *argv[])
         PrivTaskDelay(4000);
     }
 
-    char wifi_recv_msg[128];
-    for(i = 0; i < 10; i ++)
+    char wifi_recv_msg[APT_WIFI_PARAM_LEN];
+    memset(wifi_recv_msg, 0, APT_WIFI_PARAM_LEN);
+    for(i = 0; i < APT_WIFI_PARAM_NUM; i ++)
     {
         AdapterDeviceRecv(adapter, wifi_recv_msg, 128);
         PrivTaskDelay(1000);
@@ -405,6 +419,7 @@ int AdapterWifiTest(int argc, char *argv[])
 //    CHECK_RET(AdapterDevicePing(adapter, wifi_param[APT_WIFI_PARAM_PING]));
 //    AdapterDeviceDisconnect(adapter, NULL);
     ret = AdapterDeviceClose(adapter);
+	free(adapter->adapter_param);
     return ret;
 }
 

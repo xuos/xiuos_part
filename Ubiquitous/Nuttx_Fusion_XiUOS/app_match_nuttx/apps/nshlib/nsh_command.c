@@ -608,12 +608,19 @@ static const struct cmdmap_s g_cmdmap[] =
   { "ch438",    cmd_Ch438,     1, 1, "[ch438 demo cmd.]" },
 #endif
 
-#if defined(CONFIG_K210_LCD) && !defined(CONFIG_NSH_DISABLE_LCD)
-  { "lcd",      cmd_Lcd,     1, 1, "[LCD demo cmd.]" },
+#if defined(CONFIG_USER_TEST_LCD) && !defined(CONFIG_NSH_DISABLE_USER_TEST_LCD)
+  { "lcd",      cmd_Lcd,      1, 1, "[LCD demo cmd.]" },
 #endif
 
 #if defined(CONFIG_USER_TEST_SEMC) && !defined(CONFIG_NSH_DISABLE_USER_TEST_SEMC)
   { "sram",      cmd_Extsram,     1, 1, "[Extra sdram demo cmd.]" },
+#endif
+
+#if defined(CONFIG_SOCKET_DEMO) && !defined(CONFIG_NSH_DISABLE_SOCKET_DEMO)
+  { "udpsend",      cmd_Udpsend,     1, 2, "[Udp send demo cmd.]" },
+  { "udprecv",      cmd_Udprecv,     1, 2, "[Udp recv demo cmd.]" },
+  { "tcpsend",      cmd_Tcpsend,     1, 2, "[Tcp send demo cmd.]" },
+  { "tcprecv",      cmd_Tcprecv,     1, 2, "[Tcp recv demo cmd.]" },
 #endif
 
 #if defined(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS) && !defined(CONFIG_NSH_DISABLE_HCHO_TB600B_WQ_HCHO1OS)
