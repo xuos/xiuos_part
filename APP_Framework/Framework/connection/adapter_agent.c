@@ -211,8 +211,7 @@ int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
         ret = -1;
         goto __exit;
     }
-    printf("[reply result :\n");
-    printf("%s]\n", result);
+    printf("[reply result: %s]\n", result);
     if(!strstr(result, check)) {
         printf("%s %d check[%s] reply[%s] failed.\n",__func__,__LINE__,check,result);
         ret = -1;
@@ -522,7 +521,7 @@ static int ATAgentInit(ATAgentType agent)
 #ifdef ADD_NUTTX_FETURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
     attr.priority = 18;
-    attr.stacksize = 4096;
+    attr.stacksize = 8192;
 
 #else
     pthread_attr_t attr;
