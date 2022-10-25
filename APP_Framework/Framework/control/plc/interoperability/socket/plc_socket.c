@@ -347,6 +347,7 @@ void PlcSocketTask(int argc, char *argv[])
 {
     int result = 0;
     pthread_t th_id;
+    uint8_t enet_port = 0; ///< test enet port 0
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = LWIP_DEMO_TASK_PRIO;
@@ -355,7 +356,7 @@ void PlcSocketTask(int argc, char *argv[])
 
     PlcCheckParam(argc, argv);
 
-    lwip_config_net(lwip_ipaddr, lwip_netmask, param->ip);
+    lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, param->ip);
     PrivTaskCreate(&th_id, &attr, PlcSocketStart, param);
 }
 

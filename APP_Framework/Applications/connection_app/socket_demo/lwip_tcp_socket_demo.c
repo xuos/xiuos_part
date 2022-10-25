@@ -19,18 +19,71 @@
 */
 
 #include <transform.h>
+
+#ifdef ADD_XIZI_FETURES
 #include "sys_arch.h"
 #include <lwip/sockets.h>
 #include "lwip/sys.h"
+#endif
+
+#ifdef ADD_NUTTX_FETURES
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include "stdio.h"
+#endif
 
 #define TCP_DEMO_BUF_SIZE 65535
 
 char tcp_socket_ip[] = {192, 168, 250, 252};
-u16_t tcp_socket_port = LWIP_TARGET_PORT;
+
+#ifdef ADD_NUTTX_FETURES
+#define lw_print printf
+#define lw_notice printf
+#define lw_error printf
+
+#define LWIP_DEMO_TIMES 3
+#define LWIP_TARGET_PORT 4840
+#endif
+
+uint16_t tcp_socket_port = LWIP_TARGET_PORT;
+char tcp_ip_str[128] = {0};
 
 /******************************************************************************/
+void TcpSocketConfigParam(char *ip_str)
+{
+    int ip1, ip2, ip3, ip4, port = 0;
 
-static void TCPSocketRecvTask(void *arg)
+    if(ip_str == NULL)
+    {
+        return;
+    }
+
+    if(sscanf(ip_str, "%d.%d.%d.%d:%d", &ip1, &ip2, &ip3, &ip4, &port))
+    {
+        printf("config ip %s port %d\n", ip_str, port);
+        strcpy(tcp_ip_str, ip_str);
+        tcp_socket_ip[0] = ip1;
+        tcp_socket_ip[1] = ip2;
+        tcp_socket_ip[2] = ip3;
+        tcp_socket_ip[3] = ip4;
+        if(port)
+            tcp_socket_port = port;
+        return;
+    }
+
+    if(sscanf(ip_str, "%d.%d.%d.%d", &ip1, &ip2, &ip3, &ip4))
+    {
+        printf("config ip %s\n", ip_str);
+        tcp_socket_ip[0] = ip1;
+        tcp_socket_ip[1] = ip2;
+        tcp_socket_ip[2] = ip3;
+        tcp_socket_ip[3] = ip4;
+        strcpy(tcp_ip_str, ip_str);
+    }
+}
+
+static void TcpSocketRecvTask(void *arg)
 {
     int fd = -1, clientfd;
     int recv_len;
@@ -63,19 +116,19 @@ static void TCPSocketRecvTask(void *arg)
         if (bind(fd, (struct sockaddr *)&tcp_addr, sizeof(struct sockaddr)) == -1)
         {
             lw_error("Unable to bind\n");
-            closesocket(fd);
+            close(fd);
             free(recv_buf);
             continue;
         }
 
         lw_print("tcp bind success, start to receive.\n");
-        lw_notice("\n\nLocal Port:%d\n\n", tcp_socket_port);
+        lw_notice("\nLocal Port:%d\n", tcp_socket_port);
 
         // setup socket fd as listening mode
         if (listen(fd, 5) != 0 )
         {
             lw_error("Unable to listen\n");
-            closesocket(fd);
+            close(fd);
             free(recv_buf);
             continue;
         }
@@ -87,7 +140,8 @@ static void TCPSocketRecvTask(void *arg)
         while(1)
         {
             memset(recv_buf, 0, TCP_DEMO_BUF_SIZE);
-            recv_len = recvfrom(clientfd, recv_buf, TCP_DEMO_BUF_SIZE, 0, (struct sockaddr *)&tcp_addr, &addr_len);
+            recv_len = recvfrom(clientfd, recv_buf, TCP_DEMO_BUF_SIZE, 0,
+                (struct sockaddr *)&tcp_addr, &addr_len);
             if(recv_len > 0)
             {
                 lw_notice("Receive from : %s\n", inet_ntoa(tcp_addr.sin_addr));
@@ -97,36 +151,37 @@ static void TCPSocketRecvTask(void *arg)
         }
     }
 
-    closesocket(fd);
+    close(fd);
     free(recv_buf);
 }
 
-void TCPSocketRecvTest(int argc, char *argv[])
+void TcpSocketRecvTest(int argc, char *argv[])
 {
-    int result = 0;
-
     if(argc >= 2)
     {
         lw_print("lw: [%s] target ip %s\n", __func__, argv[1]);
-        if(sscanf(argv[1], "%d.%d.%d.%d:%d", &tcp_socket_ip[0], &tcp_socket_ip[1], &tcp_socket_ip[2], &tcp_socket_ip[3], &tcp_socket_port) == EOK)
-        {
-            sscanf(argv[1], "%d.%d.%d.%d", &tcp_socket_ip[0], &tcp_socket_ip[1], &tcp_socket_ip[2], &tcp_socket_ip[3]);
-        }
+        TcpSocketConfigParam(argv[1]);
     }
 
+#ifdef ADD_XIZI_FETURES
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
-    sys_thread_new("TCPSocketRecvTask", TCPSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    sys_thread_new("TcpSocketRecvTask", TcpSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+#endif
+
+#ifdef ADD_NUTTX_FETURES
+    TcpSocketRecvTask(NULL);
+#endif
 }
+PRIV_SHELL_CMD_FUNCTION(TcpSocketRecvTest, a tcp receive sample, PRIV_SHELL_CMD_MAIN_ATTR);
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     TCPSocketRecv, TCPSocketRecvTest, TCP recv echo);
-
-static void TCPSocketSendTask(void *arg)
+static void TcpSocketSendTask(void *arg)
 {
     int cnt = LWIP_DEMO_TIMES;
     int fd = -1;
+    int ret;
     char send_msg[128];
 
+	lw_print("2022-10-14 Mr. Wang commit TCP\n");
     lw_print("%s start\n", __func__);
 
     memset(send_msg, 0, sizeof(send_msg));
@@ -140,47 +195,48 @@ static void TCPSocketSendTask(void *arg)
     struct sockaddr_in tcp_sock;
     tcp_sock.sin_family = AF_INET;
     tcp_sock.sin_port = htons(tcp_socket_port);
-    tcp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(tcp_socket_ip[0], tcp_socket_ip[1], tcp_socket_ip[2], tcp_socket_ip[3]));
+    tcp_sock.sin_addr.s_addr = inet_addr(tcp_ip_str);
+
     memset(&(tcp_sock.sin_zero), 0, sizeof(tcp_sock.sin_zero));
 
-    if (connect(fd, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr)))
+    ret = connect(fd, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr));
+    if (ret)
     {
-        lw_print("Unable to connect\n");
-        closesocket(fd);
+        lw_print("Unable to connect %s = %d\n", tcp_ip_str, ret);
+        close(fd);
         return;
     }
 
-    lw_notice("\n\nTarget Port:%d\n\n", tcp_socket_port);
+    lw_print("TCP connect %s:%d success, start to send.\n", tcp_ip_str, tcp_socket_port);
 
     while (cnt --)
     {
         lw_print("Lwip client is running.\n");
         snprintf(send_msg, sizeof(send_msg), "TCP test package times %d\r\n", cnt);
-        sendto(fd, send_msg, strlen(send_msg), 0, (struct sockaddr*)&tcp_sock, sizeof(struct sockaddr));
+        send(fd, send_msg, strlen(send_msg), 0);
         lw_notice("Send tcp msg: %s ", send_msg);
-        MdelayKTask(1000);
+        PrivTaskDelay(1000);
     }
 
-    closesocket(fd);
+    close(fd);
     return;
 }
 
-
-void TCPSocketSendTest(int argc, char *argv[])
+void TcpSocketSendTest(int argc, char *argv[])
 {
     if(argc >= 2)
     {
         lw_print("lw: [%s] target ip %s\n", __func__, argv[1]);
-        if(sscanf(argv[1], "%d.%d.%d.%d:%d", &tcp_socket_ip[0], &tcp_socket_ip[1], &tcp_socket_ip[2], &tcp_socket_ip[3], &tcp_socket_port) == EOK)
-        {
-            sscanf(argv[1], "%d.%d.%d.%d", &tcp_socket_ip[0], &tcp_socket_ip[1], &tcp_socket_ip[2], &tcp_socket_ip[3]);
-        }
+        TcpSocketConfigParam(argv[1]);
     }
 
+#ifdef ADD_XIZI_FETURES
     lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
-    sys_thread_new("TCP Socket Send", TCPSocketSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    sys_thread_new("Tcp Socket Send", TcpSocketSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+#endif
+#ifdef ADD_NUTTX_FETURES
+    TcpSocketSendTask(NULL);
+#endif
 }
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-     TCPSocketSend, TCPSocketSendTest, TCP send demo);
+PRIV_SHELL_CMD_FUNCTION(TcpSocketSendTest, a tcp send sample, PRIV_SHELL_CMD_MAIN_ATTR);
 

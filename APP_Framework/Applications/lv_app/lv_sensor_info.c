@@ -1,3 +1,24 @@
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
+
+/**
+* @file:    lv_sensor_info.c
+* @brief:   a sensor info application using littleVgl
+* @version: 2.0
+* @author:  AIIT XUOS Lab
+* @date:    2022/9/26
+*
+*/
+
 #include "lv_sensor_info.h"
 
 static void draw_part_event_cb(lv_event_t* e) {
@@ -25,12 +46,11 @@ static void draw_part_event_cb(lv_event_t* e) {
     }
 }
 
-char* Double2Str(char* buf, double value) {
-	sprintf(buf,"%.8f",value);//保留8位小数，不够补0
+char *Double2Str(char* buf, double value) {
+	sprintf(buf,"%.8f",value);//keep 8 bit float data
 	int index = 0;
 	int len = strlen(buf);
-	for(int i = len-1;i>0;i--)
-	{
+	for(int i = len-1;i>0;i--) {
 		if(buf[i] == '0')
 			continue;
         else {
@@ -71,8 +91,7 @@ void lv_sensor_info(void) {
     for (uint32_t i = 0; i < 2 * NR_VAL_PERLINE; ++i) {
         if (i % 2 == 0) {
             lv_table_set_col_width(lv_ssr_tb, i, 75);
-        }
-        else {
+        } else {
             lv_table_set_col_width(lv_ssr_tb, i, 85);
         }
     }
@@ -100,12 +119,11 @@ void lv_sensor_info(void) {
     lv_obj_add_event_cb(lv_ssr_tb, draw_part_event_cb, LV_EVENT_DRAW_PART_BEGIN, NULL);
 }
 
-void* lvgl_thd_show_sensor_info(void *parameter)
+void *lvgl_thd_show_sensor_info(void *parameter)
 {
     lv_sensor_info();
     PrivMutexCreate(&ssr_val_lock, 0);
-    while (1)
-    {
+    while (1) {
         lv_task_handler();
 
         sensor_update_table();
@@ -123,5 +141,4 @@ static int lvgl_show_sensor_info(void)
 
     return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),lvgl_show_sensor_info, lvgl_show_sensor_info, lvgl_show_sensor_info );
-
+PRIV_SHELL_CMD_FUNCTION(lvgl_show_sensor_info, a littlevgl sensor info show sample, PRIV_SHELL_CMD_MAIN_ATTR);
