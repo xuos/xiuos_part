@@ -604,6 +604,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "w5500",    cmd_w5500,     1, 1, "[w5500 demo cmd.]" },
 #endif
 
+#if defined(CONFIG_BSP_USING_TOUCH) && !defined(CONFIG_NSH_DISABLE_TOUCH)
+  { "touch",    cmd_Touch,     1, 1, "[gt911 touch screen demo cmd.]" },
+#endif
+
 #if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)
   { "ch438",    cmd_Ch438,     1, 1, "[ch438 demo cmd.]" },
 #endif

@@ -555,6 +555,10 @@ config NSH_DISABLE_W5500
 	bool "Disable the w5500 demo."
 	default n
 
+config NSH_DISABLE_TOUCH
+	bool "Disable the gt911 touch screen demo."
+	default n
+
 config NSH_DISABLE_CH438
 	bool "Disable the ch438 demo."
 	default n
