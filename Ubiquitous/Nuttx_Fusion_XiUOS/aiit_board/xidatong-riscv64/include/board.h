@@ -111,6 +111,10 @@ extern "C"
 #define BSP_ENET_NRST   13
 #define BSP_ENET_NINT   14
 
+/* I2C  */
+#define BSP_IIC_SDA     15
+#define BSP_IIC_SCL     17
+
 /* other mode io */
 #define GPIO_E220_M0   44
 #define GPIO_E220_M1   45
@@ -152,6 +156,10 @@ extern "C"
 #define FPIOA_ENET_MISO 29
 #define FPIOA_ENET_MOSI 23
 #define FPIOA_ENET_NCS  31
+
+/* I2C  */
+#define FPIOA_IIC_SDA  7
+#define FPIOA_IIC_SCL  8
 
 /* other mode FPIOA */
 #define FPIOA_E220_M0   1

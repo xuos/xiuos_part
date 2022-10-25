@@ -6,7 +6,7 @@
 if ARCH_BOARD_XIDATONG_RISCV64
 
 menuconfig BSP_USING_CH376
-    bool "Using ch376 device"
+    bool "Using CH376 device"
     default n
     select K210_16550_UART
     select K210_16550_UART3
@@ -33,6 +33,10 @@ endif # BSP_USING_CH376
 
 menuconfig BSP_USING_ENET
     bool "Using ENET device"
+    default n
+
+menuconfig BSP_USING_TOUCH
+    bool "Using touch device"
     default n
 
 menuconfig BSP_USING_CH438
