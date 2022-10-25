@@ -403,7 +403,7 @@ void GT911_test(void)
     {
         if(GT911_Scan(&point))
         {
-            printf("Now touch point:(%d,%d)\n",point.X,point.X);
+            printf("Now touch point:(%d,%d)\n",point.X,point.Y);
         }
     }
 }
