@@ -58,6 +58,8 @@ extern int IoConfigInit(void);
 extern int HwI2cInit(void);
 extern int HwTouchInit(void);
 extern int HwCh376Init(void);
+extern int HwLcdInit(void);
+extern int HwSpiInit(void);
 
 #ifdef FS_CH376
 #include <iot-vfs.h>
@@ -170,7 +172,12 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_I2C
     { "hw_i2c", HwI2cInit },
 #endif
-
+#ifdef BSP_USING_SPI
+	{ "hw_spi", HwSpiInit },
+#endif
+#ifdef BSP_USING_LCD
+	{ "hw_lcd", HwLcdInit },
+#endif
 #ifdef BSP_USING_USB
     { "hw_usb", HwCh376Init},
 #endif

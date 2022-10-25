@@ -46,7 +46,8 @@ static struct io_config
 #ifdef BSP_USING_LCD
     IOCONFIG(BSP_LCD_CS_PIN, FUNC_SPI0_SS0),                
     IOCONFIG(BSP_LCD_WR_PIN, FUNC_SPI0_SCLK),                
-    IOCONFIG(BSP_LCD_DC_PIN, HS_GPIO(LCD_DC_PIN)),     
+    IOCONFIG(BSP_LCD_DC_PIN, HS_GPIO(FPIOA_LCD_DC)),
+    IOCONFIG(BSP_LCD_RST_PIN, HS_GPIO(FPIOA_LCD_RST)),     
 #endif
 
 #ifdef BSP_USING_SPI1

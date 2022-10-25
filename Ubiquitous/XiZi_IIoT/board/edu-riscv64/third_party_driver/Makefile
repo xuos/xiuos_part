@@ -12,6 +12,10 @@ ifeq ($(CONFIG_BSP_USING_GPIO),y)
   SRC_DIR += gpio
 endif
 
+ifeq ($(CONFIG_BSP_USING_SPI),y)
+  SRC_DIR += spi
+endif
+
 ifeq ($(CONFIG_BSP_USING_I2C),y)
   SRC_DIR += i2c
 endif
@@ -30,6 +34,10 @@ endif
 
 ifeq ($(CONFIG_BSP_USING_UART),y)
   SRC_DIR += uart
+endif
+
+ifeq ($(CONFIG_BSP_USING_LCD),y)
+  SRC_DIR += lcd
 endif
 
 include $(KERNEL_ROOT)/compiler.mk
