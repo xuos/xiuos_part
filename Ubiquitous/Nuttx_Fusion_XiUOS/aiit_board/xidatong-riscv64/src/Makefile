@@ -46,4 +46,16 @@ ifeq ($(CONFIG_BSP_USING_CH438),y)
 CSRCS += k210_ch438.c ch438_demo.c
 endif
 
+ifeq ($(CONFIG_BSP_USING_CH376),y)
+CSRCS += k210_ch376.c ch376_demo.c
+endif
+
+ifeq ($(CONFIG_BSP_USING_ENET),y)
+CSRCS += k210_w5500.c
+endif
+
+ifeq ($(CONFIG_BSP_USING_TOUCH),y)
+CSRCS += k210_touch.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

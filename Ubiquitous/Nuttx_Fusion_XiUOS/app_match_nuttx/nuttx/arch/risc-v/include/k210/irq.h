@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_fpioa.c
+ * arch/risc-v/include/k210/irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,50 +18,32 @@
  *
  ****************************************************************************/
 
-/**
-* @file k210_fpioa.c
-* @brief nuttx source code
-*                https://github.com/apache/incubator-nuttx.git
-* @version 10.3.0 
-* @author AIIT XUOS Lab
-* @date 2022-03-23
-*/
+#ifndef __ARCH_RISCV_INCLUDE_K210_IRQ_H
+#define __ARCH_RISCV_INCLUDE_K210_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
-#include <debug.h>
-
-#include "riscv_internal.h"
-#include "k210_memorymap.h"
-#include "k210_fpioa.h"
+#include <arch/irq.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
-int k210_fpioa_get_io_by_function(uint8_t function)
-{
-  int index = 0;
-  uint32_t RegValue = 0x0000;
-  uint32_t *fpioa_base = (uint32_t *)K210_FPIOA_BASE;
 
-  for (index = 0; index < K210_IO_NUMBER; index++)
-  {
-      RegValue = getreg32(&fpioa_base[index]);
-      if ((RegValue & 0xFF) == function)
-          return index;
-  }
-  return -1;
-}
+/* Map RISC-V exception code to NuttX IRQ */
 
+#ifdef CONFIG_K210_WITH_QEMU
+#define K210_IRQ_UART0    (RISCV_IRQ_MEXT + 4)
+#else
+#define K210_IRQ_UART0    (RISCV_IRQ_MEXT + 33)
+#define K210_IRQ_UART1    (RISCV_IRQ_MEXT + 11)
+#define K210_IRQ_UART2    (RISCV_IRQ_MEXT + 12)
+#define K210_IRQ_UART3    (RISCV_IRQ_MEXT + 13)
+#endif
 
-void k210_fpioa_config(uint32_t io, uint32_t ioflags)
-{
-  uint32_t *fpioa_base = (uint32_t *)K210_FPIOA_BASE;
-  DEBUGASSERT(io < K210_IO_NUMBER);
-  putreg32(ioflags, &fpioa_base[io]);
-}
+/* Total number of IRQs */
+
+#define NR_IRQS           (64 + 16 +16)
+
+#endif /* __ARCH_RISCV_INCLUDE_K210_IRQ_H */
