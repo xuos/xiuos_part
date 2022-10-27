@@ -22,17 +22,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <transform.h>
 
 #ifdef ADD_NUTTX_FETURES
 
 #ifdef CONFIG_K210_LCD
-
-#include "nuttx/arch.h"
-#include "nuttx/lcd/lt768.h"
-#include "nuttx/lcd/lt768_lib.h"
-#include "nuttx/lcd/k210_lcd.h"
-
 void LcdDemo(void)
 {
     int x1 = 50, y1 = 50, x2 = LCD_XSIZE_TFT - 50, y2 = LCD_YSIZE_TFT - 50;
@@ -72,18 +66,6 @@ void LcdDemo(void)
 }
 
 #else
-
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <errno.h>
-
-#include <nuttx/video/fb.h>
-#include <nuttx/video/rgbcolors.h>
-
 /****************************************************************************
  * Preprocessor Definitions
  ****************************************************************************/

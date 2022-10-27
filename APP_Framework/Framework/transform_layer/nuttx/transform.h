@@ -25,11 +25,33 @@
 #include <nuttx/pthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/time.h>
+#include <sys/ioctl.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <nuttx/wireless/lpwan/sx127x.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <nuttx/ioexpander/gpio.h>
 #include <termios.h>
+#include <nuttx/arch.h>
+
+#ifdef CONFIG_ADAPTER_SX1278
+#include <nuttx/wireless/lpwan/sx127x.h>
+#endif
+
+#ifdef CONFIG_USER_TEST_LCD
+#ifdef CONFIG_K210_LCD
+#  include "nuttx/lcd/lt768.h"
+#  include "nuttx/lcd/lt768_lib.h"
+#  include "nuttx/lcd/if_port.h"
+#else
+#  include <sys/mman.h>
+#  include <nuttx/video/fb.h>
+#  include <nuttx/video/rgbcolors.h>
+#endif
+#endif
 
 typedef uint8_t uint8;
 typedef uint16_t uint16;
