@@ -1839,11 +1839,9 @@ void Display_ON(void)
     uint8_t temp;
     LCD_CmdWrite(0x12);
     temp = LCD_DataRead();
-    syslog(LOG_NOTICE, "Display_ON.pre_read=%02x\n", temp);
     temp |= cSetb6;
     LCD_DataWrite(temp);
     temp = LCD_DataRead();
-    syslog(LOG_NOTICE, "Display_ON.write_read=%02x\n", temp);
 }
 
 void Display_OFF(void)
