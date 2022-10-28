@@ -101,8 +101,8 @@ void gpio_set_drive_mode(uint8_t pin, gpio_drive_mode_t mode)
     int io_number = fpioa_get_io_by_function(K210_IO_FUNC_GPIO0 + pin);
     DEBUGASSERT(io_number >= 0);
 
-    fpioa_pull_t pull;
-    uint32_t dir;
+    fpioa_pull_t pull = FPIOA_PULL_NONE;
+    uint32_t dir = 0;
 
     switch(mode)
     {

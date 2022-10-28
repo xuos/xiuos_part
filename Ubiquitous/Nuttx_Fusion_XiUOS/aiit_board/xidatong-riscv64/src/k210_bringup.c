@@ -32,12 +32,16 @@
 
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/arch.h>
 
 #include "k210.h"
 #include "k210_clockconfig.h"
 #include "xidatong-riscv64.h"
 #include <arch/board/board.h>
 #include "k210_sysctl.h"
+#include "k210_fpioa.h"
+#include "k210_gpiohs.h"
+#include "k210_gpio_common.h"
 
 #ifdef CONFIG_BSP_USING_CH438
 #  include "k210_ch438.h"
@@ -86,8 +90,15 @@ int k210_bringup(void)
 #ifdef CONFIG_K210_16550_UART1
   sysctl_clock_enable(SYSCTL_CLOCK_UART1);
   sysctl_reset(SYSCTL_RESET_UART1);
-  fpioa_set_function(GPIO_WIFI_RXD, FPOA_USART1_RX);
-  fpioa_set_function(GPIO_WIFI_TXD, FPOA_USART1_TX);
+
+  fpioa_set_function(GPIO_WIFI_TXD, FPOA_USART1_RX);
+  fpioa_set_function(GPIO_WIFI_RXD, FPOA_USART1_TX);
+
+  fpioa_set_function(GPIO_WIFI_EN, K210_IO_FUNC_GPIOHS0 + GPIO_WIFI_EN);
+  k210_gpiohs_set_direction(GPIO_WIFI_EN, GPIO_DM_OUTPUT);
+  k210_gpiohs_set_value(GPIO_WIFI_EN, GPIO_PV_LOW);
+  up_mdelay(50);
+  k210_gpiohs_set_value(GPIO_WIFI_EN, GPIO_PV_HIGH);
 #endif
 
 #ifdef CONFIG_K210_16550_UART2
