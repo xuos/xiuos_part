@@ -55,7 +55,7 @@
 
 /* GPIO pins used by the GPIO Subsystem */
 
-#define BOARD_NGPIOOUT    4 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOOUT    3 /* Amount of register GPIO Output pins */
 #define BOARD_NGPIOINT    0 /* Amount of GPIO Input */
 
 /****************************************************************************
