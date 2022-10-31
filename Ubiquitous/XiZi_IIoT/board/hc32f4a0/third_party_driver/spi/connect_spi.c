@@ -271,15 +271,13 @@ static uint32 SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStan
             if (tx_buff) {
                 x_free(tx_buff);
             }
-        }
 
-        SPI_ClearStatus(spi, SPI_FLAG_CLR_ALL | SPI_FLAG_RX_BUF_FULL);
+            SPI_ClearStatus(spi, SPI_FLAG_CLR_ALL | SPI_FLAG_RX_BUF_FULL);            
+        }
 
         if (spi_datacfg->spi_cs_release) {
             GPIO_SetPins(cs_gpio_port, cs_gpio_pin);
         }
-
-
 
         spi_datacfg = spi_datacfg->next;
     }
@@ -323,9 +321,9 @@ static uint32 SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStand
             if (rx_buff) {
                 x_free(rx_buff);
             }
-        }
 
-        SPI_ClearStatus(spi, SPI_FLAG_CLR_ALL | SPI_FLAG_RX_BUF_FULL);
+            SPI_ClearStatus(spi, SPI_FLAG_CLR_ALL | SPI_FLAG_RX_BUF_FULL);
+        }
 
         if (spi_datacfg->spi_cs_release) {
             GPIO_SetPins(cs_gpio_port, cs_gpio_pin);
@@ -337,7 +335,6 @@ static uint32 SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStand
 
     return spi_read_length;
 }
-
 
 /*manage the spi device operations*/
 static const struct SpiDevDone spi_dev_done =
@@ -492,3 +489,89 @@ int HwSpiInit(void)
 
     return ret;
 }
+
+/*Just for lora test*/
+static struct Bus *bus;
+static struct HardwareDev *dev;
+static struct Driver *drv;
+
+static uint32 TestSpiLoraOpen(void)
+{
+    NULL_PARAM_CHECK(drv);
+
+    KPrintf("SpiLoraOpen start\n");
+
+    x_err_t ret = EOK;
+
+    struct BusConfigureInfo configure_info;
+    struct SpiMasterParam spi_master_param;
+    spi_master_param.spi_data_bit_width = 8;
+    spi_master_param.spi_work_mode = SPI_MODE_0 | SPI_MSB;
+
+    configure_info.configure_cmd = OPE_CFG;
+    configure_info.private_data = (void *)&spi_master_param;
+    ret = BusDrvConfigure(drv, &configure_info);
+    if (ret) {
+        KPrintf("spi drv OPE_CFG error drv %8p cfg %8p\n", drv, &spi_master_param);
+        return ERROR;
+    }
+
+    configure_info.configure_cmd = OPE_INT;
+    ret = BusDrvConfigure(drv, &configure_info);
+    if (ret) {
+        KPrintf("spi drv OPE_INT error drv %8p\n", drv);
+        return ERROR;
+    }
+    
+    return ret;
+}
+
+static void TestSpiRead(void)
+{
+    struct BusBlockWriteParam write_param;
+    struct BusBlockReadParam read_param;
+
+    uint8 write_addr = 0x06 & 0x7F;
+    uint8 read_data = 0;
+
+    BusDevOpen(dev);
+
+    write_param.buffer = (void *)&write_addr;
+    write_param.size = 1;
+    BusDevWriteData(dev, &write_param);
+
+    read_param.buffer = (void *)&read_data;
+    read_param.size = 1;
+    BusDevReadData(dev, &read_param);
+
+    BusDevClose(dev);
+
+    KPrintf("read data from lora 0x06 register, receive data 0x%x\n", read_data);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                                                TestSpiRead, TestSpiRead, read data from lora register);
+
+void TestLoraOpen(void)
+{
+    x_err_t ret = EOK;
+
+    bus = BusFind(SPI_BUS_NAME_1);
+    dev = BusFindDevice(bus, SPI_1_DEVICE_NAME_0);
+    drv = BusFindDriver(bus, SPI_1_DRV_NAME);
+
+    bus->match(drv, dev);
+ 
+    ret = TestSpiLoraOpen();
+    if (EOK != ret) {
+        KPrintf("LoRa init failed\n");
+        return;
+    }
+
+    KPrintf("LoRa init succeed\n");
+
+    return;
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                                                TestLoraOpen, TestLoraOpen, open lora device and read parameters);
+
+

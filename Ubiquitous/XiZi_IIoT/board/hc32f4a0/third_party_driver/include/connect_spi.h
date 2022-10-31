@@ -29,8 +29,6 @@
 extern "C" {
 #endif
 
-
-
 int HwSpiInit(void);
 
 #ifdef __cplusplus

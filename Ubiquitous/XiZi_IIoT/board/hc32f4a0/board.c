@@ -38,6 +38,10 @@ Modification:
 #include <connect_sdio.h>
 #endif
 
+#ifdef BSP_USING_SPI
+#include <connect_spi.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
 
@@ -125,6 +129,9 @@ struct InitSequenceDesc _board_init[] =
 {	
 #ifdef BSP_USING_SDIO
 	{ "sdio", HwSdioInit },
+#endif
+#ifdef BSP_USING_SPI
+	{ "spi", HwSpiInit },
 #endif
     { " NONE ", NONE },
 };

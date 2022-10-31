@@ -8,4 +8,8 @@ ifeq ($(CONFIG_BSP_USING_SDIO),y)
   SRC_FILES += hc32_ll_sdioc.c
 endif
 
+ifeq ($(CONFIG_BSP_USING_SPI),y)
+  SRC_FILES += hc32_ll_spi.c
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
