@@ -34,7 +34,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/ioexpander/gpio.h>
-
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "k210_fpioa.h"
@@ -48,13 +48,7 @@
 
 /* Pin 1 and 2 are used for this example as GPIO outputs. */
 
-#define GPIO_E220_M0   44
-#define GPIO_E220_M1   45
-#define GPIO_E18_MODE  46
 
-#define FPIOA_E220_M0   1
-#define FPIOA_E220_M1   2
-#define FPIOA_E18_MODE  3
 
 /****************************************************************************
  * Private Types
@@ -94,14 +88,16 @@ static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
   GPIO_E220_M0, 
   GPIO_E220_M1,
-  GPIO_E18_MODE
+  GPIO_E18_MODE,
+  GPIO_WIFI_EN
 };
 
 static const uint32_t g_fpioa[BOARD_NGPIOOUT] =
 {
   FPIOA_E220_M0, 
   FPIOA_E220_M1,
-  FPIOA_E18_MODE
+  FPIOA_E18_MODE,
+  FPIOA_WIFI_EN
 };
 
 static struct k210gpio_dev_s g_gpout[BOARD_NGPIOOUT];
