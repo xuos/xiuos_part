@@ -88,16 +88,14 @@ static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
   GPIO_E220_M0, 
   GPIO_E220_M1,
-  GPIO_E18_MODE,
-  GPIO_WIFI_EN
+  GPIO_E18_MODE
 };
 
 static const uint32_t g_fpioa[BOARD_NGPIOOUT] =
 {
   FPIOA_E220_M0, 
   FPIOA_E220_M1,
-  FPIOA_E18_MODE,
-  FPIOA_WIFI_EN
+  FPIOA_E18_MODE
 };
 
 static struct k210gpio_dev_s g_gpout[BOARD_NGPIOOUT];
@@ -173,7 +171,6 @@ int k210_gpio_init(void)
                         (K210_IO_FUNC_GPIOHS0 + g_fpioa[i]) | K210_IOFLAG_GPIOHS);
       k210_gpiohs_set_direction(g_fpioa[i], GPIO_DM_OUTPUT);
       k210_gpiohs_set_value(g_fpioa[i], false);
-
       pincount++;
     }
 #endif

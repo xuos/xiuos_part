@@ -35,7 +35,7 @@ CSRCS += k210_leds.c
 endif
 
 ifeq ($(CONFIG_K210_LCD),y)
-CSRCS += k210_lcd.c lcd_demo.c
+CSRCS += k210_lcd.c
 endif
 
 ifeq ($(CONFIG_DEV_GPIO),y)
