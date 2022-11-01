@@ -238,7 +238,7 @@ static int Esp8285WifiSetUp(struct Adapter *adapter)
 
     result = GetReplyText(reply);
     if (!result) {
-        printf("%s %n get reply failed.\n",__func__,__LINE__);
+        printf("%s %d get reply failed.\n",__func__,__LINE__);
         ret = -1;
         goto __exit;
     }
@@ -355,7 +355,7 @@ static int Esp8285WifiNetstat(struct Adapter *adapter)
 
     result = GetReplyText(reply);
     if (!result) {
-        printf("%s %n get reply failed.\n",__func__,__LINE__);
+        printf("%s %d get reply failed.\n",__func__,__LINE__);
         ret = -1;
         goto __exit;
     }

@@ -55,7 +55,7 @@
 
 /* GPIO pins used by the GPIO Subsystem */
 
-#define BOARD_NGPIOOUT    4 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOOUT    3 /* Amount of register GPIO Output pins */
 #define BOARD_NGPIOINT    0 /* Amount of GPIO Input */
 
 /****************************************************************************
@@ -111,6 +111,14 @@ extern "C"
 #define BSP_ENET_NRST   13
 #define BSP_ENET_NINT   14
 
+/* LCD IO */
+#define BSP_LCD_NRST        37
+#define BSP_LCD_SCLK        38
+#define BSP_LCD_MOSI        39
+#define BSP_LCD_MISO        40
+#define BSP_LCD_NCS         41
+#define BSP_LCD_BL_PIN      47
+
 /* I2C  */
 #define BSP_IIC_SDA     15
 #define BSP_IIC_SCL     17
@@ -156,6 +164,14 @@ extern "C"
 #define FPIOA_ENET_MISO 29
 #define FPIOA_ENET_MOSI 23
 #define FPIOA_ENET_NCS  31
+
+/* LCD FPIOA */
+#define FPIOA_LCD_NRST      0
+#define FPIOA_LCD_BL        9
+#define FPIOA_LCD_SCLK      28
+#define FPIOA_LCD_MOSI      29
+#define FPIOA_LCD_MISO      23 
+#define FPIOA_LCD_NCS       31
 
 /* I2C  */
 #define FPIOA_IIC_SDA  7

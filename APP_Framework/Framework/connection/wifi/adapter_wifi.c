@@ -384,7 +384,6 @@ int AdapterWifiTestWithParam(int argc, char *argv[])
     strcpy(apt_param->wifi_ssid, wifi_param[APT_WIFI_PARAM_SSID]);
     strcpy(apt_param->wifi_pwd, wifi_param[APT_WIFI_PARAM_PWD]);
 
-	printf("2022-10-14 Mr. Wang commit Wifi\n");
 	printf("apt %p ssid %p %s\n", apt_param, apt_param->wifi_ssid);
 
     CHECK_RET(AdapterDeviceOpen(adapter));
