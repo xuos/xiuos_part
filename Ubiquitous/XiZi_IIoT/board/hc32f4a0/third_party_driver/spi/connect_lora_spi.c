@@ -13,163 +13,80 @@
 /**
 * @file connect_lora_spi.c
 * @brief support to register spi lora pointer and function
-* @version 1.0 
+* @version 2.0 
 * @author AIIT XUOS Lab
-* @date 2021-05-17
+* @date 2022-10-31
 */
 
 #include <connect_spi_lora.h>
 
+/* RST = PI02 */
+#define LORA_RST_PORT                     (GPIO_PORT_I)
+#define LORA_RST_PIN                      (GPIO_PIN_02)
+
 static struct HardwareDev *g_spi_lora_dev;
-static BusType buspin;
 tRadioDriver *Radio = NONE;
+
 void SX1276InitIo(void)
 {
-    struct PinParam PinCfg;
-	struct PinStat PinStat;
+    stc_gpio_init_t stcGpioInit;
 
-	struct BusConfigureInfo configure_info;
-	struct BusBlockWriteParam write_param;
-
-    write_param.buffer = (void *)&PinStat;
-    configure_info.configure_cmd = OPE_CFG;
-    configure_info.private_data = (void *)&PinCfg;
-
-    buspin = PinBusInitGet();  
-
-    PinCfg.cmd = GPIO_CONFIG_MODE;
-    PinCfg.pin = SX12XX_DEVICE_DO0_PIN;
-    PinCfg.mode = GPIO_CFG_INPUT;
-    BusDrvConfigure(buspin->owner_driver, &configure_info);
-
-    PinCfg.cmd = GPIO_CONFIG_MODE;
-    PinCfg.pin = SX12XX_DEVICE_DO1_PIN;
-    PinCfg.mode = GPIO_CFG_INPUT;
-    BusDrvConfigure(buspin->owner_driver, &configure_info);
-
-    PinCfg.cmd = GPIO_CONFIG_MODE;
-    PinCfg.pin = SX12XX_DEVICE_DO2_PIN;
-    PinCfg.mode = GPIO_CFG_INPUT;
-    BusDrvConfigure(buspin->owner_driver, &configure_info);
-}
-
-inline uint8_t SX1276ReadDio0(void)
-{
-    struct PinStat PinStat;
-
-    struct BusBlockReadParam read_param;
-    read_param.buffer = (void *)&PinStat;
-
-    PinStat.pin = SX12XX_DEVICE_DO0_PIN;
-    
-    return BusDevReadData(buspin->owner_haldev, &read_param);
-}
-
-inline uint8_t SX1276ReadDio1(void)
-{
-    struct PinStat PinStat;
-
-    struct BusBlockReadParam read_param;
-    read_param.buffer = (void *)&PinStat;
-
-    PinStat.pin = SX12XX_DEVICE_DO1_PIN;
-    
-    return BusDevReadData(buspin->owner_haldev, &read_param);
-}
-
-inline uint8_t SX1276ReadDio2(void)
-{
-    struct PinStat PinStat;
-
-    struct BusBlockReadParam read_param;
-    read_param.buffer = (void *)&PinStat;
-
-    PinStat.pin = SX12XX_DEVICE_DO2_PIN;
-    
-    return BusDevReadData(buspin->owner_haldev, &read_param);
-}
-
-inline uint8_t SX1276ReadDio3(void)
-{
-    struct PinStat PinStat;
-
-    struct BusBlockReadParam read_param;
-    read_param.buffer = (void *)&PinStat;
-
-    PinStat.pin = SX12XX_DEVICE_DO3_PIN;
-    
-    return BusDevReadData(buspin->owner_haldev, &read_param);
-}
-
-inline uint8_t SX1276ReadDio4(void)
-{
-    struct PinStat PinStat;
-
-    struct BusBlockReadParam read_param;
-    read_param.buffer = (void *)&PinStat;
-
-    PinStat.pin = SX12XX_DEVICE_DO4_PIN;
-    
-    return BusDevReadData(buspin->owner_haldev, &read_param);
-}
-
-inline uint8_t SX1276ReadDio5(void)
-{
-    struct PinStat PinStat;
-
-    struct BusBlockReadParam read_param;
-    read_param.buffer = (void *)&PinStat;
-
-    PinStat.pin = SX12XX_DEVICE_DO5_PIN;
-    
-    return BusDevReadData(buspin->owner_haldev, &read_param);
+    (void)GPIO_StructInit(&stcGpioInit);
+    stcGpioInit.u16PinState = PIN_STAT_RST;
+    stcGpioInit.u16PinDir = PIN_DIR_OUT;
+    (void)GPIO_Init(LORA_RST_PORT, LORA_RST_PIN, &stcGpioInit);
 }
 
 inline void SX1276WriteRxTx(uint8_t txEnable)
 {
-    return;
+    if (txEnable != 0) {
+        /*to do*/
+    } else {
+        /*to do*/
+    }
 }
 
 void SX1276SetReset(uint8_t state)
 {
-    struct PinParam PinCfg;
-	struct PinStat PinStat;
-
-	struct BusConfigureInfo configure_info;
-	struct BusBlockWriteParam write_param;
-
-    configure_info.configure_cmd = OPE_CFG;
-    configure_info.private_data = (void *)&PinCfg;
-    write_param.buffer = (void *)&PinStat;
-
-    if (state == RADIO_RESET_ON)
-    {
-        PinCfg.cmd = GPIO_CONFIG_MODE;
-        PinCfg.pin = SX12XX_DEVICE_RST_PIN;
-        PinCfg.mode = GPIO_CFG_OUTPUT;
-        BusDrvConfigure(buspin->owner_driver, &configure_info);
-
-        PinStat.val = GPIO_LOW;
-        PinStat.pin = SX12XX_DEVICE_RST_PIN;
-        BusDevWriteData(buspin->owner_haldev, &write_param);
-    }
-    else
-    {
-        PinCfg.cmd = GPIO_CONFIG_MODE;
-        PinCfg.pin = SX12XX_DEVICE_RST_PIN;
-        PinCfg.mode = GPIO_CFG_INPUT;
-        BusDrvConfigure(buspin->owner_driver, &configure_info);
+    if (state == RADIO_RESET_ON) {
+        GPIO_ResetPins(LORA_RST_PORT, LORA_RST_PIN);
+    } else {
+        stc_gpio_init_t stcGpioInit;
+        (void)GPIO_StructInit(&stcGpioInit);
+        stcGpioInit.u16PinDir = PIN_DIR_IN;
+        (void)GPIO_Init(LORA_RST_PORT, LORA_RST_PIN, &stcGpioInit);
     }
 }
 
-void SX1276Write(uint8_t addr, uint8_t data)
+//Not-necessary Function
+uint8_t SX1276ReadDio0(void)
 {
-    SX1276WriteBuffer(addr, &data, 1);
+    return 1;
 }
 
-void SX1276Read(uint8_t addr, uint8_t *data)
+uint8_t SX1276ReadDio1(void)
 {
-    SX1276ReadBuffer(addr, data, 1);
+    return 1;
+}
+
+uint8_t SX1276ReadDio2(void)
+{
+    return 1;
+}
+
+uint8_t SX1276ReadDio3(void)
+{
+    return 1;
+}
+
+uint8_t SX1276ReadDio4(void)
+{
+    return 1;
+}
+
+uint8_t SX1276ReadDio5(void)
+{
+    return 1;
 }
 
 void SX1276WriteBuffer(uint8_t addr, uint8_t *buffer, uint8_t size)
@@ -220,21 +137,36 @@ void SX1276ReadFifo(uint8_t *buffer, uint8_t size)
     SX1276ReadBuffer(0, buffer, size);
 }
 
-uint8_t SX1276_Spi_Check()
+void SX1276Write(uint8_t addr, uint8_t data)
+{
+    SX1276WriteBuffer(addr, &data, 1);
+}
+
+void SX1276Read(uint8_t addr, uint8_t *data)
+{
+    SX1276ReadBuffer(addr, data, 1);
+}
+
+uint8_t Sx1276SpiCheck(void)
 {
     uint8_t test = 0;
-    KPrintf("SX1276_Spi_Check start\n");
+
 	tLoRaSettings settings;
-	SX1276Read(REG_LR_VERSION,&test);
-	KPrintf("version code of the chip is %x\n",test);
+	SX1276Read(REG_LR_VERSION, &test);
+	KPrintf("version code of the chip is 0x%x\n", test);
+
 	settings.RFFrequency = SX1276LoRaGetRFFrequency();
-	KPrintf("SX1278 Lora parameters are :\nRFFrequency is %d\n",settings.RFFrequency);
+	KPrintf("SX1278 Lora parameters are :\nRFFrequency is %d\n", settings.RFFrequency);
+
 	settings.Power = SX1276LoRaGetRFPower();
 	KPrintf("RFPower is %d\n",settings.Power);
+
     settings.SignalBw = SX1276LoRaGetSignalBandwidth();	  
 	KPrintf("SignalBw is %d\n",settings.SignalBw);
+
 	settings.SpreadingFactor = SX1276LoRaGetSpreadingFactor();
 	KPrintf("SpreadingFactor is %d\n",settings.SpreadingFactor);
+    
     /*SPI confirm*/
     SX1276Write(REG_LR_HOPPERIOD, 0x91);  
     SX1276Read(REG_LR_HOPPERIOD, &test);
@@ -259,8 +191,6 @@ static uint32 SpiLoraWrite(void *dev, struct BusBlockWriteParam *write_param)
         KPrintf("SpiLoraWrite ERROR:The message is too long!\n");
         return ERROR;
     } else {
-        //Radio->SetTxPacket(write_param->buffer, write_param->size);    
-        //while(Radio->Process() != RF_TX_DONE);
         SX1276SetTxPacket(write_param->buffer, write_param->size);    
         while(SX1276Process() != RF_TX_DONE);
         KPrintf("SpiLoraWrite success!\n");
@@ -280,9 +210,8 @@ static uint32 SpiLoraRead(void *dev, struct BusBlockReadParam *read_param)
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(read_param);
 
-    int read_times = 1000;
+    int read_times = 100;
     
-    //Radio->StartRx();
     SX1276StartRx();
     KPrintf("SpiLoraRead Ready!\n");
 
@@ -300,11 +229,6 @@ static uint32 SpiLoraRead(void *dev, struct BusBlockReadParam *read_param)
     } else {
         read_param->read_length = 0;
     }
-    
-    //while(Radio->Process() != RF_RX_DONE);
-    //Radio->GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);     
-    // while(SX1276Process() != RF_RX_DONE);
-    // SX1276GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);
 
     return read_param->read_length;
 }
@@ -336,8 +260,6 @@ static uint32 SpiLoraOpen(void *dev)
     struct SpiMasterParam spi_master_param;
     spi_master_param.spi_data_bit_width = 8;
     spi_master_param.spi_work_mode = SPI_MODE_0 | SPI_MSB;
-    spi_master_param.spi_maxfrequency = SPI_LORA_FREQUENCY;
-    spi_master_param.spi_data_endian = 0;
 
     configure_info.configure_cmd = OPE_CFG;
     configure_info.private_data = (void *)&spi_master_param;
@@ -356,15 +278,15 @@ static uint32 SpiLoraOpen(void *dev)
 
     SX1276Init();
 
-    if (0x91 != SX1276_Spi_Check()) {
+    if (0x91 != Sx1276SpiCheck()) {
         KPrintf("LoRa check failed!\n!");
     } else {
         Radio = RadioDriverInit();
         KPrintf("LoRa check ok!\nNote: The length of the message that can be sent in a single time is 256 characters\n");
     }
-    
-    lora_init_status = RET_TRUE;
 
+    lora_init_status = RET_TRUE;
+    
     return ret;
 }
 
@@ -389,7 +311,7 @@ static const struct LoraDevDone lora_done =
  * @param bus_name spi bus name
  * @param dev_name spi dev name
  * @param drv_name spi drv name
- * @param lora_name lora name
+ * @param lora_name lora dev name
  */
 SpiLoraDeviceType SpiLoraInit(char *bus_name, char *dev_name, char *drv_name, char *lora_name)
 {
@@ -421,12 +343,16 @@ SpiLoraDeviceType SpiLoraInit(char *bus_name, char *dev_name, char *drv_name, ch
     spi_lora_dev->lora_dev.spi_dev_flag = RET_TRUE;
     spi_lora_dev->lora_dev.haldev.dev_done = (struct HalDevDone *)&lora_done;
 
-    spi_lora_dev->spi_dev->haldev.owner_bus->owner_driver = SpiDriverFind(drv_name, TYPE_SPI_DRV);
-    if (NONE == spi_lora_dev->spi_dev->haldev.owner_bus->owner_driver) {
+    struct Driver *spi_driver = SpiDriverFind(drv_name, TYPE_SPI_DRV);
+    if (NONE == spi_driver) {
         KPrintf("SpiLoraInit find spi driver %s error! \n", drv_name);
         free(spi_lora_dev);
         return NONE;
     }
+
+    //spi drv get spi dev param (SpiDeviceParam)
+    spi_driver->private_data = spi_lora_dev->spi_dev->haldev.private_data;
+    spi_lora_dev->spi_dev->haldev.owner_bus->owner_driver = spi_driver;
 
     ret = SpiDeviceRegister(&spi_lora_dev->lora_dev, spi_lora_dev->spi_dev->haldev.private_data, lora_name);
     if (EOK != ret) {
@@ -468,39 +394,27 @@ uint32 SpiLoraRelease(SpiLoraDeviceType spi_lora_dev)
 int LoraSx12xxSpiDeviceInit(void)
 {
 #ifdef BSP_USING_SPI1
-
     if (NONE == SpiLoraInit(SPI_BUS_NAME_1, SPI_1_DEVICE_NAME_0, SPI_1_DRV_NAME, SX12XX_DEVICE_NAME)) {
         return ERROR;
     }
-
 #endif
 
     return EOK;
 }
 
-//#define LORA_TEST
+#define LORA_TEST
 #ifdef LORA_TEST
 /*Just for lora test*/
 static struct Bus *bus;
 static struct HardwareDev *dev;
-static struct Driver *drv;
 
 void LoraOpen(void)
 {
     x_err_t ret = EOK;
 
-    ret = LoraSx12xxSpiDeviceInit();
-    if (EOK != ret) {
-        KPrintf("LoraSx12xxSpiDeviceInit failed\n");
-        return;
-    }
-
     bus = BusFind(SPI_BUS_NAME_1);
     dev = BusFindDevice(bus, SX12XX_DEVICE_NAME);
-    drv = BusFindDriver(bus, SPI_1_DRV_NAME);
 
-    bus->match(drv, dev);
- 
     ret = SpiLoraOpen(dev);
     if (EOK != ret) {
         KPrintf("LoRa init failed\n");
@@ -512,7 +426,7 @@ void LoraOpen(void)
     return;
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
-                                                LoraOpen, LoraOpen,  open lora device and read parameters );
+                                                LoraOpen, LoraOpen, open lora device and read parameters );
 
 static void LoraReceive(void)
 {

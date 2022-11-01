@@ -216,9 +216,7 @@ void SX1276LoRaInit( void )
 
 	SX1276LoRaSetDefaults();                                         
 	
-    
 	SX1276ReadBuffer( REG_LR_OPMODE, SX1276Regs + 1, 0x70 - 1 );     
-    
     
     //SX1276LoRaSetOpMode( RFLR_OPMODE_SLEEP );
 	
@@ -269,9 +267,10 @@ void SX1276LoRaInit( void )
 			SX1276LoRaSetRFPower( LoRaSettings.Power );
 		} 
 	#endif
-    SX1276LoRaSetOpMode( RFLR_OPMODE_STANDBY );	                      
-}
+    SX1276LoRaSetOpMode( RFLR_OPMODE_STANDBY );	
 
+	SX1276ReadBuffer( REG_LR_OPMODE, SX1276Regs + 1, 0x70 - 1 );                         
+}
 
 void SX1276LoRaSetDefaults( void )
 {
@@ -280,8 +279,6 @@ void SX1276LoRaSetDefaults( void )
     // Sets IF frequency selection manual
     SX1276Read( REG_LR_VERSION, &SX1276LR->RegVersion );
 }
-
-
 
 void SX1276LoRaReset( void )
 {
@@ -327,7 +324,6 @@ void SX1276LoRaSetOpMode( uint8_t opMode )
 	}
 }
 
-
 uint8_t SX1276LoRaGetOpMode( void )                       
 {
     SX1276Read( REG_LR_OPMODE, &SX1276LR->RegOpMode );
@@ -335,14 +331,12 @@ uint8_t SX1276LoRaGetOpMode( void )
     return SX1276LR->RegOpMode & ~RFLR_OPMODE_MASK;
 }
 
-
 uint8_t SX1276LoRaReadRxGain( void )                    
 {
 	
 	SX1276Read( REG_LR_LNA, &SX1276LR->RegLna );
 	return( SX1276LR->RegLna >> 5 ) & 0x07;
 }
-
 
 double SX1276LoRaReadRssi( void )
 {  
@@ -359,30 +353,25 @@ double SX1276LoRaReadRssi( void )
     }
 }
 
-
 uint8_t SX1276LoRaGetPacketRxGain( void )
 {
     return RxGain;
 }
-
 
 int8_t SX1276LoRaGetPacketSnr( void )
 {
     return RxPacketSnrEstimate;
 }
 
-
 double SX1276LoRaGetPacketRssi( void )
 {
     return RxPacketRssiValue;
 }
 
-
 void SX1276LoRaStartRx( void )
 {
     SX1276LoRaSetRFState( RFLR_STATE_RX_INIT );
 }
-
 
 void SX1276LoRaGetRxPacket( void *buffer, uint16_t *size )
 {
@@ -390,7 +379,6 @@ void SX1276LoRaGetRxPacket( void *buffer, uint16_t *size )
 	RxPacketSize = 0;
 	memcpy( (void*)buffer, (void*)RFBuffer, (size_t)*size );
 }
-
 
 void SX1276LoRaSetTxPacket( const void *buffer, uint16_t size )
 {
@@ -407,12 +395,10 @@ void SX1276LoRaSetTxPacket( const void *buffer, uint16_t size )
     RFLRState = RFLR_STATE_TX_INIT;                                
 }
 
-
 uint8_t SX1276LoRaGetRFState( void )
 {
     return RFLRState;
 }
-
 
 void SX1276LoRaSetRFState( uint8_t state )
 {
@@ -489,7 +475,7 @@ uint32_t SX1276LoRaProcess( void )
 		     RFLRState = RFLR_STATE_RX_RUNNING;
 		     break;
 		case RFLR_STATE_RX_RUNNING:                                              
-			 SX1276Read(0x12,&regValue);                                         
+			 SX1276Read(0x12, &regValue);                                         
              //if( DIO0 == 1 )         // RxDone
 			 if(regValue & (1<<6))                                               
              {
@@ -789,7 +775,7 @@ uint32_t SX1276LoraChannelEmpty( void )
 	}
 	else if(result == RF_CHANNEL_ACTIVITY_DETECTED)
 	{
-		KPrintf("\nLora--RF_CHANNEL_ACTIVITY_DETECTED）\n");
+		KPrintf("\nLora--RF_CHANNEL_ACTIVITY_DETECTED\n");
 		return 1;
 	}
 	else

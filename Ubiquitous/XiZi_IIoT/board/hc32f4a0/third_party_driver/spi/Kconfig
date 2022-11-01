@@ -13,11 +13,20 @@ if BSP_USING_SPI
         config SPI_1_DRV_NAME
             string "spi bus 1 driver name"
             default "spi1_drv"
+
+        menuconfig RESOURCES_SPI_LORA
+            bool "Using spi lora function"
+            default n
+            if RESOURCES_SPI_LORA
+                config SX12XX_DEVICE_NAME
+                string "SX12XX(SX1278 SX1276) lora device name"
+                default "spi1_lora"
+            endif
     endif   
 
     config BSP_USING_SPI6
     bool "Using spi6"
-    default y
+    default n
 
     if BSP_USING_SPI6
         config SPI_BUS_NAME_6

@@ -390,6 +390,8 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/include \
+	-I$(BSP_ROOT)/third_party_driver/spi/third_party_spi_lora/sx12xx/inc \
+	-I$(BSP_ROOT)/third_party_driver/spi/third_party_spi_lora/sx12xx/src/radio \
 	-I$(KERNEL_ROOT)/include #
 endif
 

@@ -42,7 +42,6 @@ Modification:
 /* SS = PI01 */
 #define SPI1_SS_PORT                     (GPIO_PORT_I)
 #define SPI1_SS_PIN                      (GPIO_PIN_01)
-#define SPI1_SS_FUNC                     (GPIO_FUNC_47)
 /* SCK = PH14 */
 #define SPI1_SCK_PORT                    (GPIO_PORT_H)
 #define SPI1_SCK_PIN                     (GPIO_PIN_14)
@@ -65,7 +64,6 @@ Modification:
 /* SS = PI01 */
 #define SPI6_SS_PORT                     (GPIO_PORT_I)
 #define SPI6_SS_PIN                      (GPIO_PIN_01)
-#define SPI6_SS_FUNC                     (GPIO_FUNC_47)
 /* SCK = PH14 */
 #define SPI6_SCK_PORT                    (GPIO_PORT_H)
 #define SPI6_SCK_PIN                     (GPIO_PIN_14)
@@ -95,12 +93,18 @@ static uint32 SpiSdkInit(struct SpiDriver *spi_drv)
     NULL_PARAM_CHECK(spi_drv);
 
     stc_spi_init_t stcSpiInit;
+    stc_gpio_init_t stcGpioInit;
 
     SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_drv->driver.private_data);
 
-//#ifdef BSP_USING_SPI1
+#ifdef BSP_USING_SPI1
     /* Configure Port */
-    GPIO_SetFunc(SPI1_SS_PORT, SPI1_SS_PIN, SPI1_SS_FUNC);
+    (void)GPIO_StructInit(&stcGpioInit);
+    stcGpioInit.u16PinState = PIN_STAT_RST;
+    stcGpioInit.u16PinDir = PIN_DIR_OUT;
+    (void)GPIO_Init(SPI1_SS_PORT, SPI1_SS_PIN, &stcGpioInit);
+    GPIO_SetPins(SPI1_SS_PORT, SPI1_SS_PIN);
+
     GPIO_SetFunc(SPI1_SCK_PORT, SPI1_SCK_PIN, SPI1_SCK_FUNC);
     GPIO_SetFunc(SPI1_MOSI_PORT, SPI1_MOSI_PIN, SPI1_MOSI_FUNC);
     GPIO_SetFunc(SPI1_MISO_PORT, SPI1_MISO_PIN, SPI1_MISO_FUNC);
@@ -142,11 +146,16 @@ static uint32 SpiSdkInit(struct SpiDriver *spi_drv)
 
     (void)SPI_Init(SPI1_UNIT, &stcSpiInit);
     SPI_Cmd(SPI1_UNIT, ENABLE);
-//#endif
+#endif
 
 #ifdef BSP_USING_SPI6
     /* Configure Port */
-    GPIO_SetFunc(SPI6_SS_PORT, SPI6_SS_PIN, SPI6_SS_FUNC);
+    (void)GPIO_StructInit(&stcGpioInit);
+    stcGpioInit.u16PinState = PIN_STAT_RST;
+    stcGpioInit.u16PinDir = PIN_DIR_OUT;
+    (void)GPIO_Init(SPI6_SS_PORT, SPI6_SS_PIN, &stcGpioInit);
+    GPIO_SetPins(SPI6_SS_PORT, SPI6_SS_PIN);
+
     GPIO_SetFunc(SPI6_SCK_PORT, SPI6_SCK_PIN, SPI6_SCK_FUNC);
     GPIO_SetFunc(SPI6_MOSI_PORT, SPI6_MOSI_PIN, SPI6_MOSI_FUNC);
     GPIO_SetFunc(SPI6_MISO_PORT, SPI6_MISO_PIN, SPI6_MISO_FUNC);
@@ -378,7 +387,7 @@ static int BoardSpiDevBend(void)
 {
     x_err_t ret = EOK;
 
-//#ifdef BSP_SPI1_USING_SS0
+#ifdef SPI_1_DEVICE_NAME_0
     static struct SpiHardwareDevice spi1_device0;
     memset(&spi1_device0, 0, sizeof(struct SpiHardwareDevice));
 
@@ -404,9 +413,9 @@ static int BoardSpiDevBend(void)
         KPrintf("BoardSpiDevBend SpiDeviceAttachToBus device %s error %d\n", SPI_1_DEVICE_NAME_0, ret);
         return ERROR;
     }  
-//#endif
+#endif
 
-#ifdef BSP_SPI6_USING_SS0
+#ifdef SPI_6_DEVICE_NAME_0
     static struct SpiHardwareDevice spi6_device0;
     memset(&spi6_device0, 0, sizeof(struct SpiHardwareDevice));
 
@@ -441,7 +450,7 @@ int HwSpiInit(void)
 {
     x_err_t ret = EOK;
 
-//#ifdef BSP_USING_SPI1
+#ifdef BSP_USING_SPI1
     static struct SpiBus spi1_bus;
     memset(&spi1_bus, 0, sizeof(struct SpiBus));
 
@@ -462,7 +471,7 @@ int HwSpiInit(void)
         KPrintf("BoardSpiDevBend error ret %u\n", ret);
         return ERROR;
     }    
-//#endif
+#endif
 
 #ifdef BSP_USING_SPI6
     static struct SpiBus spi6_bus;

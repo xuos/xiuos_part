@@ -24,6 +24,7 @@
 #include <device.h>
 #include <hardware_irq.h>
 #include <hc32_ll_spi.h>
+#include <hc32_ll_gpio.h>
 
 #ifdef __cplusplus
 extern "C" {
