@@ -547,6 +547,18 @@ config NSH_DISABLE_XD
 	bool "Disable xd"
 	default DEFAULT_SMALL
 
+config NSH_DISABLE_CH376
+	bool "Disable the ch376 demo."
+	default n
+
+config NSH_DISABLE_W5500
+	bool "Disable the w5500 demo."
+	default n
+
+config NSH_DISABLE_TOUCH
+	bool "Disable the gt911 touch screen demo."
+	default n
+
 config NSH_DISABLE_CH438
 	bool "Disable the ch438 demo."
 	default n

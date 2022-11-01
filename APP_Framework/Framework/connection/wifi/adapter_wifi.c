@@ -28,6 +28,10 @@ extern AdapterProductInfoType Hfa21WifiAttach(struct Adapter *adapter);
 extern AdapterProductInfoType Esp07sWifiAttach(struct Adapter *adapter);
 #endif
 
+#ifdef ADAPTER_ESP8285_WIFI
+extern AdapterProductInfoType Esp8285WifiAttach(struct Adapter *adapter);
+#endif
+
 static int AdapterWifiRegister(struct Adapter *adapter)
 {
     int ret = 0;
@@ -93,8 +97,24 @@ int AdapterWifiInit(void)
 
 #endif
 
+
+#ifdef ADAPTER_ESP8285_WIFI
+    AdapterProductInfoType product_info = Esp8285WifiAttach(adapter);
+    if (!product_info) {
+        printf("AdapterWifiInit ESP8285 attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
+
+#endif
+
     return ret;
 }
+
 
 /******************wifi TEST*********************/
 int AdapterWifiTest(void)
@@ -364,7 +384,6 @@ int AdapterWifiTestWithParam(int argc, char *argv[])
     strcpy(apt_param->wifi_ssid, wifi_param[APT_WIFI_PARAM_SSID]);
     strcpy(apt_param->wifi_pwd, wifi_param[APT_WIFI_PARAM_PWD]);
 
-	printf("2022-10-14 Mr. Wang commit Wifi\n");
 	printf("apt %p ssid %p %s\n", apt_param, apt_param->wifi_ssid);
 
     CHECK_RET(AdapterDeviceOpen(adapter));

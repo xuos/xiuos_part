@@ -1,5 +1,5 @@
 /****************************************************************************
- * lcd_demo.c
+ * arch/arm/src/hc32/hc32_pminitialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,47 +18,41 @@
  *
  ****************************************************************************/
 
-/**
-* @file lcd_demo.c
-* @brief
-* @version 1.0.0
-* @author AIIT XUOS Lab
-* @date 2022-07-21
-*/
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "nuttx/arch.h"
-#include "nuttx/lcd/lt768.h"
-#include "nuttx/lcd/lt768_lib.h"
-#include "nuttx/lcd/k210_lcd.h"
+#include <nuttx/config.h>
 
-void LcdDemo(void)
+#include "arm_internal.h"
+#include "hc32_pm.h"
+
+#ifdef CONFIG_PM
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_pminitialize
+ *
+ * Description:
+ *   This function is called by MCU-specific logic at power-on reset in
+ *   order to provide one-time initialization the power management subsystem.
+ *   This function must be called *very* early in the initialization sequence
+ *   *before* any other device drivers are initialized (since they may
+ *   attempt to register with the power management subsystem).
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void arm_pminitialize(void)
 {
-//    int x1 = 0, y1 = 0, x2 = LCD_XSIZE_TFT, y2 = LCD_YSIZE_TFT;
-    int x1 = 100, y1 = 100, x2 = 200, y2 = 200;
-
-    Main_Image_Start_Address(LCD_START_ADDR);
-    Main_Image_Width(LCD_XSIZE_TFT);
-    Main_Window_Start_XY(0, 0);
-    Canvas_Image_Start_address(LCD_START_ADDR);
-    Canvas_image_width(LCD_XSIZE_TFT);
-    Active_Window_XY(0, 0);
-    Active_Window_WH(LCD_XSIZE_TFT, LCD_YSIZE_TFT);
-    up_mdelay(10);
-    Canvas_Image_Start_address(LCD_START_ADDR);
-
-    for(int i = 0; i < 3; i++)
-    {
-        syslog(LOG_NOTICE, "Disp_demo %d\n", i);
-        LT768_DrawSquare_Fill(x1, y1, x2, y2, Red);
-        up_mdelay(2000);
-        LT768_DrawSquare_Fill(x1, y1, x2, y2, Green);
-        up_mdelay(2000);
-        LT768_DrawSquare_Fill(x1, y1, x2, y2, Blue);
-        up_mdelay(2000);
-    }
 }
 
+#endif /* CONFIG_PM */

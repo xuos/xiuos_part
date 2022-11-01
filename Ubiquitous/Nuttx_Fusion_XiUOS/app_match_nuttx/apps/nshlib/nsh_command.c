@@ -596,6 +596,18 @@ static const struct cmdmap_s g_cmdmap[] =
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
 #endif
 
+#if defined(CONFIG_BSP_USING_CH376) && !defined(CONFIG_NSH_DISABLE_CH376)
+  { "ch376",    cmd_Ch376,     1, 1, "[ch376 demo cmd.]" },
+#endif
+
+#if defined(CONFIG_BSP_USING_ENET) && !defined(CONFIG_NSH_DISABLE_W5500)
+  { "w5500",    cmd_w5500,     1, 1, "[w5500 demo cmd.]" },
+#endif
+
+#if defined(CONFIG_BSP_USING_TOUCH) && !defined(CONFIG_NSH_DISABLE_TOUCH)
+  { "touch",    cmd_Touch,     1, 1, "[gt911 touch screen demo cmd.]" },
+#endif
+
 #if defined(CONFIG_BSP_USING_CH438) && !defined(CONFIG_NSH_DISABLE_CH438)
   { "ch438",    cmd_Ch438,     1, 1, "[ch438 demo cmd.]" },
 #endif
@@ -712,7 +724,7 @@ static const struct cmdmap_s g_cmdmap[] =
   { "AdapterBlueToothTest",       cmd_AdapterBlueToothTest,       1, 1, "[BlueTooth hc08 test.]" },
 #endif
 
-#if defined(CONFIG_ADAPTER_ESP07S_WIFI) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
+#if (defined(CONFIG_ADAPTER_ESP07S_WIFI) || defined(CONFIG_ADAPTER_ESP8285_WIFI)) && !defined(CONFIG_NSH_DISABLE_ADAPTER_WIFI_TEST)
   { "wifitest",       cmd_AdapterWifiTest,       1, 8, "[WIFI test.]" },
 #endif
 
