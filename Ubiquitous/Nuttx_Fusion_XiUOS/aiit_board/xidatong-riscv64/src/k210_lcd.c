@@ -22,7 +22,7 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
+#include <nuttx/config.h>
 #include "k210_fpioa.h"
 #include "k210_gpiohs.h"
 #include "nuttx/arch.h"
@@ -31,10 +31,15 @@
 #include "nuttx/lcd/if_port.h"
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 #ifdef CONFIG_LCD_LCDDRV_SPIIF
 #include "nuttx/lcd/lcddrv_spiif.h"
 #endif
 
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 #define NCS_H() k210_gpiohs_set_value(FPIOA_LCD_NCS, GPIO_PV_HIGH); up_udelay(20)
 #define NCS_L() k210_gpiohs_set_value(FPIOA_LCD_NCS, GPIO_PV_LOW); up_udelay(20)
 #define CLK_H() k210_gpiohs_set_value(FPIOA_LCD_SCLK, GPIO_PV_HIGH); up_udelay(20)
@@ -42,6 +47,25 @@
 #define MOSI_H() k210_gpiohs_set_value(FPIOA_LCD_MOSI, GPIO_PV_HIGH)
 #define MOSI_L() k210_gpiohs_set_value(FPIOA_LCD_MOSI, GPIO_PV_LOW)
 
+static int lcd_open(FAR struct file *filep);
+static int lcd_close(FAR struct file *filep);
+static ssize_t lcd_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t lcd_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+/* Ch438 POSIX interface */
+static const struct file_operations g_lcdfops =
+{
+  lcd_open,
+  lcd_close,
+  lcd_read,
+  lcd_write,
+  NULL,
+  NULL,
+  NULL
+};
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -184,23 +208,7 @@ void lcd_drv_init(void)
     Canvas_Image_Start_address(LCD_START_ADDR);
 
     //fill blue background
-    LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, Blue);
-}
-
-/****************************************************************************
- * Name: k210_lcd_initialize
- *
- * Description:
- *   Initialize the LCD.  Setup backlight (initially off)
- *
- ****************************************************************************/
-
-int board_lcd_initialize(void)
-{
-    /* Configure the LCD backlight (and turn the backlight off) */
-    lcd_backlight_init(true);
-    lcd_drv_init();
-    return 0;
+    LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, BLUE);
 }
 
 /****************************************************************************
@@ -218,3 +226,83 @@ void k210_backlight(bool blon)
     lcd_backlight_init(blon);
 }
 #endif
+
+
+/****************************************************************************
+ * Name: lcd_open
+ ****************************************************************************/
+static int lcd_open(FAR struct file *filep)
+{
+    return OK;
+}
+
+/****************************************************************************
+ * Name: lcd_close
+ ****************************************************************************/
+static int lcd_close(FAR struct file *filep)
+{
+    return OK;
+}
+
+/****************************************************************************
+ * Name: lcd_read
+ ****************************************************************************/
+static ssize_t lcd_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+{
+    return OK;
+}
+
+/****************************************************************************
+ * Name: ch438_write
+ ****************************************************************************/
+static ssize_t lcd_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+{
+    if (buffer  == NULL) {
+         return  -ERROR;
+     }
+    LcdWriteParam * show = (LcdWriteParam *)buffer;
+    /* output string */
+    if(0 == show->type) 
+    {
+        LT768_Select_Internal_Font_Init(show->string_info.height, 1, 1, 1, 1);
+        LT768_Print_Internal_Font_String(show->string_info.x_pos, show->string_info.y_pos, show->string_info.font_color,show->string_info.back_color,show->string_info.addr);
+        return  buflen;   
+    }
+    /* output dot */
+    else if(1 == show->type)
+    {
+        LT768_DrawSquare_Fill(show->pixel_info.x_startpos,show->pixel_info.y_startpos, show->pixel_info.x_endpos, show->pixel_info.y_endpos, *(uint32_t *)(show->pixel_info.pixel_color));
+        return  buflen;
+    } 
+    else 
+    {
+        return -ERROR;
+    }
+}
+
+/****************************************************************************
+ * Name: k210_lcd_initialize
+ *
+ * Description:
+ *   Initialize the LCD.  Setup backlight (initially off)
+ *
+ ****************************************************************************/
+int board_lcd_initialize(void)
+{
+    /* Configure the LCD backlight (and turn the backlight off) */
+    lcd_backlight_init(true);
+    lcd_drv_init();
+    up_mdelay(10);
+    Main_Image_Start_Address(LCD_START_ADDR);
+    Main_Image_Width(LCD_XSIZE_TFT);
+    Main_Window_Start_XY(0, 0);
+    Canvas_Image_Start_address(LCD_START_ADDR);
+    Canvas_image_width(LCD_XSIZE_TFT);
+    Active_Window_XY(0, 0);
+    Active_Window_WH(LCD_XSIZE_TFT, LCD_YSIZE_TFT);
+    up_mdelay(10);
+    Canvas_Image_Start_address(LCD_START_ADDR);
+    /* register device */
+    register_driver("/dev/lcd_dev", &g_lcdfops, 0666, NULL);
+    return OK;
+}

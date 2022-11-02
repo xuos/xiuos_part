@@ -99,16 +99,29 @@
 #define color16M_purple  color16M_red|color16M_blue
 
 /* LCD color */
-#define White          0xFFFF
-#define Black          0x0000
-#define Grey           0xF7DE
-#define Blue           0x001F
-#define Blue2          0x051F
-#define Red            0xF800
-#define Magenta        0xF81F
-#define Green          0x07E0
-#define Cyan           0x7FFF
-#define Yellow         0xFFE0
+#define WHITE           0xFFFF
+#define BLACK           0x0000  
+#define BLUE            0x001F  
+#define BRED            0xF81F
+#define GRED            0xFFE0
+#define GBLUE           0x07FF
+#define RED             0xF800
+#define MAGENTA         0xF81F
+#define GREEN           0x07E0
+#define CYAN            0x7FFF
+#define YELLOW          0xFFE0
+#define BROWN           0xBC40    
+#define BRRED           0xFC07      
+#define GRAY            0x8430      
+        
+#define DARKBLUE        0x01CF
+#define LIGHTBLUE       0x7D7C
+#define GRAYBLUE        0x5458
+#define LIGHTGREEN      0x841F 
+#define LGRAY           0xC618
+#define LGRAYBLUE       0xA651
+#define LBBLUE          0x2B12
+
 
 #define Line0          0
 #define Line1          24
@@ -474,7 +487,7 @@ void LT768_Print_Internal_Font_String(uint16_t x,
     uint16_t y,
     uint32_t FontColor,
     uint32_t BackGroundColor,
-    char *c);
+    uint8_t *c);
 
 /* nor flash use outside font */
 /* 16*16 24*24 32*32 */

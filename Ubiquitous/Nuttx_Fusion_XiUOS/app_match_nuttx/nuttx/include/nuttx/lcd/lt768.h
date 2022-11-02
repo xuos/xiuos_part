@@ -21,6 +21,34 @@
 #ifndef __LT768_H_
 #define __LT768_H_
 
+typedef struct 
+{
+    uint16_t x_pos;
+    uint16_t y_pos;
+    uint16_t width;
+    uint16_t height;
+    uint8_t  font_size;
+    uint8_t *addr;
+    uint16_t font_color;
+    uint16_t back_color;
+}LcdStringParam;
+
+typedef struct 
+{
+    uint16_t x_startpos;
+    uint16_t x_endpos;
+    uint16_t y_startpos;
+    uint16_t y_endpos;
+    void* pixel_color;
+}LcdPixelParam;
+
+typedef struct 
+{
+    char type; // 0:write string;1:write dot
+    LcdPixelParam pixel_info;
+    LcdStringParam string_info;
+}LcdWriteParam;
+
 #define cSetb0    0x01
 #define cSetb1    0x02
 #define cSetb2    0x04
@@ -691,7 +719,7 @@ uint8_t Read_Key_Strobe_Data_0(void);
 uint8_t Read_Key_Strobe_Data_1(void);
 uint8_t Read_Key_Strobe_Data_2(void);
 
-void Show_String(char *str);
+void Show_String(uint8_t *str);
 void Show_picture(uint32_t numbers, const uint16_t *data);
 
 void PWM0_ON(void);    //PWM0

@@ -1388,7 +1388,7 @@ void LT768_Print_Internal_Font_String
     , uint16_t y // font start y
     , uint32_t FontColor // font color
     , uint32_t BackGroundColor // font background color(when font background is transparent, it is invalid)
-    , char *c // data start address
+    , uint8_t *c // data start address
 )
 {
     Text_Mode();

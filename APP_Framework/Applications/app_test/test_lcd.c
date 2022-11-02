@@ -48,19 +48,19 @@ void LcdDemo(void)
         x2 = LCD_XSIZE_TFT - 50;
         y2 = LCD_YSIZE_TFT - 50;
         syslog(LOG_NOTICE, "Disp_demo %d (%d,%d - %d,%d)\n", i, x1, y1, x2, y2);
-        LT768_DrawSquare_Fill(x1, y1, x2, y2, Red);
+        LT768_DrawSquare_Fill(x1, y1, x2, y2, RED);
         up_mdelay(2000);
         x1 += 20;
         y1 += 20;
         x2 -= 20;
         y2 -= 20;
-        LT768_DrawSquare_Fill(x1, y1, x2, y2, Green);
+        LT768_DrawSquare_Fill(x1, y1, x2, y2, GREEN);
         up_mdelay(2000);
         x1 += 20;
         y1 += 20;
         x2 -= 20;
         y2 -= 20;
-        LT768_DrawSquare_Fill(x1, y1, x2, y2, Blue);
+        LT768_DrawSquare_Fill(x1, y1, x2, y2, BLUE);
         up_mdelay(2000);
     }
 }
