@@ -318,7 +318,7 @@ void SX1276LoRaSetOpMode( uint8_t opMode )
 			antennaSwitchTxOnPrev = antennaSwitchTxOn;	// Antenna switch control
 			RXTX( antennaSwitchTxOn );                                
 		}
-		SX1276LR->RegOpMode = ( SX1276LR->RegOpMode & RFLR_OPMODE_MASK ) | opMode;
+		SX1276LR->RegOpMode = ( SX1276LR->RegOpMode & RFLR_OPMODE_MASK ) | opMode | RFLR_OPMODE_FREQMODE_ACCESS_LF;
 		
 		SX1276Write( REG_LR_OPMODE, SX1276LR->RegOpMode );        
 	}
@@ -416,160 +416,108 @@ void SX1276LoRaSetRFState( uint8_t state )
 uint32_t SX1276LoRaProcess( void )
 {
     uint32_t result = RF_BUSY;
-    uint8_t regValue=0;
+    uint8_t regValue = 0;
+
     switch( RFLRState )
     {
 		case RFLR_STATE_IDLE:                                                 
-             break;
+            break;
         case RFLR_STATE_RX_INIT:                                               
-			 SX1276LoRaSetOpMode(RFLR_OPMODE_STANDBY);                         
-		     
-		     SX1276LR->RegIrqFlagsMask = RFLR_IRQFLAGS_RXTIMEOUT          |    
-									   
-									     RFLR_IRQFLAGS_PAYLOADCRCERROR    |    
-									     RFLR_IRQFLAGS_VALIDHEADER        |
-									     RFLR_IRQFLAGS_TXDONE             |
-									     RFLR_IRQFLAGS_CADDONE            |
-                                         RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL |    
-									     RFLR_IRQFLAGS_CADDETECTED;
-		     SX1276Write( REG_LR_IRQFLAGSMASK, SX1276LR->RegIrqFlagsMask );    
+			SX1276LoRaSetOpMode(RFLR_OPMODE_STANDBY);                         
+		    SX1276LR->RegIrqFlagsMask = RFLR_IRQFLAGS_RXTIMEOUT          |  
+										//RFLR_IRQFLAGS_RXDONE             |  
+									    RFLR_IRQFLAGS_PAYLOADCRCERROR    |    
+									    RFLR_IRQFLAGS_VALIDHEADER        |
+									    RFLR_IRQFLAGS_TXDONE             |
+									    RFLR_IRQFLAGS_CADDONE            |
+                                        RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL |    
+									    RFLR_IRQFLAGS_CADDETECTED;
+		    SX1276Write( REG_LR_IRQFLAGSMASK, SX1276LR->RegIrqFlagsMask );    
 
-		     if(LoRaSettings.FreqHopOn == true )                               
-		     {
-		         SX1276LR->RegHopPeriod = LoRaSettings.HopPeriod;              
+		    if(LoRaSettings.FreqHopOn == true )                               
+		    {
+		        SX1276LR->RegHopPeriod = LoRaSettings.HopPeriod;              
 		       
-                 SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );    
-			     SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
-		     }
-		     else    
-		     { 
-                 SX1276LR->RegHopPeriod = 255;
-		     } 
+                SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );    
+			    SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
+		    }
+		    else    
+		    { 
+                SX1276LR->RegHopPeriod = 255;
+		    } 
 		     
-		     SX1276Write( REG_LR_HOPPERIOD, SX1276LR->RegHopPeriod );  
+		    SX1276Write( REG_LR_HOPPERIOD, SX1276LR->RegHopPeriod );  
 			
-		     
-                                    // RxDone     
-		     SX1276LR->RegDioMapping1 = RFLR_DIOMAPPING1_DIO0_00 | RFLR_DIOMAPPING1_DIO1_00 | RFLR_DIOMAPPING1_DIO2_00 | RFLR_DIOMAPPING1_DIO3_00;
-                                    // CadDetected   
-		     SX1276LR->RegDioMapping2 = RFLR_DIOMAPPING2_DIO4_10 | RFLR_DIOMAPPING2_DIO5_00;
-		
-		     SX1276WriteBuffer( REG_LR_DIOMAPPING1, &SX1276LR->RegDioMapping1, 2 );
-			
-		     if( LoRaSettings.RxSingleOn == true )        // Rx single mode                       
-		     {
-			     SX1276LoRaSetOpMode( RFLR_OPMODE_RECEIVER_SINGLE );
-		     }
-	         else                        // Rx continuous mode                                        
-		     {
-			     SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoRxBaseAddr;
+		    if( LoRaSettings.RxSingleOn == true )        // Rx single mode                       
+		    {
+			    SX1276LoRaSetOpMode( RFLR_OPMODE_RECEIVER_SINGLE );
+		    }
+	        else                        // Rx continuous mode                                        
+		    {
+			    SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoRxBaseAddr;
 			     
-			     SX1276Write( REG_LR_FIFOADDRPTR, SX1276LR->RegFifoAddrPtr );    
-			     SX1276LoRaSetOpMode( RFLR_OPMODE_RECEIVER );
-				 
-		     }   
-		     memset( RFBuffer, 0, ( size_t )RF_BUFFER_SIZE );                    
-             Rx_Time_Start=TickCounter;
-		     PacketTimeout = LoRaSettings.RxPacketTimeout;                       
-		     RxTimeoutTimer = GET_TICK_COUNT( );
-		     RFLRState = RFLR_STATE_RX_RUNNING;
-		     break;
+			    SX1276Write( REG_LR_FIFOADDRPTR, SX1276LR->RegFifoAddrPtr );    
+			    SX1276LoRaSetOpMode( RFLR_OPMODE_RECEIVER ); 
+		    }   
+		    memset( RFBuffer, 0, ( size_t )RF_BUFFER_SIZE );                    
+            Rx_Time_Start=TickCounter;
+		    PacketTimeout = LoRaSettings.RxPacketTimeout;                       
+		    RxTimeoutTimer = GET_TICK_COUNT( );
+		    RFLRState = RFLR_STATE_RX_RUNNING;
+		    break;
 		case RFLR_STATE_RX_RUNNING:                                              
-			 SX1276Read(0x12, &regValue);                                         
-             //if( DIO0 == 1 )         // RxDone
-			 if(regValue & (1<<6))                                               
-             {
-				 
-		         RxTimeoutTimer = GET_TICK_COUNT( );
-                 if( LoRaSettings.FreqHopOn == true )                             
-                 { 
-				     SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );
-					 SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
-				 }
-				 // Clear Irq
-				 SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_RXDONE  );           
-				 RFLRState = RFLR_STATE_RX_DONE;
-			  }
-			  //if( DIO2 == 1 )         // FHSS Changed Channel
-			  if(regValue & (1<<1))                                               
-			  {
-			      RxTimeoutTimer = GET_TICK_COUNT( );
-			      if( LoRaSettings.FreqHopOn == true )
-				  {
-					  SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );
-					  SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
-				  }
-					// Clear Irq
-				  SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL ); 
-				  //RxGain = SX1276LoRaReadRxGain( );
-			  }
-			  if( LoRaSettings.RxSingleOn == true )    // Rx single mode                             
-			  {
-			     if( ( GET_TICK_COUNT( ) - RxTimeoutTimer ) > PacketTimeout )       
-				 {
-				      RFLRState = RFLR_STATE_RX_TIMEOUT;                            
-				 }
-			 }
-             break;
-		case RFLR_STATE_RX_DONE:                                                    
-			                                                                        
-			 																		
-		     SX1276Read( REG_LR_IRQFLAGS, &SX1276LR->RegIrqFlags );
-			 if( ( SX1276LR->RegIrqFlags & RFLR_IRQFLAGS_PAYLOADCRCERROR ) == RFLR_IRQFLAGS_PAYLOADCRCERROR )   
-			 {      
-				 // Clear Irq
-				 SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_PAYLOADCRCERROR );     
-				 if( LoRaSettings.RxSingleOn == true ) // Rx single mode                             
-				 {
-					RFLRState = RFLR_STATE_RX_INIT;                                
-				 }
-				 else
-				 { 
-					RFLRState = RFLR_STATE_RX_RUNNING;
-				 }
-				 break;
-		     }
-		     
-/*			 {
-				 uint8_t rxSnrEstimate;
-				 
-				 SX1276Read( REG_LR_PKTSNRVALUE, &rxSnrEstimate );                     
-				 if( rxSnrEstimate & 0x80 )  
-				 {
-
-					 RxPacketSnrEstimate = ( ( ~rxSnrEstimate + 1 ) & 0xFF ) >> 2;     
-					 RxPacketSnrEstimate = -RxPacketSnrEstimate;
-				 }
-				 else
-				 {
-					 RxPacketSnrEstimate = ( rxSnrEstimate & 0xFF ) >> 2;
-				 }
-			}        
-			if( LoRaSettings.RFFrequency < 860000000 ) 
-			{    
-				if( RxPacketSnrEstimate < 0 )          
-				{
-					
-					RxPacketRssiValue = NOISE_ABSOLUTE_ZERO + 10.0 * SignalBwLog[LoRaSettings.SignalBw] + NOISE_FIGURE_LF + ( double )RxPacketSnrEstimate;
+			SX1276Read(0x12, &regValue);                                         
+            // RxDone
+			if(regValue & (1<<6))                                               
+            {
+		        RxTimeoutTimer = GET_TICK_COUNT( );
+                if( LoRaSettings.FreqHopOn == true )                             
+                { 
+				    SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );
+					SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
 				}
-				else
-				{    
-					SX1276Read( REG_LR_PKTRSSIVALUE, &SX1276LR->RegPktRssiValue );
-					RxPacketRssiValue = RssiOffsetLF[LoRaSettings.SignalBw] + ( double )SX1276LR->RegPktRssiValue;
+				// Clear Irq
+				SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_RXDONE  );           
+				RFLRState = RFLR_STATE_RX_DONE;
+			}
+			// FHSS Changed Channel
+			if(regValue & (1<<1))                                               
+			{
+			    RxTimeoutTimer = GET_TICK_COUNT( );
+			    if( LoRaSettings.FreqHopOn == true )
+				{
+					SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );
+					SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
+				}
+				// Clear Irq
+				SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL ); 
+				//RxGain = SX1276LoRaReadRxGain( );
+			}
+			if( LoRaSettings.RxSingleOn == true )    // Rx single mode                             
+			{
+			    if( ( GET_TICK_COUNT( ) - RxTimeoutTimer ) > PacketTimeout )       
+				{
+				    RFLRState = RFLR_STATE_RX_TIMEOUT;                            
 				}
 			}
-			else                                        
-			{    
-				if( RxPacketSnrEstimate < 0 )
+            break;
+		case RFLR_STATE_RX_DONE:                                                    	                                                                    																	
+		    SX1276Read( REG_LR_IRQFLAGS, &SX1276LR->RegIrqFlags );
+			if( ( SX1276LR->RegIrqFlags & RFLR_IRQFLAGS_PAYLOADCRCERROR ) == RFLR_IRQFLAGS_PAYLOADCRCERROR )   
+			{      
+				// Clear Irq
+				SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_PAYLOADCRCERROR );     
+				if( LoRaSettings.RxSingleOn == true ) // Rx single mode                             
 				{
-					RxPacketRssiValue = NOISE_ABSOLUTE_ZERO + 10.0 * SignalBwLog[LoRaSettings.SignalBw] + NOISE_FIGURE_HF + ( double )RxPacketSnrEstimate;
+					RFLRState = RFLR_STATE_RX_INIT;                                
 				}
 				else
-				{    
-					SX1276Read( REG_LR_PKTRSSIVALUE, &SX1276LR->RegPktRssiValue );
-					RxPacketRssiValue = RssiOffsetHF[LoRaSettings.SignalBw] + ( double )SX1276LR->RegPktRssiValue;
+				{ 
+					RFLRState = RFLR_STATE_RX_RUNNING;
 				}
-			}*/
+				break;
+		    }
+		     
 			if( LoRaSettings.RxSingleOn == true )     // Rx single mode                                
 			{
 			    SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoRxBaseAddr;       
@@ -581,160 +529,148 @@ uint32_t SX1276LoRaProcess( void )
 				}
 				else	
 				{
-					
 				    SX1276Read( REG_LR_NBRXBYTES, &SX1276LR->RegNbRxBytes );
 					RxPacketSize = SX1276LR->RegNbRxBytes;
 				    SX1276ReadFifo( RFBuffer, SX1276LR->RegNbRxBytes );
-			     }
-			 }
-			 else     // Rx continuous mode                                                                
-			 {
-			     
-				 SX1276Read( REG_LR_FIFORXCURRENTADDR, &SX1276LR->RegFifoRxCurrentAddr );
-				 if( LoRaSettings.ImplicitHeaderOn == true )
-				 {
-					 RxPacketSize = SX1276LR->RegPayloadLength;
-					 SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoRxCurrentAddr;
-					 SX1276Write( REG_LR_FIFOADDRPTR, SX1276LR->RegFifoAddrPtr );
-				     SX1276ReadFifo( RFBuffer, SX1276LR->RegPayloadLength );
-				 }
-				 else
-				 {
-					 SX1276Read( REG_LR_NBRXBYTES, &SX1276LR->RegNbRxBytes );
-					 RxPacketSize = SX1276LR->RegNbRxBytes;
-					 SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoRxCurrentAddr;
-					 SX1276Write( REG_LR_FIFOADDRPTR, SX1276LR->RegFifoAddrPtr );
-					 SX1276ReadFifo( RFBuffer, SX1276LR->RegNbRxBytes );
-				 }
-			 }  
-			 if( LoRaSettings.RxSingleOn == true )   // Rx single mode                                  
-			 { 
-				 RFLRState = RFLR_STATE_RX_INIT;
-			 }
-			 else  // Rx continuous mode                                                                    
-			 { 
-				 RFLRState = RFLR_STATE_RX_RUNNING;
-			 }
-			 Rx_Time_End=TickCounter;
-			 result = RF_RX_DONE;
-			 break;
+			    }
+			}
+			else     // Rx continuous mode                                                                
+			{
+				SX1276Read( REG_LR_FIFORXCURRENTADDR, &SX1276LR->RegFifoRxCurrentAddr );
+				if( LoRaSettings.ImplicitHeaderOn == true )
+				{
+					RxPacketSize = SX1276LR->RegPayloadLength;
+					SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoRxCurrentAddr;
+					SX1276Write( REG_LR_FIFOADDRPTR, SX1276LR->RegFifoAddrPtr );
+				    SX1276ReadFifo( RFBuffer, SX1276LR->RegPayloadLength );
+				}
+				else
+				{
+					SX1276Read( REG_LR_NBRXBYTES, &SX1276LR->RegNbRxBytes );
+					RxPacketSize = SX1276LR->RegNbRxBytes;
+					SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoRxCurrentAddr;
+					SX1276Write( REG_LR_FIFOADDRPTR, SX1276LR->RegFifoAddrPtr );
+					SX1276ReadFifo( RFBuffer, SX1276LR->RegNbRxBytes );
+				}
+			}  
+			if( LoRaSettings.RxSingleOn == true )   // Rx single mode                                  
+			{ 
+				RFLRState = RFLR_STATE_RX_INIT;
+			}
+			else  // Rx continuous mode                                                                    
+			{ 
+				RFLRState = RFLR_STATE_RX_RUNNING;
+			}
+			Rx_Time_End=TickCounter;
+			result = RF_RX_DONE;
+			break;
 		case RFLR_STATE_RX_TIMEOUT:                                                   
-		     RFLRState = RFLR_STATE_RX_INIT;                                          
-		     result = RF_RX_TIMEOUT;
-		     break;
-		case RFLR_STATE_TX_INIT:                                                      
-																					  
-		     Tx_Time_Start=TickCounter;
-			 SX1276LoRaSetOpMode( RFLR_OPMODE_STANDBY );                              
-			 if( LoRaSettings.FreqHopOn == true )                                     
-			 {
-				 SX1276LR->RegIrqFlagsMask = RFLR_IRQFLAGS_RXTIMEOUT          |
-											 RFLR_IRQFLAGS_RXDONE             |
-											 RFLR_IRQFLAGS_PAYLOADCRCERROR    |
-											 RFLR_IRQFLAGS_VALIDHEADER        |
-										   //RFLR_IRQFLAGS_TXDONE             |
-											 RFLR_IRQFLAGS_CADDONE            |
-										   //RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL |
-											 RFLR_IRQFLAGS_CADDETECTED;
-				 SX1276LR->RegHopPeriod = LoRaSettings.HopPeriod;
-				 SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );
-				 SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
+		    RFLRState = RFLR_STATE_RX_INIT;                                          
+		    result = RF_RX_TIMEOUT;
+		    break;
+		case RFLR_STATE_TX_INIT:                                                      																	  
+		    Tx_Time_Start = TickCounter;
+			                            
+			// Initializes the payload size
+			SX1276LR->RegPayloadLength = TxPacketSize;                              
+			SX1276Write( REG_LR_PAYLOADLENGTH, SX1276LR->RegPayloadLength );
+			
+			SX1276LR->RegFifoTxBaseAddr = 0x00;  // Full buffer used for Tx                                   
+			SX1276Write( REG_LR_FIFOTXBASEADDR, SX1276LR->RegFifoTxBaseAddr );
+
+			SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoTxBaseAddr;
+			SX1276Write( REG_LR_FIFOADDRPTR, SX1276LR->RegFifoAddrPtr );
+
+			SX1276LoRaSetOpMode( RFLR_OPMODE_STANDBY );   
+
+			// Write payload buffer to LORA modem
+			SX1276WriteFifo( TFBuffer, SX1276LR->RegPayloadLength );  
+
+			if( LoRaSettings.FreqHopOn == true )                                     
+			{
+				SX1276LR->RegIrqFlagsMask = RFLR_IRQFLAGS_RXTIMEOUT          |
+											RFLR_IRQFLAGS_RXDONE             |
+											RFLR_IRQFLAGS_PAYLOADCRCERROR    |
+											RFLR_IRQFLAGS_VALIDHEADER        |
+										    //RFLR_IRQFLAGS_TXDONE             |
+											RFLR_IRQFLAGS_CADDONE            |
+										    RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL |
+											RFLR_IRQFLAGS_CADDETECTED;
+				SX1276LR->RegHopPeriod = LoRaSettings.HopPeriod;
+				SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );
+				SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
 			 }
 			 else
 			 {
-				 
-				 SX1276LR->RegIrqFlagsMask = RFLR_IRQFLAGS_RXTIMEOUT          |
-									         RFLR_IRQFLAGS_RXDONE             |
-											 RFLR_IRQFLAGS_PAYLOADCRCERROR    |
-											 RFLR_IRQFLAGS_VALIDHEADER        |
-										   //RFLR_IRQFLAGS_TXDONE             |
-											 RFLR_IRQFLAGS_CADDONE            |
-											 RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL |
-											 RFLR_IRQFLAGS_CADDETECTED;             
-				 SX1276LR->RegHopPeriod = 0;
-			 }
-			 SX1276Write( REG_LR_HOPPERIOD, SX1276LR->RegHopPeriod );                
-			 SX1276Write( REG_LR_IRQFLAGSMASK, SX1276LR->RegIrqFlagsMask );      
-			 // Initializes the payload size
-			 SX1276LR->RegPayloadLength = TxPacketSize;                              
-			 SX1276Write( REG_LR_PAYLOADLENGTH, SX1276LR->RegPayloadLength );
-			
-			 SX1276LR->RegFifoTxBaseAddr = 0x00;  // Full buffer used for Tx                                   
-			 SX1276Write( REG_LR_FIFOTXBASEADDR, SX1276LR->RegFifoTxBaseAddr );
+				SX1276LR->RegIrqFlagsMask = RFLR_IRQFLAGS_RXTIMEOUT          |
+									        RFLR_IRQFLAGS_RXDONE             |
+											RFLR_IRQFLAGS_PAYLOADCRCERROR    |
+											RFLR_IRQFLAGS_VALIDHEADER        |
+										   	//RFLR_IRQFLAGS_TXDONE             |
+											RFLR_IRQFLAGS_CADDONE            |
+											RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL |
+											RFLR_IRQFLAGS_CADDETECTED;             
+				SX1276LR->RegHopPeriod = 0;
+			}
+			SX1276Write( REG_LR_HOPPERIOD, SX1276LR->RegHopPeriod );                
+			SX1276Write( REG_LR_IRQFLAGSMASK, SX1276LR->RegIrqFlagsMask );  
 
-			 SX1276LR->RegFifoAddrPtr = SX1276LR->RegFifoTxBaseAddr;
-			 SX1276Write( REG_LR_FIFOADDRPTR, SX1276LR->RegFifoAddrPtr );
-			  // Write payload buffer to LORA modem
-			 SX1276WriteFifo( TFBuffer, SX1276LR->RegPayloadLength );                
-			 								// TxDone               RxTimeout                   FhssChangeChannel          ValidHeader         
-			 SX1276LR->RegDioMapping1 = RFLR_DIOMAPPING1_DIO0_01 | RFLR_DIOMAPPING1_DIO1_00 | RFLR_DIOMAPPING1_DIO2_00 | RFLR_DIOMAPPING1_DIO3_01;
-											// PllLock              Mode Ready
-			 SX1276LR->RegDioMapping2 = RFLR_DIOMAPPING2_DIO4_01 | RFLR_DIOMAPPING2_DIO5_00;
-			
-			 SX1276WriteBuffer( REG_LR_DIOMAPPING1, &SX1276LR->RegDioMapping1, 2 );
+			SX1276Write( REG_LR_DIOMAPPING1, ( regValue & RFLR_DIOMAPPING1_DIO0_MASK ) | RFLR_DIOMAPPING1_DIO0_01 );//DIO0设置为TXdone中断              
 
-			 SX1276LoRaSetOpMode( RFLR_OPMODE_TRANSMITTER );
+			SX1276LoRaSetOpMode( RFLR_OPMODE_TRANSMITTER );
 
-			 RFLRState = RFLR_STATE_TX_RUNNING;
-			 break;
+			RFLRState = RFLR_STATE_TX_RUNNING;
+			break;
 		case RFLR_STATE_TX_RUNNING:                                            
-			 SX1276Read(0x12,&regValue);
-		     //if( DIO0 == 1 )    // TxDone
-			 if(regValue & (1<<3))
-			 {
-		         // Clear Irq
-				 SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_TXDONE );          
-				 RFLRState = RFLR_STATE_TX_DONE;   
-			 }	
-			 //if( DIO2 == 1 )   // FHSS Changed Channel
-			 if(regValue & (1<<3))
-			 {
-				 if( LoRaSettings.FreqHopOn == true )
-				 {
-					 SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );
-					 SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
-				 }		
-				 // Clear Irq		
-				 SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL ); 
-			 }
-			 break;
+			SX1276Read(0x12, &regValue);
+			if(regValue & (1<<3))
+			{
+		        // Clear Irq
+				SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_TXDONE );          
+				RFLRState = RFLR_STATE_TX_DONE;   
+			}	
+			// FHSS Changed Channel
+			if(regValue & (1<<3))
+			{
+				if( LoRaSettings.FreqHopOn == true )
+				{
+					SX1276Read( REG_LR_HOPCHANNEL, &SX1276LR->RegHopChannel );
+					SX1276LoRaSetRFFrequency( HoppingFrequencies[SX1276LR->RegHopChannel & RFLR_HOPCHANNEL_CHANNEL_MASK] );
+				}		
+				// Clear Irq		
+				SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL ); 
+			}
+			break;
 		case RFLR_STATE_TX_DONE:                                                
-             Tx_Time_End=TickCounter;			
-			 SX1276LoRaSetOpMode( RFLR_OPMODE_STANDBY );                         
-			 RFLRState = RFLR_STATE_IDLE;
-			 result = RF_TX_DONE;
-			 break;
+            Tx_Time_End=TickCounter;			
+			SX1276LoRaSetOpMode( RFLR_OPMODE_STANDBY );                         
+			RFLRState = RFLR_STATE_IDLE;
+			result = RF_TX_DONE;
+			break;
 		case RFLR_STATE_CAD_INIT:
 		// optimize the power consumption by switching off the transmitter as soon as the packet has been sent                                               
-			 SX1276LoRaSetOpMode( RFLR_OPMODE_STANDBY );
-			 SX1276LR->RegIrqFlagsMask = RFLR_IRQFLAGS_RXTIMEOUT           |
-										 RFLR_IRQFLAGS_RXDONE              |
-										 RFLR_IRQFLAGS_PAYLOADCRCERROR     |
-										 RFLR_IRQFLAGS_VALIDHEADER         |
-										 RFLR_IRQFLAGS_TXDONE              |
-									     //RFLR_IRQFLAGS_CADDONE             |
-										 RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL;
-									     //RFLR_IRQFLAGS_CADDETECTED;
-			 SX1276Write( REG_LR_IRQFLAGSMASK, SX1276LR->RegIrqFlagsMask );
+			SX1276LoRaSetOpMode( RFLR_OPMODE_STANDBY );
+			SX1276LR->RegIrqFlagsMask = RFLR_IRQFLAGS_RXTIMEOUT           |
+										RFLR_IRQFLAGS_RXDONE              |
+										RFLR_IRQFLAGS_PAYLOADCRCERROR     |
+										RFLR_IRQFLAGS_VALIDHEADER         |
+										RFLR_IRQFLAGS_TXDONE              |
+									    //RFLR_IRQFLAGS_CADDONE             |
+										RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL;
+									    //RFLR_IRQFLAGS_CADDETECTED;
+			SX1276Write( REG_LR_IRQFLAGSMASK, SX1276LR->RegIrqFlagsMask );
 
-										 // RxDone                   RxTimeout                   FhssChangeChannel           CadDone
-			 SX1276LR->RegDioMapping1 = RFLR_DIOMAPPING1_DIO0_00 | RFLR_DIOMAPPING1_DIO1_00 | RFLR_DIOMAPPING1_DIO2_00 | RFLR_DIOMAPPING1_DIO3_00;
-										 // CAD Detected              ModeReady
-			 SX1276LR->RegDioMapping2 = RFLR_DIOMAPPING2_DIO4_00 | RFLR_DIOMAPPING2_DIO5_00;
-			 SX1276WriteBuffer( REG_LR_DIOMAPPING1, &SX1276LR->RegDioMapping1, 2 );
+			SX1276LoRaSetOpMode( RFLR_OPMODE_CAD );
+			RFLRState = RFLR_STATE_CAD_RUNNING;
 
-
-			 SX1276LoRaSetOpMode( RFLR_OPMODE_CAD );
-			 RFLRState = RFLR_STATE_CAD_RUNNING;
-
-			 break;
+			break;
 		case RFLR_STATE_CAD_RUNNING:
-			 SX1276Read(0x12,&regValue);                                         
-			 int cad_done = regValue & (1<<2);
-			 int cad_detected = regValue & (1<<0);
+			SX1276Read(0x12,&regValue);                                         
+			int cad_done = regValue & (1<<2);
+			int cad_detected = regValue & (1<<0);
 
-			 if( cad_done  ) //CAD Done interrupt
-			 { 
+			if( cad_done  ) //CAD Done interrupt
+			{ 
 				SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_CADDONE  );
 				if( cad_detected  ) // CAD Detected interrupt
 				{
@@ -749,10 +685,10 @@ uint32_t SX1276LoRaProcess( void )
 					RFLRState = RFLR_STATE_IDLE;
 					result = RF_CHANNEL_EMPTY;
 				}
-			 }   
-			 break;			
+			}   
+			break;			
         default:
-             break;
+            break;
     } 
     return result;
 }

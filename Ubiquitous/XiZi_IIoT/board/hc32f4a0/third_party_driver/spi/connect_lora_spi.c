@@ -166,7 +166,7 @@ uint8_t Sx1276SpiCheck(void)
 
 	settings.SpreadingFactor = SX1276LoRaGetSpreadingFactor();
 	KPrintf("SpreadingFactor is %d\n",settings.SpreadingFactor);
-    
+
     /*SPI confirm*/
     SX1276Write(REG_LR_HOPPERIOD, 0x91);  
     SX1276Read(REG_LR_HOPPERIOD, &test);
@@ -430,12 +430,18 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
 
 static void LoraReceive(void)
 {
+    uint32 read_length = 0;
     struct BusBlockReadParam read_param;
     memset(&read_param, 0, sizeof(struct BusBlockReadParam));
 
     read_param.buffer = malloc(SPI_LORA_BUFFER_SIZE);
 
-    SpiLoraRead(dev, &read_param);
+    read_length = SpiLoraRead(dev, &read_param);
+
+    KPrintf("LoraReceive length %d\n", read_length);
+    for (int i = 0; i < read_length; i ++) {
+        KPrintf("i %d data 0x%x\n", i, ((uint8 *)read_param.buffer)[i]);
+    }
 
     free(read_param.buffer);
 }
@@ -452,6 +458,8 @@ static void LoraSend(int argc, char *argv[])
         strncpy(Msg, argv[1], SPI_LORA_BUFFER_SIZE);
         write_param.buffer = Msg;
         write_param.size = strlen(Msg);
+
+        KPrintf("LoraSend data %s length %d\n", Msg, strlen(Msg));
 
         SpiLoraWrite(dev, &write_param);
     }

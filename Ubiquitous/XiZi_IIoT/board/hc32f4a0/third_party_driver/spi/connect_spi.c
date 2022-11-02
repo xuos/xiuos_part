@@ -312,18 +312,17 @@ static uint32 SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStand
         }
 
         if (spi_datacfg->length) {
-            uint32_t *rx_buff = x_malloc(spi_datacfg->length * 4);
+            uint8_t *rx_buff = x_malloc(spi_datacfg->length);
             if ((spi_datacfg->rx_buff) && (rx_buff)) {
-                memset(rx_buff, 0xFF, spi_datacfg->length * 4);
+                memset(rx_buff, 0xFF, spi_datacfg->length);
 
                 HwSpiEnable(spi);
                 spi_read_status = SPI_Receive(spi, rx_buff, spi_datacfg->length, 1000);
 
                 while (RESET != SPI_GetStatus(spi, SPI_FLAG_IDLE));
-
                 if (LL_OK == spi_read_status) {
                     for (i = 0; i < spi_datacfg->length; i++) {           
-                        ((uint8_t *)spi_datacfg->rx_buff)[i] = (uint8_t)rx_buff[i];
+                        ((uint8_t *)spi_datacfg->rx_buff)[i] = rx_buff[i];
                     }
                 }
             }
