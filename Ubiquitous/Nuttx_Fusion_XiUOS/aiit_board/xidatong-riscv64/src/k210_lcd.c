@@ -55,7 +55,7 @@ static ssize_t lcd_write(FAR struct file *filep, FAR const char *buffer, size_t 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* Ch438 POSIX interface */
+/* LCD POSIX interface */
 static const struct file_operations g_lcdfops =
 {
   lcd_open,
@@ -208,7 +208,7 @@ void lcd_drv_init(void)
     Canvas_Image_Start_address(LCD_START_ADDR);
 
     //fill blue background
-    LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, BLUE);
+    LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, WHITE);
 }
 
 /****************************************************************************
@@ -257,7 +257,8 @@ static ssize_t lcd_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
  ****************************************************************************/
 static ssize_t lcd_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
 {
-    if (buffer  == NULL) {
+    if (buffer  == NULL) 
+    {
          return  -ERROR;
      }
     LcdWriteParam * show = (LcdWriteParam *)buffer;

@@ -68,11 +68,11 @@ int cmd_w5500(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_Touch
  ****************************************************************************/
 #if defined(CONFIG_BSP_USING_TOUCH) && !defined(CONFIG_NSH_DISABLE_TOUCH)
-extern void GT911_test(void);
+extern void TestTouch(void);
 int cmd_Touch(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
-    GT911_test();
+    TestTouch();
     return OK;
 }
 #endif

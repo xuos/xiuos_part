@@ -53,6 +53,14 @@
 #endif
 #endif
 
+#define PRIV_LCD_DEV "/dev/lcd_dev"
+#define MY_DISP_HOR_RES 480
+#define MY_DISP_VER_RES 272
+
+#define PRIV_TOUCH_DEV "/dev/touch_dev"
+#define MY_INDEV_X 480
+#define MY_INDEV_Y 272
+
 typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
@@ -126,6 +134,23 @@ extern "C" {
 
 #define EOK 0
 #define x_err_t int
+
+typedef union {
+    struct {
+        uint16_t blue  : 5;
+        uint16_t green : 6;
+        uint16_t red   : 5;
+    } ch;
+    uint16_t full;
+} lv_color16_t;
+typedef lv_color16_t lv_color_t;
+
+typedef struct
+{
+    uint16_t x;
+    uint16_t y;
+    uint16_t press;
+}TouchDataParam;
 
 struct PinDevIrq
 {
