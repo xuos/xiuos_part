@@ -1,26 +1,22 @@
-/****************************************************************************
- * apps/examples/fb/fb_main.c
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
- ****************************************************************************/
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+/**
+* @file:    test_lcd.c
+* @brief:   a application of dac function
+* @version: 2.0
+* @author:  AIIT XUOS Lab
+* @date:    2022/1/11
+*/
 
 #include <transform.h>
 
@@ -29,40 +25,35 @@
 #ifdef CONFIG_K210_LCD
 void LcdDemo(void)
 {
-    int x1 = 50, y1 = 50, x2 = LCD_XSIZE_TFT - 50, y2 = LCD_YSIZE_TFT - 50;
+    int lcd_fd = PrivOpen("/dev/lcd_dev",O_RDWR);
+    LcdWriteParam disp_info;
+    disp_info.type = 1;
+    lv_color_t redcolor = {
+        .ch = {
+            .red   = 0b11111,
+            .green = 0,
+            .blue  = 0
+        }
+    };
+    disp_info.pixel_info.x_startpos =  0;
+    disp_info.pixel_info.x_endpos =  50;
+    disp_info.pixel_info.y_startpos = 0;
+    disp_info.pixel_info.y_endpos = 50;
+    disp_info.pixel_info.pixel_color = &redcolor;
 
-    Main_Image_Start_Address(LCD_START_ADDR);
-    Main_Image_Width(LCD_XSIZE_TFT);
-    Main_Window_Start_XY(0, 0);
-    Canvas_Image_Start_address(LCD_START_ADDR);
-    Canvas_image_width(LCD_XSIZE_TFT);
-    Active_Window_XY(0, 0);
-    Active_Window_WH(LCD_XSIZE_TFT, LCD_YSIZE_TFT);
-    up_mdelay(10);
-    Canvas_Image_Start_address(LCD_START_ADDR);
-
-    for(int i = 0; i < 3; i++)
-    {
-        x1 = 50;
-        y1 = 50;
-        x2 = LCD_XSIZE_TFT - 50;
-        y2 = LCD_YSIZE_TFT - 50;
-        syslog(LOG_NOTICE, "Disp_demo %d (%d,%d - %d,%d)\n", i, x1, y1, x2, y2);
-        LT768_DrawSquare_Fill(x1, y1, x2, y2, RED);
-        up_mdelay(2000);
-        x1 += 20;
-        y1 += 20;
-        x2 -= 20;
-        y2 -= 20;
-        LT768_DrawSquare_Fill(x1, y1, x2, y2, GREEN);
-        up_mdelay(2000);
-        x1 += 20;
-        y1 += 20;
-        x2 -= 20;
-        y2 -= 20;
-        LT768_DrawSquare_Fill(x1, y1, x2, y2, BLUE);
-        up_mdelay(2000);
-    }
+    PrivWrite(lcd_fd, &disp_info, sizeof(LcdWriteParam));
+    
+    disp_info.type = 0;
+    disp_info.string_info.x_pos = 80;
+    disp_info.string_info.y_pos = 80;
+    disp_info.string_info.width = 250;
+    disp_info.string_info.height = 24;
+    disp_info.string_info.font_size = 24;
+    disp_info.string_info.addr = "wecome test lcd";
+    disp_info.string_info.font_color = GREEN;
+    disp_info.string_info.back_color = BLUE;
+    
+    PrivWrite(lcd_fd, &disp_info, sizeof(LcdWriteParam));
 }
 
 #else

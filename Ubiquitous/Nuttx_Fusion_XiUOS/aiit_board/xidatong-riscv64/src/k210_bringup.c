@@ -47,6 +47,10 @@
 #  include "k210_ch438.h"
 #endif
 
+#ifdef CONFIG_BSP_USING_TOUCH
+#  include "k210_touch.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -85,6 +89,10 @@ int k210_bringup(void)
 #ifdef CONFIG_K210_LCD
   k210_sysctl_init();
   board_lcd_initialize();
+#endif
+
+#ifdef CONFIG_BSP_USING_TOUCH
+  board_touch_initialize();
 #endif
 
 #ifdef CONFIG_K210_16550_UART1
