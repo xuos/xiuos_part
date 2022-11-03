@@ -49,9 +49,9 @@ struct UsartHwCfg
 #define FCG_TMR0_CLK                   FCG_Fcg2PeriphClockCmd
 #define FCG_DMA_CLK                    FCG_Fcg0PeriphClockCmd
 
-#define KERNEL_CONSOLE_BUS_NAME        SERIAL_BUS_NAME_6
-#define KERNEL_CONSOLE_DRV_NAME        SERIAL_DRV_NAME_6
-#define KERNEL_CONSOLE_DEVICE_NAME     SERIAL_6_DEVICE_NAME_0
+#define KERNEL_CONSOLE_BUS_NAME        SERIAL_BUS_NAME_3
+#define KERNEL_CONSOLE_DRV_NAME        SERIAL_DRV_NAME_3
+#define KERNEL_CONSOLE_DEVICE_NAME     SERIAL_3_DEVICE_NAME_0
 
 int HwUsartInit(void);
 
