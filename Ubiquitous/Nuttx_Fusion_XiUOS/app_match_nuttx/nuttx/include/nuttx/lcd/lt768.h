@@ -21,6 +21,18 @@
 #ifndef __LT768_H_
 #define __LT768_H_
 
+typedef enum _LcdOperation
+{
+    SHOW_STRING = 0,
+    SHOW_WDOT,
+    SHOW_RGB,
+    SHOW_PIP,
+    SHOW_INTERNAL_FONT,
+    SHOW_OUTSIDE_FONT,
+    SHOW_TRIANGLE,
+    SHOW_PICTURE,
+} LcdOperation;
+
 typedef struct 
 {
     uint16_t x_pos;
@@ -44,7 +56,7 @@ typedef struct
 
 typedef struct 
 {
-    char type; // 0:write string;1:write dot
+    LcdOperation type;
     LcdPixelParam pixel_info;
     LcdStringParam string_info;
 }LcdWriteParam;

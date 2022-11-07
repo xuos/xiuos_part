@@ -27,6 +27,19 @@ void LcdDemo(void)
 {
     int lcd_fd = PrivOpen("/dev/lcd_dev",O_RDWR);
     LcdWriteParam disp_info;
+
+    disp_info.type = 0;
+    disp_info.string_info.x_pos = 80;
+    disp_info.string_info.y_pos = 80;
+    disp_info.string_info.width = 250;
+    disp_info.string_info.height = 24;
+    disp_info.string_info.font_size = 24;
+    disp_info.string_info.addr = "wecome test lcd";
+    disp_info.string_info.font_color = GREEN;
+    disp_info.string_info.back_color = BLUE;
+    PrivWrite(lcd_fd, &disp_info, sizeof(LcdWriteParam));
+    PrivTaskDelay(2000);
+
     disp_info.type = 1;
     lv_color_t redcolor = {
         .ch = {
@@ -40,19 +53,10 @@ void LcdDemo(void)
     disp_info.pixel_info.y_startpos = 0;
     disp_info.pixel_info.y_endpos = 50;
     disp_info.pixel_info.pixel_color = &redcolor;
-
     PrivWrite(lcd_fd, &disp_info, sizeof(LcdWriteParam));
+    PrivTaskDelay(2000);
     
-    disp_info.type = 0;
-    disp_info.string_info.x_pos = 80;
-    disp_info.string_info.y_pos = 80;
-    disp_info.string_info.width = 250;
-    disp_info.string_info.height = 24;
-    disp_info.string_info.font_size = 24;
-    disp_info.string_info.addr = "wecome test lcd";
-    disp_info.string_info.font_color = GREEN;
-    disp_info.string_info.back_color = BLUE;
-    
+    disp_info.type = SHOW_TRIANGLE;
     PrivWrite(lcd_fd, &disp_info, sizeof(LcdWriteParam));
 }
 

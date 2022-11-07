@@ -26,6 +26,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/time.h>
 #include <sys/ioctl.h>
+#include <nuttx/clock.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -44,6 +45,7 @@
 #ifdef CONFIG_USER_TEST_LCD
 #ifdef CONFIG_K210_LCD
 #  include "nuttx/lcd/lt768.h"
+#  include "nuttx/lcd/lt768_learn.h"
 #  include "nuttx/lcd/lt768_lib.h"
 #  include "nuttx/lcd/if_port.h"
 #else
@@ -52,14 +54,6 @@
 #  include <nuttx/video/rgbcolors.h>
 #endif
 #endif
-
-#define PRIV_LCD_DEV "/dev/lcd_dev"
-#define MY_DISP_HOR_RES 480
-#define MY_DISP_VER_RES 272
-
-#define PRIV_TOUCH_DEV "/dev/touch_dev"
-#define MY_INDEV_X 480
-#define MY_INDEV_Y 272
 
 typedef uint8_t uint8;
 typedef uint16_t uint16;

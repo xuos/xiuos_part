@@ -29,6 +29,7 @@
 #include "nuttx/lcd/lt768.h"
 #include "nuttx/lcd/lt768_lib.h"
 #include "nuttx/lcd/if_port.h"
+#include "nuttx/lcd/lt768_learn.h"
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 #include <nuttx/fs/fs.h>
@@ -255,32 +256,75 @@ static ssize_t lcd_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 /****************************************************************************
  * Name: ch438_write
  ****************************************************************************/
-static ssize_t lcd_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+ static ssize_t lcd_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
 {
+    ssize_t ret = buflen;
     if (buffer  == NULL) 
     {
          return  -ERROR;
-     }
+    }
     LcdWriteParam * show = (LcdWriteParam *)buffer;
-    /* output string */
-    if(0 == show->type) 
-    {
-        LT768_Select_Internal_Font_Init(show->string_info.height, 1, 1, 1, 1);
-        LT768_Print_Internal_Font_String(show->string_info.x_pos, show->string_info.y_pos, show->string_info.font_color,show->string_info.back_color,show->string_info.addr);
-        return  buflen;   
-    }
-    /* output dot */
-    else if(1 == show->type)
-    {
-        LT768_DrawSquare_Fill(show->pixel_info.x_startpos,show->pixel_info.y_startpos, show->pixel_info.x_endpos, show->pixel_info.y_endpos, *(uint32_t *)(show->pixel_info.pixel_color));
-        return  buflen;
-    } 
-    else 
-    {
-        return -ERROR;
-    }
-}
 
+    /* output string */
+    switch (show->type)
+    {
+        
+        /* output string */
+        case SHOW_STRING:
+            LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, WHITE);
+            LT768_Select_Internal_Font_Init(show->string_info.height, 1, 1, 1, 1);
+            LT768_Print_Internal_Font_String(show->string_info.x_pos, show->string_info.y_pos, show->string_info.font_color,show->string_info.back_color,show->string_info.addr);
+            break; 
+
+        /* output dot */
+        case SHOW_WDOT:
+            LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, WHITE);
+            LT768_DrawSquare_Fill(show->pixel_info.x_startpos,show->pixel_info.y_startpos, show->pixel_info.x_endpos, show->pixel_info.y_endpos, *(uint32_t *)(show->pixel_info.pixel_color));
+            break;
+
+        /* output rgb */
+        case SHOW_RGB:
+            LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, WHITE);
+            Display_RGB();
+            break;
+
+        /* output pip */
+        case SHOW_PIP:
+            LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, WHITE);
+            Display_PIP();
+            break;
+
+        /* output Internal Font */
+        case SHOW_INTERNAL_FONT:
+            LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, WHITE);
+            Display_Internal_Font();
+            break;
+
+        /* output Outside Font */
+        case SHOW_OUTSIDE_FONT:
+            LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, WHITE);
+            Display_Outside_Font();
+            break;
+
+        /* output Triangle */
+        case SHOW_TRIANGLE:
+            LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, WHITE);
+            Display_Triangle();
+            break;
+
+        /* output picture */
+        case SHOW_PICTURE:
+            LT768_DrawSquare_Fill(0, 0, LCD_XSIZE_TFT, LCD_YSIZE_TFT, WHITE);
+            Display_Picture();
+            break;
+
+        default:
+            ret = -ERROR;
+            break;
+    }
+
+    return ret;
+}
 /****************************************************************************
  * Name: k210_lcd_initialize
  *

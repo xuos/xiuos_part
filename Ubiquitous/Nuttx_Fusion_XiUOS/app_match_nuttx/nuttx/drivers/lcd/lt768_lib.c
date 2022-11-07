@@ -303,7 +303,7 @@ void MPU8_24bpp_Memory_Write
 
 
 
-void MPuint16_t_16bpp_Memory_Write
+void MPU16_16bpp_Memory_Write
 (
     uint16_t x
     , uint16_t y
@@ -332,7 +332,7 @@ void MPuint16_t_16bpp_Memory_Write
     Check_Mem_WR_FIFO_Empty();
 }
 
-void MPuint16_t_24bpp_Mode1_Memory_Write
+void MPU16_24bpp_Mode1_Memory_Write
 (
     uint16_t x
     , uint16_t y
@@ -368,7 +368,7 @@ void MPuint16_t_24bpp_Mode1_Memory_Write
 }
 
 
-void MPuint16_t_24bpp_Mode2_Memory_Write
+void MPU16_24bpp_Mode2_Memory_Write
 (
     uint16_t x
     , uint16_t y
