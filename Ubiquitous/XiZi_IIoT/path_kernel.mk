@@ -402,6 +402,10 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/include \
 	-I$(BSP_ROOT)/third_party_driver/spi/third_party_spi_lora/sx12xx/inc \
 	-I$(BSP_ROOT)/third_party_driver/spi/third_party_spi_lora/sx12xx/src/radio \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver/usb_host_lib \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver/usb_host_lib/host_class/msc \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver/usb_host_lib/host_core \
 	-I$(KERNEL_ROOT)/include #
 endif
 

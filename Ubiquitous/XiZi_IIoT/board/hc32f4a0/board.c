@@ -42,6 +42,10 @@ Modification:
 #include <connect_spi.h>
 #endif
 
+#ifdef BSP_USING_USB
+#include <connect_usb.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
 
@@ -132,6 +136,9 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_SPI
 	{ "spi", HwSpiInit },
+#endif
+#ifdef BSP_USING_USB
+	{ "usb", HwUsbHostInit },
 #endif
     { " NONE ", NONE },
 };

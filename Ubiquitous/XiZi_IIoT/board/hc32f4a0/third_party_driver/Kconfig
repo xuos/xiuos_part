@@ -21,3 +21,11 @@ menuconfig BSP_USING_SDIO
     if BSP_USING_SDIO
         source "$BSP_DIR/third_party_driver/sdio/Kconfig"
     endif
+
+menuconfig BSP_USING_USB
+    bool "Using USB device"
+    default n
+    select RESOURCES_USB
+    if BSP_USING_USB
+        source "$BSP_DIR/third_party_driver/usb/Kconfig"
+    endif
