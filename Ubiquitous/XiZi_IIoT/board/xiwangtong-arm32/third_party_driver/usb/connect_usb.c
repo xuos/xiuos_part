@@ -28,7 +28,6 @@ Modification:
 #include <board.h>
 #include <connect_usb.h>
 
-#define BSP_USING_NXP_USBH
 #ifdef BSP_USING_NXP_USBH
 
 /*! @brief USB host msd command instance global variable */
