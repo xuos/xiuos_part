@@ -51,7 +51,6 @@ extern int HwSramInit(void);
 extern int Stm32HwAdcInit(void);
 extern int Stm32HwDacInit(void);
 extern int Stm32HwLcdInit(void);
-extern int STM32USBHostRegister(void);
 extern int Stm32HwUsbInit(void);
 
 static void ClockConfiguration()
@@ -151,7 +150,6 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_USB
 #ifdef BSP_USING_STM32_USBH
-    { "STM32USBHostRegister", STM32USBHostRegister },
 	{ "hw usb", Stm32HwUsbInit },
 #endif
 #endif
