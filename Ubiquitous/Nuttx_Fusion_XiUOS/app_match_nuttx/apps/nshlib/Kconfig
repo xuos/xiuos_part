@@ -667,6 +667,10 @@ config NSH_DISABLE_K210_FFT
 	bool "Disable the K210 fft device."
 	default n
 
+config NSH_DISABLE_MUSL_TEST
+	bool "Disable the musl test."
+	default n
+
 endmenu
 
 if MMCSD

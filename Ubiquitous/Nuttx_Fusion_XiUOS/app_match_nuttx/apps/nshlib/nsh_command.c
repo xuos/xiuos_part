@@ -732,6 +732,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "fft",       cmd_fft,       1, 1, "[K210 fft function.]" },
 #endif
 
+#if defined(CONFIG_MUSL_LIBC) && !defined(CONFIG_NSH_DISABLE_MUSL_TEST)
+  { "testmusl",       cmd_musl,       1, 1, "[test musl function.]" },
+#endif
+
   { NULL,       NULL,         1, 1, NULL }
 };
 
