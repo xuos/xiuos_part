@@ -26,6 +26,17 @@ menu "test app"
                     endif
                 endif
 
+            menuconfig USER_TEST_SD
+                bool "Config test sd"
+                default n
+                if USER_TEST_SD
+                    if ADD_XIZI_FETURES
+                        config SD_FPATH
+                            string "Set sd file path"
+                            default "/sdcard_testfile"
+                    endif
+                endif
+
             config USER_TEST_SEMC
                 bool "Config test semc sdram"
                 default n
@@ -33,5 +44,7 @@ menu "test app"
             config USER_TEST_LCD
                 bool "Config test lcd device"
                 default n
+
+                
         endif
 endmenu

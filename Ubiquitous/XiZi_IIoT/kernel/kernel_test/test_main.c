@@ -119,6 +119,8 @@ int TestMain(int argc, char*argv[])
 		if (argc > 2)
 			TestRealtime(argc-2, &argv[2]);
 #endif
+#ifdef KERNEL_TEST_SOFT_SPI_SD
+#endif
 		default:
 			break;
 	}

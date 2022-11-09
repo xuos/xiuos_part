@@ -16,6 +16,16 @@ menuconfig BSP_USING_SPI
         source "$BSP_DIR/third_party_driver/spi/Kconfig"
     endif
 
+menuconfig BSP_USING_SOFT_SPI
+    bool "Using SOFT_SPI device"
+    default n
+    select BSP_USING_SPI
+    select MOUNT_SDCARD
+    select FS_VFS
+    if BSP_USING_SOFT_SPI
+        source "$BSP_DIR/third_party_driver/soft_spi/Kconfig"
+    endif
+
 menuconfig BSP_USING_LCD
     bool "Using LCD device"
     default n

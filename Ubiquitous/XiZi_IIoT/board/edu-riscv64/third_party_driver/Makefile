@@ -40,4 +40,8 @@ ifeq ($(CONFIG_BSP_USING_LCD),y)
   SRC_DIR += lcd
 endif
 
+ifeq ($(CONFIG_BSP_USING_SOFT_SPI),y)
+  SRC_DIR += soft_spi
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

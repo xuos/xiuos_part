@@ -44,10 +44,11 @@ Modification:
 #include "fpioa.h"
 #include "dmac.h"
 #include "connect_gpio.h"
+#include "connect_soft_spi.h"
 
-#if defined(FS_VFS)
-#include <iot-vfs.h>
-#endif
+// #if defined(FS_VFS)
+// #include <iot-vfs.h>
+// #endif
 
 #define CPU0    (0)
 #define CPU1    (1)
@@ -60,8 +61,8 @@ extern int HwTouchInit(void);
 extern int HwCh376Init(void);
 extern int HwLcdInit(void);
 extern int HwSpiInit(void);
+extern int HwSoftSPIInit(void);
 
-#ifdef FS_CH376
 #include <iot-vfs.h>
 #ifdef MOUNT_USB
 /**
@@ -78,23 +79,34 @@ int  MountUSB(void)
     return 0;
 }
 #endif
-#ifdef MOUNT_SDCARD
+
+#if defined(FS_VFS) && defined (MOUNT_SDCARD)
+#include <iot-vfs.h>
+#include <sd_spi.h>
+extern SpiSdDeviceType SpiSdInit(struct Bus *bus, const char *dev_name, const char *drv_name, const char *sd_name);
+
 /**
  * @description: Mount SD card
  * @return 0
  */
-
-int  MountSDCard(void)
+int MountSDCard(void)
 {
-    if (MountFilesystem(SDIO_BUS_NAME,SDIO_DEVICE_NAME ,SDIO_DRIVER_NAME , FSTYPE_CH376, "/") == 0)
-        KPrintf("sd card mount to '/'\n");
-    else
-        KPrintf("sd card mount to '/' failed!\n");
-    
-    return 0;
+    struct Bus *spi_bus;
+    spi_bus = BusFind(SOFT_SPI_BUS_NAME);
+    if (NONE == SpiSdInit(spi_bus, SOFT_SPI_DEVICE_NAME, SOFT_SPI_DRV_NAME, SPI_SD_NAME)) {
+        KPrintf("MountSDCard SpiSdInit error!\n");
+        return -1;
+    }
+    if (EOK != MountFilesystem(SOFT_SPI_BUS_NAME, SPI_SD_NAME, SOFT_SPI_DRV_NAME, FSTYPE_FATFS, "/")) {
+        return -1; 
+    }
+
+    KPrintf("SPI SD card fatfs mounted\n");
+   return 0;
 }
 #endif
-#endif
+
+
 
 void InitBss(void)
 {
@@ -184,8 +196,12 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_TOUCH
     {"touch", HwTouchInit },
 #endif
+#ifdef BSP_USING_SOFT_SPI
+    {"soft_spi", HwSoftSPIInit },
+#endif
     { " NONE ",NONE },
 };
+
 
 void InitBoardHardware(void)
 {

@@ -25,6 +25,10 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
         SRC_FILES += test_dac.c
     endif
 
+    ifeq ($(CONFIG_USER_TEST_SD),y)
+        SRC_FILES += test_softspi_sd.c
+    endif
+
     ifeq ($(CONFIG_USER_TEST_SEMC),y)
         SRC_FILES += test_extsram.c
     endif
