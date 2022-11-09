@@ -25,8 +25,8 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
         SRC_FILES += test_dac.c
     endif
 
-    ifeq ($(CONFIG_USER_TEST_SD),y)
-        SRC_FILES += test_softspi_sd.c
+    ifeq ($(CONFIG_USER_TEST_FS),y)
+        SRC_FILES += test_fs.c
     endif
 
     ifeq ($(CONFIG_USER_TEST_SEMC),y)
@@ -35,6 +35,14 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
 
     ifeq ($(CONFIG_USER_TEST_LCD),y)
         SRC_FILES +=
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_I2C),y)
+        SRC_FILES += test_i2c.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_GPIO),y)
+        SRC_FILES += test_gpio.c
     endif
 
     include $(KERNEL_ROOT)/compiler.mk

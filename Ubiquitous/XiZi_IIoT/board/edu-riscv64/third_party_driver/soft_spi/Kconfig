@@ -38,10 +38,6 @@ if BSP_USING_SOFT_SPI
         config SOFT_SPI_CLK_DELAY
             int "clk in microsecond"
             default 0
-
-        config SOFT_SPI_READ_DELAY
-            int "read after millisecond"
-            default 1
         
 endif
 

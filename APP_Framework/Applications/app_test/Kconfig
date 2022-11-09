@@ -26,14 +26,42 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_SD
-                bool "Config test sd"
+            menuconfig USER_TEST_FS
+                bool "Config test fs with sd or usb"
                 default n
-                if USER_TEST_SD
+                if USER_TEST_FS
                     if ADD_XIZI_FETURES
                         config SD_FPATH
-                            string "Set sd file path"
-                            default "/sdcard_testfile"
+                            string "Set test file path"
+                            default "/test_file"
+                    endif
+                endif
+
+
+            menuconfig USER_TEST_GPIO
+                select BSP_USING_GPIO
+                select RESOURCES_PIN
+                select BSP_USING_LED
+                select BSP_USING_KEY
+                bool "Config test gpio with led and key"
+                default n
+                if USER_TEST_GPIO
+                    if ADD_XIZI_FETURES
+                        config GPIO_DEV_DRIVER
+                            string "Set gpio dev path"
+                            default "/dev/pin_dev"
+                    endif
+                endif
+
+            menuconfig USER_TEST_I2C
+                select BSP_USING_I2C
+                bool "Config test i2c"
+                default n
+                if USER_TEST_I2C
+                    if ADD_XIZI_FETURES
+                        config I2C_DEV_DRIVER
+                            string "Set i2c dev path"
+                            default "/dev/i2c_dev"
                     endif
                 endif
 

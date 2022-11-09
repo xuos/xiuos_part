@@ -15,7 +15,7 @@ void TestSD(void)
     //read and write then close file
     read(fd,filewords,MAX_READ_LENGTH);
     printf("read data is \n%s\n",filewords);
-    const char *input_words = "these words are going to write in sdcard\n";
+    const char *input_words = "these words are going to write in fs\n";
     write(fd,input_words,strlen(input_words));
     close(fd);
 
