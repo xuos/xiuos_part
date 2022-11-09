@@ -60,7 +60,7 @@ void CH376Demo(void)
     printf( "CH376FileCreatePath:0x%02x\n",(uint16_t)s );
     
     printf( "Write some data to file\n" );
-    strcpy( (char *)buf, "This is 演示数据\xd\xa" );
+    strcpy( (char *)buf, "This is test case!\xd\xa" );
     s = CH376ByteWrite(buf, strlen((char *)buf), NULL );
     printf( "CH376ByteWrite:0x%02x\n",(uint16_t)s );
     
