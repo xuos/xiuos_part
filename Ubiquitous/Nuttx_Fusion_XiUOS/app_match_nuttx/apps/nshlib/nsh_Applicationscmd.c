@@ -500,3 +500,13 @@ int cmd_fft(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     return OK;
 }
 #endif
+
+#if defined(CONFIG_MUSL_LIBC) && !defined(CONFIG_NSH_DISABLE_MUSL_TEST)
+extern void Testmusl(void);
+int cmd_musl(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, test musl!\n");
+    Testmusl();
+    return OK;
+}
+#endif
