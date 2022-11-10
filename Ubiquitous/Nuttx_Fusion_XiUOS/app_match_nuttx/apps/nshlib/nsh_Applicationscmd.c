@@ -510,3 +510,13 @@ int cmd_musl(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     return OK;
 }
 #endif
+
+#if defined(CONFIG_BSP_USING_CAN) && !defined(CONFIG_NSH_DISABLE_CAN_TEST)
+extern void can_test(void);
+int cmd_cantest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    can_test();
+    return OK;
+}
+#endif
