@@ -89,6 +89,9 @@ enum HS_GPIO_CONFIG
 #define BSP_SOFT_SPI_MIOS_PIN 25
 #define BSP_SOFT_SPI_MSOI_PIN 27
 #define BSP_SOFT_SPI_NCS_PIN 28
+
+#define BSP_LED_PIN 29
+#define BSP_KEY_PIN 31
 #endif
 
 extern int IoConfigInit(void);
