@@ -736,6 +736,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "testmusl",       cmd_musl,       1, 1, "[test musl function.]" },
 #endif
 
+#if defined(CONFIG_BSP_USING_CAN) && !defined(CONFIG_NSH_DISABLE_CAN_TEST)
+  { "cantest",       cmd_cantest,       1, 1, "[test can function.]" },
+#endif
+
   { NULL,       NULL,         1, 1, NULL }
 };
 

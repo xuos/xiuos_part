@@ -671,6 +671,10 @@ config NSH_DISABLE_MUSL_TEST
 	bool "Disable the musl test."
 	default n
 
+config NSH_NSH_DISABLE_CAN_TEST
+	bool "Disable the can test."
+	default n
+
 endmenu
 
 if MMCSD
