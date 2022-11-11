@@ -59,7 +59,7 @@ menu "test app"
                 select RESOURCES_PIN
                 select BSP_USING_UART2
                 select BSP_USING_LORA
-                bool "Config test uart"
+                bool "Config test uart(loraE220)"
                 default n
                 if USER_TEST_LORA
                     if ADD_XIZI_FETURES
@@ -67,6 +67,24 @@ menu "test app"
                             string "Set uart dev path"
                             default "/dev/uart2_dev2"
                         config LORA_PIN_DEV_DRIVER
+                            string "Set pin dev path"
+                            default "/dev/pin_dev"
+                    endif
+                endif
+
+            menuconfig USER_TEST_RS485
+                select BSP_USING_UART
+                select BSP_USING_GPIO
+                select RESOURCES_PIN
+                select BSP_USING_UART1
+                bool "Config test uart(RS485)"
+                default n
+                if USER_TEST_RS485
+                    if ADD_XIZI_FETURES
+                        config RS485_UART_DEV_DRIVER
+                            string "Set uart dev path"
+                            default "/dev/uart1_dev1"
+                        config RS485_PIN_DEV_DRIVER
                             string "Set pin dev path"
                             default "/dev/pin_dev"
                     endif

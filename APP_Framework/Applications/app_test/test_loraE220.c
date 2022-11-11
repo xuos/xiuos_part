@@ -17,7 +17,7 @@
 #define BSP_E220_M0_PIN 32
 #define BSP_E220_M1_PIN 33
 
-void TestLora(int argc, char *agrv[])
+void TestLora(int argc, char *argv[])
 {
     char uart_recvbuff[100];
     memset(uart_recvbuff, 0, sizeof(uart_recvbuff));
@@ -39,7 +39,6 @@ void TestLora(int argc, char *agrv[])
 
     struct PinStat pin_m0;
     struct PinStat pin_m1;
-    struct PinStat pin_key;
     pin_m0.pin = BSP_E220_M0_PIN;
     pin_m1.pin = BSP_E220_M1_PIN;
 
@@ -47,19 +46,10 @@ void TestLora(int argc, char *agrv[])
     struct PrivIoctlCfg ioctl_cfg;
     struct PinParam pin_param;
     pin_param.cmd = GPIO_CONFIG_MODE;
-    pin_param.mode = GPIO_CFG_INPUT;
-
-    ioctl_cfg.ioctl_driver_type = PIN_TYPE;
-    ioctl_cfg.args = (void *)&pin_param;
-    if (0 != PrivIoctl(pin_fd, OPE_CFG, &ioctl_cfg))
-    {
-        printf("ioctl pin fd error %d\n", pin_fd);
-        PrivClose(pin_fd);
-        return;
-    }
-
     pin_param.mode = GPIO_CFG_OUTPUT;
     pin_param.pin = BSP_E220_M0_PIN;
+    ioctl_cfg.ioctl_driver_type = PIN_TYPE;
+    ioctl_cfg.args = &pin_param;
     if (0 != PrivIoctl(pin_fd, OPE_CFG, &ioctl_cfg))
     {
         printf("ioctl pin fd error %d\n", pin_fd);
@@ -106,7 +96,7 @@ void TestLora(int argc, char *agrv[])
     printf("lora configure into sleep(configure) mode\n");
 
     // send configure data, and receive the same length of data
-    char sendbuff[] = {0xC0, 0x00, 0x05, 0x19, 0x49, 0xE6, 0x00, 0x17}; // config as address 1949 CH17 2.4kps
+    char sendbuff[] = {0xC0, 0x00, 0x05, 0x19, 0x49, 0xE6, 0x00, 0x17}; // config as address 1949 CH17 36.8kps
 
     PrivTaskDelay(2000);
 
@@ -150,6 +140,8 @@ void TestLora(int argc, char *agrv[])
         PrivRead(uart_fd, uart_recvbuff, sizeof(uart_recvbuff));
         printf("Receive Data is :\n%s\n", uart_recvbuff);
     }
+    PrivClose(pin_fd);
+    PrivClose(uart_fd);
 }
 
 PRIV_SHELL_CMD_FUNCTION(TestLora, a lora test sample, PRIV_SHELL_CMD_MAIN_ATTR);

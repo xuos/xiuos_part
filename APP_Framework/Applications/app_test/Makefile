@@ -53,5 +53,9 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
         SRC_FILES += test_rtc.c
     endif
 
+    ifeq ($(CONFIG_USER_TEST_RS485),y)
+        SRC_FILES += test_rs485.c
+    endif    
+
     include $(KERNEL_ROOT)/compiler.mk
 endif

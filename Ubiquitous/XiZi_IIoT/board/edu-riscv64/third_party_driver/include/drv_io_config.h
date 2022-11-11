@@ -103,6 +103,11 @@ enum HS_GPIO_CONFIG
 #define BSP_E220_M0_PIN 32
 #define BSP_E220_M1_PIN 33
 #endif
+
+#ifdef BSP_USING_RS485
+#define BSP_485_DIR_PIN 24
+#endif
+
 extern int IoConfigInit(void);
 
 #endif

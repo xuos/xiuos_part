@@ -110,6 +110,10 @@ static struct io_config
     IOCONFIG(BSP_E220_M1_PIN,  HS_GPIO(FUNC_GPIOHS11)),      
 #endif
 
+#ifdef BSP_USING_RS485
+    IOCONFIG(BSP_485_DIR_PIN,HS_GPIO(FUNC_GPIOHS12));
+#endif
+
 #ifdef BSP_USING_LED
     IOCONFIG(BSP_LED_PIN,FUNC_GPIO5);
 #endif

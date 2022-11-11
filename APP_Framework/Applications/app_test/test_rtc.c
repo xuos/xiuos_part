@@ -13,7 +13,7 @@ void TestRTC(int argc,char *argv[])
     if(argc>1){
         
         int times = atoi(argv[1]);
-        printf("Time will be printf times %d\n",times);
+        printf("Time will be printf %d times\n",times);
         struct RtcDrvConfigureParam rtc_para;
         rtc_para.rtc_operation_cmd = OPER_RTC_SET_TIME;
         *(rtc_para.time) = 0;
@@ -26,12 +26,12 @@ void TestRTC(int argc,char *argv[])
         rtc_para.rtc_operation_cmd = OPER_RTC_GET_TIME;
         for(size_t i=0;i<times;i++){
             PrivIoctl(rtc_fd,0,&ioctl_cfg);
-            printf("The time now is %x,%d\n",*(rtc_para.time),*(rtc_para.time));
+            printf("The time now is %d\n",*(rtc_para.time));
             PrivTaskDelay(5000);  
         }
-                
     }
     
+    PrivClose(rtc_fd);
     return;
 }
 
