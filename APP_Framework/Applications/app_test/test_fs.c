@@ -8,7 +8,7 @@
 void TestFs(void)
 {
     //open the file in sdcard
-    int fd = open(SD_FPATH,O_RDWR|O_CREAT);
+    int fd = open(FPATH,O_RDWR|O_CREAT);
     if(fd<0){
         printf("fs fd open error:%d\n",fd);
         return;
@@ -38,7 +38,7 @@ void TestFs(void)
     }
 
     //re-open the file and re-read the file
-    fd = open(SD_FPATH,O_RDWR);
+    fd = open(FPATH,O_RDWR);
      if(fd<0){
         printf("fs fd open error:%d\n",fd);
         return;

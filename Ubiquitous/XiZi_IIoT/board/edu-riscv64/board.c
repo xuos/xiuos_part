@@ -184,6 +184,12 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_I2C
     { "hw_i2c", HwI2cInit },
 #endif
+#ifdef BSP_USING_RTC
+    { "hw_uart", HwRTC },
+#endif
+#ifdef BSP_USING_UART
+    { "hw_uart", HwUartInit },
+#endif
 #ifdef BSP_USING_SPI
 	{ "hw_spi", HwSpiInit },
 #endif

@@ -31,12 +31,8 @@ void  TestGpio(void)
     }
 
     //config key pin in board
-     parameter.cmd = GPIO_CONFIG_MODE;
      parameter.pin = BSP_KEY_PIN;
      parameter.mode = GPIO_CFG_INPUT;
-
-    ioctl_cfg.ioctl_driver_type = PIN_TYPE;
-    ioctl_cfg.args =  (void *)&parameter;
 
     if (0 != PrivIoctl(pin_fd, OPE_CFG, &ioctl_cfg)) {
         printf("ioctl pin fd error %d\n", pin_fd);
@@ -61,19 +57,15 @@ void  TestGpio(void)
         //led on if key pressed,or led off
         if(pin_key.val){
             pin_led.val = GPIO_HIGH;
-            if(0>PrivWrite(pin_fd,&pin_led,NULL_PARAMETER)){
-                printf("write pin fd error %d\n", pin_fd);
-                PrivClose(pin_fd);
-                return;
-            }
         }else{
             pin_led.val = GPIO_LOW;
-            if(0>PrivWrite(pin_fd,&pin_led,NULL_PARAMETER)){
+        }            
+        
+        if(0>PrivWrite(pin_fd,&pin_led,NULL_PARAMETER)){
                 printf("write pin fd error %d\n", pin_fd);
                 PrivClose(pin_fd);
                 return;
-            }           
-        }
+         }           
 
     }
 }

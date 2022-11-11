@@ -45,5 +45,13 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
         SRC_FILES += test_gpio.c
     endif
 
+    ifeq ($(CONFIG_USER_TEST_LORA),y)
+        SRC_FILES += test_loraE220.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_RTC),y)
+        SRC_FILES += test_rtc.c
+    endif
+
     include $(KERNEL_ROOT)/compiler.mk
 endif

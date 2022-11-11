@@ -78,7 +78,6 @@ enum HS_GPIO_CONFIG
 #define BSP_CH438_INT_PIN   35
 #endif
 
-#define BSP_USING_SOFT_SPI
 #ifdef BSP_USING_SOFT_SPI
 #define FPIOA_SOFT_SPI_SCK  26
 #define FPIOA_SOFT_SPI_MIOS   25
@@ -90,10 +89,20 @@ enum HS_GPIO_CONFIG
 #define BSP_SOFT_SPI_MSOI_PIN 27
 #define BSP_SOFT_SPI_NCS_PIN 28
 
+#endif
+
+#ifdef BSP_USING_LED
 #define BSP_LED_PIN 29
+#endif
+
+#ifdef BSP_USING_KEY
 #define BSP_KEY_PIN 31
 #endif
 
+#ifdef BSP_USING_LORA
+#define BSP_E220_M0_PIN 32
+#define BSP_E220_M1_PIN 33
+#endif
 extern int IoConfigInit(void);
 
 #endif
