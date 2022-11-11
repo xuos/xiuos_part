@@ -100,26 +100,3 @@ if BSP_USING_SPI1
     endif
 endif
 
-config BSP_USING_TP
-bool "Using LCD touch  "
-default n
-
-if BSP_USING_TP
-    config BSP_TP_SCK_PIN
-        int "TP SCK pin number"
-        default 42
-    config BSP_TP_NCS_PIN
-        int "TP NCS pin number"
-        default 43
-    config BSP_TP_MISO_PIN
-        int "TP MISO pin number"
-        default 44
-    config BSP_TP_IRQ_PIN
-        int "TP IRQ pin number"
-        default 45
-    config BSP_TP_MOSI_PIN
-        int "TP MOSI pin number"
-        default 46
-
-endif
-
