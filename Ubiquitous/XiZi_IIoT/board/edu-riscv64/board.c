@@ -45,6 +45,7 @@ Modification:
 #include "dmac.h"
 #include "connect_gpio.h"
 #include "connect_soft_spi.h"
+#include "connect_rtc.h"
 
 // #if defined(FS_VFS)
 // #include <iot-vfs.h>
@@ -185,7 +186,7 @@ struct InitSequenceDesc _board_init[] =
     { "hw_i2c", HwI2cInit },
 #endif
 #ifdef BSP_USING_RTC
-    { "hw_uart", HwRTC },
+    { "hw_rtc", HwRtcInit },
 #endif
 #ifdef BSP_USING_UART
     { "hw_uart", HwUartInit },

@@ -44,4 +44,9 @@ ifeq ($(CONFIG_BSP_USING_SOFT_SPI),y)
   SRC_DIR += soft_spi
 endif
 
+ifeq ($(CONFIG_BSP_USING_RTC),y)
+  SRC_DIR += rtc
+endif
+
+
 include $(KERNEL_ROOT)/compiler.mk
