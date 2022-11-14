@@ -107,7 +107,7 @@ void usb_host_deinit(usb_core_instance *pdev, USBH_HOST *phost)
  * @param  [in] phost       host state set
  * @retval None
  */
-int usb_host_mainprocess(usb_core_instance *pdev, USBH_HOST *phost)
+void usb_host_mainprocess(usb_core_instance *pdev, USBH_HOST *phost)
 {
     __IO HOST_STATUS tmp_status;
     tmp_status = HSTATUS_FAIL;
@@ -193,8 +193,6 @@ int usb_host_mainprocess(usb_core_instance *pdev, USBH_HOST *phost)
     } else {
         ;
     }
-
-    return 0;
 }
 
 /**

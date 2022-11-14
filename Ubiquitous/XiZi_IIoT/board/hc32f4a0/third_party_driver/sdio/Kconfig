@@ -12,13 +12,13 @@ if BSP_USING_SDIO
         default "sdio_dev"
 
     config MOUNT_SDCARD_FS
-        bool "mount sd card file system"
+        bool "mount sd card file system : if y then not support usb-mount-fs"
         default y
         select MOUNT_SDCARD
 
     if MOUNT_SDCARD_FS
         config MOUNT_SDCARD_FS_TYPE
-            int "choose file system type : FATFS(0) LWEXT4(3)"
+            int "choose file system type : FATFS(0)"
             default 0 
     endif
 endif

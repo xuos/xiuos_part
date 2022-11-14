@@ -35,6 +35,8 @@ Modification:
 usb_core_instance usb_app_instance;
 USBH_HOST usb_app_host;
 
+static void UsbHostTask(void *parameter);
+
 #if defined(FS_VFS)
 void UsbMountFileSystem()
 {
@@ -48,6 +50,23 @@ void UsbUnmountFileSystem()
 {
     UnmountFileSystem(UDISK_MOUNTPOINT);
 }
+
+#ifdef MOUNT_USB
+int MountUsb(void)
+{
+    int32 usb_host_task = 0;
+    usb_host_task = KTaskCreate("usbh", UsbHostTask, NONE,
+                           USB_HOST_STACK_SIZE, 8);
+    if(usb_host_task < 0) {		
+		KPrintf("usb_host_task create failed ...%s %d.\n", __FUNCTION__, __LINE__);
+		return ERROR;
+	}
+
+    StartupKTask(usb_host_task);
+
+    return 0;
+}
+#endif
 #endif
 
 static uint32 UsbHostOpen(void *dev)
@@ -127,8 +146,9 @@ static const struct UsbDevDone dev_done =
     .read = UsbHostRead,
 };
 
-static void UsbHostTask(void* parameter)
+static void UsbHostTask(void *parameter)
 {
+    usb_host_init(&usb_app_instance, &usb_app_host, &USBH_MSC_cb, &USR_cb);
     while (1) {
         usb_host_mainprocess(&usb_app_instance, &usb_app_host);
     }
@@ -191,15 +211,12 @@ static int BoardUsbDevBend(void)
 int HwUsbHostInit(void)
 {
     x_err_t ret = EOK;
-    int32 usb_host_task = 0;
 
     static struct UsbBus usb_bus;
     memset(&usb_bus, 0, sizeof(struct UsbBus));
 
     static struct UsbDriver usb_driver;
     memset(&usb_driver, 0, sizeof(struct UsbDriver));
-
-    usb_host_init(&usb_app_instance, &usb_app_host, &USBH_MSC_cb, &USR_cb);
 
     ret = BoardUsbBusInit(&usb_bus, &usb_driver);
     if (EOK != ret) {
@@ -212,15 +229,6 @@ int HwUsbHostInit(void)
         KPrintf("BoardUsbDevBend error ret %u\n", ret);
         return ERROR;
     }
-
-    usb_host_task = KTaskCreate("usbh", UsbHostTask, NONE,
-                           USB_HOST_STACK_SIZE, 8);
-    if(usb_host_task < 0) {		
-		KPrintf("usb_host_task create failed ...%s %d.\n", __FUNCTION__, __LINE__);
-		return ERROR;
-	}
-
-    StartupKTask(usb_host_task);
 
     return ret;
 }

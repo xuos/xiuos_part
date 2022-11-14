@@ -74,10 +74,6 @@ void usb_bsp_init(usb_core_instance *pdev)
 {
     stc_gpio_init_t stcGpioCfg;
 
-    /* SysTick configuration */
-    (void)SysTick_Init(1000U);
-    NVIC_SetPriority(SysTick_IRQn, DDL_IRQ_PRIO_14);
-
     /* USB clock source configurate */
     CLK_SetUSBClockSrc(CLK_USBCLK_SYSCLK_DIV5);
 
@@ -87,11 +83,6 @@ void usb_bsp_init(usb_core_instance *pdev)
     stcGpioCfg.u16PinAttr = PIN_ATTR_ANALOG;
     (void)GPIO_Init(USB_DM_PORT, USB_DM_PIN, &stcGpioCfg);
     (void)GPIO_Init(USB_DP_PORT, USB_DP_PIN, &stcGpioCfg);
-
-    // stcGpioInit.u16PinState = PIN_STAT_RST;
-    // stcGpioInit.u16PinDir = PIN_DIR_OUT;
-    // (void)GPIO_Init(USB_DRVVBUS_PORT, USB_DRVVBUS_PIN, &stcGpioInit);
-    // GPIO_SetPins(USB_DRVVBUS_PORT, USB_DRVVBUS_PIN);
 
     GPIO_SetFunc(USB_DRVVBUS_PORT, USB_DRVVBUS_PIN, GPIO_FUNC_10); /* VBUS */
 
@@ -133,7 +124,7 @@ void usb_udelay(const uint32_t usec)
 
 void usb_mdelay(const uint32_t msec)
 {
-    SysTick_Delay(msec);
+    usb_udelay(msec * 1000);
 }
 
 /**
@@ -141,7 +132,7 @@ void usb_mdelay(const uint32_t msec)
  * @param  [in] pdev        device instance
  * @retval None
  */
-void  usb_bsp_cfgvbus(LL_USB_TypeDef *USBx)
+void usb_bsp_cfgvbus(LL_USB_TypeDef *USBx)
 {
 }
 

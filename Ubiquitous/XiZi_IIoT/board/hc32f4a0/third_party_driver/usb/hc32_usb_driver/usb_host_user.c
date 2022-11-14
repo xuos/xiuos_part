@@ -105,6 +105,7 @@ usb_host_user_callback_func USR_cb = {
 /*******************************************************************************
  * Local function prototypes ('static')
  ******************************************************************************/
+static int usb_connect_status = 0;
 
 /*******************************************************************************
  * Local variable definitions ('static')
@@ -125,7 +126,7 @@ void host_user_init(void)
 
     if (startup == 0U) {
         startup = 1U;
-        KPrintf("USB Host library v2.1.0 started\r\n");
+        //KPrintf("USB Host library v2.1.0 started\r\n");
     }
 }
 
@@ -137,7 +138,6 @@ void host_user_init(void)
 void host_user_devattached(void)
 {
     KPrintf("USB device attached\r\n");
-    UsbMountFileSystem();
 }
 
 /**
@@ -158,6 +158,7 @@ void host_user_unrecoverederror(void)
 void host_user_devdisconn(void)
 {
     KPrintf("USB device disconnect\r\n");
+    usb_connect_status = 0;
     UsbUnmountFileSystem();
 }
 
@@ -307,6 +308,12 @@ void host_user_overcurrent(void)
  */
 int host_user_msc_app(void)
 {
+    if (0 == usb_connect_status) {
+        KPrintf("ready to mount file system\n");
+        UsbMountFileSystem();
+        usb_connect_status = 1;
+    }
+    
     return ((int)0);
 }
 

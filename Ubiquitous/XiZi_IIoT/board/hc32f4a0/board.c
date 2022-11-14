@@ -71,21 +71,35 @@ void SystemClockConfig(void)
     (void)CLK_XtalInit(&stcXtalInit);
 
     (void)CLK_PLLStructInit(&stcPLLHInit);
-    /* VCO = (8/1)*100 = 800MHz*/
+
     stcPLLHInit.u8PLLState      = CLK_PLL_ON;
     stcPLLHInit.PLLCFGR         = 0UL;
     stcPLLHInit.PLLCFGR_f.PLLM  = 1UL - 1UL;
+
+#ifdef BSP_USING_USB
+    /* VCO = (8/1)*120 = 960MHz*/
+    stcPLLHInit.PLLCFGR_f.PLLN  = 120UL - 1UL;
+#else
+    /* VCO = (8/1)*100 = 800MHz*/
     stcPLLHInit.PLLCFGR_f.PLLN  = 100UL - 1UL;
+#endif
     stcPLLHInit.PLLCFGR_f.PLLP  = 4UL - 1UL;
     stcPLLHInit.PLLCFGR_f.PLLQ  = 4UL - 1UL;
     stcPLLHInit.PLLCFGR_f.PLLR  = 4UL - 1UL;
     stcPLLHInit.PLLCFGR_f.PLLSRC = CLK_PLL_SRC_XTAL;
     (void)CLK_PLLInit(&stcPLLHInit);
 
+#ifdef BSP_USING_USB
+    /* Highspeed SRAM set to 0 Read/Write wait cycle */
+    SRAM_SetWaitCycle(SRAM_SRAMH, SRAM_WAIT_CYCLE0, SRAM_WAIT_CYCLE0);
+    /* SRAM1_2_3_4_backup set to 1 Read/Write wait cycle */
+    SRAM_SetWaitCycle((SRAM_SRAM123 | SRAM_SRAM4 | SRAM_SRAMB), SRAM_WAIT_CYCLE1, SRAM_WAIT_CYCLE1);
+#else
     /* Highspeed SRAM set to 1 Read/Write wait cycle */
     SRAM_SetWaitCycle(SRAM_SRAMH, SRAM_WAIT_CYCLE1, SRAM_WAIT_CYCLE1);
     /* SRAM1_2_3_4_backup set to 2 Read/Write wait cycle */
     SRAM_SetWaitCycle((SRAM_SRAM123 | SRAM_SRAM4 | SRAM_SRAMB), SRAM_WAIT_CYCLE2, SRAM_WAIT_CYCLE2);
+#endif
     /* 0-wait @ 40MHz */
     EFM_SetWaitCycle(EFM_WAIT_CYCLE5);
     /* 4 cycles for 200 ~ 250MHz */

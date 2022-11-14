@@ -73,7 +73,7 @@ extern void usb_host_init(usb_core_instance *pdev,
                           usb_host_class_callback_func *class_cbk,
                           usb_host_user_callback_func *user_cbk);
 extern void usb_host_deinit(usb_core_instance *pdev, USBH_HOST *phost);
-extern int usb_host_mainprocess(usb_core_instance *pdev, USBH_HOST *phost);
+extern void usb_host_mainprocess(usb_core_instance *pdev, USBH_HOST *phost);
 extern void usb_host_errorprocess(USBH_HOST *phost, HOST_STATUS errType);
 
 /**
