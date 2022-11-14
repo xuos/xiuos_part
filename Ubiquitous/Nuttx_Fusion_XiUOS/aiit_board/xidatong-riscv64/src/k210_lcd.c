@@ -28,23 +28,23 @@
 #include "nuttx/arch.h"
 #include "nuttx/lcd/lt768.h"
 #include "nuttx/lcd/lt768_lib.h"
-#include "nuttx/lcd/k210_lcd.h"
+#include "nuttx/lcd/if_port.h"
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 #ifdef CONFIG_LCD_LCDDRV_SPIIF
 #include "nuttx/lcd/lcddrv_spiif.h"
 #endif
 
+#define NCS_H() k210_gpiohs_set_value(FPIOA_LCD_NCS, GPIO_PV_HIGH); up_udelay(20)
+#define NCS_L() k210_gpiohs_set_value(FPIOA_LCD_NCS, GPIO_PV_LOW); up_udelay(20)
+#define CLK_H() k210_gpiohs_set_value(FPIOA_LCD_SCLK, GPIO_PV_HIGH); up_udelay(20)
+#define CLK_L() k210_gpiohs_set_value(FPIOA_LCD_SCLK, GPIO_PV_LOW); up_udelay(20)
+#define MOSI_H() k210_gpiohs_set_value(FPIOA_LCD_MOSI, GPIO_PV_HIGH)
+#define MOSI_L() k210_gpiohs_set_value(FPIOA_LCD_MOSI, GPIO_PV_LOW)
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-void test_delay(void)
-{
-    volatile uint32_t i = 0;
-    for (i = 0; i < 200; ++i)
-    {
-        __asm("NOP"); /* delay */
-    }
-}
 
 void lcd_pin_init(void)
 {
@@ -60,9 +60,9 @@ void lcd_pin_init(void)
     k210_gpiohs_set_direction(FPIOA_LCD_MOSI, GPIO_DM_OUTPUT);
     k210_gpiohs_set_direction(FPIOA_LCD_NCS, GPIO_DM_OUTPUT);
 
-    lcd_set_pin(FPIOA_LCD_SCLK, GPIO_PV_HIGH);
-    lcd_set_pin(FPIOA_LCD_NCS, GPIO_PV_HIGH);
-    lcd_set_pin(FPIOA_LCD_NRST, GPIO_PV_HIGH);
+    k210_gpiohs_set_value(FPIOA_LCD_SCLK, GPIO_PV_HIGH);
+    k210_gpiohs_set_value(FPIOA_LCD_NCS, GPIO_PV_HIGH);
+    k210_gpiohs_set_value(FPIOA_LCD_NRST, GPIO_PV_HIGH);
 }
 
 void lcd_backlight_init(bool enable)
@@ -86,74 +86,74 @@ uint8_t lcd_transfer_byte(uint8_t dat)
 
     for(i = 0; i < 8; i++)
     {
-        CLK_H;
+        CLK_H();
 
         // MOSI during falling edge
         if((dat << i) & 0x80)
         {
-            MOSI_H;
+            MOSI_H();
         }
         else
         {
-            MOSI_L;
+            MOSI_L();
         }
 
-        CLK_L;
+        CLK_L();
 
         // MISO during rising edge
         rx_data <<= 1;
-        if(lcd_get_pin(FPIOA_LCD_MISO))
+        if(k210_gpiohs_get_value(FPIOA_LCD_MISO))
             rx_data ++;
     }
-    CLK_H;
+    CLK_H();
     return rx_data;
 }
 
 void LCD_CmdWrite(uint8_t cmd)
 {
-    NCS_L;
+    NCS_L();
     lcd_transfer_byte(0x00);
     lcd_transfer_byte(cmd);
-    NCS_H;
+    NCS_H();
 }
 
 void LCD_DataWrite(uint8_t data)
 {
-    NCS_L;
+    NCS_L();
     lcd_transfer_byte(0x80);
     lcd_transfer_byte(data);
-    NCS_H;
+    NCS_H();
 }
 
 void LCD_DataWrite_Pixel(uint8_t data)
 {
-    NCS_L;
+    NCS_L();
     lcd_transfer_byte(0x80);
     lcd_transfer_byte(data);
-    NCS_H;
-    NCS_L;
+    NCS_H();
+    NCS_L();
     lcd_transfer_byte(0x80);
     lcd_transfer_byte(data >> 8);
-    NCS_H;
+    NCS_H();
 }
 
 uint8_t LCD_StatusRead(void)
 {
     uint8_t temp = 0;
-    NCS_L;
+    NCS_L();
     lcd_transfer_byte(0x40);
     temp = lcd_transfer_byte(0xff);
-    NCS_H;
+    NCS_H();
     return temp;
 }
 
 uint8_t LCD_DataRead(void)
 {
     uint8_t temp = 0;
-    NCS_L;
+    NCS_L();
     lcd_transfer_byte(0xc0);
     temp = lcd_transfer_byte(0xff);
-    NCS_H;
+    NCS_H();
     return temp;
 }
 
@@ -195,11 +195,12 @@ void lcd_drv_init(void)
  *
  ****************************************************************************/
 
-void board_lcd_initialize(void)
+int board_lcd_initialize(void)
 {
     /* Configure the LCD backlight (and turn the backlight off) */
     lcd_backlight_init(true);
     lcd_drv_init();
+    return 0;
 }
 
 /****************************************************************************

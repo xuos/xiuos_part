@@ -59,6 +59,9 @@ extern int HwI2cInit(void);
 extern int HwTouchInit(void);
 extern int HwCh438Init(void);
 extern int HwCh376Init(void);
+extern int HwTimerInit(void);
+extern int HwRtcInit(void);
+extern int HwWdtInit(void);
 
 #ifdef FS_CH376
 #include <iot-vfs.h>
@@ -173,6 +176,15 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_I2C
     { "hw_i2c", HwI2cInit },
+#endif
+#ifdef BSP_USING_RTC
+    { "hw_rtc", HwRtcInit },
+#endif
+#ifdef BSP_USING_HWTIMER
+    { "hw_timer" , HwTimerInit },
+#endif
+#ifdef BSP_USING_WDT
+    { "hw_wdt", HwWdtInit },
 #endif
 #ifdef BSP_USING_SDIO
     { "hw_sdio", HwCh376Init},
