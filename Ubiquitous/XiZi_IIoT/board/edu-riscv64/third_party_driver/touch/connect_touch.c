@@ -38,7 +38,7 @@ struct Touch_event {
 };
 
 #define DEFAULT_NUM 0x0D
-
+#define TOUCH_ADDRESS 0x44
 volatile bool SemReleaseFlag = 0;
 
 static struct Bus* i2c_bus = NONE;
@@ -77,7 +77,7 @@ static x_err_t ReadRegs(struct HardwareDev* dev, uint8 len, uint8* buf)
 // not used in polling mode
 static void touch_pin_irqhandler(void* arg)
 {
-    KPrintf("int hdr working.\n");
+    // KPrintf("int hdr working.\n");
     if (!SemReleaseFlag)
     {
         KSemaphoreAbandon(touch_sem);
