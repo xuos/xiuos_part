@@ -16,6 +16,14 @@ ifeq ($(CONFIG_BSP_USING_I2C),y)
   SRC_DIR += i2c
 endif
 
+ifeq ($(CONFIG_BSP_USING_SPI),y)
+  SRC_DIR += spi
+endif
+
+ifeq ($(CONFIG_BSP_USING_WIZCHIP),y)
+  SRC_DIR += ethernet
+endif
+
 ifeq ($(CONFIG_BSP_USING_TOUCH),y)
   SRC_DIR += touch
 endif

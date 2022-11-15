@@ -20,6 +20,22 @@ if BSP_USING_GPIO
 source "$BSP_DIR/third_party_driver/gpio/Kconfig"
 endif
 
+menuconfig BSP_USING_SPI
+bool "Using SPI device"
+default n
+select RESOURCES_SPI
+if BSP_USING_SPI
+source "$BSP_DIR/third_party_driver/spi/Kconfig"
+endif
+
+menuconfig BSP_USING_WIZCHIP
+bool "Using w5500 as network device"
+default n
+select RESOURCES_WIZCHIP
+if BSP_USING_WIZCHIP
+source "$BSP_DIR/third_party_driver/ethernet/Kconfig"
+endif
+
 menuconfig BSP_USING_I2C
 bool "Using I2C device"
 default n
