@@ -92,8 +92,4 @@ ifeq ($(CONFIG_KERNEL_TEST_SPI_FLASH),y)
 	SRC_FILES += test_spi_flash.c 
 endif
 
-ifeq ($(KERNEL_TEST_SOFT_SPI_SD),y)
-	SRC_FILES += test_softspi_sd.c 
-endif
-
 include $(KERNEL_ROOT)/compiler.mk

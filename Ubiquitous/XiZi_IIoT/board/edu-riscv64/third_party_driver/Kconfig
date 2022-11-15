@@ -96,3 +96,19 @@ menuconfig BSP_USING_RTC
     if BSP_USING_RTC
         source "$BSP_DIR/third_party_driver/rtc/Kconfig"
     endif
+
+menuconfig BSP_USING_HWTIMER
+    bool "Using TIMER device"
+    default y
+    select RESOURCES_HWTIMER
+    if BSP_USING_HWTIMER
+        source "$BSP_DIR/third_party_driver/timer/Kconfig"
+    endif
+
+menuconfig BSP_USING_WDT
+    bool "Using WATCHDOG device"
+    default y
+    select RESOURCES_WDT
+    if BSP_USING_WDT
+        source "$BSP_DIR/third_party_driver/watchdog/Kconfig"
+    endif

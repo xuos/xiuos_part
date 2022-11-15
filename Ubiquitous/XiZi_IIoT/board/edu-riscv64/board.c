@@ -46,6 +46,8 @@ Modification:
 #include "connect_gpio.h"
 #include "connect_soft_spi.h"
 #include "connect_rtc.h"
+#include "connect_hwtimer.h"
+#include "connect_wdt.h"
 
 // #if defined(FS_VFS)
 // #include <iot-vfs.h>
@@ -188,9 +190,6 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_RTC
     { "hw_rtc", HwRtcInit },
 #endif
-#ifdef BSP_USING_UART
-    { "hw_uart", HwUartInit },
-#endif
 #ifdef BSP_USING_SPI
 	{ "hw_spi", HwSpiInit },
 #endif
@@ -205,6 +204,12 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_SOFT_SPI
     {"soft_spi", HwSoftSPIInit },
+#endif
+#ifdef BSP_USING_HWTIMER
+    {"hw_timer", HwTimerInit },
+#endif
+#ifdef BSP_USING_WDT
+    {"hw_wdt", HwWdtInit },
 #endif
     { " NONE ",NONE },
 };

@@ -102,6 +102,43 @@ menu "test app"
                     endif
                 endif
 
+            menuconfig USER_TEST_HWTIMER
+                select BSP_USING_HWTIMER
+                select BSP_USING_GPIO
+                bool "Config test hwtimer"
+                default n
+                if USER_TEST_HWTIMER
+                    if ADD_XIZI_FETURES
+                        config HWTIMER_PIN_DEV_DRIVER
+                            string "Set pin dev path"
+                            default "/dev/pin_dev"
+                    endif
+                endif
+
+            menuconfig USER_TEST_WDT
+                select BSP_USING_WDT0
+                bool "Config test watchdog"
+                default n
+                if USER_TEST_WDT
+                    if ADD_XIZI_FETURES
+                        config WDT0_DEV_DRIVER
+                            string "Set wdt dev path"
+                            default "/dev/wdt0_dev0"
+                    endif
+                endif
+
+            menuconfig USER_TEST_LCD_EDU
+                select BSP_USING_LCD
+                bool "Config test lcd in PrivOpen"
+                default n
+                if USER_TEST_LCD_EDU
+                    if ADD_XIZI_FETURES
+                        config EDU_LCD_DEV_DRIVER
+                            string "Set lcd dev path"
+                            default "/dev/lcd_dev"
+                    endif
+                endif
+
             menuconfig USER_TEST_I2C
                 select BSP_USING_I2C
                 bool "Config test i2c"
@@ -110,7 +147,7 @@ menu "test app"
                     if ADD_XIZI_FETURES
                         config I2C_DEV_DRIVER
                             string "Set i2c dev path"
-                            default "/dev/i2c_dev"
+                            default "/dev/i2c1_dev0"
                     endif
                 endif
 

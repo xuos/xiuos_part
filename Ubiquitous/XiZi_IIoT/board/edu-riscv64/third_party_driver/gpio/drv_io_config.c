@@ -75,7 +75,7 @@ static struct io_config
     IOCONFIG(BSP_UART3_TXD_PIN, FUNC_UART3_RX),
     IOCONFIG(BSP_UART3_RXD_PIN, FUNC_UART3_TX),
 #endif
-#ifdef BSP_USING_I2C1
+#ifdef BSP_USING_I2C
     IOCONFIG(BSP_I2C_SDA, FUNC_GPIO3),
     IOCONFIG(BSP_I2C_SCL, FUNC_GPIO4),
 #endif
@@ -121,7 +121,6 @@ static struct io_config
 #ifdef BSP_USING_KEY
     IOCONFIG(BSP_KEY_PIN,FUNC_GPIO6);
 #endif
-
 };
 
 static int PrintIoConfig()

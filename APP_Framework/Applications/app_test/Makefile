@@ -57,5 +57,17 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
         SRC_FILES += test_rs485.c
     endif    
 
+    ifeq ($(CONFIG_USER_TEST_HWTIMER),y)
+        SRC_FILES += test_hwtimer.c
+    endif  
+
+    ifeq ($(CONFIG_USER_TEST_LCD_EDU),y)
+        SRC_FILES += test_lcd_edu.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_WDT),y)
+        SRC_FILES += test_wdt.c
+    endif  
+
     include $(KERNEL_ROOT)/compiler.mk
 endif

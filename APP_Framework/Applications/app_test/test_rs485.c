@@ -81,7 +81,6 @@ void Test485(void)
     PrivClose(pin_fd);
     PrivClose(uart_fd);
     return;
-    
 }
 
 PRIV_SHELL_CMD_FUNCTION(Test485, a RS485 test sample, PRIV_SHELL_CMD_MAIN_ATTR);
