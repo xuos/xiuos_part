@@ -157,7 +157,6 @@ void EnvInitKTask(void *parameter)
 	_InitSubCmpts(components_init);
 	_InitSubCmpts(env_init);
 	ENABLE_INTERRUPT(lock);
-
 	_InitSubCmpts(communication_init);
 	 
 #ifdef ARCH_SMP
