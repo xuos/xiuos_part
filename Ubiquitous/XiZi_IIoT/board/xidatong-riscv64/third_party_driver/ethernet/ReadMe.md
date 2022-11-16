@@ -18,6 +18,7 @@
 <img src="imgs\server0.png" style="zoom:60%;" />
 
 - client 测试：通过wiz_client_op可以向pc中打开的tcp server发送消息
+	- 由于wiz_client_test函数参数接收问题，测试使用的ip地址暂时使用硬编码实现
 
 <img src="imgs\client0.png" style="zoom:67%;" />
 
