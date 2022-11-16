@@ -58,4 +58,8 @@ ifeq ($(CONFIG_BSP_USING_TOUCH),y)
 CSRCS += k210_touch.c
 endif
 
+ifeq ($(CONFIG_BSP_USING_CAN),y)
+CSRCS += can_demo.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

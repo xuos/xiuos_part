@@ -1587,6 +1587,13 @@ int nsh_foreach_var(FAR struct nsh_vtbl_s *vtbl, nsh_foreach_var_t cb,
   int cmd_fft(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
+#if defined(CONFIG_MUSL_LIBC) && !defined(CONFIG_NSH_DISABLE_MUSL_TEST)
+  int cmd_musl(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_BSP_USING_CAN) && !defined(CONFIG_NSH_DISABLE_CAN_TEST)
+  int cmd_cantest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
 #if defined(__cplusplus)
 }
 #endif

@@ -25,13 +25,51 @@
 #include "k210_touch.h"
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+static void IIC_Init(void);
+static void SDA_IN(void);
+static void SDA_OUT(void);
+static uint8_t READ_SDA(void);
+static void IIC_SCL(uint8_t val);
+static void IIC_SDA(uint8_t val);
+static void IIC_Start(void);
+static void IIC_Stop(void);
+static uint8_t IIC_Wait_Ack(void);
+static void IIC_Ack(void);
+static void IIC_NAck(void);
+static void IIC_Send_Byte(uint8_t txd);
+static uint8_t IIC_Read_Byte(uint8_t ack);
+static bool GT911_Scan(POINT* point);
+
+static int touch_open(FAR struct file *filep);
+static int touch_close(FAR struct file *filep);
+static ssize_t touch_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+/* touch POSIX interface */
+static const struct file_operations g_touchfops =
+{
+  touch_open,
+  touch_close,
+  touch_read,
+  touch_write,
+  NULL,
+  NULL,
+  NULL
+};
+
+/****************************************************************************
  * Name: IIC_Init
  * Description: i2c pin mode configure
  * input: None
  * output: None
  * return:none
  ****************************************************************************/
-void IIC_Init(void)
+static void IIC_Init(void)
 {
     /* config simluate IIC bus */
     k210_fpioa_config(BSP_IIC_SDA, GT911_FUNC_GPIO(FPIOA_IIC_SDA));
@@ -48,7 +86,7 @@ void IIC_Init(void)
  * output: None
  * return:none
  ****************************************************************************/
-void SDA_IN(void)
+static void SDA_IN(void)
 {
     k210_gpiohs_set_direction(FPIOA_IIC_SDA, GPIO_DM_INPUT_PULL_UP);
 }
@@ -60,7 +98,7 @@ void SDA_IN(void)
  * output: None
  * return:none
  ****************************************************************************/
-void SDA_OUT(void)
+static void SDA_OUT(void)
 {	
     k210_gpiohs_set_direction(FPIOA_IIC_SDA, GPIO_DM_OUTPUT);
 }
@@ -72,7 +110,7 @@ void SDA_OUT(void)
  * output: None
  * return: sda pin value
  ****************************************************************************/
-uint8_t READ_SDA(void)
+static uint8_t READ_SDA(void)
 {
 	return k210_gpiohs_get_value(FPIOA_IIC_SDA);
 }   
@@ -84,7 +122,7 @@ uint8_t READ_SDA(void)
  * output: None
  * return: None
  ****************************************************************************/
-void IIC_SCL(uint8_t val)
+static void IIC_SCL(uint8_t val)
 {
 	if (val)
 		k210_gpiohs_set_value(FPIOA_IIC_SCL,GPIO_PV_HIGH); 
@@ -101,7 +139,7 @@ void IIC_SCL(uint8_t val)
  * output: None
  * return: None
  ****************************************************************************/
-void IIC_SDA(uint8_t val)
+static void IIC_SDA(uint8_t val)
 {
 	if (val)
 		k210_gpiohs_set_value(FPIOA_IIC_SDA,GPIO_PV_HIGH);
@@ -118,7 +156,7 @@ void IIC_SDA(uint8_t val)
  * output: None
  * return: None
  ****************************************************************************/
-void IIC_Start(void)
+static void IIC_Start(void)
 {
 	SDA_OUT(); 
 	IIC_SDA(1);	  	  
@@ -136,7 +174,7 @@ void IIC_Start(void)
  * output: None
  * return: None
  ****************************************************************************/
-void IIC_Stop(void)
+static void IIC_Stop(void)
 {
 	SDA_OUT();
 	IIC_SCL(1);
@@ -153,7 +191,7 @@ void IIC_Stop(void)
  * output: None
  * return: Return value: 1:failed to receive response,0:the received response is successful.
 ********************************************************************************************/
-uint8_t IIC_Wait_Ack(void)
+static uint8_t IIC_Wait_Ack(void)
 {
 	uint16_t ucErrTime=0;
 	SDA_IN();
@@ -181,7 +219,7 @@ uint8_t IIC_Wait_Ack(void)
  * output: None
  * return: None
  ****************************************************************************/
-void IIC_Ack(void)
+static void IIC_Ack(void)
 {
 	IIC_SCL(0);
 	SDA_OUT();
@@ -200,7 +238,7 @@ void IIC_Ack(void)
  * output: None
  * return: None
  ****************************************************************************/
-void IIC_NAck(void)
+static void IIC_NAck(void)
 {
 	IIC_SCL(0);
 	SDA_OUT();
@@ -219,7 +257,7 @@ void IIC_NAck(void)
  * output: None
  * return: 1:there is a response,0:no response
  ****************************************************************************/	  
-void IIC_Send_Byte(uint8_t txd)
+static void IIC_Send_Byte(uint8_t txd)
 {                        
     uint8_t t;   
 	SDA_OUT(); 	    
@@ -243,7 +281,7 @@ void IIC_Send_Byte(uint8_t txd)
  * output: None
  * return: Returns one byte of data read
  ****************************************************************************/	
-uint8_t IIC_Read_Byte(uint8_t ack)
+static uint8_t IIC_Read_Byte(uint8_t ack)
 {
 	uint8_t i,receive=0;
 	SDA_IN();
@@ -323,27 +361,13 @@ static void GT911_RD_Reg(uint16_t reg,uint8_t *buf,uint8_t len)
 }
 
 /***********************************************************************************
- * Name: GT911_ReadFirmwareVersion
- * Description: Get firmware version number
- * input: None
- * output: None
- * return: version number
- ***********************************************************************************/	
-static uint16_t GT911_ReadFirmwareVersion(void)
-{
-	uint8_t buf[2];
-	GT911_RD_Reg(GT911_FIRMWARE_VERSION_REG, buf, 2);
-	return ((uint16_t)buf[1] << 8) + buf[0];
-}
-
-/***********************************************************************************
  * Name: GT911_Scan
  * Description: point:structure to store coordinates
  * input: None
  * output: None
  * return: Returns true for touch, false for no touch
  ***********************************************************************************/
-bool GT911_Scan(POINT* point)
+static bool GT911_Scan(POINT* point)
 {
     GT911_Dev Dev_Now;
     uint8_t Clearbuf = 0;
@@ -378,32 +402,74 @@ bool GT911_Scan(POINT* point)
             if(Dev_Now.Y[i] > GT911_MAX_HEIGHT -20) Dev_Now.Y[i]=GT911_MAX_HEIGHT - 20;
             if(Dev_Now.X[i] < 20) Dev_Now.X[i] = 20;
             if(Dev_Now.X[i] > GT911_MAX_WIDTH-20) Dev_Now.X[i] = GT911_MAX_WIDTH - 20;
-            point->X = Dev_Now.X[i];
-            point->Y = Dev_Now.Y[i];	
+            point->x = Dev_Now.X[i];
+            point->y = Dev_Now.Y[i];	
         }
     }
     return true;			
 }
 
+/****************************************************************************
+ * Name: touch_open
+ ****************************************************************************/
+static int touch_open(FAR struct file *filep)
+{
+    return OK;
+}
+
+/****************************************************************************
+ * Name: touch_close
+ ****************************************************************************/
+static int touch_close(FAR struct file *filep)
+{
+    return OK;
+}
+
+/****************************************************************************
+ * Name: lcd_read
+ ****************************************************************************/
+static ssize_t touch_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+{
+    int  ret = -ERROR;
+    POINT  touch_point = {0, 0, 0};
+
+	if (buffer  == NULL) 
+	{
+		return  -ERROR;
+	}
+
+    POINT* data = (POINT*)buffer;
+	while(1)
+	{
+		if(GT911_Scan(&touch_point))
+		{
+			data->x = touch_point.x;
+			data->y = touch_point.y;
+			ret = buflen;
+			break;
+		}
+	}
+    return ret;
+}
+
+/****************************************************************************
+ * Name: lcd_read
+ ****************************************************************************/
+static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+{
+    return OK;
+}
+
 /***********************************************************************************
- * Name: GT911_test
- * Description: gt911 test code
+ * Name: board_touch_initialize
+ * Description: touch initialize
  * input: None
  * output: None
- * return: Returns true for touch, false for no touch
+ * return: None
  ***********************************************************************************/
-void GT911_test(void)
+void board_touch_initialize(void)
 {
-    uint16_t res;
-    POINT point = {0, 0};
     IIC_Init();
-    res = GT911_ReadFirmwareVersion();
-    printf("FirmwareVersion:%2x\n",res);
-    while(1)
-    {
-        if(GT911_Scan(&point))
-        {
-            printf("Now touch point:(%d,%d)\n",point.X,point.Y);
-        }
-    }
+	/* register device */
+    register_driver("/dev/touch_dev", &g_touchfops, 0666, NULL);
 }

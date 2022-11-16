@@ -10,6 +10,14 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
         CSRCS += test_lcd.c
     endif
 
+    ifeq ($(CONFIG_BSP_USING_TOUCH),y)
+        CSRCS += test_touch.c
+    endif
+
+    ifeq ($(CONFIG_MUSL_LIBC),y)
+        CSRCS += test_musl.c
+    endif
+
     include $(APPDIR)/Application.mk
 
 endif

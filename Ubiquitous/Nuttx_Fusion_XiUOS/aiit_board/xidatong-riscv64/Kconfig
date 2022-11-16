@@ -39,6 +39,12 @@ menuconfig BSP_USING_TOUCH
     bool "Using touch device"
     default n
 
+menuconfig BSP_USING_CAN
+    select K210_16550_UART
+    select K210_16550_UART1
+    bool "Using CAN device"
+    default n
+
 menuconfig BSP_USING_CH438
     bool "Using CH438 device"
     default n

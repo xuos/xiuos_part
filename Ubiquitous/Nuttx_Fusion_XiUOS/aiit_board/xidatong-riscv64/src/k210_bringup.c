@@ -47,6 +47,10 @@
 #  include "k210_ch438.h"
 #endif
 
+#ifdef CONFIG_BSP_USING_TOUCH
+#  include "k210_touch.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -87,23 +91,40 @@ int k210_bringup(void)
   board_lcd_initialize();
 #endif
 
+#ifdef CONFIG_BSP_USING_TOUCH
+  board_touch_initialize();
+#endif
+
 #ifdef CONFIG_K210_16550_UART1
+#ifdef CONFIG_ADAPTER_ESP8285_WIFI
   sysctl_clock_enable(SYSCTL_CLOCK_UART1);
   sysctl_reset(SYSCTL_RESET_UART1);
 
   fpioa_set_function(GPIO_WIFI_TXD, FPOA_USART1_RX);
   fpioa_set_function(GPIO_WIFI_RXD, FPOA_USART1_TX);
 
-  fpioa_set_function(GPIO_WIFI_EN, K210_IO_FUNC_GPIOHS0 + GPIO_WIFI_EN);
-  k210_gpiohs_set_direction(GPIO_WIFI_EN, GPIO_DM_OUTPUT);
-  k210_gpiohs_set_value(GPIO_WIFI_EN, GPIO_PV_LOW);
+  fpioa_set_function(GPIO_WIFI_EN, K210_IO_FUNC_GPIOHS0 + FPIOA_WIFI_EN);
+  k210_gpiohs_set_direction(FPIOA_WIFI_EN, GPIO_DM_OUTPUT);
+  k210_gpiohs_set_value(FPIOA_WIFI_EN, GPIO_PV_LOW);
   up_mdelay(50);
-  k210_gpiohs_set_value(GPIO_WIFI_EN, GPIO_PV_HIGH);
+  k210_gpiohs_set_value(FPIOA_WIFI_EN, GPIO_PV_HIGH);
+#endif
+
+#ifdef CONFIG_BSP_USING_CAN
+  sysctl_clock_enable(SYSCTL_CLOCK_UART1);
+  sysctl_reset(SYSCTL_RESET_UART1);
+
+  fpioa_set_function(GPIO_CAN_TXD, FPOA_USART1_TX);
+  fpioa_set_function(GPIO_CAN_RXD, FPOA_USART1_RX);
+
+  k210_fpioa_config(GPIO_CAN_CFG, HS_GPIO(FPIOA_CAN_NCFG) | K210_IOFLAG_GPIOHS);
+#endif
 #endif
 
 #ifdef CONFIG_K210_16550_UART2
   sysctl_clock_enable(SYSCTL_CLOCK_UART2);
   sysctl_reset(SYSCTL_RESET_UART2);
+
   fpioa_set_function(GPIO_EC200T_RXD, FPOA_USART2_RX);
   fpioa_set_function(GPIO_EC200T_TXD, FPOA_USART2_TX);
 #endif
@@ -111,6 +132,7 @@ int k210_bringup(void)
 #ifdef CONFIG_K210_16550_UART3
   sysctl_clock_enable(SYSCTL_CLOCK_UART3);
   sysctl_reset(SYSCTL_RESET_UART3);
+  
   fpioa_set_function(GPIO_CH376T_RXD, FPOA_USART3_RX);
   fpioa_set_function(GPIO_CH376T_TXD, FPOA_USART3_TX);
 #endif
