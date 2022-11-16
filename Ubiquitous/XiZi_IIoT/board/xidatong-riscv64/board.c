@@ -70,7 +70,7 @@ extern int HwWdtInit(void);
  * @description: Mount USB
  * @return 0
  */
-int  MountUSB(void)
+int  MountUsb(void)
 {
     if (MountFilesystem(USB_BUS_NAME, USB_DEVICE_NAME, USB_DRIVER_NAME, FSTYPE_CH376, "/") == 0)
         KPrintf("usb mount to '/'\n");
