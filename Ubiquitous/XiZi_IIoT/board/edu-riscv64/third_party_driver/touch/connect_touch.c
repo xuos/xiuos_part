@@ -24,21 +24,33 @@
 #include <bus.h>
 #include <gpiohs.h>
 #include <fpioa.h>
+#include "gsl2038firmware.h"
 
-// #define LCD_HEIGHT  BSP_LCD_X_MAX
-// #define LCD_WIDTH   BSP_LCD_Y_MAX
+
+struct Finger {
+    uint8_t fingerID;
+    uint32_t x;
+    uint32_t y;
+};
+struct Touch_event {
+    uint8_t NBfingers;
+    struct Finger fingers[5];
+};
+
 #define DEFAULT_NUM 0x0D
-
+#define TOUCH_ADDRESS 0x44
 volatile bool SemReleaseFlag = 0;
 
 static struct Bus* i2c_bus = NONE;
 static struct Bus* pin_bus = NONE;
 int touch_sem = 0;
-POINT Pre_Touch_Point;
+
+#define DATA_REG 0x80
+#define STATUS_REG 0xE0
 
 /* HERE WE IMPLEMENT I2C READING AND WRITING FROM SENSOR */
 /* write sensor register data */
-static x_err_t WriteReg(struct HardwareDev* dev, uint8 len, uint8* buf)
+static x_err_t WriteReg(struct HardwareDev* dev, char* buf, int len)
 {
     struct BusBlockWriteParam write_param;
     write_param.pos = 0;
@@ -62,150 +74,10 @@ static x_err_t ReadRegs(struct HardwareDev* dev, uint8 len, uint8* buf)
     return BusDevReadData(dev, &read_param);
 }
 
-/**
- * i2c_transfer - execute a single I2C message
- * @msgs: One or more messages to execute before STOP is issued to
- *	terminate the operation; each message begins with a START.
- */
-int I2C_Transfer(struct i2c_msg* msg)
-{
-    int16 ret = 0;
-
-    if (msg->flags & I2C_M_RD)																//根据flag判断是读数据还是写数据
-    {
-        ret = ReadRegs(i2c_bus->owner_haldev, msg->len, msg->buf);		//IIC读取数据
-    }
-    else
-    {
-        ret = WriteReg(i2c_bus->owner_haldev, msg->len, msg->buf);	//IIC写入数据
-    }  													//正常完成的传输结构个数
-
-    return ret;
-}
-
-static int32_t GtpI2cWrite(uint8_t* buf, int32_t len)
-{
-    struct i2c_msg msg;
-    int32_t ret = -1;
-    int32_t retries = 0;
-
-    msg.flags = !I2C_M_RD;
-    msg.len = len;
-    msg.buf = buf;
-    //msg.scl_rate = 300 * 1000;    // for Rockchip, etc
-    while (retries < 5)
-    {
-        ret = I2C_Transfer(&msg);
-        if (ret == 1) { break; }
-        retries++;
-    }
-    if (retries >= 5)
-    {
-        KPrintf("I2C Write: 0x%04X, %d bytes failed, errcode: %d! Process reset.", (((uint16_t)(buf[0] << 8)) | buf[1]), len - 2, ret);
-        ret = -1;
-    }
-    return ret;
-}
-static int32_t GtpI2cRead(uint8_t* buf, int32_t len)
-{
-    struct i2c_msg msgs[2];
-    int32_t ret = -1;
-    int32_t retries = 0;
-
-    // write reading addr.
-    msgs[0].flags = !I2C_M_RD;
-    msgs[0].len = GTP_ADDR_LENGTH;
-    msgs[0].buf = buf;
-
-    // read data at addr sended.
-    msgs[1].flags = I2C_M_RD;
-    msgs[1].len = len - GTP_ADDR_LENGTH;
-    msgs[1].buf = &buf[GTP_ADDR_LENGTH];
-
-    while (retries < 5)
-    {
-        ret = I2C_Transfer(&msgs[0]);
-        ret += I2C_Transfer(&msgs[1]);
-        if (ret == 2)break;
-        retries++;
-    }
-    if (retries >= 5)
-    {
-        KPrintf("I2C Read: 0x%04X, %d bytes %d times failed, errcode: %d! Process reset.\n", (((uint16_t)(buf[0] << 8)) | buf[1]), len - 2, retries, ret);
-        ret = -1;
-    }
-    return ret;
-}
-
-/* HERE WE IMPLEMENT TOUCH INIT */
-int32_t GtpReadVersion(void)
-{
-    int32_t ret = -1;
-    uint8_t buf[8] = { GTP_REG_VERSION >> 8, GTP_REG_VERSION & 0xff };
-
-    ret = GtpI2cRead(buf, sizeof(buf));
-    if (ret < 0)
-    {
-        KPrintf("GTP read version failed.\n");
-        return ret;
-    }
-
-    if (buf[5] == 0x00)
-    {
-        KPrintf("IC1 Version: %c%c%c_%02x%02x\n", buf[2], buf[3], buf[4], buf[7], buf[6]);
-    }
-    else
-    {
-        KPrintf("IC2 Version: %c%c%c%c_%02x%02x\n", buf[2], buf[3], buf[4], buf[5], buf[7], buf[6]);
-    }
-    return ret;
-}
-
-static int32_t GtpGetInfo(void)
-{
-    uint8_t end_cmd[3] = { GTP_READ_COOR_ADDR >> 8, GTP_READ_COOR_ADDR & 0xFF, 0 };
-    uint8_t opr_buf[6] = { 0 };
-    int32_t ret = 0;
-
-    uint16_t abs_x_max = GTP_MAX_WIDTH;
-    uint16_t abs_y_max = GTP_MAX_HEIGHT;
-    uint8_t int_trigger_type = GTP_INT_TRIGGER;
-
-    opr_buf[0] = (uint8_t)((GTP_REG_CONFIG_DATA + 1) >> 8);
-    opr_buf[1] = (uint8_t)((GTP_REG_CONFIG_DATA + 1) & 0xFF);
-
-    if (GtpI2cRead(opr_buf, 6) < 0)
-    {
-        return -1;
-    }
-
-    abs_x_max = (opr_buf[3] << 8) + opr_buf[2];
-    abs_y_max = (opr_buf[5] << 8) + opr_buf[4];
-
-    opr_buf[0] = (uint8_t)((GTP_REG_CONFIG_DATA + 6) >> 8);
-    opr_buf[1] = (uint8_t)((GTP_REG_CONFIG_DATA + 6) & 0xFF);
-
-    if (GtpI2cRead(opr_buf, 3) < 0)
-    {
-        return 0;
-    }
-
-    int_trigger_type = opr_buf[2] & 0x03;
-    KPrintf("X_MAX = %d, Y_MAX = %d, TRIGGER = 0x%02x\n",
-        abs_x_max, abs_y_max, int_trigger_type);
-
-    if (GtpI2cWrite(end_cmd, 3) < 0)
-    {
-        KPrintf("I2C write end_cmd error!\n");
-        ret = 0;
-    }
-    return 0; ;
-}
-
 // not used in polling mode
-static void GT9xx_PEN_IRQHandler(void* arg)
+static void touch_pin_irqhandler(void* arg)
 {
-    KPrintf("int hdr working.\n");
+    // KPrintf("int hdr working.\n");
     if (!SemReleaseFlag)
     {
         KSemaphoreAbandon(touch_sem);
@@ -213,20 +85,20 @@ static void GT9xx_PEN_IRQHandler(void* arg)
     }
 }
 
-int32_t GT9xx_INT_INIT() {
+int32_t touch_irq_init() 
+{
     int32_t ret = -ERROR;
-
-    pin_bus = PinBusInitGet();
-
     struct PinParam pin_param;
     struct BusConfigureInfo pin_configure_info;
+
+    pin_bus = PinBusInitGet();
 
     pin_configure_info.configure_cmd = OPE_CFG;
     pin_configure_info.private_data = (void*)&pin_param;
 
     pin_param.cmd = GPIO_CONFIG_MODE;
     pin_param.pin = BSP_TOUCH_TP_INT;
-    pin_param.mode = GPIO_CFG_INPUT_PULLUP;
+    pin_param.mode = GPIO_CFG_INPUT;
     ret = BusDrvConfigure(pin_bus->owner_driver, &pin_configure_info);
     if (ret != EOK) {
         KPrintf("config pin_param  %d input failed!\n", pin_param.pin);
@@ -235,8 +107,8 @@ int32_t GT9xx_INT_INIT() {
 
     pin_param.cmd = GPIO_IRQ_REGISTER;
     pin_param.pin = BSP_TOUCH_TP_INT;
-    pin_param.irq_set.irq_mode = GPIO_IRQ_EDGE_FALLING;
-    pin_param.irq_set.hdr = GT9xx_PEN_IRQHandler;
+    pin_param.irq_set.irq_mode = GPIO_IRQ_EDGE_BOTH;
+    pin_param.irq_set.hdr = touch_pin_irqhandler;
     pin_param.irq_set.args = NONE;
     ret = BusDrvConfigure(pin_bus->owner_driver, &pin_configure_info);
     if (ret != EOK) {
@@ -264,7 +136,7 @@ int32_t GT9xx_INT_INIT() {
     return EOK;
 }
 
-int32_t I2C_Touch_Init() {
+int32_t I2cTouchInit() {
     // using static bus information
     int32_t ret = -1;
     /* find I2C device and get I2C handle */
@@ -294,116 +166,68 @@ int32_t I2C_Touch_Init() {
 
     // memset(&i2c_configure_info, 0, sizeof(struct BusConfigureInfo));
     i2c_configure_info.configure_cmd = OPE_INT;
-    uint16 i2c_address = GTP_ADDRESS >> 1;
+    uint16 i2c_address = TOUCH_ADDRESS;
     i2c_configure_info.private_data = (void*)&i2c_address;
     BusDrvConfigure(i2c_bus->owner_driver, &i2c_configure_info);
 
     // 3. init interruption
-    return GT9xx_INT_INIT();
+    return touch_irq_init();
 }
 
-
-/* HERE WE IMPLEMENT GET COORDINATE FUNCTION */
-/**
-  * @brief   触屏处理函数，轮询或者在触摸中断调用
-  * @param 无
-  * @retval 无
-  */
-bool GetTouchEvent(POINT* touch_point, touch_event_t* touch_event)
+void loadfw(struct HardwareDev *dev)
 {
+    uint8_t addr;
+    uint8_t Wrbuf[5];
+    size_t source_len = sizeof(GSL2038_FW) / sizeof(struct fw_data);
+    
+    for (size_t source_line = 0; source_line < source_len; source_line++) {
+        // addr = GSL2038_FW[source_line].offset;
+        memset(Wrbuf, 0 , 5);
+        Wrbuf[0] = GSL2038_FW[source_line].offset;
+        Wrbuf[1] = (char)(GSL2038_FW[source_line].val & 0x000000ff);
+        Wrbuf[2] = (char)((GSL2038_FW[source_line].val & 0x0000ff00) >> 8);
+        Wrbuf[3] = (char)((GSL2038_FW[source_line].val & 0x00ff0000) >> 16);
+        Wrbuf[4] = (char)((GSL2038_FW[source_line].val & 0xff000000) >> 24);
 
-    uint8_t  end_cmd[3] = { GTP_READ_COOR_ADDR >> 8, GTP_READ_COOR_ADDR & 0xFF, 0 };
-    uint8_t  point_data[2 + 1 + 8 * GTP_MAX_TOUCH + 1] = { GTP_READ_COOR_ADDR >> 8, GTP_READ_COOR_ADDR & 0xFF };
-    uint8_t  touch_num = 0;
-    uint8_t  finger = 0;
-    static uint16_t pre_touch = 0;
-
-    uint8_t* coor_data = NULL;
-    int32_t input_x = 0;
-    int32_t input_y = 0;
-    int32_t input_w = 0;
-
-    int32_t ret = -1;
-
-    ret = GtpI2cRead(point_data, 12);//10字节寄存器加2字节地址
-    if (ret < 0)
-    {
-        KPrintf("I2C transfer error. errno:%d\n ", ret);
-        return 0;
+        WriteReg(dev, Wrbuf,5);
     }
+}
 
-    finger = point_data[GTP_ADDR_LENGTH];//状态寄存器数据
+void reset()
+{
+    uint8_t REG[6] = {STATUS_REG, 0xE4, 0xbc, 0xbd, 0xbe, 0xbf};
+    uint8_t DATA[6] = {0x88, 0x04, 0x00, 0x00, 0x00, 0x00};
+    char reg_data[2];
 
-    if (finger == 0x00)		//没有数据，退出
+    int i;
+    for (i = 0; i < sizeof(REG); ++i)
     {
-        ret = 0;
-        goto exit_work_func;
+        // WriteReg(i2c_bus->owner_haldev, &REG[i],1);
+        // WriteReg(i2c_bus->owner_haldev, &DATA[i],1);
+        reg_data[0] = REG[i];
+        reg_data[1] = DATA[i];
+        WriteReg(i2c_bus->owner_haldev, reg_data,2);
+        MdelayKTask(10);
     }
+}
 
-    if ((finger & 0x80) == 0)//判断buffer status位
-    {
-        ret = 0;
-        goto exit_work_func;//坐标未就绪，数据无效
-    }
+void startchip()
+{
+    char reg_data[] = {0xE0, 0x00};
 
-    touch_num = finger & 0x0f;//坐标点数
-    if (touch_num > GTP_MAX_TOUCH)
-    {
-        ret = 0;
-        goto exit_work_func;//大于最大支持点数，错误退出
-    }
-
-    if (touch_num)
-    {
-        coor_data = &point_data[0 * 8 + 3];
-        input_x = coor_data[1] | (coor_data[2] << 8);	//x坐标
-        input_y = coor_data[3] | (coor_data[4] << 8);	//y坐标
-        input_w = coor_data[5] | (coor_data[6] << 8);	//size
-        touch_point->X = input_x;
-        touch_point->Y = input_y;
-        *touch_event = kTouch_Down;
-        Pre_Touch_Point = *touch_point;
-
-    }
-    else if (pre_touch)		//touch_ num=0 且pre_touch！=0
-    {
-        *touch_point = Pre_Touch_Point;
-        *touch_event = kTouch_Up;
-        Pre_Touch_Point.X = -1;
-        Pre_Touch_Point.Y = -1;
-    }
-    pre_touch = touch_num;
-
-exit_work_func:
-    {
-        ret = GtpI2cWrite(end_cmd, 3);
-        if (ret < 0)
-        {
-            KPrintf("I2C write end_cmd error!\n");
-            ret = 0;
-        }
-    }
-    return ret;
+    WriteReg(i2c_bus->owner_haldev, reg_data,2); // Registre
 }
 
 static uint32 TouchOpen(void* dev)
 {
-    int32_t ret = -1;
+    int32_t ret = 0;
 
-    I2C_Touch_Init();
-    ret = GtpReadVersion();
-    if (ret < 0)
-    {
-        KPrintf("gtp read version error\n");
-        return ret;
-    }
+    I2cTouchInit();
 
-    ret = GtpGetInfo();
-    if (ret < 0)
-    {
-        KPrintf("gtp read info error\n");
-        return ret;
-    }
+    reset();
+    loadfw(i2c_bus->owner_haldev);
+    reset();
+    startchip();
 
     touch_sem = KSemaphoreCreate(0);
     if (touch_sem < 0) {
@@ -415,8 +239,32 @@ static uint32 TouchOpen(void* dev)
 }
 
 static uint32 TouchClose(void* dev)
-{
+{   
+    int32_t ret = -ERROR;
+    struct PinParam pin_param;
+    struct BusConfigureInfo pin_configure_info;
+
+    pin_configure_info.configure_cmd = OPE_CFG;
+    pin_configure_info.private_data = (void*)&pin_param;
+
+    pin_param.cmd = GPIO_IRQ_DISABLE;
+    pin_param.pin = BSP_TOUCH_TP_INT;
+    ret = BusDrvConfigure(pin_bus->owner_driver, &pin_configure_info);
+    if (ret != EOK) {
+        KPrintf("disable pin_param  %d  irq failed!\n", pin_param.pin);
+        return -ERROR;
+    }
+
+    pin_param.cmd = GPIO_IRQ_FREE;
+    pin_param.pin = BSP_TOUCH_TP_INT;
+    ret = BusDrvConfigure(pin_bus->owner_driver, &pin_configure_info);
+    if (ret != EOK) {
+        KPrintf("register pin_param  %d  irq failed!\n", pin_param.pin);
+        return -ERROR;
+    }
+
     KSemaphoreDelete(touch_sem);
+
     return 0;
 }
 
@@ -424,23 +272,35 @@ static uint32 TouchRead(void* dev, struct BusBlockReadParam* read_param)
 {
     uint32  ret = -1;
     x_err_t result;
-    POINT  touch_point;
-    touch_point.X = -1;
-    touch_point.Y = -1;
-    touch_event_t touch_event;
+    uint8_t TOUCHRECDATA[24] = {0};
+    struct Touch_event ts_event;
+    char status_reg = 0x80;
 
     struct TouchDataStandard* data = (struct TouchDataStandard*)read_param->buffer;
     read_param->read_length = 0;
-    result = KSemaphoreObtain(touch_sem, 100);
-    if (GetTouchEvent(&touch_point, &touch_event))
-    {
-        data->x = touch_point.X;
-        data->y = touch_point.Y;
+    result = KSemaphoreObtain(touch_sem, 1000);
+    // if (EOK == result)
+    // {
+        memset(TOUCHRECDATA, 0, 24);
+        memset(&ts_event, 0, sizeof(struct Touch_event));
 
-        read_param->read_length = read_param->size;
-        ret = EOK;
-    }
-    SemReleaseFlag = 0;
+        WriteReg(i2c_bus->owner_haldev, &status_reg, 1);
+        ReadRegs(i2c_bus->owner_haldev, 24, TOUCHRECDATA);
+        ts_event.NBfingers = TOUCHRECDATA[0];
+
+        for (int i = 0; i < ts_event.NBfingers; i++)
+        {
+            ts_event.fingers[i].x = ((((uint32_t)TOUCHRECDATA[(i * 4) + 5]) << 8) | (uint32_t)TOUCHRECDATA[(i * 4) + 4]) & 0x00000FFF; // 12 bits of X coord
+            ts_event.fingers[i].y = ((((uint32_t)TOUCHRECDATA[(i * 4) + 7]) << 8) | (uint32_t)TOUCHRECDATA[(i * 4) + 6]) & 0x00000FFF;
+            ts_event.fingers[i].fingerID = (uint32_t)TOUCHRECDATA[(i * 4) + 7] >> 4; // finger that did the touch
+            printf("fingers[%d] x %d y %d id %d\n",i,ts_event.fingers[i].x,ts_event.fingers[i].y,ts_event.fingers[i].fingerID);
+        }
+
+        data->x = ts_event.fingers[ts_event.NBfingers - 1].x;
+        data->y = ts_event.fingers[ts_event.NBfingers - 1].y;
+
+        SemReleaseFlag = 0;
+    // }
 
     return ret;
 }
