@@ -303,7 +303,7 @@ void MPU8_24bpp_Memory_Write
 
 
 
-void MPuint16_t_16bpp_Memory_Write
+void MPU16_16bpp_Memory_Write
 (
     uint16_t x
     , uint16_t y
@@ -332,7 +332,7 @@ void MPuint16_t_16bpp_Memory_Write
     Check_Mem_WR_FIFO_Empty();
 }
 
-void MPuint16_t_24bpp_Mode1_Memory_Write
+void MPU16_24bpp_Mode1_Memory_Write
 (
     uint16_t x
     , uint16_t y
@@ -368,7 +368,7 @@ void MPuint16_t_24bpp_Mode1_Memory_Write
 }
 
 
-void MPuint16_t_24bpp_Mode2_Memory_Write
+void MPU16_24bpp_Mode2_Memory_Write
 (
     uint16_t x
     , uint16_t y
@@ -1388,7 +1388,7 @@ void LT768_Print_Internal_Font_String
     , uint16_t y // font start y
     , uint32_t FontColor // font color
     , uint32_t BackGroundColor // font background color(when font background is transparent, it is invalid)
-    , char *c // data start address
+    , uint8_t *c // data start address
 )
 {
     Text_Mode();
