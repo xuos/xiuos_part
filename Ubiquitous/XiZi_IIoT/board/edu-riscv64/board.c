@@ -48,6 +48,7 @@ Modification:
 #include "connect_rtc.h"
 #include "connect_hwtimer.h"
 #include "connect_wdt.h"
+#include "connect_dvp.h"
 
 // #if defined(FS_VFS)
 // #include <iot-vfs.h>
@@ -211,6 +212,9 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_WDT
     {"hw_wdt", HwWdtInit },
 #endif
+#ifdef BSP_USING_CAMERA
+    {"hw_camera", HwDvpInit },
+#endif
     { " NONE ",NONE },
 };
 
@@ -222,6 +226,7 @@ void InitBoardHardware(void)
 	
     SysctlPllSetFreq(SYSCTL_PLL0, 800000000UL);
     SysctlPllSetFreq(SYSCTL_PLL1, 400000000UL);
+    SysctlPllSetFreq(SYSCTL_PLL2, 45158400UL);
 #ifdef BSP_USING_GPIO
     /* Init FPIOA */
     FpioaInit();
@@ -235,7 +240,9 @@ void InitBoardHardware(void)
 #ifdef BSP_USING_UART    
     HwUartInit();
 #endif
-
+// #ifdef BSP_USING_CAMERA
+//     HwDvpInit();
+// #endif
     /* initialize memory system */
 	InitBoardMemory(MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
 

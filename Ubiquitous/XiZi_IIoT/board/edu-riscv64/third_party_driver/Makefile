@@ -56,5 +56,9 @@ ifeq ($(CONFIG_BSP_USING_WDT),y)
   SRC_DIR += watchdog
 endif
 
+ifeq ($(CONFIG_BSP_USING_CAMERA),y)
+  SRC_DIR += dvp
+endif
+
 
 include $(KERNEL_ROOT)/compiler.mk

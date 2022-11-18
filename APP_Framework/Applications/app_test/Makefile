@@ -67,7 +67,15 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
 
     ifeq ($(CONFIG_USER_TEST_WDT),y)
         SRC_FILES += test_wdt.c
-    endif  
+    endif 
+
+    ifeq ($(CONFIG_USER_TEST_TOUCH),y)
+        SRC_FILES += test_touch.c
+    endif 
+
+    ifeq ($(CONFIG_USER_TEST_CAMERA),y)
+        SRC_FILES += test_camera.c
+    endif 
 
     include $(KERNEL_ROOT)/compiler.mk
 endif

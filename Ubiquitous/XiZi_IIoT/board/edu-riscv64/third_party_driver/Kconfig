@@ -112,3 +112,12 @@ menuconfig BSP_USING_WDT
     if BSP_USING_WDT
         source "$BSP_DIR/third_party_driver/watchdog/Kconfig"
     endif
+
+menuconfig BSP_USING_CAMERA
+    bool "Using camera device"
+    default y
+    select RESOURCES_CAMERA
+    if BSP_USING_CAMERA
+        source "$BSP_DIR/third_party_driver/dvp/Kconfig"
+    endif
+

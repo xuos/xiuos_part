@@ -150,8 +150,17 @@ enum IoctlDriverType
     DAC_TYPE,
     WDT_TYPE,
     RTC_TYPE,
+    CAMERA_TYPE,
     DEFAULT_TYPE,
 };
+
+
+struct DvpRegConfigureInfo
+{
+    uint8_t device_addr;
+    uint16_t reg_addr;
+    uint8_t reg_value;
+} ;
 
 struct PrivIoctlCfg
 {
@@ -179,6 +188,18 @@ typedef struct
     uint16 y_endpos;
     void* pixel_color;
 }LcdPixelParam;
+
+struct CameraCfg
+{
+    uint16_t window_w;
+    uint16_t window_h;
+    uint16_t window_xoffset;
+    uint16_t window_yoffset;
+    uint16_t output_w;
+    uint16_t output_h;
+    uint8_t gain;
+    uint8_t gain_manu_enable;
+};
 
 typedef struct 
 {
