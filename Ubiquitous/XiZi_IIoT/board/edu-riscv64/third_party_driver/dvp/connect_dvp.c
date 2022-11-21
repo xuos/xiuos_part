@@ -138,6 +138,7 @@ static uint32 dvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
         readDvpReg(drv, (struct DvpRegConfigureInfo *)args->private_data);
         break;
     case REG_SCCB_WRITE:
+        //for ov2640,write reg 0x04 to Horizontal mirror or Vertical flip
         writeDvpReg(drv, (struct DvpRegConfigureInfo *)args->private_data);
         break;
     default:
