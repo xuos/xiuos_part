@@ -292,7 +292,7 @@ static bool touchpad_is_pressed(struct TouchDataStandard* touch_data_ptr)
         press_failed_cnt = 0;
         return true;
     }
-
+    printf("lv_touch:%d,%d\n",touch_data_ptr->x,touch_data_ptr->y);
     press_failed_cnt++;
     if (press_failed_cnt >= PRESS_FAILED_LIMIT) {
         PrivClose(touch_fd);

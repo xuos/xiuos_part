@@ -268,7 +268,7 @@ static bool touchpad_is_pressed(void)
     ret = PrivRead(touch_fd, &touch_data, 1);
     if(ret && touch_data.x >= 0 && touch_data.x < MY_INDEV_X && touch_data.y >= 0 && touch_data.y < MY_INDEV_Y)
     {
-        // printf("touch x %d touch y %d\n",touch_data.x,touch_data.y);
+        printf("touch x %d touch y %d\n",touch_data.x,touch_data.y);
         return true;
     }
     
