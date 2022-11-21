@@ -18,8 +18,8 @@
  * @date 2022.04.26
  */
 
-#ifndef __BOARDS_ARM_IMXRT_XIDATONG_SRC_IMXRT_CH438_H
-#define __BOARDS_ARM_IMXRT_XIDATONG_SRC_IMXRT_CH438_H
+#ifndef __BOARDS_XIDATONG_SRC_RISCV64_CH438_H
+#define __BOARDS_XIDATONG_SRC_RISCV64_CH438_H
 
 /****************************************************************************
  * Included Files
@@ -322,5 +322,5 @@
 void board_ch438_initialize(void);
 #endif
 
-#endif /* __BOARDS_ARM_IMXRT_XIDATONG_SRC_IMXRT_CH438_H */
+#endif /* __BOARDS_XIDATONG_SRC_RISCV64_CH438_H */
 

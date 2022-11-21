@@ -113,18 +113,11 @@ struct InitSequenceDesc components_init[] =
 };
 struct InitSequenceDesc env_init[] = 
 {
-#ifdef BSP_USING_STM32_USBH
-    { "STM32USBHostRegister", STM32USBHostRegister },
-	{ "hw usb", Stm32HwUsbInit },
-#endif
-#ifdef BSP_USING_NXP_USBH
-	{ "nxp hw usb", Imxrt1052HwUsbHostInit },
-#endif
 #ifdef MOUNT_SDCARD
 	{ "MountSDCard", MountSDCard },
 #endif
 #ifdef MOUNT_USB
-	{ "MountUSB", MountUSB },
+	{ "MountUsb", MountUsb },
 #endif
 #ifdef FS_VFS_MNTTABLE
 	{ "DfsMountTable", DfsMountTable },
