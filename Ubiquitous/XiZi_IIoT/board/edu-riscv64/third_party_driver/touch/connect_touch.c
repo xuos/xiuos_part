@@ -38,7 +38,7 @@ struct Touch_event {
 };
 
 #define DEFAULT_NUM 0x0D
-#define TOUCH_ADDRESS 0x44
+#define TOUCH_ADDRESS 0x40
 volatile bool SemReleaseFlag = 0;
 
 static struct Bus* i2c_bus = NONE;

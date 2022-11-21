@@ -215,6 +215,12 @@ typedef struct
     uint16_t press;
 }TouchDataParam;
 
+struct TouchDataStandard
+{
+    uint16 x;
+    uint16 y;
+};
+
 struct RtcDrvConfigureParam
 {
     int rtc_operation_cmd;
