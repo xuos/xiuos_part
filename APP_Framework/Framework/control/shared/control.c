@@ -12,16 +12,239 @@
 
 /**
  * @file control.c
- * @brief control framework code
+ * @brief code for control framework app
  * @version 3.0
  * @author AIIT XUOS Lab
  * @date 2022-09-27
  */
 
 #include <control.h>
+#include <control_def.h>
 
-void control_init(void)
+ControlProtocolType control_protocol;
+
+/**
+ * @description: Control Framework Find certain Protocol
+ * @param
+ * @return Control Protocol pointer
+ */
+ControlProtocolType ControlProtocolFind(void)
 {
-    //to do
+    return control_protocol;
 }
 
+/**
+ * @description: Control Framework Protocol Init
+ * @param control_protocol - control protocol pointer
+ * @return success: 0 error : -1
+ */
+static int ControlProtocolInit(ControlProtocolType control_protocol)
+{
+    CONTROL_PARAM_CHECK(control_protocol);
+    int ret = -1;
+
+    control_protocol->protocol_status = CONTROL_INIT;
+
+    ret = PrivMutexCreate(&control_protocol->lock, 0);
+    if(ret < 0) {
+        printf("ControlProtocolInit mutex create failed.\n");
+        goto _out;
+    }
+
+    ret = PrivSemaphoreCreate(&control_protocol->sem, 0, 0);
+    if (ret < 0) {
+        printf("ControlProtocolInit create sem error\n");
+        goto _out;
+    }
+
+_out:
+    return ret;    
+}
+
+/**
+ * @description: Analyze Recipe
+ * @param control_protocol - Control Protocol pointer
+ * @param recipe_name - recipe name
+ * @return success: 0 error : -1
+ */
+static int ControlAnalyzeRecipe(ControlProtocolType control_protocol, const char *recipe_name)
+{
+    int recipe_file_fd = -1;
+    struct stat recipe_file_status;
+    uint16_t recipe_file_length = 0;
+    char *recipe_file_buf;
+
+    //Step1 : read recipe file data from SD card or other store device
+    recipe_file_fd = PrivOpen(recipe_name, O_RDONLY);
+    if (recipe_file_fd < 0) {
+        printf("Open recipe file %s failed\n", recipe_name);
+        PrivClose(recipe_file_fd);
+        return -1;
+    }
+
+    if (0 != fstat(recipe_file_fd, &recipe_file_status)) {
+        printf("Get recipe file information failed!\n");
+        PrivClose(recipe_file_fd);
+        return -1;
+    } else {
+        recipe_file_length = recipe_file_status.st_size;
+    }
+
+    recipe_file_buf = PrivMalloc(recipe_file_length);
+    if (NULL == recipe_file_buf) {
+        printf("Get recipe file memory failed!\n");
+        PrivFree(recipe_file_buf);
+        PrivClose(recipe_file_fd);
+        return -1;
+    }
+
+    if (PrivRead(recipe_file_fd, recipe_file_buf, recipe_file_length) < 0) {
+        printf("Read recipe file failed!\n");
+        PrivFree(recipe_file_buf);
+        PrivClose(recipe_file_fd);
+        return -1;
+    }
+
+    PrivClose(recipe_file_fd);  
+
+    //Step2 : CJSON analyze
+#ifdef LIB_USING_CJSON
+    cJSON *recipe_file_json = cJSON_Parse(recipe_file_buf);
+    PrivFree(recipe_file_buf);
+    if (NULL == recipe_file_json) {
+        printf("Parse recipe_file_buf failed!\n");
+        return -1;
+    }
+    
+    control_protocol->recipe = (struct ControlRecipe *)PrivMalloc(sizeof(struct ControlRecipe));
+    memset(control_protocol->recipe, 0, sizeof(struct ControlRecipe));
+
+    /*Get basic information from recipe file*/
+    if (RecipeBasicInformation(control_protocol->recipe, control_protocol->protocol_type, recipe_file_json) < 0) {
+        return -1;
+    }
+
+    /*Get the variable need to read from recipe file*/
+    RecipeReadVariableItem(control_protocol->recipe, control_protocol->protocol_type, recipe_file_json);
+
+    cJSON_Delete(recipe_file_json);
+    printf("Read and parse recipe file done!\n");
+#endif
+
+    return 0;
+}
+
+/*Control Framework Protocol Open*/
+int ControlProtocolOpen(struct ControlProtocol *control_protocol)
+{
+    CONTROL_PARAM_CHECK(control_protocol);
+    CONTROL_PARAM_CHECK(control_protocol->done);
+    int ret = -1;
+
+    if (control_protocol->done->_open) {
+        ret = control_protocol->done->_open(control_protocol);
+    }
+
+    return ret;
+}
+
+/*Control Framework Protocol Close*/
+int ControlProtocolClose(struct ControlProtocol *control_protocol)
+{
+    CONTROL_PARAM_CHECK(control_protocol);
+    CONTROL_PARAM_CHECK(control_protocol->done);
+    int ret = -1;
+
+    if (control_protocol->done->_close) {
+        ret = control_protocol->done->_close(control_protocol);
+    }
+
+    return ret;
+}
+
+/*Control Framework Protocol Read Date*/
+int ControlProtocolRead(struct ControlProtocol *control_protocol, void *buf, size_t len)
+{
+    CONTROL_PARAM_CHECK(control_protocol);
+    CONTROL_PARAM_CHECK(control_protocol->done);
+    int ret = -1;
+
+    if (control_protocol->done->_read) {
+        ret = control_protocol->done->_read(control_protocol, buf, len);
+    }
+
+    return ret;
+}
+
+/*Control Framework Protocol Write Cmd*/
+int ControlProtocolWrite(struct ControlProtocol *control_protocol, const void *buf, size_t len)
+{
+    CONTROL_PARAM_CHECK(control_protocol);
+    CONTROL_PARAM_CHECK(control_protocol->done);
+    int ret = -1;
+
+    if (control_protocol->done->_write) {
+        ret = control_protocol->done->_write(control_protocol, buf, len);
+    }
+
+    return ret;
+}
+
+/*Control Framework Protocol Ioctl*/
+int ControlProtocolIoctl(struct ControlProtocol *control_protocol, int cmd, void *args)
+{
+    CONTROL_PARAM_CHECK(control_protocol);
+    CONTROL_PARAM_CHECK(control_protocol->done);
+    int ret = -1;
+
+    if (control_protocol->done->_ioctl) {
+        ret = control_protocol->done->_ioctl(control_protocol, cmd, args);
+    }
+
+    return ret;    
+}
+
+/**
+ * @description: Control Framework Init
+ * @return success: 0 error : -1
+ */
+int ControlFrameworkInit(void)
+{
+    int ret = 0;
+
+    control_protocol = (struct ControlProtocol *)PrivMalloc(sizeof(struct ControlProtocol));
+    if (NULL == control_protocol) {
+        printf("%s malloc control protocol failed!\n", __func__);
+        PrivFree(control_protocol);
+        ret = -1;
+        goto _out;
+    }
+
+    //Control Protocol Struct Init
+    ret = ControlProtocolInit(control_protocol);
+    if (ret < 0) {
+        printf("%s failed!\n", __func__);
+        PrivFree(control_protocol);
+        goto _out;
+    }
+
+    //Read Recipe File, Get Control Protocol Configure Param
+    ret = ControlAnalyzeRecipe(control_protocol, CONTROL_RECIPE_FILE);
+    if (ret < 0) {
+        printf("%s failed!\n", __func__);
+        PrivFree(control_protocol);
+        goto _out;
+    }
+
+    control_protocol->protocol_status = CONTROL_REGISTERED;
+
+    ret = ControlPeripheralInit(control_protocol->recipe);
+    if (ret < 0) {
+        printf("%s failed!\n", __func__);
+        PrivFree(control_protocol);
+        goto _out;
+    }
+
+_out:
+    return ret;
+}
