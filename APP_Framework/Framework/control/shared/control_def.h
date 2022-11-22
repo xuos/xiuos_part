@@ -25,14 +25,10 @@
 #include <list.h>
 #include <circular_area_app.h>
 #include <control.h>
+#include <control_io.h>
 
 #ifdef LIB_USING_CJSON
 #include <cJSON.h>
-#endif
-
-#ifdef BSP_USING_LWIP
-#include "lwip/sys.h"
-#include "lwip/sockets.h"
 #endif
 
 #ifdef __cplusplus
@@ -47,11 +43,6 @@ extern "C" {
             return -1;                                                                              \
         }                                                                                           \
     }while (0)   
-
-#ifdef BSP_USING_LWIP
-#define socket_write lwip_write
-#define socket_read  lwip_read
-#endif
 
 typedef enum
 {
@@ -141,16 +132,22 @@ int RecipeBasicInformation(struct ControlRecipe *p_recipe, int protocol_type, cJ
 /*Get the variable need to read from recipe file*/
 void RecipeReadVariableItem(struct ControlRecipe *p_recipe, int protocol_type, cJSON *p_recipe_file_json);
 
+/*Control Framework Peripheral Device Init*/
 int ControlPeripheralInit(struct ControlRecipe *p_recipe);
 
-void ControlPrintList(char name[5], uint8_t *number_list, uint16_t length);
+/*Control Framework Printf List Function*/
+void ControlPrintfList(char name[5], uint8_t *number_list, uint16_t length);
 
+/*Control Framework Connect Socket*/
 int ControlConnectSocket(BasicSocketPlc *p_plc);
 
+/*Control Framework Disconnect Socket*/
 int ControlDisconnectSocket(BasicSocketPlc *p_plc);
 
+/*Control Framework Protocol Open for Sub_Protocol, Init Circular Area and Receive Data Task*/
 int ControlProtocolOpenDef(struct ControlProtocol *control_protocol);
 
+/*Control Framework Protocol Open for Sub_Protocol, Release Circular Area and Delete Receive Data Task*/
 int ControlProtocolCloseDef(void);
 
 #ifdef __cplusplus

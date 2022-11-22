@@ -19,6 +19,7 @@
  */
 
 #include <control_def.h>
+#include <control_io.h>
 
 /*using cirtular area to receive data*/
 #define PLC_DATA_LENGTH 1024
@@ -58,6 +59,12 @@ static struct ControlProtocolInitParam protocol_init[] =
 	{ PROTOCOL_END, NULL },
 };
 
+/**
+ * @description: Control Framework Sub_Protocol Desc Init
+ * @param p_recipe - Control recipe pointer
+ * @param sub_protocol_desc - sub_protocol desc
+ * @return success : 0 error : -1
+ */
 static int ControlProtocolInitDesc(struct ControlRecipe *p_recipe, struct ControlProtocolInitParam sub_protocol_desc[])
 {
 	int i = 0;
@@ -72,6 +79,11 @@ static int ControlProtocolInitDesc(struct ControlRecipe *p_recipe, struct Contro
 	return ret;
 }
 
+/**
+ * @description: Control Framework Protocol Data Header Format
+ * @param p_recipe - Control recipe pointer
+ * @return 
+ */
 static void FormatDataHeader(struct ControlRecipe *p_recipe)
 {
     uint16_t plc_read_data_length = CONTROL_DATA_HEAD_LENGTH + p_recipe->total_data_length;//Head length is CONTROL_DATA_HEAD_LENGTH
@@ -87,6 +99,11 @@ static void FormatDataHeader(struct ControlRecipe *p_recipe)
     data[7] = p_recipe->read_item_count;
 }
 
+/**
+ * @description: Get Recipe Total Data Length
+ * @param read_item_list_json - read_item_list_json pointer
+ * @return success : total_data_length error : 0
+ */
 static uint16_t GetRecipeTotalDataLength(cJSON* read_item_list_json)
 {
     uint16_t read_item_count = cJSON_GetArraySize(read_item_list_json);
@@ -99,6 +116,12 @@ static uint16_t GetRecipeTotalDataLength(cJSON* read_item_list_json)
     return total_data_length;
 }
 
+/**
+ * @description: Control Framework Basic Serial Configure
+ * @param p_recipe - Control recipe pointer
+ * @param p_recipe_file_json - p_recipe_file_json pointer
+ * @return
+ */
 static void ControlBasicSerialConfig(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_json)
 {
     cJSON *p_serial_config_json = cJSON_GetObjectItem(p_recipe_file_json, "serial_config");
@@ -110,6 +133,12 @@ static void ControlBasicSerialConfig(struct ControlRecipe *p_recipe, cJSON *p_re
         p_recipe->serial_config.baud_rate, p_recipe->serial_config.data_bits, p_recipe->serial_config.stop_bits, p_recipe->serial_config.check_mode);
 }
 
+/**
+ * @description: Control Framework Basic Socket Configure
+ * @param p_recipe - Control recipe pointer
+ * @param p_recipe_file_json - p_recipe_file_json pointer
+ * @return
+ */
 static void ControlBasicSocketConfig(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_json)
 {
     cJSON *p_socket_address_json = cJSON_GetObjectItem(p_recipe_file_json, "socket_config");
@@ -146,7 +175,14 @@ static void ControlBasicSocketConfig(struct ControlRecipe *p_recipe, cJSON *p_re
         local_ip_string, plc_ip_string, gateway_ip_string, p_recipe->socket_config.port);
 }
 
-void ControlPrintList(char name[5], uint8_t *number_list, uint16_t length)
+/**
+ * @description: Control Framework Printf List Function
+ * @param name - printf function name
+ * @param number_list - number_list pointer
+ * @param length - number_list length
+ * @return
+ */
+void ControlPrintfList(char name[5], uint8_t *number_list, uint16_t length)
 {
     printf("\n******************%5s****************\n", name);
     for (int32_t i = 0;i < length;i ++) {
@@ -155,6 +191,11 @@ void ControlPrintList(char name[5], uint8_t *number_list, uint16_t length)
     printf("\n**************************************\n");
 }
 
+/**
+ * @description: Control Framework Connect Socket
+ * @param p_plc - basic socket plc pointer
+ * @return success : 0 error : -1 -2 -3 -4 -5
+ */
 int ControlConnectSocket(BasicSocketPlc *p_plc)
 {
     if (p_plc->socket >= 0)
@@ -179,10 +220,12 @@ int ControlConnectSocket(BasicSocketPlc *p_plc)
         printf("Error setting TCP_NODELAY function!\n");
         return -1;
     }
+
     if (setsockopt(plc_socket, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, (socklen_t)sizeof(struct timeval)) < 0) {
         printf("Error setting SO_SNDTIMEO function!\n");
         return -2;
     }
+
     if (setsockopt(plc_socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, (socklen_t)sizeof(struct timeval)) < 0) {
         printf("Error setting SO_RCVTIMEO function!\n");
         return -3;
@@ -204,6 +247,11 @@ int ControlConnectSocket(BasicSocketPlc *p_plc)
     }
 }
 
+/**
+ * @description: Control Framework Disconnect Socket
+ * @param p_plc - basic socket plc pointer
+ * @return success : 0 error : -1
+ */
 int ControlDisconnectSocket(BasicSocketPlc *p_plc)
 {
     if (p_plc->socket < 0)
@@ -216,6 +264,11 @@ int ControlDisconnectSocket(BasicSocketPlc *p_plc)
     return error;
 }
 
+/**
+ * @description: Control Framework Protocol Open for Sub_Protocol, Init Circular Area and Receive Data Task
+ * @param control_protocol - Control protocol pointer
+ * @return success : 0 error : -1
+ */
 int ControlProtocolOpenDef(struct ControlProtocol *control_protocol)
 {
     g_circular_area = CircularAreaAppInit(PLC_DATA_LENGTH);
@@ -234,6 +287,11 @@ int ControlProtocolOpenDef(struct ControlProtocol *control_protocol)
     PrivTaskStartup(&recv_plc_data_task);
 }
 
+/**
+ * @description: Control Framework Protocol Open for Sub_Protocol, Release Circular Area and Delete Receive Data Task
+ * @param void
+ * @return success : 0 error : -1
+ */
 int ControlProtocolCloseDef(void)
 {
     CircularAreaAppRelease(g_circular_area);
@@ -243,6 +301,11 @@ int ControlProtocolCloseDef(void)
     return 0;
 }
 
+/**
+ * @description: Control Framework Get Value Memory Size From Recipe File
+ * @param uniform_value_type - uniform value type
+ * @return success : size error : 0
+ */
 uint8_t GetValueTypeMemorySize(UniformValueType uniform_value_type)
 {
     switch (uniform_value_type)
@@ -271,16 +334,20 @@ uint8_t GetValueTypeMemorySize(UniformValueType uniform_value_type)
     return 0;
 }
 
+/**
+ * @description: Control Framework Peripheral Device Init
+ * @param p_recipe - Control recipe pointer
+ * @return success : 0 error : 
+ */
 int ControlPeripheralInit(struct ControlRecipe *p_recipe)
 {
     switch (p_recipe->communication_type)
     {
     case 0://Socket Init
-        lwip_config_tcp(0, p_recipe->socket_config.local_ip, p_recipe->socket_config.netmask, p_recipe->socket_config.gateway);
+        SocketInit(p_recipe->socket_config.local_ip, p_recipe->socket_config.netmask, p_recipe->socket_config.gateway);
         break;
     case 1://Serial Init
-        // Uart485Init(p_recipe->serial_config.baud_rate, p_recipe->serial_config.data_bits,
-        //     p_recipe->serial_config.stop_bits, p_recipe->serial_config.check_mode);
+        SerialInit(p_recipe->serial_config.baud_rate, p_recipe->serial_config.data_bits, p_recipe->serial_config.stop_bits, p_recipe->serial_config.check_mode);
         break;
     default:
         break;
@@ -289,6 +356,13 @@ int ControlPeripheralInit(struct ControlRecipe *p_recipe)
     return 0;
 }
 
+/**
+ * @description: Control Framework Get Recipe Basic Information
+ * @param p_recipe - Control recipe pointer
+ * @param protocol_type - protocol type
+ * @param p_recipe_file_json - recipe_file_json pointer
+ * @return success : 0 error : -1
+ */
 int RecipeBasicInformation(struct ControlRecipe *p_recipe, int protocol_type, cJSON *p_recipe_file_json)
 {
     if (protocol_type != (ProtocolType)(cJSON_GetObjectItem(p_recipe_file_json, "protocol_type")->valueint)) {
@@ -308,10 +382,10 @@ int RecipeBasicInformation(struct ControlRecipe *p_recipe, int protocol_type, cJ
 
     switch (p_recipe->communication_type)
     {
-    case 0://Socket Config
+    case 0://Get Socket Config
         ControlBasicSocketConfig(p_recipe, p_recipe_file_json);
         break;
-    case 1://Serial Config
+    case 1://Get Serial Config
         ControlBasicSerialConfig(p_recipe, p_recipe_file_json);
         break;
     default:
@@ -321,6 +395,13 @@ int RecipeBasicInformation(struct ControlRecipe *p_recipe, int protocol_type, cJ
     printf("\n************************************************************\n");
 }
 
+/**
+ * @description: Control Framework Read Variable Item Function
+ * @param p_recipe - Control recipe pointer
+ * @param protocol_type - protocol type
+ * @param p_recipe_file_json - recipe_file_json pointer
+ * @return
+ */
 void RecipeReadVariableItem(struct ControlRecipe *p_recipe, int protocol_type, cJSON *p_recipe_file_json)
 {
     int ret = 0;

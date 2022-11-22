@@ -25,7 +25,7 @@ ControlProtocolType control_protocol;
 
 /**
  * @description: Control Framework Find certain Protocol
- * @param
+ * @param void
  * @return Control Protocol pointer
  */
 ControlProtocolType ControlProtocolFind(void)
@@ -36,7 +36,7 @@ ControlProtocolType ControlProtocolFind(void)
 /**
  * @description: Control Framework Protocol Init
  * @param control_protocol - control protocol pointer
- * @return success: 0 error : -1
+ * @return success : 0 error : -1
  */
 static int ControlProtocolInit(ControlProtocolType control_protocol)
 {
@@ -65,7 +65,7 @@ _out:
  * @description: Analyze Recipe
  * @param control_protocol - Control Protocol pointer
  * @param recipe_name - recipe name
- * @return success: 0 error : -1
+ * @return success : 0 error : -1
  */
 static int ControlAnalyzeRecipe(ControlProtocolType control_protocol, const char *recipe_name)
 {
@@ -134,7 +134,11 @@ static int ControlAnalyzeRecipe(ControlProtocolType control_protocol, const char
     return 0;
 }
 
-/*Control Framework Protocol Open*/
+/**
+ * @description: Control Framework Protocol Open
+ * @param control_protocol - Control Protocol pointer
+ * @return success : 0 error : -1
+ */
 int ControlProtocolOpen(struct ControlProtocol *control_protocol)
 {
     CONTROL_PARAM_CHECK(control_protocol);
@@ -148,7 +152,11 @@ int ControlProtocolOpen(struct ControlProtocol *control_protocol)
     return ret;
 }
 
-/*Control Framework Protocol Close*/
+/**
+ * @description: Control Framework Protocol Close
+ * @param control_protocol - Control Protocol pointer
+ * @return success : 0 error : -1
+ */
 int ControlProtocolClose(struct ControlProtocol *control_protocol)
 {
     CONTROL_PARAM_CHECK(control_protocol);
@@ -162,7 +170,13 @@ int ControlProtocolClose(struct ControlProtocol *control_protocol)
     return ret;
 }
 
-/*Control Framework Protocol Read Date*/
+/**
+ * @description: Control Framework Protocol Read Data
+ * @param control_protocol - Control Protocol pointer
+ * @param buf - read buffer
+ * @param len - read data length
+ * @return success : data length error : -1
+ */
 int ControlProtocolRead(struct ControlProtocol *control_protocol, void *buf, size_t len)
 {
     CONTROL_PARAM_CHECK(control_protocol);
@@ -176,7 +190,13 @@ int ControlProtocolRead(struct ControlProtocol *control_protocol, void *buf, siz
     return ret;
 }
 
-/*Control Framework Protocol Write Cmd*/
+/**
+ * @description: Control Framework Protocol Write Cmd
+ * @param control_protocol - Control Protocol pointer
+ * @param buf - write buffer
+ * @param len - write data length
+ * @return success : data length error : -1
+ */
 int ControlProtocolWrite(struct ControlProtocol *control_protocol, const void *buf, size_t len)
 {
     CONTROL_PARAM_CHECK(control_protocol);
@@ -190,7 +210,13 @@ int ControlProtocolWrite(struct ControlProtocol *control_protocol, const void *b
     return ret;
 }
 
-/*Control Framework Protocol Ioctl*/
+/**
+ * @description: Control Framework Protocol Ioctl
+ * @param control_protocol - Control Protocol pointer
+ * @param cmd - ioctl cmd
+ * @param args - args
+ * @return success : 0 error : -1
+ */
 int ControlProtocolIoctl(struct ControlProtocol *control_protocol, int cmd, void *args)
 {
     CONTROL_PARAM_CHECK(control_protocol);
@@ -206,7 +232,8 @@ int ControlProtocolIoctl(struct ControlProtocol *control_protocol, int cmd, void
 
 /**
  * @description: Control Framework Init
- * @return success: 0 error : -1
+ * @param void
+ * @return success : 0 error : -1
  */
 int ControlFrameworkInit(void)
 {

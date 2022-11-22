@@ -28,6 +28,12 @@ static uint8_t handshake_require_command[] = {0x46, 0x49, 0x4E, 0x53, 0x00, 0x00
 static uint8_t handshake_respond_buff[24] = {0};
 static uint8_t recv_buff[1024] = {0};
 
+/**
+ * @description: Fins Get Area Code
+ * @param area_char - area char
+ * @param type - fins data type
+ * @return success : area_char error : 0
+ */
 static uint8_t FinsAreaCode(char area_char, FinsDataType type)
 {
     uint8_t area_code = 0;
@@ -42,7 +48,20 @@ static uint8_t FinsAreaCode(char area_char, FinsDataType type)
     return area_code;
 }
 
-static uint16_t FinsCommandGenerate(uint8_t *p_command, uint16_t plc_ip_4, uint16_t pc_ip_4, FinsCommandCode command_code, char area_char,
+/**
+ * @description: Fins Cmd Genetare
+ * @param p_command - command pointer
+ * @param plc_ip_4 - last plc ip
+ * @param local_ip_4 - last local ip
+ * @param command_code - fins command code
+ * @param area_char - area char 
+ * @param data_type - fins data type
+ * @param start_address - fins cmd start address
+ * @param bit_address - fins cmd bit address
+ * @param data_length - fins cmd data length
+ * @return success : index error : 0
+ */
+static uint16_t FinsCommandGenerate(uint8_t *p_command, uint16_t plc_ip_4, uint16_t local_ip_4, FinsCommandCode command_code, char area_char,
     FinsDataType data_type, uint16_t start_address, uint8_t bit_address, uint16_t data_length)
 {
     uint8_t index = 0;
@@ -71,7 +90,7 @@ static uint16_t FinsCommandGenerate(uint8_t *p_command, uint16_t plc_ip_4, uint1
     p_command[index++] = FINS_DA2;
 
     p_command[index++] = FINS_SNA;
-    p_command[index++] = pc_ip_4;
+    p_command[index++] = local_ip_4;
     p_command[index++] = FINS_SA2;
 
     p_command[index++] = FINS_SID;
@@ -88,6 +107,12 @@ static uint16_t FinsCommandGenerate(uint8_t *p_command, uint16_t plc_ip_4, uint1
     return index;
 }
 
+/**
+ * @description: Fins Data Transform from Receive Buffer To Control-Data
+ * @param p_read_item - read item pointer
+ * @param recv_buff - receive buff
+ * @return success : 0 error : -1
+ */
 static int FinsTransformRecvBuffToData(FinsReadItem *p_read_item, uint8_t *recv_buff)
 {
     FinsDataInfo *p_fins_data_info = &(p_read_item->data_info);
@@ -102,7 +127,7 @@ static int FinsTransformRecvBuffToData(FinsReadItem *p_read_item, uint8_t *recv_
     if (FINS_COMMAND_CODE_READ == command_code) {
 
         uint16_t data_length = p_read_item->data_length;
-        ControlPrintList("DATA", recv_buff, data_length * (FINS_DATA_TYPE_BIT == p_read_item->data_type ? 1 : 2));
+        ControlPrintfList("DATA", recv_buff, data_length * (FINS_DATA_TYPE_BIT == p_read_item->data_type ? 1 : 2));
         printf("Receive data is ");
 
         if (FINS_DATA_TYPE_BIT == p_read_item->data_type) {
@@ -128,6 +153,12 @@ static int FinsTransformRecvBuffToData(FinsReadItem *p_read_item, uint8_t *recv_
     return 0;
 }
 
+/**
+ * @description: Fins Protocol Handshake
+ * @param socket - socket
+ * @param local_ip_4 - last local ip
+ * @return success : 0 error : -1 -2
+ */
 static int FinsHandshake(int32_t socket, uint16_t local_ip_4)
 {
     handshake_require_command[18] = (uint8_t)(local_ip_4 >> 8);
@@ -135,7 +166,7 @@ static int FinsHandshake(int32_t socket, uint16_t local_ip_4)
     uint8_t try_count = 0;
 
     while (try_count < 10) {
-        ControlPrintList("SEND", (uint8_t *)handshake_require_command, sizeof(handshake_require_command));
+        ControlPrintfList("SEND", (uint8_t *)handshake_require_command, sizeof(handshake_require_command));
         int32_t write_error = socket_write(socket, handshake_require_command, sizeof(handshake_require_command));
         if (write_error < 0) {
             printf("Write socket error, errno is %d!", errno);
@@ -144,7 +175,7 @@ static int FinsHandshake(int32_t socket, uint16_t local_ip_4)
             if (recv_length < 0) {
                 printf("Read socket error, errno is %d!", errno);
             } else {
-                ControlPrintList("RECV", (uint8_t *)handshake_respond_buff, recv_length);
+                ControlPrintfList("RECV", (uint8_t *)handshake_respond_buff, recv_length);
 
                 /*check fins handshake respond*/
                 uint8_t error_code = handshake_respond_buff[15];
@@ -166,6 +197,13 @@ static int FinsHandshake(int32_t socket, uint16_t local_ip_4)
     return -2;
 }
 
+/**
+ * @description: Fins Get Data From Socket
+ * @param socket - socket
+ * @param p_read_item - read item pointer
+ * @param p_recipe - control recipe pointer
+ * @return success : 0 error : -1 -2
+ */
 static int FinsGetData(int32_t socket, FinsReadItem *p_read_item, struct ControlRecipe *p_recipe)
 {
     uint8_t try_count = 0;
@@ -177,7 +215,7 @@ static int FinsGetData(int32_t socket, FinsReadItem *p_read_item, struct Control
     memset(recv_buff, 0, sizeof(recv_buff));
 
     while (try_count < 10) {
-        ControlPrintList("SEND", p_base_data_info->p_command, p_base_data_info->command_length);
+        ControlPrintfList("SEND", p_base_data_info->p_command, p_base_data_info->command_length);
         try_count++;
 
         write_error = socket_write(socket, p_base_data_info->p_command, p_base_data_info->command_length);
@@ -190,7 +228,7 @@ static int FinsGetData(int32_t socket, FinsReadItem *p_read_item, struct Control
             if (recv_length < 0) {
                 printf("Read socket error, errno is %d!", errno);
             } else {
-                ControlPrintList("RECV", recv_buff, recv_length);
+                ControlPrintfList("RECV", recv_buff, recv_length);
                 return FinsTransformRecvBuffToData(p_read_item, recv_buff);
             }
         }
@@ -205,6 +243,20 @@ static int FinsGetData(int32_t socket, FinsReadItem *p_read_item, struct Control
     return -2;
 }
 
+/**
+ * @description: Fins Data Info Init
+ * @param p_read_item - read item pointer
+ * @param plc_ip_4 - last plc ip
+ * @param local_ip_4 - last local ip
+ * @param command_code - fins command code
+ * @param area_char - area char 
+ * @param data_type - fins data type
+ * @param start_address - fins cmd start address
+ * @param bit_address - fins cmd bit address
+ * @param data_length - fins cmd data length
+ * @param p_data - control-data pointer
+ * @return success : 0 error : -1
+ */
 static int FinsInitialDataInfo(FinsReadItem *p_read_item, uint16_t plc_ip_4, uint16_t local_ip_4, FinsCommandCode command_code,
     char area_char, FinsDataType data_type, uint16_t start_address, uint8_t bit_address, uint16_t data_length, uint8_t *p_data)
 {
@@ -237,6 +289,11 @@ static int FinsInitialDataInfo(FinsReadItem *p_read_item, uint16_t plc_ip_4, uin
     return 0;
 }
 
+/**
+ * @description: Fins Receive Plc Data Task
+ * @param parameter - parameter pointer
+ * @return
+ */
 void *ReceivePlcDataTask(void *parameter)
 {
     int i = 0;
@@ -289,6 +346,11 @@ void *ReceivePlcDataTask(void *parameter)
     }
 }
 
+/**
+ * @description: Fins Protocol Open
+ * @param control_protocol - control protocol pointer
+ * @return success : 0 error
+ */
 int FinsOpen(struct ControlProtocol *control_protocol)
 {
     ControlProtocolOpenDef(control_protocol);
@@ -296,11 +358,25 @@ int FinsOpen(struct ControlProtocol *control_protocol)
     return 0;
 }
 
+/**
+ * @description: Fins Protocol Close
+ * @param control_protocol - control protocol pointer
+ * @return success : 0 error
+ */
 int FinsClose(struct ControlProtocol *control_protocol)
 {
     ControlProtocolCloseDef();
+
+    return 0;
 }
 
+/**
+ * @description: Fins Protocol Read Data
+ * @param control_protocol - control protocol pointer
+ * @param buf - read data buffer
+ * @param len - read data length
+ * @return success : data length error : 0
+ */
 int FinsRead(struct ControlProtocol *control_protocol, void *buf, size_t len)
 {
     return CircularAreaAppRead(circular_area, buf, len);
@@ -315,6 +391,12 @@ static struct ControlDone fins_protocol_done =
     ._ioctl = NULL,
 };
 
+/**
+ * @description: Fins Protocol Cmd Generate
+ * @param p_recipe - recipe pointer
+ * @param protocol_format_info - protocol format info pointer
+ * @return success : 0 error : -1
+ */
 int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *protocol_format_info)
 {
     int ret = 0;
@@ -337,12 +419,17 @@ int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *pr
         cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "data_length")->valueint,
         p_recipe->protocol_data->data + last_data_length);
 
-    ControlPrintList("CMD", fins_read_item->data_info.base_data_info.p_command, fins_read_item->data_info.base_data_info.command_length);
+    ControlPrintfList("CMD", fins_read_item->data_info.base_data_info.p_command, fins_read_item->data_info.base_data_info.command_length);
     last_data_length = GetValueTypeMemorySize(fins_read_item->value_type);
 
     return ret;
 }
 
+/**
+ * @description: Fins Protocol Init
+ * @param p_recipe - recipe pointer
+ * @return success : 0 error : -1
+ */
 int FinsProtocolInit(struct ControlRecipe *p_recipe)
 {
     struct ControlProtocol *p_control_protocol = CONTAINER_OF(p_recipe, struct ControlProtocol, recipe);
