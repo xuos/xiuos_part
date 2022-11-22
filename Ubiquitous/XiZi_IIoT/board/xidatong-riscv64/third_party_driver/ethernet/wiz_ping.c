@@ -236,7 +236,7 @@ void wiz_ping_test(int argc, char *argv[]) {
   uint32_t tmp_ip[4];
   uint8_t target_ip[4];
   if (argc >= 2) {
-    KPrintf("this is ping test: %s\n", argv[1]);
+    KPrintf("This is a Ping test: %s\n", argv[1]);
     sscanf(argv[1], "%d.%d.%d.%d", &tmp_ip[0], &tmp_ip[1], &tmp_ip[2],
            &tmp_ip[3]);
     target_ip[0] = (uint8_t)tmp_ip[0];
@@ -244,7 +244,6 @@ void wiz_ping_test(int argc, char *argv[]) {
     target_ip[2] = (uint8_t)tmp_ip[2];
     target_ip[3] = (uint8_t)tmp_ip[3];
     ping_count(ping_socket, 5, target_ip);
-    // ping_request(ping_socket, target_ip);
   }
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),

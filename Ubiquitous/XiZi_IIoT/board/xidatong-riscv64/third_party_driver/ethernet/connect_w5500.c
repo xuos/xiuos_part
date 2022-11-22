@@ -257,9 +257,7 @@ int HwWiznetInit(void) {
   return EOK;
 }
 
-static void set_netinfo() {
-  // set g_wiz_netinfo
-}
+/****************** basic functions ********************/
 
 enum TCP_OPTION {
   SEND_DATA = 0,
@@ -318,18 +316,17 @@ void wiz_client_op_test(char *addr, uint16_t port, char *msg) {
   uint32_t tmp_ip[4];
   KPrintf("wiz client to %s", addr);
   sscanf(addr, "%d.%d.%d.%d", &tmp_ip[0], &tmp_ip[1], &tmp_ip[2], &tmp_ip[3]);
-  // for (int i = 0; i < 4; ++i) {
-  //   ip[i] = (uint8_t)tmp_ip[i];
-  // }
+  for (int i = 0; i < 4; ++i) {
+    ip[i] = (uint8_t)tmp_ip[i];
+  }
   uint8_t buf[g_wiznet_buf_size];
-  // TODO: bug if argv[2] is not a port
-  // TODO: bug if msg size > 2048
-  KPrintf("wiz_server, send to %d.%d.%d.%d %d\n", ip[0], ip[1], ip[2], ip[3],
-          port);
+  KPrintf("wiz_server, send to %d.%d.%d.%d %d\n",  // tip info
+          ip[0], ip[1], ip[2], ip[3], port);
   sscanf(msg, "%s", buf);
   wiz_client_op(client_sock, buf, g_wiznet_buf_size, ip, port, SEND_DATA);
   MdelayKTask(10);
   memset(buf, 0, g_wiznet_buf_size);
+  // waiting for a responding.
   wiz_client_op(client_sock, buf, g_wiznet_buf_size, ip, port, RECV_DATA);
   KPrintf("received msg: %s\n", buf);
 }
@@ -453,3 +450,56 @@ int32_t loopback_udps(uint8_t sn, uint8_t *buf, uint16_t port) {
   }
   return 1;
 }
+
+void ifconfig() {
+  wiz_NetInfo wiz_netinfo;
+  ctlnetwork(CN_GET_NETINFO, (void *)&wiz_netinfo);
+  uint8_t tmpstr[6];
+  ctlwizchip(CW_GET_ID, (void *)tmpstr);
+  KPrintf("=== %s NET CONF ===\r\n", (char *)tmpstr);
+  KPrintf("MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n", wiz_netinfo.mac[0],
+          wiz_netinfo.mac[1], wiz_netinfo.mac[2], wiz_netinfo.mac[3],
+          wiz_netinfo.mac[4], wiz_netinfo.mac[5]);
+  KPrintf("SIP: %d.%d.%d.%d\r\n", wiz_netinfo.ip[0], wiz_netinfo.ip[1],
+          wiz_netinfo.ip[2], wiz_netinfo.ip[3]);
+  KPrintf("GAR: %d.%d.%d.%d\r\n", wiz_netinfo.gw[0], wiz_netinfo.gw[1],
+          wiz_netinfo.gw[2], wiz_netinfo.gw[3]);
+  KPrintf("SUB: %d.%d.%d.%d\r\n", wiz_netinfo.sn[0], wiz_netinfo.sn[1],
+          wiz_netinfo.sn[2], wiz_netinfo.sn[3]);
+  KPrintf("DNS: %d.%d.%d.%d\r\n", wiz_netinfo.dns[0], wiz_netinfo.dns[1],
+          wiz_netinfo.dns[2], wiz_netinfo.dns[3]);
+  KPrintf("======================\r\n");
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC),
+                 ifconfig, ifconfig, printf w5500 configurations);
+
+void char_arr_assign(uint8_t **dst, uint32_t *src, uint32_t len) {
+  for (int i = 0; i < len; ++i) {
+    (*dst)[i] = (uint8_t)(src[i]);
+  }
+}
+
+void config_w5500_network(char *mac, char *ip, char *sn, char *gw, char *dns) {
+  wiz_NetInfo wiz_netinfo;
+  uint32_t tmp_arr[4];
+  // config netinfo
+  sscanf(mac, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2],
+         &tmp_arr[3]);
+  char_arr_assign((uint8_t **)&wiz_netinfo.mac, tmp_arr, 4);
+  sscanf(ip, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2], &tmp_arr[3]);
+  char_arr_assign((uint8_t **)&wiz_netinfo.ip, tmp_arr, 4);
+  sscanf(sn, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2], &tmp_arr[3]);
+  char_arr_assign((uint8_t **)&wiz_netinfo.sn, tmp_arr, 4);
+  sscanf(gw, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2], &tmp_arr[3]);
+  char_arr_assign((uint8_t **)&wiz_netinfo.gw, tmp_arr, 4);
+  sscanf(dns, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2],
+         &tmp_arr[3]);
+  char_arr_assign((uint8_t **)&wiz_netinfo.dns, tmp_arr, 4);
+  // set new netinfo
+  ctlnetwork(CN_SET_NETINFO, (void *)&wiz_netinfo);
+  ifconfig();
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) |
+                     SHELL_CMD_PARAM_NUM(5),
+                 config_w5500_network, config_w5500_network,
+                 set w5500 configurations);
