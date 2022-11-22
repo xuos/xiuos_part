@@ -46,6 +46,9 @@ void TestTouch(void)
 #include <transform.h>
 
 #define NULL_PARAMETER 0
+#define LCD_DOT_TYPE 1
+#define LCD_SIZE 320
+
 
 void TestTouch(void)
 {
@@ -55,17 +58,52 @@ void TestTouch(void)
         printf("open touch fd error:%d\n", touch_fd);
         return;
     }
+    int lcd_fd = PrivOpen(TOUCH_LCD_DEV_DRIVER, O_RDWR);
+    if (lcd_fd < 0)
+    {
+        printf("open lcd fd error:%d\n", lcd_fd);
+        return;
+    }
 
     // draw text
     struct TouchDataStandard touch_pixel;
     memset(&touch_pixel,0,sizeof(touch_pixel));
+    LcdWriteParam graph_param;
+    
+    
+    graph_param.type = LCD_DOT_TYPE;
 
+    uint16_t back_color[LCD_SIZE];
+    memset(back_color,0x00,sizeof(back_color));
+    for (int i = 0; i < LCD_SIZE; i++)
+    {
+        graph_param.pixel_info.pixel_color = &back_color;
+        graph_param.pixel_info.x_startpos = 0;
+        graph_param.pixel_info.y_startpos = i;
+        graph_param.pixel_info.x_endpos = LCD_SIZE -1;
+        graph_param.pixel_info.y_endpos = i;
+        PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
+    }
+    
+    uint16 color_select[20];
+    memset(color_select,0xff,sizeof(color_select));
+    graph_param.pixel_info.pixel_color = &color_select;
     while(1){
         if(0 > PrivRead(touch_fd, &touch_pixel, NULL_PARAMETER)){
             printf("read touch error\n");
             return;            
         }
         printf("touch pixel position x:%d,y:%d\n",touch_pixel.x,touch_pixel.y);
+        graph_param.pixel_info.x_startpos = touch_pixel.x-10>0?touch_pixel.x-10:0;
+        graph_param.pixel_info.y_startpos = touch_pixel.y;
+        graph_param.pixel_info.x_endpos = touch_pixel.x+10;
+        graph_param.pixel_info.y_endpos = touch_pixel.y;
+        PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
+        graph_param.pixel_info.x_startpos = touch_pixel.x;
+        graph_param.pixel_info.y_startpos = touch_pixel.y-10>0?touch_pixel.y-10:0;
+        graph_param.pixel_info.x_endpos = touch_pixel.x;
+        graph_param.pixel_info.y_endpos = touch_pixel.y+10;
+        PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
     }
     PrivClose(touch_fd);
 }

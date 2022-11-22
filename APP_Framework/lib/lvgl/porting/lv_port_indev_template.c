@@ -12,7 +12,6 @@
 #include "lv_port_indev_template.h"
 #include "../lvgl.h"
 
-#include <dev_touch.h>
 
 static int touch_fd = 0;
 /*********************

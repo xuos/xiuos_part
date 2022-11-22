@@ -121,8 +121,8 @@ static uint32 dvpRead(void *dev, struct BusBlockReadParam *read_param)
 
 static uint32 dvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
 {
-
     x_err_t ret = EOK;
+    
     int cmd_type = args->configure_cmd;
     struct CameraCfg* tmp_cfg;
     switch (cmd_type)

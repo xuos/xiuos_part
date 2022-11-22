@@ -150,6 +150,9 @@ menu "test app"
                         config TOUCH_DEV_DRIVER
                             string "Set touch dev path"
                             default "/dev/touch_dev"
+                        config TOUCH_LCD_DEV_DRIVER
+                            string "Set lcd dev path"
+                            default "/dev/lcd_dev"
                     endif
                 endif
 

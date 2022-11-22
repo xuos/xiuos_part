@@ -91,3 +91,19 @@ select RESOURCES_WDT
 if BSP_USING_WDT
 source "$BSP_DIR/third_party_driver/watchdog/Kconfig"
 endif 
+
+menuconfig BSP_USING_WDT
+bool "Using WATCHDOG device"
+default n
+select RESOURCES_WDT
+if BSP_USING_WDT
+source "$BSP_DIR/third_party_driver/watchdog/Kconfig"
+endif 
+
+menuconfig BSP_USING_SOFT_SPI
+bool "Using SOFT_SPI device"
+default n
+select RESOURCES_SOFT_SPI
+if BSP_USING_SOFT_SPI
+source "$BSP_DIR/third_party_driver/soft_spi/Kconfig"
+endif 

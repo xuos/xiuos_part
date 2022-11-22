@@ -278,7 +278,7 @@ static uint32 TouchRead(void* dev, struct BusBlockReadParam* read_param)
 
     struct TouchDataStandard* data = (struct TouchDataStandard*)read_param->buffer;
     
-    result = KSemaphoreObtain(touch_sem, 10);
+    result = KSemaphoreObtain(touch_sem, 100);
     // if (EOK == result)
     // {
         memset(TOUCHRECDATA, 0, 24);
@@ -292,8 +292,8 @@ static uint32 TouchRead(void* dev, struct BusBlockReadParam* read_param)
         {
             ts_event.fingers[i].x = ((((uint32_t)TOUCHRECDATA[(i * 4) + 5]) << 8) | (uint32_t)TOUCHRECDATA[(i * 4) + 4]) & 0x00000FFF; // 12 bits of X coord
             ts_event.fingers[i].y = ((((uint32_t)TOUCHRECDATA[(i * 4) + 7]) << 8) | (uint32_t)TOUCHRECDATA[(i * 4) + 6]) & 0x00000FFF;
-            uint32_t pos_y = 308 - ts_event.fingers[i].x *LCD_SIZE/TOUCH_WIDTH;
-            ts_event.fingers[i].x = ts_event.fingers[i].y *LCD_SIZE/TOUCH_HEIGHT;
+            uint32_t pos_y = 320 > ts_event.fingers[i].x *LCD_SIZE/TOUCH_WIDTH?320 - ts_event.fingers[i].x *LCD_SIZE/TOUCH_WIDTH:0;
+            ts_event.fingers[i].x = ts_event.fingers[i].y *LCD_SIZE/TOUCH_HEIGHT>6?ts_event.fingers[i].y *LCD_SIZE/TOUCH_HEIGHT-6:0;
             ts_event.fingers[i].y = pos_y;
             ts_event.fingers[i].fingerID = (uint32_t)TOUCHRECDATA[(i * 4) + 7] >> 4; // finger that did the touch
             // printf("fingers[%d] x %d y %d id %d\n",i,ts_event.fingers[i].x,ts_event.fingers[i].y,ts_event.fingers[i].fingerID);
