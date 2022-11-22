@@ -85,7 +85,7 @@ void TestTouch(void)
         PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
     }
     
-    uint16 color_select[20];
+    uint16 color_select[LCD_SIZE];
     memset(color_select,0xff,sizeof(color_select));
     graph_param.pixel_info.pixel_color = &color_select;
     while(1){

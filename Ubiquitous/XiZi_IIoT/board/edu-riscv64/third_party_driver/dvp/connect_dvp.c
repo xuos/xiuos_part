@@ -43,7 +43,7 @@ static struct CameraCfg sensor_config = {
     .gain = 0x00
     };
 
-static uint32 dvpDrvInit(void)
+static uint32 DvpDrvInit(void)
 {
     x_err_t ret = EOK;
     dvp_init(SCCB_REG_LENGTH);
@@ -53,7 +53,7 @@ static uint32 dvpDrvInit(void)
     dvp_set_output_enable(DVP_OUTPUT_DISPLAY, 0);
     dvp_set_output_enable(DVP_OUTPUT_AI, 0);
     ov2640_init();
-    sensorConfigure(&sensor_config);
+    SensorConfigure(&sensor_config);
 
     sysctl_set_spi0_dvp_data(1);
 #ifdef DVP_BURST_ENABLE
@@ -77,28 +77,28 @@ static uint32 dvpDrvInit(void)
     return ret;
 }
 
-static uint32 readDvpReg(void *drv, struct DvpRegConfigureInfo *reg_info)
+static uint32 ReadDvpReg(void *drv, struct DvpRegConfigureInfo *reg_info)
 {
     x_err_t ret = EOK;
     reg_info->reg_value = dvp_sccb_receive_data(reg_info->device_addr, reg_info->reg_addr);
     return ret;
 }
 
-static uint32 writeDvpReg(void *drv, struct DvpRegConfigureInfo *reg_info)
+static uint32 WriteDvpReg(void *drv, struct DvpRegConfigureInfo *reg_info)
 {
     x_err_t ret = EOK;
     dvp_sccb_send_data(reg_info->device_addr, reg_info->reg_addr, reg_info->reg_value);
     return ret;
 }
 
-static uint32 dvpOpen(void *dev)
+static uint32 DvpOpen(void *dev)
 {
     x_err_t ret = EOK;
-    dvpDrvInit();
+    DvpDrvInit();
     return ret;
 }
 
-static uint32 dvpClose(void *dev)
+static uint32 DvpClose(void *dev)
 {
     x_err_t ret = EOK;
     dvp_config_interrupt(DVP_CFG_START_INT_ENABLE | DVP_CFG_FINISH_INT_ENABLE, 0);
@@ -107,7 +107,7 @@ static uint32 dvpClose(void *dev)
     return ret;
 }
 
-static uint32 dvpRead(void *dev, struct BusBlockReadParam *read_param)
+static uint32 DvpRead(void *dev, struct BusBlockReadParam *read_param)
 {
     x_err_t ret = EOK;
 
@@ -119,7 +119,7 @@ static uint32 dvpRead(void *dev, struct BusBlockReadParam *read_param)
     return ret;
 }
 
-static uint32 dvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
+static uint32 DvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
 {
     x_err_t ret = EOK;
     
@@ -131,15 +131,15 @@ static uint32 dvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
         break;
     case OPE_CFG:
         tmp_cfg = (struct CameraCfg *)args->private_data;
-        sensorConfigure(tmp_cfg);
+        SensorConfigure(tmp_cfg);
         dvp_set_image_size(tmp_cfg->output_w, tmp_cfg->output_h);
         break;
     case REG_SCCB_READ:
-        readDvpReg(drv, (struct DvpRegConfigureInfo *)args->private_data);
+        ReadDvpReg(drv, (struct DvpRegConfigureInfo *)args->private_data);
         break;
     case REG_SCCB_WRITE:
         //for ov2640,write reg 0x04 to Horizontal mirror or Vertical flip
-        writeDvpReg(drv, (struct DvpRegConfigureInfo *)args->private_data);
+        WriteDvpReg(drv, (struct DvpRegConfigureInfo *)args->private_data);
         break;
     default:
         break;
@@ -150,10 +150,10 @@ static uint32 dvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
 /*manage the camera device operations*/
 static const struct CameraDevDone camera_dev_done =
     {
-        .dev_open = dvpOpen,
-        .dev_close = dvpClose,
+        .dev_open = DvpOpen,
+        .dev_close = DvpClose,
         .dev_write = NONE,
-        .dev_read = dvpRead,
+        .dev_read = DvpRead,
 };
 
 /*Init camera bus*/
@@ -225,7 +225,7 @@ int HwDvpInit(void)
     static struct CameraDriver camera_driver;
     memset(&camera_driver, 0, sizeof(struct CameraDriver));
 
-    camera_driver.configure = dvpDrvConfigure;
+    camera_driver.configure = DvpDrvConfigure;
     ret = BoardCameraBusInit(&camera_bus, &camera_driver);
     if (EOK != ret)
     {

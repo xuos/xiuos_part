@@ -15,7 +15,7 @@
 * @brief define camera dev function using bus driver framework
 * @version 1.0 
 * @author AIIT XUOS Lab
-* @date 2021-04-24
+* @date 2022-11-15
 */
 
 #ifndef DEV_CAMERA_H

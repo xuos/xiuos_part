@@ -15,7 +15,7 @@
 * @brief define camera bus and drv function using bus driver framework
 * @version 1.0 
 * @author AIIT XUOS Lab
-* @date 2021-11-16
+* @date 2022-11-15
 */
 
 #ifndef BUS_CAMERA_H

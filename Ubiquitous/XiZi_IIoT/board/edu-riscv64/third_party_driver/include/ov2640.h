@@ -33,6 +33,6 @@ struct CameraCfg
 
 int ov2640_init(void);
 int ov2640_read_id(uint16_t *manuf_id, uint16_t *device_id);
-int sensorConfigure(struct CameraCfg* cfg_info);
+int SensorConfigure(struct CameraCfg* cfg_info);
 
 #endif /* _OV2640_H */

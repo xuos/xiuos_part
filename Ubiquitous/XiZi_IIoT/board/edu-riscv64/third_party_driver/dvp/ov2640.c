@@ -425,7 +425,7 @@ int ov2640_read_id(uint16_t *manuf_id, uint16_t *device_id)
     return 0;
 }
 
-int sensorConfigure(struct CameraCfg *cfg_info)
+int SensorConfigure(struct CameraCfg *cfg_info)
 {
     uint8_t reg_tmp;
 
