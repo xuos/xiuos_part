@@ -117,9 +117,9 @@ static uint16_t FinsCommandGenerate(uint8_t *p_command, uint16_t plc_ip_4, uint1
 static int FinsTransformRecvBuffToData(FinsReadItem *p_read_item, uint8_t *recv_buff)
 {
     FinsDataInfo *p_fins_data_info = &(p_read_item->data_info);
-    uint8_t error_code = recv_buff[3];
+    uint8_t error_code = recv_buff[15];
     if (error_code) {
-        printf("Data abnormal, abnormal error code is %08x!", error_code);
+        printf("Data abnormal, abnormal error code is 0x%x!\n", error_code);
         return -1;
     }
     recv_buff += 30;
@@ -134,14 +134,14 @@ static int FinsTransformRecvBuffToData(FinsReadItem *p_read_item, uint8_t *recv_
         if (FINS_DATA_TYPE_BIT == p_read_item->data_type) {
             memcpy(p_fins_data_info->base_data_info.p_data, recv_buff, data_length);
 
-            printf("%02x", p_fins_data_info->base_data_info.p_data[0]);
+            printf("0x%x", p_fins_data_info->base_data_info.p_data[0]);
         } else {
             uint8_t *p_data = p_fins_data_info->base_data_info.p_data;
 
             for (uint16_t i = 0; i < data_length; i ++) {
                 p_data[2 * i] = recv_buff[2 * (data_length - i - 1)];
                 p_data[2 * i + 1] = recv_buff[2 * (data_length - i - 1) + 1];
-                printf("%03x%03x", p_data[2 * i], p_data[2 * i + 1]);
+                printf("0x%x 0x%x", p_data[2 * i], p_data[2 * i + 1]);
             }
         }
 
