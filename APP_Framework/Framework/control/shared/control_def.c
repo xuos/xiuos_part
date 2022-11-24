@@ -393,7 +393,7 @@ int RecipeBasicInformation(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_
 
     printf("\n************************************************************\n");
 }
-extern int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *protocol_format_info);
+
 /**
  * @description: Control Framework Read Variable Item Function
  * @param p_recipe - Control recipe pointer
@@ -420,8 +420,6 @@ void RecipeReadVariableItem(struct ControlRecipe *p_recipe, cJSON *p_recipe_file
 
         protocol_format_info.p_read_item_data = p_recipe->protocol_data.data + CONTROL_DATA_HEAD_LENGTH;
 
-        printf("%s %d recipe %p\n", __func__, __LINE__, p_recipe);
-
         /*Init The Control Protocol*/
         ControlProtocolInitDesc(p_recipe, protocol_init);
 
@@ -430,11 +428,7 @@ void RecipeReadVariableItem(struct ControlRecipe *p_recipe, cJSON *p_recipe_file
 
         uint16_t read_item_count = p_recipe->read_item_count;
 
-        printf("%s %d protocol_format_info %p read_item_count %p\n", __func__, __LINE__, &protocol_format_info, &(p_recipe->read_item_count));
-
         for (i = 0; i < read_item_count; i ++) {
-            printf("%s %d read_item_index %d read_item_count %d\n", __func__, __LINE__, i, read_item_count);
-
             cJSON *read_single_item_json = cJSON_GetArrayItem(read_item_list_json, i);
 
             protocol_format_info.read_single_item_json = read_single_item_json;
@@ -446,8 +440,6 @@ void RecipeReadVariableItem(struct ControlRecipe *p_recipe, cJSON *p_recipe_file
                 printf("%s read %d item failed!\n", __func__, i);
                 continue;
             }
-
-            printf("%s %d ret %d recipe %p count %p [%d] [%d]\n", __func__, __LINE__, ret, p_recipe, &(p_recipe->read_item_count), p_recipe->read_item_count, read_item_count);
         }
     }
 }

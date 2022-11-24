@@ -128,8 +128,6 @@ static int ControlAnalyzeRecipe(ControlProtocolType control_protocol, const char
 
     control_protocol->protocol_type = control_protocol->recipe->protocol_type;
 
-    printf("%s %d control_protocol %p recipe %p\n", __func__, __LINE__, control_protocol, control_protocol->recipe);
-
     /*Get the variable need to read from recipe file*/
     RecipeReadVariableItem(control_protocol->recipe, recipe_file_json);
 
@@ -256,9 +254,7 @@ int ControlFrameworkInit(void)
         ret = -1;
         goto _out;
     }
-
-    printf("%s malloc control_protocol %p\n", __func__, control_protocol);
-
+    
     //Control Protocol Struct Init
     ret = ControlProtocolInit(control_protocol);
     if (ret < 0) {
@@ -278,8 +274,6 @@ int ControlFrameworkInit(void)
     }
 
     control_protocol->protocol_status = CONTROL_REGISTERED;
-
-    printf("%s recipe %p\n", __func__, control_protocol->recipe);
 
     ret = ControlPeripheralInit(control_protocol->recipe);
     if (ret < 0) {

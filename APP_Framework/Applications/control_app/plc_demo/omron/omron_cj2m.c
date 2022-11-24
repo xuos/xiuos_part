@@ -22,6 +22,7 @@
 
 void ControlOmronTest(void)
 {
+    int i = 0;
     uint16_t read_data_length = 0;
     uint8_t read_data[1024] = {0};
     ControlProtocolType fins_protocol = ControlProtocolFind();
@@ -35,11 +36,11 @@ void ControlOmronTest(void)
     if (CONTROL_REGISTERED == fins_protocol->protocol_status) {
         ControlProtocolOpen(fins_protocol);
 
-        PrivTaskDelay(10000);
-
-        for (int i = 0; i < 10; i ++) {
+        for (;;) {
             read_data_length = ControlProtocolRead(fins_protocol, read_data, sizeof(read_data));
             printf("%s read [%d] fins data %d using receipe file\n", __func__, i, read_data_length);
+            i++;
+            PrivTaskDelay(100000);
         }
 
         //ControlProtocolClose(fins_protocol);

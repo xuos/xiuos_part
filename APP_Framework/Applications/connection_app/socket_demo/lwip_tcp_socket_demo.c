@@ -164,7 +164,7 @@ void TcpSocketRecvTest(int argc, char *argv[])
     }
 
 #ifdef ADD_XIZI_FETURES
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
+    lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, tcp_socket_ip);
     sys_thread_new("TcpSocketRecvTask", TcpSocketRecvTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 #endif
 
@@ -231,7 +231,7 @@ void TcpSocketSendTest(int argc, char *argv[])
     }
 
 #ifdef ADD_XIZI_FETURES
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, tcp_socket_ip);
+    lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, tcp_socket_ip);
     sys_thread_new("Tcp Socket Send", TcpSocketSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 #endif
 #ifdef ADD_NUTTX_FETURES
