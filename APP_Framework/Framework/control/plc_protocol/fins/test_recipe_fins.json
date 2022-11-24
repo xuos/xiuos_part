@@ -9,7 +9,7 @@
         "netmask": "255.255.254.0",
         "port": 9600
     },
-    "protocol_type": 6,
+    "protocol_type": 5,
     "read_period": 100,
     "read_item_list": [
         {

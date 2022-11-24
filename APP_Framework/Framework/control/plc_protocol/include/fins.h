@@ -70,9 +70,9 @@ typedef struct
     FinsDataInfo data_info;
 
     UniformValueType value_type;
-    char value_name[20];
+    uint8_t value_name[20];
     
-    char area_char;
+    uint8_t area_char;
     FinsDataType data_type;
     uint16_t start_address;
     uint8_t bit_address;

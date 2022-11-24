@@ -72,7 +72,7 @@ static int ControlProtocolInitDesc(struct ControlRecipe *p_recipe, struct Contro
 	for( i = 0; sub_protocol_desc[i].fn != NULL; i++ ) {
 		if (p_recipe->protocol_type == sub_protocol_desc[i].protocol_type) {
 			ret = sub_protocol_desc[i].fn(p_recipe);
-            printf("control protocol initialize %d %s\n", sub_protocol_desc[i].protocol_type, ret == 0 ? "success" : "failed");
+            printf("%s initialize %d %s\n", __func__, sub_protocol_desc[i].protocol_type, ret == 0 ? "success" : "failed");
 			break;
 		}
 	}
@@ -87,16 +87,16 @@ static int ControlProtocolInitDesc(struct ControlRecipe *p_recipe, struct Contro
 static void FormatDataHeader(struct ControlRecipe *p_recipe)
 {
     uint16_t plc_read_data_length = CONTROL_DATA_HEAD_LENGTH + p_recipe->total_data_length;//Head length is CONTROL_DATA_HEAD_LENGTH
-    uint8_t *data = p_recipe->protocol_data->data;
+    uint8_t *data = p_recipe->protocol_data.data;
 
     data[0] = CONTROL_DATA_HEAD_1;
     data[1] = CONTROL_DATA_HEAD_2;
-    data[2] = (p_recipe->device_id) >> 8;
-    data[3] = p_recipe->device_id;
-    data[4] = (plc_read_data_length) >> 8;
-    data[5] = plc_read_data_length;
-    data[6] = (p_recipe->read_item_count) >> 8;
-    data[7] = p_recipe->read_item_count;
+    data[2] = (uint8_t)(p_recipe->device_id >> 8);
+    data[3] = (uint8_t)p_recipe->device_id;
+    data[4] = (uint8_t)(plc_read_data_length >> 8);
+    data[5] = (uint8_t)plc_read_data_length;
+    data[6] = (uint8_t)(p_recipe->read_item_count >> 8);
+    data[7] = (uint8_t)p_recipe->read_item_count;
 }
 
 /**
@@ -236,8 +236,12 @@ int ControlConnectSocket(BasicSocketPlc *p_plc)
         return -4;
     }
 
+    printf("%s %d ip %u.%u.%u.%u port %d\n", __func__, __LINE__, 
+        p_plc->ip[0], p_plc->ip[1], p_plc->ip[2], p_plc->ip[3],
+        p_plc->port);
+
     if (connect(plc_socket, (struct sockaddr*)&plc_addr_in, sizeof(struct sockaddr)) == -1) {
-        printf("Connect plc socket failed!\n");
+        printf("Connect plc socket failed!errno %d\n", errno);
         closesocket(plc_socket);
         return -5;
     } else {
@@ -359,17 +363,12 @@ int ControlPeripheralInit(struct ControlRecipe *p_recipe)
 /**
  * @description: Control Framework Get Recipe Basic Information
  * @param p_recipe - Control recipe pointer
- * @param protocol_type - protocol type
  * @param p_recipe_file_json - recipe_file_json pointer
  * @return success : 0 error : -1
  */
-int RecipeBasicInformation(struct ControlRecipe *p_recipe, int protocol_type, cJSON *p_recipe_file_json)
+int RecipeBasicInformation(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_json)
 {
-    if (protocol_type != (ProtocolType)(cJSON_GetObjectItem(p_recipe_file_json, "protocol_type")->valueint)) {
-        printf("protocol type not match!\n");
-        return -1;
-    }
-    p_recipe->protocol_type = protocol_type;
+    p_recipe->protocol_type = (ProtocolType)(cJSON_GetObjectItem(p_recipe_file_json, "protocol_type")->valueint);
 
     p_recipe->device_id = cJSON_GetObjectItem(p_recipe_file_json, "device_id")->valueint;
     strncpy(p_recipe->device_name, cJSON_GetObjectItem(p_recipe_file_json, "device_name")->valuestring, 20);
@@ -394,17 +393,16 @@ int RecipeBasicInformation(struct ControlRecipe *p_recipe, int protocol_type, cJ
 
     printf("\n************************************************************\n");
 }
-
+extern int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *protocol_format_info);
 /**
  * @description: Control Framework Read Variable Item Function
  * @param p_recipe - Control recipe pointer
- * @param protocol_type - protocol type
  * @param p_recipe_file_json - recipe_file_json pointer
  * @return
  */
-void RecipeReadVariableItem(struct ControlRecipe *p_recipe, int protocol_type, cJSON *p_recipe_file_json)
+void RecipeReadVariableItem(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_json)
 {
-    int ret = 0;
+    int i, ret = 0;
 
     ProtocolFormatInfo protocol_format_info;
     memset(&protocol_format_info, 0, sizeof(ProtocolFormatInfo));
@@ -416,10 +414,13 @@ void RecipeReadVariableItem(struct ControlRecipe *p_recipe, int protocol_type, c
         p_recipe->total_data_length = GetRecipeTotalDataLength(read_item_list_json);
 
         /*Malloc Read Data Pointer, Reference "CONTROL FRAMEWORK READ DATA FORMAT"*/
-        p_recipe->protocol_data = PrivMalloc(sizeof(struct ProtocolData));
-        p_recipe->protocol_data->data = PrivMalloc(CONTROL_DATA_HEAD_LENGTH + p_recipe->total_data_length);
-        p_recipe->protocol_data->data_length = CONTROL_DATA_HEAD_LENGTH + p_recipe->total_data_length;
-        memset(p_recipe->protocol_data->data, 0, p_recipe->protocol_data->data_length);
+        p_recipe->protocol_data.data = PrivMalloc(CONTROL_DATA_HEAD_LENGTH + p_recipe->total_data_length);
+        p_recipe->protocol_data.data_length = CONTROL_DATA_HEAD_LENGTH + p_recipe->total_data_length;
+        memset(p_recipe->protocol_data.data, 0, p_recipe->protocol_data.data_length);
+
+        protocol_format_info.p_read_item_data = p_recipe->protocol_data.data + CONTROL_DATA_HEAD_LENGTH;
+
+        printf("%s %d recipe %p\n", __func__, __LINE__, p_recipe);
 
         /*Init The Control Protocol*/
         ControlProtocolInitDesc(p_recipe, protocol_init);
@@ -427,18 +428,26 @@ void RecipeReadVariableItem(struct ControlRecipe *p_recipe, int protocol_type, c
         /*Format Data Header, Reference "CONTROL FRAMEWORK READ DATA FORMAT"*/
         FormatDataHeader(p_recipe);
 
-        for (uint16_t read_item_index = 0; read_item_index < p_recipe->read_item_count; read_item_index ++) {
-            cJSON *read_single_item_json = cJSON_GetArrayItem(read_item_list_json, read_item_index);
+        uint16_t read_item_count = p_recipe->read_item_count;
+
+        printf("%s %d protocol_format_info %p read_item_count %p\n", __func__, __LINE__, &protocol_format_info, &(p_recipe->read_item_count));
+
+        for (i = 0; i < read_item_count; i ++) {
+            printf("%s %d read_item_index %d read_item_count %d\n", __func__, __LINE__, i, read_item_count);
+
+            cJSON *read_single_item_json = cJSON_GetArrayItem(read_item_list_json, i);
 
             protocol_format_info.read_single_item_json = read_single_item_json;
-            protocol_format_info.read_item_index = read_item_index;
+            protocol_format_info.read_item_index = i;
 
             /*Format Protocol Cmd By Analyze Variable Item One By One*/
             ret = p_recipe->ControlProtocolFormatCmd(p_recipe, &protocol_format_info);
             if (ret < 0) {
-                printf("%s read %d item failed!\n", __func__, read_item_index);
+                printf("%s read %d item failed!\n", __func__, i);
                 continue;
             }
+
+            printf("%s %d ret %d recipe %p count %p [%d] [%d]\n", __func__, __LINE__, ret, p_recipe, &(p_recipe->read_item_count), p_recipe->read_item_count, read_item_count);
         }
     }
 }

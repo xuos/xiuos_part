@@ -22,7 +22,7 @@
 
 #define FINS_COMMAND_LENGTH 34
 
-static struct CircularAreaApp *circular_area;
+static BasicSocketPlc plc_socket = {0};
 
 static uint8_t handshake_require_command[] = {0x46, 0x49, 0x4E, 0x53, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 static uint8_t handshake_respond_buff[24] = {0};
@@ -53,18 +53,19 @@ static uint8_t FinsAreaCode(char area_char, FinsDataType type)
  * @param p_command - command pointer
  * @param plc_ip_4 - last plc ip
  * @param local_ip_4 - last local ip
- * @param command_code - fins command code
- * @param area_char - area char 
- * @param data_type - fins data type
- * @param start_address - fins cmd start address
- * @param bit_address - fins cmd bit address
- * @param data_length - fins cmd data length
+ * @param p_read_item - p_read_item pointer
  * @return success : index error : 0
  */
-static uint16_t FinsCommandGenerate(uint8_t *p_command, uint16_t plc_ip_4, uint16_t local_ip_4, FinsCommandCode command_code, char area_char,
-    FinsDataType data_type, uint16_t start_address, uint8_t bit_address, uint16_t data_length)
+static uint16_t FinsCommandGenerate(uint8_t *p_command, uint16_t plc_ip_4, uint16_t local_ip_4, FinsReadItem *p_read_item)
 {
     uint8_t index = 0;
+    uint16_t command_code = p_read_item->data_info.command_code;
+    uint8_t area_char = p_read_item->area_char;
+    uint16_t data_type = p_read_item->data_type;
+    uint16_t start_address = p_read_item->start_address;
+    uint8_t bit_address = p_read_item->bit_address;
+    uint16_t data_length = p_read_item->data_length;
+
     p_command[index++] = (uint8_t)(FINS_HEADER_HEAD >> (3 * 8));
     p_command[index++] = (uint8_t)(FINS_HEADER_HEAD >> (2 * 8));
     p_command[index++] = (uint8_t)(FINS_HEADER_HEAD >> (1 * 8));
@@ -201,10 +202,9 @@ static int FinsHandshake(int32_t socket, uint16_t local_ip_4)
  * @description: Fins Get Data From Socket
  * @param socket - socket
  * @param p_read_item - read item pointer
- * @param p_recipe - control recipe pointer
  * @return success : 0 error : -1 -2
  */
-static int FinsGetData(int32_t socket, FinsReadItem *p_read_item, struct ControlRecipe *p_recipe)
+static int FinsGetData(int32_t socket, FinsReadItem *p_read_item)
 {
     uint8_t try_count = 0;
     int32_t write_error = 0;
@@ -248,34 +248,22 @@ static int FinsGetData(int32_t socket, FinsReadItem *p_read_item, struct Control
  * @param p_read_item - read item pointer
  * @param plc_ip_4 - last plc ip
  * @param local_ip_4 - last local ip
- * @param command_code - fins command code
- * @param area_char - area char 
- * @param data_type - fins data type
- * @param start_address - fins cmd start address
- * @param bit_address - fins cmd bit address
- * @param data_length - fins cmd data length
  * @param p_data - control-data pointer
  * @return success : 0 error : -1
  */
-static int FinsInitialDataInfo(FinsReadItem *p_read_item, uint16_t plc_ip_4, uint16_t local_ip_4, FinsCommandCode command_code,
-    char area_char, FinsDataType data_type, uint16_t start_address, uint8_t bit_address, uint16_t data_length, uint8_t *p_data)
+static int FinsInitialDataInfo(FinsReadItem *p_read_item, uint16_t plc_ip_4, uint16_t local_ip_4, uint8_t *p_data)
 {
-    p_read_item->area_char = area_char;
-    p_read_item->data_type = data_type;
-    p_read_item->data_info.command_code = command_code;
-    p_read_item->start_address = start_address;
-    p_read_item->bit_address = bit_address;
-    p_read_item->data_length = data_length;
+    uint16_t data_length = p_read_item->data_length;
 
     BasicPlcDataInfo *p_base_data_info = &(p_read_item->data_info.base_data_info);
-    switch (command_code) 
+    switch (p_read_item->data_info.command_code) 
     {
     case FINS_COMMAND_CODE_READ:
-        data_length *= (data_type == FINS_DATA_TYPE_BIT ? 1 : 2);
+        data_length *= (p_read_item->data_type == FINS_DATA_TYPE_BIT ? 1 : 2);
         p_base_data_info->command_length = FINS_COMMAND_LENGTH;
-        p_base_data_info->p_command = (p_data == NULL ? PrivMalloc(FINS_COMMAND_LENGTH + data_length) : PrivMalloc(FINS_COMMAND_LENGTH));
+        p_base_data_info->p_command = PrivMalloc(FINS_COMMAND_LENGTH);
         p_base_data_info->data_size = data_length;
-        p_base_data_info->p_data = (p_data == NULL ? p_base_data_info->p_command + FINS_COMMAND_LENGTH : p_data);
+        p_base_data_info->p_data = p_data;
         break;
     case FINS_COMMAND_CODE_WRITE:
         //To Do
@@ -283,8 +271,7 @@ static int FinsInitialDataInfo(FinsReadItem *p_read_item, uint16_t plc_ip_4, uin
     default:
         return -1;
     }
-    uint16_t command_length = FinsCommandGenerate(p_base_data_info->p_command, plc_ip_4, local_ip_4, command_code, area_char,
-        data_type, start_address, bit_address, data_length);
+    FinsCommandGenerate(p_base_data_info->p_command, plc_ip_4, local_ip_4, p_read_item);
 
     return 0;
 }
@@ -303,12 +290,11 @@ void *ReceivePlcDataTask(void *parameter)
     uint16_t read_item_size = sizeof(FinsReadItem);
 
     struct ControlProtocol *control_protocol = (struct ControlProtocol *)parameter;
-    circular_area = (struct CircularAreaApp *)control_protocol->args;
+    struct CircularAreaApp *circular_area = (struct CircularAreaApp *)control_protocol->args;
     FinsReadItem *fins_read_item = (FinsReadItem *)control_protocol->recipe->read_item;
-    fins_data = control_protocol->recipe->protocol_data->data;
-    data_length = control_protocol->recipe->protocol_data->data_length;
+    fins_data = control_protocol->recipe->protocol_data.data;
+    data_length = control_protocol->recipe->protocol_data.data_length;
 
-    BasicSocketPlc plc_socket;
     memset(&plc_socket, 0, sizeof(BasicSocketPlc));
     memcpy(plc_socket.ip, control_protocol->recipe->socket_config.plc_ip, 4);
     plc_socket.port = control_protocol->recipe->socket_config.port;
@@ -333,16 +319,17 @@ void *ReceivePlcDataTask(void *parameter)
 
             plc_socket.secondary_connect_flag = 1;
 
-            FinsGetData(plc_socket.socket, (FinsReadItem *)fins_read_item + i, control_protocol->recipe);
+            FinsGetData(plc_socket.socket, (FinsReadItem *)fins_read_item + i);
         }
 
         /*read all variable item data, put them into circular_area*/
         if (i == control_protocol->recipe->read_item_count) {
+            printf("%s get %d item %d length\n", __func__, i, data_length);
             CircularAreaAppWrite(circular_area, fins_data, data_length, 0);
         }
 
         /*read data every single 200ms*/
-        PrivTaskDelay(200);
+        PrivTaskDelay(control_protocol->recipe->read_period);
     }
 }
 
@@ -365,6 +352,8 @@ int FinsOpen(struct ControlProtocol *control_protocol)
  */
 int FinsClose(struct ControlProtocol *control_protocol)
 {
+    ControlDisconnectSocket(&plc_socket);
+    
     ControlProtocolCloseDef();
 
     return 0;
@@ -379,6 +368,7 @@ int FinsClose(struct ControlProtocol *control_protocol)
  */
 int FinsRead(struct ControlProtocol *control_protocol, void *buf, size_t len)
 {
+    struct CircularAreaApp *circular_area = (struct CircularAreaApp *)control_protocol->args;
     return CircularAreaAppRead(circular_area, buf, len);
 }
 
@@ -400,27 +390,25 @@ static struct ControlDone fins_protocol_done =
 int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *protocol_format_info)
 {
     int ret = 0;
-    static uint8_t last_data_length = 0;
 
-    p_recipe->read_item = PrivMalloc(sizeof(FinsReadItem) * p_recipe->read_item_count);
     FinsReadItem *fins_read_item = (FinsReadItem *)(p_recipe->read_item) + protocol_format_info->read_item_index;
-    
+
     fins_read_item->value_type = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "value_type")->valueint;
     strncpy(fins_read_item->value_name, cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "value_name")->valuestring, 20);
-    
+    strncpy(&fins_read_item->area_char, cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "area_char")->valuestring, 1);
+    fins_read_item->data_type = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "data_type")->valueint;
+    fins_read_item->data_info.command_code = FINS_COMMAND_CODE_READ;
+    fins_read_item->start_address = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "start_address")->valueint;
+    fins_read_item->bit_address = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "bit_address")->valueint;
+    fins_read_item->data_length = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "data_length")->valueint;
+
     ret = FinsInitialDataInfo(fins_read_item,
         p_recipe->socket_config.plc_ip[3],
         p_recipe->socket_config.local_ip[3],
-        FINS_COMMAND_CODE_READ,
-        cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "area_char")->valuestring[0],
-        cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "data_type")->valueint,
-        cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "start_address")->valueint,
-        cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "bit_address")->valueint,
-        cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "data_length")->valueint,
-        p_recipe->protocol_data->data + last_data_length);
+        protocol_format_info->p_read_item_data + protocol_format_info->last_item_size);
 
     ControlPrintfList("CMD", fins_read_item->data_info.base_data_info.p_command, fins_read_item->data_info.base_data_info.command_length);
-    last_data_length = GetValueTypeMemorySize(fins_read_item->value_type);
+    protocol_format_info->last_item_size = GetValueTypeMemorySize(fins_read_item->value_type);
 
     return ret;
 }
@@ -431,23 +419,16 @@ int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *pr
  * @return success : 0 error : -1
  */
 int FinsProtocolInit(struct ControlRecipe *p_recipe)
-{
-    struct ControlProtocol *p_control_protocol = CONTAINER_OF(p_recipe, struct ControlProtocol, recipe);
-    if (NULL == p_control_protocol) {
-        printf("%s get control protocol failed\n", __func__);
+{   
+    p_recipe->read_item = PrivMalloc(sizeof(FinsReadItem) * p_recipe->read_item_count);
+    if (NULL == p_recipe->read_item) {
+        PrivFree(p_recipe->read_item);
         return -1;
     }
-    
-    FinsReadItem *fins_read_item = PrivMalloc(sizeof(FinsReadItem) * p_recipe->read_item_count);
-    if (NULL == fins_read_item) {
-        PrivFree(fins_read_item);
-        return -1;
-    }
-    p_recipe->read_item = (void *)fins_read_item;
-    
+
     p_recipe->ControlProtocolFormatCmd = FinsProtocolFormatCmd;
 
-    p_control_protocol->done = &fins_protocol_done;
+    p_recipe->done = &fins_protocol_done;
 
     return 0;
 }

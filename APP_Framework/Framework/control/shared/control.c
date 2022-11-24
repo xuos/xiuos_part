@@ -74,6 +74,9 @@ static int ControlAnalyzeRecipe(ControlProtocolType control_protocol, const char
     uint16_t recipe_file_length = 0;
     char *recipe_file_buf;
 
+    /*wait for SD-card mount done*/
+    PrivTaskDelay(5000);
+
     //Step1 : read recipe file data from SD card or other store device
     recipe_file_fd = PrivOpen(recipe_name, O_RDONLY);
     if (recipe_file_fd < 0) {
@@ -110,7 +113,6 @@ static int ControlAnalyzeRecipe(ControlProtocolType control_protocol, const char
     //Step2 : CJSON analyze
 #ifdef LIB_USING_CJSON
     cJSON *recipe_file_json = cJSON_Parse(recipe_file_buf);
-    PrivFree(recipe_file_buf);
     if (NULL == recipe_file_json) {
         printf("Parse recipe_file_buf failed!\n");
         return -1;
@@ -120,14 +122,22 @@ static int ControlAnalyzeRecipe(ControlProtocolType control_protocol, const char
     memset(control_protocol->recipe, 0, sizeof(struct ControlRecipe));
 
     /*Get basic information from recipe file*/
-    if (RecipeBasicInformation(control_protocol->recipe, control_protocol->protocol_type, recipe_file_json) < 0) {
+    if (RecipeBasicInformation(control_protocol->recipe, recipe_file_json) < 0) {
         return -1;
     }
 
+    control_protocol->protocol_type = control_protocol->recipe->protocol_type;
+
+    printf("%s %d control_protocol %p recipe %p\n", __func__, __LINE__, control_protocol, control_protocol->recipe);
+
     /*Get the variable need to read from recipe file*/
-    RecipeReadVariableItem(control_protocol->recipe, control_protocol->protocol_type, recipe_file_json);
+    RecipeReadVariableItem(control_protocol->recipe, recipe_file_json);
+
+    control_protocol->done = control_protocol->recipe->done;
 
     cJSON_Delete(recipe_file_json);
+
+    PrivFree(recipe_file_buf);
     printf("Read and parse recipe file done!\n");
 #endif
 
@@ -247,6 +257,8 @@ int ControlFrameworkInit(void)
         goto _out;
     }
 
+    printf("%s malloc control_protocol %p\n", __func__, control_protocol);
+
     //Control Protocol Struct Init
     ret = ControlProtocolInit(control_protocol);
     if (ret < 0) {
@@ -254,6 +266,8 @@ int ControlFrameworkInit(void)
         PrivFree(control_protocol);
         goto _out;
     }
+
+    printf("%s malloc CONTROL_RECIPE_FILE %s\n", __func__, CONTROL_RECIPE_FILE);
 
     //Read Recipe File, Get Control Protocol Configure Param
     ret = ControlAnalyzeRecipe(control_protocol, CONTROL_RECIPE_FILE);
@@ -265,12 +279,16 @@ int ControlFrameworkInit(void)
 
     control_protocol->protocol_status = CONTROL_REGISTERED;
 
+    printf("%s recipe %p\n", __func__, control_protocol->recipe);
+
     ret = ControlPeripheralInit(control_protocol->recipe);
     if (ret < 0) {
         printf("%s failed!\n", __func__);
         PrivFree(control_protocol);
         goto _out;
     }
+
+    printf("%s ControlPeripheralInit done\n", __func__);
 
 _out:
     return ret;

@@ -29,6 +29,10 @@
  */
 void SocketInit(char *ip, char *mask, char *gw)
 {
+    printf("%s ip %d.%d.%d.%d mask %d.%d.%d.%d gw %d.%d.%d.%d\n", __func__, 
+        ip[0], ip[1], ip[2], ip[3],
+        mask[0], mask[1], mask[2], mask[3],
+        gw[0], gw[1], gw[2], gw[3]);
 #ifdef BSP_USING_LWIP
     lwip_config_tcp(0, ip, mask, gw);
 #endif

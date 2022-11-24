@@ -30,7 +30,6 @@ extern "C" {
 
 struct ControlProtocol;
 typedef struct ControlProtocol *ControlProtocolType;
-typedef struct ControlData *ControlDataType;
 
 struct ControlDone 
 {
@@ -76,7 +75,6 @@ struct ControlProtocol
 
     sem_t sem;
     pthread_mutex_t lock;
-    //struct DoublelistNode link;
 };
 
 /*Control Framework Protocol Init*/
@@ -84,12 +82,6 @@ int ControlFrameworkInit(void);
 
 /*Control Framework Find certain Protocol*/
 ControlProtocolType ControlProtocolFind(void);
-
-// /*Control Framework Protocol Register*/
-// int ControlProtocolRegister(struct ControlProtocol *control_protocol);
-
-// /*Control Framework Protocol Unregister*/
-// int ControlProtocolUnregister(struct ControlProtocol *control_protocol);
 
 /*Control Framework Protocol Open*/
 int ControlProtocolOpen(struct ControlProtocol *control_protocol);

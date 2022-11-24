@@ -76,7 +76,9 @@ typedef struct
 typedef struct 
 {
     cJSON *read_single_item_json;
+    uint8_t *p_read_item_data;
     uint16_t read_item_index;//Variable item index(1 ++)
+    uint8_t last_item_size;
 }ProtocolFormatInfo;
 
 struct ProtocolData
@@ -104,7 +106,7 @@ struct SocketConfig
 
 struct ControlRecipe
 {
-    char device_name[20];
+    uint8_t device_name[20];
     uint16_t device_id;
     uint16_t read_period;
     uint16_t read_item_count;
@@ -114,11 +116,12 @@ struct ControlRecipe
     ProtocolType protocol_type;
 
     void *read_item;
+    struct ControlDone *done;
 
     struct SerialConfig serial_config;
     struct SocketConfig socket_config;
 
-    struct ProtocolData *protocol_data;
+    struct ProtocolData protocol_data;
 
     int (*ControlProtocolFormatCmd)(struct ControlRecipe *p_recipe, ProtocolFormatInfo *protocol_format_info);
 };
@@ -127,10 +130,10 @@ struct ControlRecipe
 uint8_t GetValueTypeMemorySize(UniformValueType uniform_value_type);
 
 /*Get basic information from recipe file*/
-int RecipeBasicInformation(struct ControlRecipe *p_recipe, int protocol_type, cJSON *p_recipe_file_json);
+int RecipeBasicInformation(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_json);
 
 /*Get the variable need to read from recipe file*/
-void RecipeReadVariableItem(struct ControlRecipe *p_recipe, int protocol_type, cJSON *p_recipe_file_json);
+void RecipeReadVariableItem(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_json);
 
 /*Control Framework Peripheral Device Init*/
 int ControlPeripheralInit(struct ControlRecipe *p_recipe);
