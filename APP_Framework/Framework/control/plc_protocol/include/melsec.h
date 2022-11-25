@@ -11,11 +11,9 @@
 */
 
 /**
- * @file control_file.c
- * @brief control relative file operation
+ * @file melsec.h
+ * @brief plc protocol melsec
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2022-09-37
+ * @date 2022-10-08
  */
-
-

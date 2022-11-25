@@ -1,3 +1,4 @@
+SRC_FILES := framework_init.c
 SRC_DIR :=  transform_layer 
 
 ifeq ($(CONFIG_SUPPORT_SENSOR_FRAMEWORK),y)

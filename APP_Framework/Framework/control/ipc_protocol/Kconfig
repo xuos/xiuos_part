@@ -1,2 +1,8 @@
+config CONTROL_PROTOCOL_MODBUS_TCP
+        bool "Using modbus_tcp control protocol"
+        default n
 
+config CONTROL_PROTOCOL_MODBUS_UART
+        bool "Using modbus_uart control protocol"
+        default n
 
