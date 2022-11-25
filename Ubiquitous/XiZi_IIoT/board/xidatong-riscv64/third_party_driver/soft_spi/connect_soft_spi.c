@@ -79,7 +79,7 @@ static void SoftSpiWriteByte(struct SpiHardwareDevice *spi_dev, uint8_t data)
 }
 
 /* 读一个字节 */
-static uint8_t SoftSpiReadbyte(struct SpiHardwareDevice *spi_dev)
+static uint8_t SoftSpiReadByte(struct SpiHardwareDevice *spi_dev)
 {
     uint8_t i = 0;
     uint8_t read_data = 0xFF;
@@ -179,7 +179,7 @@ static uint32 SoftSpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataS
 
     for (size_t i = 0; i < recv_length; i++)
     {
-        recv_buff[i] = SoftSpiReadbyte(spi_dev);
+        recv_buff[i] = SoftSpiReadByte(spi_dev);
     }
 
     if (spi_datacfg->spi_cs_release)
