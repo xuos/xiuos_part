@@ -9,19 +9,19 @@
  */
 
 /**
-* @file drv_io_config.h
-* @brief define edu-riscv64-board io configure
-* @version 2.0 
-* @author AIIT XUOS Lab
-* @date 2022-10-17
-*/
+ * @file drv_io_config.h
+ * @brief define edu-riscv64-board io configure
+ * @version 2.0
+ * @author AIIT XUOS Lab
+ * @date 2022-10-17
+ */
 
 /*************************************************
 File name: drv_io_config.h
 Description: define edu-riscv64-board io configure
 Others: take RT-Thread v4.0.2/bsp/k210/driver/drv_io_config.h for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
-History: 
+History:
 1. Date: 2022-10-17
 Author: AIIT XUOS Lab
 Modification: add edu-riscv64-board io configure define
@@ -30,10 +30,9 @@ Modification: add edu-riscv64-board io configure define
 #ifndef __DRV_IO_CONFIG_H__
 #define __DRV_IO_CONFIG_H__
 
-enum HS_GPIO_CONFIG
-{
+enum HS_GPIO_CONFIG {
 #ifdef BSP_USING_LCD
-    LCD_DC_PIN = 0,     /* LCD DC PIN */
+    LCD_DC_PIN = 0, /* LCD DC PIN */
 #endif
 #ifdef BSP_SPI1_USING_SS0
     SPI1_CS0_PIN,
@@ -47,15 +46,26 @@ enum HS_GPIO_CONFIG
 #ifdef BSP_SPI1_USING_SS3
     SPI1_CS3_PIN,
 #endif
+#ifdef BSP_USING_W5500
+    WIZ_RST_PIN, WIZ_INT_PIN,
+#endif
     GPIO_ALLOC_START /* index of gpio driver start */
-};
+}
+;
+
+#ifdef BSP_USING_SOFT_SPI
+#define FPIOA_SOFT_SPI_SCK 26
+#define FPIOA_SOFT_SPI_MIOS 25
+#define FPIOA_SOFT_SPI_MSOI 27
+#define FPIOA_SOFT_SPI_NCS 28
+#endif
 
 
 #ifdef BSP_USING_SOFT_SPI
-#define FPIOA_SOFT_SPI_SCK  26
-#define FPIOA_SOFT_SPI_MIOS   25
-#define FPIOA_SOFT_SPI_MSOI   27
-#define FPIOA_SOFT_SPI_NCS    28
+#define FPIOA_SOFT_SPI_SCK 26
+#define FPIOA_SOFT_SPI_MIOS 25
+#define FPIOA_SOFT_SPI_MSOI 27
+#define FPIOA_SOFT_SPI_NCS 28
 
 #define BSP_SOFT_SPI_SCK_PIN 26
 #define BSP_SOFT_SPI_MIOS_PIN 25
@@ -91,6 +101,7 @@ enum HS_GPIO_CONFIG
 #define BSP_485_DIR_PIN 24
 #endif
 
-extern int IoConfigInit(void);
+    extern int
+    IoConfigInit(void);
 
 #endif
