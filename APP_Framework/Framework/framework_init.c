@@ -15,6 +15,7 @@
 
 extern int SensorFrameworkInit(void);
 extern int AdapterFrameworkInit(void);
+extern int ControlFrameworkInit(void);
 
 extern int Adapter4GInit(void);
 extern int AdapterNbiotInit(void);
@@ -71,6 +72,10 @@ static struct InitDesc framework[] =
 
 #ifdef SUPPORT_CONNECTION_FRAMEWORK
 	{ "connection_framework", AdapterFrameworkInit },
+#endif
+
+#ifdef SUPPORT_CONTROL_FRAMEWORK
+	{ "control_framework", ControlFrameworkInit },
 #endif
 
 	{ "NULL", NULL },
@@ -227,6 +232,10 @@ int FrameworkInit(void)
 
 #ifdef SUPPORT_CONNECTION_FRAMEWORK
 	ConnectionDeviceFrameworkInit(framework);
+#endif
+
+#ifdef SUPPORT_CONTROL_FRAMEWORK
+	ControlFrameworkInit();
 #endif
 
 #ifdef LIB_LV

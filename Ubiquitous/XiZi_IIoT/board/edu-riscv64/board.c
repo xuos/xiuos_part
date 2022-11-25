@@ -47,6 +47,7 @@ Modification:
 #include "connect_uart.h"
 #include "connect_w5500.h"
 #include "connect_wdt.h"
+#include "connect_dvp.h"
 #include "dmac.h"
 #include "encoding.h"
 #include "fpioa.h"
@@ -217,7 +218,10 @@ struct InitSequenceDesc _board_init[] = {
 #ifdef BSP_USING_W5500
     {"w5500", HwWiznetInit},
 #endif
-    {" NONE ", NONE},
+#ifdef BSP_USING_CAMERA
+    {"hw_camera", HwDvpInit },
+#endif
+    { " NONE ",NONE },
 };
 
 void InitBoardHardware(void) {

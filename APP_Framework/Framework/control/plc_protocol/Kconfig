@@ -1,2 +1,15 @@
+config CONTROL_PROTOCOL_FINS
+        bool "Using fins control protocol"
+        default n
 
+config CONTROL_PROTOCOL_MELSEC
+        bool "Using melsec control protocol"
+        default n
 
+config CONTROL_PROTOCOL_OPCUA
+        bool "Using opcua control protocol"
+        default n
+
+config CONTROL_PROTOCOL_S7
+        bool "Using s7 control protocol"
+        default n

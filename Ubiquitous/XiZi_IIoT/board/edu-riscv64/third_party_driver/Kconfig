@@ -120,3 +120,12 @@ menuconfig BSP_USING_WIZCHIP
     if BSP_USING_WIZCHIP
         source "$BSP_DIR/third_party_driver/ethernet/Kconfig"
     endif
+
+menuconfig BSP_USING_CAMERA
+    bool "Using camera device"
+    default y
+    select RESOURCES_CAMERA
+    if BSP_USING_CAMERA
+        source "$BSP_DIR/third_party_driver/dvp/Kconfig"
+    endif
+

@@ -173,6 +173,7 @@ int PrivIoctl(int fd, int cmd, void *args)
     case ADC_TYPE:
     case DAC_TYPE:
     case WDT_TYPE:
+    case CAMERA_TYPE:
         ret = ioctl(fd, cmd, ioctl_cfg->args);
         break;
     default:

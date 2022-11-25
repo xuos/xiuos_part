@@ -144,7 +144,7 @@ void UdpSocketRecvTest(int argc, char *argv[])
     }
 
 #ifdef ADD_XIZI_FETURES
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, udp_socket_ip);
+    lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, udp_socket_ip);
     sys_thread_new("UdpSocketRecvTask", UdpSocketRecvTask, NULL,
         LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 #endif
@@ -207,7 +207,7 @@ void UdpSocketSendTest(int argc, char *argv[])
     }
 
 #ifdef ADD_XIZI_FETURES
-    lwip_config_tcp(lwip_ipaddr, lwip_netmask, udp_socket_ip);
+    lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, udp_socket_ip);
     sys_thread_new("UdpSocketSendTask", UdpSocketSendTask, NULL, LWIP_TASK_STACK_SIZE,
         LWIP_DEMO_TASK_PRIO);
 #endif

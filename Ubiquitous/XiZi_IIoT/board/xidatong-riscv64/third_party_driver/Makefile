@@ -56,4 +56,8 @@ ifeq ($(CONFIG_BSP_USING_WDT),y)
   SRC_DIR += watchdog
 endif
 
+ifeq ($(CONFIG_BSP_USING_SOFT_SPI),y)
+  SRC_DIR += soft_spi
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 AIIT XUOS Lab
+* Copyright (c) 2020 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
@@ -11,11 +11,24 @@
 */
 
 /**
- * @file control_file.c
- * @brief control relative file operation
- * @version 3.0
- * @author AIIT XUOS Lab
- * @date 2022-09-37
- */
+* @file connect_dvp.h
+* @brief define edu-riscv64-board DVP init function
+* @version 2.0 
+* @author AIIT XUOS Lab
+* @date 2022-11-21
+*/
+#ifndef CONNECT_DVP_H
+#define CONNECT_DVP_H
+#include <device.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+int HwDvpInit(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

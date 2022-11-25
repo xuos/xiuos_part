@@ -11,16 +11,9 @@
 */
 
 /**
- * @file control_file.h
- * @brief control file function relative API
+ * @file melsec.h
+ * @brief plc protocol melsec
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2022-09-27
+ * @date 2022-10-08
  */
-
-#ifndef CONTROL_FILE_H
-#define CONTROL_FILE_H
-
-
-#endif
-
