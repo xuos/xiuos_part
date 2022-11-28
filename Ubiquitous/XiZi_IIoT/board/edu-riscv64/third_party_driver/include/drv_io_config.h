@@ -47,7 +47,8 @@ enum HS_GPIO_CONFIG {
     SPI1_CS3_PIN,
 #endif
 #ifdef BSP_USING_W5500
-    WIZ_RST_PIN, WIZ_INT_PIN,
+    WIZ_RST_PIN,
+    WIZ_INT_PIN,
 #endif
     GPIO_ALLOC_START /* index of gpio driver start */
 }

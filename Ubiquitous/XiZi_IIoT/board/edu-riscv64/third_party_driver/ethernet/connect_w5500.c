@@ -26,9 +26,9 @@ const uint32_t socket_tcp = 0;
 const uint32_t g_wiznet_buf_size = 2048;
 
 static wiz_NetInfo g_wiz_netinfo = {.mac = {0x00, 0x08, 0xdc, 0x11, 0x11, 0x11},
-                                    .ip = {192, 168, 31, 13},
-                                    .sn = {255, 255, 255, 0},
-                                    .gw = {192, 168, 31, 1},
+                                    .ip = {192, 168, 131, 42},
+                                    .sn = {255, 255, 254, 0},
+                                    .gw = {192, 168, 130, 1},
                                     .dns = {0, 0, 0, 0},
                                     .dhcp = NETINFO_STATIC};
 
@@ -473,33 +473,52 @@ void ifconfig() {
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC),
                  ifconfig, ifconfig, printf w5500 configurations);
 
-void char_arr_assign(uint8_t **dst, uint32_t *src, uint32_t len) {
+void char_arr_assign(uint8_t *dst, uint32_t *src, int len) {
   for (int i = 0; i < len; ++i) {
-    (*dst)[i] = (uint8_t)(src[i]);
+    dst[i] = (uint8_t)(src[i]);
   }
 }
 
-void config_w5500_network(char *mac, char *ip, char *sn, char *gw, char *dns) {
+char *network_param_name[] = {"ip", "sn", "gw"};
+
+void config_w5500_network(int argc, char *argv[]) {
+  if (argc < 2) {
+    KPrintf("[W5500] Network config require params.\n");
+    return;
+  }
+
   wiz_NetInfo wiz_netinfo;
-  uint32_t tmp_arr[4];
-  // config netinfo
-  sscanf(mac, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2],
-         &tmp_arr[3]);
-  char_arr_assign((uint8_t **)&wiz_netinfo.mac, tmp_arr, 4);
-  sscanf(ip, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2], &tmp_arr[3]);
-  char_arr_assign((uint8_t **)&wiz_netinfo.ip, tmp_arr, 4);
-  sscanf(sn, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2], &tmp_arr[3]);
-  char_arr_assign((uint8_t **)&wiz_netinfo.sn, tmp_arr, 4);
-  sscanf(gw, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2], &tmp_arr[3]);
-  char_arr_assign((uint8_t **)&wiz_netinfo.gw, tmp_arr, 4);
-  sscanf(dns, "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1], &tmp_arr[2],
-         &tmp_arr[3]);
-  char_arr_assign((uint8_t **)&wiz_netinfo.dns, tmp_arr, 4);
-  // set new netinfo
+  memcpy(&wiz_netinfo, &g_wiz_netinfo, sizeof(wiz_NetInfo));
+
+  int cur_arg_idx = 1;
+
+  while (argv[cur_arg_idx] != NULL) {
+    if (argv[cur_arg_idx + 1] == NULL) {
+      KPrintf("[W5500] Network config %s requires value.\n", argv[cur_arg_idx]);
+      return;
+    }
+    uint32_t tmp_arr[4];
+    sscanf(argv[cur_arg_idx + 1], "%d.%d.%d.%d", &tmp_arr[0], &tmp_arr[1],
+           &tmp_arr[2], &tmp_arr[3]);
+    if (memcmp(argv[cur_arg_idx], network_param_name[0], 2 * sizeof(char)) ==
+        0) {
+      char_arr_assign(wiz_netinfo.ip, tmp_arr, 4);
+    } else if (memcmp(argv[cur_arg_idx], network_param_name[1],
+                      2 * sizeof(char)) == 0) {
+      char_arr_assign(wiz_netinfo.sn, tmp_arr, 4);
+    } else if (memcmp(argv[cur_arg_idx], network_param_name[2],
+                      2 * sizeof(char)) == 0) {
+      char_arr_assign(wiz_netinfo.gw, tmp_arr, 4);
+    } else {
+      KPrintf("[W5500] Invalid network param.\n");
+    }
+    cur_arg_idx += 2;
+  }
+
   ctlnetwork(CN_SET_NETINFO, (void *)&wiz_netinfo);
+  KPrintf("[W5500] Network config success.\n", argv[cur_arg_idx]);
   ifconfig();
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) |
-                     SHELL_CMD_PARAM_NUM(5),
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
                  config_w5500_network, config_w5500_network,
                  set w5500 configurations);
