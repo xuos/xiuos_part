@@ -18,8 +18,8 @@
  * @date 2022.09.28
  */
 
-#ifndef __INCLUDE_NUTTX_SERIAL_UART_K210_16550_H
-#define __INCLUDE_NUTTX_SERIAL_UART_K210_16550_H
+#ifndef __INCLUDE_NUTTX_SERIAL_UART_K210_H
+#define __INCLUDE_NUTTX_SERIAL_UART_K210_H
 
 /****************************************************************************
  * Included Files
@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_K210_16550_UART
+#ifdef CONFIG_K210_UART
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -38,7 +38,7 @@
 /* Are any UARTs enabled? */
 
 #undef HAVE_UART
-#if defined(CONFIG_K210_16550_UART1) || defined(CONFIG_K210_16550_UART2) || defined(CONFIG_K210_16550_UART3)
+#if defined(CONFIG_K210_UART1) || defined(CONFIG_K210_UART2) || defined(CONFIG_K210_UART3)
 #  define HAVE_UART 1
 #endif
 
@@ -46,78 +46,78 @@
  * register bit width.
  */
 
-#ifndef CONFIG_K210_16550_REGINCR
-#  error "CONFIG_K210_16550_REGINCR not defined"
+#ifndef CONFIG_K210_UART_REGINCR
+#  error "CONFIG_K210_UART_REGINCR not defined"
 #endif
 
-#if CONFIG_K210_16550_REGINCR != 1 && CONFIG_K210_16550_REGINCR != 2 && CONFIG_K210_16550_REGINCR != 4
-#  error "CONFIG_K210_16550_REGINCR not supported"
+#if CONFIG_K210_UART_REGINCR != 1 && CONFIG_K210_UART_REGINCR != 2 && CONFIG_K210_UART_REGINCR != 4
+#  error "CONFIG_K210_UART_REGINCR not supported"
 #endif
 
-#ifndef CONFIG_K210_16550_REGWIDTH
-#  error "CONFIG_K210_16550_REGWIDTH not defined"
+#ifndef CONFIG_K210_UART_REGWIDTH
+#  error "CONFIG_K210_UART_REGWIDTH not defined"
 #endif
 
-#if CONFIG_K210_16550_REGWIDTH != 8 && CONFIG_K210_16550_REGWIDTH != 16 && CONFIG_K210_16550_REGWIDTH != 32
-#  error "CONFIG_K210_16550_REGWIDTH not supported"
+#if CONFIG_K210_UART_REGWIDTH != 8 && CONFIG_K210_UART_REGWIDTH != 16 && CONFIG_K210_UART_REGWIDTH != 32
+#  error "CONFIG_K210_UART_REGWIDTH not supported"
 #endif
 
-#ifndef CONFIG_K210_16550_ADDRWIDTH
-#  error "CONFIG_K210_16550_ADDRWIDTH not defined"
+#ifndef CONFIG_K210_UART_ADDRWIDTH
+#  error "CONFIG_K210_UART_ADDRWIDTH not defined"
 #endif
 
-#if CONFIG_K210_16550_ADDRWIDTH != 0 && CONFIG_K210_16550_ADDRWIDTH != 8 && \
-    CONFIG_K210_16550_ADDRWIDTH != 16 && CONFIG_K210_16550_ADDRWIDTH != 32 && \
-    CONFIG_K210_16550_ADDRWIDTH != 64
-#  error "CONFIG_K210_16550_ADDRWIDTH not supported"
+#if CONFIG_K210_UART_ADDRWIDTH != 0 && CONFIG_K210_UART_ADDRWIDTH != 8 && \
+    CONFIG_K210_UART_ADDRWIDTH != 16 && CONFIG_K210_UART_ADDRWIDTH != 32 && \
+    CONFIG_K210_UART_ADDRWIDTH != 64
+#  error "CONFIG_K210_UART_ADDRWIDTH not supported"
 #endif
 
 /* If a UART is enabled, then its base address, clock, and IRQ
  * must also be provided
  */
 
-#ifdef CONFIG_K210_16550_UART1
-#  ifndef CONFIG_K210_16550_UART1_BASE
-#    error "CONFIG_K210_16550_UART1_BASE not provided"
-#    undef CONFIG_K210_16550_UART1
+#ifdef CONFIG_K210_UART1
+#  ifndef CONFIG_K210_UART1_BASE
+#    error "CONFIG_K210_UART1_BASE not provided"
+#    undef CONFIG_K210_UART1
 #  endif
-#  ifndef CONFIG_K210_16550_UART1_CLOCK
-#    error "CONFIG_K210_16550_UART1_CLOCK not provided"
-#    undef CONFIG_K210_16550_UART1
+#  ifndef CONFIG_K210_UART1_CLOCK
+#    error "CONFIG_K210_UART1_CLOCK not provided"
+#    undef CONFIG_K210_UART1
 #  endif
-#  ifndef CONFIG_K210_16550_UART1_IRQ
-#    error "CONFIG_K210_16550_UART1_IRQ not provided"
-#    undef CONFIG_K210_16550_UART1
-#  endif
-#endif
-
-#ifdef CONFIG_K210_16550_UART2
-#  ifndef CONFIG_K210_16550_UART2_BASE
-#    error "CONFIG_K210_16550_UART2_BASE not provided"
-#    undef CONFIG_K210_16550_UART2
-#  endif
-#  ifndef CONFIG_K210_16550_UART2_CLOCK
-#    error "CONFIG_K210_16550_UART2_CLOCK not provided"
-#    undef CONFIG_K210_16550_UART2
-#  endif
-#  ifndef CONFIG_K210_16550_UART2_IRQ
-#    error "CONFIG_K210_16550_UART2_IRQ not provided"
-#    undef CONFIG_K210_16550_UART2
+#  ifndef CONFIG_K210_UART1_IRQ
+#    error "CONFIG_K210_UART1_IRQ not provided"
+#    undef CONFIG_K210_UART1
 #  endif
 #endif
 
-#ifdef CONFIG_K210_16550_UART3
-#  ifndef CONFIG_K210_16550_UART3_BASE
-#    error "CONFIG_K210_16550_UART3_BASE not provided"
-#    undef CONFIG_K210_16550_UART3
+#ifdef CONFIG_K210_UART2
+#  ifndef CONFIG_K210_UART2_BASE
+#    error "CONFIG_K210_UART2_BASE not provided"
+#    undef CONFIG_K210_UART2
 #  endif
-#  ifndef CONFIG_K210_16550_UART3_CLOCK
-#    error "CONFIG_K210_16550_UART3_CLOCK not provided"
-#    undef CONFIG_K210_16550_UART3
+#  ifndef CONFIG_K210_UART2_CLOCK
+#    error "CONFIG_K210_UART2_CLOCK not provided"
+#    undef CONFIG_K210_UART2
 #  endif
-#  ifndef CONFIG_K210_16550_UART3_IRQ
-#    error "CONFIG_K210_16550_UART3_IRQ not provided"
-#    undef CONFIG_K210_16550_UART3
+#  ifndef CONFIG_K210_UART2_IRQ
+#    error "CONFIG_K210_UART2_IRQ not provided"
+#    undef CONFIG_K210_UART2
+#  endif
+#endif
+
+#ifdef CONFIG_K210_UART3
+#  ifndef CONFIG_K210_UART3_BASE
+#    error "CONFIG_K210_UART3_BASE not provided"
+#    undef CONFIG_K210_UART3
+#  endif
+#  ifndef CONFIG_K210_UART3_CLOCK
+#    error "CONFIG_K210_UART3_CLOCK not provided"
+#    undef CONFIG_K210_UART3
+#  endif
+#  ifndef CONFIG_K210_UART3_IRQ
+#    error "CONFIG_K210_UART3_IRQ not provided"
+#    undef CONFIG_K210_UART3
 #  endif
 #endif
 
@@ -143,21 +143,21 @@
 #define UART_DLF_INCR          48 /* Divisor factor Register*/
 #define UART_CPR_INCR          61 /* Component Register */
 
-#define UART_RBR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_RBR_INCR)
-#define UART_THR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_THR_INCR)
-#define UART_DLL_OFFSET        (CONFIG_K210_16550_REGINCR*UART_DLL_INCR)
-#define UART_DLM_OFFSET        (CONFIG_K210_16550_REGINCR*UART_DLM_INCR)
-#define UART_IER_OFFSET        (CONFIG_K210_16550_REGINCR*UART_IER_INCR)
-#define UART_IIR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_IIR_INCR)
-#define UART_FCR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_FCR_INCR)
-#define UART_LCR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_LCR_INCR)
-#define UART_MCR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_MCR_INCR)
-#define UART_LSR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_LSR_INCR)
-#define UART_MSR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_MSR_INCR)
-#define UART_SCR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_SCR_INCR)
-#define UART_SRT_OFFSET        (CONFIG_K210_16550_REGINCR*UART_SRT_INCR)
-#define UART_DLF_OFFSET        (CONFIG_K210_16550_REGINCR*UART_DLF_INCR)
-#define UART_CPR_OFFSET        (CONFIG_K210_16550_REGINCR*UART_CPR_INCR)
+#define UART_RBR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_RBR_INCR)
+#define UART_THR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_THR_INCR)
+#define UART_DLL_OFFSET        (CONFIG_K210_UART_REGINCR*UART_DLL_INCR)
+#define UART_DLM_OFFSET        (CONFIG_K210_UART_REGINCR*UART_DLM_INCR)
+#define UART_IER_OFFSET        (CONFIG_K210_UART_REGINCR*UART_IER_INCR)
+#define UART_IIR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_IIR_INCR)
+#define UART_FCR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_FCR_INCR)
+#define UART_LCR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_LCR_INCR)
+#define UART_MCR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_MCR_INCR)
+#define UART_LSR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_LSR_INCR)
+#define UART_MSR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_MSR_INCR)
+#define UART_SCR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_SCR_INCR)
+#define UART_SRT_OFFSET        (CONFIG_K210_UART_REGINCR*UART_SRT_INCR)
+#define UART_DLF_OFFSET        (CONFIG_K210_UART_REGINCR*UART_DLF_INCR)
+#define UART_CPR_OFFSET        (CONFIG_K210_UART_REGINCR*UART_CPR_INCR)
 
 /* Register bit definitions *************************************************/
 
@@ -267,36 +267,36 @@
  * Public Types
  ****************************************************************************/
 
-#if CONFIG_K210_16550_REGWIDTH == 8
+#if CONFIG_K210_UART_REGWIDTH == 8
 typedef uint8_t uart_datawidth_t;
-#elif CONFIG_K210_16550_REGWIDTH == 16
+#elif CONFIG_K210_UART_REGWIDTH == 16
 typedef uint16_t uart_datawidth_t;
-#elif CONFIG_K210_16550_REGWIDTH == 32
+#elif CONFIG_K210_UART_REGWIDTH == 32
 typedef uint32_t uart_datawidth_t;
 #endif
 
-#if CONFIG_K210_16550_ADDRWIDTH == 0
+#if CONFIG_K210_UART_ADDRWIDTH == 0
 typedef uintptr_t uart_addrwidth_t;
-#elif CONFIG_K210_16550_ADDRWIDTH == 8
+#elif CONFIG_K210_UART_ADDRWIDTH == 8
 typedef uint8_t uart_addrwidth_t;
-#elif CONFIG_K210_16550_ADDRWIDTH == 16
+#elif CONFIG_K210_UART_ADDRWIDTH == 16
 typedef uint16_t uart_addrwidth_t;
-#elif CONFIG_K210_16550_ADDRWIDTH == 32
+#elif CONFIG_K210_UART_ADDRWIDTH == 32
 typedef uint32_t uart_addrwidth_t;
-#elif CONFIG_K210_16550_ADDRWIDTH == 64
+#elif CONFIG_K210_UART_ADDRWIDTH == 64
 typedef uint64_t uart_addrwidth_t;
 #endif
 
-struct k210_16550_s
+struct k210_uart_s
 {
   uart_addrwidth_t uartbase;  /* Base address of UART registers */
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
   uint32_t         baud;      /* Configured baud */
   uint32_t         uartclk;   /* UART clock frequency */
 #endif
   uart_datawidth_t ier;       /* Saved IER value */
   uint8_t          irq;       /* IRQ associated with this UART */
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
   uint8_t          parity;    /* 0=none, 1=odd, 2=even */
   uint8_t          bits;      /* Number of bits (7 or 8) */
   int             stopbits2; /* true: Configure with 2 stop bits instead of 1 */
@@ -319,7 +319,7 @@ struct k210_16550_s
  *
  * Description:
  *   These functions must be provided by the processor-specific code in order
- *   to correctly access 16550 registers
+ *   to correctly access registers
  *   uart_ioctl() is optional to provide custom IOCTLs
  *
  ****************************************************************************/
@@ -334,6 +334,6 @@ void uart_putreg(uart_addrwidth_t base,
 struct file;  /* Forward reference */
 int uart_ioctl(struct file *filep, int cmd, unsigned long arg);
 
-void k210_uart_16550_register(void);
-#endif /* CONFIG_K210_16550_UART */
+void k210_uart_register(void);
+#endif /* CONFIG_K210_UART */
 #endif /* __INCLUDE_NUTTX_SERIAL_UART_16550_H */
