@@ -42,10 +42,6 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += k210_gpio.c
 endif
 
-ifeq ($(CONFIG_BSP_USING_CH438),y)
-CSRCS += k210_ch438.c ch438_demo.c
-endif
-
 ifeq ($(CONFIG_BSP_USING_CH376),y)
 CSRCS += k210_ch376.c ch376_demo.c
 endif
@@ -56,10 +52,6 @@ endif
 
 ifeq ($(CONFIG_BSP_USING_TOUCH),y)
 CSRCS += k210_touch.c
-endif
-
-ifeq ($(CONFIG_BSP_USING_CAN),y)
-CSRCS += can_demo.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

@@ -80,28 +80,12 @@ extern "C"
 /*************************** GPIO define ***************************/
 
 /* UART IO */
-#define GPIO_WIFI_RXD       7
-#define GPIO_WIFI_TXD       6
-#define GPIO_EC200T_RXD     21
-#define GPIO_EC200T_TXD     20
-#define GPIO_CH376T_RXD     22
-#define GPIO_CH376T_TXD     23
-#define GPIO_CAN_RXD        18
-#define GPIO_CAN_TXD        19
-
-/* ch438 IO */
-#define CH438_ALE_PIN   24
-#define CH438_NWR_PIN   25
-#define CH438_NRD_PIN   26
-#define CH438_D0_PIN    27
-#define CH438_D1_PIN    28
-#define CH438_D2_PIN    29
-#define CH438_D3_PIN    30
-#define CH438_D4_PIN    31
-#define CH438_D5_PIN    32
-#define CH438_D6_PIN    33
-#define CH438_D7_PIN    34
-#define CH438_INT_PIN   35
+#define GPIO_WIFI_RXD      7
+#define GPIO_WIFI_TXD      6
+#define GPIO_E220_RXD     21
+#define GPIO_E220_TXD     20
+#define GPIO_CH376T_RXD   22
+#define GPIO_CH376T_TXD   23
 
 /* w5500 IO */
 #define BSP_ENET_SCLK   9
@@ -124,8 +108,8 @@ extern "C"
 #define BSP_IIC_SCL     17
 
 /* other mode io */
-#define GPIO_E220_M0   44
-#define GPIO_E220_M1   45
+#define GPIO_E220_M0   32
+#define GPIO_E220_M1   33
 #define GPIO_E18_MODE  46
 #define GPIO_WIFI_EN   8
 #define GPIO_CAN_CFG   43
@@ -142,20 +126,6 @@ extern "C"
 #define FPOA_USART2_TX        K210_IO_FUNC_UART2_TX
 #define FPOA_USART3_RX        K210_IO_FUNC_UART3_RX
 #define FPOA_USART3_TX        K210_IO_FUNC_UART3_TX
-
-/* ch438 FPIOA */
-#define FPIOA_CH438_ALE   11
-#define FPIOA_CH438_NWR   12
-#define FPIOA_CH438_NRD   13
-#define FPIOA_CH438_D0    14
-#define FPIOA_CH438_D1    15
-#define FPIOA_CH438_D2    16
-#define FPIOA_CH438_D3    17
-#define FPIOA_CH438_D4    18
-#define FPIOA_CH438_D5    29
-#define FPIOA_CH438_D6    20
-#define FPIOA_CH438_D7    31
-#define FPIOA_CH438_INT   22
 
 /* w5500 FPIOA */
 #define FPIOA_ENET_NRST 0
