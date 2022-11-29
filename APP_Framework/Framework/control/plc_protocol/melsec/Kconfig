@@ -1,2 +1,20 @@
+choice
+    prompt "select melsec protocol"
+    default CONTROL_PROTOCOL_MELSEC_1E
 
+    config CONTROL_PROTOCOL_MELSEC_1E
+        bool "support melsec_1e protocol, using TCP"
+    
+    config CONTROL_PROTOCOL_MELSEC_3E_Q_L
+        bool "support melsec_3e_q_l protocol, using TCP"
+
+    config CONTROL_PROTOCOL_MELSEC_3E_IQ_R
+        bool "support melsec_3e_iq_r protocol, using TCP"
+
+    config CONTROL_PROTOCOL_MELSEC_1C
+        bool "support melsec_1c protocol, using SERIAL"
+
+    config CONTROL_PROTOCOL_MELSEC_3C
+        bool "support melsec_3c protocol, using SERIAL"
+endchoice
 

@@ -33,6 +33,10 @@ extern void *ReceivePlcDataTask(void *parameter);
 extern int FinsProtocolInit(struct ControlRecipe *p_recipe);
 #endif
 
+#ifdef CONTROL_PROTOCOL_MELSEC
+extern int MelsecProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
 /*
 CONTROL FRAMEWORK READ DATA FORMAT:
 |  HEAD |device_id|read data length|read item count|         data         |
@@ -54,6 +58,13 @@ static struct ControlProtocolInitParam protocol_init[] =
 {
 #ifdef CONTROL_PROTOCOL_FINS
 	{ PROTOCOL_FINS, FinsProtocolInit },
+#endif
+#ifdef CONTROL_PROTOCOL_MELSEC
+	{ PROTOCOL_MELSEC_1E, MelsecProtocolInit },
+    { PROTOCOL_MELSEC_3E_Q_L, MelsecProtocolInit },
+    { PROTOCOL_MELSEC_3E_IQ_R, MelsecProtocolInit },
+    { PROTOCOL_MELSEC_1C, MelsecProtocolInit },
+    { PROTOCOL_MELSEC_3C, MelsecProtocolInit },
 #endif
 
 	{ PROTOCOL_END, NULL },
