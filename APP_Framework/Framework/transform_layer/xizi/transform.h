@@ -227,6 +227,11 @@ struct RtcDrvConfigureParam
     time_t *time;
 };
 
+enum TCP_OPTION {
+  SEND_DATA = 0,
+  RECV_DATA,
+};
+
 #define PRIV_SYSTICK_GET (CurrentTicksGain())
 #define PRIV_LCD_DEV "/dev/lcd_dev"
 #define MY_DISP_HOR_RES BSP_LCD_Y_MAX

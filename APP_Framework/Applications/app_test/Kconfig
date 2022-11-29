@@ -192,6 +192,10 @@ menu "test app"
                 bool "Config test lcd device"
                 default n
 
+            config USER_TEST_W5500
+                select BSP_USING_W5500
+                bool "Config test W5500 only for edu-riscv64"
+                default n
                 
         endif
 endmenu
