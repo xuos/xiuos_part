@@ -98,7 +98,11 @@ enum HS_GPIO_CONFIG {
 #define BSP_E220_M1_PIN 33
 #endif
 
-#ifdef BSP_USING_RS485
+#ifdef USER_TEST_RS485
+#define BSP_485_DIR_PIN 24
+#elif defined SENSOR_QS_FX
+#define BSP_485_DIR_PIN 24
+#elif defined SENSOR_QS_FS
 #define BSP_485_DIR_PIN 24
 #endif
 
