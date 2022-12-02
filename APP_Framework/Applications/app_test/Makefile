@@ -85,8 +85,8 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
         SRC_FILES += test_camera.c
     endif
 
-    ifeq ($(CONFIG_USER_TEST_W5500),y)
-        SRC_FILES += test_w5500.c
+    ifeq ($(CONFIG_USER_TEST_ETHERNET),y)
+        SRC_FILES += test_ethernet.c
     endif  
 
     include $(KERNEL_ROOT)/compiler.mk

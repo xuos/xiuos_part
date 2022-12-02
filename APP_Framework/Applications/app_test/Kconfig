@@ -192,10 +192,23 @@ menu "test app"
                 bool "Config test lcd device"
                 default n
 
-            config USER_TEST_W5500
-                select BSP_USING_W5500
-                bool "Config test W5500 only for edu-riscv64"
+            menuconfig USER_TEST_ETHERNET
+                bool "Config test ethernet only for edu-riscv64"
                 default n
+                if USER_TEST_ETHERNET
+                    if ADD_XIZI_FETURES
+                        choice 
+                            prompt "set ethernet role as client or server"
+                            default ETHERNET_AS_SERVER
+
+                            config ETHERNET_AS_SERVER
+                            bool "test as server"
+
+                            config ETHERNET_AS_CLIENT
+                            bool "test as client"
+                        endchoice
+                    endif
+                endif
                 
         endif
 endmenu
