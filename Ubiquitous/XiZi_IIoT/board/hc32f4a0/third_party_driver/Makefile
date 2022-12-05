@@ -8,6 +8,10 @@ ifeq ($(CONFIG_BSP_USING_GPIO),y)
   SRC_DIR += gpio
 endif
 
+ifeq ($(CONFIG_BSP_USING_LWIP),y)
+  SRC_DIR += ethernet
+endif
+
 ifeq ($(CONFIG_BSP_USING_SPI),y)
   SRC_DIR += spi
 endif
