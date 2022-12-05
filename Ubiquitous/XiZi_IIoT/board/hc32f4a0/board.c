@@ -34,6 +34,10 @@ Modification:
 #include <hc32_ll.h>
 #include <connect_usart.h>
 
+#ifdef BSP_USING_GPIO
+#include <connect_gpio.h>
+#endif
+
 #ifdef BSP_USING_SDIO
 #include <connect_sdio.h>
 #endif
@@ -149,6 +153,9 @@ void SysTick_Handler(void)
 
 struct InitSequenceDesc _board_init[] = 
 {	
+#ifdef BSP_USING_GPIO
+    { "hw_pin", HwGpioInit },
+#endif
 #ifdef BSP_USING_SDIO
 	{ "sdio", HwSdioInit },
 #endif
