@@ -8,6 +8,10 @@ ifeq ($(CONFIG_BSP_USING_SPI),y)
   SRC_DIR += spi
 endif
 
+ifeq ($(CONFIG_BSP_USING_I2C),y)
+  SRC_DIR += i2c
+endif
+
 ifeq ($(CONFIG_BSP_USING_SDIO),y)
   SRC_DIR += sdio
 endif

@@ -42,6 +42,10 @@ Modification:
 #include <connect_spi.h>
 #endif
 
+#ifdef BSP_USING_I2C
+#include <connect_i2c.h>
+#endif
+
 #ifdef BSP_USING_USB
 #include <connect_usb.h>
 #endif
@@ -150,6 +154,9 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_SPI
 	{ "spi", HwSpiInit },
+#endif
+#ifdef BSP_USING_I2C
+	{ "i2c", HwI2cInit },
 #endif
 #ifdef BSP_USING_USB
 	{ "usb", HwUsbHostInit },
