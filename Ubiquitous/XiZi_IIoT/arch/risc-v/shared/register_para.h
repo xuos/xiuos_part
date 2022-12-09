@@ -18,7 +18,7 @@
 #ifdef ARCH_CPU_64BIT
 #define StoreD                   sd
 #define LoadD                    ld
-#define FSubDS                   fsub.d
+#define FSubDS                   fsub.s
 #define RegLength                8
 #define StoreDS                  "sd"
 #define LoadDS                   "ld"

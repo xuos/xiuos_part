@@ -1,6 +1,6 @@
-export CFLAGS := -mcmodel=medany -march=rv64imafdc -mabi=lp64d -fno-common -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -O0 -ggdb -fgnu89-inline -Werror
-export AFLAGS := -c -mcmodel=medany -march=rv64imafdc -mabi=lp64d -x assembler-with-cpp -ggdb
-export LFLAGS := -mcmodel=medany -march=rv64imafdc -mabi=lp64d -nostartfiles -Wl,--gc-sections,-Map=XiZi-edu-riscv64.map,-cref,-u,_start -T $(BSP_ROOT)/link.lds
+export CFLAGS := -mcmodel=medany -march=rv64imafc -mabi=lp64f -fsingle-precision-constant -fno-common -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -O0 -ggdb -fgnu89-inline -Werror
+export AFLAGS := -c -mcmodel=medany -march=rv64imafc -mabi=lp64f -fsingle-precision-constant -x assembler-with-cpp -ggdb
+export LFLAGS := -mcmodel=medany -march=rv64imafc -mabi=lp64f -fsingle-precision-constant -nostartfiles -Wl,--gc-sections,-Map=XiZi-edu-riscv64.map,-cref,-u,_start -T $(BSP_ROOT)/link.lds
 
 ifeq ($(CONFIG_LIB_MUSLLIB), y)
 export LFLAGS += -nostdlib -nostdinc # -fno-builtin -nodefaultlibs
