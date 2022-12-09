@@ -850,7 +850,6 @@ static uint32 SdReadMultiBlock(SpiSdDeviceType spi_sd_dev, uint32 id, const uint
 
         do
         {
-            BusDevWriteData(&spi_sd_dev->spi_dev->haldev, &write_param);
             BusDevReadData(&spi_sd_dev->spi_dev->haldev, &read_param);
 
             SD_TIMEOUT(start_time, 10 * SPI_SD_TIMEOUT_NUM);

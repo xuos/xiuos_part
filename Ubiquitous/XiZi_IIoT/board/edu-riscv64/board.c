@@ -70,6 +70,7 @@ extern int HwLcdInit(void);
 extern int HwSpiInit(void);
 extern int HwSoftSPIInit(void);
 extern int HwWiznetInit(void);
+extern int HwDvpInit(void);
 
 #include <iot-vfs.h>
 #ifdef MOUNT_USB

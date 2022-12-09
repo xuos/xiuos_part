@@ -3,5 +3,9 @@ menuconfig USING_K210_YOLOV2_DETECT
 	depends on USING_KPU_PROCESSING
     default n
 
+config CAMERA_DEV_DRIVER
+    string "Set camera dev path"
+    default "/dev/ov2640"
+
 
 
