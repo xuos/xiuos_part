@@ -12,7 +12,7 @@
 
 /**
  * @file k210_bringup.c
- * @brief xidatong-riscv64 k210_bringup.c
+ * @brief edu-riscv64 k210_bringup.c
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2022.03.17
@@ -36,7 +36,7 @@
 
 #include "k210.h"
 #include "k210_clockconfig.h"
-#include "xidatong-riscv64.h"
+#include "edu-riscv64.h"
 #include <arch/board/board.h>
 #include "k210_sysctl.h"
 #include "k210_fpioa.h"
@@ -82,10 +82,6 @@ int k210_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_BSP_USING_CH438
-  board_ch438_initialize();
-#endif
-
 #ifdef CONFIG_K210_LCD
   k210_sysctl_init();
   board_lcd_initialize();
@@ -96,7 +92,6 @@ int k210_bringup(void)
 #endif
 
 #ifdef CONFIG_K210_UART1
-#ifdef CONFIG_ADAPTER_ESP8285_WIFI
   sysctl_clock_enable(SYSCTL_CLOCK_UART1);
   sysctl_reset(SYSCTL_RESET_UART1);
 
@@ -110,23 +105,12 @@ int k210_bringup(void)
   k210_gpiohs_set_value(FPIOA_WIFI_EN, GPIO_PV_HIGH);
 #endif
 
-#ifdef CONFIG_BSP_USING_CAN
-  sysctl_clock_enable(SYSCTL_CLOCK_UART1);
-  sysctl_reset(SYSCTL_RESET_UART1);
-
-  fpioa_set_function(GPIO_CAN_TXD, FPOA_USART1_TX);
-  fpioa_set_function(GPIO_CAN_RXD, FPOA_USART1_RX);
-
-  k210_fpioa_config(GPIO_CAN_CFG, HS_GPIO(FPIOA_CAN_NCFG) | K210_IOFLAG_GPIOHS);
-#endif
-#endif
-
 #ifdef CONFIG_K210_UART2
   sysctl_clock_enable(SYSCTL_CLOCK_UART2);
   sysctl_reset(SYSCTL_RESET_UART2);
 
-  fpioa_set_function(GPIO_EC200T_RXD, FPOA_USART2_RX);
-  fpioa_set_function(GPIO_EC200T_TXD, FPOA_USART2_TX);
+  fpioa_set_function(GPIO_E220_RXD, FPOA_USART2_RX);
+  fpioa_set_function(GPIO_E220_TXD, FPOA_USART2_TX);
 #endif
 
 #ifdef CONFIG_K210_UART3

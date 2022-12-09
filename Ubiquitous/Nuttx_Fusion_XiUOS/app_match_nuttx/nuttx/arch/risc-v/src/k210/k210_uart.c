@@ -11,7 +11,7 @@
 */
 
 /**
- * @file k210_uart_16550.c
+ * @file k210_uart.c
  * @brief k210 uart1-uart3 support
  * @version 1.0
  * @author AIIT XUOS Lab
@@ -37,13 +37,13 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
-#include "k210_uart_16550.h"
+#include "k210_uart.h"
 
 #ifdef CONFIG_SERIAL_TERMIOS
 #  include <termios.h>
 #endif
 
-#ifdef CONFIG_K210_16550_UART
+#ifdef CONFIG_K210_UART
 
 
 /****************************************************************************
@@ -58,31 +58,31 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  k210_16550_setup(FAR struct uart_dev_s *dev);
-static void k210_16550_shutdown(FAR struct uart_dev_s *dev);
-static int  k210_16550_attach(FAR struct uart_dev_s *dev);
-static void k210_16550_detach(FAR struct uart_dev_s *dev);
-static int  k210_16550_interrupt(int irq, FAR void *context, FAR void *arg);
-static int  k210_16550_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int  k210_16550_receive(FAR struct uart_dev_s *dev, unsigned int *status);
-static void k210_16550_rxint(FAR struct uart_dev_s *dev, bool enable);
-static bool k210_16550_rxavailable(FAR struct uart_dev_s *dev);
+static int  k210_uart_setup(FAR struct uart_dev_s *dev);
+static void k210_uart_shutdown(FAR struct uart_dev_s *dev);
+static int  k210_uart_attach(FAR struct uart_dev_s *dev);
+static void k210_uart_detach(FAR struct uart_dev_s *dev);
+static int  k210_uart_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  k210_uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int  k210_uart_receive(FAR struct uart_dev_s *dev, unsigned int *status);
+static void k210_uart_rxint(FAR struct uart_dev_s *dev, bool enable);
+static bool k210_uart_rxavailable(FAR struct uart_dev_s *dev);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool k210_16550_rxflowcontrol(struct uart_dev_s *dev,
+static bool k210_uart_rxflowcontrol(struct uart_dev_s *dev,
                                  unsigned int nbuffered, bool upper);
 #endif
 #ifdef CONFIG_SERIAL_TXDMA
-static void k210_16550_dmasend(FAR struct uart_dev_s *dev);
-static void k210_16550_dmatxavail(FAR struct uart_dev_s *dev);
+static void k210_uart_dmasend(FAR struct uart_dev_s *dev);
+static void k210_uart_dmatxavail(FAR struct uart_dev_s *dev);
 #endif
 #ifdef CONFIG_SERIAL_RXDMA
-static void k210_16550_dmareceive(FAR struct uart_dev_s *dev);
-static void k210_16550_dmarxfree(FAR struct uart_dev_s *dev);
+static void k210_uart_dmareceive(FAR struct uart_dev_s *dev);
+static void k210_uart_dmarxfree(FAR struct uart_dev_s *dev);
 #endif
-static void k210_16550_send(FAR struct uart_dev_s *dev, int ch);
-static void k210_16550_txint(FAR struct uart_dev_s *dev, bool enable);
-static bool k210_16550_txready(FAR struct uart_dev_s *dev);
-static bool k210_16550_txempty(FAR struct uart_dev_s *dev);
+static void k210_uart_send(FAR struct uart_dev_s *dev, int ch);
+static void k210_uart_txint(FAR struct uart_dev_s *dev, bool enable);
+static bool k210_uart_txready(FAR struct uart_dev_s *dev);
+static bool k210_uart_txempty(FAR struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -90,64 +90,64 @@ static bool k210_16550_txempty(FAR struct uart_dev_s *dev);
 
 static const struct uart_ops_s g_uart_ops =
 {
-  .setup          = k210_16550_setup,
-  .shutdown       = k210_16550_shutdown,
-  .attach         = k210_16550_attach,
-  .detach         = k210_16550_detach,
-  .ioctl          = k210_16550_ioctl,
-  .receive        = k210_16550_receive,
-  .rxint          = k210_16550_rxint,
-  .rxavailable    = k210_16550_rxavailable,
+  .setup          = k210_uart_setup,
+  .shutdown       = k210_uart_shutdown,
+  .attach         = k210_uart_attach,
+  .detach         = k210_uart_detach,
+  .ioctl          = k210_uart_ioctl,
+  .receive        = k210_uart_receive,
+  .rxint          = k210_uart_rxint,
+  .rxavailable    = k210_uart_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = k210_16550_rxflowcontrol,
+  .rxflowcontrol  = k210_uart_rxflowcontrol,
 #endif
 #ifdef CONFIG_SERIAL_TXDMA
-  .dmasend        = k210_16550_dmasend,
+  .dmasend        = k210_uart_dmasend,
 #endif
 #ifdef CONFIG_SERIAL_RXDMA
-  .dmareceive     = k210_16550_dmareceive,
-  .dmarxfree      = k210_16550_dmarxfree,
+  .dmareceive     = k210_uart_dmareceive,
+  .dmarxfree      = k210_uart_dmarxfree,
 #endif
 #ifdef CONFIG_SERIAL_TXDMA
-  .dmatxavail     = k210_16550_dmatxavail,
+  .dmatxavail     = k210_uart_dmatxavail,
 #endif
-  .send           = k210_16550_send,
-  .txint          = k210_16550_txint,
-  .txready        = k210_16550_txready,
-  .txempty        = k210_16550_txempty,
+  .send           = k210_uart_send,
+  .txint          = k210_uart_txint,
+  .txready        = k210_uart_txready,
+  .txempty        = k210_uart_txempty,
 };
 
 /* I/O buffers */
 
-#ifdef CONFIG_K210_16550_UART1
-static char g_uart1rxbuffer[CONFIG_K210_16550_UART1_RXBUFSIZE];
-static char g_uart1txbuffer[CONFIG_K210_16550_UART1_TXBUFSIZE];
+#ifdef CONFIG_K210_UART1
+static char g_uart1rxbuffer[CONFIG_K210_UART1_RXBUFSIZE];
+static char g_uart1txbuffer[CONFIG_K210_UART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_K210_16550_UART2
-static char g_uart2rxbuffer[CONFIG_K210_16550_UART2_RXBUFSIZE];
-static char g_uart2txbuffer[CONFIG_K210_16550_UART2_TXBUFSIZE];
+#ifdef CONFIG_K210_UART2
+static char g_uart2rxbuffer[CONFIG_K210_UART2_RXBUFSIZE];
+static char g_uart2txbuffer[CONFIG_K210_UART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_K210_16550_UART3
-static char g_uart3rxbuffer[CONFIG_K210_16550_UART3_RXBUFSIZE];
-static char g_uart3txbuffer[CONFIG_K210_16550_UART3_TXBUFSIZE];
+#ifdef CONFIG_K210_UART3
+static char g_uart3rxbuffer[CONFIG_K210_UART3_RXBUFSIZE];
+static char g_uart3txbuffer[CONFIG_K210_UART3_TXBUFSIZE];
 #endif
 
-/* This describes the state of the 16550 uart1 port. */
+/* This describes the state of the uart1 port. */
 
-#ifdef CONFIG_K210_16550_UART1
-static struct k210_16550_s g_uart1priv =
+#ifdef CONFIG_K210_UART1
+static struct k210_uart_s g_uart1priv =
 {
-  .uartbase       = CONFIG_K210_16550_UART1_BASE,
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
-  .baud           = CONFIG_K210_16550_UART1_BAUD,
-  .uartclk        = CONFIG_K210_16550_UART1_CLOCK,
+  .uartbase       = CONFIG_K210_UART1_BASE,
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
+  .baud           = CONFIG_K210_UART1_BAUD,
+  .uartclk        = CONFIG_K210_UART1_CLOCK,
 #endif
-  .irq            = CONFIG_K210_16550_UART1_IRQ,
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
-  .parity         = CONFIG_K210_16550_UART1_PARITY,
-  .bits           = CONFIG_K210_16550_UART1_BITS,
-  .stopbits2      = CONFIG_K210_16550_UART1_2STOP,
-#if defined(CONFIG_K210_16550_UART1_IFLOWCONTROL) || defined(CONFIG_K210_16550_UART1_OFLOWCONTROL)
+  .irq            = CONFIG_K210_UART1_IRQ,
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
+  .parity         = CONFIG_K210_UART1_PARITY,
+  .bits           = CONFIG_K210_UART1_BITS,
+  .stopbits2      = CONFIG_K210_UART1_2STOP,
+#if defined(CONFIG_K210_UART1_IFLOWCONTROL) || defined(CONFIG_K210_UART1_OFLOWCONTROL)
   .flow           = true,
 #endif
 #endif
@@ -157,12 +157,12 @@ static uart_dev_t g_uart1port =
 {
   .recv     =
   {
-    .size   = CONFIG_K210_16550_UART1_RXBUFSIZE,
+    .size   = CONFIG_K210_UART1_RXBUFSIZE,
     .buffer = g_uart1rxbuffer,
   },
   .xmit     =
   {
-    .size   = CONFIG_K210_16550_UART1_TXBUFSIZE,
+    .size   = CONFIG_K210_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
   },
   .ops      = &g_uart_ops,
@@ -170,22 +170,22 @@ static uart_dev_t g_uart1port =
 };
 #endif
 
-/* This describes the state of the 16550 uart2 port. */
+/* This describes the state of the uart2 port. */
 
-#ifdef CONFIG_K210_16550_UART2
-static struct k210_16550_s g_uart2priv =
+#ifdef CONFIG_K210_UART2
+static struct k210_uart_s g_uart2priv =
 {
-  .uartbase       = CONFIG_K210_16550_UART2_BASE,
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
-  .baud           = CONFIG_K210_16550_UART2_BAUD,
-  .uartclk        = CONFIG_K210_16550_UART2_CLOCK,
+  .uartbase       = CONFIG_K210_UART2_BASE,
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
+  .baud           = CONFIG_K210_UART2_BAUD,
+  .uartclk        = CONFIG_K210_UART2_CLOCK,
 #endif
-  .irq            = CONFIG_K210_16550_UART2_IRQ,
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
-  .parity         = CONFIG_K210_16550_UART2_PARITY,
-  .bits           = CONFIG_K210_16550_UART2_BITS,
-  .stopbits2      = CONFIG_K210_16550_UART2_2STOP,
-#if defined(CONFIG_K210_16550_UART2_IFLOWCONTROL) || defined(CONFIG_K210_16550_UART2_OFLOWCONTROL)
+  .irq            = CONFIG_K210_UART2_IRQ,
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
+  .parity         = CONFIG_K210_UART2_PARITY,
+  .bits           = CONFIG_K210_UART2_BITS,
+  .stopbits2      = CONFIG_K210_UART2_2STOP,
+#if defined(CONFIG_K210_UART2_IFLOWCONTROL) || defined(CONFIG_K210_UART2_OFLOWCONTROL)
   .flow           = true,
 #endif
 #endif
@@ -195,12 +195,12 @@ static uart_dev_t g_uart2port =
 {
   .recv     =
   {
-    .size   = CONFIG_K210_16550_UART2_RXBUFSIZE,
+    .size   = CONFIG_K210_UART2_RXBUFSIZE,
     .buffer = g_uart2rxbuffer,
   },
   .xmit     =
   {
-    .size   = CONFIG_K210_16550_UART2_TXBUFSIZE,
+    .size   = CONFIG_K210_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
   },
   .ops      = &g_uart_ops,
@@ -209,22 +209,22 @@ static uart_dev_t g_uart2port =
 
 #endif
 
-/* This describes the state of the 16550 uart1 port. */
+/* This describes the state of the uart1 port. */
 
-#ifdef CONFIG_K210_16550_UART3
-static struct k210_16550_s g_uart3priv =
+#ifdef CONFIG_K210_UART3
+static struct k210_uart_s g_uart3priv =
 {
-  .uartbase       = CONFIG_K210_16550_UART3_BASE,
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
-  .baud           = CONFIG_K210_16550_UART3_BAUD,
-  .uartclk        = CONFIG_K210_16550_UART3_CLOCK,
+  .uartbase       = CONFIG_K210_UART3_BASE,
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
+  .baud           = CONFIG_K210_UART3_BAUD,
+  .uartclk        = CONFIG_K210_UART3_CLOCK,
 #endif
-  .irq            = CONFIG_K210_16550_UART3_IRQ,
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
-  .parity         = CONFIG_K210_16550_UART3_PARITY,
-  .bits           = CONFIG_K210_16550_UART3_BITS,
-  .stopbits2      = CONFIG_K210_16550_UART3_2STOP,
-#if defined(CONFIG_K210_16550_UART3_IFLOWCONTROL) || defined(CONFIG_K210_16550_UART3_OFLOWCONTROL)
+  .irq            = CONFIG_K210_UART3_IRQ,
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
+  .parity         = CONFIG_K210_UART3_PARITY,
+  .bits           = CONFIG_K210_UART3_BITS,
+  .stopbits2      = CONFIG_K210_UART3_2STOP,
+#if defined(CONFIG_K210_UART3_IFLOWCONTROL) || defined(CONFIG_K210_UART3_OFLOWCONTROL)
   .flow           = true,
 #endif
 #endif
@@ -234,12 +234,12 @@ static uart_dev_t g_uart3port =
 {
   .recv     =
   {
-    .size   = CONFIG_K210_16550_UART3_RXBUFSIZE,
+    .size   = CONFIG_K210_UART3_RXBUFSIZE,
     .buffer = g_uart3rxbuffer,
   },
   .xmit     =
   {
-    .size   = CONFIG_K210_16550_UART3_TXBUFSIZE,
+    .size   = CONFIG_K210_UART3_TXBUFSIZE,
     .buffer = g_uart3txbuffer,
   },
   .ops      = &g_uart_ops,
@@ -253,10 +253,10 @@ static uart_dev_t g_uart3port =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: k210_16550_serialin
+ * Name: k210_uart_serialin
  ****************************************************************************/
 
-static inline uart_datawidth_t k210_16550_serialin(FAR struct k210_16550_s *priv,
+static inline uart_datawidth_t k210_uart_serialin(FAR struct k210_uart_s *priv,
                                                int offset)
 {
 #ifdef CONFIG_SERIAL_UART_ARCH_MMIO
@@ -267,10 +267,10 @@ static inline uart_datawidth_t k210_16550_serialin(FAR struct k210_16550_s *priv
 }
 
 /****************************************************************************
- * Name: k210_16550_serialout
+ * Name: k210_uart_serialout
  ****************************************************************************/
 
-static inline void k210_16550_serialout(FAR struct k210_16550_s *priv, int offset,
+static inline void k210_uart_serialout(FAR struct k210_uart_s *priv, int offset,
                                     uart_datawidth_t value)
 {
 #ifdef CONFIG_SERIAL_UART_ARCH_MMIO
@@ -281,10 +281,10 @@ static inline void k210_16550_serialout(FAR struct k210_16550_s *priv, int offse
 }
 
 /****************************************************************************
- * Name: k210_16550_disableuartint
+ * Name: k210_uart_disableuartint
  ****************************************************************************/
 
-static inline void k210_16550_disableuartint(FAR struct k210_16550_s *priv,
+static inline void k210_uart_disableuartint(FAR struct k210_uart_s *priv,
                                          FAR uart_datawidth_t *ier)
 {
   if (ier)
@@ -293,28 +293,28 @@ static inline void k210_16550_disableuartint(FAR struct k210_16550_s *priv,
     }
 
   priv->ier &= ~UART_IER_ALLIE;
-  k210_16550_serialout(priv, UART_IER_OFFSET, priv->ier);
+  k210_uart_serialout(priv, UART_IER_OFFSET, priv->ier);
 }
 
 /****************************************************************************
- * Name: k210_16550_restoreuartint
+ * Name: k210_uart_restoreuartint
  ****************************************************************************/
 
-static inline void k210_16550_restoreuartint(FAR struct k210_16550_s *priv,
+static inline void k210_uart_restoreuartint(FAR struct k210_uart_s *priv,
                                          uint32_t ier)
 {
   priv->ier |= ier & UART_IER_ALLIE;
-  k210_16550_serialout(priv, UART_IER_OFFSET, priv->ier);
+  k210_uart_serialout(priv, UART_IER_OFFSET, priv->ier);
 }
 
 /****************************************************************************
- * Name: k210_16550_enablebreaks
+ * Name: k210_uart_enablebreaks
  ****************************************************************************/
 
-static inline void k210_16550_enablebreaks(FAR struct k210_16550_s *priv,
+static inline void k210_uart_enablebreaks(FAR struct k210_uart_s *priv,
                                        bool enable)
 {
-  uint32_t lcr = k210_16550_serialin(priv, UART_LCR_OFFSET);
+  uint32_t lcr = k210_uart_serialin(priv, UART_LCR_OFFSET);
 
   if (enable)
     {
@@ -325,11 +325,11 @@ static inline void k210_16550_enablebreaks(FAR struct k210_16550_s *priv,
       lcr &= ~UART_LCR_BRK;
     }
 
-  k210_16550_serialout(priv, UART_LCR_OFFSET, lcr);
+  k210_uart_serialout(priv, UART_LCR_OFFSET, lcr);
 }
 
 /****************************************************************************
- * Name: k210_16550_divisor
+ * Name: k210_uart_divisor
  *
  * Description:
  *   Select a divider to produce the BAUD from the UART_CLK.
@@ -341,8 +341,8 @@ static inline void k210_16550_enablebreaks(FAR struct k210_16550_s *priv,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
-static inline uint32_t k210_16550_divisor(FAR struct k210_16550_s *priv)
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
+static inline uint32_t k210_uart_divisor(FAR struct k210_uart_s *priv)
 {
   return (priv->uartclk / (uint32_t)priv->baud);
 //  return (priv->uartclk + (priv->baud << 3)) / (priv->baud << 4);
@@ -350,7 +350,7 @@ static inline uint32_t k210_16550_divisor(FAR struct k210_16550_s *priv)
 #endif
 
 /****************************************************************************
- * Name: k210_16550_setup
+ * Name: k210_uart_setup
  *
  * Description:
  *   Configure the UART baud, bits, parity, fifos, etc. This
@@ -359,10 +359,10 @@ static inline uint32_t k210_16550_divisor(FAR struct k210_16550_s *priv)
  *
  ****************************************************************************/
 
-static int k210_16550_setup(FAR struct uart_dev_s *dev)
+static int k210_uart_setup(FAR struct uart_dev_s *dev)
 {
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
   uint16_t div;
   uint8_t dlh, dll, dlf;
   uint32_t lcr;
@@ -372,17 +372,17 @@ static int k210_16550_setup(FAR struct uart_dev_s *dev)
 
   /* Clear fifos */
 
-  k210_16550_serialout(priv, UART_FCR_OFFSET,
+  k210_uart_serialout(priv, UART_FCR_OFFSET,
                    (UART_FCR_RXRST | UART_FCR_TXRST));
 
   /* Set trigger */
 
-  k210_16550_serialout(priv, UART_FCR_OFFSET,
+  k210_uart_serialout(priv, UART_FCR_OFFSET,
                    (UART_FCR_FIFOEN | UART_FCR_RXTRIGGER_8));
 
   /* Set up the IER */
 
-  priv->ier = k210_16550_serialin(priv, UART_IER_OFFSET);
+  priv->ier = k210_uart_serialin(priv, UART_IER_OFFSET);
 
   /* Set up the LCR */
 
@@ -423,33 +423,33 @@ static int k210_16550_setup(FAR struct uart_dev_s *dev)
 
   /* Enter DLAB=1 */
 
-  k210_16550_serialout(priv, UART_LCR_OFFSET, (lcr | UART_LCR_DLAB));
+  k210_uart_serialout(priv, UART_LCR_OFFSET, (lcr | UART_LCR_DLAB));
 
   /* Set the BAUD divisor */
 
-  div = k210_16550_divisor(priv);
+  div = k210_uart_divisor(priv);
   dlh = div >> 12;
   dll = (div - (dlh << 12)) / 16;
   dlf = div - (dlh << 12) - dll * 16;
 
-  k210_16550_serialout(priv, UART_DLM_OFFSET, dlh);
-  k210_16550_serialout(priv, UART_DLL_OFFSET, dll);
-  k210_16550_serialout(priv, UART_DLF_OFFSET, dlf);
+  k210_uart_serialout(priv, UART_DLM_OFFSET, dlh);
+  k210_uart_serialout(priv, UART_DLL_OFFSET, dll);
+  k210_uart_serialout(priv, UART_DLF_OFFSET, dlf);
 
   /* Clear DLAB */
 
-  k210_16550_serialout(priv, UART_LCR_OFFSET, lcr);
+  k210_uart_serialout(priv, UART_LCR_OFFSET, lcr);
 
   /* Configure the FIFOs */
 
-  k210_16550_serialout(priv, UART_FCR_OFFSET,
+  k210_uart_serialout(priv, UART_FCR_OFFSET,
                    (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST | UART_FCR_RXRST |
                     UART_FCR_FIFOEN));
 
   /* Set up the auto flow control */
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  mcr = k210_16550_serialin(priv, UART_MCR_OFFSET);
+  mcr = k210_uart_serialin(priv, UART_MCR_OFFSET);
   if (priv->flow)
     {
       mcr |= UART_MCR_AFCE;
@@ -461,9 +461,9 @@ static int k210_16550_setup(FAR struct uart_dev_s *dev)
 
   mcr |= UART_MCR_RTS;
 
-  k210_16550_serialout(priv, UART_MCR_OFFSET, mcr);
+  k210_uart_serialout(priv, UART_MCR_OFFSET, mcr);
 
-  k210_16550_serialout(priv, UART_SRT_OFFSET, 0x0);
+  k210_uart_serialout(priv, UART_SRT_OFFSET, 0x0);
 
 #endif /* defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL) */
 
@@ -472,7 +472,7 @@ static int k210_16550_setup(FAR struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: k210_16550_shutdown
+ * Name: k210_uart_shutdown
  *
  * Description:
  *   Disable the UART.  This method is called when the serial
@@ -480,14 +480,14 @@ static int k210_16550_setup(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void k210_16550_shutdown(struct uart_dev_s *dev)
+static void k210_uart_shutdown(struct uart_dev_s *dev)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
-  k210_16550_disableuartint(priv, NULL);
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
+  k210_uart_disableuartint(priv, NULL);
 }
 
 /****************************************************************************
- * Name: k210_16550_attach
+ * Name: k210_uart_attach
  *
  * Description:
  *   Configure the UART to operation in interrupt driven mode.  This method
@@ -502,14 +502,14 @@ static void k210_16550_shutdown(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int k210_16550_attach(struct uart_dev_s *dev)
+static int k210_uart_attach(struct uart_dev_s *dev)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, k210_16550_interrupt, dev);
+  ret = irq_attach(priv->irq, k210_uart_interrupt, dev);
 #ifndef CONFIG_ARCH_NOINTC
   if (ret == OK)
     {
@@ -525,7 +525,7 @@ static int k210_16550_attach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: k210_16550_detach
+ * Name: k210_uart_detach
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
@@ -534,36 +534,36 @@ static int k210_16550_attach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void k210_16550_detach(FAR struct uart_dev_s *dev)
+static void k210_uart_detach(FAR struct uart_dev_s *dev)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
 
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
 
 /****************************************************************************
- * Name: k210_16550_interrupt
+ * Name: k210_uart_interrupt
  *
  * Description:
  *   This is the UART interrupt handler.  It will be invoked when an
  *   interrupt received on the 'irq'  It should call uart_transmitchars or
  *   uart_receivechar to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
- *   appropriate k210_16550_s structure in order to call these functions.
+ *   appropriate k210_uart_s structure in order to call these functions.
  *
  ****************************************************************************/
 
-static int k210_16550_interrupt(int irq, FAR void *context, FAR void *arg)
+static int k210_uart_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  FAR struct k210_16550_s *priv;
+  FAR struct k210_uart_s *priv;
   uint32_t status;
   int passes;
   uint8_t v_int_status;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
-  priv = (FAR struct k210_16550_s *)dev->priv;
+  priv = (FAR struct k210_uart_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -575,7 +575,7 @@ static int k210_16550_interrupt(int irq, FAR void *context, FAR void *arg)
        * termination conditions
        */
 
-      status = k210_16550_serialin(priv, UART_IIR_OFFSET);
+      status = k210_uart_serialin(priv, UART_IIR_OFFSET);
 
       if (status == 0)
       {
@@ -603,18 +603,18 @@ static int k210_16550_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Name: k210_16550_ioctl
+ * Name: k210_uart_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int k210_16550_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int k210_uart_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode    = filep->f_inode;
   FAR struct uart_dev_s *dev = inode->i_private;
-  FAR struct k210_16550_s *priv  = (FAR struct k210_16550_s *)dev->priv;
+  FAR struct k210_uart_s *priv  = (FAR struct k210_uart_s *)dev->priv;
   int ret;
 
 #ifdef CONFIG_SERIAL_UART_ARCH_IOCTL
@@ -634,14 +634,14 @@ static int k210_16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-        FAR struct k210_16550_s *user = (FAR struct k210_16550_s *)arg;
+        FAR struct k210_uart_s *user = (FAR struct k210_uart_s *)arg;
         if (!user)
           {
             ret = -EINVAL;
           }
         else
           {
-            memcpy(user, dev, sizeof(struct k210_16550_s));
+            memcpy(user, dev, sizeof(struct k210_uart_s));
           }
       }
       break;
@@ -650,7 +650,7 @@ static int k210_16550_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags = enter_critical_section();
-        k210_16550_enablebreaks(priv, true);
+        k210_uart_enablebreaks(priv, true);
         leave_critical_section(flags);
       }
       break;
@@ -659,12 +659,12 @@ static int k210_16550_ioctl(struct file *filep, int cmd, unsigned long arg)
       {
         irqstate_t flags;
         flags = enter_critical_section();
-        k210_16550_enablebreaks(priv, false);
+        k210_uart_enablebreaks(priv, false);
         leave_critical_section(flags);
       }
       break;
 
-#if defined(CONFIG_SERIAL_TERMIOS) && !defined(CONFIG_K210_16550_SUPRESS_CONFIG)
+#if defined(CONFIG_SERIAL_TERMIOS) && !defined(CONFIG_K210_UART_SUPRESS_CONFIG)
     case TCGETS:
       {
         FAR struct termios *termiosp = (FAR struct termios *)arg;
@@ -758,7 +758,7 @@ static int k210_16550_ioctl(struct file *filep, int cmd, unsigned long arg)
         priv->flow      = (termiosp->c_cflag & CRTSCTS) != 0;
 #endif
 
-        k210_16550_setup(dev);
+        k210_uart_setup(dev);
         leave_critical_section(flags);
       }
       break;
@@ -773,7 +773,7 @@ static int k210_16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: k210_16550_receive
+ * Name: k210_uart_receive
  *
  * Description:
  *   Called (usually) from the interrupt level to receive one
@@ -782,26 +782,26 @@ static int k210_16550_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int k210_16550_receive(struct uart_dev_s *dev, unsigned int *status)
+static int k210_uart_receive(struct uart_dev_s *dev, unsigned int *status)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
   uint32_t rbr = 0;
-  *status = k210_16550_serialin(priv, UART_LSR_OFFSET);
-  rbr     = k210_16550_serialin(priv, UART_RBR_OFFSET);
+  *status = k210_uart_serialin(priv, UART_LSR_OFFSET);
+  rbr     = k210_uart_serialin(priv, UART_RBR_OFFSET);
   return rbr;
 }
 
 /****************************************************************************
- * Name: k210_16550_rxint
+ * Name: k210_uart_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
  ****************************************************************************/
 
-static void k210_16550_rxint(struct uart_dev_s *dev, bool enable)
+static void k210_uart_rxint(struct uart_dev_s *dev, bool enable)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
 
   if (enable)
     {
@@ -812,25 +812,25 @@ static void k210_16550_rxint(struct uart_dev_s *dev, bool enable)
       priv->ier &= ~UART_IER_ERBFI;
     }
 
-  k210_16550_serialout(priv, UART_IER_OFFSET, priv->ier);
+  k210_uart_serialout(priv, UART_IER_OFFSET, priv->ier);
 }
 
 /****************************************************************************
- * Name: k210_16550_rxavailable
+ * Name: k210_uart_rxavailable
  *
  * Description:
  *   Return true if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static bool k210_16550_rxavailable(struct uart_dev_s *dev)
+static bool k210_uart_rxavailable(struct uart_dev_s *dev)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
-  return ((k210_16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_DR) != 0);
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
+  return ((k210_uart_serialin(priv, UART_LSR_OFFSET) & UART_LSR_DR) != 0);
 }
 
 /****************************************************************************
- * Name: k210_16550_dma*
+ * Name: k210_uart_dma*
  *
  * Description:
  *   Stubbed out DMA-related methods
@@ -838,11 +838,11 @@ static bool k210_16550_rxavailable(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool k210_16550_rxflowcontrol(struct uart_dev_s *dev,
+static bool k210_uart_rxflowcontrol(struct uart_dev_s *dev,
                                  unsigned int nbuffered, bool upper)
 {
-#ifndef CONFIG_K210_16550_SUPRESS_CONFIG
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
+#ifndef CONFIG_K210_UART_SUPRESS_CONFIG
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
 
   if (priv->flow)
     {
@@ -853,7 +853,7 @@ static bool k210_16550_rxflowcontrol(struct uart_dev_s *dev,
        * input is received.
        */
 
-      k210_16550_rxint(dev, !upper);
+      k210_uart_rxint(dev, !upper);
       return true;
     }
 #endif
@@ -863,7 +863,7 @@ static bool k210_16550_rxflowcontrol(struct uart_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Name: k210_16550_dma*
+ * Name: k210_uart_dma*
  *
  * Description:
  *   Stub functions used when serial DMA is enabled.
@@ -871,59 +871,59 @@ static bool k210_16550_rxflowcontrol(struct uart_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_TXDMA
-static void k210_16550_dmasend(FAR struct uart_dev_s *dev)
+static void k210_uart_dmasend(FAR struct uart_dev_s *dev)
 {
 }
 #endif
 
 #ifdef CONFIG_SERIAL_RXDMA
-static void k210_16550_dmareceive(FAR struct uart_dev_s *dev)
+static void k210_uart_dmareceive(FAR struct uart_dev_s *dev)
 {
 }
 
-static void k210_16550_dmarxfree(FAR struct uart_dev_s *dev)
+static void k210_uart_dmarxfree(FAR struct uart_dev_s *dev)
 {
 }
 #endif
 
 #ifdef CONFIG_SERIAL_TXDMA
-static void k210_16550_dmatxavail(FAR struct uart_dev_s *dev)
+static void k210_uart_dmatxavail(FAR struct uart_dev_s *dev)
 {
 }
 #endif
 
 /****************************************************************************
- * Name: k210_16550_send
+ * Name: k210_uart_send
  *
  * Description:
  *   This method will send one byte on the UART
  *
  ****************************************************************************/
 
-static void k210_16550_send(struct uart_dev_s *dev, int ch)
+static void k210_uart_send(struct uart_dev_s *dev, int ch)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
-  k210_16550_serialout(priv, UART_THR_OFFSET, (uart_datawidth_t)ch);
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
+  k210_uart_serialout(priv, UART_THR_OFFSET, (uart_datawidth_t)ch);
 }
 
 /****************************************************************************
- * Name: k210_16550_txint
+ * Name: k210_uart_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
  ****************************************************************************/
 
-static void k210_16550_txint(struct uart_dev_s *dev, bool enable)
+static void k210_uart_txint(struct uart_dev_s *dev, bool enable)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
   irqstate_t flags;
 
   flags = enter_critical_section();
   if (enable)
     {
       priv->ier |= UART_IER_ETBEI;
-      k210_16550_serialout(priv, UART_IER_OFFSET, priv->ier);
+      k210_uart_serialout(priv, UART_IER_OFFSET, priv->ier);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -934,38 +934,38 @@ static void k210_16550_txint(struct uart_dev_s *dev, bool enable)
   else
     {
       priv->ier &= ~UART_IER_ETBEI;
-      k210_16550_serialout(priv, UART_IER_OFFSET, priv->ier);
+      k210_uart_serialout(priv, UART_IER_OFFSET, priv->ier);
     }
 
   leave_critical_section(flags);
 }
 
 /****************************************************************************
- * Name: k210_16550_txready
+ * Name: k210_uart_txready
  *
  * Description:
  *   Return true if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static bool k210_16550_txready(struct uart_dev_s *dev)
+static bool k210_uart_txready(struct uart_dev_s *dev)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
-  return (((k210_16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0));
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
+  return (((k210_uart_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0));
 }
 
 /****************************************************************************
- * Name: k210_16550_txempty
+ * Name: k210_uart_txempty
  *
  * Description:
  *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static bool k210_16550_txempty(struct uart_dev_s *dev)
+static bool k210_uart_txempty(struct uart_dev_s *dev)
 {
-  FAR struct k210_16550_s *priv = (FAR struct k210_16550_s *)dev->priv;
-  return ((k210_16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_TEMT) != 0);
+  FAR struct k210_uart_s *priv = (FAR struct k210_uart_s *)dev->priv;
+  return ((k210_uart_serialin(priv, UART_LSR_OFFSET) & UART_LSR_TEMT) != 0);
 }
 
 /****************************************************************************
@@ -973,7 +973,7 @@ static bool k210_16550_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
  
 /****************************************************************************
- * Name: k210_uart_16550_register
+ * Name: k210_uart_register
  *
  * Description:
  *   Register serial console and serial ports.  This assumes that
@@ -981,20 +981,20 @@ static bool k210_16550_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-void k210_uart_16550_register(void)
+void k210_uart_register(void)
 {
-#if defined(CONFIG_K210_16550_UART1)
-    k210_16550_setup(&g_uart1port);
+#if defined(CONFIG_K210_UART1)
+    k210_uart_setup(&g_uart1port);
     uart_register("/dev/ttyS1", &g_uart1port);
 #endif
-#if defined(CONFIG_K210_16550_UART2)
-    k210_16550_setup(&g_uart2port);
+#if defined(CONFIG_K210_UART2)
+    k210_uart_setup(&g_uart2port);
     uart_register("/dev/ttyS2", &g_uart2port);
 #endif
-#if defined(CONFIG_K210_16550_UART3)
-    k210_16550_setup(&g_uart3port);
+#if defined(CONFIG_K210_UART3)
+    k210_uart_setup(&g_uart3port);
     uart_register("/dev/ttyS3", &g_uart3port);
 #endif
 }
 
-#endif /* CONFIG_K210_16550_UART */
+#endif /* CONFIG_K210_UART */

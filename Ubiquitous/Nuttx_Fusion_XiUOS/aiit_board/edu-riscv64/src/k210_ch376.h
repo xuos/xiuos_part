@@ -12,7 +12,7 @@
 
 /**
  * @file k210_ch376.h
- * @brief xidatong-riscv64 k210_ch376.h
+ * @brief edu-riscv64 k210_ch376.h
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2022.10.10
