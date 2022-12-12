@@ -10,6 +10,8 @@
 #include "bsp.h"
 #include <assert.h>
 #include <float.h>
+#include "plic.h"
+#include <device.h>
 
 #define LAYER_BURST_SIZE 12
 
@@ -765,7 +767,6 @@ static void kpu_kmodel_input_with_padding(const kpu_layer_argument_t *layer, con
     size_t width = layer->image_size.data.i_row_wid + 1;
     size_t height = layer->image_size.data.i_col_high + 1;
     size_t channels = layer->image_channel_num.data.i_ch_num + 1;
-
     kpu_upload_core(width, height, channels, src, layer->image_addr.data.image_src_addr);
 }
 
@@ -1349,7 +1350,7 @@ int kpu_load_kmodel(kpu_model_context_t *ctx, const uint8_t *buffer)
 {
     uintptr_t base_addr = (uintptr_t)buffer;
     const kpu_kmodel_header_t *header = (const kpu_kmodel_header_t *)buffer;
-    printf("\nheader->version:%d,header->arch:%d\n",header->version,header->arch);
+
     if (header->version == 3 && header->arch == 0)
     {
         ctx->model_buffer = buffer;
@@ -1500,7 +1501,6 @@ static int ai_step(void *userdata)
     last_layer_type = cnt_layer_header->type;
     last_time = sysctl_get_time_us();
 #endif
-
     switch (cnt_layer_header->type)
     {
         case KL_ADD:
@@ -1564,9 +1564,10 @@ static int ai_step(void *userdata)
         default:
             assert(!"Layer is not supported.");
     }
-
-    if (cnt_layer_id != (ctx->layers_length - 1))
-        ai_step(userdata);
+    if (cnt_layer_id != (ctx->layers_length - 1)){
+        
+        ai_step(userdata);        
+    }
     else
         kpu_kmodel_done(ctx);
     return 0;
@@ -1577,6 +1578,11 @@ static void ai_step_not_isr(void *userdata)
     sysctl_disable_irq();
     ai_step(userdata);
     sysctl_enable_irq();
+}
+
+static void ai_my_step(int vector,void *userdata)
+{
+    ai_step(userdata);
 }
 
 int kpu_run_kmodel(kpu_model_context_t *ctx, const uint8_t *src, dmac_channel_number_t dma_ch, kpu_done_callback_t done_callback, void *userdata)
@@ -1608,10 +1614,12 @@ int kpu_run_kmodel(kpu_model_context_t *ctx, const uint8_t *src, dmac_channel_nu
         .layer_cfg_almost_empty_int = 0,
         .layer_cfg_almost_full_int = 1
     };
-
-    plic_irq_enable(IRQN_AI_INTERRUPT);
-    plic_set_priority(IRQN_AI_INTERRUPT, 1);
-    plic_irq_register(IRQN_AI_INTERRUPT, ai_step, ctx);
+    isrManager.done->enableIrq(IRQN_AI_INTERRUPT);
+    isrManager.done->registerIrq(IRQN_AI_INTERRUPT, (IsrHandlerType)ai_my_step, ctx);
+    
+    // plic_irq_enable(IRQN_AI_INTERRUPT);
+    // plic_set_priority(IRQN_AI_INTERRUPT, 1);
+    // plic_irq_register(IRQN_AI_INTERRUPT, ai_step, ctx);
 
     const kpu_model_layer_header_t *first_layer_header = ctx->layer_headers;
     if (first_layer_header->type != KL_K210_CONV)
@@ -1624,11 +1632,9 @@ int kpu_run_kmodel(kpu_model_context_t *ctx, const uint8_t *src, dmac_channel_nu
         kpu_kmodel_input_with_padding(&layer_arg, src);
         ai_step_not_isr(ctx);
     }
-    else
-    {
+    else{
         kpu_input_dma(&layer_arg, src, ctx->dma_ch, ai_step, ctx);
     }
-
     return 0;
 }
 

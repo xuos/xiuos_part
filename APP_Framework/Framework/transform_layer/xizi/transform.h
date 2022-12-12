@@ -227,6 +227,25 @@ struct RtcDrvConfigureParam
     time_t *time;
 };
 
+typedef struct 
+{
+    uintptr_t pdata; 
+    uint32_t length;
+}_ioctl_shoot_para;
+
+typedef struct 
+{
+    uint32_t width;         // width   The width  of image
+    uint32_t height;        // height  The height of image
+}_ioctl_set_reso;
+
+typedef struct 
+{
+    uintptr_t r_addr;
+    uintptr_t g_addr;
+    uintptr_t b_addr;
+}RgbAddress;
+
 enum TCP_OPTION {
   SEND_DATA = 0,
   RECV_DATA,
@@ -240,6 +259,25 @@ enum TCP_OPTION {
 #define PRIV_TOUCH_DEV "/dev/touch_dev"
 #define MY_INDEV_X BSP_LCD_Y_MAX
 #define MY_INDEV_Y BSP_LCD_X_MAX
+
+#define DVP_INIT 0x00U
+#define REG_SCCB_READ 0x12U
+#define REG_SCCB_WRITE 0x13U
+#define OUTPUT_CONFIG 0x20U
+#define LCD_STRING_TYPE 0
+#define LCD_DOT_TYPE 1
+#define LCD_SIZE 320
+#define IMAGE_HEIGHT 240
+#define IMAGE_WIDTH 320
+#define NULL_PARAMETER 0
+
+#define REG_SCCB_READ 0x12U
+#define REG_SCCB_WRITE 0x13U
+#define SCCB_REG_LENGTH 0x08U
+#define IOCTRL_CAMERA_START_SHOT (20)
+#define SET_DISPLAY_ADDR (21)
+#define SET_AI_ADDR (22)
+#define IOCTRL_CAMERA_OUT_SIZE_RESO (23)
 
 /*********************shell***********************/
 //for int func(int argc, char *agrv[])

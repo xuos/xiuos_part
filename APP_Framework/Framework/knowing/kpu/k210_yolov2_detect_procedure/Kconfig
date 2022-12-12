@@ -4,8 +4,11 @@ menuconfig USING_K210_YOLOV2_DETECT
     default n
 
 config CAMERA_DEV_DRIVER
-    string "Set camera dev path"
+    string "Set camera dev path for kpu"
     default "/dev/ov2640"
 
+config KPU_LCD_DEV_DRIVER
+    string "Set lcd dev path for kpu"
+    default "/dev/lcd_dev"
 
 

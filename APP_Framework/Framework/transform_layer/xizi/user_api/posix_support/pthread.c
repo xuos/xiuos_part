@@ -77,6 +77,7 @@ int pthread_attr_setschedparam(pthread_attr_t           *attr,
 
 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stack_size)
 {
+    attr->stacksize = stack_size;
     return 0;
 }
 

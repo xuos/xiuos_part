@@ -154,7 +154,6 @@ int PrivIoctl(int fd, int cmd, void *args)
 {
     int ret;
     struct PrivIoctlCfg *ioctl_cfg = (struct PrivIoctlCfg *)args;
-    
     switch (ioctl_cfg->ioctl_driver_type)
     {
     case SERIAL_TYPE:
@@ -163,12 +162,10 @@ int PrivIoctl(int fd, int cmd, void *args)
     case PIN_TYPE:
         ret = PrivPinIoctl(fd, cmd, ioctl_cfg->args);
         break;
-    case I2C_TYPE:
-        ret = ioctl(fd, cmd, ioctl_cfg->args);
-        break;
     case LCD_TYPE:
         ret = PrivLcdIoctl(fd, cmd, ioctl_cfg->args);
         break;
+    case I2C_TYPE:
     case RTC_TYPE:
     case ADC_TYPE:
     case DAC_TYPE:
