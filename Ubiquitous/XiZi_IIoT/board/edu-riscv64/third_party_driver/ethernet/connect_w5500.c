@@ -22,7 +22,6 @@ extern void spi_select_cs(void);
 extern void spi_deselete_cs(void);
 
 // global configurations for w5500 tcp connection
-const uint32_t socket_tcp = 0;
 const uint32_t g_wiznet_buf_size = 2048;
 
 static wiz_NetInfo g_wiz_netinfo = {.mac = {0x00, 0x08, 0xdc, 0x11, 0x11, 0x11},
@@ -269,27 +268,27 @@ uint32_t wiz_client_op(uint8_t sn, uint8_t *buf, uint32_t buf_size,
                        enum TCP_OPTION opt) {
   // assert(buf_size <= g_wiznet_buf_size);
   int32_t ret;
-  switch (getSn_SR(socket_tcp)) {
+  switch (getSn_SR(sn)) {
     case SOCK_CLOSE_WAIT:
-      wiz_sock_disconnect(socket_tcp);
+      wiz_sock_disconnect(sn);
       break;
     case SOCK_CLOSED:
-      wiz_socket(socket_tcp, Sn_MR_TCP, 5000, 0x00);
+      wiz_socket(sn, Sn_MR_TCP, 5000, 0x00);
       break;
     case SOCK_INIT:
       KPrintf("[SOCKET CLIENT] sock init.\n");
-      wiz_sock_connect(socket_tcp, dst_ip, dst_port);
+      wiz_sock_connect(sn, dst_ip, dst_port);
       break;
     case SOCK_ESTABLISHED:
-      if (getSn_IR(socket_tcp) & Sn_IR_CON) {
-        printf("[SOCKET CLIENT] %d:Connected\r\n", socket_tcp);
-        setSn_IR(socket_tcp, Sn_IR_CON);
+      if (getSn_IR(sn) & Sn_IR_CON) {
+        printf("[SOCKET CLIENT] %d:Connected\r\n", sn);
+        setSn_IR(sn, Sn_IR_CON);
       }
       if (opt == SEND_DATA) {
         uint32_t sent_size = 0;
-        ret = wiz_sock_send(socket_tcp, buf, buf_size);
+        ret = wiz_sock_send(sn, buf, buf_size);
         if (ret < 0) {
-          wiz_sock_close(socket_tcp);
+          wiz_sock_close(sn);
           return ret;
         }
       } else if (opt == RECV_DATA) {
@@ -348,9 +347,9 @@ int32_t wiz_server_op(uint8_t sn, uint8_t *buf, uint32_t buf_size,
       }
       if (opt == SEND_DATA) {
         uint32_t sent_size = 0;
-        ret = wiz_sock_send(socket_tcp, buf, buf_size);
+        ret = wiz_sock_send(sn, buf, buf_size);
         if (ret < 0) {
-          wiz_sock_close(socket_tcp);
+          wiz_sock_close(sn);
           return ret;
         }
       } else if (opt == RECV_DATA) {
