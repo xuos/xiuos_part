@@ -328,7 +328,7 @@ void *ReceivePlcDataTask(void *parameter)
             CircularAreaAppWrite(circular_area, fins_data, data_length, 0);
         }
 
-        /*read data every single 200ms*/
+        /*read data every single 'read_period' ms*/
         PrivTaskDelay(control_protocol->recipe->read_period);
     }
 }
@@ -390,6 +390,8 @@ static struct ControlDone fins_protocol_done =
 int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *protocol_format_info)
 {
     int ret = 0;
+    static uint8_t last_item_size = 0;
+    uint8_t *p_read_item_data = protocol_format_info->p_read_item_data + last_item_size;
 
     FinsReadItem *fins_read_item = (FinsReadItem *)(p_recipe->read_item) + protocol_format_info->read_item_index;
 
@@ -405,10 +407,12 @@ int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *pr
     ret = FinsInitialDataInfo(fins_read_item,
         p_recipe->socket_config.plc_ip[3],
         p_recipe->socket_config.local_ip[3],
-        protocol_format_info->p_read_item_data + protocol_format_info->last_item_size);
+        p_read_item_data);
 
     ControlPrintfList("CMD", fins_read_item->data_info.base_data_info.p_command, fins_read_item->data_info.base_data_info.command_length);
     protocol_format_info->last_item_size = GetValueTypeMemorySize(fins_read_item->value_type);
+
+    last_item_size += protocol_format_info->last_item_size;
 
     return ret;
 }
@@ -425,6 +429,8 @@ int FinsProtocolInit(struct ControlRecipe *p_recipe)
         PrivFree(p_recipe->read_item);
         return -1;
     }
+
+    memset(p_recipe->read_item, 0, sizeof(FinsReadItem));
 
     p_recipe->ControlProtocolFormatCmd = FinsProtocolFormatCmd;
 

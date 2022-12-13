@@ -566,7 +566,7 @@ void *ReceivePlcDataTask(void *parameter)
             CircularAreaAppWrite(circular_area, melsec_data, data_length, 0);
         }
 
-        /*read data every single read_period*/
+        /*read data every single 'read_period' ms*/
         PrivTaskDelay(control_protocol->recipe->read_period);
     }
 }
@@ -628,6 +628,9 @@ static struct ControlDone melsec_protocol_done =
 int MelsecProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *protocol_format_info)
 {
     int ret = 0;
+    static uint8_t last_item_size = 0;
+    uint8_t *p_read_item_data = protocol_format_info->p_read_item_data + last_item_size;
+
     MelsecReadItem *melsec_read_item = (MelsecReadItem *)(p_recipe->read_item) + protocol_format_info->read_item_index;
 
     melsec_read_item->value_type = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "value_type")->valueint;
@@ -639,11 +642,12 @@ int MelsecProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *
     strncpy(melsec_read_item->head_device_number_string, cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "head_device_number_string")->valuestring, 6);
     melsec_read_item->device_points_count = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "device_points_count")->valueint;
 
-    ret = MelsecInitialDataInfo(melsec_read_item,
-        protocol_format_info->p_read_item_data + protocol_format_info->last_item_size);
+    ret = MelsecInitialDataInfo(melsec_read_item, p_read_item_data);
 
     ControlPrintfList("CMD", melsec_read_item->data_info.base_data_info.p_command, melsec_read_item->data_info.base_data_info.command_length);
     protocol_format_info->last_item_size = GetValueTypeMemorySize(melsec_read_item->value_type);
+
+    last_item_size += protocol_format_info->last_item_size;
 
     return ret;
 }
@@ -660,6 +664,8 @@ int MelsecProtocolInit(struct ControlRecipe *p_recipe)
         PrivFree(p_recipe->read_item);
         return -1;
     }
+
+    memset(p_recipe->read_item, 0, sizeof(MelsecReadItem));
 
     p_recipe->ControlProtocolFormatCmd = MelsecProtocolFormatCmd;
 

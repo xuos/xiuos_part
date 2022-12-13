@@ -69,6 +69,7 @@ typedef struct
 {
     uint16_t command_length;
     uint16_t data_size;
+    uint8_t command_ready;
     uint8_t *p_command;
     uint8_t *p_data;
 }BasicPlcDataInfo;

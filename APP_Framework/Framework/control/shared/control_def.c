@@ -37,6 +37,10 @@ extern int FinsProtocolInit(struct ControlRecipe *p_recipe);
 extern int MelsecProtocolInit(struct ControlRecipe *p_recipe);
 #endif
 
+#ifdef CONTROL_PROTOCOL_MODBUS_TCP
+extern int ModbusTcpProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
 /*
 CONTROL FRAMEWORK READ DATA FORMAT:
 |  HEAD |device_id|read data length|read item count|         data         |
@@ -65,6 +69,9 @@ static struct ControlProtocolInitParam protocol_init[] =
     { PROTOCOL_MELSEC_3E_IQ_R, MelsecProtocolInit },
     { PROTOCOL_MELSEC_1C, MelsecProtocolInit },
     { PROTOCOL_MELSEC_3C, MelsecProtocolInit },
+#endif
+#ifdef CONTROL_PROTOCOL_MODBUS_TCP
+    { PROTOCOL_MODBUS_TCP, ModbusTcpProtocolInit },
 #endif
 
 	{ PROTOCOL_END, NULL },
