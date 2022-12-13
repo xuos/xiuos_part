@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-#define MODBUS_TCP_UNIT_ID                     0x00
+#define MODBUS_TCP_UNIT_ID                     0x01
 #define MODBUS_TCP_READ_CMD_LENGTH             0x0C
 #define MODBUS_TCP_WRITE_SINGLE_CMD_LENGTH     0x0C
 

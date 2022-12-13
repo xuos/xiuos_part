@@ -202,7 +202,7 @@ static void ControlBasicSocketConfig(struct ControlRecipe *p_recipe, cJSON *p_re
  */
 void ControlPrintfList(char name[5], uint8_t *number_list, uint16_t length)
 {
-    printf("\n******************%5s****************\n", name);
+    printf("\n******************%s****************\n", name);
     for (int32_t i = 0;i < length;i ++) {
         printf("0x%x ", number_list[i]);
     }

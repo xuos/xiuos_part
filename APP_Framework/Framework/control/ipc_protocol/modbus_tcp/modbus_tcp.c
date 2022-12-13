@@ -35,6 +35,7 @@ static uint8_t recv_buff[1024] = {0};
  */
 static int ModbusTcpTransformRecvBuffToData(ModbusTcpReadItem *p_read_item, uint8_t *recv_buff)
 {
+    uint8_t head_length = 9;
     uint8_t *data_buffer;
     ModbusTcpDataInfo *p_modbus_tcp_data_info = &(p_read_item->data_info);
     uint16_t quantity = p_read_item->quantity;
@@ -45,7 +46,16 @@ static int ModbusTcpTransformRecvBuffToData(ModbusTcpReadItem *p_read_item, uint
     printf("Receive data is ");
 
     uint8_t bytes_count = recv_buff[8];
-    data_buffer = recv_buff + 9;//remove head data
+
+    if ((WRITE_SINGLE_COIL == function_code) || (WRITE_SINGLE_REGISTER == function_code) || 
+        (WRITE_MULTIPLE_COIL == function_code) || (WRITE_MULTIPLE_REGISTER == function_code)) {
+        head_length = 10;
+        if (p_modbus_tcp_data_info->base_data_info.command_ready) {
+            p_modbus_tcp_data_info->base_data_info.command_ready = 0;
+        }
+    }
+
+    data_buffer = recv_buff + head_length;//remove head data
 
     if (READ_COIL_STATUS == function_code || READ_INPUT_STATUS == function_code) {
         for (int i = 0;i < bytes_count;i ++) {
@@ -190,27 +200,28 @@ static int ModbusTcpInitialDataInfo(ModbusTcpReadItem *p_read_item, uint16_t ind
         break;
     }
 
-    command_index = 0;
-    p_base_data_info->p_command[command_index++] = index >> 8;
-    p_base_data_info->p_command[command_index++] = index;
-    p_base_data_info->p_command[command_index++] = 0x00;
-    p_base_data_info->p_command[command_index++] = 0x00;
-    p_base_data_info->p_command[command_index++] = 0x00;
+    memset(p_base_data_info->p_command, 0, p_base_data_info->command_length);
 
-    if (function_code < 5) {
-        p_base_data_info->p_command[command_index++] = 0x06;
+    p_base_data_info->p_command[0] = index >> 8;
+    p_base_data_info->p_command[1] = index;
+    p_base_data_info->p_command[2] = 0x00;
+    p_base_data_info->p_command[3] = 0x00;
+    p_base_data_info->p_command[4] = 0x00;
+
+    if (function_code < WRITE_MULTIPLE_COIL) {
+        p_base_data_info->p_command[5] = 0x06;
     } else {
-        p_base_data_info->p_command[command_index++] = 0x09;
+        p_base_data_info->p_command[5] = 0x09;
     }
 
-    p_base_data_info->p_command[command_index++] = MODBUS_TCP_UNIT_ID;
-    p_base_data_info->p_command[command_index++] = function_code;
-    p_base_data_info->p_command[command_index++] = start_address >> 8;
-    p_base_data_info->p_command[command_index++] = start_address;
+    p_base_data_info->p_command[6] = MODBUS_TCP_UNIT_ID;
+    p_base_data_info->p_command[7] = function_code;
+    p_base_data_info->p_command[8] = start_address >> 8;
+    p_base_data_info->p_command[9] = start_address;
 
-    if (function_code != WRITE_SINGLE_COIL || function_code != WRITE_SINGLE_REGISTER) {
-        p_base_data_info->p_command[command_index++] = quantity >> 8;
-        p_base_data_info->p_command[command_index++] = quantity;
+    if ((function_code != WRITE_SINGLE_COIL) && (function_code != WRITE_SINGLE_REGISTER)) {
+        p_base_data_info->p_command[10] = quantity >> 8;
+        p_base_data_info->p_command[11] = quantity;
     }
     return 0;
 }
@@ -237,7 +248,7 @@ static int ModbusTcpForamatWriteData(ModbusTcpReadItem *p_read_item)
 
     write_data_length = CircularAreaAppRead(g_write_data, write_data_buffer, p_base_data_info->data_size);
     if (p_base_data_info->data_size != write_data_length) {
-        printf("%s get write data %d [should be %d]failed!", __func__, write_data_length, p_base_data_info->data_size);
+        //printf("%s get write data %d [should be %d]failed!\n", __func__, write_data_length, p_base_data_info->data_size);
         return 0;
     }
 
@@ -246,6 +257,7 @@ static int ModbusTcpForamatWriteData(ModbusTcpReadItem *p_read_item)
     case WRITE_SINGLE_COIL:
     case WRITE_SINGLE_REGISTER:
         command_index = 10;
+        break;
     case WRITE_MULTIPLE_COIL:
     case WRITE_MULTIPLE_REGISTER:
         command_index = 13;
@@ -256,8 +268,10 @@ static int ModbusTcpForamatWriteData(ModbusTcpReadItem *p_read_item)
     }
 
     for (i = 0; i < write_data_length; i ++) {
-        p_base_data_info->p_command[command_index++] = write_data_buffer[i];
+        p_base_data_info->p_command[command_index + i] = write_data_buffer[i];
     }
+
+    p_base_data_info->command_ready = 1;
 
     return write_data_length;
 }
