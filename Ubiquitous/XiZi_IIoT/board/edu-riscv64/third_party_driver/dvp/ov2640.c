@@ -399,8 +399,8 @@ const uint8_t ov2640_config[][2]=
 #else
 const uint8_t ov2640_config[][2]=
 {
-    {0x00,x00}
-}
+    {0x00,0x00}
+};
 #endif
 
 
@@ -447,7 +447,7 @@ int SensorConfigure(struct CameraCfg *cfg_info)
 
     //set reg mode to dsp
     dvp_sccb_send_data(OV2640_ADDR, 0xFF, 0x01);
-
+    
     //configure dsp gain
     if(cfg_info->gain_manu_enable){
         reg_tmp = dvp_sccb_receive_data(OV2640_ADDR, 0x13);
@@ -460,4 +460,400 @@ int SensorConfigure(struct CameraCfg *cfg_info)
     
 
     return 1;
+}
+
+const uint8_t OV2640_AUTOEXPOSURE_LEVEL[5][8]=
+{
+    {
+        0xFF,0x01,
+        0x24,0x20,
+        0x25,0x18,
+        0x26,0x60,
+    },
+    {
+        0xFF,0x01,
+        0x24,0x34,
+        0x25,0x1c,
+        0x26,0x00,
+    },
+    {
+        0xFF,0x01,
+        0x24,0x3e,
+        0x25,0x38,
+        0x26,0x81,
+    },
+    {
+        0xFF,0x01,
+        0x24,0x48,
+        0x25,0x40,
+        0x26,0x81,
+    },
+    {
+        0xFF,0x01,
+        0x24,0x58,
+        0x25,0x50,
+        0x26,0x92,
+    },
+};
+
+const uint8_t ov2640_yuv422_reg_tbl[][2] =
+{
+    {0xFF, 0x00},
+    {0xDA, 0x10},
+    {0xD7, 0x03},
+    {0xDF, 0x00},
+    {0x33, 0x80},
+    {0x3C, 0x40},
+    {0xe1, 0x77},
+    {0x00, 0x00},
+};
+
+const uint8_t ov2640_jpeg_reg_tbl[][2]=
+{
+    {0xff, 0x01},
+    {0xe0, 0x14},
+    {0xe1, 0x77},
+    {0xe5, 0x1f},
+    {0xd7, 0x03},
+    {0xda, 0x10},
+    {0xe0, 0x00},
+};
+
+const uint8_t ov2640_rgb565_reg_tbl[][2]=
+{
+    {0xFF, 0x00},
+    {0xDA, 0x08},
+    {0xD7, 0x03},
+    {0xDF, 0x02},
+    {0x33, 0xa0},
+    {0x3C, 0x00},
+    {0xe1, 0x67},
+
+    {0xff, 0x01},
+    {0xe0, 0x00},
+    {0xe1, 0x00},
+    {0xe5, 0x00},
+    {0xd7, 0x00},
+    {0xda, 0x00},
+    {0xe0, 0x00},
+};
+
+
+/* change ov2640 to jpeg mode */
+void ov2640_jpeg_mode(void)
+{
+    uint16_t i=0;
+    /* set yun422 mode */
+    for (i = 0; i < (sizeof(ov2640_yuv422_reg_tbl) / 2); i++)
+    {
+        dvp_sccb_send_data(OV2640_ADDR, ov2640_yuv422_reg_tbl[i][0],ov2640_yuv422_reg_tbl[i][1]);
+    }
+
+    /* set jpeg mode */
+    for(i=0;i<(sizeof(ov2640_jpeg_reg_tbl)/2);i++)
+    {
+        dvp_sccb_send_data(OV2640_ADDR, ov2640_jpeg_reg_tbl[i][0],ov2640_jpeg_reg_tbl[i][1]);
+    }
+}
+
+/* change ov2640 to rgb565 mode */
+void ov2640_rgb565_mode(void)
+{
+    uint16_t i=0;
+    for (i = 0; i < (sizeof(ov2640_rgb565_reg_tbl) / 2); i++)
+    {
+        dvp_sccb_send_data(OV2640_ADDR, ov2640_rgb565_reg_tbl[i][0],ov2640_rgb565_reg_tbl[i][1]);
+    }
+}
+
+
+
+/* set auto exposure level value must be 0 ~4 */
+void ov2640_set_auto_exposure(uint8_t level)
+{
+    uint8_t i = 0;
+    uint8_t *p = (uint8_t*)OV2640_AUTOEXPOSURE_LEVEL[level];
+    for (i = 0; i < 4; i++)
+    {
+        dvp_sccb_send_data(OV2640_ADDR, p[i*2],p[i*2+1]);
+    }
+}
+
+/* set light mode
+ * 0: auto
+ * 1: sunny
+ * 2: cloudy
+ * 3: office
+ * 4: home
+ * */
+void ov2640_set_light_mode(uint8_t mode)
+{
+    uint8_t regccval, regcdval, regceval;
+
+    switch(mode)
+    {
+        case 0:
+            dvp_sccb_send_data(OV2640_ADDR, 0xFF, 0x00);
+            dvp_sccb_send_data(OV2640_ADDR, 0xC7, 0x10);
+            return;
+
+        case 2:
+            regccval = 0x65;
+            regcdval = 0x41;
+            regceval = 0x4F;
+            break;
+
+        case 3:
+            regccval = 0x52;
+            regcdval = 0x41;
+            regceval = 0x66;
+            break;
+
+        case 4:
+            regccval = 0x42;
+            regcdval = 0x3F;
+            regceval = 0x71;
+            break;
+
+        default:
+            regccval = 0x5E;
+            regcdval = 0x41;
+            regceval = 0x54;
+            break;
+    }
+
+    dvp_sccb_send_data(OV2640_ADDR, 0xFF, 0x00);
+    dvp_sccb_send_data(OV2640_ADDR, 0xC7, 0x40);
+    dvp_sccb_send_data(OV2640_ADDR, 0xCC, regccval);
+    dvp_sccb_send_data(OV2640_ADDR, 0xCD, regcdval);
+    dvp_sccb_send_data(OV2640_ADDR, 0xCE, regceval);
+}
+
+/* set color saturation
+ * 0: -2
+ * 1: -1
+ * 2: 0
+ * 3: +1
+ * 4: +2
+ * */
+void ov2640_set_color_saturation(uint8_t sat)
+{
+    uint8_t reg7dval = ((sat+2)<<4) | 0x08;
+    dvp_sccb_send_data(OV2640_ADDR, 0xFF, 0X00);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7C, 0X00);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7D, 0X02);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7C, 0X03);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7D, reg7dval);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7D, reg7dval);
+}
+
+/* set brightness
+ * 0: -2
+ * 1: -1
+ * 2: 0
+ * 3: 1
+ * 4: 2
+ * */
+void ov2640_set_brightness(uint8_t bright)
+{
+  dvp_sccb_send_data(OV2640_ADDR, 0xff, 0x00);
+  dvp_sccb_send_data(OV2640_ADDR, 0x7c, 0x00);
+  dvp_sccb_send_data(OV2640_ADDR, 0x7d, 0x04);
+  dvp_sccb_send_data(OV2640_ADDR, 0x7c, 0x09);
+  dvp_sccb_send_data(OV2640_ADDR, 0x7d, bright << 4);
+  dvp_sccb_send_data(OV2640_ADDR, 0x7d, 0x00);
+}
+
+/* set contrast
+ * 0: -2
+ * 1: -1
+ * 2: 0
+ * 3: 1
+ * 4: 2
+ * */
+void ov2640_set_contrast(uint8_t contrast)
+{
+    uint8_t reg7d0val, reg7d1val;
+
+    switch(contrast)
+    {
+        case 0:
+            reg7d0val = 0x18;
+            reg7d1val = 0x34;
+            break;
+
+        case 1:
+            reg7d0val = 0x1C;
+            reg7d1val = 0x2A;
+            break;
+
+        case 3:
+            reg7d0val = 0x24;
+            reg7d1val = 0x16;
+            break;
+
+        case 4:
+            reg7d0val = 0x28;
+            reg7d1val = 0x0C;
+            break;
+
+        default:
+            reg7d0val = 0x20;
+            reg7d1val = 0x20;
+            break;
+    }
+    dvp_sccb_send_data(OV2640_ADDR, 0xff, 0x00);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7c, 0x00);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7d, 0x04);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7c, 0x07);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7d, 0x20);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7d, reg7d0val);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7d, reg7d1val);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7d, 0x06);
+}
+
+/* set special effects
+ * 0: noraml
+ * 1: negative film
+ * 2: black-and-white
+ * 3: the red
+ * 4: the green
+ * 5: the blue
+ * 6: Retro
+*/
+void ov2640_set_special_effects(uint8_t eft)
+{
+    uint8_t reg7d0val, reg7d1val, reg7d2val;
+
+    switch(eft)
+    {
+        case 1:
+            reg7d0val = 0x40;
+            break;
+        case 2:
+            reg7d0val = 0x18;
+            break;
+        case 3:
+            reg7d0val = 0x18;
+            reg7d1val = 0x40;
+            reg7d2val = 0xC0;
+            break;
+        case 4:
+            reg7d0val = 0x18;
+            reg7d1val = 0x40;
+            reg7d2val = 0x40;
+            break;
+        case 5:
+            reg7d0val = 0x18;
+            reg7d1val = 0xA0;
+            reg7d2val = 0x40;
+            break;
+        case 6:
+            reg7d0val = 0x18;
+            reg7d1val = 0x40;
+            reg7d2val = 0xA6;
+            break;
+        default:
+            reg7d0val = 0x00;
+            reg7d1val = 0x80;
+            reg7d2val = 0x80;
+            break;
+    }
+    dvp_sccb_send_data(OV2640_ADDR, 0xff, 0x00);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7c, 0x00);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7d, reg7d0val);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7c, 0x05);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7d, reg7d1val);
+    dvp_sccb_send_data(OV2640_ADDR, 0x7d, reg7d2val);
+}
+
+/* set the image output window */
+void ov2640_set_window_size(uint16_t sx,uint16_t sy,uint16_t width,uint16_t height)
+{
+    uint16_t endx;
+    uint16_t endy;
+    uint8_t temp;
+    endx = sx + width / 2;
+    endy = sy + height / 2;
+
+    dvp_sccb_send_data(OV2640_ADDR, 0xFF, 0x01);
+    temp = dvp_sccb_receive_data(OV2640_ADDR,0x03);
+    temp &= 0xF0;
+    temp |= ((endy & 0x03) << 2) | (sy & 0x03);
+    dvp_sccb_send_data(OV2640_ADDR, 0x03, temp);
+    dvp_sccb_send_data(OV2640_ADDR, 0x19, sy>>2);
+    dvp_sccb_send_data(OV2640_ADDR, 0x1A, endy>>2);
+
+    temp = dvp_sccb_receive_data(OV2640_ADDR,0x32);
+    temp &= 0xC0;
+    temp |= ((endx & 0x07) << 3) | (sx & 0x07);
+    dvp_sccb_send_data(OV2640_ADDR, 0x32, temp);
+    dvp_sccb_send_data(OV2640_ADDR, 0x17, sx>>3);
+    dvp_sccb_send_data(OV2640_ADDR, 0x18, endx>>3);
+}
+
+/* set the image output size */
+uint8_t ov2640_set_image_out_size(uint16_t width,uint16_t height)
+{
+    uint16_t outh, outw;
+    uint8_t temp;
+
+    if(width%4)return 1;
+    if(height%4)return 2;
+    outw = width /4;
+    outh = height/4;
+    dvp_sccb_send_data(OV2640_ADDR, 0xFF, 0x00);
+    dvp_sccb_send_data(OV2640_ADDR, 0xE0, 0x04);
+    dvp_sccb_send_data(OV2640_ADDR, 0x5A, outw & 0XFF);
+    dvp_sccb_send_data(OV2640_ADDR, 0x5B, outh & 0XFF);
+    temp = (outw >> 8) & 0x03;
+    temp |= (outh >> 6) & 0x04;
+    dvp_sccb_send_data(OV2640_ADDR, 0x5C, temp);
+    dvp_sccb_send_data(OV2640_ADDR, 0xE0, 0X00);
+
+    return 1;
+}
+
+/* set the image window size */
+uint8_t ov2640_set_image_window_size(uint16_t offx, uint16_t offy, uint16_t width, uint16_t height)
+{
+    uint16_t hsize, vsize;
+    uint8_t temp;
+    if ((width % 4) || (height%4))
+    {
+        return EOF;
+    }
+    hsize = width /4;
+    vsize = height/4;
+   dvp_sccb_send_data(OV2640_ADDR, 0XFF,0X00);
+   dvp_sccb_send_data(OV2640_ADDR, 0XE0,0X04);
+   dvp_sccb_send_data(OV2640_ADDR, 0X51,hsize&0XFF);
+   dvp_sccb_send_data(OV2640_ADDR, 0X52,vsize&0XFF);
+   dvp_sccb_send_data(OV2640_ADDR, 0X53,offx&0XFF);
+   dvp_sccb_send_data(OV2640_ADDR, 0X54,offy&0XFF);
+   temp=(vsize>>1)&0X80;
+   temp|=(offy>>4)&0X70;
+   temp|=(hsize>>5)&0X08;
+   temp|=(offx>>8)&0X07;
+   dvp_sccb_send_data(OV2640_ADDR, 0X55,temp);             //
+   dvp_sccb_send_data(OV2640_ADDR, 0X57,(hsize>>2)&0X80);  //
+   dvp_sccb_send_data(OV2640_ADDR, 0XE0,0X00);
+   return 0;
+}
+
+/* set output resolution */
+uint8_t ov2640_set_image_size(uint16_t width ,uint16_t height)
+{
+   uint8_t temp;
+   dvp_sccb_send_data(OV2640_ADDR, 0xFF, 0x00);
+   dvp_sccb_send_data(OV2640_ADDR, 0xE0, 0x04);
+   dvp_sccb_send_data(OV2640_ADDR, 0xC0, (width >>3) & 0xFF);
+   dvp_sccb_send_data(OV2640_ADDR, 0xC1, (height >> 3) & 0xFF);
+   temp = (width & 0x07) << 3;
+   temp |= height & 0x07;
+   temp |= (width >> 4) & 0x80;
+   dvp_sccb_send_data(OV2640_ADDR, 0x8C, temp);
+   dvp_sccb_send_data(OV2640_ADDR, 0xE0, 0x00);
+
+   return 1;
 }

@@ -25,14 +25,23 @@
 extern "C" {
 #endif
 
-#define REG_SCCB_READ 0x12U
-#define REG_SCCB_WRITE 0x13U
+#define REG_SCCB_READ 0xA2U
+#define REG_SCCB_WRITE 0xA3U
 #define SCCB_REG_LENGTH 0x08U
-#define IOCTRL_CAMERA_START_SHOT (20)
-#define SET_DISPLAY_ADDR (21)
-#define SET_AI_ADDR (22)
+
+#define SET_DISPLAY_ADDR (0xD1)
+#define SET_AI_ADDR (0xD2)
+#define FLAG_CHECK (0xD4)
+
+#define IOCTRL_CAMERA_START_SHOT            (22)     // start shoot
 #define IOCTRL_CAMERA_OUT_SIZE_RESO (23)
-#define FLAG_CHECK (24)
+#define IOCTRL_CAMERA_SET_WINDOWS_SIZE      (21)     // user set specific windows outsize
+#define IOCTRL_CAMERA_SET_LIGHT             (24)     //set light mode
+#define IOCTRL_CAMERA_SET_COLOR             (25)     //set color saturation
+#define IOCTRL_CAMERA_SET_BRIGHTNESS        (26)     //set color brightness
+#define IOCTRL_CAMERA_SET_CONTRAST          (27)     //set contrast
+#define IOCTRL_CAMERA_SET_EFFECT            (28)     //set effect
+#define IOCTRL_CAMERA_SET_EXPOSURE          (29)     //set auto exposure
 
 
 typedef struct 

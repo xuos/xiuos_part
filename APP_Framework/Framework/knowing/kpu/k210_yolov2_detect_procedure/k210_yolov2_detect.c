@@ -7,11 +7,11 @@
 #endif
 #include "region_layer.h"
 #define STACK_SIZE (128 * 1024)
+#define THREAD_PRIORITY_D (11)
 
 static dmac_channel_number_t dma_ch = DMAC_CHANNEL_MAX - 1;
 static _ioctl_shoot_para shoot_para_t = {0};
 
-#define THREAD_PRIORITY_D (11)
 static pthread_t tid = 0;
 static void *thread_detect_entry(void *parameter);
 static int camera_fd = 0;
@@ -32,7 +32,6 @@ volatile uint32_t g_ai_done_flag;
 
 static void ai_done(void *ctx) { g_ai_done_flag = 1; }
 
-#define ERROR_FLAG (1)
 
 void k210_detect(char *json_file_path)
 {
@@ -47,6 +46,7 @@ void k210_detect(char *json_file_path)
     {
         return;
     }
+    
     printf("select camera device name:%s\n", CAMERA_DEV_DRIVER);
     camera_fd = PrivOpen(CAMERA_DEV_DRIVER, O_RDONLY);
     if (camera_fd < 0)
@@ -54,6 +54,8 @@ void k210_detect(char *json_file_path)
         printf("open %s fail !!", CAMERA_DEV_DRIVER);
         return;
     }
+
+#ifdef ADD_XIZI_FETURES
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = CAMERA_TYPE;
     struct CameraCfg camera_init_cfg = {
@@ -71,6 +73,7 @@ void k210_detect(char *json_file_path)
         printf("camera pin fd error %d\n", camera_fd);
         PrivClose(camera_fd);
     }
+#endif
 
     // configure the resolution of camera
     _ioctl_set_reso set_dvp_reso = {detect_params.sensor_output_size[1], detect_params.sensor_output_size[0]};
@@ -81,8 +84,16 @@ void k210_detect(char *json_file_path)
     image_height = set_dvp_reso.height;
     image_width = set_dvp_reso.width;
 
-    model_data = (unsigned char *)malloc(detect_params.kmodel_size + 255);
     // alloc the memory for camera and kpu running
+    model_data = (unsigned char *)malloc(detect_params.kmodel_size + 255);
+    if (NULL == model_data)
+    {
+        free(showbuffer);
+        free(kpurgbbuffer);
+        close(camera_fd);
+        printf("model_data apply memory fail !!");
+        return;
+    }
     showbuffer = (unsigned char *)malloc(detect_params.sensor_output_size[0] * detect_params.sensor_output_size[1] * 2);
     if (NULL == showbuffer)
     {
@@ -99,14 +110,7 @@ void k210_detect(char *json_file_path)
         return;
     }
 
-    if (NULL == model_data)
-    {
-        free(showbuffer);
-        free(kpurgbbuffer);
-        close(camera_fd);
-        printf("model_data apply memory fail !!");
-        return;
-    }
+
     memset(model_data, 0, detect_params.kmodel_size + 255);
     memset(showbuffer, 0, detect_params.sensor_output_size[0] * detect_params.sensor_output_size[1] * 2);
     memset(kpurgbbuffer, 0, detect_params.net_input_size[0] * detect_params.net_input_size[1] * 3);
@@ -171,7 +175,7 @@ void k210_detect(char *json_file_path)
         (uintptr_t)(kpurgbbuffer +
                     detect_params.net_input_size[1] * (detect_params.net_input_size[0] - detect_params.sensor_output_size[0]) +
                     detect_params.net_input_size[0] * detect_params.net_input_size[1] * 2));
-#endif
+#else
     // Set AI buff address of Camera
     RgbAddress ai_address_preset;
     ai_address_preset.r_addr = (uintptr_t)kpurgbbuffer + detect_params.net_input_size[1];
@@ -179,6 +183,7 @@ void k210_detect(char *json_file_path)
     ai_address_preset.b_addr = ai_address_preset.g_addr + detect_params.net_input_size[0] * detect_params.net_input_size[1];
     camera_cfg.args = &ai_address_preset;
     PrivIoctl(camera_fd, SET_AI_ADDR, &camera_cfg);
+#endif
 
     // Load kmodel into kpu task
     if (kpu_load_kmodel(&detect_task, model_data_align) != 0)
@@ -207,7 +212,7 @@ void k210_detect(char *json_file_path)
     size_t stack_size = STACK_SIZE;
     pthread_attr_t attr;                      /* 线程属性 */
     struct sched_param prio;                  /* 线程优先级 */
-    prio.sched_priority = 8;                  /* 优先级设置为 8 */
+    prio.sched_priority = THREAD_PRIORITY_D;  /* 优先级设置为 11 */
     pthread_attr_init(&attr);                 /* 先使用默认值初始化属性 */
     pthread_attr_setschedparam(&attr, &prio); /* 修改属性对应的优先级 */
     pthread_attr_setstacksize(&attr, stack_size);
@@ -253,7 +258,7 @@ static void *thread_detect_entry(void *parameter)
         // get a graph map from camera
         camera_cfg.args = &shoot_para_t;
         ret = PrivIoctl(camera_fd, IOCTRL_CAMERA_START_SHOT, &camera_cfg);
-        if (ERROR_FLAG == ret)
+        if (EOF == ret)
         {
             printf("ov2640 can't wait event flag");
             free(showbuffer);

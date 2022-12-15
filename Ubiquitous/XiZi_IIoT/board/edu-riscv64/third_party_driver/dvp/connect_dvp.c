@@ -126,6 +126,10 @@ static uint32 DvpRead(void *dev, struct BusBlockReadParam *read_param)
     return ret;
 }
 
+/**
+ * @brief configure api for dvp device
+ * TODO: unified APIs to keep consistent with RT-thread 
+ */
 static uint32 DvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
 {
     x_err_t ret = EOK;
@@ -134,6 +138,7 @@ static uint32 DvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
     struct CameraCfg* tmp_cfg;
     RgbAddress* kpu_rgb_address;
     _ioctl_shoot_para* pixel_cfg;
+    int value = ((int*)args->private_data)[0];
     switch (cmd_type)
     {
     case OPE_INT:
@@ -151,6 +156,9 @@ static uint32 DvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
         dvp_config_interrupt(DVP_CFG_START_INT_ENABLE | DVP_CFG_FINISH_INT_ENABLE, 1);
         shoot_flag=ONLY_ONE_SHOOT;
         break;
+    case IOCTRL_CAMERA_OUT_SIZE_RESO:
+        dvp_set_image_size(((uint32_t*)args->private_data)[0], ((uint32_t*)args->private_data)[1]);
+        break;
     case FLAG_CHECK:
         *((int*)args->private_data) = shoot_flag;
         break;        
@@ -159,9 +167,27 @@ static uint32 DvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
         dvp_set_output_enable(DVP_OUTPUT_AI, 1);
         dvp_set_ai_addr(kpu_rgb_address->r_addr,kpu_rgb_address->g_addr,kpu_rgb_address->b_addr);
         break;
-    case IOCTRL_CAMERA_OUT_SIZE_RESO:
-        dvp_set_image_size(((uint32_t*)args->private_data)[0], ((uint32_t*)args->private_data)[1]);
+
+    // make compatible for rt-fusion xizi
+    case IOCTRL_CAMERA_SET_LIGHT:
+        ov2640_set_light_mode(value);
         break;
+    case IOCTRL_CAMERA_SET_COLOR:
+        ov2640_set_color_saturation(value);
+        break;
+    case IOCTRL_CAMERA_SET_BRIGHTNESS:
+        ov2640_set_brightness(value);
+        break;
+    case IOCTRL_CAMERA_SET_CONTRAST:
+        ov2640_set_contrast(value);
+        break;
+    case IOCTRL_CAMERA_SET_EFFECT:
+        ov2640_set_special_effects(value);
+        break;
+    case IOCTRL_CAMERA_SET_EXPOSURE:
+        ov2640_set_auto_exposure(value);
+        break;
+
     case REG_SCCB_READ:
         ReadDvpReg(drv, (struct DvpRegConfigureInfo *)args->private_data);
         break;

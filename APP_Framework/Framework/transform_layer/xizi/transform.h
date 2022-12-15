@@ -260,10 +260,6 @@ enum TCP_OPTION {
 #define MY_INDEV_X BSP_LCD_Y_MAX
 #define MY_INDEV_Y BSP_LCD_X_MAX
 
-#define DVP_INIT 0x00U
-#define REG_SCCB_READ 0x12U
-#define REG_SCCB_WRITE 0x13U
-#define OUTPUT_CONFIG 0x20U
 #define LCD_STRING_TYPE 0
 #define LCD_DOT_TYPE 1
 #define LCD_SIZE 320
@@ -271,15 +267,23 @@ enum TCP_OPTION {
 #define IMAGE_WIDTH 320
 #define NULL_PARAMETER 0
 
-#define REG_SCCB_READ 0x12U
-#define REG_SCCB_WRITE 0x13U
+#define REG_SCCB_READ 0xA2U
+#define REG_SCCB_WRITE 0xA3U
 #define SCCB_REG_LENGTH 0x08U
-#define IOCTRL_CAMERA_START_SHOT (20)
-#define SET_DISPLAY_ADDR (21)
-#define SET_AI_ADDR (22)
-#define IOCTRL_CAMERA_OUT_SIZE_RESO (23)
-#define FLAG_CHECK (24)
 
+#define SET_DISPLAY_ADDR (0xD1)
+#define SET_AI_ADDR (0xD2)
+#define FLAG_CHECK (0xD4)
+
+#define IOCTRL_CAMERA_START_SHOT            (22)     // start shoot
+#define IOCTRL_CAMERA_OUT_SIZE_RESO (23)
+#define IOCTRL_CAMERA_SET_WINDOWS_SIZE      (21)     // user set specific windows outsize
+#define IOCTRL_CAMERA_SET_LIGHT             (24)     //set light mode
+#define IOCTRL_CAMERA_SET_COLOR             (25)     //set color saturation
+#define IOCTRL_CAMERA_SET_BRIGHTNESS        (26)     //set color brightness
+#define IOCTRL_CAMERA_SET_CONTRAST          (27)     //set contrast
+#define IOCTRL_CAMERA_SET_EFFECT            (28)     //set effect
+#define IOCTRL_CAMERA_SET_EXPOSURE          (29)     //set auto exposure
 /*********************shell***********************/
 //for int func(int argc, char *agrv[])
 #define PRIV_SHELL_CMD_MAIN_ATTR (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN))
