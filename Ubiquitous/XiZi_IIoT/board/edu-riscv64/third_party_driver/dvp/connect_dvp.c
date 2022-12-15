@@ -151,6 +151,9 @@ static uint32 DvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
         dvp_config_interrupt(DVP_CFG_START_INT_ENABLE | DVP_CFG_FINISH_INT_ENABLE, 1);
         shoot_flag=ONLY_ONE_SHOOT;
         break;
+    case FLAG_CHECK:
+        *((int*)args->private_data) = shoot_flag;
+        break;        
     case SET_AI_ADDR:
         kpu_rgb_address = (RgbAddress*)args->private_data;
         dvp_set_output_enable(DVP_OUTPUT_AI, 1);

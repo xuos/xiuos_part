@@ -32,6 +32,7 @@ extern "C" {
 #define SET_DISPLAY_ADDR (21)
 #define SET_AI_ADDR (22)
 #define IOCTRL_CAMERA_OUT_SIZE_RESO (23)
+#define FLAG_CHECK (24)
 
 
 typedef struct 
