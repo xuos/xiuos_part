@@ -300,7 +300,7 @@ struct InitSequenceDesc _board_init[] =
 #endif
 
 #ifdef BSP_USING_CH438
-    {"ch438", Imxrt1052HwCh438Init()},
+    {"ch438", Imxrt1052HwCh438Init },
 #endif
 
 #ifdef BSP_USING_SDIO

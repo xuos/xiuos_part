@@ -33,7 +33,7 @@ static uint8_t recv_buff[1024] = {0};
  * @param recv_buff - receive buff
  * @return success : 0 error : -1
  */
-static int ModbusTcpTransformRecvBuffToData(ModbusTcpReadItem *p_read_item, uint8_t *recv_buff)
+static void ModbusTcpTransformRecvBuffToData(ModbusTcpReadItem *p_read_item, uint8_t *recv_buff)
 {
     uint8_t head_length = 9;
     uint8_t *data_buffer;
@@ -42,8 +42,6 @@ static int ModbusTcpTransformRecvBuffToData(ModbusTcpReadItem *p_read_item, uint
 
     ModbusTcpFunctionCode function_code = p_modbus_tcp_data_info->function_code;
     uint8_t *p_data = p_modbus_tcp_data_info->base_data_info.p_data;
-
-    printf("Receive data is ");
 
     uint8_t bytes_count = recv_buff[8];
 
@@ -58,6 +56,7 @@ static int ModbusTcpTransformRecvBuffToData(ModbusTcpReadItem *p_read_item, uint
     data_buffer = recv_buff + head_length;//remove head data
 
     if (READ_COIL_STATUS == function_code || READ_INPUT_STATUS == function_code) {
+        printf("Receive data is ");
         for (int i = 0;i < bytes_count;i ++) {
             for (int j = 0;j < 8;j ++) {
                 if ((i * 8 + j) < p_read_item->quantity) {
@@ -66,7 +65,8 @@ static int ModbusTcpTransformRecvBuffToData(ModbusTcpReadItem *p_read_item, uint
                 }
             }
         }
-    } else {
+    } else if (READ_HOLDING_REGISTER == function_code || READ_INPUT_REGISTER == function_code) {
+        printf("Receive data is ");
         for (uint16_t i = 0; i < quantity; i ++) {
             ((int16_t *)p_data)[i] = ((int16_t *)data_buffer)[quantity - i - 1];
             printf("0x%x 0x%x ", p_data[2 * i], p_data[2 * i + 1]);
@@ -102,21 +102,30 @@ static int ModbusTcpGetData(int32_t socket, ModbusTcpReadItem *p_read_item)
 
         write_error = socket_write(socket, p_base_data_info->p_command, p_base_data_info->command_length);
         if (write_error < 0) {
-            printf("Write socket error, errno is %d!", errno);
+            printf("Write socket error, errno is %d!\n", errno);
         } else {
             PrivTaskDelay(20);
 
             int32_t recv_length = socket_read(socket, recv_buff, sizeof(recv_buff));
             if (recv_length < 0) {
-                printf("Read socket error, errno is %d!", errno);
+                printf("Read socket error, errno is %d! read again\n", errno);
+                memset(recv_buff, 0, sizeof(recv_buff));
+                recv_length = socket_read(socket, recv_buff, sizeof(recv_buff));
+                if (recv_length > 0) {
+                    ControlPrintfList("RECV", recv_buff, recv_length);
+                    ModbusTcpTransformRecvBuffToData(p_read_item, recv_buff);
+                    return 0;
+                }
             } else {
                 ControlPrintfList("RECV", recv_buff, recv_length);
-                return ModbusTcpTransformRecvBuffToData(p_read_item, recv_buff);
+                ModbusTcpTransformRecvBuffToData(p_read_item, recv_buff);
+
+                return 0;
             }
         }
 
         if ((errno == EINTR) || (errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-            printf("Send command failed, errno is %d!", errno);
+            printf("Send command failed, errno is %d!\n", errno);
             continue;
         } else {
             return -1;
