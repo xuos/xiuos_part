@@ -30,5 +30,6 @@ int main(void)
 
 ## TODO
 
-* KPU drivers are still not completed, because it is undefined how to reisgter KPU's bus and device name in XIZI system. The framework is still directly using the SDK From Canaan Inc. But after the driver completed, it will be easy to adapt framework for the APIs.
-* Camera and LCD drivers between RT and XIZI are not completely compatible. So there are some marcos like `ifdef` to make the framework compatible for both systems.
+* KPU drivers and frameworks are still not completed, because it is undefined how to reisgter KPU's bus and device name in rt-fusion system. The framework is still directly using the SDK with *ifdef* From Canaan Inc. But after the driver completed, it will be easy to adapt framework for the APIs.
+* Camera and LCD drivers between RT and XIZI are not completely compatible. So there are some marcos like *ifdef* to make the framework compatible for both systems.
+* After completed, all codes from kernel in knowing framework should be posix interfaces,like *PrivOpen*、*PrivIoctrl*、*PrivRead*.
