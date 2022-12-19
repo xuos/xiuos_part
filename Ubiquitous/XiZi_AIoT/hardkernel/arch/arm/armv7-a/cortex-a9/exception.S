@@ -52,15 +52,15 @@ PrefetchAbortExceptionHandle:
     b     PrefetchAbortIsrEntry
 
 DataAbortExceptionHandle:
-    b     UndefInstrIsrEntry
+    b     DataAbortIsrEntry
 
 ResvExceptionHandle:
-    b     DataAbortIsrEntry
+    b     ResvIsrEntry
 
 ExceptionIsrEntry:
     stmfd   sp!, {r0-r12,lr}
 
-    bl      IsrEntry
+    b      IsrEntry
 
 FiqExceptionHandle:
     b      FiqIsrEntry
