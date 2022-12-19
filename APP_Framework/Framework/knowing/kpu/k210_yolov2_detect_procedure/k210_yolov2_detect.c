@@ -16,6 +16,7 @@ static pthread_t tid = 0;
 static void *thread_detect_entry(void *parameter);
 static int camera_fd = 0;
 static int kmodel_fd = 0;
+static int kpu_fd = 0;
 static int if_exit = 0;
 static unsigned char *showbuffer = NULL;
 static unsigned char *kpurgbbuffer = NULL;
@@ -46,7 +47,16 @@ void k210_detect(char *json_file_path)
     {
         return;
     }
-    
+
+#ifdef ADD_XIZI_FETURES
+    kpu_fd = PrivOpen(KPU_DEV_DRIVER, O_RDONLY);
+    if (camera_fd < 0)
+    {
+        printf("open %s fail !!", KPU_DEV_DRIVER);
+        return;
+    }    
+#endif
+
     printf("select camera device name:%s\n", CAMERA_DEV_DRIVER);
     camera_fd = PrivOpen(CAMERA_DEV_DRIVER, O_RDONLY);
     if (camera_fd < 0)
@@ -54,26 +64,6 @@ void k210_detect(char *json_file_path)
         printf("open %s fail !!", CAMERA_DEV_DRIVER);
         return;
     }
-
-#ifdef ADD_XIZI_FETURES
-    struct PrivIoctlCfg ioctl_cfg;
-    ioctl_cfg.ioctl_driver_type = CAMERA_TYPE;
-    struct CameraCfg camera_init_cfg = {
-        .gain_manu_enable = 0,
-        .gain = 0xFF,
-        .window_w = 800,
-        .window_h = 600,
-        .output_w = IMAGE_WIDTH,
-        .output_h = IMAGE_HEIGHT,
-        .window_xoffset = 0,
-        .window_yoffset = 0};
-    ioctl_cfg.args = &camera_init_cfg;
-    if (0 != PrivIoctl(camera_fd, OPE_CFG, &ioctl_cfg))
-    {
-        printf("camera pin fd error %d\n", camera_fd);
-        PrivClose(camera_fd);
-    }
-#endif
 
     // configure the resolution of camera
     _ioctl_set_reso set_dvp_reso = {detect_params.sensor_output_size[1], detect_params.sensor_output_size[0]};
@@ -90,21 +80,21 @@ void k210_detect(char *json_file_path)
     {
         free(showbuffer);
         free(kpurgbbuffer);
-        close(camera_fd);
+        PrivClose(camera_fd);
         printf("model_data apply memory fail !!");
         return;
     }
     showbuffer = (unsigned char *)malloc(detect_params.sensor_output_size[0] * detect_params.sensor_output_size[1] * 2);
     if (NULL == showbuffer)
     {
-        close(camera_fd);
+        PrivClose(camera_fd);
         printf("showbuffer apply memory fail !!");
         return;
     }
     kpurgbbuffer = (unsigned char *)malloc(detect_params.net_input_size[0] * detect_params.net_input_size[1] * 3);
     if (NULL == kpurgbbuffer)
     {
-        close(camera_fd);
+        PrivClose(camera_fd);
         free(showbuffer);
         printf("kpurgbbuffer apply memory fail !!");
         return;
@@ -122,7 +112,6 @@ void k210_detect(char *json_file_path)
     */
     // kmodel path generate from json file path, *.json -> *.kmodel
     memcpy(kmodel_path, json_file_path, strlen(json_file_path));
-
     int idx_suffix_start = strlen(json_file_path) - 4;
     const char kmodel_suffix[7] = "kmodel";
     int kmodel_suffix_len = 6;
@@ -139,7 +128,7 @@ void k210_detect(char *json_file_path)
     if (kmodel_fd < 0)
     {
         printf("open kmodel fail");
-        close(camera_fd);
+        PrivClose(camera_fd);
         free(showbuffer);
         free(kpurgbbuffer);
         free(model_data);
@@ -147,12 +136,12 @@ void k210_detect(char *json_file_path)
     }
     else
     {
-        size = read(kmodel_fd, model_data_align, detect_params.kmodel_size);
+        size = PrivRead(kmodel_fd, model_data_align, detect_params.kmodel_size);
         if (size != detect_params.kmodel_size)
         {
             printf("read kmodel error size %d\n", size);
-            close(camera_fd);
-            close(kmodel_fd);
+            PrivClose(camera_fd);
+            PrivClose(kmodel_fd);
             free(showbuffer);
             free(kpurgbbuffer);
             free(model_data);
@@ -160,7 +149,7 @@ void k210_detect(char *json_file_path)
         }
         else
         {
-            close(kmodel_fd);
+            PrivClose(kmodel_fd);
             printf("read kmodel success \n");
         }
     }
@@ -186,16 +175,32 @@ void k210_detect(char *json_file_path)
 #endif
 
     // Load kmodel into kpu task
+#ifdef ADD_RTTHREAD_FETURES
     if (kpu_load_kmodel(&detect_task, model_data_align) != 0)
     {
         printf("\nmodel init error\n");
-        close(camera_fd);
-        close(kmodel_fd);
+        PrivClose(camera_fd);
+        PrivClose(kmodel_fd);
         free(showbuffer);
         free(kpurgbbuffer);
         free(model_data);
         return;
     }
+#else
+    struct PrivIoctlCfg kpu_cfg;
+    kpu_cfg.args = model_data_align;
+    kpu_cfg.ioctl_driver_type = KPU_TYPE;
+    if (PrivIoctl(kpu_fd,LOAD_KMODEL,&kpu_cfg) != 0)
+    {
+        printf("\nmodel init error\n");
+        PrivClose(camera_fd);
+        PrivClose(kmodel_fd);
+        free(showbuffer);
+        free(kpurgbbuffer);
+        free(model_data);
+        return;
+    }
+#endif
 
     detect_rl.anchor_number = ANCHOR_NUM;
     detect_rl.anchor = detect_params.anchor;
@@ -226,7 +231,7 @@ void k210_detect(char *json_file_path)
     else
     {
         printf("thread_detect_entry failed! error code is %d\n", result);
-        close(camera_fd);
+        PrivClose(camera_fd);
     }
 }
 // #ifdef __RT_THREAD_H__
@@ -243,6 +248,15 @@ static void *thread_detect_entry(void *parameter)
     }
     LcdWriteParam graph_param;
     graph_param.type = LCD_DOT_TYPE;
+    for (int i = 0; i < LCD_SIZE; i++)
+    {
+        graph_param.pixel_info.pixel_color = (uint16_t *)showbuffer;
+        graph_param.pixel_info.x_startpos = 0;
+        graph_param.pixel_info.y_startpos = i;
+        graph_param.pixel_info.x_endpos = LCD_SIZE - 1;
+        graph_param.pixel_info.y_endpos = graph_param.pixel_info.y_startpos;
+        PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
+    }
 #endif
 
     yolov2_params_t detect_params = *(yolov2_params_t *)parameter;
@@ -262,7 +276,7 @@ static void *thread_detect_entry(void *parameter)
         {
             printf("ov2640 can't wait event flag");
             free(showbuffer);
-            close(camera_fd);
+            PrivClose(camera_fd);
             pthread_exit(NULL);
             return NULL;
         }
@@ -283,15 +297,29 @@ static void *thread_detect_entry(void *parameter)
             ;
         dmalock_release(dma_ch);
 #elif defined ADD_XIZI_FETURES
-        kpu_run_kmodel(&detect_task, kpurgbbuffer, dma_ch, ai_done, NULL);
-        while (!g_ai_done_flag)
-            ;
+        struct PrivIoctlCfg kpu_cfg;
+        kpu_cfg.args = kpurgbbuffer;
+        kpu_cfg.ioctl_driver_type = KPU_TYPE;
+        PrivIoctl(kpu_fd,RUN_KMODEL,&kpu_cfg);
+
+        int wait_flag=0;
+        kpu_cfg.args = &wait_flag;
+        while (0==wait_flag){
+            PrivIoctl(kpu_fd,WAIT_FLAG,&kpu_cfg);
+        }
 #endif
 
+#ifdef ADD_RTTHREAD_FETURES
         float *output;
         size_t output_size;
         kpu_get_output(&detect_task, 0, (uint8_t **)&output, &output_size);
         detect_rl.input = output;
+#else
+        KpuOutputBuffer output_buffer;
+        kpu_cfg.args = &output_buffer;
+        PrivIoctl(kpu_fd,GET_OUTPUT,&kpu_cfg);
+        detect_rl.input = (float*)(output_buffer.buffer);
+#endif
         region_layer_run(&detect_rl, &detect_info);
         printf("detect_info.obj_number:%d\n", detect_info.obj_number);
         /* display result */
@@ -317,16 +345,11 @@ static void *thread_detect_entry(void *parameter)
         // refresh the LCD using photo of camera
         for (int i = 0; i < image_height; i++)
         {
-            graph_param.pixel_info.pixel_color = (uint16_t *)showbuffer + i * image_width;
+            graph_param.pixel_info.pixel_color = (uint16_t *)showbuffer + (image_height-i-1) * image_width;
             graph_param.pixel_info.x_startpos = (LCD_SIZE - image_width) / 2;
             graph_param.pixel_info.y_startpos = i + (LCD_SIZE - image_height) / 2;
             graph_param.pixel_info.x_endpos = LCD_SIZE - 1 - (LCD_SIZE - image_width) / 2;
             graph_param.pixel_info.y_endpos = graph_param.pixel_info.y_startpos;
-            // printf("refreshing screen: address[%08X] at row in %d\n",graph_param.pixel_info.pixel_color, graph_param.pixel_info.y_startpos);
-            // for(int j=0;j<image_width;j++){
-            //     printf("%04X ",((uint16_t*)graph_param.pixel_info.pixel_color)[j]);
-            // }
-            // printf("\n");
             PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
         }
 #endif
@@ -346,8 +369,8 @@ void detect_delete()
     if (showbuffer != NULL)
     {
         int ret = 0;
-        close(camera_fd);
-        close(kmodel_fd);
+        PrivClose(camera_fd);
+        PrivClose(kmodel_fd);
         free(showbuffer);
         free(kpurgbbuffer);
         free(model_data);

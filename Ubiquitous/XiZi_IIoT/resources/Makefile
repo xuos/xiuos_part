@@ -69,4 +69,8 @@ ifeq ($(CONFIG_RESOURCES_CAMERA),y)
 	SRC_DIR += camera
 endif
 
+ifeq ($(CONFIG_RESOURCES_KPU),y)
+	SRC_DIR += kpu
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

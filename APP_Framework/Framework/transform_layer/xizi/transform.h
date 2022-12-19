@@ -151,6 +151,7 @@ enum IoctlDriverType
     WDT_TYPE,
     RTC_TYPE,
     CAMERA_TYPE,
+    KPU_TYPE,
     DEFAULT_TYPE,
 };
 
@@ -247,9 +248,15 @@ typedef struct
 }RgbAddress;
 
 enum TCP_OPTION {
-  SEND_DATA = 0,
-  RECV_DATA,
+    SEND_DATA = 0,
+    RECV_DATA,
 };
+
+typedef struct
+{
+    uint8_t *buffer;
+    size_t length;
+}KpuOutputBuffer;
 
 #define PRIV_SYSTICK_GET (CurrentTicksGain())
 #define PRIV_LCD_DEV "/dev/lcd_dev"
@@ -274,6 +281,11 @@ enum TCP_OPTION {
 #define SET_DISPLAY_ADDR (0xD1)
 #define SET_AI_ADDR (0xD2)
 #define FLAG_CHECK (0xD4)
+
+#define LOAD_KMODEL 0xA0
+#define RUN_KMODEL 0xA1
+#define GET_OUTPUT 0xA2
+#define WAIT_FLAG 0xA3
 
 #define IOCTRL_CAMERA_START_SHOT            (22)     // start shoot
 #define IOCTRL_CAMERA_OUT_SIZE_RESO (23)
