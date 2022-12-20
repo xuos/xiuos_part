@@ -87,15 +87,13 @@ static const struct gpio_operations_s gpout_ops =
 static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
   GPIO_E220_M0, 
-  GPIO_E220_M1,
-  GPIO_E18_MODE
+  GPIO_E220_M1
 };
 
 static const uint32_t g_fpioa[BOARD_NGPIOOUT] =
 {
   FPIOA_E220_M0, 
-  FPIOA_E220_M1,
-  FPIOA_E18_MODE
+  FPIOA_E220_M1
 };
 
 static struct k210gpio_dev_s g_gpout[BOARD_NGPIOOUT];

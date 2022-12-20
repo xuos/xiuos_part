@@ -107,7 +107,7 @@ UINT8 mInitCH376Host(void)
     if ( res != 0x9A ) return( ERR_USB_UNKNOWN );
 
     xWriteCH376Cmd(CMD11_SET_USB_MODE);  /* SET USB MODE */
-    xWriteCH376Data(CONFIG_CH376_WORK_MODE);
+    xWriteCH376Data(0x06);
     up_udelay(20);
     res = xReadCH376Data();
     xEndCH376Cmd();

@@ -39,8 +39,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-
-
 /* Map pad 14 to gpiohs io 0 */
 #define BOARD_LED_IO_FUNC K210_IO_FUNC_GPIOHS0
 
@@ -55,7 +53,7 @@
 
 /* GPIO pins used by the GPIO Subsystem */
 
-#define BOARD_NGPIOOUT    3 /* Amount of register GPIO Output pins */
+#define BOARD_NGPIOOUT    2 /* Amount of register GPIO Output pins */
 #define BOARD_NGPIOINT    0 /* Amount of GPIO Input */
 
 /****************************************************************************
@@ -84,8 +82,8 @@ extern "C"
 #define GPIO_WIFI_TXD      6
 #define GPIO_E220_RXD     21
 #define GPIO_E220_TXD     20
-#define GPIO_CH376T_RXD   22
-#define GPIO_CH376T_TXD   23
+#define GPIO_CH376T_RXD   23
+#define GPIO_CH376T_TXD   22
 
 /* w5500 IO */
 #define BSP_ENET_SCLK   9
@@ -95,13 +93,11 @@ extern "C"
 #define BSP_ENET_NRST   13
 #define BSP_ENET_NINT   14
 
-/* LCD IO */
-#define BSP_LCD_NRST        37
-#define BSP_LCD_SCLK        38
-#define BSP_LCD_MOSI        39
-#define BSP_LCD_MISO        40
-#define BSP_LCD_NCS         41
-#define BSP_LCD_BL_PIN      47
+/* sdcard IO */
+#define SOFT_SPI_MISO    25
+#define SOFT_SPI_SCK     26
+#define SOFT_SPI_MOSI    27
+#define SOFT_SPI_CS0_PIN 28
 
 /* I2C  */
 #define BSP_IIC_SDA     15
@@ -110,9 +106,7 @@ extern "C"
 /* other mode io */
 #define GPIO_E220_M0   32
 #define GPIO_E220_M1   33
-#define GPIO_E18_MODE  46
 #define GPIO_WIFI_EN   8
-#define GPIO_CAN_CFG   43
 
 /************************** end GPIO define **************************/
 
@@ -135,24 +129,16 @@ extern "C"
 #define FPIOA_ENET_MOSI 23
 #define FPIOA_ENET_NCS  31
 
-/* LCD FPIOA */
-#define FPIOA_LCD_NRST      0
-#define FPIOA_LCD_BL        9
-#define FPIOA_LCD_SCLK      28
-#define FPIOA_LCD_MOSI      29
-#define FPIOA_LCD_MISO      23 
-#define FPIOA_LCD_NCS       31
-
-/* I2C  */
-#define FPIOA_IIC_SDA  7
-#define FPIOA_IIC_SCL  8
+/* sdcard FPIOA */
+#define FPIOA_SOFT_SPI_MISO    4
+#define FPIOA_SOFT_SPI_SCK     5
+#define FPIOA_SOFT_SPI_MOSI    6
+#define FPIOA_SOFT_SPI_CS0_PIN 7
 
 /* other mode FPIOA */
 #define FPIOA_E220_M0   1
 #define FPIOA_E220_M1   2
-#define FPIOA_E18_MODE  3
-#define FPIOA_WIFI_EN   4
-#define FPIOA_CAN_NCFG  5
+#define FPIOA_WIFI_EN   3
 
 /************************** end FPIOA define **************************/
 

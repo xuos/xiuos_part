@@ -35,8 +35,4 @@ menuconfig BSP_USING_ENET
     bool "Using ENET device"
     default n
 
-menuconfig BSP_USING_TOUCH
-    bool "Using touch device"
-    default n
-
 endif # ARCH_BOARD_EDU_RISCV64
