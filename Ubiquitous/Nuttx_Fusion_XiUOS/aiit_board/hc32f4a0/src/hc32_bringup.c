@@ -71,6 +71,5 @@ int hc32_bringup(void)
   }
 #endif
 
-  printf("start %s\n", __func__);
   return ret;
 }

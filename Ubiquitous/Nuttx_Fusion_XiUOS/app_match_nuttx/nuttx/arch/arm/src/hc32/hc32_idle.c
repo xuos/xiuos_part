@@ -153,11 +153,6 @@ static void up_idlepm(void)
 void up_idle(void)
 {
 
-#if defined (CONFIG_HC32F4A0_BOARD)
-    extern void hc32_uart_handle(void);
-    hc32_uart_handle();
-#endif
-
 #if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
   /* If the system is idle and there are no timer interrupts, then process
    * "fake" timer interrupts. Hopefully, something will wake up.
