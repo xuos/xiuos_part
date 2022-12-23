@@ -28,6 +28,7 @@ _start:
     bic     r0, #(1 << 2)           /* d cache */
     bic     r0, #(1 << 0)           /* mmu */
     mcr     p15, 0, r0, c1, c0, 0
+    
 
     ldr     r0, =stack_top
 
