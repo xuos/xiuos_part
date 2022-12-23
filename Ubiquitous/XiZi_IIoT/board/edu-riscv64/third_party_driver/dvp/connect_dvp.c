@@ -122,6 +122,8 @@ static uint32 DvpRead(void *dev, struct BusBlockReadParam *read_param)
     dvp_set_output_enable(DVP_OUTPUT_DISPLAY, 0);
     dvp_set_display_addr((uintptr_t)read_param->buffer);
     dvp_set_output_enable(DVP_OUTPUT_DISPLAY, 1);
+    shoot_flag=CONTINOUS_SHOOTS;
+    dvp_config_interrupt(DVP_CFG_START_INT_ENABLE | DVP_CFG_FINISH_INT_ENABLE, 1);
 
     return ret;
 }
