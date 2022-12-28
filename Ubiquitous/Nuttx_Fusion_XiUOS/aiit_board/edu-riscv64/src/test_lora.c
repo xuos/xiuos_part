@@ -11,8 +11,8 @@
 */
 
 /**
- * @file test_loraE220.c
- * @brief edu-riscv64 test_loraE220.c
+ * @file test_lora.c
+ * @brief edu-riscv64 test_lora.c
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2022.12.13
@@ -52,7 +52,11 @@ void TestLora(void)
 
     m0fd = open("/dev/gpio0", O_RDWR);
     m1fd = open("/dev/gpio1", O_RDWR);
+#ifdef CONFIG_ADAPTER_E22
+    ioctl(m0fd, GPIOC_WRITE, (unsigned long)0);
+#else
     ioctl(m0fd, GPIOC_WRITE, (unsigned long)1);
+#endif
     ioctl(m1fd, GPIOC_WRITE, (unsigned long)1);
     sleep(1);
 
