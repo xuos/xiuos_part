@@ -47,7 +47,7 @@ CSRCS += k210_w5500.c
 endif
 
 ifeq ($(CONFIG_K210_UART2),y)
-CSRCS += test_loraE220.c
+CSRCS += test_lora.c
 endif
 
 include $(TOPDIR)/boards/Board.mk
