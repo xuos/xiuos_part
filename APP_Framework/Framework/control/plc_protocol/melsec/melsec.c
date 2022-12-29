@@ -258,7 +258,7 @@ static uint16_t Melsec3eqlGenerateCommand(uint8_t *p_command, uint32_t command_c
     p_command[index++] = (uint8_t)QEQUEST_DESTINSTION_MODULE_IO_NUMBER;
     p_command[index++] = (uint8_t)(QEQUEST_DESTINSTION_MODULE_IO_NUMBER >> 8);
     p_command[index++] = QEQUEST_DESTINSTION_MODULE_STATION_NUMBER;
-    p_command[index++] = 0x0c;
+    p_command[index++] = 0x0C;
     p_command[index++] = 0x00;
     p_command[index++] = p_read_item->monitoring_timer;
     p_command[index++] = p_read_item->monitoring_timer >> 8;
@@ -502,7 +502,77 @@ int MelsecInitialDataInfo(MelsecReadItem *p_read_item, uint8_t *p_data)
  */
 static int MelsecTransformRecvBuffToData(MelsecReadItem *p_read_item, uint8_t *recv_buff)
 {
+    MelsecDataInfo *p_melsec_data_info = &(p_read_item->data_info);
+    MelsecFrameType frame_type = p_melsec_data_info->frame_type;
+    MelsecCommandType command_type = p_melsec_data_info->command_type;
+    uint8_t *p_data = p_melsec_data_info->base_data_info.p_data;
 
+    uint16_t device_points_count = p_read_item->device_points_count;
+    uint8_t is_ascii = ((MELSEC_1E_FRAME == frame_type) || (MELSEC_3E_Q_L_FRAME == frame_type) || (MELSEC_3E_IQ_R_FRAME == frame_type)) ? 0 : 1;
+    uint16_t abnormal_code = 0;
+
+    switch (frame_type) {
+    case MELSEC_3E_IQ_R_FRAME:
+    case MELSEC_3E_Q_L_FRAME:
+        if (recv_buff[9] != 0 || recv_buff[10] != 0)
+            abnormal_code = recv_buff[10] * 256 + recv_buff[9];
+        else
+            recv_buff += 11;
+        break;
+    case MELSEC_1E_FRAME:
+        if (recv_buff[1] != 0)
+            abnormal_code = recv_buff[2];
+        else
+            recv_buff += 2;
+        break;
+    case MELSEC_1C_FRAME:
+        if (MELSEC_NAK == recv_buff[0])
+            abnormal_code = recv_buff[5] * 256 + recv_buff[6];
+        else
+            recv_buff += 5;
+        break;
+    case MELSEC_3C_FRAME:
+        if (MELSEC_NAK == recv_buff[0])
+            abnormal_code = ((uint16_t)TransformAsciiToHex(recv_buff[11])) << 12 + ((uint16_t)TransformAsciiToHex(recv_buff[12])) << 8 +
+            ((uint16_t)TransformAsciiToHex(recv_buff[13])) << 4 + ((uint16_t)TransformAsciiToHex(recv_buff[14]));
+        else
+            recv_buff += 11;
+        break;
+    default:
+        return -1;
+    }
+
+    if (abnormal_code != 0) {
+        printf("Data abnormal, abnormal code is %0x!", abnormal_code);
+        return -1;
+    }
+
+    ControlPrintfList("DATA", recv_buff, (uint16_t)(device_points_count * (READ_IN_BITS == command_type ? 0.5 : 2) * (frame_type >= MELSEC_1C_FRAME ? 2 : 1) + 0.6));
+    printf("Receive data is ");
+    for (uint16_t i = 0; i < device_points_count; i++) {
+        if (READ_IN_BITS == command_type) {
+            if (!is_ascii) {
+                p_data[i] = (recv_buff[i / 2] & (i % 2 == 0 ? 0x10 : 0x01)) || 0;
+            } else {
+                p_data[i] = TransformAsciiToHex(recv_buff[i]);
+            }
+            printf("0x%x", p_data[i]);
+        } else if (READ_IN_WORD == command_type) {
+            if (!is_ascii) {
+                uint16_t recv_buff_index = 2 * (device_points_count - 1 - i);
+                p_data[2 * i] = recv_buff[recv_buff_index + 1];
+                p_data[2 * i + 1] = recv_buff[recv_buff_index];
+            } else {
+                uint16_t recv_buff_index = 4 * (device_points_count - 1 - i);
+                p_data[2 * i] = TransformAsciiToHex(recv_buff[recv_buff_index]) * 16 + TransformAsciiToHex(recv_buff[recv_buff_index + 1]);
+                p_data[2 * i + 1] = TransformAsciiToHex(recv_buff[recv_buff_index + 2]) * 16 + TransformAsciiToHex(recv_buff[recv_buff_index + 3]);
+            }
+            printf("0x%x 0x%x", p_data[2 * i], p_data[2 * i + 1]);
+        }
+    }
+    printf("\n");
+
+    return 0;
 }
 
 /**
@@ -513,7 +583,41 @@ static int MelsecTransformRecvBuffToData(MelsecReadItem *p_read_item, uint8_t *r
  */
 static int MelsecGetDataBySocket(int32_t socket, MelsecReadItem *p_read_item)
 {
+    uint8_t try_count = 0;
+    int32_t write_error = 0;
 
+    MelsecDataInfo *p_melsec_data_info = &(p_read_item->data_info);
+    BasicPlcDataInfo *p_base_data_info = &(p_melsec_data_info->base_data_info);
+
+    memset(recv_buff, 0, sizeof(recv_buff));
+
+    while (try_count < 10) {
+        ControlPrintfList("SEND", p_base_data_info->p_command, p_base_data_info->command_length);
+        try_count++;
+
+        write_error = socket_write(socket, p_base_data_info->p_command, p_base_data_info->command_length);
+        if (write_error < 0) {
+            printf("Write socket error, errno is %d!", errno);
+        } else {
+            PrivTaskDelay(20);
+
+            int32_t recv_length = socket_read(socket, recv_buff, sizeof(recv_buff));
+            if (recv_length < 0) {
+                printf("Read socket error, errno is %d!", errno);
+            } else {
+                ControlPrintfList("RECV", recv_buff, recv_length);
+                return MelsecTransformRecvBuffToData(p_read_item, recv_buff);
+            }
+        }
+
+        if ((errno == EINTR) || (errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+            printf("Send plc command failed, errno is %d!", errno);
+            continue;
+        } else {
+            return -1;
+        }
+    }
+    return -2;
 }
 
 /**
@@ -523,7 +627,20 @@ static int MelsecGetDataBySocket(int32_t socket, MelsecReadItem *p_read_item)
  */
 static int MelsecGetDataBySerial(MelsecReadItem *p_read_item)
 {
+    uint32_t read_length = 0;
+    memset(recv_buff, 0, sizeof(recv_buff));
 
+    MelsecDataInfo *p_melsec_data_info = &(p_read_item->data_info);
+    BasicPlcDataInfo *p_base_data_info = &(p_melsec_data_info->base_data_info);    
+
+    ControlPrintfList("SEND", p_base_data_info->p_command, p_base_data_info->command_length);
+    SerialWrite(p_base_data_info->p_command, p_base_data_info->command_length);
+
+    read_length = SerialRead(recv_buff, sizeof(recv_buff));
+    if (read_length) {
+        ControlPrintfList("RECV", recv_buff, read_length);
+        return MelsecTransformRecvBuffToData(p_read_item, recv_buff);
+    }
 }
 
 /**
@@ -552,12 +669,17 @@ void *ReceivePlcDataTask(void *parameter)
 
     while (1) {
         for (i = 0; i < control_protocol->recipe->read_item_count; i ++) {
-            /*only connect socket when close socket or init*/
-            while (ControlConnectSocket(&plc_socket) < 0) {
-                PrivTaskDelay(1000);
-            }
 
-            MelsecGetDataBySocket(plc_socket.socket, (MelsecReadItem *)melsec_read_item + i);
+            if ((PROTOCOL_MELSEC_1C == control_protocol->protocol_type) || (PROTOCOL_MELSEC_3C == control_protocol->protocol_type)) {
+                MelsecGetDataBySerial((MelsecReadItem *)melsec_read_item + i);
+            } else {
+                /*only connect socket when close socket or init*/
+                while (ControlConnectSocket(&plc_socket) < 0) {
+                    PrivTaskDelay(1000);
+                }
+
+                MelsecGetDataBySocket(plc_socket.socket, (MelsecReadItem *)melsec_read_item + i);
+            }
         }
 
         /*read all variable item data, put them into circular_area*/
@@ -638,7 +760,7 @@ int MelsecProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *
     melsec_read_item->data_info.command_type = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "command_type")->valueint;
     melsec_read_item->data_info.frame_type = p_recipe->protocol_type - PROTOCOL_MELSEC_1E;
     melsec_read_item->monitoring_timer = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "monitoring_timer")->valueint;
-    melsec_read_item->device_code = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "device_code")->valuestring;
+    melsec_read_item->device_code = MelsecGetDeviceCode(melsec_read_item->data_info.frame_type, cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "device_code")->valuestring);
     strncpy(melsec_read_item->head_device_number_string, cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "head_device_number_string")->valuestring, 6);
     melsec_read_item->device_points_count = cJSON_GetObjectItem(protocol_format_info->read_single_item_json, "device_points_count")->valueint;
 

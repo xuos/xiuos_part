@@ -44,6 +44,12 @@ void SocketInit(char *ip, char *mask, char *gw);
 /*Control Framework Serial Init*/
 void SerialInit(uint32_t baud_rate, uint8_t data_bits, uint8_t stop_bits, uint8_t check_mode);
 
+/*Control Framework Serial Write*/
+void SerialWrite(uint8_t *write_data, int length);
+
+/*Control Framework Serial Read*/
+int SerialRead(uint8_t *read_data, int length);
+
 #ifdef __cplusplus
 }
 #endif

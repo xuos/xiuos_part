@@ -50,3 +50,25 @@ void SerialInit(uint32_t baud_rate, uint8_t data_bits, uint8_t stop_bits, uint8_
 {
     // Uart485Init(baud_rate, data_bits, stop_bits, check_mode);
 }
+
+/**
+ * @description: Control Framework Serial Write
+ * @param write_data - write data
+ * @param length - length
+ * @return
+ */
+void SerialWrite(uint8_t *write_data, int length)
+{
+    //to do
+}
+
+/**
+ * @description: Control Framework Serial Read
+ * @param read_data - read data
+ * @param length - length
+ * @return
+ */
+int SerialRead(uint8_t *read_data, int length)
+{
+    //to do
+}
