@@ -1,20 +1,21 @@
 
-.equ Mode_USR,        0x10
-.equ Mode_FIQ,        0x11
-.equ Mode_IRQ,        0x12
-.equ Mode_SVC,        0x13
-.equ Mode_ABT,        0x17
-.equ Mode_UND,        0x1B
-.equ Mode_SYS,        0x1F
+@ .equ Mode_USR,        0x10
+@ .equ Mode_FIQ,        0x11
+@ .equ Mode_IRQ,        0x12
+@ .equ Mode_SVC,        0x13
+@ .equ Mode_ABT,        0x17
+@ .equ Mode_UND,        0x1B
+@ .equ Mode_SYS,        0x1F
+#include <asm_defines.h>
 
-.equ I_Bit,           0x80            @ when I bit is set, IRQ is disabled
-.equ F_Bit,           0x40            @ when F bit is set, FIQ is disabled
+@ .equ I_BIT,           0x80            @ when I bit is set, IRQ is disabled
+@ .equ F_BIT,           0x40            @ when F bit is set, FIQ is disabled
 
 .equ STACK_SIZE,     0x00000100
 
-.globl _start
+.globl _reset
 
-_start:
+_reset:
 
     /* set the cpu to SVC32 mode and disable interrupt */
     mrs     r0, cpsr
@@ -36,32 +37,32 @@ _start:
     mov     sp, r0
 
     @  Enter Undefined Instruction Mode and set its Stack Pointer
-    msr     cpsr_c, #Mode_UND|I_Bit|F_Bit
+    msr     cpsr_c, #MODE_UND|I_BIT|F_BIT
     mov     sp, r0
     sub     r0, r0, #STACK_SIZE
 
     @  Enter Abort Mode and set its Stack Pointer
-    msr     cpsr_c, #Mode_ABT|I_Bit|F_Bit
+    msr     cpsr_c, #MODE_ABT|I_BIT|F_BIT
     mov     sp, r0
     sub     r0, r0, #STACK_SIZE
 
     @  Enter FIQ Mode and set its Stack Pointer
-    msr     cpsr_c, #Mode_FIQ|I_Bit|F_Bit
+    msr     cpsr_c, #MODE_FIQ|I_BIT|F_BIT
     mov     sp, r0
     sub     r0, r0, #STACK_SIZE
 
     @  Enter IRQ Mode and set its Stack Pointer
-    msr     cpsr_c, #Mode_IRQ|I_Bit|F_Bit
+    msr     cpsr_c, #MODE_IRQ|I_BIT|F_BIT
     mov     sp, r0
     sub     r0, r0, #STACK_SIZE
 
     /* come back to SVC mode */
-    msr     cpsr_c, #Mode_SVC|I_Bit|F_Bit
+    msr     cpsr_c, #MODE_SVC|I_BIT|F_BIT
 
     /* clear .bss */
     mov     r0, #0                  /* get a zero */
-    ldr     r1,=BSS_START           /* bss start  */
-    ldr     r2,=BSS_END             /* bss end    */
+    ldr     r1,=__bss_start           /* bss start  */
+    ldr     r2,=__bss_end             /* bss end    */
 
 bss_loop:
     cmp     r1,r2                   /* check if data to clear           */
