@@ -90,6 +90,7 @@ struct ProtocolData
 
 struct SerialConfig
 {
+    uint8_t station;
     uint32_t baud_rate;
     uint8_t data_bits;
     uint8_t stop_bits;

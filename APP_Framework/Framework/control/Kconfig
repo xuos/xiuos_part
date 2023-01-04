@@ -2,12 +2,15 @@ menuconfig SUPPORT_CONTROL_FRAMEWORK
     bool "support control framework"
     default n
     select TRANSFORM_LAYER_ATTRIUBUTE
-    select BSP_USING_LWIP
     select BSP_USING_SDIO
     select MOUNT_SDCARD_FS
     select LIB_USING_CJSON
 
 if SUPPORT_CONTROL_FRAMEWORK
+    config BSP_USING_SERIAL_485
+        bool
+        default n
+
     config CONTROL_RECIPE_FILE
         string "control framework recipe file name"
         default "test_recipe.json"

@@ -575,6 +575,7 @@ static int MelsecTransformRecvBuffToData(MelsecReadItem *p_read_item, uint8_t *r
     return 0;
 }
 
+#ifdef BSP_USING_LWIP
 /**
  * @description: Melsec Get Data From Socket
  * @param socket - socket
@@ -619,6 +620,7 @@ static int MelsecGetDataBySocket(int32_t socket, MelsecReadItem *p_read_item)
     }
     return -2;
 }
+#endif
 
 /**
  * @description: Melsec Get Data From Serial
@@ -673,12 +675,14 @@ void *ReceivePlcDataTask(void *parameter)
             if ((PROTOCOL_MELSEC_1C == control_protocol->protocol_type) || (PROTOCOL_MELSEC_3C == control_protocol->protocol_type)) {
                 MelsecGetDataBySerial((MelsecReadItem *)melsec_read_item + i);
             } else {
+#ifdef BSP_USING_LWIP
                 /*only connect socket when close socket or init*/
                 while (ControlConnectSocket(&plc_socket) < 0) {
                     PrivTaskDelay(1000);
                 }
 
                 MelsecGetDataBySocket(plc_socket.socket, (MelsecReadItem *)melsec_read_item + i);
+#endif
             }
         }
 
@@ -712,8 +716,12 @@ int MelsecOpen(struct ControlProtocol *control_protocol)
  */
 int MelsecClose(struct ControlProtocol *control_protocol)
 {
-    ControlDisconnectSocket(&plc_socket);
-    
+    if ((PROTOCOL_MELSEC_1C != control_protocol->protocol_type) && (PROTOCOL_MELSEC_3C != control_protocol->protocol_type)) {
+#ifdef BSP_USING_LWIP
+        ControlDisconnectSocket(&plc_socket);
+#endif
+    }
+
     ControlProtocolCloseDef();
 
     return 0;

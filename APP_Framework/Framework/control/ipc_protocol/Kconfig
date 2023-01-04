@@ -1,6 +1,7 @@
 config CONTROL_PROTOCOL_MODBUS_TCP
         bool "Using modbus_tcp control protocol"
         default n
+        select BSP_USING_LWIP
 if CONTROL_PROTOCOL_MODBUS_TCP
         source "$APP_DIR/Framework/control/ipc_protocol/modbus_tcp/Kconfig"
 endif

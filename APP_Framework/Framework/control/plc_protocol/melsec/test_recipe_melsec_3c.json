@@ -3,6 +3,7 @@
     "device_name": "S02",
     "communication_type": 1,
     "serial_config": {
+        "station": 1,
         "baud_rate": 19200,
         "data_bits": 7,
         "stop_bits": 1,

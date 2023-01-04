@@ -1,6 +1,7 @@
 config CONTROL_PROTOCOL_FINS
         bool "Using fins control protocol"
         default n
+        select BSP_USING_LWIP
 if CONTROL_PROTOCOL_FINS
         source "$APP_DIR/Framework/control/plc_protocol/fins/Kconfig"
 endif
