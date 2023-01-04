@@ -97,7 +97,8 @@ extern "C"
 #define SOFT_SPI_MISO    25
 #define SOFT_SPI_SCK     26
 #define SOFT_SPI_MOSI    27
-#define SOFT_SPI_CS0_PIN 28
+#define SOFT_SPI_CS      28
+
 
 /* I2C  */
 #define BSP_IIC_SDA     15
@@ -133,7 +134,7 @@ extern "C"
 #define FPIOA_SOFT_SPI_MISO    4
 #define FPIOA_SOFT_SPI_SCK     5
 #define FPIOA_SOFT_SPI_MOSI    6
-#define FPIOA_SOFT_SPI_CS0_PIN 7
+#define FPIOA_SOFT_SPI_CS      7
 
 /* other mode FPIOA */
 #define FPIOA_E220_M0   1
