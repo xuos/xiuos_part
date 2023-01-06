@@ -20,7 +20,7 @@
 
 #include <control_io.h>
 
-#ifdef BSP_USING_SERIAL_485
+#ifdef CONTROL_USING_SERIAL_485
 static int pin_fd = 0;
 static int uart_fd = 0;
 
@@ -119,8 +119,13 @@ void SocketInit(char *ip, char *mask, char *gw)
         ip[0], ip[1], ip[2], ip[3],
         mask[0], mask[1], mask[2], mask[3],
         gw[0], gw[1], gw[2], gw[3]);
+#ifdef CONTROL_USING_SOCKET
 #ifdef BSP_USING_LWIP
     lwip_config_tcp(0, ip, mask, gw);
+#endif
+#ifdef BSP_USING_W5500
+    //to do
+#endif
 #endif
 }
 
@@ -134,7 +139,7 @@ void SocketInit(char *ip, char *mask, char *gw)
  */
 void SerialInit(uint32_t baud_rate, uint8_t data_bits, uint8_t stop_bits, uint8_t check_mode)
 {
-#ifdef BSP_USING_SERIAL_485
+#ifdef CONTROL_USING_SERIAL_485
     Uart485Init(baud_rate, data_bits, stop_bits, check_mode);
 #endif
 }
@@ -147,7 +152,7 @@ void SerialInit(uint32_t baud_rate, uint8_t data_bits, uint8_t stop_bits, uint8_
  */
 void SerialWrite(uint8_t *write_data, int length)
 {
-#ifdef BSP_USING_SERIAL_485
+#ifdef CONTROL_USING_SERIAL_485
     Set485Output();
     PrivTaskDelay(20);
 
@@ -166,7 +171,7 @@ void SerialWrite(uint8_t *write_data, int length)
  */
 int SerialRead(uint8_t *read_data, int length)
 {
-#ifdef BSP_USING_SERIAL_485
+#ifdef CONTROL_USING_SERIAL_485
     int data_size = 0;
     int data_recv_size = 0;
 

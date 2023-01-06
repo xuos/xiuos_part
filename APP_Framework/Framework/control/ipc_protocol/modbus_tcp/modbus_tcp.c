@@ -75,6 +75,7 @@ static void ModbusTcpTransformRecvBuffToData(ModbusTcpReadItem *p_read_item, uin
     printf("\n");
 }
 
+#ifdef CONTROL_USING_SOCKET
 /**
  * @description: Modbus Tcp Get Data From Socket
  * @param socket - socket
@@ -133,6 +134,7 @@ static int ModbusTcpGetData(int32_t socket, ModbusTcpReadItem *p_read_item)
     }
     return -2;
 }
+#endif
 
 /**
  * @description: Modbus Tcp Data Info Init
@@ -312,6 +314,7 @@ void *ReceivePlcDataTask(void *parameter)
 
     while (1) {
         for (i = 0; i < control_protocol->recipe->read_item_count; i ++) {
+#ifdef CONTROL_USING_SOCKET
             /*only connect socket when close socket or init*/
             while (ControlConnectSocket(&plc_socket) < 0) {
                 PrivTaskDelay(1000);
@@ -320,6 +323,7 @@ void *ReceivePlcDataTask(void *parameter)
             ModbusTcpForamatWriteData((ModbusTcpReadItem *)modbus_tcp_read_item + i);
 
             ModbusTcpGetData(plc_socket.socket, (ModbusTcpReadItem *)modbus_tcp_read_item + i);
+#endif
         }
 
         /*read all variable item data, put them into circular_area*/
@@ -360,7 +364,9 @@ int ModbusTcpClose(struct ControlProtocol *control_protocol)
 {
     CircularAreaAppRelease(g_write_data);
     
+#ifdef CONTROL_USING_SOCKET
     ControlDisconnectSocket(&plc_socket);
+#endif
     
     ControlProtocolCloseDef();
 

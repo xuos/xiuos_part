@@ -154,6 +154,7 @@ static int FinsTransformRecvBuffToData(FinsReadItem *p_read_item, uint8_t *recv_
     return 0;
 }
 
+#ifdef CONTROL_USING_SOCKET
 /**
  * @description: Fins Protocol Handshake
  * @param socket - socket
@@ -242,6 +243,7 @@ static int FinsGetData(int32_t socket, FinsReadItem *p_read_item)
     }
     return -2;
 }
+#endif
 
 /**
  * @description: Fins Data Info Init
@@ -303,6 +305,7 @@ void *ReceivePlcDataTask(void *parameter)
 
     while (1) {
         for (i = 0; i < control_protocol->recipe->read_item_count; i ++) {
+#ifdef CONTROL_USING_SOCKET
             /*only connect socket when close socket or init*/
             while (ControlConnectSocket(&plc_socket) < 0) {
                 PrivTaskDelay(1000);
@@ -320,6 +323,7 @@ void *ReceivePlcDataTask(void *parameter)
             plc_socket.secondary_connect_flag = 1;
 
             FinsGetData(plc_socket.socket, (FinsReadItem *)fins_read_item + i);
+#endif
         }
 
         /*read all variable item data, put them into circular_area*/
@@ -352,7 +356,9 @@ int FinsOpen(struct ControlProtocol *control_protocol)
  */
 int FinsClose(struct ControlProtocol *control_protocol)
 {
+#ifdef CONTROL_USING_SOCKET
     ControlDisconnectSocket(&plc_socket);
+#endif
     
     ControlProtocolCloseDef();
 

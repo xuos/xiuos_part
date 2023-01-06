@@ -41,6 +41,10 @@ extern int MelsecProtocolInit(struct ControlRecipe *p_recipe);
 extern int ModbusTcpProtocolInit(struct ControlRecipe *p_recipe);
 #endif
 
+#ifdef CONTROL_PROTOCOL_MODBUS_UART
+extern int ModbusUartProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
 /*
 CONTROL FRAMEWORK READ DATA FORMAT:
 |  HEAD |device_id|read data length|read item count|         data         |
@@ -72,6 +76,9 @@ static struct ControlProtocolInitParam protocol_init[] =
 #endif
 #ifdef CONTROL_PROTOCOL_MODBUS_TCP
     { PROTOCOL_MODBUS_TCP, ModbusTcpProtocolInit },
+#endif
+#ifdef CONTROL_PROTOCOL_MODBUS_UART
+    { PROTOCOL_MODBUS_UART, ModbusUartProtocolInit },
 #endif
 
 	{ PROTOCOL_END, NULL },
@@ -210,7 +217,7 @@ void ControlPrintfList(char name[5], uint8_t *number_list, uint16_t length)
     printf("\n**************************************\n");
 }
 
-#ifdef BSP_USING_LWIP
+#ifdef CONTROL_USING_SOCKET
 /**
  * @description: Control Framework Connect Socket
  * @param p_plc - basic socket plc pointer
