@@ -81,7 +81,7 @@ struct InterruptServiceRoutines {
 
 extern struct InterruptServiceRoutines isrManager ;
 
-unsigned long DisableLocalInterrupt();
+uint32_t DisableLocalInterrupt();
 void EnableLocalInterrupt(unsigned long level);
 
 #define DISABLE_INTERRUPT DisableLocalInterrupt

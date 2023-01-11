@@ -22,6 +22,14 @@
 int32_t ArchEnableHwIrq(uint32_t irq_num);
 int32_t ArchDisableHwIrq(uint32_t irq_num);
 
+//! @brief
+typedef enum {
+    CPU_0,
+    CPU_1,
+    CPU_2,
+    CPU_3,
+} cpuid_e;
+
 struct ExceptionStackRegister
 {
 	uint32_t r0;

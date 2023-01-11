@@ -15,7 +15,7 @@ endif
 # export LINK_LWIP := $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
 # endif
 
-export DEFINES := -DHAVE_CCONFIG_H  -DSTM32F407xx -DUSE_HAL_DRIVER -DHAVE_SIGINFO
+export DEFINES := -DHAVE_CCONFIG_H
 
 export USING_NEWLIB =1
 export USING_VFS = 1

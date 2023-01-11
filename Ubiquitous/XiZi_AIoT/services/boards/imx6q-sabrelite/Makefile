@@ -1,4 +1,4 @@
-SRC_FILES := board.c
+SRC_FILES := board.c ivt.c
 
 SRC_DIR := third_party_driver
 

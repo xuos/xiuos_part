@@ -3,24 +3,43 @@
 #include <stddef.h>
 #include <isr.h>
 
-unsigned long __attribute__((naked)) DisableLocalInterrupt()
+uint32_t DisableLocalInterrupt(void)
 {
-
+    uint32_t intSave;
+    __asm__ __volatile__(
+        "mrs    %0, cpsr      \n"
+        "cpsid  if              "
+        : "=r"(intSave)
+        :
+        : "memory");
+    return intSave;
 }
 
-void __attribute__((naked)) EnableLocalInterrupt(unsigned long level)
+void EnableLocalInterrupt(unsigned long level)
 {
-
+    uint32_t intSave;
+    __asm__ __volatile__(
+        "mrs    %0, cpsr      \n"
+        "cpsie  if              "
+        : "=r"(intSave)
+        :
+        : "memory");
+    return;
 }
 
 int32_t ArchEnableHwIrq(uint32_t irq_num)
 {
-
+    // gic_set_irq_priority(irq_num, priority);
+    gic_set_irq_security(irq_num, false);    // set IRQ as non-secure
+    // gic_set_cpu_target(irq_num, CPU_0, true);
+    gic_enable_irq(irq_num, true);
     return 0;
 }
 
 int32_t ArchDisableHwIrq(uint32_t irq_num)
 {
+    gic_enable_irq(irq_num, false);
+    // gic_set_cpu_target(irq_num, CPU_0, false);
     return 0;
 }
 

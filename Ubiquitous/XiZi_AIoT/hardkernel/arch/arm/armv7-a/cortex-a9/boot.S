@@ -1,18 +1,8 @@
-
-@ .equ Mode_USR,        0x10
-@ .equ Mode_FIQ,        0x11
-@ .equ Mode_IRQ,        0x12
-@ .equ Mode_SVC,        0x13
-@ .equ Mode_ABT,        0x17
-@ .equ Mode_UND,        0x1B
-@ .equ Mode_SYS,        0x1F
 #include <asm_defines.h>
 
-@ .equ I_BIT,           0x80            @ when I bit is set, IRQ is disabled
-@ .equ F_BIT,           0x40            @ when F bit is set, FIQ is disabled
+.global ExceptionVectors
 
-.equ STACK_SIZE,     0x00000100
-
+.section ".startup","ax"
 .globl _reset
 
 _reset:
@@ -30,7 +20,6 @@ _reset:
     bic     r0, #(1 << 0)           /* mmu */
     mcr     p15, 0, r0, c1, c0, 0
     
-
     ldr     r0, =stack_top
 
     @  Set the startup stack for svc
@@ -39,25 +28,37 @@ _reset:
     @  Enter Undefined Instruction Mode and set its Stack Pointer
     msr     cpsr_c, #MODE_UND|I_BIT|F_BIT
     mov     sp, r0
-    sub     r0, r0, #STACK_SIZE
+    sub     r0, r0, #EXCEPTION_STACK_SIZE
 
     @  Enter Abort Mode and set its Stack Pointer
     msr     cpsr_c, #MODE_ABT|I_BIT|F_BIT
     mov     sp, r0
-    sub     r0, r0, #STACK_SIZE
+    sub     r0, r0, #EXCEPTION_STACK_SIZE
 
     @  Enter FIQ Mode and set its Stack Pointer
     msr     cpsr_c, #MODE_FIQ|I_BIT|F_BIT
     mov     sp, r0
-    sub     r0, r0, #STACK_SIZE
+    sub     r0, r0, #EXCEPTION_STACK_SIZE
 
     @  Enter IRQ Mode and set its Stack Pointer
     msr     cpsr_c, #MODE_IRQ|I_BIT|F_BIT
     mov     sp, r0
-    sub     r0, r0, #STACK_SIZE
+    sub     r0, r0, #EXCEPTION_STACK_SIZE
 
     /* come back to SVC mode */
     msr     cpsr_c, #MODE_SVC|I_BIT|F_BIT
+
+    /*
+     * copy the vector table into the RAM vectors
+     * this assumes that the RAM vectors size is divisible by 3 words (12 bytes)
+     */
+    ldr     r1,=__ram_vectors_start
+    ldr     r2,=__ram_vectors_end
+    ldr     r3,=ExceptionVectors
+1:  cmp     r1,r2
+    ldmlt   r3!,{r4,r5,r6}
+    stmlt   r1!,{r4,r5,r6}
+    blt     1b
 
     /* clear .bss */
     mov     r0, #0                  /* get a zero */

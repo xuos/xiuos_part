@@ -1,6 +1,6 @@
 #include <asm_defines.h>
 
-.section .vectors, "ax"
+.section .text.vectors, "ax"
 .code 32
 
 .globl ExceptionVectors
