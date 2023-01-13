@@ -107,16 +107,28 @@ static int ModbusUartTransformRecvBuffToData(ModbusUartReadItem *p_read_item, ui
  */
 static int ModbusUartGetDataBySerial(ModbusUartReadItem *p_read_item)
 {
-    uint32_t read_length = 0;
+    uint32_t cmd_length, read_length = 0;
     memset(recv_buff, 0, sizeof(recv_buff));
 
     ModbusUartDataInfo *p_modbus_uart_data_info = &(p_read_item->data_info);
-    BasicPlcDataInfo *p_base_data_info = &(p_modbus_uart_data_info->base_data_info);    
+    BasicPlcDataInfo *p_base_data_info = &(p_modbus_uart_data_info->base_data_info);   
+    ModbusUartFunctionCode function_code = p_modbus_uart_data_info->function_code; 
 
     ControlPrintfList("SEND", p_base_data_info->p_command, p_base_data_info->command_length);
     SerialWrite(p_base_data_info->p_command, p_base_data_info->command_length);
 
-    read_length = SerialRead(recv_buff, sizeof(recv_buff));
+    if (READ_COIL_STATUS == function_code || READ_INPUT_STATUS == function_code) {
+        cmd_length = 6;
+    } else if (READ_HOLDING_REGISTER == function_code || READ_INPUT_REGISTER == function_code) {
+        cmd_length = 7;
+    } else if (WRITE_SINGLE_COIL == function_code || WRITE_SINGLE_REGISTER == function_code) {
+        cmd_length = 8;
+    } else {
+        //MULTIPLE_COIL and MULTIPLE_REGISTER to do
+        cmd_length = 0;
+    }
+
+    read_length = SerialRead(recv_buff, cmd_length);
     if (read_length) {
         ControlPrintfList("RECV", recv_buff, read_length);
         return ModbusUartTransformRecvBuffToData(p_read_item, recv_buff);

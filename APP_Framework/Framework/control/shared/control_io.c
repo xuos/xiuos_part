@@ -162,7 +162,7 @@ void SerialWrite(uint8_t *write_data, int length)
 
     PrivWrite(uart_fd, write_data, length);
 
-    PrivTaskDelay(10);
+    PrivTaskDelay(15);
     Set485Input();
 #endif
 }
@@ -181,15 +181,11 @@ int SerialRead(uint8_t *read_data, int length)
 
     while (data_size < length) {
         data_recv_size = PrivRead(uart_fd, read_data + data_recv_size, length);
-        // for (int i = 0; i < data_recv_size; i ++) {
-        //     printf("idx %d data 0x%x\n", i, recv_data[i + data_size]);
-        // }
-
         data_size += data_recv_size;
     }
 
-    //need to wait 25ms , make sure write cmd again and receive data successfully
-    PrivTaskDelay(25);
+    //need to wait 30ms , make sure write cmd again and receive data successfully
+    PrivTaskDelay(30);
 
     return data_size;
 #endif
