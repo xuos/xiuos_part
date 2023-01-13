@@ -9,6 +9,7 @@ endif
 config CONTROL_PROTOCOL_MODBUS_UART
         bool "Using modbus_uart control protocol"
         default n
+        select CONTROL_USING_SERIAL_485
 if CONTROL_PROTOCOL_MODBUS_UART
         source "$APP_DIR/Framework/control/ipc_protocol/modbus_uart/Kconfig"
 endif

@@ -81,7 +81,8 @@ void Uart485Init(uint32_t baud_rate, uint8_t data_bits, uint8_t stop_bits, uint8
         printf("open fd error %d\n", uart_fd);
         return;
     }
-    printf("Uart485Init open fd %d\n", uart_fd);
+    printf("Uart485Init open fd %d baud_rate %d data_bits %d stop_bits %d check_mode %d\n", 
+        uart_fd, baud_rate, data_bits, stop_bits, check_mode);
 
     struct SerialDataCfg cfg;
     cfg.serial_baud_rate = baud_rate;
@@ -97,7 +98,10 @@ void Uart485Init(uint32_t baud_rate, uint8_t data_bits, uint8_t stop_bits, uint8
 #endif
     cfg.serial_timeout = 10000;
 
-    if (ret != PrivIoctl(uart_fd, OPE_INT, &cfg)) {
+    ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
+    ioctl_cfg.args = &cfg;
+    ret = PrivIoctl(uart_fd, OPE_INT, &ioctl_cfg);
+    if (0 != ret) {
         printf("ioctl fd error %d\n", ret);
         return;
     }
