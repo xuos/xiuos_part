@@ -86,9 +86,11 @@ CHIP_CSRCS += hc32_console.c
 
 CHIP_CSRCS += hc32f4a0_clk.c hc32f4a0_efm.c hc32f4a0_gpio.c
 CHIP_CSRCS += hc32f4a0_interrupts.c hc32f4a0_usart.c hc32f4a0_utility.c
-CHIP_CSRCS += hc32f4a0_sram.c hc32f4a0_pwc.c
+CHIP_CSRCS += hc32f4a0_sram.c hc32f4a0_pwc.c hc32f4a0_i2c.c
 
 CHIP_CSRCS += hc32f4a0_spi.c
 
 CHIP_CSRCS += hc32_spiflash.c hc32_spi.c
+
+CHIP_CSRCS += hc32_i2c.c
 
