@@ -43,10 +43,6 @@
 #include "k210_gpiohs.h"
 #include "k210_gpio_common.h"
 
-#ifdef CONFIG_BSP_USING_CH438
-#  include "k210_ch438.h"
-#endif
-
 #ifdef CONFIG_BSP_USING_TOUCH
 #  include "k210_touch.h"
 #endif
@@ -80,15 +76,6 @@ int k210_bringup(void)
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
       return ret;
     }
-#endif
-
-#ifdef CONFIG_K210_LCD
-  k210_sysctl_init();
-  board_lcd_initialize();
-#endif
-
-#ifdef CONFIG_BSP_USING_TOUCH
-  board_touch_initialize();
 #endif
 
 #ifdef CONFIG_K210_UART1
