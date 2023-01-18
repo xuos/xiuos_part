@@ -1,4 +1,4 @@
-SRC_DIR := kpu tensorflow-lite
+SRC_FILES := kpu.c connect_kpu.c
 
 
 include $(KERNEL_ROOT)/compiler.mk

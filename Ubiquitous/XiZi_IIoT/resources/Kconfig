@@ -169,3 +169,9 @@ if BSP_USING_CAMERA
         bool "Using Camera bus drivers"
         default n
 endif
+
+if BSP_USING_KPU
+    config RESOURCES_KPU
+        bool "Using Kpu bus drivers"
+        default n
+endif

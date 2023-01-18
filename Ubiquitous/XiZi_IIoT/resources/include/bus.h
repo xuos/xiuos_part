@@ -55,6 +55,7 @@ enum BusType_e
     TYPE_ADC_BUS,
     TYPE_DAC_BUS,
     TYPE_CAMERA_BUS,
+    TYPE_KPU_BUS,
     TYPE_BUS_END,
 };
 
@@ -82,6 +83,7 @@ enum DevType
     TYPE_ADC_DEV,
     TYPE_DAC_DEV,
     TYPE_CAMERA_DEV,
+    TYPE_KPU_DEV,
     TYPE_DEV_END,
 };
 
@@ -109,6 +111,7 @@ enum DriverType_e
     TYPE_ADC_DRV,
     TYPE_DAC_DRV,
     TYPE_CAMERA_DRV,
+    TYPE_KPU_DRV,
     TYPE_DRV_END,
 };
 

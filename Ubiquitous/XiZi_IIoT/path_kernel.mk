@@ -475,6 +475,9 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/gemmlowp #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/flatbuffers/include #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/ruy #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/kpu/k210_yolov2_detect_procedure #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/kpu/yolov2 #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/kpu/yolov2_json #
 endif
 
 ifeq ($(CONFIG_LIB_LV),y)
@@ -495,6 +498,10 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protoc
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/melsec #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/opcua #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/s7 #
+endif
+
+
+ifeq ($(CONFIG_LIB_USING_CJSON), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON
 endif
 

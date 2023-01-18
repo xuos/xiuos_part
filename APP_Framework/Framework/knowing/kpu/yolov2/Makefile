@@ -1,4 +1,4 @@
-SRC_DIR := kpu tensorflow-lite
-
+SRC_FILES := region_layer.c
 
 include $(KERNEL_ROOT)/compiler.mk
+

@@ -6,9 +6,11 @@
 #include "plic.h"
 #include <ov2640.h>
 
-#define REG_SCCB_READ 0x12U
-#define REG_SCCB_WRITE 0x13U
-#define SCCB_REG_LENGTH 0x08U
+#define CONTINOUS_SHOOTS 1
+#define ONLY_ONE_SHOOT 2
+#define STOP_SHOOT 0
+
+static int shoot_flag = 0; // shoot will close when shoot_flag == 0
 
 // irq interrupt function
 static int on_irq_dvp(int irq, void *arg)
@@ -17,11 +19,16 @@ static int on_irq_dvp(int irq, void *arg)
     {
         dvp_clear_interrupt(DVP_STS_FRAME_FINISH);
     }
-    else
-    {
-        dvp_start_convert();
+    else{
+        if(shoot_flag>0){
+            dvp_start_convert();
+            if(ONLY_ONE_SHOOT==shoot_flag){
+                shoot_flag=STOP_SHOOT;
+            }            
+        }
         dvp_clear_interrupt(DVP_STS_FRAME_START);
     }
+
     return 0;
 }
 
@@ -64,14 +71,14 @@ static uint32 DvpDrvInit(void)
 #endif
 #ifdef DVP_AI_OUTPUT
     dvp_set_output_enable(DVP_OUTPUT_AI, 1);
-    dvp_set_ai_addr((uint32_t)DVP_AI_RED_ADRESS, (uint32_t)DVP_AI_GREEN_ADRESS, (uint32_t)DVP_AI_BLUE_ADRESS);
+    // dvp_set_ai_addr((uint32_t)DVP_AI_RED_ADRESS, (uint32_t)DVP_AI_GREEN_ADRESS, (uint32_t)DVP_AI_BLUE_ADRESS);
 #endif
 #ifdef DVP_INTERRUPT_ENABLE
     dvp_config_interrupt(DVP_CFG_START_INT_ENABLE | DVP_CFG_FINISH_INT_ENABLE, 0);
     isrManager.done->registerIrq(IRQN_DVP_INTERRUPT, (IsrHandlerType)on_irq_dvp, NULL);
     isrManager.done->enableIrq(IRQN_DVP_INTERRUPT);
     dvp_clear_interrupt(DVP_STS_FRAME_START | DVP_STS_FRAME_FINISH);
-    dvp_config_interrupt(DVP_CFG_START_INT_ENABLE | DVP_CFG_FINISH_INT_ENABLE, 1);
+    dvp_config_interrupt(DVP_CFG_START_INT_ENABLE | DVP_CFG_FINISH_INT_ENABLE, 0);
     KPrintf("camera interrupt has open!\n");
 #endif
     return ret;
@@ -115,25 +122,74 @@ static uint32 DvpRead(void *dev, struct BusBlockReadParam *read_param)
     dvp_set_output_enable(DVP_OUTPUT_DISPLAY, 0);
     dvp_set_display_addr((uintptr_t)read_param->buffer);
     dvp_set_output_enable(DVP_OUTPUT_DISPLAY, 1);
+    shoot_flag=CONTINOUS_SHOOTS;
+    dvp_config_interrupt(DVP_CFG_START_INT_ENABLE | DVP_CFG_FINISH_INT_ENABLE, 1);
 
     return ret;
 }
 
+/**
+ * @brief configure api for dvp device
+ * TODO: unified APIs to keep consistent with RT-thread 
+ */
 static uint32 DvpDrvConfigure(void *drv, struct BusConfigureInfo *args)
 {
     x_err_t ret = EOK;
     
     int cmd_type = args->configure_cmd;
     struct CameraCfg* tmp_cfg;
+    RgbAddress* kpu_rgb_address;
+    _ioctl_shoot_para* pixel_cfg;
+    int value = ((int*)args->private_data)[0];
     switch (cmd_type)
     {
     case OPE_INT:
         break;
     case OPE_CFG:
         tmp_cfg = (struct CameraCfg *)args->private_data;
-        SensorConfigure(tmp_cfg);
+        memcpy(&sensor_config,tmp_cfg,sizeof(struct CameraCfg));
+        SensorConfigure(&sensor_config);
         dvp_set_image_size(tmp_cfg->output_w, tmp_cfg->output_h);
         break;
+    case IOCTRL_CAMERA_START_SHOT:
+        pixel_cfg = (_ioctl_shoot_para*)args->private_data;
+        dvp_set_display_addr(pixel_cfg->pdata);
+        dvp_set_output_enable(DVP_OUTPUT_DISPLAY, 1); 
+        dvp_config_interrupt(DVP_CFG_START_INT_ENABLE | DVP_CFG_FINISH_INT_ENABLE, 1);
+        shoot_flag=ONLY_ONE_SHOOT;
+        break;
+    case IOCTRL_CAMERA_OUT_SIZE_RESO:
+        dvp_set_image_size(((uint32_t*)args->private_data)[0], ((uint32_t*)args->private_data)[1]);
+        break;
+    case FLAG_CHECK:
+        *((int*)args->private_data) = shoot_flag;
+        break;        
+    case SET_AI_ADDR:
+        kpu_rgb_address = (RgbAddress*)args->private_data;
+        dvp_set_output_enable(DVP_OUTPUT_AI, 1);
+        dvp_set_ai_addr(kpu_rgb_address->r_addr,kpu_rgb_address->g_addr,kpu_rgb_address->b_addr);
+        break;
+
+    // make compatible for rt-fusion xizi
+    case IOCTRL_CAMERA_SET_LIGHT:
+        ov2640_set_light_mode(value);
+        break;
+    case IOCTRL_CAMERA_SET_COLOR:
+        ov2640_set_color_saturation(value);
+        break;
+    case IOCTRL_CAMERA_SET_BRIGHTNESS:
+        ov2640_set_brightness(value);
+        break;
+    case IOCTRL_CAMERA_SET_CONTRAST:
+        ov2640_set_contrast(value);
+        break;
+    case IOCTRL_CAMERA_SET_EFFECT:
+        ov2640_set_special_effects(value);
+        break;
+    case IOCTRL_CAMERA_SET_EXPOSURE:
+        ov2640_set_auto_exposure(value);
+        break;
+
     case REG_SCCB_READ:
         ReadDvpReg(drv, (struct DvpRegConfigureInfo *)args->private_data);
         break;
