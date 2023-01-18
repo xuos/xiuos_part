@@ -48,7 +48,7 @@ int CircularAreaAppIsEmpty(CircularAreaAppType circular_area)
     CA_PARAM_CHECK(circular_area);
 
     if((circular_area->readidx == circular_area->writeidx) && (!circular_area->b_status)) {
-        printf("the circular area is empty\n");
+        //printf("the circular area is empty\n");
         return 1;
     } else {
         return 0;
@@ -164,7 +164,7 @@ int CircularAreaAppRead(CircularAreaAppType circular_area, uint8_t *output_buffe
         return -1;
     }
 
-    uint32_t read_length = (data_length > CircularAreaAppGetDataLength(circular_area)) ? CircularAreaAppGetDataLength(circular_area) : data_length;
+    int read_length = (data_length > CircularAreaAppGetDataLength(circular_area)) ? CircularAreaAppGetDataLength(circular_area) : data_length;
     // if (data_length > CircularAreaAppGetDataLength(circular_area)) {
     //     return -1;
     // }

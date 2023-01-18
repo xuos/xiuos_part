@@ -104,7 +104,7 @@ int PrivTaskDelay(int32_t ms)
 #ifndef SEPARATE_COMPILE
 uint32_t PrivGetTickTime()
 {
-    return CalculteTimeMsFromTick(CurrentTicksGain());
+    return CalculateTimeMsFromTick(CurrentTicksGain());
 }
 #endif
 /*********************fs**************************/

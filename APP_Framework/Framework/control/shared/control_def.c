@@ -33,6 +33,18 @@ extern void *ReceivePlcDataTask(void *parameter);
 extern int FinsProtocolInit(struct ControlRecipe *p_recipe);
 #endif
 
+#ifdef CONTROL_PROTOCOL_MELSEC
+extern int MelsecProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
+#ifdef CONTROL_PROTOCOL_MODBUS_TCP
+extern int ModbusTcpProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
+#ifdef CONTROL_PROTOCOL_MODBUS_UART
+extern int ModbusUartProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
 /*
 CONTROL FRAMEWORK READ DATA FORMAT:
 |  HEAD |device_id|read data length|read item count|         data         |
@@ -54,6 +66,19 @@ static struct ControlProtocolInitParam protocol_init[] =
 {
 #ifdef CONTROL_PROTOCOL_FINS
 	{ PROTOCOL_FINS, FinsProtocolInit },
+#endif
+#ifdef CONTROL_PROTOCOL_MELSEC
+	{ PROTOCOL_MELSEC_1E, MelsecProtocolInit },
+    { PROTOCOL_MELSEC_3E_Q_L, MelsecProtocolInit },
+    { PROTOCOL_MELSEC_3E_IQ_R, MelsecProtocolInit },
+    { PROTOCOL_MELSEC_1C, MelsecProtocolInit },
+    { PROTOCOL_MELSEC_3C, MelsecProtocolInit },
+#endif
+#ifdef CONTROL_PROTOCOL_MODBUS_TCP
+    { PROTOCOL_MODBUS_TCP, ModbusTcpProtocolInit },
+#endif
+#ifdef CONTROL_PROTOCOL_MODBUS_UART
+    { PROTOCOL_MODBUS_UART, ModbusUartProtocolInit },
 #endif
 
 	{ PROTOCOL_END, NULL },
@@ -125,12 +150,13 @@ static uint16_t GetRecipeTotalDataLength(cJSON* read_item_list_json)
 static void ControlBasicSerialConfig(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_json)
 {
     cJSON *p_serial_config_json = cJSON_GetObjectItem(p_recipe_file_json, "serial_config");
+    p_recipe->serial_config.station = cJSON_GetObjectItem(p_serial_config_json, "station")->valueint;
     p_recipe->serial_config.baud_rate = cJSON_GetObjectItem(p_serial_config_json, "baud_rate")->valueint;
     p_recipe->serial_config.data_bits = cJSON_GetObjectItem(p_serial_config_json, "data_bits")->valueint;
     p_recipe->serial_config.stop_bits = cJSON_GetObjectItem(p_serial_config_json, "stop_bits")->valueint;
     p_recipe->serial_config.check_mode = cJSON_GetObjectItem(p_serial_config_json, "check_mode")->valueint;
-    printf("Serial_config: baud_rate: %d, data_bits: %d, stop_bits: %d, check_mode is %d\n",
-        p_recipe->serial_config.baud_rate, p_recipe->serial_config.data_bits, p_recipe->serial_config.stop_bits, p_recipe->serial_config.check_mode);
+    printf("Serial_config:station: %d baud_rate: %d, data_bits: %d, stop_bits: %d, check_mode is %d\n",
+        p_recipe->serial_config.station, p_recipe->serial_config.baud_rate, p_recipe->serial_config.data_bits, p_recipe->serial_config.stop_bits, p_recipe->serial_config.check_mode);
 }
 
 /**
@@ -184,13 +210,14 @@ static void ControlBasicSocketConfig(struct ControlRecipe *p_recipe, cJSON *p_re
  */
 void ControlPrintfList(char name[5], uint8_t *number_list, uint16_t length)
 {
-    printf("\n******************%5s****************\n", name);
+    printf("\n******************%s****************\n", name);
     for (int32_t i = 0;i < length;i ++) {
         printf("0x%x ", number_list[i]);
     }
     printf("\n**************************************\n");
 }
 
+#ifdef CONTROL_USING_SOCKET
 /**
  * @description: Control Framework Connect Socket
  * @param p_plc - basic socket plc pointer
@@ -267,6 +294,7 @@ int ControlDisconnectSocket(BasicSocketPlc *p_plc)
         
     return error;
 }
+#endif
 
 /**
  * @description: Control Framework Protocol Open for Sub_Protocol, Init Circular Area and Receive Data Task
