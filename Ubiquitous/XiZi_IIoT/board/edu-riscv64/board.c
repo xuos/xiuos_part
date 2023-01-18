@@ -48,6 +48,7 @@ Modification:
 #include "connect_w5500.h"
 #include "connect_wdt.h"
 #include "connect_dvp.h"
+#include "connect_kpu.h"
 #include "dmac.h"
 #include "encoding.h"
 #include "fpioa.h"
@@ -70,6 +71,8 @@ extern int HwLcdInit(void);
 extern int HwSpiInit(void);
 extern int HwSoftSPIInit(void);
 extern int HwWiznetInit(void);
+extern int HwDvpInit(void);
+extern int HwKpuInit(void);
 
 #include <iot-vfs.h>
 #ifdef MOUNT_USB
@@ -220,6 +223,9 @@ struct InitSequenceDesc _board_init[] = {
 #endif
 #ifdef BSP_USING_CAMERA
     {"hw_camera", HwDvpInit },
+#endif
+#ifdef BSP_USING_KPU
+    {"hw_kpu", HwKpuInit },
 #endif
     { " NONE ",NONE },
 };

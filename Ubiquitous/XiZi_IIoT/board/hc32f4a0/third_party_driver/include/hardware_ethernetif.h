@@ -135,7 +135,7 @@ extern "C"
  */
 err_t   ethernetif_init(struct netif *netif);
 void    ethernetif_input(struct netif *netif);
-int32_t low_level_output(struct netif *netif, struct pbuf *p);
+err_t low_level_output(struct netif *netif, struct pbuf *p);
 
 void    EthernetIF_CheckLink(struct netif *netif);
 void    EthernetIF_UpdateLink(struct netif *netif);

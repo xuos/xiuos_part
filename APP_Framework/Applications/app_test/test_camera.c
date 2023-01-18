@@ -2,15 +2,6 @@
 #include <string.h>
 #include <transform.h>
 
-#define NULL_PARAMETER 0
-
-#define DVP_INIT 0x00U
-#define REG_SCCB_READ 0x12U
-#define REG_SCCB_WRITE 0x13U
-#define OUTPUT_CONFIG 0x20U
-#define LCD_STRING_TYPE 0
-#define LCD_DOT_TYPE 1
-#define LCD_SIZE 320
 
 static uint16_t image_buff[384000];
 

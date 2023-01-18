@@ -39,7 +39,8 @@ Modification:
 3、add ETH_RST_PORT and ETH_RST_PIN;
 4、add ETH_LINK_LED_PORT and ETH_LINK_LED_PIN;
 5、add ethernetif_config_enet_set;
-6、add ETHERNET_LOOPBACK_TEST with testnetif and txPbuf.
+6、add ETHERNET_LOOPBACK_TEST with testnetif and txPbuf;
+7、modify ethernetif_init() and ethernetif_input() to support LwIP.
 *************************************************/
 
 /*******************************************************************************
@@ -282,6 +283,10 @@ static int32_t low_level_init(struct netif *netif)
     netif->hwaddr[5] = (EthHandle.stcCommInit).au8MacAddr[5];
     /* maximum transfer unit */
     netif->mtu = 1500U;
+
+    /* device capabilities */
+    netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
+
     /* Enable MAC and DMA transmission and reception */
     (void)ETH_Start();
 
@@ -322,9 +327,9 @@ static int32_t low_level_init(struct netif *netif)
  *           - LL_OK: The packet could be sent
  *           - LL_ERR: The packet couldn't be sent
  */
-int32_t low_level_output(struct netif *netif, struct pbuf *p)
+err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
-    int32_t i32Ret;
+    err_t i32Ret;
     struct pbuf *q;
     uint8_t *txBuffer;
     __IO stc_eth_dma_desc_t *DmaTxDesc;
@@ -474,8 +479,22 @@ static struct pbuf *low_level_input(struct netif *netif)
  */
 err_t ethernetif_init(struct netif *netif)
 {
+#if LWIP_NETIF_HOSTNAME
+    /* Initialize interface hostname */
+    netif->hostname = "lwip";
+#endif /* LWIP_NETIF_HOSTNAME */
     netif->name[0] = IFNAME0;
     netif->name[1] = IFNAME1;
+
+#ifndef ETHERNET_LOOPBACK_TEST
+    /* We directly use etharp_output() here to save a function call.
+    * You can instead declare your own function an call etharp_output()
+    * from it if you have to do some checks before sending (e.g. if link
+    * is available...) */
+    netif->output = &etharp_output;
+    netif->linkoutput = &low_level_output;
+#endif
+
     /* initialize the hardware */
     return low_level_init(netif);
 }
@@ -487,15 +506,32 @@ err_t ethernetif_init(struct netif *netif)
  */
 void ethernetif_input(struct netif *netif)
 {
+    err_t err;
     struct pbuf *p;
 
     /* Move received packet into a new pbuf */
     p = low_level_input(netif);
+
+#ifndef ETHERNET_LOOPBACK_TEST
+    /* No packet could be read, silently ignore this */
+    if (NULL == p) {
+        return;
+    }
+
+    /* Entry point to the LwIP stack */
+    err = netif->input(p, netif);
+    if (err != (err_t)ERR_OK) {
+        LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
+        (void)pbuf_free(p);
+    }
+#endif
+#ifdef ETHERNET_LOOPBACK_TEST
     /* No packet could be read, silently ignore this */
     if (p != NULL) {
         EthernetIF_InputCallback(netif, p);
         free(p);
     }
+#endif
 }
 
 /**

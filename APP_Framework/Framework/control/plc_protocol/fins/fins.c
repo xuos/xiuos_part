@@ -154,6 +154,7 @@ static int FinsTransformRecvBuffToData(FinsReadItem *p_read_item, uint8_t *recv_
     return 0;
 }
 
+#ifdef CONTROL_USING_SOCKET
 /**
  * @description: Fins Protocol Handshake
  * @param socket - socket
@@ -242,6 +243,7 @@ static int FinsGetData(int32_t socket, FinsReadItem *p_read_item)
     }
     return -2;
 }
+#endif
 
 /**
  * @description: Fins Data Info Init
@@ -303,6 +305,7 @@ void *ReceivePlcDataTask(void *parameter)
 
     while (1) {
         for (i = 0; i < control_protocol->recipe->read_item_count; i ++) {
+#ifdef CONTROL_USING_SOCKET
             /*only connect socket when close socket or init*/
             while (ControlConnectSocket(&plc_socket) < 0) {
                 PrivTaskDelay(1000);
@@ -320,6 +323,7 @@ void *ReceivePlcDataTask(void *parameter)
             plc_socket.secondary_connect_flag = 1;
 
             FinsGetData(plc_socket.socket, (FinsReadItem *)fins_read_item + i);
+#endif
         }
 
         /*read all variable item data, put them into circular_area*/
@@ -328,7 +332,7 @@ void *ReceivePlcDataTask(void *parameter)
             CircularAreaAppWrite(circular_area, fins_data, data_length, 0);
         }
 
-        /*read data every single 200ms*/
+        /*read data every single 'read_period' ms*/
         PrivTaskDelay(control_protocol->recipe->read_period);
     }
 }
@@ -352,7 +356,9 @@ int FinsOpen(struct ControlProtocol *control_protocol)
  */
 int FinsClose(struct ControlProtocol *control_protocol)
 {
+#ifdef CONTROL_USING_SOCKET
     ControlDisconnectSocket(&plc_socket);
+#endif
     
     ControlProtocolCloseDef();
 
@@ -390,6 +396,8 @@ static struct ControlDone fins_protocol_done =
 int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *protocol_format_info)
 {
     int ret = 0;
+    static uint8_t last_item_size = 0;
+    uint8_t *p_read_item_data = protocol_format_info->p_read_item_data + last_item_size;
 
     FinsReadItem *fins_read_item = (FinsReadItem *)(p_recipe->read_item) + protocol_format_info->read_item_index;
 
@@ -405,10 +413,12 @@ int FinsProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *pr
     ret = FinsInitialDataInfo(fins_read_item,
         p_recipe->socket_config.plc_ip[3],
         p_recipe->socket_config.local_ip[3],
-        protocol_format_info->p_read_item_data + protocol_format_info->last_item_size);
+        p_read_item_data);
 
     ControlPrintfList("CMD", fins_read_item->data_info.base_data_info.p_command, fins_read_item->data_info.base_data_info.command_length);
     protocol_format_info->last_item_size = GetValueTypeMemorySize(fins_read_item->value_type);
+
+    last_item_size += protocol_format_info->last_item_size;
 
     return ret;
 }
@@ -425,6 +435,8 @@ int FinsProtocolInit(struct ControlRecipe *p_recipe)
         PrivFree(p_recipe->read_item);
         return -1;
     }
+
+    memset(p_recipe->read_item, 0, sizeof(FinsReadItem));
 
     p_recipe->ControlProtocolFormatCmd = FinsProtocolFormatCmd;
 

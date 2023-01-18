@@ -69,6 +69,7 @@ typedef struct
 {
     uint16_t command_length;
     uint16_t data_size;
+    uint8_t command_ready;
     uint8_t *p_command;
     uint8_t *p_data;
 }BasicPlcDataInfo;
@@ -89,6 +90,7 @@ struct ProtocolData
 
 struct SerialConfig
 {
+    uint8_t station;
     uint32_t baud_rate;
     uint8_t data_bits;
     uint8_t stop_bits;
