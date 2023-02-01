@@ -11,13 +11,10 @@
  */
 
 /**
- * @file schneider_m241.c
- * @brief PLC SCHNEIDER M241 app
+ * @file mitsubishi_fx3u.c
+ * @brief PLC MITSUBISHI FX3U app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2023.2.1
+ * @date 2022.9.27
  */
-
-
-
 
