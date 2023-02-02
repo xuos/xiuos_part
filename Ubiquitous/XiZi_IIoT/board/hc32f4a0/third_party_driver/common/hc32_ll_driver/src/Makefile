@@ -24,4 +24,8 @@ ifeq ($(CONFIG_BSP_USING_USB),y)
   SRC_FILES += hc32_ll_usb.c
 endif
 
+ifeq ($(CONFIG_BSP_USING_RTC),y)
+  SRC_FILES += hc32_ll_rtc.c
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

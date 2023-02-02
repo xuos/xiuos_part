@@ -54,6 +54,10 @@ Modification:
 #include <connect_usb.h>
 #endif
 
+#ifdef BSP_USING_RTC
+#include <connect_rtc.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
 
@@ -167,6 +171,9 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_USB
 	{ "usb", HwUsbHostInit },
+#endif
+#ifdef BSP_USING_RTC
+	{ "usb", HwRtcInit },
 #endif
     { " NONE ", NONE },
 };

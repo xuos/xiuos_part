@@ -28,4 +28,8 @@ ifeq ($(CONFIG_BSP_USING_USB),y)
   SRC_DIR += usb
 endif
 
+ifeq ($(CONFIG_BSP_USING_RTC),y)
+  SRC_DIR += rtc
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
