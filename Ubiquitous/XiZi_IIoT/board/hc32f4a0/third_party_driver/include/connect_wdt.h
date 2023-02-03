@@ -11,8 +11,8 @@
 */
  
 /**
-* @file connect_rtc.h
-* @brief define hc32f4a0-board i2c function and struct
+* @file connect_wdt.h
+* @brief define hc32f4a0-board watchdog function and struct
 * @version 3.0
 * @author AIIT XUOS Lab
 * @date 2023-02-02

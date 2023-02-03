@@ -12,7 +12,7 @@
 
 /**
 * @file connect_wdt.c
-* @brief support aiit-riscv64-board watchdog function and register to bus framework
+* @brief support hc32f4a0-board watchdog function and register to bus framework
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2023-02-02
