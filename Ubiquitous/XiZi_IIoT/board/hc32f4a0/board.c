@@ -58,8 +58,13 @@ Modification:
 #include <connect_rtc.h>
 #endif
 
+#ifdef BSP_USING_WDT
+#include <connect_wdt.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
+extern int HwWdtInit();
 
 /* Peripheral register WE/WP selection */
 #define LL_PERIPH_SEL                   (LL_PERIPH_GPIO | LL_PERIPH_FCG | LL_PERIPH_PWC_CLK_RMU | \
@@ -173,7 +178,10 @@ struct InitSequenceDesc _board_init[] =
 	{ "usb", HwUsbHostInit },
 #endif
 #ifdef BSP_USING_RTC
-	{ "usb", HwRtcInit },
+	{ "rtc", HwRtcInit },
+#endif
+#ifdef BSP_USING_WDT
+	{ "wdt", HwWdtInit },
 #endif
     { " NONE ", NONE },
 };

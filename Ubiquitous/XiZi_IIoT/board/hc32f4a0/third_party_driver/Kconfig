@@ -61,3 +61,11 @@ menuconfig BSP_USING_RTC
     if BSP_USING_RTC
         source "$BSP_DIR/third_party_driver/rtc/Kconfig"
     endif
+
+menuconfig BSP_USING_WDT
+    bool "Using WDT device"
+    default n
+    select RESOURCES_WDT
+    if BSP_USING_WDT
+        source "$BSP_DIR/third_party_driver/watchdog/Kconfig"
+    endif
