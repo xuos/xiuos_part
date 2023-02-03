@@ -15,7 +15,7 @@
 * @brief support aiit-riscv64-board watchdog function and register to bus framework
 * @version 1.0 
 * @author AIIT XUOS Lab
-* @date 2021-04-25
+* @date 2023-02-02
 */
 
 #include <connect_wdt.h>
