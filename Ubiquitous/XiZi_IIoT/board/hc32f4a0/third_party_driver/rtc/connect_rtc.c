@@ -12,7 +12,7 @@
 
 /**
 * @file connect_rtc.c
-* @brief support aiit-riscv64-board rtc function and register to bus framework
+* @brief support aiit-hc32f4a0-board rtc function and register to bus framework
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2023-02-02
@@ -22,14 +22,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
-
-// static int GetWeekDay(int year, int month, int day)
-// {
-//     /* Magic method to get weekday */
-//     int weekday  = (day += month < 3 ? year-- : year - 2, 
-//         23 * month / 9 + day + 4 + year / 4 - year / 100 + year / 400) % 7;
-//     return weekday;
-// }
 
 static uint32 RtcConfigure(void *drv, struct BusConfigureInfo *configure_info)
 {

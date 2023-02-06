@@ -11,7 +11,6 @@ void TestRTC(int argc,char *argv[])
     }
     
     if(argc>1){
-        
         int times = atoi(argv[1]);
         printf("Time will be printf %d times\n",times);
 
