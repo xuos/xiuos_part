@@ -27,10 +27,10 @@ static uint32 WdtOpen(void *dev)
     NULL_PARAM_CHECK(dev);
 
     stc_wdt_init_t stcWdtInit;
-    stcWdtInit.u32CountPeriod = WDT_CNT_PERIOD65536;
-    stcWdtInit.u32ClockDiv = WDT_CLK_DIV1024;
-    stcWdtInit.u32RefreshRange = WDT_RANGE_0TO25PCT;
-    stcWdtInit.u32LPMCount = WDT_LPM_CNT_STOP;
+    stcWdtInit.u32CountPeriod   = WDT_CNT_PERIOD65536;
+    stcWdtInit.u32ClockDiv      = WDT_CLK_DIV1024;
+    stcWdtInit.u32RefreshRange  = WDT_RANGE_0TO25PCT;
+    stcWdtInit.u32LPMCount      = WDT_LPM_CNT_STOP;
     stcWdtInit.u32ExceptionType = WDT_EXP_TYPE_RST;
     (void)WDT_Init(&stcWdtInit);
     return EOK;
@@ -42,13 +42,25 @@ static uint32 WdtConfigure(void *drv, struct BusConfigureInfo *args)
     NULL_PARAM_CHECK(args);
 
     stc_wdt_init_t stcWdtInit;
+
+    int period_option = *((int*)args->private_data);
+    if(period_option<=256){
+        period_option = WDT_CNT_PERIOD256;
+    }else if(period_option<=4096){
+        period_option = WDT_CNT_PERIOD4096;
+    }else if(period_option<=16384){
+        period_option = WDT_CNT_PERIOD16384;
+    }else{
+        period_option = WDT_CNT_PERIOD65536;
+    }
+
     switch (args->configure_cmd)
     {
         case OPER_WDT_SET_TIMEOUT:
-        stcWdtInit.u32CountPeriod = WDT_CNT_PERIOD65536;
-        stcWdtInit.u32ClockDiv = WDT_CLK_DIV1024;
-        stcWdtInit.u32RefreshRange  = WDT_RANGE_0TO25PCT;
-        stcWdtInit.u32LPMCount = WDT_LPM_CNT_STOP;
+        stcWdtInit.u32CountPeriod    = period_option;
+        stcWdtInit.u32ClockDiv       = WDT_CLK_DIV1024;
+        stcWdtInit.u32RefreshRange   = WDT_RANGE_0TO25PCT;
+        stcWdtInit.u32LPMCount       = WDT_LPM_CNT_STOP;
         stcWdtInit.u32ExceptionType  = WDT_EXP_TYPE_RST;
         if (WDT_Init(&stcWdtInit) != 0) {
             return ERROR;

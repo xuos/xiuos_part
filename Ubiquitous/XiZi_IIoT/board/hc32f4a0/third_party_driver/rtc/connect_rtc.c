@@ -174,8 +174,8 @@ int HwRtcInit(void)
     (void)RTC_StructInit(&stcRtcInit);
 
     /* Configuration RTC structure */
-    stcRtcInit.u8ClockSrc     = RTC_CLK_SRC_XTAL32;
-    stcRtcInit.u8HourFormat      = RTC_HOUR_FMT_24H;
+    stcRtcInit.u8ClockSrc  = RTC_CLK_SRC_XTAL32;
+    stcRtcInit.u8HourFormat= RTC_HOUR_FMT_24H;
     stcRtcInit.u8IntPeriod = RTC_INT_PERIOD_PER_SEC;
     (void)RTC_Init(&stcRtcInit);
 
