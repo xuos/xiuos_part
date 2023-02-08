@@ -435,7 +435,7 @@ static int32 GpioConfigMode(int mode, const struct PinIndex* index)
         break;
     }
 
-    GPIO_Init(index->pin, index->pin, &stcGpioInit);
+    GPIO_Init(index->port, index->pin, &stcGpioInit);
 }
 
 static int32 GpioIrqRegister(int32 pin, int32 mode, void (*hdr)(void *args), void *args)
@@ -637,9 +637,9 @@ uint32 Hc32PinWrite(void *dev, struct BusBlockWriteParam *write_param)
     NULL_PARAM_CHECK(index);
 
     if (GPIO_LOW == pinstat->val) {
-        GPIO_ResetPins(index->pin, index->pin);
+        GPIO_ResetPins(index->port, index->pin);
     } else {
-        GPIO_SetPins(index->pin, index->pin);
+        GPIO_SetPins(index->port, index->pin);
     }
 
     return EOK;
@@ -653,7 +653,7 @@ uint32 Hc32PinRead(void *dev, struct BusBlockReadParam *read_param)
     const struct PinIndex* index = GetPin(pinstat->pin);
     NULL_PARAM_CHECK(index);
     
-    if(GPIO_ReadInputPins(index->pin, index->pin) == PIN_RESET) {
+    if(GPIO_ReadInputPins(index->port, index->pin) == PIN_RESET) {
         pinstat->val = GPIO_LOW;
     } else {
         pinstat->val = GPIO_HIGH;
