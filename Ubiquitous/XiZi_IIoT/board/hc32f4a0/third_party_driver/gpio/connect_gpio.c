@@ -33,9 +33,9 @@ Modification:
 
 #include <connect_gpio.h>
 
-#define GPIO_PIN_INDEX(pin)             ((uint8_t)((pin) & 0x0F))
-
 #define ITEM_NUM(items)                 sizeof(items) / sizeof(items[0])
+#define IRQ_INT(callback)
+#define INTSEL_REG              (uint32_t)(&CM_INTC->SEL0)                       
 
 #ifndef HC32_PIN_CONFIG
 #define HC32_PIN_CONFIG(pin, callback, config)                                 \
@@ -48,6 +48,8 @@ Modification:
 
 #define __HC32_PIN(index, gpio_port, gpio_pin) { 0, GPIO_PORT_##gpio_port, GPIO_PIN_##gpio_pin}
 #define __HC32_PIN_DEFAULT                     {-1, 0, 0}
+#define MAX_PIN_INDEX 15
+#define INT_VECTOR_OFFSET 16
 
 struct PinIndex
 {
@@ -294,6 +296,17 @@ struct PinIrqHdr pin_irq_hdr_tab[] =
     {-1, 0, NONE, NONE}
 };
 
+static int GpioPinIndex(uint16_t pin){
+    int ret = 0;
+    for(;ret<=MAX_PIN_INDEX;ret++){ //ret must be 16-bit 
+        if((0x0001U<<ret)&pin){
+            KPrintf("the int pin is %d\n",ret);
+            return ret;
+        }
+    };
+    return -1;
+}
+
 static void PinIrqHandler(uint16_t pinbit)
 {
     int32_t irqindex = -1;
@@ -418,6 +431,7 @@ static int32 GpioConfigMode(int mode, const struct PinIndex* index)
         break;
     case GPIO_CFG_INPUT:
         stcGpioInit.u16PinDir   = PIN_DIR_IN;
+        stcGpioInit.u16ExtInt = PIN_EXTINT_ON;
         break;
     case GPIO_CFG_INPUT_PULLUP:
         stcGpioInit.u16PinDir   = PIN_DIR_IN;
@@ -434,7 +448,6 @@ static int32 GpioConfigMode(int mode, const struct PinIndex* index)
     default:
         break;
     }
-
     GPIO_Init(index->port, index->pin, &stcGpioInit);
 }
 
@@ -443,7 +456,9 @@ static int32 GpioIrqRegister(int32 pin, int32 mode, void (*hdr)(void *args), voi
     const struct PinIndex *index = GetPin(pin);
     int32 irqindex = -1;
 
-    irqindex = GPIO_PIN_INDEX(index->pin);
+    stc_extint_init_t stcExtIntInit;
+
+    irqindex = GpioPinIndex(index->pin); // start from 0
     if (irqindex >= ITEM_NUM(pin_irq_map)) {
         return -ENONESYS;
     }
@@ -465,8 +480,31 @@ static int32 GpioIrqRegister(int32 pin, int32 mode, void (*hdr)(void *args), voi
     pin_irq_hdr_tab[irqindex].hdr = hdr;
     pin_irq_hdr_tab[irqindex].mode = mode;
     pin_irq_hdr_tab[irqindex].args = args;
+
+    /* Extint config */
+    EXTINT_StructInit(&stcExtIntInit);
+    switch (mode)
+    {
+    case GPIO_IRQ_EDGE_RISING:
+        stcExtIntInit.u32Edge = EXTINT_TRIG_RISING;
+        break;
+    case GPIO_IRQ_EDGE_FALLING:
+        stcExtIntInit.u32Edge = EXTINT_TRIG_FALLING;
+        break;
+    case GPIO_IRQ_EDGE_BOTH:
+        stcExtIntInit.u32Edge = EXTINT_TRIG_BOTH;
+        break;
+    case GPIO_IRQ_LEVEL_LOW:
+        stcExtIntInit.u32Edge = EXTINT_TRIG_LOW;
+        break;
+    }
+    EXTINT_Init(index->pin, &stcExtIntInit);   
+
+    __IO uint32_t *INTC_SELx = (__IO uint32_t *)(INTSEL_REG + (4U * (uint32_t)(irqindex)));
+    WRITE_REG32(*INTC_SELx, irqindex);
+    isrManager.done->registerIrq(irqindex+INT_VECTOR_OFFSET, (void(*)(int vector,void *))hdr, args);
+
     CriticalAreaUnLock(level);
- 
     return EOK;
 }
 
@@ -475,7 +513,7 @@ static uint32 GpioIrqFree(x_base pin)
     const struct PinIndex* index = GetPin(pin);
     int32 irqindex = -1;
 
-    irqindex = GPIO_PIN_INDEX(index->pin);
+    irqindex = GpioPinIndex(index->pin);
     if (irqindex >= ITEM_NUM(pin_irq_map)) {
         return -ENONESYS;
     }
@@ -485,6 +523,7 @@ static uint32 GpioIrqFree(x_base pin)
         CriticalAreaUnLock(level);
         return EOK;
     }
+    isrManager.done->freeIrq(pin_irq_hdr_tab[irqindex].pin);
     pin_irq_hdr_tab[irqindex].pin  = -1;
     pin_irq_hdr_tab[irqindex].hdr  = NONE;
     pin_irq_hdr_tab[irqindex].mode = 0;
@@ -509,9 +548,8 @@ static int32 GpioIrqEnable(x_base pin)
     struct Hc32PinIrqMap *irq_map;
     const struct PinIndex* index = GetPin(pin);
     int32 irqindex = -1;
-    stc_extint_init_t stcExtIntInit;
 
-    irqindex = GPIO_PIN_INDEX(index->pin);
+    irqindex = GpioPinIndex(index->pin);
     if (irqindex >= ITEM_NUM(pin_irq_map)) {
         return -ENONESYS;
     }
@@ -522,28 +560,11 @@ static int32 GpioIrqEnable(x_base pin)
         return -ENONESYS;
     }
 
-    /* Extint config */
-    EXTINT_StructInit(&stcExtIntInit);
-    switch (pin_irq_hdr_tab[irqindex].mode)
-    {
-    case GPIO_IRQ_EDGE_RISING:
-        stcExtIntInit.u32Edge = EXTINT_TRIG_RISING;
-        break;
-    case GPIO_IRQ_EDGE_FALLING:
-        stcExtIntInit.u32Edge = EXTINT_TRIG_FALLING;
-        break;
-    case GPIO_IRQ_EDGE_BOTH:
-        stcExtIntInit.u32Edge = EXTINT_TRIG_BOTH;
-        break;
-    case GPIO_IRQ_LEVEL_LOW:
-        stcExtIntInit.u32Edge = EXTINT_TRIG_LOW;
-        break;
-    }
-    EXTINT_Init(index->pin, &stcExtIntInit);
-    NVIC_EnableIRQ(irq_map->irq_config.irq_num);
-    GpioIrqConfig(index->pin, index->pin, PIN_EXTINT_ON);
+    GpioIrqConfig(index->port, index->pin, PIN_EXTINT_ON);
+    isrManager.done->enableIrq(GpioPinIndex(index->pin));
 
     CriticalAreaUnLock(level);
+    KPrintf("port%d,pin%04x has enable\n",index->port, index->pin);
     return EOK;
 }
 
@@ -554,8 +575,8 @@ static int32 GpioIrqDisable(x_base pin)
 
     x_base level = CriticalAreaLock();
 
-    GpioIrqConfig(index->pin, index->pin, PIN_EXTINT_OFF);
-    NVIC_DisableIRQ(irq_map->irq_config.irq_num);
+    GpioIrqConfig(index->port, index->pin, PIN_EXTINT_OFF);
+    isrManager.done->disableIrq(GpioPinIndex(index->pin));
 
     CriticalAreaUnLock(level);
     return EOK;
