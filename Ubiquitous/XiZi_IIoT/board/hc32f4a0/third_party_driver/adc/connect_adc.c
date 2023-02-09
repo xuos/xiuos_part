@@ -15,7 +15,7 @@
 * @brief support to register ADC pointer and function
 * @version 1.1
 * @author AIIT XUOS Lab
-* @date 2023-2-6
+* @date 2023-02-09
 */
 
 #include <connect_adc.h>

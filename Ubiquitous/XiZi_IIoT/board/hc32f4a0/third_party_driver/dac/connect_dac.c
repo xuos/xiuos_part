@@ -15,7 +15,7 @@
 * @brief support to register DAC pointer and function
 * @version 2.0
 * @author AIIT XUOS Lab
-* @date 2023-2-09
+* @date 2023-02-09
 */
 
 #include <connect_dac.h>

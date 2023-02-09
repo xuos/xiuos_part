@@ -15,7 +15,7 @@
 * @brief define hc32f4a0-board usart function and struct
 * @version 2.0
 * @author AIIT XUOS Lab
-* @date 
+* @date 2023-02-09
 */
 
 #include <device.h>
