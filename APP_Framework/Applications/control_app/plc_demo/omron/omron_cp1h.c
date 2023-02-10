@@ -11,10 +11,10 @@
  */
 
 /**
- * @file mitsubishi_fx3u.c
- * @brief PLC MITSUBISHI FX3U app
+ * @file omron_cj2m.c
+ * @brief PLC OMRON CJ2M app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2023.2.1
+ * @date 2022.9.27
  */
 
