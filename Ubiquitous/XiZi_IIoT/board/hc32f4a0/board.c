@@ -177,7 +177,7 @@ struct InitSequenceDesc _board_init[] =
     {"hw adc init", HwAdcInit},
 #endif
 #ifdef BSP_USING_DAC
-    {"hw adc init", HwDacInit},
+    {"hw dac init", HwDacInit},
 #endif
 #ifdef BSP_USING_USB
 	{ "usb", HwUsbHostInit },

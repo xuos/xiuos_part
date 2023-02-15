@@ -64,7 +64,6 @@ static uint32 DacRead(void *dev, struct BusBlockReadParam *read_param)
 
     uint16 dac_set_value = 0;
 
-    // dac_set_value = DAC_GetDataOutputValue(DAC_CH1);
     dac_set_value = DAC_GetChConvertState(DACx,DAC_CH1);
 
    *(uint16 *)read_param->buffer = dac_set_value;
