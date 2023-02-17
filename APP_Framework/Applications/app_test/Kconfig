@@ -111,6 +111,9 @@ menu "test app"
                 default n
                 if USER_TEST_HWTIMER
                     if ADD_XIZI_FETURES
+                        config HWTIMER_TIMER_DEV_DRIVER
+                            string "Set pin dev path"
+                            default "/dev/timer0_dev0"
                         config HWTIMER_PIN_DEV_DRIVER
                             string "Set pin dev path"
                             default "/dev/pin_dev"
@@ -207,6 +210,17 @@ menu "test app"
                             config ETHERNET_AS_CLIENT
                             bool "test as client"
                         endchoice
+                    endif
+                endif
+            
+            menuconfig USER_TEST_FLASH
+                bool "Config test w25q128 device"
+                default n
+                if USER_TEST_FLASH
+                    if ADD_XIZI_FETURES
+                        config FLASH_DEV_DRIVER
+                            string "Set flash dev path"
+                            default "/dev/qspi_W25Q128"
                     endif
                 endif
                 

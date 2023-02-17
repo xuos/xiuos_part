@@ -152,6 +152,8 @@ enum IoctlDriverType
     RTC_TYPE,
     CAMERA_TYPE,
     KPU_TYPE,
+    FLASH_TYPE,
+    TIME_TYPE,
     DEFAULT_TYPE,
 };
 

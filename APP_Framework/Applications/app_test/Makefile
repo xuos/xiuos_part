@@ -87,7 +87,11 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
 
     ifeq ($(CONFIG_USER_TEST_ETHERNET),y)
         SRC_FILES += test_ethernet.c
-    endif  
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_FLASH),y)
+        SRC_FILES += test_flash.c
+    endif    
 
     include $(KERNEL_ROOT)/compiler.mk
 endif

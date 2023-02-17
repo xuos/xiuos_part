@@ -465,11 +465,6 @@ int HwSpiInit(void)
         return ERROR;
     }
 
-    ret = BoardSpiDevBend();
-    if (EOK != ret) {
-        KPrintf("BoardSpiDevBend error ret %u\n", ret);
-        return ERROR;
-    }    
 #endif
 
 #ifdef BSP_USING_SPI6
@@ -488,12 +483,13 @@ int HwSpiInit(void)
         return ERROR;
     }
 
+#endif
+
     ret = BoardSpiDevBend();
     if (EOK != ret) {
         KPrintf("BoardSpiDevBend error ret %u\n", ret);
         return ERROR;
-    }    
-#endif
+    } 
 
     return ret;
 }

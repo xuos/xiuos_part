@@ -62,6 +62,10 @@ Modification:
 #include <connect_wdt.h>
 #endif
 
+#ifdef BSP_USING_TIMER
+#include <connect_hwtimer.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
 extern int HwWdtInit();
@@ -182,6 +186,9 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_WDT
 	{ "wdt", HwWdtInit },
+#endif
+#ifdef BSP_USING_TIMER
+	{ "tmr", HwTimerInit },
 #endif
     { " NONE ", NONE },
 };

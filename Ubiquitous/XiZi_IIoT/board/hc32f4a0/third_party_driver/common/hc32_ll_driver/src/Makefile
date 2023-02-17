@@ -12,6 +12,10 @@ ifeq ($(CONFIG_BSP_USING_SPI),y)
   SRC_FILES += hc32_ll_spi.c
 endif
 
+ifeq ($(CONFIG_BSP_USING_QSPI_FLASH),y)
+  SRC_FILES += hc32_ll_qspi.c
+endif
+
 ifeq ($(CONFIG_BSP_USING_I2C),y)
   SRC_FILES += hc32_ll_i2c.c
 endif
