@@ -107,7 +107,7 @@ static void CanInit(struct CanDriverConfigure *can_drv_config)
     FCG_Fcg1PeriphClockCmd(PWC_FCG1_CAN2, ENABLE);
     (void)CAN_Init(CAN_X, &stcInit);
 #endif
-    CAN_ClearStatus(CAN_X, 0xFFFF);
+    CAN_ClearStatus(CAN_X, 0xFFFFFFFFU);
 
 #ifdef CAN_USING_INTERRUPT
     /* Configures the interrupts if needed. */
