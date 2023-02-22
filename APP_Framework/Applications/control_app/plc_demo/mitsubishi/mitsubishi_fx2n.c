@@ -11,8 +11,8 @@
  */
 
 /**
- * @file mitsubishi_fx3u.c
- * @brief PLC MITSUBISHI FX3U app
+ * @file mitsubishi_fx2n.c
+ * @brief PLC MITSUBISHI FX2N app
  * @version 3.0
  * @author AIIT XUOS Lab
  * @date 2022.9.27
@@ -22,7 +22,7 @@
 
 extern int Adapter4GActive(void);
 
-void ControlFx3uTest(void)
+void ControlFx2nTest(void)
 {
     int i, j = 0;
     int read_data_length = 0;
@@ -32,20 +32,20 @@ void ControlFx3uTest(void)
     Adapter4GActive();
 #endif
 
-    ControlProtocolType melsec_1e_protocol = ControlProtocolFind();
-    if (NULL == melsec_1e_protocol) {
-        printf("%s get melsec 1e protocol %p failed\n", __func__, melsec_1e_protocol);
+    ControlProtocolType melsec_1c_protocol = ControlProtocolFind();
+    if (NULL == melsec_1c_protocol) {
+        printf("%s get melsec 1c protocol %p failed\n", __func__, melsec_1c_protocol);
         return;
     }
 
-    printf("%s get melsec 1e protocol %p successfull\n", __func__, melsec_1e_protocol);
+    printf("%s get melsec 1c protocol %p successfull\n", __func__, melsec_1c_protocol);
 
-    if (CONTROL_REGISTERED == melsec_1e_protocol->protocol_status) {
-        ControlProtocolOpen(melsec_1e_protocol);
+    if (CONTROL_REGISTERED == melsec_1c_protocol->protocol_status) {
+        ControlProtocolOpen(melsec_1c_protocol);
 
         for (;;) {
-            read_data_length = ControlProtocolRead(melsec_1e_protocol, read_data, sizeof(read_data));
-            printf("%s read [%d] melsec 1e data %d using receipe file\n", __func__, i, read_data_length);
+            read_data_length = ControlProtocolRead(melsec_1c_protocol, read_data, sizeof(read_data));
+            printf("%s read [%d] melsec 1c data %d using receipe file\n", __func__, i, read_data_length);
             if (read_data_length) {
                 for (j = 0; j < read_data_length; j ++) {
                     printf("j %d data 0x%x\n", j, read_data[j]);
@@ -56,9 +56,9 @@ void ControlFx3uTest(void)
             PrivTaskDelay(10000);
         }
 
-        //ControlProtocolClose(modbus_tcp_protocol);
+        //ControlProtocolClose(melsec_1c_protocol);
     }
 }
-PRIV_SHELL_CMD_FUNCTION(ControlFx3uTest, Mitsubishi fx3u Demo, PRIV_SHELL_CMD_MAIN_ATTR);
+PRIV_SHELL_CMD_FUNCTION(ControlFx2nTest, Mitsubishi FX2N Demo, PRIV_SHELL_CMD_MAIN_ATTR);
 
 
