@@ -171,6 +171,18 @@ menu "test app"
                     endif
                 endif
 
+            menuconfig USER_TEST_CAN
+                select BSP_USING_CAN
+                bool "Config test can"
+                default n
+                if USER_TEST_CAN
+                    if ADD_XIZI_FETURES
+                        config CAN_DEV_DRIVER
+                            string "Set can dev path"
+                            default "/dev/can2_dev1"
+                    endif
+                endif
+
             menuconfig USER_TEST_CAMERA
                 select BSP_USING_CAMERA
                 select BSP_USING_LCD

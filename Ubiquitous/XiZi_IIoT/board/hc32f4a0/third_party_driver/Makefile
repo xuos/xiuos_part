@@ -40,4 +40,8 @@ ifeq ($(CONFIG_BSP_USING_TIMER),y)
   SRC_DIR += timer
 endif
 
+ifeq ($(CONFIG_BSP_USING_CAN),y)
+  SRC_DIR += can
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

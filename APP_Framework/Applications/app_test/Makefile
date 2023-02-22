@@ -91,6 +91,10 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
 
     ifeq ($(CONFIG_USER_TEST_FLASH),y)
         SRC_FILES += test_flash.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_CAN),y)
+        SRC_FILES += test_can.c
     endif    
 
     include $(KERNEL_ROOT)/compiler.mk

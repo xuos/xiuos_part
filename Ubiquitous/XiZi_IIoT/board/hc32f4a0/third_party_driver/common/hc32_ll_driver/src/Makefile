@@ -36,4 +36,8 @@ ifeq ($(CONFIG_BSP_USING_WDT),y)
   SRC_FILES += hc32_ll_wdt.c
 endif
 
+ifeq ($(CONFIG_BSP_USING_CAN),y)
+  SRC_FILES += hc32_ll_can.c
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

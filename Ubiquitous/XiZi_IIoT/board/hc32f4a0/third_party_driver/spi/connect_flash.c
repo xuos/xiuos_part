@@ -19,7 +19,7 @@
 */
 #include <connect_flash.h>
 
-#define QSPI_DEVICE_SLAVE_ID_0 0
+#define QSPI_DEVICE_SLAVE_ID_0 (0)
 #define QSPI_UNIT    (CM_QSPI)
 
 #define QSPI_CS_PORT (GPIO_PORT_C)

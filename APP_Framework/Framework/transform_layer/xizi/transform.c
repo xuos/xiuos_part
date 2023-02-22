@@ -174,6 +174,7 @@ int PrivIoctl(int fd, int cmd, void *args)
     case KPU_TYPE:
     case TIME_TYPE:
     case FLASH_TYPE:
+    case CAN_TYPE:
         ret = ioctl(fd, cmd, ioctl_cfg->args);
         break;
     default:

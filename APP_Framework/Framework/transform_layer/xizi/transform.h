@@ -151,6 +151,7 @@ enum IoctlDriverType
     WDT_TYPE,
     RTC_TYPE,
     CAMERA_TYPE,
+    CAN_TYPE,
     KPU_TYPE,
     FLASH_TYPE,
     TIME_TYPE,
@@ -252,6 +253,25 @@ typedef struct
 enum TCP_OPTION {
     SEND_DATA = 0,
     RECV_DATA,
+};
+
+struct CanDriverConfigure 
+{
+    uint8 tsjw;
+    uint8 tbs2 ;
+    uint8 tbs1;
+    uint8 mode;
+    uint16 brp;
+};
+
+struct CanSendConfigure
+{
+    uint32 stdid;
+    uint32 exdid;
+    uint8 ide;
+    uint8 rtr;
+    uint8 data_lenth;
+    uint8 *data;
 };
 
 typedef struct
