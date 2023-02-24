@@ -4,6 +4,14 @@ ifeq ($(CONFIG_BSP_USING_UART),y)
   SRC_FILES += hc32_ll_usart.c
 endif
 
+ifeq ($(CONFIG_BSP_USING_ADC),y)
+  SRC_FILES += hc32_ll_adc.c
+endif
+
+ifeq ($(CONFIG_BSP_USING_DAC),y)
+  SRC_FILES += hc32_ll_dac.c
+endif
+
 ifeq ($(CONFIG_BSP_USING_SDIO),y)
   SRC_FILES += hc32_ll_sdioc.c
 endif

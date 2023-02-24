@@ -38,6 +38,14 @@ Modification:
 #include <connect_gpio.h>
 #endif
 
+#ifdef BSP_USING_ADC
+#include <connect_adc.h>
+#endif
+
+#ifdef BSP_USING_DAC
+#include <connect_dac.h>
+#endif
+
 #ifdef BSP_USING_SDIO
 #include <connect_sdio.h>
 #endif
@@ -173,6 +181,12 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_I2C
 	{ "i2c", HwI2cInit },
+#endif
+#ifdef BSP_USING_ADC
+    {"hw adc init", HwAdcInit},
+#endif
+#ifdef BSP_USING_DAC
+    {"hw dac init", HwDacInit},
 #endif
 #ifdef BSP_USING_USB
 	{ "usb", HwUsbHostInit },
