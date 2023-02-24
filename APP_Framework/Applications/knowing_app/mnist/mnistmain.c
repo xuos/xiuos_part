@@ -26,5 +26,3 @@ void mnist_app(void);
 int tfmnist(void) {
     mnist_app();
 }
-
-PRIV_SHELL_CMD_FUNCTION(tfmnist, a mnist test sample, PRIV_SHELL_CMD_MAIN_ATTR);
