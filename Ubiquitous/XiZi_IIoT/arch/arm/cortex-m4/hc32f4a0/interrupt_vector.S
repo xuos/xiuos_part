@@ -61,22 +61,22 @@ InterruptVectors:
                 .long       SysTick_Handler                    /*  -1 SysTick Handler */
 
                 /* Interrupts */
-                .long       IRQ000_Handler
-                .long       IRQ001_Handler
-                .long       IRQ002_Handler
-                .long       IRQ003_Handler
-                .long       IRQ004_Handler
-                .long       IRQ005_Handler
-                .long       IRQ006_Handler
-                .long       IRQ007_Handler
-                .long       IRQ008_Handler
-                .long       IRQ009_Handler
-                .long       IRQ010_Handler
-                .long       IRQ011_Handler
-                .long       IRQ012_Handler
-                .long       IRQ013_Handler
-                .long       IRQ014_Handler
-                .long       IRQ015_Handler
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
                 .long       IRQ016_Handler
                 .long       IRQ017_Handler
                 .long       IRQ018_Handler

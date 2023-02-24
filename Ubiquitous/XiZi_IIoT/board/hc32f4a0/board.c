@@ -38,6 +38,14 @@ Modification:
 #include <connect_gpio.h>
 #endif
 
+#ifdef BSP_USING_ADC
+#include <connect_adc.h>
+#endif
+
+#ifdef BSP_USING_DAC
+#include <connect_dac.h>
+#endif
+
 #ifdef BSP_USING_SDIO
 #include <connect_sdio.h>
 #endif
@@ -54,8 +62,17 @@ Modification:
 #include <connect_usb.h>
 #endif
 
+#ifdef BSP_USING_RTC
+#include <connect_rtc.h>
+#endif
+
+#ifdef BSP_USING_WDT
+#include <connect_wdt.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
+extern int HwWdtInit();
 
 /* Peripheral register WE/WP selection */
 #define LL_PERIPH_SEL                   (LL_PERIPH_GPIO | LL_PERIPH_FCG | LL_PERIPH_PWC_CLK_RMU | \
@@ -165,8 +182,20 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_I2C
 	{ "i2c", HwI2cInit },
 #endif
+#ifdef BSP_USING_ADC
+    {"hw adc init", HwAdcInit},
+#endif
+#ifdef BSP_USING_DAC
+    {"hw dac init", HwDacInit},
+#endif
 #ifdef BSP_USING_USB
 	{ "usb", HwUsbHostInit },
+#endif
+#ifdef BSP_USING_RTC
+	{ "rtc", HwRtcInit },
+#endif
+#ifdef BSP_USING_WDT
+	{ "wdt", HwWdtInit },
 #endif
     { " NONE ", NONE },
 };
