@@ -6,6 +6,7 @@
 #include <drv_io_config.h>
 #include <fpioa.h>
 #include <string.h>
+#include <stdlib.h>
 #include <xs_base.h>
 
 #include "gpio_common.h"
@@ -305,34 +306,50 @@ uint32_t wiz_client_op(uint8_t sn, uint8_t *buf, uint32_t buf_size,
   }
 }
 
-void wiz_client_op_test(char *addr, uint16_t port, char *msg) {
-  /* argv[1]: ip
-   * argv[2]: port
-   * argv[3]: msg
+void wiz_client_op_test(int argc, char *argv[]) {
+  /* argv[1]: ip      ip addr
+   * argv[2]: port    port number
+   * argv[3]: msg     send msg
+   * argv[4]: count   test times,if no this parameter,default 10 times
    */
-  uint8_t client_sock = 2;
-  uint8_t ip[4] = {192, 168, 31, 127};
-  uint32_t tmp_ip[4];
-  KPrintf("wiz client to %s", addr);
-  sscanf(addr, "%d.%d.%d.%d", &tmp_ip[0], &tmp_ip[1], &tmp_ip[2], &tmp_ip[3]);
-  for (int i = 0; i < 4; ++i) {
-    ip[i] = (uint8_t)tmp_ip[i];
+  if (argc < 4)
+  {
+    KPrintf("wiz_client_op_test error\n");
+    return;
   }
+  uint8_t client_sock = 2;
+  uint32_t tmp_ip[4];
+  uint8_t ip[4];
+  uint64_t pCount = 10;
   uint8_t buf[g_wiznet_buf_size];
-  KPrintf("wiz_server, send to %d.%d.%d.%d %d\n",  // tip info
+  uint16_t port;
+ 
+  sscanf(argv[1], "%d.%d.%d.%d", &tmp_ip[0], &tmp_ip[1], &tmp_ip[2], &tmp_ip[3]);
+  ip[0] = (uint8_t)tmp_ip[0];
+  ip[1] = (uint8_t)tmp_ip[1];
+  ip[2] = (uint8_t)tmp_ip[2];
+  ip[3] = (uint8_t)tmp_ip[3];
+  
+  port = atoi(argv[2]);
+  KPrintf("wiz client to wiz_server, send to %d.%d.%d.%d %d\n",  // tip info
           ip[0], ip[1], ip[2], ip[3], port);
-  sscanf(msg, "%s", buf);
-  wiz_client_op(client_sock, buf, g_wiznet_buf_size, ip, port, SEND_DATA);
-  MdelayKTask(10);
-  memset(buf, 0, g_wiznet_buf_size);
-  // waiting for a responding.
-  wiz_client_op(client_sock, buf, g_wiznet_buf_size, ip, port, RECV_DATA);
-  KPrintf("received msg: %s\n", buf);
+
+  if (argc >= 5){
+    pCount = atoi(argv[4]);
+  }
+  for(uint64_t i = 0; i < pCount; i++)
+  {
+    wiz_client_op(client_sock, argv[3], strlen(argv[3]), ip, port, SEND_DATA);
+    MdelayKTask(10);
+    // waiting for a responding.
+    wiz_client_op(client_sock, buf, g_wiznet_buf_size, ip, port, RECV_DATA);
+    KPrintf("received msg: %s\n", buf);
+    memset(buf, 0, g_wiznet_buf_size);
+  }
 }
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) |
-                     SHELL_CMD_PARAM_NUM(3),
-                 wiz_client_op, wiz_client_op_test,
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                 wiz_client_op, wiz_client_op_test, 
                  wiz_sock_recv or wiz_sock_send data as tcp client);
 
 int32_t wiz_server_op(uint8_t sn, uint8_t *buf, uint32_t buf_size,
@@ -387,11 +404,20 @@ void wiz_server(void *param) {
   uint8_t buf[g_wiznet_buf_size];
   memset(buf, 0, g_wiznet_buf_size);
   int ret = 0;
+  uint32_t size = 0;
+
   while (1) {
     ret = wiz_server_op(0, buf, g_wiznet_buf_size, port, RECV_DATA);
+    while(buf[size] != 0){
+      size ++;
+    }
     if (ret > 0) {
+      KPrintf("received %d bytes: %s\n", size, buf);
+
       wiz_server_op(0, buf, g_wiznet_buf_size, port, SEND_DATA);
-    };
+      memset(buf, 0, g_wiznet_buf_size);
+    }
+    size = 0;
   }
 }
 
