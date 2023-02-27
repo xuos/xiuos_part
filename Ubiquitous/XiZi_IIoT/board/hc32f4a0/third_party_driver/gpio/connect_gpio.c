@@ -34,8 +34,7 @@ Modification:
 #include <connect_gpio.h>
 
 #define ITEM_NUM(items)                 sizeof(items) / sizeof(items[0])
-#define IRQ_INT(callback)
-#define INTSEL_REG              (uint32_t)(&CM_INTC->SEL0)                       
+#define IRQ_INT(callback)                  
 
 #ifndef HC32_PIN_CONFIG
 #define HC32_PIN_CONFIG(pin, callback, config)                                 \
@@ -50,6 +49,7 @@ Modification:
 #define __HC32_PIN_DEFAULT                     {-1, 0, 0}
 #define MAX_PIN_INDEX 15
 #define INT_VECTOR_OFFSET 16
+#define INTSEL_REG              (uint32_t)(&CM_INTC->SEL0)
 
 struct PinIndex
 {
@@ -564,7 +564,6 @@ static int32 GpioIrqEnable(x_base pin)
     isrManager.done->enableIrq(GpioPinIndex(index->pin));
 
     CriticalAreaUnLock(level);
-    KPrintf("port%d,pin%04x has enable\n",index->port, index->pin);
     return EOK;
 }
 

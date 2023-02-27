@@ -77,36 +77,36 @@ InterruptVectors:
                 .long       IsrEntry
                 .long       IsrEntry
                 .long       IsrEntry
-                .long       IRQ016_Handler
-                .long       IRQ017_Handler
-                .long       IRQ018_Handler
-                .long       IRQ019_Handler
-                .long       IRQ020_Handler
-                .long       IRQ021_Handler
-                .long       IRQ022_Handler
-                .long       IRQ023_Handler
-                .long       IRQ024_Handler
-                .long       IRQ025_Handler
-                .long       IRQ026_Handler
-                .long       IRQ027_Handler
-                .long       IRQ028_Handler
-                .long       IRQ029_Handler
-                .long       IRQ030_Handler
-                .long       IRQ031_Handler
-                .long       IRQ032_Handler
-                .long       IRQ033_Handler
-                .long       IRQ034_Handler
-                .long       IRQ035_Handler
-                .long       IRQ036_Handler
-                .long       IRQ037_Handler
-                .long       IRQ038_Handler
-                .long       IRQ039_Handler
-                .long       IRQ040_Handler
-                .long       IRQ041_Handler
-                .long       IRQ042_Handler
-                .long       IRQ043_Handler
-                .long       IRQ044_Handler
-                .long       IRQ045_Handler
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
+                .long       IsrEntry
                 .long       IRQ046_Handler
                 .long       IRQ047_Handler
                 .long       IRQ048_Handler

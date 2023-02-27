@@ -39,4 +39,23 @@ if BSP_USING_SPI
             string "spi bus 6 driver name"
             default "spi6_drv"
     endif  
+
+    config BSP_USING_QSPI_FLASH
+    bool "Using qspi and flash"
+    default n
+
+    if BSP_USING_QSPI_FLASH
+        config QSPI_BUS_NAME
+            string "qspi bus name"
+            default "qspi"
+        config QSPI_DEVICE_NAME_0
+            string "qspi bus device 0 name"
+            default "qspi_dev0" 
+        config QSPI_DRV_NAME
+            string "qspi bus driver name"
+            default "qspi_drv"
+        config QSPI_FLASH_DEV_NAME
+            string "flash dev name"
+            default "qspi_W25Q128"        
+    endif  
 endif

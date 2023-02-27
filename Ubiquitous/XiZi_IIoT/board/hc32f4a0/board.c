@@ -70,9 +70,16 @@ Modification:
 #include <connect_wdt.h>
 #endif
 
+#ifdef BSP_USING_TIMER
+#include <connect_hwtimer.h>
+#endif
+
+#ifdef BSP_USING_CAN
+#include <connect_can.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
-extern int HwWdtInit();
 
 /* Peripheral register WE/WP selection */
 #define LL_PERIPH_SEL                   (LL_PERIPH_GPIO | LL_PERIPH_FCG | LL_PERIPH_PWC_CLK_RMU | \
@@ -196,6 +203,12 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_WDT
 	{ "wdt", HwWdtInit },
+#endif
+#ifdef BSP_USING_TIMER
+	{ "tmr", HwTimerInit },
+#endif
+#ifdef BSP_USING_CAN
+	{ "can", HwCanInit },
 #endif
     { " NONE ", NONE },
 };

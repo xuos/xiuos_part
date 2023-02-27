@@ -20,6 +20,10 @@ ifeq ($(CONFIG_BSP_USING_SPI),y)
   SRC_FILES += hc32_ll_spi.c
 endif
 
+ifeq ($(CONFIG_BSP_USING_QSPI_FLASH),y)
+  SRC_FILES += hc32_ll_qspi.c
+endif
+
 ifeq ($(CONFIG_BSP_USING_I2C),y)
   SRC_FILES += hc32_ll_i2c.c
 endif
@@ -38,6 +42,10 @@ endif
 
 ifeq ($(CONFIG_BSP_USING_WDT),y)
   SRC_FILES += hc32_ll_wdt.c
+endif
+
+ifeq ($(CONFIG_BSP_USING_CAN),y)
+  SRC_FILES += hc32_ll_can.c
 endif
 
 include $(KERNEL_ROOT)/compiler.mk

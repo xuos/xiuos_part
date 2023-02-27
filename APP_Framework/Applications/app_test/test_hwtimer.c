@@ -2,29 +2,32 @@
 #include <string.h>
 #include <transform.h>
 
-#define BSP_LED_PIN 29
+#define BSP_LED_PIN 134
 #define NULL_PARAMETER 0
 
-static uint16_t pinval=0;
 static uint16_t pin_fd=0;
+static struct PinStat pin_led;
 
 void ledflip(void *parameter)
 {
-    struct PinStat pin_led;
     pin_led.pin = BSP_LED_PIN;
-    pin_led.val = !pinval;
-    pinval = !pinval;
+    pin_led.val = !pin_led.val;
     PrivWrite(pin_fd,&pin_led,NULL_PARAMETER);
-    // printf("Timer has callback once:%d\n",pinval);
 }
 
 void TestHwTimer(void)
 {
-    x_ticks_t period = 100;//uint:10ms
+    x_ticks_t period = 100000;
     
     pin_fd = PrivOpen(HWTIMER_PIN_DEV_DRIVER, O_RDWR);
     if(pin_fd<0){
         printf("open pin fd error:%d\n",pin_fd);
+        return;
+    }
+
+    int timer_fd = PrivOpen(HWTIMER_TIMER_DEV_DRIVER, O_RDWR);
+    if(timer_fd<0){
+        printf("open timer fd error:%d\n",timer_fd);
         return;
     }
 
@@ -44,10 +47,30 @@ void TestHwTimer(void)
         return;
     }
 
-    int32 timer_handle = KCreateTimer("LED on and off by 1s",&ledflip,&pin_fd,period,TIMER_TRIGGER_PERIODIC);
+    ioctl_cfg.ioctl_driver_type = TIME_TYPE;
+    ioctl_cfg.args = (void *)&ledflip;
+    if (0 != PrivIoctl(timer_fd, OPE_INT, &ioctl_cfg)) {
+        printf("timer pin fd error %d\n", pin_fd);
+        PrivClose(pin_fd);
+        return;
+    }    
+
+    ioctl_cfg.args = (void *)&period;
+    if (0 != PrivIoctl(timer_fd, OPE_CFG, &ioctl_cfg)) {
+        printf("timer pin fd error %d\n", pin_fd);
+        PrivClose(pin_fd);
+        return;
+    }    
+
+    while(1){
+        
+    }
+
+    // int32 timer_handle = KCreateTimer("LED on and off by 1s",&ledflip,&pin_fd,period,TIMER_TRIGGER_PERIODIC);
     
-    KTimerStartRun(timer_handle);
-    
+    // KTimerStartRun(timer_handle);
+    PrivClose(pin_fd);
+    PrivClose(timer_fd);
 }
 
 PRIV_SHELL_CMD_FUNCTION(TestHwTimer, a timer test sample, PRIV_SHELL_CMD_MAIN_ATTR);

@@ -86,3 +86,19 @@ menuconfig BSP_USING_WDT
     if BSP_USING_WDT
         source "$BSP_DIR/third_party_driver/watchdog/Kconfig"
     endif
+
+menuconfig BSP_USING_TIMER
+    bool "Using TIMER device"
+    default n
+    select RESOURCES_TIMER
+    if BSP_USING_TIMER
+        source "$BSP_DIR/third_party_driver/timer/Kconfig"
+    endif
+
+menuconfig BSP_USING_CAN
+    bool "Using CAN device"
+    default n
+    select RESOURCES_CAN
+    if BSP_USING_CAN
+        source "$BSP_DIR/third_party_driver/can/Kconfig"
+    endif
