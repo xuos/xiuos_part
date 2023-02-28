@@ -3,6 +3,7 @@
 
 #include <shell.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <xs_base.h>
 #include <xs_ktask.h>
@@ -235,6 +236,8 @@ uint8_t ping_reply(uint8_t sn, uint8_t *addr, uint16_t rlen) {
 void wiz_ping_test(int argc, char *argv[]) {
   uint32_t tmp_ip[4];
   uint8_t target_ip[4];
+  uint16_t pCount = 5; //默认ping 5次
+
   if (argc >= 2) {
     KPrintf("This is a Ping test: %s\n", argv[1]);
     sscanf(argv[1], "%d.%d.%d.%d", &tmp_ip[0], &tmp_ip[1], &tmp_ip[2],
@@ -243,7 +246,10 @@ void wiz_ping_test(int argc, char *argv[]) {
     target_ip[1] = (uint8_t)tmp_ip[1];
     target_ip[2] = (uint8_t)tmp_ip[2];
     target_ip[3] = (uint8_t)tmp_ip[3];
-    ping_count(ping_socket, 5, target_ip);
+    if (argc >= 3){
+      pCount = atoi(argv[2]); //如果ip后面跟具体的数字,代表ping的次数
+    }
+    ping_count(ping_socket, pCount, target_ip);
   }
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),

@@ -33,6 +33,11 @@
 #endif
 #endif
 
+#ifdef BSP_USING_QSPI_FLASH
+#include "connect_flash.h"
+extern int FlashW25qxxSpiDeviceInit(void);
+#endif
+
 #ifdef KERNEL_USER_MAIN
 #ifndef MAIN_KTASK_STACK_SIZE
 #define MAIN_KTASK_STACK_SIZE     2048
@@ -45,6 +50,8 @@
 #ifdef BSP_USING_WDT
 extern int StartWatchdog(void);
 #endif
+
+
 
 extern void CreateKServiceKTask(void);
 extern int main(void);

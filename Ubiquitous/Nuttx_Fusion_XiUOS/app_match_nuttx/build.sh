@@ -21,5 +21,6 @@ cp -rf $nuttx/aiit_board/xidatong-riscv64 $nuttx/nuttx/boards/risc-v/k210
 cp -rf $nuttx/aiit_board/edu-riscv64 $nuttx/nuttx/boards/risc-v/k210
 cp -rf $nuttx/aiit_board/xidatong-arm32 $nuttx/nuttx/boards/arm/imxrt
 cp -rf $nuttx/aiit_board/hc32f4a0 $nuttx/nuttx/boards/arm/hc32
+cp -rf $nuttx/aiit_board/sabre-lite $nuttx/nuttx/boards/arm/imx6
 
 cd ../nuttx

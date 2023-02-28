@@ -1,0 +1,16 @@
+menuconfig BSP_USING_TIMER_0
+bool "Using timer 0"
+default n
+select RESOURCES_HWTIMER
+
+if BSP_USING_TIMER_0
+    config HWTIMER_BUS_NAME_0
+        string "timer 0 bus 0 name"
+        default "timer0"
+    config HWTIMER_0_DEVICE_NAME_0
+        string "timer 0 bus 0 device 0 name"
+        default "timer0_dev0" 
+    config HWTIMER_DRIVER_NAME_0
+        string "timer 0 bus 0 driver name"
+        default "timer0_drv"
+endif

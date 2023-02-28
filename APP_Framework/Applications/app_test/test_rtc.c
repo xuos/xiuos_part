@@ -11,16 +11,19 @@ void TestRTC(int argc,char *argv[])
     }
     
     if(argc>1){
-        
         int times = atoi(argv[1]);
         printf("Time will be printf %d times\n",times);
+
         struct RtcDrvConfigureParam rtc_para;
+        time_t my_time=0;
+
         rtc_para.rtc_operation_cmd = OPER_RTC_SET_TIME;
-        *(rtc_para.time) = 0;
+        rtc_para.time = &my_time;
 
         struct PrivIoctlCfg ioctl_cfg;
         ioctl_cfg.ioctl_driver_type = RTC_TYPE;
         ioctl_cfg.args =  (void *)&rtc_para;
+
         PrivIoctl(rtc_fd,0,&ioctl_cfg);
 
         rtc_para.rtc_operation_cmd = OPER_RTC_GET_TIME;
