@@ -533,17 +533,14 @@ endif
 
 
 ifeq ($(ARCH), risc-v)
-# KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
-ifeq ($(MCU), k210)
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
+ifeq ($(MCU), k210)
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/k210
 endif
 ifeq ($(MCU), FE310)
-	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/fe310
 endif
 ifeq ($(MCU), GAP8)
-	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/gap8
 endif
 ifeq ($(MCU), GD32VF103)

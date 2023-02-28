@@ -30,7 +30,7 @@
 
 #ifdef  SEPARATE_COMPILE
 
-#include "../../../../../../Ubiquitous/XiZi/arch/kswitch.h"
+#include "../../../../../../Ubiquitous/XiZi_IIoT/arch/kswitch.h"
 
 #define TASK_INFO      1
 #define MEM_INFO       2
