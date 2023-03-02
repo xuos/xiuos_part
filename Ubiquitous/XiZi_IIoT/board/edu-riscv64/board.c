@@ -91,7 +91,7 @@ int MountUsb(void) {
 }
 #endif
 
-#if defined(FS_VFS) && defined(MOUNT_SDCARD)
+#if defined(MOUNT_SDCARD)
 #include <iot-vfs.h>
 #include <sd_spi.h>
 extern SpiSdDeviceType SpiSdInit(struct Bus *bus, const char *dev_name,

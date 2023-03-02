@@ -1563,6 +1563,16 @@ config ARCH_BOARD_SABRE_6QUAD
 		This options selects support for NuttX on the NXP/Freescale Sabre
 		board featuring the iMX 6Quad CPU.
 
+config ARCH_BOARD_SABRE_LITE
+	bool "NXP/Freescale i.MX6 Sabre Lite board"
+	depends on ARCH_CHIP_IMX6_6QUAD
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP/Freescale Sabre
+		board featuring the iMX 6Quad CPU.
+
 config ARCH_BOARD_SAMA5D2_XULT
 	bool "Atmel SAMA5D2 Xplained Ultra development board"
 	depends on ARCH_CHIP_ATSAMA5D27
@@ -2485,7 +2495,7 @@ config ARCH_BOARD
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1020-evk"            if ARCH_BOARD_IMXRT1020_EVK
 	default "imxrt1050-evk"            if ARCH_BOARD_IMXRT1050_EVK
-	default "xidatong-arm32"                 if ARCH_BOARD_XIDATONG_ARM32
+	default "xidatong-arm32"           if ARCH_BOARD_XIDATONG_ARM32
 	default "imxrt1060-evk"            if ARCH_BOARD_IMXRT1060_EVK
 	default "imxrt1064-evk"            if ARCH_BOARD_IMXRT1064_EVK
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
@@ -2596,6 +2606,7 @@ config ARCH_BOARD
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
+	default "sabre-lite"               if ARCH_BOARD_SABRE_LITE
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"              if ARCH_BOARD_GIANT_BOARD
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
@@ -2767,6 +2778,9 @@ source "boards/arm/s32k1xx/s32k148evb/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
+endif
+if ARCH_BOARD_SABRE_LITE
+source "boards/arm/imx6/sabre-lite/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1020_EVK
 source "boards/arm/imxrt/imxrt1020-evk/Kconfig"

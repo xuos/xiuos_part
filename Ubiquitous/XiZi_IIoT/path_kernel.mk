@@ -475,9 +475,21 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/gemmlowp #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/flatbuffers/include #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/ruy #
+
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/kpu/k210_yolov2_detect_procedure #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/kpu/yolov2 #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/kpu/yolov2_json #
+
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/nnom/inc #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/nnom/inc/layers #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/nnom/port #
+
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/cmsis_5/Core/Include #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/cmsis_5/DSP/Include #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/cmsis_5/DSP/Include/dsp #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/cmsis_5/NN/Include #
+
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/knowing_app/cmsis_5_demo/cmsisnn-cifar10/model/m4 #
 endif
 
 ifeq ($(CONFIG_LIB_LV),y)

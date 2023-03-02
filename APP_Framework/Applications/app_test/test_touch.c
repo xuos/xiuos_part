@@ -105,6 +105,7 @@ void TestTouch(void)
         graph_param.pixel_info.y_endpos = touch_pixel.y+10;
         PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
     }
+    PrivClose(lcd_fd);
     PrivClose(touch_fd);
 }
 

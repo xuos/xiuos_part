@@ -20,6 +20,7 @@
 
 #include <xs_base.h>
 #include <xs_isr.h>
+#include <hc32f4xx.h>
 
 x_base __attribute__((naked)) DisableLocalInterrupt()
 {
@@ -36,6 +37,9 @@ void __attribute__((naked)) EnableLocalInterrupt(x_base level)
 
 int32 ArchEnableHwIrq(uint32 irq_num)
 {
+    NVIC_ClearPendingIRQ(irq_num);
+    NVIC_SetPriority(irq_num, 0);
+    NVIC_EnableIRQ(irq_num);
     return EOK;
 }
 

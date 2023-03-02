@@ -17,11 +17,11 @@ menuconfig BSP_USING_SPI
     endif
 
 menuconfig BSP_USING_SOFT_SPI
-    bool "Using SOFT_SPI device"
+    bool "Using TFcard device"
     default n
     select BSP_USING_SPI
     select MOUNT_SDCARD
-    select FS_VFS
+    select RESOURCES_SPI_SD
     if BSP_USING_SOFT_SPI
         source "$BSP_DIR/third_party_driver/soft_spi/Kconfig"
     endif

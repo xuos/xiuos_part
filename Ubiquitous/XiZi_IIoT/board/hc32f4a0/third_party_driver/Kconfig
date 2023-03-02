@@ -6,6 +6,23 @@ menuconfig BSP_USING_UART
         source "$BSP_DIR/third_party_driver/usart/Kconfig"
     endif
 
+menuconfig BSP_USING_ADC
+bool "Using ADC device"
+default n
+select RESOURCES_ADC
+if BSP_USING_ADC
+source "$BSP_DIR/third_party_driver/adc/Kconfig"
+endif
+
+menuconfig BSP_USING_DAC
+bool "Using DAC device"
+default n
+select RESOURCES_DAC
+if BSP_USING_DAC
+source "$BSP_DIR/third_party_driver/dac/Kconfig"
+endif
+
+
 menuconfig BSP_USING_GPIO
     bool "Using GPIO device "
     default y
@@ -52,4 +69,36 @@ menuconfig BSP_USING_USB
     select RESOURCES_USB
     if BSP_USING_USB
         source "$BSP_DIR/third_party_driver/usb/Kconfig"
+    endif
+
+menuconfig BSP_USING_RTC
+    bool "Using RTC device"
+    default n
+    select RESOURCES_RTC
+    if BSP_USING_RTC
+        source "$BSP_DIR/third_party_driver/rtc/Kconfig"
+    endif
+
+menuconfig BSP_USING_WDT
+    bool "Using WDT device"
+    default n
+    select RESOURCES_WDT
+    if BSP_USING_WDT
+        source "$BSP_DIR/third_party_driver/watchdog/Kconfig"
+    endif
+
+menuconfig BSP_USING_TIMER
+    bool "Using TIMER device"
+    default n
+    select RESOURCES_TIMER
+    if BSP_USING_TIMER
+        source "$BSP_DIR/third_party_driver/timer/Kconfig"
+    endif
+
+menuconfig BSP_USING_CAN
+    bool "Using CAN device"
+    default n
+    select RESOURCES_CAN
+    if BSP_USING_CAN
+        source "$BSP_DIR/third_party_driver/can/Kconfig"
     endif
