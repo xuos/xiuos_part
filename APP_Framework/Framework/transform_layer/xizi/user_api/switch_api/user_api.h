@@ -123,6 +123,14 @@ long UserMsgQueueRecv(int32_t mq, void *buffer, size_t  size,int32_t wait_time);
 long UserMsgQueueReinit(int32_t mq);
 #endif
 
+#ifdef KERNEL_SOFTTIMER
+int32_t UserTimerCreate(const char *name, void (*timeout)(void *parameter), void *parameter, uint32_t time, uint8_t trigger_mode);
+long UserTimerDelete(int32_t timer_id);
+long UserTimerStartRun(int32_t timer_id);
+long UserTimerQuitRun(int32_t timer_id);
+long UserTimerModify(int32_t timer_id, uint32_t ticks);
+#endif
+
 int open(const char *path, int flags, ...);
 int read(int fd, void *buf, size_t len);
 int write(int fd, const void *buf, size_t len);
@@ -238,6 +246,14 @@ uint8_t UserGetTaskPriority(int32_t id);
 #define UserMsgQueueUrgentSend   KMsgQueueUrgentSend
 #define UserMsgQueueRecv         KMsgQueueRecv
 #define UserMsgQueueReinit       KMsgQueueReinit
+#endif
+
+#ifdef KERNEL_SOFTTIMER
+int32_t UserTimerCreate(const char *name, void (*timeout)(void *parameter), void *parameter, uint32_t time, uint8_t trigger_mode);
+long UserTimerDelete(int32_t timer_id);
+long UserTimerStartRun(int32_t timer_id);
+long UserTimerQuitRun(int32_t timer_id);
+long UserTimerModify(int32_t timer_id, uint32_t ticks);
 #endif
 
 #define UserPrintf               KPrintf

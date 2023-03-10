@@ -107,6 +107,36 @@ uint32_t PrivGetTickTime()
     return CalculateTimeMsFromTick(CurrentTicksGain());
 }
 #endif
+
+/******************Soft Timer*********************/
+int PrivTimerCreate(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
+{
+    return timer_create(clockid, evp, timerid);
+}
+
+int PrivTimerDelete(timer_t timerid)
+{
+    return timer_delete(timerid);
+}
+
+int PrivTimerStartRun(timer_t timerid)
+{
+    return UserTimerStartRun(timerid);
+}
+
+int PrivTimerQuitRun(timer_t timerid)
+{
+    return UserTimerQuitRun(timerid);
+}
+
+int PrivTimerModify(timer_t timerid, int flags, const struct itimerspec *restrict value,
+                  struct itimerspec *restrict ovalue)
+{
+    return timer_settime(timerid, flags, value, ovalue);
+}
+
+/*************************************************/
+
 /*********************fs**************************/
 #ifdef FS_VFS
 /************************Driver Posix Transform***********************/

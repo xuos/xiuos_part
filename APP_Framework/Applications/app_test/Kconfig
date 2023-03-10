@@ -235,6 +235,10 @@ menu "test app"
                             default "/dev/qspi_W25Q128"
                     endif
                 endif
-                
+
+            menuconfig USER_TEST_TIMER
+                bool "Config test soft timer"
+                default n
+            
         endif
 endmenu

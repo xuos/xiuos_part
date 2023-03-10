@@ -24,6 +24,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <semaphore.h>
+#include <timer.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -377,6 +378,13 @@ void *PrivRealloc(void *pointer, size_t size);
 void *PrivCalloc(size_t  count, size_t size);
 void PrivFree(void *pointer);
 
+/******************soft timer*********************/
+int PrivTimerCreate(clockid_t clockid, struct sigevent * evp, timer_t * timerid);
+int PrivTimerDelete(timer_t timerid);
+int PrivTimerStartRun(timer_t timerid);
+int PrivTimerQuitRun(timer_t timerid);
+int PrivTimerModify(timer_t timerid, int flags, const struct itimerspec *restrict value,
+                  struct itimerspec *restrict ovalue);
 
 #ifdef __cplusplus
 }
