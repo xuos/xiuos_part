@@ -29,12 +29,16 @@ void TimerFunction(union sigval sig_val)
 void TestTimer(void)
 {
     int ret = 0;
+    int timer_flags;
     timer_t timer_id;
     struct sigevent evp;
     memset(&evp, 0, sizeof(struct sigevent));
+
+    timer_flags = TIMER_TRIGGER_PERIODIC;
     
     evp.sigev_notify = SIGEV_THREAD; 
     evp.sigev_notify_function = TimerFunction;
+    evp.sigev_notify_attributes = &timer_flags;
 
     ret = timer_create(CLOCK_REALTIME, &evp, &timer_id);
     if (ret < 0) {
@@ -51,7 +55,7 @@ void TestTimer(void)
     value.it_value.tv_sec = 2; 
     value.it_value.tv_nsec = 0; 
 
-    ret = timer_settime(timer_id, 0, &value, NULL);
+    ret = timer_settime(timer_id, 1, &value, NULL);
     if (ret < 0) { 
         printf("%s set timer time failed ret %d\n", __func__, ret);
         return;

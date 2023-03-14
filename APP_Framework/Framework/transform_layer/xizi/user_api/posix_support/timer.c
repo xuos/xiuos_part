@@ -30,6 +30,7 @@ static pthread_t timer_task;
 
 struct timer_func {
     union sigval value;
+    int timer_flags;
     void (* user_timer_function)(union sigval val);
 };
 
@@ -53,8 +54,7 @@ int timer_create(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
     int timer_id;
     char timer_name[16];
 
-    if ((NULL == evp) || (NULL == timerid) ||
-        (clockid != CLOCK_REALTIME)) {
+    if ((NULL == evp) || (NULL == timerid)) {
         errno = EINVAL;
         return -1;
     }
@@ -72,6 +72,7 @@ int timer_create(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
 
     g_timer_func.value = evp->sigev_value;
     g_timer_func.user_timer_function = evp->sigev_notify_function;
+    g_timer_func.timer_flags = *(int *)(evp->sigev_notify_attributes);
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 22;
@@ -79,7 +80,7 @@ int timer_create(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
 
     pthread_create(&timer_task, &attr, &timer_callback, (void *)evp);
     
-    timer_id = UserTimerCreate(timer_name, NULL, (void *)&timer_sem, 0, TIMER_TRIGGER_PERIODIC);
+    timer_id = UserTimerCreate(timer_name, NULL, (void *)&timer_sem, 1000, g_timer_func.timer_flags);
     *timerid = timer_id;
     return timer_id;
 }
@@ -114,5 +115,8 @@ int timer_settime(timer_t timerid, int flags, const struct itimerspec *restrict 
     int ticks = (value->it_interval.tv_sec * TICK_PER_SECOND) + (value->it_interval.tv_nsec * TICK_PER_SECOND) / 1000000000;
 
     UserTimerModify(timerid, ticks);
-    UserTimerStartRun(timerid);
+
+    if (flags) {
+        UserTimerStartRun(timerid);  
+    }
 }
