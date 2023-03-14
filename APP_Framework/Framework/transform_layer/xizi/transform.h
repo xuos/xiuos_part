@@ -94,6 +94,30 @@ extern "C" {
 #define SERIAL_RB_BUFSZ         128
 #endif
 
+/********************SPI define*******************/
+#define SPI_MAX_CLOCK            40000000
+#define spi_device_max_num       4
+
+#define SPI_LINE_CPHA            (1 << 0)                           
+#define SPI_LINE_CPOL            (1 << 1)                          
+
+#define SPI_LSB                  (0 << 2)                             
+#define SPI_MSB                  (1 << 2)                             
+
+#define SPI_DEV_MASTER           (0 << 3)                            
+#define SPI_DEV_SLAVE            (1 << 3)      
+
+#define SPI_MODE_0               (0 | 0)                        
+#define SPI_MODE_1               (0 | SPI_LINE_CPHA)              
+#define SPI_MODE_2               (SPI_LINE_CPOL | 0)            
+#define SPI_MODE_3               (SPI_LINE_CPOL | SPI_LINE_CPHA)    
+#define SPI_MODE_MASK            (SPI_LINE_CPHA | SPI_LINE_CPOL | SPI_MSB)
+
+#define SPI_CS_HIGH              (1 << 4)                            
+#define SPI_NO_CS                (1 << 5)                           
+#define SPI_3WIRE                (1 << 6)                             
+#define SPI_READY                (1 << 7)
+
 struct PinDevIrq
 {
     int irq_mode;//< RISING/FALLING/HIGH/LOW
@@ -138,6 +162,15 @@ struct SerialDataCfg
     uint8_t is_ext_uart;
     uint8_t ext_uart_no;
     enum ExtSerialPortConfigure port_configure;
+};
+
+struct SpiMasterParam
+{
+    uint8 spi_work_mode;//CPOL CPHA
+    uint8 spi_frame_format;//frame format
+    uint8 spi_data_bit_width;//bit width
+    uint8 spi_data_endian;//little endian：0，big endian：1
+    uint32 spi_maxfrequency;//work frequency
 };
 
 enum IoctlDriverType

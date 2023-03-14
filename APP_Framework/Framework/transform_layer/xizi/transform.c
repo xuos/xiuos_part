@@ -195,6 +195,7 @@ int PrivIoctl(int fd, int cmd, void *args)
     case LCD_TYPE:
         ret = PrivLcdIoctl(fd, cmd, ioctl_cfg->args);
         break;
+    case SPI_TYPE:
     case I2C_TYPE:
     case RTC_TYPE:
     case ADC_TYPE:
