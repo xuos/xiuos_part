@@ -22,3 +22,6 @@
 [submodule "Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/xidatong-riscv64/kendryte-sdk/kendryte-sdk-source"]
 	path = Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/xidatong-riscv64/kendryte-sdk/kendryte-sdk-source
 	url = https://code.gitlink.org.cn/chunyexixiaoyu/kendryte-sdk-source.git
+[submodule "APP_Framework/lib/lora_radio_driver"]
+	path = APP_Framework/lib/lora_radio_driver
+	url = https://gitlink.org.cn/IACU/lora_radio_driver.git
