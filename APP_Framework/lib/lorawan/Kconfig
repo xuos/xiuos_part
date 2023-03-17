@@ -1,0 +1,17 @@
+menu "lib using LoRaWan"
+
+menuconfig LIB_USING_LORAWAN
+    bool "Using LoRaWan lib"
+    default n
+
+    if LIB_USING_LORAWAN
+        menuconfig LIB_USING_LORA_RADIO
+            bool "LoRaWan using lora-radio-driver lib"
+            default n
+
+        if LIB_USING_LORA_RADIO
+            source "$APP_DIR/lib/lorawan/lora_radio_driver/Kconfig"
+        endif
+    endif
+
+endmenu
