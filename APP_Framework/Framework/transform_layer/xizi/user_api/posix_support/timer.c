@@ -112,7 +112,7 @@ int timer_settime(timer_t timerid, int flags, const struct itimerspec *restrict 
         *    TICK_PER_SECOND           NANOSECOND_PER_SECOND                         NANOSECOND_PER_SECOND
         *
         */
-    int ticks = (value->it_interval.tv_sec * TICK_PER_SECOND) + (value->it_interval.tv_nsec * TICK_PER_SECOND) / 1000000000;
+    uint32_t ticks = (value->it_interval.tv_sec * TICK_PER_SECOND) + (value->it_interval.tv_nsec / 1000000000) * TICK_PER_SECOND;
 
     UserTimerModify(timerid, ticks);
 
