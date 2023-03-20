@@ -43,6 +43,16 @@ extern "C" {
 
 #define NAME_NUM_MAX            32
 
+#ifndef EVENT_AND
+#define EVENT_AND          (1 << 0)
+#endif
+#ifndef EVENT_OR
+#define EVENT_OR           (1 << 1)
+#endif
+#ifndef EVENT_AUTOCLEAN
+#define EVENT_AUTOCLEAN    (1 << 2)
+#endif
+
 /*********************GPIO define*********************/
 #define GPIO_LOW    0x00
 #define GPIO_HIGH   0x01
@@ -384,6 +394,14 @@ int PrivSemaphoreObtainWait(sem_t *sem, const struct timespec *abstime);
 int PrivSemaphoreObtainNoWait(sem_t *sem);
 int PrivSemaphoreAbandon(sem_t *sem);
 int32_t PrivSemaphoreSetValue(int32_t sem, uint16_t val);
+
+/*********************event**********************/
+#ifndef SEPARATE_COMPILE
+int PrivEventCreate(uint8_t flag);
+int PrivEvenDelete(int event);
+int PrivEvenTrigger(int event, uint32_t set);
+int PrivEventProcess(int event, uint32_t set, uint8_t option, int32_t wait_time, unsigned int *Recved);
+#endif
 
 /*********************task**************************/
 

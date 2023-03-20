@@ -68,6 +68,30 @@ int PrivSemaphoreAbandon(sem_t *sem)
     return sem_post(sem);
 }
 
+/**********************event****************************/
+#ifndef SEPARATE_COMPILE
+int PrivEventCreate(uint8_t flag)
+{
+    return UserEventCreate(flag);
+}
+
+int PrivEvenDelete(int event)
+{
+    UserEventDelete(event);
+    return 1;
+}
+
+int PrivEvenTrigger(int event, uint32_t set)
+{
+    return UserEventTrigger(event, set);
+}
+
+int PrivEventProcess(int event, uint32_t set, uint8_t option, int32_t wait_time, unsigned int *Recved)
+{
+    return UserEventProcess(event, set, option, wait_time, Recved);
+}
+#endif
+
 /**************************task*************************/
 int PrivTaskCreate(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*start_routine)(void *), void *arg)
