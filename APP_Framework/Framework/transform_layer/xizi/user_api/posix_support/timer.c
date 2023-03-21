@@ -107,12 +107,13 @@ int timer_settime(timer_t timerid, int flags, const struct itimerspec *restrict 
     //reference from RTT
     /* calculate timer period(tick);  To avoid lost of accuracy, because "TICK_PER_SECOND" maybe 100, 1000, 1024 and so on.
         *
-        *          tick                        nanosecond                          nanosecond * TICK_PER_SECOND
+        *          tick                        millisecond                          millisecond * TICK_PER_SECOND
         *  ------------------------- = --------------------------  --->  tick = -------------------------------------
-        *    TICK_PER_SECOND           NANOSECOND_PER_SECOND                         NANOSECOND_PER_SECOND
+        *    TICK_PER_SECOND           MILLISECOND_PER_SECOND                         MILLISECOND_PER_SECOND
         *
         */
-    uint32_t ticks = (value->it_interval.tv_sec * TICK_PER_SECOND) + (value->it_interval.tv_nsec / 1000000000) * TICK_PER_SECOND;
+    uint32_t ms_value = value->it_interval.tv_nsec / 1000000;
+    uint32_t ticks = (value->it_interval.tv_sec * TICK_PER_SECOND) + (ms_value * TICK_PER_SECOND) / 1000;
 
     UserTimerModify(timerid, ticks);
 
