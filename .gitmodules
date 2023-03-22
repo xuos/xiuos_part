@@ -25,3 +25,7 @@
 [submodule "APP_Framework/lib/lorawan/lora_radio_driver"]
 	path = APP_Framework/lib/lorawan/lora_radio_driver
 	url = https://gitlink.org.cn/IACU/lora_radio_driver.git
+[submodule "APP_Framework/lib/lorawan/lorawan_devicenode"]
+	path = APP_Framework/lib/lorawan/lorawan_devicenode
+	url = https://gitlink.org.cn/IACU/lorawan_devicenode.git
+	branch = master
