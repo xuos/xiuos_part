@@ -525,6 +525,14 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_drive
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/ports/lora-module/inc #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/ports/samples/lora-radio-tester #
 endif
+
+ifeq ($(CONFIG_LIB_USING_LORAWAN_ED_STACK), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Aps/Basic #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Common #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Mac #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Mac/Crypto #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Phy/region #
+endif
 endif
 
 ifeq ($(CONFIG_CRYPTO), y)

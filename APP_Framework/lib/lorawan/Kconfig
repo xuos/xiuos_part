@@ -5,6 +5,15 @@ menuconfig LIB_USING_LORAWAN
     default n
 
     if LIB_USING_LORAWAN
+        menuconfig LIB_USING_LORAWAN_ED_STACK
+            bool "LoRaWan using lorawan_ed_stack lib"
+            default n
+            select LIB_USING_LORA_RADIO
+
+        if LIB_USING_LORAWAN_ED_STACK
+            source "$APP_DIR/lib/lorawan/lorawan_devicenode/Kconfig"
+        endif
+
         menuconfig LIB_USING_LORA_RADIO
             bool "LoRaWan using lora-radio-driver lib"
             default n
