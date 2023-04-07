@@ -24,6 +24,7 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/hardkernel/arch/arm/armv7-a/cortex-a9 \
 	-I$(KERNEL_ROOT)/hardkernel/abstraction \
 	-I$(KERNEL_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/include
 
 ifeq ($(CONFIG_RESOURCES_LWIP),y)
