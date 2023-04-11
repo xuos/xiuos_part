@@ -20,11 +20,11 @@
 #ifdef MCUBOOT_BOOTLOADER
 static void JumpToApp(void)
 {
-    asm volatile("LDR   R0, = 0x60040000");
+    asm volatile("LDR   R0, = 0x60100000");
     asm volatile("LDR   R0, [R0]");
     asm volatile("MOV   SP, R0");
     
-    asm volatile("LDR   R0, = 0x60040000+4");
+    asm volatile("LDR   R0, = 0x60100000+4");
     asm volatile("LDR   R0, [R0]");
     asm volatile("BX  R0");
 }
@@ -79,8 +79,8 @@ void BootLoaderJumpApp(void)
 
     UartConfig();
     
-    SerialPutString("BOOTLOADER START AND JUMP TO APP[0x60040000]\n");
-    SCB->VTOR = (uint32_t)0x60040000;
+    SerialPutString("BOOTLOADER START AND JUMP TO APP[0x60100000]\n");
+    SCB->VTOR = (uint32_t)0x60100000;
     JumpToApp();
 }
 #endif

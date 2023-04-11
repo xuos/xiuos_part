@@ -27,6 +27,10 @@ status_t FLASH_EraseSector(uint32_t addr);
 status_t FLASH_Read(uint32_t addr, const uint8_t *buf, uint32_t len);
 uint32_t FLASH_Test(uint32_t startAddr, uint32_t len);
 uint32_t FLASH_GetProgramCmd(void);
+status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt);
+status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt);
+status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len);
+status_t flash_copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize);
 
 #endif
 

@@ -13,18 +13,20 @@
 * @date 2023-04-03
 */
  
+#include <stdio.h>
+#include <xs_base.h>
 #include "flash.h"
-#include "stdio.h"
-#include "xs_base.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-
+#define APP_FLASH_SIZE  0x100000   //Application package size is limited to 1M
+#define FLASH_PAGE_SIZE 256        //每次写入256个字节
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-
+               
+uint8_t buffer[FLASH_PAGE_SIZE];       //256 bytes buffer cache
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -301,4 +303,134 @@ status_t FLASH_Read(uint32_t addr, const uint8_t *buf, uint32_t len)
     __enable_irq();
 
     return status;
+}
+
+ /**
+ * @brief  擦除flash指定地址指定长度的空间
+ * @param  start_addr: 开始地址
+ * @param  byte_cnt : 要擦除的字节数
+ * @retval kStatus_Success：擦除成功
+ */
+status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt)
+{
+    uint32_t addr;
+    status_t status;
+
+    addr = start_addr;
+    while(addr < (byte_cnt + start_addr))
+    {
+        status = FLASH_EraseSector(addr);
+        if(status != kStatus_Success)
+        {
+            return status;
+        }
+        addr += FLASH_GetSectorSize();
+    }
+    return status;
+}
+
+ /**
+ * @brief  在flash指定地址写入指定长度的数据
+ * @param  start_addr: 开始地址
+ * @param  buf : 数据buffer
+ * @param  byte_cnt : 要写入的字节数
+ * @retval kStatus_Success：写入成功
+ */
+status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt)
+{
+    return FLASH_WritePage(start_addr, buf, byte_cnt);
+}
+
+ /**
+ * @brief  在flash指定开始读取一定长度的数据到缓存中
+ * @param  start_addr: 开始地址
+ * @param  buf : 数据buffer
+ * @param  byte_cnt : 要读取的字节数
+ * @retval kStatus_Success：读取成功
+ */
+status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len)
+{   
+    /* For FlexSPI Memory ReadBack, use IP Command instead of AXI command for security */
+    if((addr >= 0x60000000) && (addr < 0x70000000))
+    {
+        return FLASH_Read(addr, buf, len);
+    }
+        
+    else
+    {
+        void* result = memcpy(buf, (void*)addr, len);
+        if(result == NULL)
+        {
+            return (status_t)kStatus_Fail;  
+        } 
+        else 
+        {
+            return (status_t)kStatus_Success;  
+        }
+        
+    }
+}
+
+ /**
+ * @brief  实现两块连续flash地址空间之间的数据拷贝
+ * @param  srcAddr: 源flash的起始地址
+ * @param  dstAddr : 目标flash的起始地址
+ * @param  imageSize : 要拷贝的flash空间大小,单位为字节
+ * @retval kStatus_Success：拷贝成功
+ */
+status_t flash_copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
+{   
+    uint32_t PageNum, Remain, i;
+    status_t status;
+
+    if((srcAddr == dstAddr) || imageSize > (APP_FLASH_SIZE + 1))
+    {
+        return (status_t)kStatus_Fail;
+    }
+
+    status = flash_erase(dstAddr,imageSize);
+    if(status != kStatus_Success)
+    {
+        KPrintf("Erase flash 0x%08x failure !\r\n",dstAddr);
+        return status;
+    }
+
+    PageNum = imageSize/FLASH_PAGE_SIZE;
+    Remain = imageSize%FLASH_PAGE_SIZE;
+
+    for(i=0;i<PageNum;i++)
+    {
+        memset(buffer, 0, sizeof(buffer));
+        status = flash_read(srcAddr + i*FLASH_PAGE_SIZE, buffer, sizeof(buffer));
+        if(status != kStatus_Success)
+        {
+            KPrintf("Read flash 0x%08x failure !\r\n", srcAddr + i*FLASH_PAGE_SIZE);
+            return status;
+        }
+        status = flash_write(dstAddr+ i*FLASH_PAGE_SIZE, buffer, FLASH_PAGE_SIZE);
+        if(status != kStatus_Success)
+        {
+            KPrintf("Write flash 0x%08x failure !\r\n", dstAddr + i*FLASH_PAGE_SIZE);
+            return status;
+        }
+    }
+
+    if(Remain)
+    {
+        memset(buffer, 0, sizeof(buffer));
+        status = flash_read(srcAddr + i*FLASH_PAGE_SIZE, buffer, Remain);
+        if(status != kStatus_Success)
+        {
+            KPrintf("Read flash 0x%08x failure !\r\n", srcAddr + i*FLASH_PAGE_SIZE);
+            return status;
+        }
+        status = flash_write(dstAddr+ i*FLASH_PAGE_SIZE, buffer, Remain);
+        if(status != kStatus_Success)
+        {
+            KPrintf("Write flash 0x%08x failure !\r\n", dstAddr + i*FLASH_PAGE_SIZE);
+            return status;
+        }
+    }
+
+    return (status_t)kStatus_Success; 
 }
