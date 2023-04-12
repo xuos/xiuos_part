@@ -6,6 +6,9 @@ endif
 
 ifeq ($(CONFIG_BSP_USING_OTA),y)
   SRC_FILES += fsl_romapi.c flash.c mcuboot.c
+  ifeq ($(CONFIG_MCUBOOT_BOOTLOADER),y)
+    SRC_FILES += common.c ymodem.c
+  endif
 endif
 
 include $(KERNEL_ROOT)/compiler.mk

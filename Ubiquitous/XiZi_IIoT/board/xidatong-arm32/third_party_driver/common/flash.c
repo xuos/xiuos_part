@@ -25,7 +25,7 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-               
+uint8_t NorFlash_BUFFER[4096];         //4K buffer cache              
 uint8_t buffer[FLASH_PAGE_SIZE];       //256 bytes buffer cache
 /*******************************************************************************
  * Variables
@@ -264,13 +264,13 @@ status_t FLASH_EraseSector(uint32_t addr)
  * @param  len : 字节数
  * @retval kStatus_Success：完成
  */
-status_t FLASH_WritePage(uint32_t addr, const uint8_t *buf, uint32_t len)
+status_t FLASH_WritePage(uint32_t addr, const uint32_t *buf, uint32_t len)
 {
     status_t status;
     addr &= 0x0FFFFFFF;
     __disable_irq();
     norConfig.pageSize = len;
-    status = ROM_FLEXSPI_NorFlash_ProgramPage(0, &norConfig, addr, (const uint32_t *)buf);
+    status = ROM_FLEXSPI_NorFlash_ProgramPage(0, &norConfig, addr, buf);
     __enable_irq();
 
     return status;
@@ -282,7 +282,7 @@ status_t FLASH_WritePage(uint32_t addr, const uint8_t *buf, uint32_t len)
  * @param  len : 字节数
  * @retval kStatus_Success：完成
  */
-status_t FLASH_Read(uint32_t addr, const uint8_t *buf, uint32_t len)
+status_t FLASH_Read(uint32_t addr, uint32_t *buf, uint32_t len)
 {
     status_t status;
     flexspi_xfer_t flashXfer;
@@ -294,7 +294,7 @@ status_t FLASH_Read(uint32_t addr, const uint8_t *buf, uint32_t len)
     flashXfer.seqId = NOR_CMD_LUT_SEQ_IDX_READ;
     flashXfer.baseAddress = addr;
     flashXfer.isParallelModeEnable = false;	
-    flashXfer.rxBuffer = (uint32_t *)buf;
+    flashXfer.rxBuffer = buf;
     flashXfer.rxSize = len;
 
     __disable_irq();
@@ -338,7 +338,7 @@ status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt)
  */
 status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt)
 {
-    return FLASH_WritePage(start_addr, buf, byte_cnt);
+    return FLASH_WritePage(start_addr, (void *)buf, byte_cnt);
 }
 
  /**
@@ -353,7 +353,7 @@ status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len)
     /* For FlexSPI Memory ReadBack, use IP Command instead of AXI command for security */
     if((addr >= 0x60000000) && (addr < 0x70000000))
     {
-        return FLASH_Read(addr, buf, len);
+        return FLASH_Read(addr, (void *)buf, len);
     }
         
     else
@@ -434,3 +434,183 @@ status_t flash_copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
 
     return (status_t)kStatus_Success; 
 }
+
+status_t NOR_FLASH_Erase(uint32_t app_base_addr,uint32_t imageSize)
+{
+    uint16_t i;
+    uint32_t sectorNum = (imageSize%4096 != 0)? (imageSize/4096 + 1):(imageSize/4096);
+    
+    for(i=0;i<sectorNum;i++)
+    {
+       status_t status = FLASH_EraseSector(app_base_addr+i*SECTOR_SIZE);
+    
+        if (status != kStatus_Success)
+        {
+            KPrintf("Erase_Sector 0x%x faild!\r\n",i*SECTOR_SIZE);
+            return status;
+        }
+    }
+    return kStatus_Success;
+}
+
+void NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
+{
+    uint8_t temp_data[256] = {0xff};
+
+    memcpy(temp_data,pBuffer,NumByteToWrite);
+    
+   status_t status = FLASH_WritePage(WriteAddr,(void *)temp_data,FLASH_PAGE_SIZE);
+    if (status != kStatus_Success)
+    {
+        KPrintf("Write_PageProgram 0x%x faild!\r\n",WriteAddr);
+    }
+} 
+
+void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)   
+{
+    uint16_t pageRemain;	
+    
+    pageRemain = 256 - WriteAddr%256;//单页剩余的字节数
+    
+    if(NumByteToWrite <= pageRemain)
+    {
+        pageRemain = NumByteToWrite;//不大于256个字节
+    }
+
+    while(1)
+    {
+        NorFlash_Write_PageProgram(pBuffer,WriteAddr,pageRemain);
+        if(NumByteToWrite == pageRemain)
+        {
+            break;//写入结束了	
+        }
+        else //NumByteToWrite>pageRemain
+        {
+            pBuffer += pageRemain;
+            WriteAddr += pageRemain;
+
+            NumByteToWrite -= pageRemain;//减去已经写入了的字节数
+            if(NumByteToWrite > 256)
+            {
+                pageRemain = 256;//一次可以写入256个字节
+            }
+            else 
+            {
+                pageRemain = NumByteToWrite;//不够256个字节了
+            }
+        }
+    }
+} 
+
+void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
+{ 
+    uint32_t secPos;
+    uint16_t secOff;
+    uint16_t secRemain;
+    uint16_t i;    
+    uint8_t *NorFlash_BUF = 0;
+
+    NorFlash_BUF = NorFlash_BUFFER;//RAM缓冲区4K
+
+    WriteAddr &= 0x0FFFFFFF;
+    
+    secPos = WriteAddr/SECTOR_SIZE;//扇区地址  
+    secOff = WriteAddr%SECTOR_SIZE;//在扇区内的偏移
+    secRemain = SECTOR_SIZE - secOff;//扇区剩余空间大小
+    
+    if(NumByteToWrite <= secRemain)
+    {
+        secRemain = NumByteToWrite;//不大于4096个字节	
+    }	
+    while(1) 
+    {	
+        FLASH_Read(FLASH_BASE + secPos*SECTOR_SIZE, (void *)NorFlash_BUF, SECTOR_SIZE);//读出整个扇区的内容
+        for(i=0;i<secRemain;i++)//校验数据
+        {
+            if(NorFlash_BUF[secOff+i] != 0xFF)
+            {
+                break;//需要擦除
+            }
+        }
+        if(i < secRemain)//需要擦除
+        {
+            FLASH_EraseSector(FLASH_BASE + secPos*SECTOR_SIZE);
+            for(i=0;i<secRemain;i++)//复制
+            {
+                NorFlash_BUF[i+secOff] = pBuffer[i];
+                        
+            }
+            NorFlash_Write_NoCheck(NorFlash_BUF,FLASH_BASE + secPos*4096,4096);//写入整个扇区  
+        }
+        else
+        {
+            NorFlash_Write_NoCheck(pBuffer,FLASH_BASE + WriteAddr,secRemain);//写已经擦除了的,直接写入扇区剩余区间. 		
+        }
+                           
+        if(NumByteToWrite == secRemain)
+        {
+            break;//写入结束了
+        }
+        else//写入未结束
+        {
+            secPos++;//扇区地址增1
+            secOff=0;//偏移位置为0
+
+            pBuffer += secRemain;//指针偏移
+            WriteAddr += secRemain;//写地址偏移
+            NumByteToWrite -= secRemain;//字节数递减
+            if(NumByteToWrite > 4096)
+            {
+                secRemain = 4096;//下一个扇区还是写不完	
+            }
+            else
+            {
+                secRemain = NumByteToWrite;//下一个扇区可以写完了	
+            }
+        }
+    }
+}
+
+#ifndef  USE_HIGHT_SPEED_TRANS
+uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength)
+{
+    uint32_t WriteAddr;
+    WriteAddr = *FlashAddress;
+    NorFlash_Write(Data,WriteAddr,DataLength);
+    *FlashAddress += DataLength;
+    return 0;
+}
+#else
+uint8_t packetNum = 0;
+uint32_t dataLen = 0;
+uint32_t WriteAddr;
+uint8_t dataBuff[5*1024];
+uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength,uint8_t doneFlag)
+{
+    if(!doneFlag)
+    {  
+        memcpy(&dataBuff[dataLen],Data,DataLength);
+        dataLen += DataLength;
+        packetNum ++;
+        if(1 == packetNum)
+        {
+            WriteAddr = *FlashAddress;    		 
+        }
+
+        if(dataLen>=4096)
+        {
+            NorFlash_Write(dataBuff,WriteAddr,dataLen);
+            packetNum = 0;
+            dataLen = 0; 
+        }
+        *FlashAddress += DataLength;
+    }
+    else
+    {
+        NorFlash_Write(dataBuff,WriteAddr,dataLen);
+        packetNum = 0;
+        dataLen = 0; 
+    }
+   return (0);
+}
+#endif

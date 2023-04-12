@@ -12,22 +12,16 @@
 * @author AIIT XUOS Lab
 * @date 2023-04-03
 */
- 
+
+#include <stdint.h>
+#include <xs_base.h>
 #include "flash.h"
-#include "stdint.h"
 #include "mcuboot.h"
+#include "ymodem.h"
+#include "common.h"
 
 #ifdef MCUBOOT_BOOTLOADER
-static void JumpToApp(void)
-{
-    asm volatile("LDR   R0, = 0x60100000");
-    asm volatile("LDR   R0, [R0]");
-    asm volatile("MOV   SP, R0");
-    
-    asm volatile("LDR   R0, = 0x60100000+4");
-    asm volatile("LDR   R0, [R0]");
-    asm volatile("BX  R0");
-}
+extern void ImxrtMsDelay(uint32 ms);
 
 static uint32_t UartSrcFreq(void)
 {
@@ -55,32 +49,72 @@ static void UartConfig(void)
     LPUART_Init(LPUART1, &config, UartSrcFreq());
 }
 
-static void SerialPutC(uint8_t c)
+static void jump_to_application(void)
 {
-    LPUART_WriteByte(LPUART1, c);
-    while(!(kLPUART_TxDataRegEmptyFlag & LPUART_GetStatusFlags(LPUART1))) 
-    {
-    }
-}
+    SCB->VTOR = (uint32_t)0x60100000;
 
-static void SerialPutString(uint8_t *s)
-{
-    while (*s != '\0') {
-        SerialPutC(*s);
-        s++;
-    }
+    asm volatile("LDR   R0, = 0x60100000");
+    asm volatile("LDR   R0, [R0]");
+    asm volatile("MOV   SP, R0");
+    
+    asm volatile("LDR   R0, = 0x60100000+4");
+    asm volatile("LDR   R0, [R0]");
+    asm volatile("BX  R0");
 }
 
 void BootLoaderJumpApp(void)
 {
+    uint8_t ch1, ch2;
+    uint32_t ret;
+    uint32_t timeout = 500;
+
     BOARD_ConfigMPU();
     BOARD_InitPins();
     BOARD_BootClockRUN();
-
     UartConfig();
+    SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
+
+    Serial_PutString("Please press 'space' key into menu in 5s !!!\r\n");
     
-    SerialPutString("BOOTLOADER START AND JUMP TO APP[0x60100000]\n");
-    SCB->VTOR = (uint32_t)0x60100000;
-    JumpToApp();
+    while(timeout)
+    { 
+        ret = (SerialKeyPressed((uint8_t*)&ch1));
+        if(ret) break;
+        timeout--;
+        ImxrtMsDelay(10);
+    }
+
+    while(1)
+    {
+        if((ret)&&(ch1 == 0x20))
+        {
+            Serial_PutString("\r\nPlease slecet:");
+            Serial_PutString("\r\n 1:run app");
+            Serial_PutString("\r\n 2:update app");
+            Serial_PutString("\r\n 3:reboot \r\n");
+
+            ch2 = GetKey();
+            switch(ch2)
+            {
+                case 0x31:
+                    jump_to_application();
+                    break;
+                case 0x32:
+                    FLASH_Init();
+                    SerialDownload();
+                    FLASH_DeInit();
+                    break;
+                case 0x33:
+                    __set_FAULTMASK(1);
+                    NVIC_SystemReset();
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            jump_to_application();
+        } 
+    }
 }
 #endif
