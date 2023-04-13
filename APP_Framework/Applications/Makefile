@@ -13,6 +13,7 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
     SRC_FILES := main.c
     ifeq ($(CONFIG_LIB_LV),y)
         SRC_DIR += lv_app
+        SRC_DIR += tinyttf_app
     endif
 
     ifeq ($(CONFIG_APPLICATION_OTA),y)
