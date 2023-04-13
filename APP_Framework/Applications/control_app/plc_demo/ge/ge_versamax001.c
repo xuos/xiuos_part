@@ -11,26 +11,26 @@
  */
 
 /**
- * @file schneider_m241.c
- * @brief PLC SCHNEIDER M241 app
+ * @file ge_versamax001.c
+ * @brief PLC GE Versamax app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2023.2.1
+ * @date 2022.9.27
  */
 
 #include <control.h>
 
 extern int Adapter4GActive(void);
 
-void ControlM241Test(void)
+void ControlGeversamaxTest(void)
 {
     int i, j = 0;
     int read_data_length = 0;
     uint8_t read_data[128] = {0};
 
-    #ifdef CONNECTION_ADAPTER_4G
-        Adapter4GActive();
-    #endif
+#ifdef CONNECTION_ADAPTER_4G
+    Adapter4GActive();
+#endif
 
     ControlProtocolType modbus_rtu_protocol = ControlProtocolFind();
     if (NULL == modbus_rtu_protocol) {
@@ -59,6 +59,6 @@ void ControlM241Test(void)
         //ControlProtocolClose(modbus_rtu_protocol);
     }
 }
-PRIV_SHELL_CMD_FUNCTION(ControlM241Test, Schneider M241 Demo, PRIV_SHELL_CMD_MAIN_ATTR);
+PRIV_SHELL_CMD_FUNCTION(ControlGeversamaxTest, ge versamax001 Demo, PRIV_SHELL_CMD_MAIN_ATTR);
 
 
