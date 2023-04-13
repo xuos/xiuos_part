@@ -4,7 +4,7 @@
 
 .section ".startup","ax"
 .globl _reset
-
+.extern init
 _reset:
 
     /* set the cpu to SVC32 mode and disable interrupt */
@@ -21,6 +21,11 @@ _reset:
     mcr     p15, 0, r0, c1, c0, 0
     
     ldr     r0, =stack_top
+
+    @ get cpu id, and subtract the offset from the stacks base address
+    mrc     p15,0,r2,c0,c0,5  @ read multiprocessor affinity register
+    and     r2, r2, #3        @ mask off, leaving CPU ID field
+    mov     r5, r2		      @ save cpu id for later
 
     @  Set the startup stack for svc
     mov     sp, r0
@@ -86,7 +91,7 @@ ctor_loop:
     b       ctor_loop
 ctor_end:
 
-    bl     start_kernel
+    bl     init
 
 _loop_here:
     b      _loop_here

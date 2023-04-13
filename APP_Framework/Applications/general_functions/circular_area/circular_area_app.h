@@ -29,11 +29,20 @@
 extern "C" {
 #endif
 
+#define CA_CHECK(TRUE_CONDITION)                                                                                   \
+    do                                                                                                             \
+    {                                                                                                              \
+        if(!(TRUE_CONDITION)) {                                                                                    \
+            printf("%s CHECK condition is false at line[%d] of [%s] func.\n", #TRUE_CONDITION, __LINE__, __func__);\
+            while(1);                                                                                              \
+        }                                                                                                          \
+    }while (0) 
+
 #define CA_PARAM_CHECK(param)                                                                  \
     do                                                                                         \
     {                                                                                          \
         if(param == NULL) {                                                                    \
-            KPrintf("PARAM CHECK FAILED ...%s %d %s is NULL.\n", __func__, __LINE__, #param);  \
+            printf("PARAM CHECK FAILED ...%s %d %s is NULL.\n", __func__, __LINE__, #param);  \
             while(1);                                                                          \
         }                                                                                      \
     }while (0) 
