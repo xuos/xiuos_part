@@ -40,7 +40,6 @@ void TestTouch(void)
 }
 #endif
 
-#endif
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
@@ -49,6 +48,7 @@ void TestTouch(void)
 #define LCD_DOT_TYPE 1
 #define LCD_SIZE 320
 
+#elif ADD_XIZI_FETURES
 
 void TestTouch(void)
 {
@@ -110,3 +110,4 @@ void TestTouch(void)
 }
 
 PRIV_SHELL_CMD_FUNCTION(TestTouch, a touch test sample, PRIV_SHELL_CMD_MAIN_ATTR);
+#endif
