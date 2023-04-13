@@ -38,8 +38,21 @@ void TestLcd(void)
         return;
     }
 
-    // draw text
     LcdWriteParam graph_param;
+
+    // black
+    uint16* color_select = malloc(sizeof(uint16) * 321 * 321);
+    memset(color_select, 0x00, sizeof(uint16) * 321 * 321);
+    graph_param.type = LCD_DOT_TYPE;
+    graph_param.pixel_info.x_startpos = 0;
+    graph_param.pixel_info.y_startpos = 0;
+    graph_param.pixel_info.x_endpos = 320;
+    graph_param.pixel_info.y_endpos = 320;
+    graph_param.pixel_info.pixel_color = color_select;
+    PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
+    free(color_select);
+
+    // draw text
     graph_param.type = LCD_STRING_TYPE;
     graph_param.string_info.x_pos = 0;
     graph_param.string_info.y_pos = 0;
@@ -49,20 +62,25 @@ void TestLcd(void)
     graph_param.string_info.back_color = 0xFFFF;
     graph_param.string_info.font_color = 0x0000;
     graph_param.string_info.addr = "hello_world!";
-
     PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
 
-    uint16 color_select = 0xF800;
-    for (int i = 0; i < 5; i++)
+    // draw line
+    color_select = malloc(sizeof(uint16) * 1 * 320);
+    for (int i = 0; i < 320; i++)
+    {
+        color_select[i] = 0xF800;
+    }
+    for (int i = 1; i <= 5; i++)
     {
         graph_param.type = LCD_DOT_TYPE;
         graph_param.pixel_info.x_startpos = 0;
-        graph_param.pixel_info.y_startpos = 50 * i;
-        graph_param.pixel_info.x_endpos = 320;
-        graph_param.pixel_info.y_endpos = 50 * i;
-        graph_param.pixel_info.pixel_color = &color_select;
+        graph_param.pixel_info.y_startpos = i * 50;
+        graph_param.pixel_info.x_endpos = 319;
+        graph_param.pixel_info.y_endpos = i * 50;
+        graph_param.pixel_info.pixel_color = color_select;
         PrivWrite(lcd_fd, &graph_param, NULL_PARAMETER);
     }
+    free(color_select);
 
     PrivClose(lcd_fd);
 }
