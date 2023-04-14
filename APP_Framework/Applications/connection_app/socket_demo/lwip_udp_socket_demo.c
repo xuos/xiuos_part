@@ -142,8 +142,8 @@ void UdpSocketRecvTest(int argc, char *argv[])
 #endif
 #ifdef ADD_NUTTX_FETURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
-    attr.priority = LWIP_TCP_DEMO_TASK_PRIO;
-    attr.stacksize = LWIP_TCP_DEMO_TASK_STACK_SIZE;
+    attr.priority = LWIP_UDP_DEMO_TASK_PRIO;
+    attr.stacksize = LWIP_UDP_DEMO_TASK_STACK_SIZE;
 #endif
 
     PrivTaskCreate(&udp_server_task, &attr, &UdpSocketRecvTask, NULL);
@@ -208,8 +208,8 @@ void UdpSocketSendTest(int argc, char *argv[])
 #endif
 #ifdef ADD_NUTTX_FETURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
-    attr.priority = LWIP_TCP_DEMO_TASK_PRIO;
-    attr.stacksize = LWIP_TCP_DEMO_TASK_STACK_SIZE;
+    attr.priority = LWIP_UDP_DEMO_TASK_PRIO;
+    attr.stacksize = LWIP_UDP_DEMO_TASK_STACK_SIZE;
 #endif
 
     PrivTaskCreate(&udp_client_task, &attr, &UdpSocketSendTask, NULL);

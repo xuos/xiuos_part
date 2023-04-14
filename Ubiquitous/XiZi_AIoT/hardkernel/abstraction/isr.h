@@ -55,8 +55,8 @@ struct IsrDone
     bool (*isInIsr)();
     int32_t  (*registerIrq)(uint32_t irq_num, IsrHandlerType handler, void *arg);
     int32_t  (*freeIrq)(uint32_t irq_num);
-    int32_t  (*enableIrq)(uint32_t irq_num);
-    int32_t  (*disableIrq)(uint32_t irq_num);
+    int32_t  (*enableIrq)(uint32_t irq_num, uint32_t cpu_id);
+    int32_t  (*disableIrq)(uint32_t irq_num, uint32_t cpu_id);
     void   (*handleIrq)(uint32_t irq_num);
     uint16_t (*getCounter)() ;
     void   (*incCounter)();

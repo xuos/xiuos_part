@@ -18,6 +18,7 @@
 * @date:    2022/1/7
 */
 
+#ifdef ADD_XIZI_FETURES
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
@@ -57,3 +58,4 @@ void TestAdc(void)
     return;
 }
 PRIV_SHELL_CMD_FUNCTION(TestAdc, a adc test sample, PRIV_SHELL_CMD_MAIN_ATTR);
+#endif

@@ -19,8 +19,8 @@
 
 #define ARCH_MAX_IRQ_NUM  PLATFORM_MAX_IRQ_NR
 
-int32_t ArchEnableHwIrq(uint32_t irq_num);
-int32_t ArchDisableHwIrq(uint32_t irq_num);
+int32_t ArchEnableHwIrq(uint32_t irq_num, uint32_t cpu_id);
+int32_t ArchDisableHwIrq(uint32_t irq_num, uint32_t cpu_id);
 
 //! @brief
 typedef enum {

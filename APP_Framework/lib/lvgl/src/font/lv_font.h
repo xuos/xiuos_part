@@ -41,6 +41,8 @@ typedef struct {
     int16_t ofs_x;   /**< x offset of the bounding box*/
     int16_t ofs_y;  /**< y offset of the bounding box*/
     uint8_t bpp;   /**< Bit-per-pixel: 1, 2, 4, 8*/
+    uint8_t is_placeholder: 1; /** Glyph is missing. But placeholder will still be displayed */
+
 } lv_font_glyph_dsc_t;
 
 /** The bitmaps might be upscaled by 3 to achieve subpixel rendering.*/
@@ -70,7 +72,7 @@ typedef struct _lv_font_t {
 
     int8_t underline_position;      /**< Distance between the top of the underline and base line (< 0 means below the base line)*/
     int8_t underline_thickness;     /**< Thickness of the underline*/
-
+    const struct _lv_font_t * fallback;   /**< Fallback font for missing glyph. Resolved recursively */
     const void * dsc;                     /**< Store implementation specific or run_time data or caching here*/
 #if LV_USE_USER_DATA
     void * user_data;               /**< Custom user data for font.*/
