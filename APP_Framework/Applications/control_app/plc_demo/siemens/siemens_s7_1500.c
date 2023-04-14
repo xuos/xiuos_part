@@ -15,9 +15,6 @@
  * @brief PLC SIEMENS S7-1500 app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2022.9.27
+ * @date 2023.3.27
  */
-
-
-
 

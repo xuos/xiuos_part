@@ -11,10 +11,10 @@
  */
 
 /**
- * @file omron_cj2m.c
- * @brief PLC OMRON CJ2M app
+ * @file omron_cp1h.c
+ * @brief PLC OMRON CP1H app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2022.9.27
+ * @date 2023.4.1
  */
 

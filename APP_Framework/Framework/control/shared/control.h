@@ -28,6 +28,8 @@
 extern "C" {
 #endif
 
+
+
 struct ControlProtocol;
 typedef struct ControlProtocol *ControlProtocolType;
 
@@ -97,6 +99,9 @@ int ControlProtocolWrite(struct ControlProtocol *control_protocol, const void *b
 
 /*Control Framework Protocol Ioctl*/
 int ControlProtocolIoctl(struct ControlProtocol *control_protocol, int cmd, void *args);
+
+/*Control Framework new certain Protocol*/
+ControlProtocolType control_protocol;
 
 #ifdef __cplusplus
 }

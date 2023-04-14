@@ -329,7 +329,11 @@ void *ReceivePlcDataTask(void *parameter)
         /*read all variable item data, put them into circular_area*/
         if (i == control_protocol->recipe->read_item_count) {
             printf("%s get %d item %d length\n", __func__, i, data_length);
+            // for(int i = 0; i < data_length; i++){
+            //     printf("%x\n",fins_data[i]);
+            // }
             CircularAreaAppWrite(circular_area, fins_data, data_length, 0);
+            printf("%s\n",fins_data);
         }
 
         /*read data every single 'read_period' ms*/
