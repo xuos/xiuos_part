@@ -15,7 +15,7 @@ endif
 # export LINK_LWIP := $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
 # endif
 
-export DEFINES := -DHAVE_CCONFIG_H
+export DEFINES := -DHAVE_CCONFIG_H -DCHIP_MX6DQ
 
 export USING_NEWLIB =1
 export USING_VFS = 1

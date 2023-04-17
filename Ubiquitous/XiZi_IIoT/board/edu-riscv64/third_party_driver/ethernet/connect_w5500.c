@@ -437,44 +437,61 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) |
                  wiz_server_op, wiz_server_test,
                  wiz_sock_recv or wiz_sock_send data as tcp server);
 
-int32_t loopback_udps(uint8_t sn, uint8_t *buf, uint16_t port) {
-  int32_t ret;
-  uint16_t size, sentsize;
-  uint8_t destip[4];
-  uint16_t destport;
-  // uint8_t  packinfo = 0;
-  switch (getSn_SR(sn)) {
-    case SOCK_UDP:
-      if ((size = getSn_RX_RSR(sn)) > 0) {
-        if (size > g_wiznet_buf_size) size = g_wiznet_buf_size;
-        ret = wiz_sock_recvfrom(sn, buf, size, destip, (uint16_t *)&destport);
-        if (ret <= 0) {
-          printf("%d: wiz_sock_recvfrom error. %ld\r\n", sn, ret);
-          return ret;
-        }
-        size = (uint16_t)ret;
-        sentsize = 0;
-        while (sentsize != size) {
-          ret = wiz_sock_sendto(sn, buf + sentsize, size - sentsize, destip,
-                                destport);
-          if (ret < 0) {
-            printf("%d: wiz_sock_sendto error. %ld\r\n", sn, ret);
-            return ret;
-          }
-          sentsize += ret;  // Don't care SOCKERR_BUSY, because it is zero.
-        }
-      }
-      break;
-    case SOCK_CLOSED:
-      printf("%d:LBUStart\r\n", sn);
-      if ((ret = wiz_socket(sn, Sn_MR_UDP, port, 0x00)) != sn) return ret;
-      printf("%d:Opened, port [%d]\r\n", sn, port);
-      break;
-    default:
-      break;
+void loopback_udps(int argc, char *argv[]) 
+{
+  /* argv[1]: remote_ip      ip address of remote udp
+   * argv[2]: remote_port    the port number of the remote udp
+   * argv[2]: local_port     the port number of the local udp
+   */
+  uint32_t tmp_ip[4];
+  uint8_t remote_ip[4];
+  uint16_t remote_port, local_port;
+  uint8_t buffer[g_wiznet_buf_size];
+  uint16_t len = 0;
+
+  if (argc < 4)
+  {
+    KPrintf("loopback_udps test error\n");
+    return;
   }
-  return 1;
+
+  sscanf(argv[1], "%d.%d.%d.%d", &tmp_ip[0], &tmp_ip[1], &tmp_ip[2], &tmp_ip[3]);
+  for(int i = 0;i < 4; i++)
+  {
+    remote_ip[i] = (uint8_t)tmp_ip[i];
+  }
+
+  remote_port = atoi(argv[2]);
+  local_port = atoi(argv[3]);
+  while(1)
+  {
+    switch (getSn_SR(0)) 
+    {
+      case SOCK_UDP:
+        if(getSn_IR(0) & Sn_IR_RECV)
+        {
+          setSn_IR(0, Sn_IR_RECV);
+        }
+        if((len = getSn_RX_RSR(0))>0)
+        {
+          memset(buffer,0,len+1);
+          wiz_sock_recvfrom(0, buffer, len, remote_ip, (uint16_t *)&remote_port);
+          printf("received msg: %s\n", buffer);
+          wiz_sock_sendto(0, buffer, len, remote_ip, remote_port);
+        }
+        break;
+
+      case SOCK_CLOSED:
+        printf("LBUStart\r\n");
+        wiz_socket(0, Sn_MR_UDP, local_port, 0);
+        break;
+    }
+  }
 }
+
+/* wiz_udp remote_ip remote_port local_port */
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                 wiz_udp, loopback_udps, w5500 upd test);
 
 void ifconfig() {
   wiz_NetInfo wiz_netinfo;

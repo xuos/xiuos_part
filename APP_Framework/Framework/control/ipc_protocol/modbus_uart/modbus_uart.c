@@ -112,15 +112,20 @@ static int ModbusUartGetDataBySerial(ModbusUartReadItem *p_read_item)
 
     ModbusUartDataInfo *p_modbus_uart_data_info = &(p_read_item->data_info);
     BasicPlcDataInfo *p_base_data_info = &(p_modbus_uart_data_info->base_data_info);   
-    ModbusUartFunctionCode function_code = p_modbus_uart_data_info->function_code; 
+    ModbusUartFunctionCode function_code = p_modbus_uart_data_info->function_code;
+    uint16_t quantity = p_read_item->quantity;//++
 
     ControlPrintfList("SEND", p_base_data_info->p_command, p_base_data_info->command_length);
     SerialWrite(p_base_data_info->p_command, p_base_data_info->command_length);
 
     if (READ_COIL_STATUS == function_code || READ_INPUT_STATUS == function_code) {
         cmd_length = 6;
-    } else if (READ_HOLDING_REGISTER == function_code || READ_INPUT_REGISTER == function_code) {
+    } else if ((READ_HOLDING_REGISTER == function_code || READ_INPUT_REGISTER == function_code) && quantity == 1 ) {
         cmd_length = 7;
+    } else if ((READ_HOLDING_REGISTER == function_code || READ_INPUT_REGISTER == function_code) && quantity == 2 ) {
+        cmd_length = 9;
+    } else if ((READ_HOLDING_REGISTER == function_code || READ_INPUT_REGISTER == function_code) && quantity == 4 ) {
+        cmd_length = 13;    
     } else if (WRITE_SINGLE_COIL == function_code || WRITE_SINGLE_REGISTER == function_code) {
         cmd_length = 8;
     } else {
@@ -369,7 +374,7 @@ static struct ControlDone modbusuart_protocol_done =
 };
 
 /**
- * @description: Modbus TCP Protocol Cmd Generate
+ * @description: Modbus Uart Protocol Cmd Generate
  * @param p_recipe - recipe pointer
  * @param protocol_format_info - protocol format info pointer
  * @return success : 0 error : -1
@@ -402,7 +407,7 @@ int ModbusUartProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatIn
 }
 
 /**
- * @description: Modbus TCP Protocol Init
+ * @description: Modbus Uart Protocol Init
  * @param p_recipe - recipe pointer
  * @return success : 0 error : -1
  */

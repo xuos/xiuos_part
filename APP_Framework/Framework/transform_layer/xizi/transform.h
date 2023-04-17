@@ -319,6 +319,8 @@ typedef struct
 #define IOCTRL_CAMERA_SET_EFFECT            (28)     //set effect
 #define IOCTRL_CAMERA_SET_EXPOSURE          (29)     //set auto exposure
 /*********************shell***********************/
+
+#ifndef SEPARATE_COMPILE
 //for int func(int argc, char *agrv[])
 #define PRIV_SHELL_CMD_MAIN_ATTR (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN))
 
@@ -335,6 +337,15 @@ typedef struct
 #define PRIV_SHELL_CMD_FUNCTION(_func, _desc, _attr)  \
     SHELL_EXPORT_CMD(_attr, _func, _func, _desc)
 
+#else
+//for int func(int argc, char *agrv[])
+#define PRIV_SHELL_CMD_MAIN_ATTR() 
+
+//for int func(int i, char ch, char *str)
+#define PRIV_SHELL_CMD_FUNC_ATTR()
+#define PRIV_SHELL_CMD_FUNCTION(_func, _desc, _attr) 
+
+#endif
 /**********************mutex**************************/
 
 int PrivMutexCreate(pthread_mutex_t *p_mutex, const pthread_mutexattr_t *attr);

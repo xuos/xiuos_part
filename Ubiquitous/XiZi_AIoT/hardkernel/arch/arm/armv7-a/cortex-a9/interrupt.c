@@ -27,19 +27,19 @@ void EnableLocalInterrupt(unsigned long level)
     return;
 }
 
-int32_t ArchEnableHwIrq(uint32_t irq_num)
+int32_t ArchEnableHwIrq(uint32_t irq_num, uint32_t cpu_id)
 {
     // gic_set_irq_priority(irq_num, priority);
     gic_set_irq_security(irq_num, false);    // set IRQ as non-secure
-    // gic_set_cpu_target(irq_num, CPU_0, true);
+    gic_set_cpu_target(irq_num, cpu_id, true);
     gic_enable_irq(irq_num, true);
     return 0;
 }
 
-int32_t ArchDisableHwIrq(uint32_t irq_num)
+int32_t ArchDisableHwIrq(uint32_t irq_num, uint32_t cpu_id)
 {
     gic_enable_irq(irq_num, false);
-    // gic_set_cpu_target(irq_num, CPU_0, false);
+    gic_set_cpu_target(irq_num, cpu_id, false);
     return 0;
 }
 

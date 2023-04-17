@@ -2,8 +2,12 @@
 export APPPATHS :=-I$(BSP_ROOT) \
 
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/general_functions/list \
-	-I$(KERNEL_ROOT)/../../APP_Framework/lib/app_newlib/include \
-	-I$(KERNEL_ROOT)/../../APP_Framework/Framework/sensor #
+		-I$(KERNEL_ROOT)/../../APP_Framework/Framework/sensor #
+
+ifeq ($(CONFIG_APP_SELECT_NEWLIB), y)
+	APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/app_newlib/include #
+endif
+	
 
 ifeq ($(CONFIG_ADD_XIZI_FETURES), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi \
