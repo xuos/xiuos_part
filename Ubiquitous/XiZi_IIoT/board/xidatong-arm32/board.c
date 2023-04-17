@@ -414,5 +414,7 @@ void InitBoardHardware()
     KPrintf("start kernel...\n");
 #ifdef BSP_USING_OTA
     FLASH_Init();
+    //Flash operation
+    FLASH_DeInit();
 #endif
 }
