@@ -19,13 +19,11 @@
 * @date:    2023/3/24
 */
 
-
 #include "common.h"
 #include "ymodem.h"
 #include "string.h"
 #include "flash.h"
 
-#define BL_APP_VECTOR_TABLE_ADDRESS  0x60100000
 
 uint8_t tab_1024[1024] ={0};
 uint8_t FileName[FILE_NAME_LENGTH];
@@ -208,17 +206,17 @@ static int32_t Receive_Packet (uint8_t *data, int32_t *length, uint32_t timeout)
 
 /**
   * @brief  Receive a file using the ymodem protocol
-  * @param  buf: Address of the first byte
+  * @param  buf: Address of the first byte,addr:download flash start address
   * @retval The size of the file
   */
-int32_t Ymodem_Receive (uint8_t *buf)
+int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
 {
   uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD], file_size[FILE_SIZE_LENGTH], *file_ptr, *buf_ptr;
   int32_t i, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
   uint32_t flashdestination;
 
   /* Initialize flashdestination variable */
-  flashdestination = BL_APP_VECTOR_TABLE_ADDRESS;
+  flashdestination = addr;
   
   for (session_done = 0, errors = 0, session_begin = 0; ;)
   {
@@ -276,7 +274,7 @@ int32_t Ymodem_Receive (uint8_t *buf)
                     }
                     /* erase user application area */
 
-                    NOR_FLASH_Erase(BL_APP_VECTOR_TABLE_ADDRESS,size);
+                    NOR_FLASH_Erase(addr,size);
                     Send_Byte(ACK);
                     Send_Byte(CRC16);
                   }
@@ -352,16 +350,16 @@ int32_t Ymodem_Receive (uint8_t *buf)
 
 /**
   * @brief  Download a file via serial port
-  * @param  None
+  * @param  flash start addr
   * @retval None
   */
-void SerialDownload(void)
+void SerialDownload(const uint32_t addr)
 {
   uint8_t Number[10] = {0};
   int32_t Size = 0;
 
   Serial_PutString("Waiting for the file to be sent ... (press 'a' to abort)\n\r");
-  Size = Ymodem_Receive(&tab_1024[0]);
+  Size = Ymodem_Receive(&tab_1024[0], addr);
   if (Size > 0)
   {		
     Serial_PutString("\n\n\r Programming Completed Successfully!\n\r--------------------------------\r\n Name: ");

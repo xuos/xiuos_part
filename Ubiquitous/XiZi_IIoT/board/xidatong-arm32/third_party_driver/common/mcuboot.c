@@ -51,7 +51,7 @@ static void UartConfig(void)
 
 static void jump_to_application(void)
 {
-    SCB->VTOR = (uint32_t)0x60100000;
+    SCB->VTOR = (uint32_t)XIUOS_FLAH_ADDRESS;
 
     asm volatile("LDR   R0, = 0x60100000");
     asm volatile("LDR   R0, [R0]");
@@ -101,7 +101,7 @@ void BootLoaderJumpApp(void)
                     break;
                 case 0x32:
                     FLASH_Init();
-                    SerialDownload();
+                    SerialDownload(XIUOS_FLAH_ADDRESS);
                     FLASH_DeInit();
                     break;
                 case 0x33:

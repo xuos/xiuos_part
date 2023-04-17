@@ -24,7 +24,6 @@
 
 #include <stdint.h>
 
-#define BL_APP_VECTOR_TABLE_ADDRESS  0x60100000   //Application start address
 #define USER_FLASH_SIZE              0x100000     //Application package size is limited to 1M
 #define PACKET_SEQNO_INDEX      (1)
 #define PACKET_SEQNO_COMP_INDEX (2)
@@ -52,7 +51,7 @@
 #define NAK_TIMEOUT             (0x100000)
 #define MAX_ERRORS              (5)
 
-void SerialDownload(void);
-int32_t Ymodem_Receive (uint8_t *);
+void SerialDownload(const uint32_t addr);
+int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr);
 
 #endif
