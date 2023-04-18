@@ -23,6 +23,7 @@
 #define _YMODEM_H_
 
 #include <stdint.h>
+#include "common.h"
 
 #define USER_FLASH_SIZE              0x100000     //Application package size is limited to 1M
 #define PACKET_SEQNO_INDEX      (1)

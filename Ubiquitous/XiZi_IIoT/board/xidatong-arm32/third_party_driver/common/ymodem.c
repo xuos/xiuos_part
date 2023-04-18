@@ -19,11 +19,9 @@
 * @date:    2023/3/24
 */
 
-#include "common.h"
 #include "ymodem.h"
 #include "string.h"
 #include "flash.h"
-
 
 uint8_t tab_1024[1024] ={0};
 uint8_t FileName[FILE_NAME_LENGTH];

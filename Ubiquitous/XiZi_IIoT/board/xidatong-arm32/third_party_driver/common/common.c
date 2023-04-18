@@ -22,6 +22,32 @@
 
 #include "common.h"
 
+static uint32_t UartSrcFreq(void)
+{
+    uint32_t freq;
+
+    if (CLOCK_GetMux(kCLOCK_UartMux) == 0){
+        freq = (CLOCK_GetPllFreq(kCLOCK_PllUsb1) / 6U) / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
+    } else {
+        freq = CLOCK_GetOscFreq() / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
+    }
+
+    return freq;
+}
+
+
+void UartConfig(void)
+{
+    lpuart_config_t config;
+    LPUART_GetDefaultConfig(&config);
+    config.baudRate_Bps = 115200u;
+    config.enableTx = true;
+    config.enableRx = true;
+
+    LPUART_Init(LPUART1, &config, UartSrcFreq());
+}
+
+
 /**
   * @brief  Convert an Integer to a string
   * @param  str: The string

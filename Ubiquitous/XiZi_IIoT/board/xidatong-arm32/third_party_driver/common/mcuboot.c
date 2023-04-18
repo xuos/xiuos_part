@@ -23,32 +23,6 @@
 #ifdef MCUBOOT_BOOTLOADER
 extern void ImxrtMsDelay(uint32 ms);
 
-static uint32_t UartSrcFreq(void)
-{
-    uint32_t freq;
-
-    /* To make it simple, we assume default PLL and divider settings, and the only variable
-       from application is use PLL3 source or OSC source */
-    if (CLOCK_GetMux(kCLOCK_UartMux) == 0) /* PLL3 div6 80M */ {
-        freq = (CLOCK_GetPllFreq(kCLOCK_PllUsb1) / 6U) / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
-    } else {
-        freq = CLOCK_GetOscFreq() / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
-    }
-
-    return freq;
-}
-
-static void UartConfig(void)
-{
-    lpuart_config_t config;
-    LPUART_GetDefaultConfig(&config);
-    config.baudRate_Bps = 115200u;
-    config.enableTx = true;
-    config.enableRx = true;
-
-    LPUART_Init(LPUART1, &config, UartSrcFreq());
-}
-
 static void jump_to_application(void)
 {
     SCB->VTOR = (uint32_t)XIUOS_FLAH_ADDRESS;
@@ -61,6 +35,7 @@ static void jump_to_application(void)
     asm volatile("LDR   R0, [R0]");
     asm volatile("BX  R0");
 }
+
 
 void BootLoaderJumpApp(void)
 {
