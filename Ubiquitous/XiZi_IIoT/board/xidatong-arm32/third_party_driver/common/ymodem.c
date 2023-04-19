@@ -351,7 +351,7 @@ int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
   * @param  flash start addr
   * @retval None
   */
-void SerialDownload(const uint32_t addr)
+int32_t SerialDownload(const uint32_t addr)
 {
   uint8_t Number[10] = {0};
   int32_t Size = 0;
@@ -384,4 +384,6 @@ void SerialDownload(const uint32_t addr)
   {
     Serial_PutString("\n\rFailed to receive the file!\n\r");
   }
+
+  return Size;
 }

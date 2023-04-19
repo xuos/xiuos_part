@@ -23,5 +23,7 @@
 #include "fsl_gpio.h"
 #include "fsl_lpuart.h"
 
+void jump_to_application(void);
+
 #endif
 

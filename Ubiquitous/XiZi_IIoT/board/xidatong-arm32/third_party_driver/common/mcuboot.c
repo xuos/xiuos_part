@@ -15,15 +15,13 @@
 
 #include <stdint.h>
 #include <xs_base.h>
-#include "flash.h"
-#include "mcuboot.h"
-#include "ymodem.h"
+#include "imxrt_ota.h"
 #include "common.h"
 
 #ifdef MCUBOOT_BOOTLOADER
 extern void ImxrtMsDelay(uint32 ms);
 
-static void jump_to_application(void)
+void jump_to_application(void)
 {
     SCB->VTOR = (uint32_t)XIUOS_FLAH_ADDRESS;
 
@@ -35,7 +33,6 @@ static void jump_to_application(void)
     asm volatile("LDR   R0, [R0]");
     asm volatile("BX  R0");
 }
-
 
 void BootLoaderJumpApp(void)
 {
@@ -76,7 +73,7 @@ void BootLoaderJumpApp(void)
                     break;
                 case 0x32:
                     FLASH_Init();
-                    SerialDownload(XIUOS_FLAH_ADDRESS);
+                    UpdateApplication();
                     FLASH_DeInit();
                     break;
                 case 0x33:

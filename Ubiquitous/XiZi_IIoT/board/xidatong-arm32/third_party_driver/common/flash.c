@@ -593,7 +593,7 @@ status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt)
 status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len)
 {   
     /* For FlexSPI Memory ReadBack, use IP Command instead of AXI command for security */
-    if((addr >= 0x60000000) && (addr < 0x70000000))
+    if((addr >= 0x60000000) && (addr < 0x61000000))
     {
         return FLASH_Read(addr, (void *)buf, len);
     }

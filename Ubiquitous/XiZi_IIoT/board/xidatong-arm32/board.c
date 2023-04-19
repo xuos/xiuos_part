@@ -65,7 +65,7 @@ Modification:
 #endif
 
 #ifdef BSP_USING_OTA
-#include <flash.h>
+#include <imxrt_ota.h>
 #endif
 
 #ifdef BSP_USING_SEMC
@@ -365,6 +365,31 @@ struct InitSequenceDesc _board_init[] =
     { " NONE ",NONE },
 };
 
+
+#ifdef BSP_USING_OTA
+static void OtaCmd(void)
+{
+    int32_t Size;
+
+    FLASH_Init();
+    UartConfig();
+    UpdateOTAStatus(OTA_STATUS_DOWNLOADING);
+    Size = SerialDownload(DOWN_FLAH_ADDRESS);
+    UpdateOTAStatus(OTA_STATUS_DOWNLOADED);
+    if(Size > 0)
+    {
+        UpdateOTAFlag(Size, 0x11223344, OTA_STATUS_READY, "OTA Test!","No error!");
+    }
+    FLASH_DeInit();
+
+    __set_FAULTMASK(1);
+    NVIC_SystemReset();
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, OtaCmd, ota function);
+
+#endif
+
 /**
  * This function will initial imxrt1050 board.
  */
@@ -412,9 +437,4 @@ void InitBoardHardware()
     }
     KPrintf("board init done.\n");
     KPrintf("start kernel...\n");
-#ifdef BSP_USING_OTA
-    FLASH_Init();
-    //Flash operation
-    FLASH_DeInit();
-#endif
 }

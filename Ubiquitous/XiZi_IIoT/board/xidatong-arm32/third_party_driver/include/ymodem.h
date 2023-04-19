@@ -52,7 +52,7 @@
 #define NAK_TIMEOUT             (0x100000)
 #define MAX_ERRORS              (5)
 
-void SerialDownload(const uint32_t addr);
+int32_t SerialDownload(const uint32_t addr);
 int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr);
 
 #endif
