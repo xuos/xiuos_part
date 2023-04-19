@@ -1,6 +1,6 @@
 {
     "device_id": 1,
-    "device_name": "打包机",
+    "device_name": "demo",
     "communication_type": 0,
     "socket_config": {
         "plc_ip": "192.168.250.2",
