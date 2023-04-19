@@ -20,7 +20,6 @@
 
 #include <control.h>
 #include <control_def.h>
-//#include "s7.h"
 
 /**
  * @description: Control Framework Find certain Protocol
@@ -284,17 +283,6 @@ int ControlFrameworkInit(void)
     printf("%u %u\n",control_protocol->recipe->total_data_length,control_protocol->recipe->device_id);
 
     printf("%s ControlPeripheralInit done\n", __func__);
-    
-    //s7 read
-
-
-
-    // ret = ReadPlcDataByRecipe(control_protocol->recipe);
-    // if (ret < 0) {
-    //     printf("%s failed!\n", __func__);
-    //     PrivFree(control_protocol);
-    //     goto _out;
-    // }
 
 _out:
     return ret;

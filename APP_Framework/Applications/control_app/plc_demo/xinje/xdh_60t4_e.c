@@ -19,6 +19,7 @@
  */
 
 #include <control.h>
+
 void ControlXDHTest(void)
 {
     int i, j = 0;

@@ -20,7 +20,6 @@
 
 #include <control_def.h>
 #include <control_io.h>
-#include "s7.h"
 
 /*using cirtular area to receive data*/
 #define PLC_DATA_LENGTH 1024
@@ -430,73 +429,6 @@ int RecipeBasicInformation(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_
     printf("\n************************************************************\n");
 }
 
-static uint8_t GetS7ValueTypeMemorySize(UniformValueType uniform_value_type)
-{
-    if (uniform_value_type == UNIFORM_BOOL || uniform_value_type == UNIFORM_INT8 || uniform_value_type == UNIFORM_UINT8)
-        return 1;
-    if (uniform_value_type == UNIFORM_INT16 || uniform_value_type == UNIFORM_UINT16)
-        return 2;
-    if (uniform_value_type == UNIFORM_INT32 || uniform_value_type == UNIFORM_UINT32 || uniform_value_type == UNIFORM_FLOAT)
-        return 4;
-    if (uniform_value_type == UNIFORM_DOUBLE)
-        return 8;
-    return 0;
-}
-
-/**
- * @description: S7 Protocol read item Init
- * @param p_read_item - read item pointer
- * @param read_item_json - read item json pointer
- * @param p_data - unused
- * @return success : 0 error : -1
- */
-static uint8_t InitialS7ReadItem(S7ReadItem* p_read_item, cJSON* read_item_json, uint8_t* p_data)
-{
-    p_read_item->value_type = cJSON_GetObjectItem(read_item_json, "value_type")->valueint;
-    strncpy(p_read_item->value_name, cJSON_GetObjectItem(read_item_json, "value_name")->valuestring, 20);
-    TS7DataItem* p_data_info = &(p_read_item->data_info);
-    p_data_info->Amount = cJSON_GetObjectItem(read_item_json, "amount")->valueint;
-    p_data_info->Start = cJSON_GetObjectItem(read_item_json, "start")->valueint;
-    p_data_info->DBNumber = cJSON_GetObjectItem(read_item_json, "db_number")->valueint;
-    char* area_valuestring = cJSON_GetObjectItem(read_item_json, "area")->valuestring;
-    if (strcmp(area_valuestring, "I") == 0)
-        p_data_info->Area = S7AreaPE;
-    else if (strcmp(area_valuestring, "Q") == 0)
-        p_data_info->Area = S7AreaPA;
-    else if (strcmp(area_valuestring, "M") == 0)
-        p_data_info->Area = S7AreaMK;
-    else if (strcmp(area_valuestring, "DB") == 0)
-        p_data_info->Area = S7AreaDB;
-    else if (strcmp(area_valuestring, "C") == 0)
-        p_data_info->Area = S7AreaCT;
-    else if (strcmp(area_valuestring, "T") == 0)
-        p_data_info->Area = S7AreaTM;
-    char* wordlen_valuestring = cJSON_GetObjectItem(read_item_json, "wordlen")->valuestring;
-    if (strcmp(wordlen_valuestring, "Bit") == 0)
-        p_data_info->WordLen = S7WLBit;
-    else if (strcmp(wordlen_valuestring, "Byte") == 0)
-        p_data_info->WordLen = S7WLByte;
-    else if (strcmp(wordlen_valuestring, "Word") == 0)
-        p_data_info->WordLen = S7WLWord;
-    else if (strcmp(wordlen_valuestring, "DWord") == 0)
-        p_data_info->WordLen = S7WLDWord;
-    else if (strcmp(wordlen_valuestring, "Real") == 0)
-        p_data_info->WordLen = S7WLReal;
-    else if (strcmp(wordlen_valuestring, "Counter") == 0)
-        p_data_info->WordLen = S7WLCounter;
-    else if (strcmp(wordlen_valuestring, "Timer") == 0)
-        p_data_info->WordLen = S7WLTimer;
-    p_data_info->pdata = p_data;
-    printf("value_type is %d, amount is %d, start is %04d, db_number is %d, area is 0x%03x, wordlen is %d.\n",
-        p_read_item->value_type, p_data_info->Amount, p_data_info->Start, p_data_info->DBNumber,
-        p_data_info->Area, p_data_info->WordLen);
-    return GetS7ValueTypeMemorySize(p_read_item->value_type);
-}
-
-
-
-
-
 /**
  * @description: Control Framework Read Variable Item Function
  * @param p_recipe - Control recipe pointer
@@ -526,37 +458,15 @@ void RecipeReadVariableItem(struct ControlRecipe *p_recipe, cJSON *p_recipe_file
         /*Format Data Header, Reference "CONTROL FRAMEWORK READ DATA FORMAT"*/
         FormatDataHeader(p_recipe);
         uint16_t read_item_count = p_recipe->read_item_count;
-
-
-        uint8_t* S7_plc_read_data;
-        S7_plc_read_data = malloc(p_recipe->protocol_data.data_length);
-        uint16_t S7_plc_read_data_index = 8;
-
         for (i = 0; i < read_item_count; i ++) {
             cJSON *read_single_item_json = cJSON_GetArrayItem(read_item_list_json, i);
-
             protocol_format_info.read_single_item_json = read_single_item_json;
             protocol_format_info.read_item_index = i;
-            switch (p_recipe->protocol_type) {
-                
-                case PROTOCOL_S7:
-                if (i == 0)
-                p_recipe->read_item = malloc(sizeof(S7ReadItem) * p_recipe->read_item_count);
-                S7_plc_read_data_index += InitialS7ReadItem((S7ReadItem*)(p_recipe->read_item) + i,
-                read_single_item_json,S7_plc_read_data + S7_plc_read_data_index);
-                 if (S7_plc_read_data_index == 8) {
-                    printf("%s read %d item failed!\n", __func__, i);
-                    continue;
-                }
-                break;
-
-                default:
-                /*Format Protocol Cmd By Analyze Variable Item One By One*/
-                ret = p_recipe->ControlProtocolFormatCmd(p_recipe, &protocol_format_info);
+            /*Format Protocol Cmd By Analyze Variable Item One By One*/
+            ret = p_recipe->ControlProtocolFormatCmd(p_recipe, &protocol_format_info);
                 if (ret < 0) {
                     printf("%s read %d item failed!\n", __func__, i);
                     continue;
-                }
             }
         }
     }
