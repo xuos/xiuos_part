@@ -25,7 +25,6 @@
 #include <stdint.h>
 #include "common.h"
 
-#define USER_FLASH_SIZE              0x100000     //Application package size is limited to 1M
 #define PACKET_SEQNO_INDEX      (1)
 #define PACKET_SEQNO_COMP_INDEX (2)
 
@@ -53,6 +52,6 @@
 #define MAX_ERRORS              (5)
 
 int32_t SerialDownload(const uint32_t addr);
-int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr);
+int32_t Ymodem_Receive(uint8_t *buf, const uint32_t addr);
 
 #endif

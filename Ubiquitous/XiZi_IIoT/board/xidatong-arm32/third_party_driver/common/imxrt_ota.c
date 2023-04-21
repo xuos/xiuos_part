@@ -24,6 +24,7 @@
 #include "common.h"
 #include "imxrt_ota.h"
 
+
 static const uint32_t crc32tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
     0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -92,6 +93,13 @@ static const uint32_t crc32tab[] = {
 };
 
 
+/*******************************************************************************
+* 函 数 名: calculate_crc32
+* 功能描述: 计算给定Flash内存地址范围中数据的CRC32校验和
+* 形    参: addr:表示Flash地址的起始位置
+            len:表示需要计算CRC32的数据长度
+* 返 回 值: 计算得到的CRC32值
+*******************************************************************************/
 static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 {
     uint32_t crc = 0xFFFFFFFF;
@@ -105,6 +113,13 @@ static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
     return crc^0xFFFFFFFF;
 }
 
+
+/*******************************************************************************
+* 函 数 名: UpdateOTAStatus
+* 功能描述: 更新OTA的状态信息
+* 形    参: status:将要更改的状态值
+* 返 回 值: 无
+*******************************************************************************/
 void UpdateOTAStatus(ota_status_t status)
 {
     ota_info_t ota_info;
@@ -116,6 +131,17 @@ void UpdateOTAStatus(ota_status_t status)
     flash_write(FLAG_FLAH_ADDRESS,(void *)&ota_info,sizeof(ota_info_t));
 }
 
+
+/*******************************************************************************
+* 函 数 名: UpdateOTAFlag
+* 功能描述: 更新OTA Flag区域的信息，版本完成下载后在app里进行调用
+* 形    参: app_size:新的固件的大小,单位字节
+            version:新的固件的版本
+            status:OTA的状态信息
+            description:新版本的固件描述
+            error_message:更新过程中存储的错误信息
+* 返 回 值: 无
+*******************************************************************************/
 void UpdateOTAFlag(uint32_t app_size, uint32_t version, uint32_t status, uint8_t* description, uint8_t* error_message)
 {
     ota_info_t ota_info;  // 定义OTA信息结构体
@@ -133,6 +159,14 @@ void UpdateOTAFlag(uint32_t app_size, uint32_t version, uint32_t status, uint8_t
     flash_write(FLAG_FLAH_ADDRESS,(void *)&ota_info,sizeof(ota_info_t));
 }
 
+
+/*******************************************************************************
+* 函 数 名: UpdateApplication
+* 功能描述: 在bootloader里进行调用,根据Flash中Flag分区中的信息决定是否进行版本更新
+* 形    参: 无
+* 返 回 值: 无
+* 注    释: 该函数调用后无论结果如何都将跳转到app分区
+*******************************************************************************/
 void UpdateApplication(void)
 {
     status_t status;

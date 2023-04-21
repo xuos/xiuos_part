@@ -1,4 +1,3 @@
-
 /*
 * Copyright (c) 2020 AIIT XUOS Lab
 * XiUOS is licensed under Mulan PSL v2.
@@ -27,18 +26,18 @@ uint8_t tab_1024[1024] ={0};
 uint8_t FileName[FILE_NAME_LENGTH];
 
 
-/**
-  * @brief  Receive byte from sender
-  * @param  c: Character
-  * @param  timeout: Timeout
-  * @retval 0: Byte received
-  *         -1: Timeout
-  */
-static  int32_t Receive_Byte (uint8_t *c, uint32_t timeout)
+/*******************************************************************************
+* 函 数 名: Receive_Byte
+* 功能描述: 从发送方接收字节 
+* 形    参: c:用于存储接收到的字符
+            timeout:超时时间
+* 返 回 值: 0:收到数据,-1:超时未接收到
+*******************************************************************************/
+static  int32_t Receive_Byte(uint8_t *c, uint32_t timeout)
 {
-  while (timeout-- > 0)
+  while(timeout-- > 0)
   {
-    if (SerialKeyPressed(c) == 1)
+    if(SerialKeyPressed(c) == 1)
     {
       return 0;
     }
@@ -46,23 +45,27 @@ static  int32_t Receive_Byte (uint8_t *c, uint32_t timeout)
   return -1;
 }
 
-/**
-  * @brief  Send a byte
-  * @param  c: Character
-  * @retval 0: Byte sent
-  */
-static uint32_t Send_Byte (uint8_t c)
+
+/*******************************************************************************
+* 函 数 名: Send_Byte
+* 功能描述: 发送一个字节的数据 
+* 形    参: c:要发送的数据
+* 返 回 值: 0
+*******************************************************************************/
+static uint32_t Send_Byte(uint8_t c)
 {
   SerialPutChar(c);
   return 0;
 }
 
-/**
-  * @brief  Update CRC16 for input byte
-  * @param  CRC input value 
-  * @param  input byte
-  * @retval Updated CRC value
-  */
+
+/*******************************************************************************
+* 函 数 名: UpdateCRC16
+* 功能描述: 更新输入数据的CRC16校验
+* 形    参: crcIn:输入的16位crc数据
+            byte:输入的8位数据
+* 返 回 值: 更新后的crc数据
+*******************************************************************************/
 uint16_t UpdateCRC16(uint16_t crcIn, uint8_t byte)
 {
   uint32_t crc = crcIn;
@@ -87,12 +90,14 @@ uint16_t UpdateCRC16(uint16_t crcIn, uint8_t byte)
  return (crc&0xffffu);
 }
 
-/**
-  * @brief  Cal CRC16 for YModem Packet
-  * @param  data
-  * @param  length
-  * @retval CRC value
-  */
+
+/*******************************************************************************
+* 函 数 名: Cal_CRC16
+* 功能描述: 计算CRC16,用于YModem的数据包
+* 形    参: data:数据buffer
+            size:数据长度
+* 返 回 值: 生成的crc数据
+*******************************************************************************/
 uint16_t Cal_CRC16(const uint8_t* data, uint32_t size)
 {
   uint32_t crc = 0;
@@ -108,12 +113,14 @@ uint16_t Cal_CRC16(const uint8_t* data, uint32_t size)
   return (crc&0xffffu);
 }
 
-/**
-  * @brief  Cal Check sum for YModem Packet
-  * @param  data
-  * @param  length
-  * @retval None
-  */
+
+/*******************************************************************************
+* 函 数 名: CalChecksum
+* 功能描述: 计算检查YModem数据包的总和
+* 形    参: data:数据buffer
+            size:数据长度
+* 返 回 值: 计算到的数据包总和
+*******************************************************************************/
 uint8_t CalChecksum(const uint8_t* data, uint32_t size)
 {
   uint32_t sum = 0;
@@ -127,24 +134,21 @@ uint8_t CalChecksum(const uint8_t* data, uint32_t size)
  return (sum&0xffu);
 }
 
-/**
-  * @brief  Receive a packet from sender
-  * @param  data
-  * @param  length
-  * @param  timeout
-  *          0: end of transmission
-  *          -1: abort by sender
-  *          >0: packet length
-  * @retval 0: normally return
-  *         -1: timeout or packet error
-  *         1: abort by user
-  */
-static int32_t Receive_Packet (uint8_t *data, int32_t *length, uint32_t timeout)
+
+/*******************************************************************************
+* 函 数 名: Receive_Packet
+* 功能描述: 从发送方接收数据包
+* 形    参: data:数据buffer
+            length:存储数据长度的指针
+            timeout:超时时间
+* 返 回 值: 0:正常返回,-1:发送者中止/超时/数据包错误,1:用户中止
+*******************************************************************************/
+static int32_t Receive_Packet(uint8_t *data, int32_t *length, uint32_t timeout)
 {
   uint16_t i, packet_size, computedcrc;
   uint8_t c;
   *length = 0;
-  if (Receive_Byte(&c, timeout) != 0)
+  if(Receive_Byte(&c, timeout) != 0)
   {
     return -1;
   }
@@ -159,7 +163,7 @@ static int32_t Receive_Packet (uint8_t *data, int32_t *length, uint32_t timeout)
     case EOT:
       return 0;
     case CA:
-      if ((Receive_Byte(&c, timeout) == 0) && (c == CA))
+      if((Receive_Byte(&c, timeout) == 0) && (c == CA))
       {
         *length = -1;
         return 0;
@@ -175,14 +179,14 @@ static int32_t Receive_Packet (uint8_t *data, int32_t *length, uint32_t timeout)
       return -1;
   }
   *data = c;
-  for (i = 1; i < (packet_size + PACKET_OVERHEAD); i ++)
+  for(i = 1; i < (packet_size + PACKET_OVERHEAD); i ++)
   {
-    if (Receive_Byte(data + i, timeout) != 0)
+    if(Receive_Byte(data + i, timeout) != 0)
     {
       return -1;
     }
   }
-  if (data[PACKET_SEQNO_INDEX] != ((data[PACKET_SEQNO_COMP_INDEX] ^ 0xff) & 0xff))
+  if(data[PACKET_SEQNO_INDEX] != ((data[PACKET_SEQNO_COMP_INDEX] ^ 0xff) & 0xff))
   {
     return -1;
   }
@@ -192,7 +196,7 @@ static int32_t Receive_Packet (uint8_t *data, int32_t *length, uint32_t timeout)
   /* Check that received CRC match the already computed CRC value
      data[packet_size+3]<<8) | data[packet_size+4] contains the received CRC 
      computedcrc contains the computed CRC value */
-  if (computedcrc != (uint16_t)((data[packet_size+3]<<8) | data[packet_size+4]))
+  if(computedcrc != (uint16_t)((data[packet_size+3]<<8) | data[packet_size+4]))
   {
     /* CRC error */
     return -1;
@@ -202,12 +206,16 @@ static int32_t Receive_Packet (uint8_t *data, int32_t *length, uint32_t timeout)
   return 0;
 }
 
-/**
-  * @brief  Receive a file using the ymodem protocol
-  * @param  buf: Address of the first byte,addr:download flash start address
-  * @retval The size of the file
-  */
-int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
+
+/*******************************************************************************
+* 函 数 名: Ymodem_Receive
+* 功能描述: 使用ymodem协议接收文件
+* 形    参: buf:数据buffer
+            addr:下载flash起始地址
+            timeout:超时时间
+* 返 回 值: 文件的大小
+*******************************************************************************/
+int32_t Ymodem_Receive(uint8_t *buf, const uint32_t addr)
 {
   uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD], file_size[FILE_SIZE_LENGTH], *file_ptr, *buf_ptr;
   int32_t i, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
@@ -216,15 +224,15 @@ int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
   /* Initialize flashdestination variable */
   flashdestination = addr;
   
-  for (session_done = 0, errors = 0, session_begin = 0; ;)
+  for(session_done = 0, errors = 0, session_begin = 0; ;)
   {
-    for (packets_received = 0, file_done = 0, buf_ptr = buf; ;)
+    for(packets_received = 0, file_done = 0, buf_ptr = buf; ;)
     {
-      switch (Receive_Packet(packet_data, &packet_length, NAK_TIMEOUT))
+      switch(Receive_Packet(packet_data, &packet_length, NAK_TIMEOUT))
       {
         case 0:
           errors = 0;
-          switch (packet_length)
+          switch(packet_length)
           {
             /* Abort by sender */
             case - 1:
@@ -237,24 +245,24 @@ int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
               break;
             /* Normal packet */
             default:
-              if ((packet_data[PACKET_SEQNO_INDEX] & 0xff) != (packets_received & 0xff))
+              if((packet_data[PACKET_SEQNO_INDEX] & 0xff) != (packets_received & 0xff))
               {
                 Send_Byte(NAK);
               }
               else
               {
-                if (packets_received == 0)
+                if(packets_received == 0)
                 {
                   /* Filename packet */
-                  if (packet_data[PACKET_HEADER] != 0)
+                  if(packet_data[PACKET_HEADER] != 0)
                   {
                     /* Filename packet has valid data */
-                    for (i = 0, file_ptr = packet_data + PACKET_HEADER; (*file_ptr != 0) && (i < FILE_NAME_LENGTH);)
+                    for(i = 0, file_ptr = packet_data + PACKET_HEADER; (*file_ptr != 0) && (i < FILE_NAME_LENGTH);)
                     {
                       FileName[i++] = *file_ptr++;
                     }
                     FileName[i++] = '\0';
-                    for (i = 0, file_ptr ++; (*file_ptr != ' ') && (i < (FILE_SIZE_LENGTH - 1));)
+                    for(i = 0, file_ptr ++; (*file_ptr != ' ') && (i < (FILE_SIZE_LENGTH - 1));)
                     {
                       file_size[i++] = *file_ptr++;
                     }
@@ -263,7 +271,7 @@ int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
 
                     /* Test the size of the image to be sent */
                     /* Image size is greater than Flash size */
-                    if (size > (USER_FLASH_SIZE + 1))
+                    if(size > APP_FLASH_SIZE)
                     {
                       /* End session */
                       Send_Byte(CA);
@@ -292,9 +300,9 @@ int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
 
                   /* Write received data in Flash */
 #ifndef  USE_HIGHT_SPEED_TRANS
-                 if (NOR_FLASH_Write(&flashdestination, buf, (uint16_t) packet_length)  == 0)
+                 if(NOR_FLASH_Write(&flashdestination, buf, (uint16_t)packet_length)  == 0)
 #else
-                  if (NOR_FLASH_Write(&flashdestination, buf, (uint16_t) packet_length,0)  == 0)
+                  if(NOR_FLASH_Write(&flashdestination, buf, (uint16_t)packet_length, 0) == 0)
 #endif
                   {
                     Send_Byte(ACK);
@@ -317,11 +325,11 @@ int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
           Send_Byte(CA);
           return -3;
         default:
-          if (session_begin > 0)
+          if(session_begin > 0)
           {
             errors ++;
           }
-          if (errors > MAX_ERRORS)
+          if(errors > MAX_ERRORS)
           {
             Send_Byte(CA);
             Send_Byte(CA);
@@ -330,12 +338,12 @@ int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
           Send_Byte(CRC16);
           break;
       }
-      if (file_done != 0)
+      if(file_done != 0)
       {
         break;
       }
     }
-    if (session_done != 0)
+    if(session_done != 0)
     {
       break;
     }
@@ -346,44 +354,46 @@ int32_t Ymodem_Receive (uint8_t *buf, const uint32_t addr)
   return (int32_t)size;
 }
 
-/**
-  * @brief  Download a file via serial port
-  * @param  flash start addr
-  * @retval None
-  */
+
+/*******************************************************************************
+* 函 数 名: SerialDownload
+* 功能描述: 通过串口下载文件
+* 形    参: addr:存储文件的flash起始地址
+* 返 回 值: 文件的大小
+*******************************************************************************/
 int32_t SerialDownload(const uint32_t addr)
 {
-  uint8_t Number[10] = {0};
-  int32_t Size = 0;
+    uint8_t Number[10] = {0};
+    int32_t Size = 0;
 
-  Serial_PutString("Waiting for the file to be sent ... (press 'a' to abort)\n\r");
-  Size = Ymodem_Receive(&tab_1024[0], addr);
-  if (Size > 0)
-  {		
-    Serial_PutString("\n\n\r Programming Completed Successfully!\n\r--------------------------------\r\n Name: ");
-    Serial_PutString(FileName);
-    Int2Str(Number, Size);
-    Serial_PutString("\n\r Size: ");
-    Serial_PutString(Number);
-    Serial_PutString(" Bytes\r\n");
-    Serial_PutString("-------------------\n");
-  }
-  else if (Size == -1)
-  {
-    Serial_PutString("\n\n\rThe image size is higher than the allowed space memory!\n\r");
-  }
-  else if (Size == -2)
-  {
-    Serial_PutString("\n\n\rVerification failed!\n\r");
-  }
-  else if (Size == -3)
-  {
-    Serial_PutString("\r\n\nAborted by user.\n\r");
-  }
-  else
-  {
-    Serial_PutString("\n\rFailed to receive the file!\n\r");
-  }
+    Serial_PutString("Waiting for the file to be sent ... (press 'a' to abort)\n\r");
+    Size = Ymodem_Receive(&tab_1024[0], addr);
+    if(Size > 0)
+    {
+        Serial_PutString("\n\n\r Programming Completed Successfully!\n\r--------------------------------\r\n Name: ");
+        Serial_PutString(FileName);
+        Int2Str(Number, Size);
+        Serial_PutString("\n\r Size: ");
+        Serial_PutString(Number);
+        Serial_PutString(" Bytes\r\n");
+        Serial_PutString("-------------------\n");
+    }
+    else if(Size == -1)
+    {
+        Serial_PutString("\n\n\rThe image size is higher than the allowed space memory!\n\r");
+    }
+    else if(Size == -2)
+    {
+        Serial_PutString("\n\n\rVerification failed!\n\r");
+    }
+    else if(Size == -3)
+    {
+        Serial_PutString("\r\n\nAborted by user.\n\r");
+    }
+    else
+    {
+        Serial_PutString("\n\rFailed to receive the file!\n\r");
+    }
 
-  return Size;
+    return Size;
 }

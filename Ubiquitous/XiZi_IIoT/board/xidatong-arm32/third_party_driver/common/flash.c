@@ -18,7 +18,7 @@
 #include "flash.h"
 #include "MIMXRT1052.h"
 
-uint8_t NorFlash_BUFFER[4096];         //4K buffer cache              
+uint8_t NorFlash_BUFFER[4096];         //4K buffer cache
 uint8_t buffer[FLASH_PAGE_SIZE];       //256 bytes buffer cache
 /*******************************************************************************
  * Prototypes
@@ -26,8 +26,8 @@ uint8_t buffer[FLASH_PAGE_SIZE];       //256 bytes buffer cache
 static status_t Flexspi_Nor_Wait_Busy(uint32_t instance, uint32_t baseAddr);
 static status_t Flexspi_Nor_Write_Enable(uint32_t instance, uint32_t baseAddr);
 static void flexspi_clock_config(uint32_t instance, uint32_t freq, uint32_t sampleClkMode);
-static void flexspi_clock_gate_enable(uint32_t instance);
-static void flexspi_clock_gate_disable(uint32_t instance);
+static void flexspi_clock_gate_enable(void);
+static void flexspi_clock_gate_disable(void);
 static status_t flexspi_get_clock(uint32_t instance, flexspi_clock_type_t type, uint32_t *freq);
 static status_t flexspi_get_ticks(uint32_t *ticks, uint32_t intervalNs, uint32_t freq, uint32_t unit);
 static status_t flexspi_configure_dll(uint32_t instance, flexspi_mem_config_t *config);
@@ -57,6 +57,13 @@ static const lookuptable_t FlashLookupTable={
 };
 
 
+/*******************************************************************************
+* 函 数 名: Flexspi_Nor_Wait_Busy
+* 功能描述: 等待FlexSPI NOR Flash忙碌状态结束
+* 形    参: instance:FlexSPI实例号
+            baseAddr:开始读取的Flash地址(32bit)
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 static status_t Flexspi_Nor_Wait_Busy(uint32_t instance, uint32_t baseAddr)
 {
     status_t status = kStatus_InvalidArgument;
@@ -93,6 +100,13 @@ static status_t Flexspi_Nor_Wait_Busy(uint32_t instance, uint32_t baseAddr)
 }
 
 
+/*******************************************************************************
+* 函 数 名: Flexspi_Nor_Write_Enable
+* 功能描述: 使能 FlexSPI NOR Flash的写入操作
+* 形    参: instance:FlexSPI实例号
+            baseAddr:开始读取的Flash地址(32bit)
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 static status_t Flexspi_Nor_Write_Enable(uint32_t instance, uint32_t baseAddr)
 {
     status_t status = kStatus_InvalidArgument;
@@ -110,6 +124,14 @@ static status_t Flexspi_Nor_Write_Enable(uint32_t instance, uint32_t baseAddr)
 }
 
 
+/*******************************************************************************
+* 函 数 名: flexspi_clock_config
+* 功能描述: 配置FlexSPI模块的时钟
+* 形    参: instance:FlexSPI实例号
+            freq:表示所需的FlexSPI时钟频率
+            sampleClkMode:指定FlexSPI时钟的采样时钟模式,可以选择SDR或DDR模式
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 static void flexspi_clock_config(uint32_t instance, uint32_t freq, uint32_t sampleClkMode)
 {
     uint32_t pfd480 = 0;
@@ -166,7 +188,7 @@ static void flexspi_clock_config(uint32_t instance, uint32_t freq, uint32_t samp
             cscmr1 |= CCM_CSCMR1_FLEXSPI_PODF(podf - 1);
 
             FLEXSPI->MCR0 |= FLEXSPI_MCR0_MDIS_MASK;
-            flexspi_clock_gate_disable(instance);
+            flexspi_clock_gate_disable();
 
             if(pfd480 != CCM_ANALOG->PFD_480)
             {
@@ -176,7 +198,7 @@ static void flexspi_clock_config(uint32_t instance, uint32_t freq, uint32_t samp
             {
                 CCM->CSCMR1 = cscmr1;
             }
-            flexspi_clock_gate_enable(instance);
+            flexspi_clock_gate_enable();
             FLEXSPI->MCR0 &= ~FLEXSPI_MCR0_MDIS_MASK;
         }
         else
@@ -187,18 +209,38 @@ static void flexspi_clock_config(uint32_t instance, uint32_t freq, uint32_t samp
 }
 
 
-static void flexspi_clock_gate_enable(uint32_t instance)
+/*******************************************************************************
+* 函 数 名: flexspi_clock_gate_enable
+* 功能描述: 开启FlexSPI模块的时钟门控
+* 形    参: 无
+* 返 回 值: 无 
+*******************************************************************************/
+static void flexspi_clock_gate_enable(void)
 {
     CCM->CCGR6 |= CCM_CCGR6_CG5_MASK;
 }
 
 
-static void flexspi_clock_gate_disable(uint32_t instance)
+/*******************************************************************************
+* 函 数 名: flexspi_clock_gate_disable
+* 功能描述: 关闭FlexSPI模块的时钟门控
+* 形    参: 无
+* 返 回 值: 无 
+*******************************************************************************/
+static void flexspi_clock_gate_disable(void)
 {
     CCM->CCGR6 &= (uint32_t)~CCM_CCGR6_CG5_MASK;
 }
 
 
+/*******************************************************************************
+* 函 数 名: flexspi_get_clock
+* 功能描述: 获取FlexSPI时钟频率
+* 形    参: instance:FlexSPI实例号
+            type:所需时钟类型
+            freq:用于存储获取到的时钟频率类型
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 static status_t flexspi_get_clock(uint32_t instance, flexspi_clock_type_t type, uint32_t *freq)
 {
     uint32_t clockFrequency = 0;
@@ -248,6 +290,15 @@ static status_t flexspi_get_clock(uint32_t instance, flexspi_clock_type_t type, 
 }
 
 
+/*******************************************************************************
+* 函 数 名: flexspi_get_ticks
+* 功能描述: 计算FlexSPI时钟周期数
+* 形    参: ticks:用于存储计算结果的指针，即所需的时钟周期数；
+            intervalNs:所需的时间间隔，以纳秒（ns）为单位；
+            freq:FlexSPI时钟频率，单位为MHz；
+            unit:时钟周期单位,即计算结果中每个时钟周期代表的时间长度,以ns为单位
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 static status_t flexspi_get_ticks(uint32_t *ticks, uint32_t intervalNs, uint32_t freq, uint32_t unit)
 {
     status_t status = kStatus_InvalidArgument;
@@ -278,6 +329,13 @@ static status_t flexspi_get_ticks(uint32_t *ticks, uint32_t intervalNs, uint32_t
 }
 
 
+/*******************************************************************************
+* 函 数 名: flexspi_configure_dll
+* 功能描述: 用来配置FLEXSPI存储器的DLL(延迟锁存器)
+* 形    参: instance:FLEXSPI实例号
+            config:存储器配置信息，包括读取时钟源、数据有效时间等参数
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 static status_t flexspi_configure_dll(uint32_t instance, flexspi_mem_config_t *config)
 {
     status_t status = kStatus_InvalidArgument;
@@ -414,6 +472,13 @@ static status_t flexspi_configure_dll(uint32_t instance, flexspi_mem_config_t *c
 }
 
 
+/*******************************************************************************
+* 函 数 名: flexspi_config_mcr1
+* 功能描述: 配置FlexSPI模块的MCR1寄存器
+* 形    参: instance:FLEXSPI实例号
+            onfig指向FlexSPI存储器配置结构体的指针
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 static status_t flexspi_config_mcr1(uint32_t instance, flexspi_mem_config_t *config)
 {
     uint32_t seqWaitTicks = 0xFFFFu;
@@ -447,6 +512,12 @@ static status_t flexspi_config_mcr1(uint32_t instance, flexspi_mem_config_t *con
 }
 
 
+/*******************************************************************************
+* 函 数 名: FLASH_GetSectorSize
+* 功能描述: 获取扇区大小
+* 形    参: 无
+* 返 回 值: 返回扇区大小,HYPER FLASH为64K字节,NOR FLASH为4K字节
+*******************************************************************************/
 uint32_t FLASH_GetSectorSize(void)
 {
 #ifndef HYPER_FLASH
@@ -457,6 +528,12 @@ uint32_t FLASH_GetSectorSize(void)
 }
 
 
+/*******************************************************************************
+* 函 数 名: FLASH_GetProgramCmd
+* 功能描述: 获取页大小
+* 形    参: 无
+* 返 回 值: 返回页大小,HYPER FLASH为512字节,NOR FLASH为256字节
+*******************************************************************************/
 uint32_t FLASH_GetProgramCmd(void)
 {
     uint32_t Program_Unit;
@@ -470,6 +547,12 @@ uint32_t FLASH_GetProgramCmd(void)
 }
 
 
+/*******************************************************************************
+* 函 数 名: FLASH_Init
+* 功能描述: Flash接口初始化,需在进行Flash相关操作前进行调用
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
 void FLASH_Init(void)
 {
     /* Update LUT Table for Status, Write Enable, Erase and Program */
@@ -483,6 +566,12 @@ void FLASH_Init(void)
 }
 
 
+/*******************************************************************************
+* 函 数 名: FLASH_DeInit
+* 功能描述: Flash接口反初始化，需在完成Flash相关操作后进行调用
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
 void FLASH_DeInit(void)
 {
     lookuptable_t clearlut;
@@ -493,6 +582,13 @@ void FLASH_DeInit(void)
 }
 
 
+/*******************************************************************************
+* 函 数 名: FLASH_EraseSector
+* 功能描述: 擦除一个Flash扇区
+* 形    参: addr:擦除区域起始地址
+* 返 回 值: None 
+* 注    释: 擦除一个扇区的最少时间:30ms~200/400ms
+*******************************************************************************/
 uint8_t FLASH_EraseSector(uint32_t addr)
 {
     status_t status;
@@ -516,6 +612,15 @@ uint8_t FLASH_EraseSector(uint32_t addr)
 }
 
 
+/*******************************************************************************
+* 函 数 名: FLASH_WritePage
+* 功能描述: 写Flash一个页
+* 形    参: addr:写入区域起始地址
+            buf:数据存储区
+            len:要写入的字节数(最大256)
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+* 注    释: 在指定地址开始写入最大256字节的数据
+*******************************************************************************/
 uint8_t FLASH_WritePage(uint32_t addr, const uint32_t *buf, uint32_t len)
 {
     status_t status;
@@ -542,6 +647,14 @@ uint8_t FLASH_WritePage(uint32_t addr, const uint32_t *buf, uint32_t len)
 }
 
 
+/*******************************************************************************
+* 函 数 名: FLASH_Read
+* 功能描述: 读Flash内容
+* 形    参: addr:读取区域起始地址
+            buf:数据存储区
+            len:要读取的字节数
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 status_t FLASH_Read(uint32_t addr, uint32_t *buf, uint32_t len)
 {
     status_t status;
@@ -566,6 +679,14 @@ status_t FLASH_Read(uint32_t addr, uint32_t *buf, uint32_t len)
 }
 
 
+/*******************************************************************************
+* 函 数 名: flash_erase
+* 功能描述: 擦除Flash指定长度的空间
+* 形    参: addr:擦除区域起始地址
+            byte_cnt:要擦除的字节数,以4k字节为最小擦除单位
+* 返 回 值: None 
+* 注    释: 不满4k字节的，也需要擦除掉4k字节
+*******************************************************************************/
 status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt)
 {
     uint32_t addr;
@@ -584,12 +705,30 @@ status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt)
     return status;
 }
 
+
+/*******************************************************************************
+* 函 数 名: flash_write
+* 功能描述: 与FLASH_WritePage功能相同，写Flash一个页
+* 形    参: addr:写入区域起始地址
+            buf:数据存储区
+            len:要写入的字节数(最大256)
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+* 注    释: 在指定地址开始写入最大256字节的数据
+*******************************************************************************/
 status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt)
 {
     return FLASH_WritePage(start_addr, (void *)buf, byte_cnt);
 }
 
 
+/*******************************************************************************
+* 函 数 名: flash_read
+* 功能描述: 读Flash内容
+* 形    参: addr:读取区域起始地址
+            buf:数据存储区
+            len:要读取的字节数
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len)
 {   
     /* For FlexSPI Memory ReadBack, use IP Command instead of AXI command for security */
@@ -614,12 +753,20 @@ status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len)
 }
 
 
+/*******************************************************************************
+* 函 数 名: flash_copy
+* 功能描述: 实现flash数据在分区之间的拷贝
+* 形    参: srcAddr:源flash的起始地址
+            dstAddr:目标flash的起始地址;
+            imageSize:要拷贝的flash空间大小,单位为字节
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
 status_t flash_copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
 {   
     uint32_t PageNum, Remain, i;
     status_t status;
 
-    if((srcAddr == dstAddr) || imageSize > (APP_FLASH_SIZE + 1))
+    if((srcAddr == dstAddr) || imageSize > APP_FLASH_SIZE)
     {
         return (status_t)kStatus_Fail;
     }
@@ -672,6 +819,13 @@ status_t flash_copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
 }
 
 
+/*******************************************************************************
+* 函 数 名: NOR_FLASH_Erase
+* 功能描述: 以扇区为擦除单位擦除Flash指定长度的空间,最终擦除的字节可能大于imageSize
+* 形    参: addr:擦除区域起始地址
+            imageSize:要擦除的字节数
+* 返 回 值: None 
+*******************************************************************************/
 status_t NOR_FLASH_Erase(uint32_t app_base_addr,uint32_t imageSize)
 {
     uint16_t i;
@@ -691,6 +845,15 @@ status_t NOR_FLASH_Erase(uint32_t app_base_addr,uint32_t imageSize)
 }
 
 
+/*******************************************************************************
+* 函 数 名: NorFlash_Write_PageProgram
+* 功能描述: 写入Flash指定长度的数据
+* 形    参: pBuffer:数据存储区
+            WriteAddr:写入区域起始地址
+            NumByteToWrite:要写入的字节数(最大256)
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+* 注    释: 在指定地址开始写入最大256字节的数据
+*******************************************************************************/
 void NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 {
     uint8_t temp_data[256] = {0xff};
@@ -705,7 +868,17 @@ void NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t Num
 }
 
 
-void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)   
+/*******************************************************************************
+* 函 数 名: NorFlash_Write_NoCheck
+* 功能描述: 无检验写入W25QXX从指定地址开始指定长度的数据
+* 形    参: pBuffer:数据存储区
+            WriteAddr:开始写入的地址(24bit)
+            NumByteToWrite:要写入的字节数(最大65535)
+* 返 回 值: 无
+* 注    释: 必须确保所写的地址范围内的数据全部为0XFF,否则在非0XFF处写入的数据将失败!
+            具有自动换页功能,在指定地址开始写入指定长度的数据,但是要确保地址不越界!
+*******************************************************************************/
+void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 {
     uint16_t pageRemain;	
     
@@ -742,6 +915,15 @@ void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByte
 }
 
 
+/*******************************************************************************
+* 函 数 名: NorFlash_Write
+* 功能描述: 写入W25QXX在指定地址开始写入指定长度的数据 
+* 形    参: pBuffer:数据存储区
+            WriteAddr:开始写入的地址(24bit)
+            NumByteToWrite:要写入的字节数(最大65535)  
+* 返 回 值: None 
+* 注    释: 该函数带擦除操作
+*******************************************************************************/
 void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 { 
     uint32_t secPos;
@@ -754,16 +936,16 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 
     WriteAddr &= 0x0FFFFFFF;
     
-    secPos = WriteAddr/SECTOR_SIZE;//扇区地址  
+    secPos = WriteAddr/SECTOR_SIZE;//扇区地址
     secOff = WriteAddr%SECTOR_SIZE;//在扇区内的偏移
     secRemain = SECTOR_SIZE - secOff;//扇区剩余空间大小
     
     if(NumByteToWrite <= secRemain)
     {
-        secRemain = NumByteToWrite;//不大于4096个字节	
-    }	
+        secRemain = NumByteToWrite;//不大于4096个字节
+    }
     while(1) 
-    {	
+    {
         FLASH_Read(FLASH_BASE + secPos*SECTOR_SIZE, (void *)NorFlash_BUF, SECTOR_SIZE);//读出整个扇区的内容
         for(i=0;i<secRemain;i++)//校验数据
         {
@@ -777,8 +959,7 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
             FLASH_EraseSector(FLASH_BASE + secPos*SECTOR_SIZE);
             for(i=0;i<secRemain;i++)//复制
             {
-                NorFlash_BUF[i+secOff] = pBuffer[i];
-                        
+                NorFlash_BUF[i+secOff] = pBuffer[i];                       
             }
             NorFlash_Write_NoCheck(NorFlash_BUF,FLASH_BASE + secPos*SECTOR_SIZE,SECTOR_SIZE);//写入整个扇区  
         }
@@ -812,6 +993,14 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 }
 
 
+/*******************************************************************************
+* 函 数 名: NOR_FLASH_Write
+* 功能描述: 写入W25QXX在指定地址开始写入指定长度的数据 
+* 形    参: FlashAddress:用于存储当前写入Flash地址的指针，写入过程中会移动
+            Data:要写入数据存储区
+            DataLength:要写入的字节数
+* 返 回 值: 0 
+*******************************************************************************/
 #ifndef  USE_HIGHT_SPEED_TRANS
 uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength)
 {
