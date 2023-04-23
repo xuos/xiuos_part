@@ -100,7 +100,7 @@ static const uint32_t crc32tab[] = {
             len:表示需要计算CRC32的数据长度
 * 返 回 值: 计算得到的CRC32值
 *******************************************************************************/
-static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
+uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 {
     uint32_t crc = 0xFFFFFFFF;
     uint8_t byte = 0xFF;
@@ -115,50 +115,24 @@ static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 
 
 /*******************************************************************************
-* 函 数 名: UpdateOTAStatus
-* 功能描述: 更新OTA的状态信息
-* 形    参: status:将要更改的状态值
-* 返 回 值: 无
-*******************************************************************************/
-void UpdateOTAStatus(ota_status_t status)
-{
-    ota_info_t ota_info;
-
-    //从Flash中读取OTA信息
-    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    ota_info.status = status;
-    flash_erase(FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    flash_write(FLAG_FLAH_ADDRESS,(void *)&ota_info,sizeof(ota_info_t));
-}
-
-
-/*******************************************************************************
 * 函 数 名: UpdateOTAFlag
 * 功能描述: 更新OTA Flag区域的信息，版本完成下载后在app里进行调用
-* 形    参: app_size:新的固件的大小,单位字节
-            version:新的固件的版本
-            status:OTA的状态信息
-            description:新版本的固件描述
-            error_message:更新过程中存储的错误信息
-* 返 回 值: 无
+* 形    参: ptr:ota_info_t结构体指针,描述OTA升级相关信息
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码
 *******************************************************************************/
-void UpdateOTAFlag(uint32_t app_size, uint32_t version, uint32_t status, uint8_t* description, uint8_t* error_message)
+status_t UpdateOTAFlag(ota_info_t *ptr)
 {
-    ota_info_t ota_info;  // 定义OTA信息结构体
+    status_t status;
 
-    // 从Flash中读取OTA信息
-    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    ota_info.app_size = app_size;
-    ota_info.crc = calculate_crc32(DOWN_FLAH_ADDRESS, app_size);
-    ota_info.version = version;
-    strncpy(ota_info.description, description,sizeof(ota_info.description));
-    ota_info.status = status;
-    strncpy(ota_info.error_message, error_message,sizeof(ota_info.error_message));
+    status = flash_erase(FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+    if(status != kStatus_Success)
+    {
+        return status;
+    }
+    status = flash_write(FLAG_FLAH_ADDRESS,(void *)ptr,sizeof(ota_info_t));
 
-    flash_erase(FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    flash_write(FLAG_FLAH_ADDRESS,(void *)&ota_info,sizeof(ota_info_t));
+    return status;
 }
-
 
 /*******************************************************************************
 * 函 数 名: UpdateApplication
@@ -179,61 +153,44 @@ void UpdateApplication(void)
     if(ota_info.status == OTA_STATUS_READY) 
     {
         Serial_PutString("\r\n------Start to update the app!------\r\n");
-        // 校验固件CRC
-        if(calculate_crc32(DOWN_FLAH_ADDRESS, ota_info.app_size) == ota_info.crc) 
+        // 校验downlad分区固件CRC
+        if(calculate_crc32(DOWN_FLAH_ADDRESS, ota_info.down.size) == ota_info.down.crc32) 
         {
-            // 如果CRC校验通过,开始升级,逐字节搬移
-            UpdateOTAStatus(OTA_STATUS_UPDATING);
-            status = flash_copy(XIUOS_FLAH_ADDRESS,BAKUP_FLAH_ADDRESS,ota_info.app_size);
-            if(status != kStatus_Success)
+            ota_info.status = OTA_STATUS_UPDATING;
+            UpdateOTAFlag(&ota_info);
+
+            // 拷贝download分区到XiUOS System分区
+            status = flash_copy(DOWN_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.down.size);
+            if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.down.size) == ota_info.down.crc32))
             {
-                Serial_PutString("------Backup app failed!------\r\n");
-                goto finish;
+                Serial_PutString("\r\n------The download partition is copied successfully!------\r\n");
+
+                ota_info.os.size = ota_info.down.size;
+                ota_info.os.crc32 = ota_info.down.crc32;
+                ota_info.os.version = ota_info.down.version;
+                strncpy(ota_info.os.description, ota_info.down.description, sizeof(ota_info.down.description));
+                ota_info.status == OTA_STATUS_IDLE; // 拷贝download分区到XiUOS System分区成功,将OTA升级状态设置为IDLE
+                UpdateOTAFlag(&ota_info); 
             }
-            status = flash_copy(DOWN_FLAH_ADDRESS,XIUOS_FLAH_ADDRESS,ota_info.app_size);
-            if(status != kStatus_Success)
+            else
             {
-                Serial_PutString("------Firmware partition copy failed!------\r\n");
+                Serial_PutString("\r\n------The download partition copy failed!------\r\n");
+                ota_info.status = OTA_STATUS_ERROR;
+                strncpy(ota_info.error_message, "The download partition copy failed!",sizeof(ota_info.error_message));
+                UpdateOTAFlag(&ota_info);
                 goto finish;
             }
 
-            // 校验搬移后的固件CRC
-            if(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.app_size) == ota_info.crc)
-            {
-                ota_info.status = OTA_STATUS_IDLE;  // 将OTA升级状态设置为IDLE
-                memset(ota_info.error_message,0,sizeof(ota_info.error_message));  // 清空错误信息
-
-                // 将更新后的OTA信息写入Flash中
-                flash_erase(FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-                flash_write(FLAG_FLAH_ADDRESS,(void *)&ota_info,sizeof(ota_info_t));
-                Serial_PutString("\r\n------Update completed!------\r\n");
-                goto finish;
-            }
-            else 
-            {
-                // 如果搬移后的固件CRC校验失败，升级失败
-                ota_info.status = OTA_STATUS_ERROR;  // 将OTA升级状态设置为ERROR
-                memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
-                snprintf((char *)ota_info.error_message, sizeof(ota_info.error_message), "APP Firmware CRC check  failed!");  // 记录错误信息
-
-                // 将更新后的OTA信息写入Flash中
-                flash_erase(FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-                flash_write(FLAG_FLAH_ADDRESS,(void *)&ota_info,sizeof(ota_info_t));
-                Serial_PutString("\r\n------APP Firmware CRC check  failed!------\r\n");
-                goto finish;
-            }
+            Serial_PutString("\r\n------Update completed!------\r\n");
+            goto finish;
         }
         else
         {
-            // 如果CRC校验失败，升级失败
-            ota_info.status = OTA_STATUS_ERROR;  // 将OTA升级状态设置为ERROR
-            memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
-            snprintf((char *)ota_info.error_message, sizeof(ota_info.error_message), "Download Firmware CRC check failed");  // 记录错误信息
-
-            // 将更新后的OTA信息写入Flash中
-            flash_erase(FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-            flash_write(FLAG_FLAH_ADDRESS,(void *)&ota_info,sizeof(ota_info_t));
+            // 如果download分区CRC校验失败，升级失败
             Serial_PutString("\r\n------Download Firmware CRC check failed!------\r\n");
+            ota_info.status = OTA_STATUS_ERROR;
+            strncpy(ota_info.error_message, "Download Firmware CRC check failed!",sizeof(ota_info.error_message));
+            UpdateOTAFlag(&ota_info);
             goto finish;  
         }  
     }

@@ -684,7 +684,7 @@ status_t FLASH_Read(uint32_t addr, uint32_t *buf, uint32_t len)
 * 功能描述: 擦除Flash指定长度的空间
 * 形    参: addr:擦除区域起始地址
             byte_cnt:要擦除的字节数,以4k字节为最小擦除单位
-* 返 回 值: None 
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码
 * 注    释: 不满4k字节的，也需要擦除掉4k字节
 *******************************************************************************/
 status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt)
@@ -708,16 +708,30 @@ status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt)
 
 /*******************************************************************************
 * 函 数 名: flash_write
-* 功能描述: 与FLASH_WritePage功能相同，写Flash一个页
+* 功能描述: 在指定的flash起始地址写入指定长度的数据
 * 形    参: addr:写入区域起始地址
             buf:数据存储区
-            len:要写入的字节数(最大256)
+            byte_cnt:要写入的字节数
 * 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
-* 注    释: 在指定地址开始写入最大256字节的数据
 *******************************************************************************/
 status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt)
 {
-    return FLASH_WritePage(start_addr, (void *)buf, byte_cnt);
+    uint32_t size;
+    status_t status;
+    while(byte_cnt > 0)
+    {
+        size = byte_cnt > FLASH_PAGE_SIZE ? FLASH_PAGE_SIZE : byte_cnt;
+        status = FLASH_WritePage(start_addr, (void *)buf, size);
+        if(status != kStatus_Success) 
+        {
+            return status;
+        }
+        start_addr += size;
+        buf += size;
+        byte_cnt -= size;
+    }
+
+    return kStatus_Success;
 }
 
 

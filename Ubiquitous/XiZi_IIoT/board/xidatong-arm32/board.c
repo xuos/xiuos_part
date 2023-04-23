@@ -369,17 +369,35 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_OTA
 static void OtaCmd(void)
 {
-    int32_t Size;
+    int32_t size;
+    ota_info_t ota_info;
 
     FLASH_Init();
     UartConfig();
-    UpdateOTAStatus(OTA_STATUS_DOWNLOADING);
-    Size = SerialDownload(DOWN_FLAH_ADDRESS);
-    UpdateOTAStatus(OTA_STATUS_DOWNLOADED);
-    if(Size > 0)
+
+    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+    ota_info.status = OTA_STATUS_DOWNLOADING;
+    UpdateOTAFlag(&ota_info);
+    size = SerialDownload(DOWN_FLAH_ADDRESS);
+    ota_info.status = OTA_STATUS_DOWNLOADED;
+    UpdateOTAFlag(&ota_info);
+    if(size > 0)
     {
-        UpdateOTAFlag(Size, 0x11223344, OTA_STATUS_READY, "OTA Test!","No error!");
+        ota_info.down.size = size;
+        ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, size);
+        ota_info.down.version = 0x11223344;
+        strncpy(ota_info.down.description, "OTA Test!",sizeof(ota_info.down.description));
+        ota_info.status = OTA_STATUS_READY;
+        strncpy(ota_info.error_message, "Download the firmware to the download partition successfully!",sizeof(ota_info.error_message));
+        UpdateOTAFlag(&ota_info);
     }
+    else
+    {
+        ota_info.status = OTA_STATUS_ERROR;
+        strncpy(ota_info.error_message, "Failed to download firmware to download partition!",sizeof(ota_info.error_message));
+        UpdateOTAFlag(&ota_info);
+    }
+    
     FLASH_DeInit();
 
     __set_FAULTMASK(1);
@@ -437,4 +455,10 @@ void InitBoardHardware()
     }
     KPrintf("board init done.\n");
     KPrintf("start kernel...\n");
+
+#ifdef BSP_USING_OTA
+    FLASH_Init();
+    //跳转成功将对应跳转失败标志清零
+    FLASH_DeInit();
+#endif
 }

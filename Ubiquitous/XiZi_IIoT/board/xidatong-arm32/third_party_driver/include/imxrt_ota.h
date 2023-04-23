@@ -26,27 +26,43 @@
 #include "flash.h"
 #include "ymodem.h"
 
+
+/* OTA升级过程中的状态描述 */
 typedef enum {
-  OTA_STATUS_IDLE = 0,     // 空闲状态，没有进行OTA升级
-  OTA_STATUS_READY,        // 准备状态，可以进行OTA升级
-  OTA_STATUS_DOWNLOADING,  // 正在下载固件
-  OTA_STATUS_DOWNLOADED,   // 固件下载完成，可以进行升级
-  OTA_STATUS_UPDATING,     // 正在进行OTA升级
-  OTA_STATUS_ERROR,        // 出现错误，升级失败
+    OTA_STATUS_IDLE = 0,     // 空闲状态，没有进行OTA升级
+    OTA_STATUS_READY,        // 准备状态，可以进行OTA升级
+    OTA_STATUS_DOWNLOADING,  // 正在下载固件
+    OTA_STATUS_DOWNLOADED,   // 固件下载完成，可以进行升级
+    OTA_STATUS_UPDATING,     // 正在进行OTA升级
+    OTA_STATUS_ERROR,        // 出现错误，升级失败
 } ota_status_t;
 
+
+/* Flash分区中保存固件的属性描述 */
 typedef struct {
-  uint32_t app_size;          // 应用程序大小
-  uint32_t crc;               // 应用程序CRC校验值
-  uint32_t version;           // 应用程序版本号
-  uint32_t status;            // 升级状态
-  uint8_t description[64];    // 应用程序升级说明，最多64个字符
-  uint8_t error_message[64];  // 错误信息，最多64个字符
+    uint32_t size;              // 应用程序大小,记录分区固件的大小
+    uint32_t crc32;             // 应用程序CRC32校验值,记录分区固件的crc32值
+    uint32_t version;           // 应用程序版本号,记录分区固件的版本号
+    uint32_t reserve;           // 保留字段
+    uint8_t  description[128];  // 固件的描述信息,最多128个字符
+} firmware_t;
+
+
+/* OTA升级过程中的信息结构体 */
+typedef struct {
+    firmware_t os;                // XiUOS System分区属性信息
+    firmware_t bak;               // Bakup分区属性信息
+    firmware_t down;              // Download分区属性信息
+    uint32_t status;              // 升级状态,取值来自于ota_status_t类型
+    uint32_t initversion;         // 恢复出厂设置的标志,0xFFFFFFFF代表未烧写过,烧写过以后设置为0x12345678
+    uint32_t jumpfailed;          // bootloaer跳转失败的标志,bootloader里置0xabababab,跳转成功后置0x00000000
+    uint32_t reserve;             // 保留字段
+    uint8_t  error_message[128];  // 错误信息,最多128个字符
 } ota_info_t;
 
 
-void UpdateOTAStatus(ota_status_t status);
-void UpdateOTAFlag(uint32_t app_size, uint32_t version, uint32_t status, uint8_t* description, uint8_t* error_message);
+uint32_t calculate_crc32(uint32_t addr, uint32_t len);
+status_t UpdateOTAFlag(ota_info_t *ptr);
 void UpdateApplication(void);
 
 #endif
