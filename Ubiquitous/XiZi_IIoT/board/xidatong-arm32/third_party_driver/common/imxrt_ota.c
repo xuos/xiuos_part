@@ -149,8 +149,8 @@ void UpdateApplication(void)
     // 从Flash中读取OTA信息
     memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
 
-    // 如果OTA升级状态为准备状态，可以进行升级
-    if(ota_info.status == OTA_STATUS_READY) 
+    // 如果OTA升级状态为准备状态，且APP分区与download分区版本不同,才可以进行升级
+    if((ota_info.status == OTA_STATUS_READY) && (ota_info.os.crc32 != ota_info.down.crc32)) 
     {
         Serial_PutString("\r\n------Start to update the app!------\r\n");
         // 校验downlad分区固件CRC
@@ -159,7 +159,27 @@ void UpdateApplication(void)
             ota_info.status = OTA_STATUS_UPDATING;
             UpdateOTAFlag(&ota_info);
 
-            // 拷贝download分区到XiUOS System分区
+            // 1.如果CRC校验通过,开始升级,逐字节拷贝Flash,先备份当前XiUOS System分区内容
+            status = flash_copy(XIUOS_FLAH_ADDRESS, BAKUP_FLAH_ADDRESS, ota_info.os.size);
+            if((status == kStatus_Success) &&(calculate_crc32(BAKUP_FLAH_ADDRESS, ota_info.os.size) == ota_info.os.crc32))
+            {
+                Serial_PutString("\r\n------Backup app success!------\r\n");
+                ota_info.bak.size = ota_info.os.size;
+                ota_info.bak.crc32 = ota_info.os.crc32;
+                ota_info.bak.version = ota_info.os.version;
+                strncpy(ota_info.bak.description, ota_info.os.description, sizeof(ota_info.os.description));
+                UpdateOTAFlag(&ota_info);
+            }
+            else
+            {
+                Serial_PutString("\r\n------Backup app failed!------\r\n");
+                ota_info.status = OTA_STATUS_ERROR;
+                strncpy(ota_info.error_message, "Backup app failed!",sizeof(ota_info.error_message));
+                UpdateOTAFlag(&ota_info);
+                goto finish;
+            }
+
+            // 2.拷贝download分区到XiUOS System分区
             status = flash_copy(DOWN_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.down.size);
             if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.down.size) == ota_info.down.crc32))
             {
@@ -200,6 +220,5 @@ void UpdateApplication(void)
         goto finish;
     }
 finish:
-    // 跳转到应用程序
-    jump_to_application(); 
+    return;
 }

@@ -385,10 +385,10 @@ static void OtaCmd(void)
     {
         ota_info.down.size = size;
         ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, size);
-        ota_info.down.version = 0x11223344;
+        ota_info.down.version = ota_info.os.version + 1;
         strncpy(ota_info.down.description, "OTA Test!",sizeof(ota_info.down.description));
         ota_info.status = OTA_STATUS_READY;
-        strncpy(ota_info.error_message, "Download the firmware to the download partition successfully!",sizeof(ota_info.error_message));
+        strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
         UpdateOTAFlag(&ota_info);
     }
     else

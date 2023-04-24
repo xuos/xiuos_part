@@ -26,15 +26,14 @@
 #include "flash.h"
 #include "ymodem.h"
 
-
 /* OTA升级过程中的状态描述 */
 typedef enum {
-    OTA_STATUS_IDLE = 0,     // 空闲状态，没有进行OTA升级
-    OTA_STATUS_READY,        // 准备状态，可以进行OTA升级
+    OTA_STATUS_IDLE = 0,     // 空闲状态,没有进行OTA升级
+    OTA_STATUS_READY,        // 准备状态,可以进行OTA升级
     OTA_STATUS_DOWNLOADING,  // 正在下载固件
-    OTA_STATUS_DOWNLOADED,   // 固件下载完成，可以进行升级
+    OTA_STATUS_DOWNLOADED,   // 固件下载完成
     OTA_STATUS_UPDATING,     // 正在进行OTA升级
-    OTA_STATUS_ERROR,        // 出现错误，升级失败
+    OTA_STATUS_ERROR,        // 出现错误,升级失败
 } ota_status_t;
 
 
@@ -54,9 +53,8 @@ typedef struct {
     firmware_t bak;               // Bakup分区属性信息
     firmware_t down;              // Download分区属性信息
     uint32_t status;              // 升级状态,取值来自于ota_status_t类型
-    uint32_t initversion;         // 恢复出厂设置的标志,0xFFFFFFFF代表未烧写过,烧写过以后设置为0x12345678
-    uint32_t jumpfailed;          // bootloaer跳转失败的标志,bootloader里置0xabababab,跳转成功后置0x00000000
-    uint32_t reserve;             // 保留字段
+    uint32_t lastjumpflag;        // bootloaer跳转失败的标志,bootloader里置0xABABABAB,跳转成功后在应用里置0x00000000
+    uint32_t reserve[2];          // 保留字段
     uint8_t  error_message[128];  // 错误信息,最多128个字符
 } ota_info_t;
 
