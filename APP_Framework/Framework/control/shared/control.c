@@ -126,6 +126,7 @@ static int ControlAnalyzeRecipe(ControlProtocolType control_protocol, const char
         return -1;
     }
 
+    strncpy(control_protocol->device->dev_name, control_protocol->recipe->device_name, 20);
     control_protocol->protocol_type = control_protocol->recipe->protocol_type;
 
     /*Get the variable need to read from recipe file*/
@@ -254,6 +255,15 @@ int ControlFrameworkInit(void)
         ret = -1;
         goto _out;
     }
+
+    control_protocol->device = (struct ControlDevice *)PrivMalloc(sizeof(struct ControlDevice));
+    if (NULL == control_protocol->device) {
+        printf("%s malloc control device failed!\n", __func__);
+        PrivFree(control_protocol->device);
+        PrivFree(control_protocol);
+        ret = -1;
+        goto _out;
+    }
     
     //Control Protocol Struct Init
     ret = ControlProtocolInit(control_protocol);
@@ -274,6 +284,7 @@ int ControlFrameworkInit(void)
     }
 
     control_protocol->protocol_status = CONTROL_REGISTERED;
+    control_protocol->device->status = CONTROL_REGISTERED;
 
     ret = ControlPeripheralInit(control_protocol->recipe);
     if (ret < 0) {
@@ -287,3 +298,57 @@ int ControlFrameworkInit(void)
 _out:
     return ret;
 }
+
+static char *const protocol_type_str[] =
+{
+    "TYPE_START",
+    "S7",
+    "MODBUS_TCP",
+    "MODBUS_UART",
+    "OPC_UA",
+    "FINS",
+    "MELSEC_1E",
+    "MELSEC_3E_Q_L",
+    "MELSEC_3E_IQ_R",
+    "MELSEC_1C",
+    "MELSEC_3C",
+    "TYPE_END"
+};
+
+/**
+ * @description: Control Framework Shell Cmd Information
+ * @param void
+ * @return success : 0 error : -1
+ */
+void ShowControl(void)
+{
+    int i = 0; 
+    int maxlen;
+    const char *item_type = "control_protocol_type";
+    const char *item_name_0 = "control_protocol_name";
+    const char *item_name_1 = "control_device_name";
+    const char *item_status = "status";
+
+    ControlProtocolType control_protocol = ControlProtocolFind();
+
+    printf(" %-28s%-28s%-26s%-20s\n", item_type, item_name_0, item_name_1, item_status); 
+    maxlen = 90;
+    while (i < maxlen) {
+        i++;
+        if (maxlen == i) {
+            printf("-\n");
+        } else {
+            printf("-");
+        }
+    }
+
+    if (control_protocol) {
+        printf("%s", " ");
+        KPrintf("%-28s%-28s%-26s%-8d\n", 
+            protocol_type_str[1], 
+            protocol_type_str[1],
+            control_protocol->device->dev_name,
+            control_protocol->device->status);
+    }
+}
+PRIV_SHELL_CMD_FUNCTION(ShowControl, show control framework information, PRIV_SHELL_CMD_FUNC_ATTR);

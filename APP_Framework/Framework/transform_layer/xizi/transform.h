@@ -24,6 +24,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <semaphore.h>
+#include <timer.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -41,6 +42,16 @@ extern "C" {
 #define OPER_WDT_KEEPALIVE      0x0003
 
 #define NAME_NUM_MAX            32
+
+#ifndef EVENT_AND
+#define EVENT_AND          (1 << 0)
+#endif
+#ifndef EVENT_OR
+#define EVENT_OR           (1 << 1)
+#endif
+#ifndef EVENT_AUTOCLEAN
+#define EVENT_AUTOCLEAN    (1 << 2)
+#endif
 
 /*********************GPIO define*********************/
 #define GPIO_LOW    0x00
@@ -93,6 +104,30 @@ extern "C" {
 #define SERIAL_RB_BUFSZ         128
 #endif
 
+/********************SPI define*******************/
+#define SPI_MAX_CLOCK            40000000
+#define spi_device_max_num       4
+
+#define SPI_LINE_CPHA            (1 << 0)                           
+#define SPI_LINE_CPOL            (1 << 1)                          
+
+#define SPI_LSB                  (0 << 2)                             
+#define SPI_MSB                  (1 << 2)                             
+
+#define SPI_DEV_MASTER           (0 << 3)                            
+#define SPI_DEV_SLAVE            (1 << 3)      
+
+#define SPI_MODE_0               (0 | 0)                        
+#define SPI_MODE_1               (0 | SPI_LINE_CPHA)              
+#define SPI_MODE_2               (SPI_LINE_CPOL | 0)            
+#define SPI_MODE_3               (SPI_LINE_CPOL | SPI_LINE_CPHA)    
+#define SPI_MODE_MASK            (SPI_LINE_CPHA | SPI_LINE_CPOL | SPI_MSB)
+
+#define SPI_CS_HIGH              (1 << 4)                            
+#define SPI_NO_CS                (1 << 5)                           
+#define SPI_3WIRE                (1 << 6)                             
+#define SPI_READY                (1 << 7)
+
 struct PinDevIrq
 {
     int irq_mode;//< RISING/FALLING/HIGH/LOW
@@ -137,6 +172,15 @@ struct SerialDataCfg
     uint8_t is_ext_uart;
     uint8_t ext_uart_no;
     enum ExtSerialPortConfigure port_configure;
+};
+
+struct SpiMasterParam
+{
+    uint8 spi_work_mode;//CPOL CPHA
+    uint8 spi_frame_format;//frame format
+    uint8 spi_data_bit_width;//bit width
+    uint8 spi_data_endian;//little endian：0，big endian：1
+    uint32 spi_maxfrequency;//work frequency
 };
 
 enum IoctlDriverType
@@ -362,6 +406,14 @@ int PrivSemaphoreObtainNoWait(sem_t *sem);
 int PrivSemaphoreAbandon(sem_t *sem);
 int32_t PrivSemaphoreSetValue(int32_t sem, uint16_t val);
 
+/*********************event**********************/
+#ifndef SEPARATE_COMPILE
+int PrivEventCreate(uint8_t flag);
+int PrivEvenDelete(int event);
+int PrivEvenTrigger(int event, uint32_t set);
+int PrivEventProcess(int event, uint32_t set, uint8_t option, int32_t wait_time, unsigned int *Recved);
+#endif
+
 /*********************task**************************/
 
 int PrivTaskCreate(pthread_t *thread, const pthread_attr_t *attr,
@@ -388,6 +440,13 @@ void *PrivRealloc(void *pointer, size_t size);
 void *PrivCalloc(size_t  count, size_t size);
 void PrivFree(void *pointer);
 
+/******************soft timer*********************/
+int PrivTimerCreate(clockid_t clockid, struct sigevent * evp, timer_t * timerid);
+int PrivTimerDelete(timer_t timerid);
+int PrivTimerStartRun(timer_t timerid);
+int PrivTimerQuitRun(timer_t timerid);
+int PrivTimerModify(timer_t timerid, int flags, const struct itimerspec *restrict value,
+                  struct itimerspec *restrict ovalue);
 
 #ifdef __cplusplus
 }

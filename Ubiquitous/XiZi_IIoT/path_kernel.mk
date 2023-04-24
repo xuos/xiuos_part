@@ -512,9 +512,27 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protoc
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/s7 #
 endif
 
-
 ifeq ($(CONFIG_LIB_USING_CJSON), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON
+endif
+
+ifeq ($(CONFIG_LIB_USING_LORAWAN), y)
+ifeq ($(CONFIG_LIB_USING_LORA_RADIO), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/lora-radio/common #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/lora-radio/include #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/lora-radio/sx126x #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/lora-radio/sx127x #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/ports/lora-module/inc #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/ports/samples/lora-radio-tester #
+endif
+
+ifeq ($(CONFIG_LIB_USING_LORAWAN_ED_STACK), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Aps/Basic #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Common #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Mac #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Mac/Crypto #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Phy/region #
+endif
 endif
 
 ifeq ($(CONFIG_CRYPTO), y)
