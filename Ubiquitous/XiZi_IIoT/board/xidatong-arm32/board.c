@@ -64,6 +64,10 @@ Modification:
 #include <connect_wdt.h>
 #endif
 
+#ifdef BSP_USING_OTA
+#include <imxrt_ota.h>
+#endif
+
 #ifdef BSP_USING_SEMC
 extern status_t BOARD_InitSEMC(void);
 #ifdef BSP_USING_EXTSRAM
@@ -330,12 +334,12 @@ struct InitSequenceDesc _board_init[] =
 #endif
 
 #ifdef BSP_USING_SDIO
-	{ "sdio", Imxrt1052HwSdioInit },
+    { "sdio", Imxrt1052HwSdioInit },
 #endif
 
 #ifdef BSP_USING_USB
 #ifdef BSP_USING_NXP_USBH
-	{ "nxp hw usb", Imxrt1052HwUsbHostInit },
+    { "nxp hw usb", Imxrt1052HwUsbHostInit },
 #endif
 #endif
 
@@ -344,7 +348,7 @@ struct InitSequenceDesc _board_init[] =
 #endif
 
 #ifdef BSP_USING_LCD
-	{ "hw_lcd", Imxrt1052HwLcdInit },
+    { "hw_lcd", Imxrt1052HwLcdInit },
 #endif
 
 #ifdef BSP_USING_TOUCH
@@ -358,8 +362,51 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_WDT
     { "hw_wdt", Imxrt1052HwWdgInit },
 #endif
-	{ " NONE ",NONE },
+    { " NONE ",NONE },
 };
+
+
+#ifdef BSP_USING_OTA
+static void OtaCmd(void)
+{
+    int32_t size;
+    ota_info_t ota_info;
+
+    FLASH_Init();
+    UartConfig();
+
+    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+    ota_info.status = OTA_STATUS_DOWNLOADING;
+    UpdateOTAFlag(&ota_info);
+    size = SerialDownload(DOWN_FLAH_ADDRESS);
+    ota_info.status = OTA_STATUS_DOWNLOADED;
+    UpdateOTAFlag(&ota_info);
+    if(size > 0)
+    {
+        ota_info.down.size = size;
+        ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, size);
+        ota_info.down.version = ota_info.os.version + 1;
+        strncpy(ota_info.down.description, "OTA Test!",sizeof(ota_info.down.description));
+        ota_info.status = OTA_STATUS_READY;
+        strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
+        UpdateOTAFlag(&ota_info);
+    }
+    else
+    {
+        ota_info.status = OTA_STATUS_ERROR;
+        strncpy(ota_info.error_message, "Failed to download firmware to download partition!",sizeof(ota_info.error_message));
+        UpdateOTAFlag(&ota_info);
+    }
+    
+    FLASH_DeInit();
+
+    __set_FAULTMASK(1);
+    NVIC_SystemReset();
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, OtaCmd, ota function);
+
+#endif
 
 /**
  * This function will initial imxrt1050 board.
@@ -367,7 +414,7 @@ struct InitSequenceDesc _board_init[] =
 void InitBoardHardware()
 {
     int i = 0;
-	int ret = 0;
+    int ret = 0;
 
     BOARD_ConfigMPU();
     BOARD_InitPins();
@@ -403,10 +450,15 @@ void InitBoardHardware()
     KPrintf("board initialization......\n");
 
     for(i = 0; _board_init[i].fn != NONE; i++) {
-		ret = _board_init[i].fn();
-		KPrintf("initialize %s %s\n",_board_init[i].fn_name, ret == 0 ? "success" : "failed");
-	}
+        ret = _board_init[i].fn();
+        KPrintf("initialize %s %s\n",_board_init[i].fn_name, ret == 0 ? "success" : "failed");
+    }
     KPrintf("board init done.\n");
-	KPrintf("start kernel...\n");
-}
+    KPrintf("start kernel...\n");
 
+#ifdef BSP_USING_OTA
+    FLASH_Init();
+    //跳转成功将对应跳转失败标志清零
+    FLASH_DeInit();
+#endif
+}

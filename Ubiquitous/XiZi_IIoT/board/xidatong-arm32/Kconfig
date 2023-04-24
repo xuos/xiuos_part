@@ -40,6 +40,22 @@ menu "xidatong-arm32 feature"
         int "stack size for interrupt"
         default 4096
 
+    config BSP_USING_OTA
+        bool "xidatong arm32 support OTA function"
+        default n
+        if BSP_USING_OTA
+            choice 
+                prompt "compile bootloader bin or application bin."
+                default MCUBOOT_BOOTLOADER
+
+                config MCUBOOT_BOOTLOADER
+                        bool "config as bootloader."
+
+                config MCUBOOT_APPLICATION
+                        bool "config as application."
+            endchoice
+        endif
+
     menu "config board peripheral"
         config MOUNT_SDCARD
             bool

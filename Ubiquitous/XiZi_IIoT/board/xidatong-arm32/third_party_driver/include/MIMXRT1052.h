@@ -58,7 +58,7 @@
  * compatible) */
 #define MCU_MEM_MAP_VERSION 0x0100U
 /** Memory map minor version */
-#define MCU_MEM_MAP_VERSION_MINOR 0x0002U
+#define MCU_MEM_MAP_VERSION_MINOR 0x0003U
 
 
 /* ----------------------------------------------------------------------------
@@ -9543,73 +9543,96 @@ typedef struct {
 /** DCP - Register Layout Typedef */
 typedef struct {
   __IO uint32_t CTRL;                              /**< DCP control register 0, offset: 0x0 */
-       uint8_t RESERVED_0[12];
+  __IO uint32_t CTRL_SET;                          /**< DCP control register 0, offset: 0x4 */
+  __IO uint32_t CTRL_CLR;                          /**< DCP control register 0, offset: 0x8 */
+  __IO uint32_t CTRL_TOG;                          /**< DCP control register 0, offset: 0xC */
   __IO uint32_t STAT;                              /**< DCP status register, offset: 0x10 */
-       uint8_t RESERVED_1[12];
+  __IO uint32_t STAT_SET;                          /**< DCP status register, offset: 0x14 */
+  __IO uint32_t STAT_CLR;                          /**< DCP status register, offset: 0x18 */
+  __IO uint32_t STAT_TOG;                          /**< DCP status register, offset: 0x1C */
   __IO uint32_t CHANNELCTRL;                       /**< DCP channel control register, offset: 0x20 */
-       uint8_t RESERVED_2[12];
+  __IO uint32_t CHANNELCTRL_SET;                   /**< DCP channel control register, offset: 0x24 */
+  __IO uint32_t CHANNELCTRL_CLR;                   /**< DCP channel control register, offset: 0x28 */
+  __IO uint32_t CHANNELCTRL_TOG;                   /**< DCP channel control register, offset: 0x2C */
   __IO uint32_t CAPABILITY0;                       /**< DCP capability 0 register, offset: 0x30 */
-       uint8_t RESERVED_3[12];
+       uint8_t RESERVED_0[12];
   __I  uint32_t CAPABILITY1;                       /**< DCP capability 1 register, offset: 0x40 */
-       uint8_t RESERVED_4[12];
+       uint8_t RESERVED_1[12];
   __IO uint32_t CONTEXT;                           /**< DCP context buffer pointer, offset: 0x50 */
-       uint8_t RESERVED_5[12];
+       uint8_t RESERVED_2[12];
   __IO uint32_t KEY;                               /**< DCP key index, offset: 0x60 */
-       uint8_t RESERVED_6[12];
+       uint8_t RESERVED_3[12];
   __IO uint32_t KEYDATA;                           /**< DCP key data, offset: 0x70 */
-       uint8_t RESERVED_7[12];
+       uint8_t RESERVED_4[12];
   __I  uint32_t PACKET0;                           /**< DCP work packet 0 status register, offset: 0x80 */
-       uint8_t RESERVED_8[12];
+       uint8_t RESERVED_5[12];
   __I  uint32_t PACKET1;                           /**< DCP work packet 1 status register, offset: 0x90 */
-       uint8_t RESERVED_9[12];
+       uint8_t RESERVED_6[12];
   __I  uint32_t PACKET2;                           /**< DCP work packet 2 status register, offset: 0xA0 */
-       uint8_t RESERVED_10[12];
+       uint8_t RESERVED_7[12];
   __I  uint32_t PACKET3;                           /**< DCP work packet 3 status register, offset: 0xB0 */
-       uint8_t RESERVED_11[12];
+       uint8_t RESERVED_8[12];
   __I  uint32_t PACKET4;                           /**< DCP work packet 4 status register, offset: 0xC0 */
-       uint8_t RESERVED_12[12];
+       uint8_t RESERVED_9[12];
   __I  uint32_t PACKET5;                           /**< DCP work packet 5 status register, offset: 0xD0 */
-       uint8_t RESERVED_13[12];
+       uint8_t RESERVED_10[12];
   __I  uint32_t PACKET6;                           /**< DCP work packet 6 status register, offset: 0xE0 */
-       uint8_t RESERVED_14[28];
+       uint8_t RESERVED_11[28];
   __IO uint32_t CH0CMDPTR;                         /**< DCP channel 0 command pointer address register, offset: 0x100 */
-       uint8_t RESERVED_15[12];
+       uint8_t RESERVED_12[12];
   __IO uint32_t CH0SEMA;                           /**< DCP channel 0 semaphore register, offset: 0x110 */
-       uint8_t RESERVED_16[12];
+       uint8_t RESERVED_13[12];
   __IO uint32_t CH0STAT;                           /**< DCP channel 0 status register, offset: 0x120 */
-       uint8_t RESERVED_17[12];
+  __IO uint32_t CH0STAT_SET;                       /**< DCP channel 0 status register, offset: 0x124 */
+  __IO uint32_t CH0STAT_CLR;                       /**< DCP channel 0 status register, offset: 0x128 */
+  __IO uint32_t CH0STAT_TOG;                       /**< DCP channel 0 status register, offset: 0x12C */
   __IO uint32_t CH0OPTS;                           /**< DCP channel 0 options register, offset: 0x130 */
-       uint8_t RESERVED_18[12];
+  __IO uint32_t CH0OPTS_SET;                       /**< DCP channel 0 options register, offset: 0x134 */
+  __IO uint32_t CH0OPTS_CLR;                       /**< DCP channel 0 options register, offset: 0x138 */
+  __IO uint32_t CH0OPTS_TOG;                       /**< DCP channel 0 options register, offset: 0x13C */
   __IO uint32_t CH1CMDPTR;                         /**< DCP channel 1 command pointer address register, offset: 0x140 */
-       uint8_t RESERVED_19[12];
+       uint8_t RESERVED_14[12];
   __IO uint32_t CH1SEMA;                           /**< DCP channel 1 semaphore register, offset: 0x150 */
-       uint8_t RESERVED_20[12];
+       uint8_t RESERVED_15[12];
   __IO uint32_t CH1STAT;                           /**< DCP channel 1 status register, offset: 0x160 */
-       uint8_t RESERVED_21[12];
+  __IO uint32_t CH1STAT_SET;                       /**< DCP channel 1 status register, offset: 0x164 */
+  __IO uint32_t CH1STAT_CLR;                       /**< DCP channel 1 status register, offset: 0x168 */
+  __IO uint32_t CH1STAT_TOG;                       /**< DCP channel 1 status register, offset: 0x16C */
   __IO uint32_t CH1OPTS;                           /**< DCP channel 1 options register, offset: 0x170 */
-       uint8_t RESERVED_22[12];
+  __IO uint32_t CH1OPTS_SET;                       /**< DCP channel 1 options register, offset: 0x174 */
+  __IO uint32_t CH1OPTS_CLR;                       /**< DCP channel 1 options register, offset: 0x178 */
+  __IO uint32_t CH1OPTS_TOG;                       /**< DCP channel 1 options register, offset: 0x17C */
   __IO uint32_t CH2CMDPTR;                         /**< DCP channel 2 command pointer address register, offset: 0x180 */
-       uint8_t RESERVED_23[12];
+       uint8_t RESERVED_16[12];
   __IO uint32_t CH2SEMA;                           /**< DCP channel 2 semaphore register, offset: 0x190 */
-       uint8_t RESERVED_24[12];
+       uint8_t RESERVED_17[12];
   __IO uint32_t CH2STAT;                           /**< DCP channel 2 status register, offset: 0x1A0 */
-       uint8_t RESERVED_25[12];
+  __IO uint32_t CH2STAT_SET;                       /**< DCP channel 2 status register, offset: 0x1A4 */
+  __IO uint32_t CH2STAT_CLR;                       /**< DCP channel 2 status register, offset: 0x1A8 */
+  __IO uint32_t CH2STAT_TOG;                       /**< DCP channel 2 status register, offset: 0x1AC */
   __IO uint32_t CH2OPTS;                           /**< DCP channel 2 options register, offset: 0x1B0 */
-       uint8_t RESERVED_26[12];
+  __IO uint32_t CH2OPTS_SET;                       /**< DCP channel 2 options register, offset: 0x1B4 */
+  __IO uint32_t CH2OPTS_CLR;                       /**< DCP channel 2 options register, offset: 0x1B8 */
+  __IO uint32_t CH2OPTS_TOG;                       /**< DCP channel 2 options register, offset: 0x1BC */
   __IO uint32_t CH3CMDPTR;                         /**< DCP channel 3 command pointer address register, offset: 0x1C0 */
-       uint8_t RESERVED_27[12];
+       uint8_t RESERVED_18[12];
   __IO uint32_t CH3SEMA;                           /**< DCP channel 3 semaphore register, offset: 0x1D0 */
-       uint8_t RESERVED_28[12];
+       uint8_t RESERVED_19[12];
   __IO uint32_t CH3STAT;                           /**< DCP channel 3 status register, offset: 0x1E0 */
-       uint8_t RESERVED_29[12];
+  __IO uint32_t CH3STAT_SET;                       /**< DCP channel 3 status register, offset: 0x1E4 */
+  __IO uint32_t CH3STAT_CLR;                       /**< DCP channel 3 status register, offset: 0x1E8 */
+  __IO uint32_t CH3STAT_TOG;                       /**< DCP channel 3 status register, offset: 0x1EC */
   __IO uint32_t CH3OPTS;                           /**< DCP channel 3 options register, offset: 0x1F0 */
-       uint8_t RESERVED_30[524];
+  __IO uint32_t CH3OPTS_SET;                       /**< DCP channel 3 options register, offset: 0x1F4 */
+  __IO uint32_t CH3OPTS_CLR;                       /**< DCP channel 3 options register, offset: 0x1F8 */
+  __IO uint32_t CH3OPTS_TOG;                       /**< DCP channel 3 options register, offset: 0x1FC */
+       uint8_t RESERVED_20[512];
   __IO uint32_t DBGSELECT;                         /**< DCP debug select register, offset: 0x400 */
-       uint8_t RESERVED_31[12];
+       uint8_t RESERVED_21[12];
   __I  uint32_t DBGDATA;                           /**< DCP debug data register, offset: 0x410 */
-       uint8_t RESERVED_32[12];
+       uint8_t RESERVED_22[12];
   __IO uint32_t PAGETABLE;                         /**< DCP page table register, offset: 0x420 */
-       uint8_t RESERVED_33[12];
+       uint8_t RESERVED_23[12];
   __I  uint32_t VERSION;                           /**< DCP version register, offset: 0x430 */
 } DCP_Type;
 
@@ -9667,6 +9690,141 @@ typedef struct {
 #define DCP_CTRL_SFTRST(x)                       (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SFTRST_SHIFT)) & DCP_CTRL_SFTRST_MASK)
 /*! @} */
 
+/*! @name CTRL_SET - DCP control register 0 */
+/*! @{ */
+#define DCP_CTRL_SET_CHANNEL_INTERRUPT_ENABLE_MASK (0xFFU)
+#define DCP_CTRL_SET_CHANNEL_INTERRUPT_ENABLE_SHIFT (0U)
+/*! CHANNEL_INTERRUPT_ENABLE
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_CTRL_SET_CHANNEL_INTERRUPT_ENABLE(x) (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SET_CHANNEL_INTERRUPT_ENABLE_SHIFT)) & DCP_CTRL_SET_CHANNEL_INTERRUPT_ENABLE_MASK)
+#define DCP_CTRL_SET_RSVD_CSC_INTERRUPT_ENABLE_MASK (0x100U)
+#define DCP_CTRL_SET_RSVD_CSC_INTERRUPT_ENABLE_SHIFT (8U)
+#define DCP_CTRL_SET_RSVD_CSC_INTERRUPT_ENABLE(x) (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SET_RSVD_CSC_INTERRUPT_ENABLE_SHIFT)) & DCP_CTRL_SET_RSVD_CSC_INTERRUPT_ENABLE_MASK)
+#define DCP_CTRL_SET_ENABLE_CONTEXT_SWITCHING_MASK (0x200000U)
+#define DCP_CTRL_SET_ENABLE_CONTEXT_SWITCHING_SHIFT (21U)
+#define DCP_CTRL_SET_ENABLE_CONTEXT_SWITCHING(x) (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SET_ENABLE_CONTEXT_SWITCHING_SHIFT)) & DCP_CTRL_SET_ENABLE_CONTEXT_SWITCHING_MASK)
+#define DCP_CTRL_SET_ENABLE_CONTEXT_CACHING_MASK (0x400000U)
+#define DCP_CTRL_SET_ENABLE_CONTEXT_CACHING_SHIFT (22U)
+#define DCP_CTRL_SET_ENABLE_CONTEXT_CACHING(x)   (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SET_ENABLE_CONTEXT_CACHING_SHIFT)) & DCP_CTRL_SET_ENABLE_CONTEXT_CACHING_MASK)
+#define DCP_CTRL_SET_GATHER_RESIDUAL_WRITES_MASK (0x800000U)
+#define DCP_CTRL_SET_GATHER_RESIDUAL_WRITES_SHIFT (23U)
+#define DCP_CTRL_SET_GATHER_RESIDUAL_WRITES(x)   (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SET_GATHER_RESIDUAL_WRITES_SHIFT)) & DCP_CTRL_SET_GATHER_RESIDUAL_WRITES_MASK)
+#define DCP_CTRL_SET_PRESENT_SHA_MASK            (0x10000000U)
+#define DCP_CTRL_SET_PRESENT_SHA_SHIFT           (28U)
+/*! PRESENT_SHA
+ *  0b1..Present
+ *  0b0..Absent
+ */
+#define DCP_CTRL_SET_PRESENT_SHA(x)              (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SET_PRESENT_SHA_SHIFT)) & DCP_CTRL_SET_PRESENT_SHA_MASK)
+#define DCP_CTRL_SET_PRESENT_CRYPTO_MASK         (0x20000000U)
+#define DCP_CTRL_SET_PRESENT_CRYPTO_SHIFT        (29U)
+/*! PRESENT_CRYPTO
+ *  0b1..Present
+ *  0b0..Absent
+ */
+#define DCP_CTRL_SET_PRESENT_CRYPTO(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SET_PRESENT_CRYPTO_SHIFT)) & DCP_CTRL_SET_PRESENT_CRYPTO_MASK)
+#define DCP_CTRL_SET_CLKGATE_MASK                (0x40000000U)
+#define DCP_CTRL_SET_CLKGATE_SHIFT               (30U)
+#define DCP_CTRL_SET_CLKGATE(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SET_CLKGATE_SHIFT)) & DCP_CTRL_SET_CLKGATE_MASK)
+#define DCP_CTRL_SET_SFTRST_MASK                 (0x80000000U)
+#define DCP_CTRL_SET_SFTRST_SHIFT                (31U)
+#define DCP_CTRL_SET_SFTRST(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_SET_SFTRST_SHIFT)) & DCP_CTRL_SET_SFTRST_MASK)
+/*! @} */
+
+/*! @name CTRL_CLR - DCP control register 0 */
+/*! @{ */
+#define DCP_CTRL_CLR_CHANNEL_INTERRUPT_ENABLE_MASK (0xFFU)
+#define DCP_CTRL_CLR_CHANNEL_INTERRUPT_ENABLE_SHIFT (0U)
+/*! CHANNEL_INTERRUPT_ENABLE
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_CTRL_CLR_CHANNEL_INTERRUPT_ENABLE(x) (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_CLR_CHANNEL_INTERRUPT_ENABLE_SHIFT)) & DCP_CTRL_CLR_CHANNEL_INTERRUPT_ENABLE_MASK)
+#define DCP_CTRL_CLR_RSVD_CSC_INTERRUPT_ENABLE_MASK (0x100U)
+#define DCP_CTRL_CLR_RSVD_CSC_INTERRUPT_ENABLE_SHIFT (8U)
+#define DCP_CTRL_CLR_RSVD_CSC_INTERRUPT_ENABLE(x) (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_CLR_RSVD_CSC_INTERRUPT_ENABLE_SHIFT)) & DCP_CTRL_CLR_RSVD_CSC_INTERRUPT_ENABLE_MASK)
+#define DCP_CTRL_CLR_ENABLE_CONTEXT_SWITCHING_MASK (0x200000U)
+#define DCP_CTRL_CLR_ENABLE_CONTEXT_SWITCHING_SHIFT (21U)
+#define DCP_CTRL_CLR_ENABLE_CONTEXT_SWITCHING(x) (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_CLR_ENABLE_CONTEXT_SWITCHING_SHIFT)) & DCP_CTRL_CLR_ENABLE_CONTEXT_SWITCHING_MASK)
+#define DCP_CTRL_CLR_ENABLE_CONTEXT_CACHING_MASK (0x400000U)
+#define DCP_CTRL_CLR_ENABLE_CONTEXT_CACHING_SHIFT (22U)
+#define DCP_CTRL_CLR_ENABLE_CONTEXT_CACHING(x)   (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_CLR_ENABLE_CONTEXT_CACHING_SHIFT)) & DCP_CTRL_CLR_ENABLE_CONTEXT_CACHING_MASK)
+#define DCP_CTRL_CLR_GATHER_RESIDUAL_WRITES_MASK (0x800000U)
+#define DCP_CTRL_CLR_GATHER_RESIDUAL_WRITES_SHIFT (23U)
+#define DCP_CTRL_CLR_GATHER_RESIDUAL_WRITES(x)   (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_CLR_GATHER_RESIDUAL_WRITES_SHIFT)) & DCP_CTRL_CLR_GATHER_RESIDUAL_WRITES_MASK)
+#define DCP_CTRL_CLR_PRESENT_SHA_MASK            (0x10000000U)
+#define DCP_CTRL_CLR_PRESENT_SHA_SHIFT           (28U)
+/*! PRESENT_SHA
+ *  0b1..Present
+ *  0b0..Absent
+ */
+#define DCP_CTRL_CLR_PRESENT_SHA(x)              (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_CLR_PRESENT_SHA_SHIFT)) & DCP_CTRL_CLR_PRESENT_SHA_MASK)
+#define DCP_CTRL_CLR_PRESENT_CRYPTO_MASK         (0x20000000U)
+#define DCP_CTRL_CLR_PRESENT_CRYPTO_SHIFT        (29U)
+/*! PRESENT_CRYPTO
+ *  0b1..Present
+ *  0b0..Absent
+ */
+#define DCP_CTRL_CLR_PRESENT_CRYPTO(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_CLR_PRESENT_CRYPTO_SHIFT)) & DCP_CTRL_CLR_PRESENT_CRYPTO_MASK)
+#define DCP_CTRL_CLR_CLKGATE_MASK                (0x40000000U)
+#define DCP_CTRL_CLR_CLKGATE_SHIFT               (30U)
+#define DCP_CTRL_CLR_CLKGATE(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_CLR_CLKGATE_SHIFT)) & DCP_CTRL_CLR_CLKGATE_MASK)
+#define DCP_CTRL_CLR_SFTRST_MASK                 (0x80000000U)
+#define DCP_CTRL_CLR_SFTRST_SHIFT                (31U)
+#define DCP_CTRL_CLR_SFTRST(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_CLR_SFTRST_SHIFT)) & DCP_CTRL_CLR_SFTRST_MASK)
+/*! @} */
+
+/*! @name CTRL_TOG - DCP control register 0 */
+/*! @{ */
+#define DCP_CTRL_TOG_CHANNEL_INTERRUPT_ENABLE_MASK (0xFFU)
+#define DCP_CTRL_TOG_CHANNEL_INTERRUPT_ENABLE_SHIFT (0U)
+/*! CHANNEL_INTERRUPT_ENABLE
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_CTRL_TOG_CHANNEL_INTERRUPT_ENABLE(x) (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_TOG_CHANNEL_INTERRUPT_ENABLE_SHIFT)) & DCP_CTRL_TOG_CHANNEL_INTERRUPT_ENABLE_MASK)
+#define DCP_CTRL_TOG_RSVD_CSC_INTERRUPT_ENABLE_MASK (0x100U)
+#define DCP_CTRL_TOG_RSVD_CSC_INTERRUPT_ENABLE_SHIFT (8U)
+#define DCP_CTRL_TOG_RSVD_CSC_INTERRUPT_ENABLE(x) (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_TOG_RSVD_CSC_INTERRUPT_ENABLE_SHIFT)) & DCP_CTRL_TOG_RSVD_CSC_INTERRUPT_ENABLE_MASK)
+#define DCP_CTRL_TOG_ENABLE_CONTEXT_SWITCHING_MASK (0x200000U)
+#define DCP_CTRL_TOG_ENABLE_CONTEXT_SWITCHING_SHIFT (21U)
+#define DCP_CTRL_TOG_ENABLE_CONTEXT_SWITCHING(x) (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_TOG_ENABLE_CONTEXT_SWITCHING_SHIFT)) & DCP_CTRL_TOG_ENABLE_CONTEXT_SWITCHING_MASK)
+#define DCP_CTRL_TOG_ENABLE_CONTEXT_CACHING_MASK (0x400000U)
+#define DCP_CTRL_TOG_ENABLE_CONTEXT_CACHING_SHIFT (22U)
+#define DCP_CTRL_TOG_ENABLE_CONTEXT_CACHING(x)   (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_TOG_ENABLE_CONTEXT_CACHING_SHIFT)) & DCP_CTRL_TOG_ENABLE_CONTEXT_CACHING_MASK)
+#define DCP_CTRL_TOG_GATHER_RESIDUAL_WRITES_MASK (0x800000U)
+#define DCP_CTRL_TOG_GATHER_RESIDUAL_WRITES_SHIFT (23U)
+#define DCP_CTRL_TOG_GATHER_RESIDUAL_WRITES(x)   (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_TOG_GATHER_RESIDUAL_WRITES_SHIFT)) & DCP_CTRL_TOG_GATHER_RESIDUAL_WRITES_MASK)
+#define DCP_CTRL_TOG_PRESENT_SHA_MASK            (0x10000000U)
+#define DCP_CTRL_TOG_PRESENT_SHA_SHIFT           (28U)
+/*! PRESENT_SHA
+ *  0b1..Present
+ *  0b0..Absent
+ */
+#define DCP_CTRL_TOG_PRESENT_SHA(x)              (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_TOG_PRESENT_SHA_SHIFT)) & DCP_CTRL_TOG_PRESENT_SHA_MASK)
+#define DCP_CTRL_TOG_PRESENT_CRYPTO_MASK         (0x20000000U)
+#define DCP_CTRL_TOG_PRESENT_CRYPTO_SHIFT        (29U)
+/*! PRESENT_CRYPTO
+ *  0b1..Present
+ *  0b0..Absent
+ */
+#define DCP_CTRL_TOG_PRESENT_CRYPTO(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_TOG_PRESENT_CRYPTO_SHIFT)) & DCP_CTRL_TOG_PRESENT_CRYPTO_MASK)
+#define DCP_CTRL_TOG_CLKGATE_MASK                (0x40000000U)
+#define DCP_CTRL_TOG_CLKGATE_SHIFT               (30U)
+#define DCP_CTRL_TOG_CLKGATE(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_TOG_CLKGATE_SHIFT)) & DCP_CTRL_TOG_CLKGATE_MASK)
+#define DCP_CTRL_TOG_SFTRST_MASK                 (0x80000000U)
+#define DCP_CTRL_TOG_SFTRST_SHIFT                (31U)
+#define DCP_CTRL_TOG_SFTRST(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CTRL_TOG_SFTRST_SHIFT)) & DCP_CTRL_TOG_SFTRST_MASK)
+/*! @} */
+
 /*! @name STAT - DCP status register */
 /*! @{ */
 #define DCP_STAT_IRQ_MASK                        (0xFU)
@@ -9699,6 +9857,102 @@ typedef struct {
 #define DCP_STAT_OTP_KEY_READY(x)                (((uint32_t)(((uint32_t)(x)) << DCP_STAT_OTP_KEY_READY_SHIFT)) & DCP_STAT_OTP_KEY_READY_MASK)
 /*! @} */
 
+/*! @name STAT_SET - DCP status register */
+/*! @{ */
+#define DCP_STAT_SET_IRQ_MASK                    (0xFU)
+#define DCP_STAT_SET_IRQ_SHIFT                   (0U)
+#define DCP_STAT_SET_IRQ(x)                      (((uint32_t)(((uint32_t)(x)) << DCP_STAT_SET_IRQ_SHIFT)) & DCP_STAT_SET_IRQ_MASK)
+#define DCP_STAT_SET_RSVD_IRQ_MASK               (0x100U)
+#define DCP_STAT_SET_RSVD_IRQ_SHIFT              (8U)
+#define DCP_STAT_SET_RSVD_IRQ(x)                 (((uint32_t)(((uint32_t)(x)) << DCP_STAT_SET_RSVD_IRQ_SHIFT)) & DCP_STAT_SET_RSVD_IRQ_MASK)
+#define DCP_STAT_SET_READY_CHANNELS_MASK         (0xFF0000U)
+#define DCP_STAT_SET_READY_CHANNELS_SHIFT        (16U)
+/*! READY_CHANNELS
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_STAT_SET_READY_CHANNELS(x)           (((uint32_t)(((uint32_t)(x)) << DCP_STAT_SET_READY_CHANNELS_SHIFT)) & DCP_STAT_SET_READY_CHANNELS_MASK)
+#define DCP_STAT_SET_CUR_CHANNEL_MASK            (0xF000000U)
+#define DCP_STAT_SET_CUR_CHANNEL_SHIFT           (24U)
+/*! CUR_CHANNEL
+ *  0b0000..None
+ *  0b0001..CH0
+ *  0b0010..CH1
+ *  0b0011..CH2
+ *  0b0100..CH3
+ */
+#define DCP_STAT_SET_CUR_CHANNEL(x)              (((uint32_t)(((uint32_t)(x)) << DCP_STAT_SET_CUR_CHANNEL_SHIFT)) & DCP_STAT_SET_CUR_CHANNEL_MASK)
+#define DCP_STAT_SET_OTP_KEY_READY_MASK          (0x10000000U)
+#define DCP_STAT_SET_OTP_KEY_READY_SHIFT         (28U)
+#define DCP_STAT_SET_OTP_KEY_READY(x)            (((uint32_t)(((uint32_t)(x)) << DCP_STAT_SET_OTP_KEY_READY_SHIFT)) & DCP_STAT_SET_OTP_KEY_READY_MASK)
+/*! @} */
+
+/*! @name STAT_CLR - DCP status register */
+/*! @{ */
+#define DCP_STAT_CLR_IRQ_MASK                    (0xFU)
+#define DCP_STAT_CLR_IRQ_SHIFT                   (0U)
+#define DCP_STAT_CLR_IRQ(x)                      (((uint32_t)(((uint32_t)(x)) << DCP_STAT_CLR_IRQ_SHIFT)) & DCP_STAT_CLR_IRQ_MASK)
+#define DCP_STAT_CLR_RSVD_IRQ_MASK               (0x100U)
+#define DCP_STAT_CLR_RSVD_IRQ_SHIFT              (8U)
+#define DCP_STAT_CLR_RSVD_IRQ(x)                 (((uint32_t)(((uint32_t)(x)) << DCP_STAT_CLR_RSVD_IRQ_SHIFT)) & DCP_STAT_CLR_RSVD_IRQ_MASK)
+#define DCP_STAT_CLR_READY_CHANNELS_MASK         (0xFF0000U)
+#define DCP_STAT_CLR_READY_CHANNELS_SHIFT        (16U)
+/*! READY_CHANNELS
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_STAT_CLR_READY_CHANNELS(x)           (((uint32_t)(((uint32_t)(x)) << DCP_STAT_CLR_READY_CHANNELS_SHIFT)) & DCP_STAT_CLR_READY_CHANNELS_MASK)
+#define DCP_STAT_CLR_CUR_CHANNEL_MASK            (0xF000000U)
+#define DCP_STAT_CLR_CUR_CHANNEL_SHIFT           (24U)
+/*! CUR_CHANNEL
+ *  0b0000..None
+ *  0b0001..CH0
+ *  0b0010..CH1
+ *  0b0011..CH2
+ *  0b0100..CH3
+ */
+#define DCP_STAT_CLR_CUR_CHANNEL(x)              (((uint32_t)(((uint32_t)(x)) << DCP_STAT_CLR_CUR_CHANNEL_SHIFT)) & DCP_STAT_CLR_CUR_CHANNEL_MASK)
+#define DCP_STAT_CLR_OTP_KEY_READY_MASK          (0x10000000U)
+#define DCP_STAT_CLR_OTP_KEY_READY_SHIFT         (28U)
+#define DCP_STAT_CLR_OTP_KEY_READY(x)            (((uint32_t)(((uint32_t)(x)) << DCP_STAT_CLR_OTP_KEY_READY_SHIFT)) & DCP_STAT_CLR_OTP_KEY_READY_MASK)
+/*! @} */
+
+/*! @name STAT_TOG - DCP status register */
+/*! @{ */
+#define DCP_STAT_TOG_IRQ_MASK                    (0xFU)
+#define DCP_STAT_TOG_IRQ_SHIFT                   (0U)
+#define DCP_STAT_TOG_IRQ(x)                      (((uint32_t)(((uint32_t)(x)) << DCP_STAT_TOG_IRQ_SHIFT)) & DCP_STAT_TOG_IRQ_MASK)
+#define DCP_STAT_TOG_RSVD_IRQ_MASK               (0x100U)
+#define DCP_STAT_TOG_RSVD_IRQ_SHIFT              (8U)
+#define DCP_STAT_TOG_RSVD_IRQ(x)                 (((uint32_t)(((uint32_t)(x)) << DCP_STAT_TOG_RSVD_IRQ_SHIFT)) & DCP_STAT_TOG_RSVD_IRQ_MASK)
+#define DCP_STAT_TOG_READY_CHANNELS_MASK         (0xFF0000U)
+#define DCP_STAT_TOG_READY_CHANNELS_SHIFT        (16U)
+/*! READY_CHANNELS
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_STAT_TOG_READY_CHANNELS(x)           (((uint32_t)(((uint32_t)(x)) << DCP_STAT_TOG_READY_CHANNELS_SHIFT)) & DCP_STAT_TOG_READY_CHANNELS_MASK)
+#define DCP_STAT_TOG_CUR_CHANNEL_MASK            (0xF000000U)
+#define DCP_STAT_TOG_CUR_CHANNEL_SHIFT           (24U)
+/*! CUR_CHANNEL
+ *  0b0000..None
+ *  0b0001..CH0
+ *  0b0010..CH1
+ *  0b0011..CH2
+ *  0b0100..CH3
+ */
+#define DCP_STAT_TOG_CUR_CHANNEL(x)              (((uint32_t)(((uint32_t)(x)) << DCP_STAT_TOG_CUR_CHANNEL_SHIFT)) & DCP_STAT_TOG_CUR_CHANNEL_MASK)
+#define DCP_STAT_TOG_OTP_KEY_READY_MASK          (0x10000000U)
+#define DCP_STAT_TOG_OTP_KEY_READY_SHIFT         (28U)
+#define DCP_STAT_TOG_OTP_KEY_READY(x)            (((uint32_t)(((uint32_t)(x)) << DCP_STAT_TOG_OTP_KEY_READY_SHIFT)) & DCP_STAT_TOG_OTP_KEY_READY_MASK)
+/*! @} */
+
 /*! @name CHANNELCTRL - DCP channel control register */
 /*! @{ */
 #define DCP_CHANNELCTRL_ENABLE_CHANNEL_MASK      (0xFFU)
@@ -9725,6 +9979,90 @@ typedef struct {
 #define DCP_CHANNELCTRL_RSVD_MASK                (0xFFFE0000U)
 #define DCP_CHANNELCTRL_RSVD_SHIFT               (17U)
 #define DCP_CHANNELCTRL_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_RSVD_SHIFT)) & DCP_CHANNELCTRL_RSVD_MASK)
+/*! @} */
+
+/*! @name CHANNELCTRL_SET - DCP channel control register */
+/*! @{ */
+#define DCP_CHANNELCTRL_SET_ENABLE_CHANNEL_MASK  (0xFFU)
+#define DCP_CHANNELCTRL_SET_ENABLE_CHANNEL_SHIFT (0U)
+/*! ENABLE_CHANNEL
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_CHANNELCTRL_SET_ENABLE_CHANNEL(x)    (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_SET_ENABLE_CHANNEL_SHIFT)) & DCP_CHANNELCTRL_SET_ENABLE_CHANNEL_MASK)
+#define DCP_CHANNELCTRL_SET_HIGH_PRIORITY_CHANNEL_MASK (0xFF00U)
+#define DCP_CHANNELCTRL_SET_HIGH_PRIORITY_CHANNEL_SHIFT (8U)
+/*! HIGH_PRIORITY_CHANNEL
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_CHANNELCTRL_SET_HIGH_PRIORITY_CHANNEL(x) (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_SET_HIGH_PRIORITY_CHANNEL_SHIFT)) & DCP_CHANNELCTRL_SET_HIGH_PRIORITY_CHANNEL_MASK)
+#define DCP_CHANNELCTRL_SET_CH0_IRQ_MERGED_MASK  (0x10000U)
+#define DCP_CHANNELCTRL_SET_CH0_IRQ_MERGED_SHIFT (16U)
+#define DCP_CHANNELCTRL_SET_CH0_IRQ_MERGED(x)    (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_SET_CH0_IRQ_MERGED_SHIFT)) & DCP_CHANNELCTRL_SET_CH0_IRQ_MERGED_MASK)
+#define DCP_CHANNELCTRL_SET_RSVD_MASK            (0xFFFE0000U)
+#define DCP_CHANNELCTRL_SET_RSVD_SHIFT           (17U)
+#define DCP_CHANNELCTRL_SET_RSVD(x)              (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_SET_RSVD_SHIFT)) & DCP_CHANNELCTRL_SET_RSVD_MASK)
+/*! @} */
+
+/*! @name CHANNELCTRL_CLR - DCP channel control register */
+/*! @{ */
+#define DCP_CHANNELCTRL_CLR_ENABLE_CHANNEL_MASK  (0xFFU)
+#define DCP_CHANNELCTRL_CLR_ENABLE_CHANNEL_SHIFT (0U)
+/*! ENABLE_CHANNEL
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_CHANNELCTRL_CLR_ENABLE_CHANNEL(x)    (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_CLR_ENABLE_CHANNEL_SHIFT)) & DCP_CHANNELCTRL_CLR_ENABLE_CHANNEL_MASK)
+#define DCP_CHANNELCTRL_CLR_HIGH_PRIORITY_CHANNEL_MASK (0xFF00U)
+#define DCP_CHANNELCTRL_CLR_HIGH_PRIORITY_CHANNEL_SHIFT (8U)
+/*! HIGH_PRIORITY_CHANNEL
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_CHANNELCTRL_CLR_HIGH_PRIORITY_CHANNEL(x) (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_CLR_HIGH_PRIORITY_CHANNEL_SHIFT)) & DCP_CHANNELCTRL_CLR_HIGH_PRIORITY_CHANNEL_MASK)
+#define DCP_CHANNELCTRL_CLR_CH0_IRQ_MERGED_MASK  (0x10000U)
+#define DCP_CHANNELCTRL_CLR_CH0_IRQ_MERGED_SHIFT (16U)
+#define DCP_CHANNELCTRL_CLR_CH0_IRQ_MERGED(x)    (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_CLR_CH0_IRQ_MERGED_SHIFT)) & DCP_CHANNELCTRL_CLR_CH0_IRQ_MERGED_MASK)
+#define DCP_CHANNELCTRL_CLR_RSVD_MASK            (0xFFFE0000U)
+#define DCP_CHANNELCTRL_CLR_RSVD_SHIFT           (17U)
+#define DCP_CHANNELCTRL_CLR_RSVD(x)              (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_CLR_RSVD_SHIFT)) & DCP_CHANNELCTRL_CLR_RSVD_MASK)
+/*! @} */
+
+/*! @name CHANNELCTRL_TOG - DCP channel control register */
+/*! @{ */
+#define DCP_CHANNELCTRL_TOG_ENABLE_CHANNEL_MASK  (0xFFU)
+#define DCP_CHANNELCTRL_TOG_ENABLE_CHANNEL_SHIFT (0U)
+/*! ENABLE_CHANNEL
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_CHANNELCTRL_TOG_ENABLE_CHANNEL(x)    (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_TOG_ENABLE_CHANNEL_SHIFT)) & DCP_CHANNELCTRL_TOG_ENABLE_CHANNEL_MASK)
+#define DCP_CHANNELCTRL_TOG_HIGH_PRIORITY_CHANNEL_MASK (0xFF00U)
+#define DCP_CHANNELCTRL_TOG_HIGH_PRIORITY_CHANNEL_SHIFT (8U)
+/*! HIGH_PRIORITY_CHANNEL
+ *  0b00000001..CH0
+ *  0b00000010..CH1
+ *  0b00000100..CH2
+ *  0b00001000..CH3
+ */
+#define DCP_CHANNELCTRL_TOG_HIGH_PRIORITY_CHANNEL(x) (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_TOG_HIGH_PRIORITY_CHANNEL_SHIFT)) & DCP_CHANNELCTRL_TOG_HIGH_PRIORITY_CHANNEL_MASK)
+#define DCP_CHANNELCTRL_TOG_CH0_IRQ_MERGED_MASK  (0x10000U)
+#define DCP_CHANNELCTRL_TOG_CH0_IRQ_MERGED_SHIFT (16U)
+#define DCP_CHANNELCTRL_TOG_CH0_IRQ_MERGED(x)    (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_TOG_CH0_IRQ_MERGED_SHIFT)) & DCP_CHANNELCTRL_TOG_CH0_IRQ_MERGED_MASK)
+#define DCP_CHANNELCTRL_TOG_RSVD_MASK            (0xFFFE0000U)
+#define DCP_CHANNELCTRL_TOG_RSVD_SHIFT           (17U)
+#define DCP_CHANNELCTRL_TOG_RSVD(x)              (((uint32_t)(((uint32_t)(x)) << DCP_CHANNELCTRL_TOG_RSVD_SHIFT)) & DCP_CHANNELCTRL_TOG_RSVD_MASK)
 /*! @} */
 
 /*! @name CAPABILITY0 - DCP capability 0 register */
@@ -10016,6 +10354,120 @@ typedef struct {
 #define DCP_CH0STAT_TAG(x)                       (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TAG_SHIFT)) & DCP_CH0STAT_TAG_MASK)
 /*! @} */
 
+/*! @name CH0STAT_SET - DCP channel 0 status register */
+/*! @{ */
+#define DCP_CH0STAT_SET_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH0STAT_SET_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH0STAT_SET_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_SET_RSVD_COMPLETE_SHIFT)) & DCP_CH0STAT_SET_RSVD_COMPLETE_MASK)
+#define DCP_CH0STAT_SET_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH0STAT_SET_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH0STAT_SET_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_SET_HASH_MISMATCH_SHIFT)) & DCP_CH0STAT_SET_HASH_MISMATCH_MASK)
+#define DCP_CH0STAT_SET_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH0STAT_SET_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH0STAT_SET_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_SET_ERROR_SETUP_SHIFT)) & DCP_CH0STAT_SET_ERROR_SETUP_MASK)
+#define DCP_CH0STAT_SET_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH0STAT_SET_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH0STAT_SET_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_SET_ERROR_PACKET_SHIFT)) & DCP_CH0STAT_SET_ERROR_PACKET_MASK)
+#define DCP_CH0STAT_SET_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH0STAT_SET_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH0STAT_SET_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_SET_ERROR_SRC_SHIFT)) & DCP_CH0STAT_SET_ERROR_SRC_MASK)
+#define DCP_CH0STAT_SET_ERROR_DST_MASK           (0x20U)
+#define DCP_CH0STAT_SET_ERROR_DST_SHIFT          (5U)
+#define DCP_CH0STAT_SET_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_SET_ERROR_DST_SHIFT)) & DCP_CH0STAT_SET_ERROR_DST_MASK)
+#define DCP_CH0STAT_SET_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH0STAT_SET_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH0STAT_SET_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_SET_ERROR_PAGEFAULT_SHIFT)) & DCP_CH0STAT_SET_ERROR_PAGEFAULT_MASK)
+#define DCP_CH0STAT_SET_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH0STAT_SET_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error signalled because the next pointer is 0x00000000
+ *  0b00000010..Error signalled because the semaphore is non-zero and neither chain bit is set
+ *  0b00000011..Error signalled because an error is reported reading/writing the context buffer
+ *  0b00000100..Error signalled because an error is reported reading/writing the payload
+ *  0b00000101..Error signalled because the control packet specifies an invalid mode select (for instance, blit + hash)
+ */
+#define DCP_CH0STAT_SET_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_SET_ERROR_CODE_SHIFT)) & DCP_CH0STAT_SET_ERROR_CODE_MASK)
+#define DCP_CH0STAT_SET_TAG_MASK                 (0xFF000000U)
+#define DCP_CH0STAT_SET_TAG_SHIFT                (24U)
+#define DCP_CH0STAT_SET_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_SET_TAG_SHIFT)) & DCP_CH0STAT_SET_TAG_MASK)
+/*! @} */
+
+/*! @name CH0STAT_CLR - DCP channel 0 status register */
+/*! @{ */
+#define DCP_CH0STAT_CLR_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH0STAT_CLR_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH0STAT_CLR_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_CLR_RSVD_COMPLETE_SHIFT)) & DCP_CH0STAT_CLR_RSVD_COMPLETE_MASK)
+#define DCP_CH0STAT_CLR_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH0STAT_CLR_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH0STAT_CLR_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_CLR_HASH_MISMATCH_SHIFT)) & DCP_CH0STAT_CLR_HASH_MISMATCH_MASK)
+#define DCP_CH0STAT_CLR_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH0STAT_CLR_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH0STAT_CLR_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_CLR_ERROR_SETUP_SHIFT)) & DCP_CH0STAT_CLR_ERROR_SETUP_MASK)
+#define DCP_CH0STAT_CLR_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH0STAT_CLR_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH0STAT_CLR_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_CLR_ERROR_PACKET_SHIFT)) & DCP_CH0STAT_CLR_ERROR_PACKET_MASK)
+#define DCP_CH0STAT_CLR_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH0STAT_CLR_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH0STAT_CLR_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_CLR_ERROR_SRC_SHIFT)) & DCP_CH0STAT_CLR_ERROR_SRC_MASK)
+#define DCP_CH0STAT_CLR_ERROR_DST_MASK           (0x20U)
+#define DCP_CH0STAT_CLR_ERROR_DST_SHIFT          (5U)
+#define DCP_CH0STAT_CLR_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_CLR_ERROR_DST_SHIFT)) & DCP_CH0STAT_CLR_ERROR_DST_MASK)
+#define DCP_CH0STAT_CLR_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH0STAT_CLR_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH0STAT_CLR_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_CLR_ERROR_PAGEFAULT_SHIFT)) & DCP_CH0STAT_CLR_ERROR_PAGEFAULT_MASK)
+#define DCP_CH0STAT_CLR_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH0STAT_CLR_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error signalled because the next pointer is 0x00000000
+ *  0b00000010..Error signalled because the semaphore is non-zero and neither chain bit is set
+ *  0b00000011..Error signalled because an error is reported reading/writing the context buffer
+ *  0b00000100..Error signalled because an error is reported reading/writing the payload
+ *  0b00000101..Error signalled because the control packet specifies an invalid mode select (for instance, blit + hash)
+ */
+#define DCP_CH0STAT_CLR_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_CLR_ERROR_CODE_SHIFT)) & DCP_CH0STAT_CLR_ERROR_CODE_MASK)
+#define DCP_CH0STAT_CLR_TAG_MASK                 (0xFF000000U)
+#define DCP_CH0STAT_CLR_TAG_SHIFT                (24U)
+#define DCP_CH0STAT_CLR_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_CLR_TAG_SHIFT)) & DCP_CH0STAT_CLR_TAG_MASK)
+/*! @} */
+
+/*! @name CH0STAT_TOG - DCP channel 0 status register */
+/*! @{ */
+#define DCP_CH0STAT_TOG_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH0STAT_TOG_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH0STAT_TOG_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TOG_RSVD_COMPLETE_SHIFT)) & DCP_CH0STAT_TOG_RSVD_COMPLETE_MASK)
+#define DCP_CH0STAT_TOG_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH0STAT_TOG_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH0STAT_TOG_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TOG_HASH_MISMATCH_SHIFT)) & DCP_CH0STAT_TOG_HASH_MISMATCH_MASK)
+#define DCP_CH0STAT_TOG_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH0STAT_TOG_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH0STAT_TOG_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TOG_ERROR_SETUP_SHIFT)) & DCP_CH0STAT_TOG_ERROR_SETUP_MASK)
+#define DCP_CH0STAT_TOG_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH0STAT_TOG_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH0STAT_TOG_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TOG_ERROR_PACKET_SHIFT)) & DCP_CH0STAT_TOG_ERROR_PACKET_MASK)
+#define DCP_CH0STAT_TOG_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH0STAT_TOG_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH0STAT_TOG_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TOG_ERROR_SRC_SHIFT)) & DCP_CH0STAT_TOG_ERROR_SRC_MASK)
+#define DCP_CH0STAT_TOG_ERROR_DST_MASK           (0x20U)
+#define DCP_CH0STAT_TOG_ERROR_DST_SHIFT          (5U)
+#define DCP_CH0STAT_TOG_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TOG_ERROR_DST_SHIFT)) & DCP_CH0STAT_TOG_ERROR_DST_MASK)
+#define DCP_CH0STAT_TOG_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH0STAT_TOG_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH0STAT_TOG_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TOG_ERROR_PAGEFAULT_SHIFT)) & DCP_CH0STAT_TOG_ERROR_PAGEFAULT_MASK)
+#define DCP_CH0STAT_TOG_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH0STAT_TOG_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error signalled because the next pointer is 0x00000000
+ *  0b00000010..Error signalled because the semaphore is non-zero and neither chain bit is set
+ *  0b00000011..Error signalled because an error is reported reading/writing the context buffer
+ *  0b00000100..Error signalled because an error is reported reading/writing the payload
+ *  0b00000101..Error signalled because the control packet specifies an invalid mode select (for instance, blit + hash)
+ */
+#define DCP_CH0STAT_TOG_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TOG_ERROR_CODE_SHIFT)) & DCP_CH0STAT_TOG_ERROR_CODE_MASK)
+#define DCP_CH0STAT_TOG_TAG_MASK                 (0xFF000000U)
+#define DCP_CH0STAT_TOG_TAG_SHIFT                (24U)
+#define DCP_CH0STAT_TOG_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH0STAT_TOG_TAG_SHIFT)) & DCP_CH0STAT_TOG_TAG_MASK)
+/*! @} */
+
 /*! @name CH0OPTS - DCP channel 0 options register */
 /*! @{ */
 #define DCP_CH0OPTS_RECOVERY_TIMER_MASK          (0xFFFFU)
@@ -10024,6 +10476,36 @@ typedef struct {
 #define DCP_CH0OPTS_RSVD_MASK                    (0xFFFF0000U)
 #define DCP_CH0OPTS_RSVD_SHIFT                   (16U)
 #define DCP_CH0OPTS_RSVD(x)                      (((uint32_t)(((uint32_t)(x)) << DCP_CH0OPTS_RSVD_SHIFT)) & DCP_CH0OPTS_RSVD_MASK)
+/*! @} */
+
+/*! @name CH0OPTS_SET - DCP channel 0 options register */
+/*! @{ */
+#define DCP_CH0OPTS_SET_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH0OPTS_SET_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH0OPTS_SET_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH0OPTS_SET_RECOVERY_TIMER_SHIFT)) & DCP_CH0OPTS_SET_RECOVERY_TIMER_MASK)
+#define DCP_CH0OPTS_SET_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH0OPTS_SET_RSVD_SHIFT               (16U)
+#define DCP_CH0OPTS_SET_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH0OPTS_SET_RSVD_SHIFT)) & DCP_CH0OPTS_SET_RSVD_MASK)
+/*! @} */
+
+/*! @name CH0OPTS_CLR - DCP channel 0 options register */
+/*! @{ */
+#define DCP_CH0OPTS_CLR_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH0OPTS_CLR_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH0OPTS_CLR_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH0OPTS_CLR_RECOVERY_TIMER_SHIFT)) & DCP_CH0OPTS_CLR_RECOVERY_TIMER_MASK)
+#define DCP_CH0OPTS_CLR_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH0OPTS_CLR_RSVD_SHIFT               (16U)
+#define DCP_CH0OPTS_CLR_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH0OPTS_CLR_RSVD_SHIFT)) & DCP_CH0OPTS_CLR_RSVD_MASK)
+/*! @} */
+
+/*! @name CH0OPTS_TOG - DCP channel 0 options register */
+/*! @{ */
+#define DCP_CH0OPTS_TOG_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH0OPTS_TOG_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH0OPTS_TOG_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH0OPTS_TOG_RECOVERY_TIMER_SHIFT)) & DCP_CH0OPTS_TOG_RECOVERY_TIMER_MASK)
+#define DCP_CH0OPTS_TOG_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH0OPTS_TOG_RSVD_SHIFT               (16U)
+#define DCP_CH0OPTS_TOG_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH0OPTS_TOG_RSVD_SHIFT)) & DCP_CH0OPTS_TOG_RSVD_MASK)
 /*! @} */
 
 /*! @name CH1CMDPTR - DCP channel 1 command pointer address register */
@@ -10081,6 +10563,120 @@ typedef struct {
 #define DCP_CH1STAT_TAG(x)                       (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TAG_SHIFT)) & DCP_CH1STAT_TAG_MASK)
 /*! @} */
 
+/*! @name CH1STAT_SET - DCP channel 1 status register */
+/*! @{ */
+#define DCP_CH1STAT_SET_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH1STAT_SET_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH1STAT_SET_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_SET_RSVD_COMPLETE_SHIFT)) & DCP_CH1STAT_SET_RSVD_COMPLETE_MASK)
+#define DCP_CH1STAT_SET_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH1STAT_SET_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH1STAT_SET_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_SET_HASH_MISMATCH_SHIFT)) & DCP_CH1STAT_SET_HASH_MISMATCH_MASK)
+#define DCP_CH1STAT_SET_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH1STAT_SET_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH1STAT_SET_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_SET_ERROR_SETUP_SHIFT)) & DCP_CH1STAT_SET_ERROR_SETUP_MASK)
+#define DCP_CH1STAT_SET_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH1STAT_SET_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH1STAT_SET_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_SET_ERROR_PACKET_SHIFT)) & DCP_CH1STAT_SET_ERROR_PACKET_MASK)
+#define DCP_CH1STAT_SET_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH1STAT_SET_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH1STAT_SET_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_SET_ERROR_SRC_SHIFT)) & DCP_CH1STAT_SET_ERROR_SRC_MASK)
+#define DCP_CH1STAT_SET_ERROR_DST_MASK           (0x20U)
+#define DCP_CH1STAT_SET_ERROR_DST_SHIFT          (5U)
+#define DCP_CH1STAT_SET_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_SET_ERROR_DST_SHIFT)) & DCP_CH1STAT_SET_ERROR_DST_MASK)
+#define DCP_CH1STAT_SET_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH1STAT_SET_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH1STAT_SET_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_SET_ERROR_PAGEFAULT_SHIFT)) & DCP_CH1STAT_SET_ERROR_PAGEFAULT_MASK)
+#define DCP_CH1STAT_SET_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH1STAT_SET_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error is signalled because the next pointer is 0x00000000.
+ *  0b00000010..Error is signalled because the semaphore is of a non-zero value and neither of the chain bits is set.
+ *  0b00000011..Error is signalled because an error was reported when reading/writing the context buffer.
+ *  0b00000100..Error is signalled because an error was reported when reading/writing the payload.
+ *  0b00000101..Error is signalled because the control packet specifies an invalid mode select (for example, blit + hash).
+ */
+#define DCP_CH1STAT_SET_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_SET_ERROR_CODE_SHIFT)) & DCP_CH1STAT_SET_ERROR_CODE_MASK)
+#define DCP_CH1STAT_SET_TAG_MASK                 (0xFF000000U)
+#define DCP_CH1STAT_SET_TAG_SHIFT                (24U)
+#define DCP_CH1STAT_SET_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_SET_TAG_SHIFT)) & DCP_CH1STAT_SET_TAG_MASK)
+/*! @} */
+
+/*! @name CH1STAT_CLR - DCP channel 1 status register */
+/*! @{ */
+#define DCP_CH1STAT_CLR_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH1STAT_CLR_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH1STAT_CLR_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_CLR_RSVD_COMPLETE_SHIFT)) & DCP_CH1STAT_CLR_RSVD_COMPLETE_MASK)
+#define DCP_CH1STAT_CLR_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH1STAT_CLR_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH1STAT_CLR_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_CLR_HASH_MISMATCH_SHIFT)) & DCP_CH1STAT_CLR_HASH_MISMATCH_MASK)
+#define DCP_CH1STAT_CLR_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH1STAT_CLR_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH1STAT_CLR_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_CLR_ERROR_SETUP_SHIFT)) & DCP_CH1STAT_CLR_ERROR_SETUP_MASK)
+#define DCP_CH1STAT_CLR_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH1STAT_CLR_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH1STAT_CLR_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_CLR_ERROR_PACKET_SHIFT)) & DCP_CH1STAT_CLR_ERROR_PACKET_MASK)
+#define DCP_CH1STAT_CLR_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH1STAT_CLR_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH1STAT_CLR_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_CLR_ERROR_SRC_SHIFT)) & DCP_CH1STAT_CLR_ERROR_SRC_MASK)
+#define DCP_CH1STAT_CLR_ERROR_DST_MASK           (0x20U)
+#define DCP_CH1STAT_CLR_ERROR_DST_SHIFT          (5U)
+#define DCP_CH1STAT_CLR_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_CLR_ERROR_DST_SHIFT)) & DCP_CH1STAT_CLR_ERROR_DST_MASK)
+#define DCP_CH1STAT_CLR_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH1STAT_CLR_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH1STAT_CLR_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_CLR_ERROR_PAGEFAULT_SHIFT)) & DCP_CH1STAT_CLR_ERROR_PAGEFAULT_MASK)
+#define DCP_CH1STAT_CLR_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH1STAT_CLR_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error is signalled because the next pointer is 0x00000000.
+ *  0b00000010..Error is signalled because the semaphore is of a non-zero value and neither of the chain bits is set.
+ *  0b00000011..Error is signalled because an error was reported when reading/writing the context buffer.
+ *  0b00000100..Error is signalled because an error was reported when reading/writing the payload.
+ *  0b00000101..Error is signalled because the control packet specifies an invalid mode select (for example, blit + hash).
+ */
+#define DCP_CH1STAT_CLR_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_CLR_ERROR_CODE_SHIFT)) & DCP_CH1STAT_CLR_ERROR_CODE_MASK)
+#define DCP_CH1STAT_CLR_TAG_MASK                 (0xFF000000U)
+#define DCP_CH1STAT_CLR_TAG_SHIFT                (24U)
+#define DCP_CH1STAT_CLR_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_CLR_TAG_SHIFT)) & DCP_CH1STAT_CLR_TAG_MASK)
+/*! @} */
+
+/*! @name CH1STAT_TOG - DCP channel 1 status register */
+/*! @{ */
+#define DCP_CH1STAT_TOG_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH1STAT_TOG_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH1STAT_TOG_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TOG_RSVD_COMPLETE_SHIFT)) & DCP_CH1STAT_TOG_RSVD_COMPLETE_MASK)
+#define DCP_CH1STAT_TOG_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH1STAT_TOG_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH1STAT_TOG_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TOG_HASH_MISMATCH_SHIFT)) & DCP_CH1STAT_TOG_HASH_MISMATCH_MASK)
+#define DCP_CH1STAT_TOG_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH1STAT_TOG_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH1STAT_TOG_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TOG_ERROR_SETUP_SHIFT)) & DCP_CH1STAT_TOG_ERROR_SETUP_MASK)
+#define DCP_CH1STAT_TOG_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH1STAT_TOG_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH1STAT_TOG_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TOG_ERROR_PACKET_SHIFT)) & DCP_CH1STAT_TOG_ERROR_PACKET_MASK)
+#define DCP_CH1STAT_TOG_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH1STAT_TOG_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH1STAT_TOG_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TOG_ERROR_SRC_SHIFT)) & DCP_CH1STAT_TOG_ERROR_SRC_MASK)
+#define DCP_CH1STAT_TOG_ERROR_DST_MASK           (0x20U)
+#define DCP_CH1STAT_TOG_ERROR_DST_SHIFT          (5U)
+#define DCP_CH1STAT_TOG_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TOG_ERROR_DST_SHIFT)) & DCP_CH1STAT_TOG_ERROR_DST_MASK)
+#define DCP_CH1STAT_TOG_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH1STAT_TOG_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH1STAT_TOG_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TOG_ERROR_PAGEFAULT_SHIFT)) & DCP_CH1STAT_TOG_ERROR_PAGEFAULT_MASK)
+#define DCP_CH1STAT_TOG_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH1STAT_TOG_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error is signalled because the next pointer is 0x00000000.
+ *  0b00000010..Error is signalled because the semaphore is of a non-zero value and neither of the chain bits is set.
+ *  0b00000011..Error is signalled because an error was reported when reading/writing the context buffer.
+ *  0b00000100..Error is signalled because an error was reported when reading/writing the payload.
+ *  0b00000101..Error is signalled because the control packet specifies an invalid mode select (for example, blit + hash).
+ */
+#define DCP_CH1STAT_TOG_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TOG_ERROR_CODE_SHIFT)) & DCP_CH1STAT_TOG_ERROR_CODE_MASK)
+#define DCP_CH1STAT_TOG_TAG_MASK                 (0xFF000000U)
+#define DCP_CH1STAT_TOG_TAG_SHIFT                (24U)
+#define DCP_CH1STAT_TOG_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH1STAT_TOG_TAG_SHIFT)) & DCP_CH1STAT_TOG_TAG_MASK)
+/*! @} */
+
 /*! @name CH1OPTS - DCP channel 1 options register */
 /*! @{ */
 #define DCP_CH1OPTS_RECOVERY_TIMER_MASK          (0xFFFFU)
@@ -10089,6 +10685,36 @@ typedef struct {
 #define DCP_CH1OPTS_RSVD_MASK                    (0xFFFF0000U)
 #define DCP_CH1OPTS_RSVD_SHIFT                   (16U)
 #define DCP_CH1OPTS_RSVD(x)                      (((uint32_t)(((uint32_t)(x)) << DCP_CH1OPTS_RSVD_SHIFT)) & DCP_CH1OPTS_RSVD_MASK)
+/*! @} */
+
+/*! @name CH1OPTS_SET - DCP channel 1 options register */
+/*! @{ */
+#define DCP_CH1OPTS_SET_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH1OPTS_SET_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH1OPTS_SET_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH1OPTS_SET_RECOVERY_TIMER_SHIFT)) & DCP_CH1OPTS_SET_RECOVERY_TIMER_MASK)
+#define DCP_CH1OPTS_SET_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH1OPTS_SET_RSVD_SHIFT               (16U)
+#define DCP_CH1OPTS_SET_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH1OPTS_SET_RSVD_SHIFT)) & DCP_CH1OPTS_SET_RSVD_MASK)
+/*! @} */
+
+/*! @name CH1OPTS_CLR - DCP channel 1 options register */
+/*! @{ */
+#define DCP_CH1OPTS_CLR_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH1OPTS_CLR_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH1OPTS_CLR_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH1OPTS_CLR_RECOVERY_TIMER_SHIFT)) & DCP_CH1OPTS_CLR_RECOVERY_TIMER_MASK)
+#define DCP_CH1OPTS_CLR_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH1OPTS_CLR_RSVD_SHIFT               (16U)
+#define DCP_CH1OPTS_CLR_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH1OPTS_CLR_RSVD_SHIFT)) & DCP_CH1OPTS_CLR_RSVD_MASK)
+/*! @} */
+
+/*! @name CH1OPTS_TOG - DCP channel 1 options register */
+/*! @{ */
+#define DCP_CH1OPTS_TOG_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH1OPTS_TOG_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH1OPTS_TOG_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH1OPTS_TOG_RECOVERY_TIMER_SHIFT)) & DCP_CH1OPTS_TOG_RECOVERY_TIMER_MASK)
+#define DCP_CH1OPTS_TOG_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH1OPTS_TOG_RSVD_SHIFT               (16U)
+#define DCP_CH1OPTS_TOG_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH1OPTS_TOG_RSVD_SHIFT)) & DCP_CH1OPTS_TOG_RSVD_MASK)
 /*! @} */
 
 /*! @name CH2CMDPTR - DCP channel 2 command pointer address register */
@@ -10146,6 +10772,120 @@ typedef struct {
 #define DCP_CH2STAT_TAG(x)                       (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TAG_SHIFT)) & DCP_CH2STAT_TAG_MASK)
 /*! @} */
 
+/*! @name CH2STAT_SET - DCP channel 2 status register */
+/*! @{ */
+#define DCP_CH2STAT_SET_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH2STAT_SET_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH2STAT_SET_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_SET_RSVD_COMPLETE_SHIFT)) & DCP_CH2STAT_SET_RSVD_COMPLETE_MASK)
+#define DCP_CH2STAT_SET_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH2STAT_SET_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH2STAT_SET_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_SET_HASH_MISMATCH_SHIFT)) & DCP_CH2STAT_SET_HASH_MISMATCH_MASK)
+#define DCP_CH2STAT_SET_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH2STAT_SET_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH2STAT_SET_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_SET_ERROR_SETUP_SHIFT)) & DCP_CH2STAT_SET_ERROR_SETUP_MASK)
+#define DCP_CH2STAT_SET_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH2STAT_SET_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH2STAT_SET_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_SET_ERROR_PACKET_SHIFT)) & DCP_CH2STAT_SET_ERROR_PACKET_MASK)
+#define DCP_CH2STAT_SET_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH2STAT_SET_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH2STAT_SET_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_SET_ERROR_SRC_SHIFT)) & DCP_CH2STAT_SET_ERROR_SRC_MASK)
+#define DCP_CH2STAT_SET_ERROR_DST_MASK           (0x20U)
+#define DCP_CH2STAT_SET_ERROR_DST_SHIFT          (5U)
+#define DCP_CH2STAT_SET_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_SET_ERROR_DST_SHIFT)) & DCP_CH2STAT_SET_ERROR_DST_MASK)
+#define DCP_CH2STAT_SET_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH2STAT_SET_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH2STAT_SET_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_SET_ERROR_PAGEFAULT_SHIFT)) & DCP_CH2STAT_SET_ERROR_PAGEFAULT_MASK)
+#define DCP_CH2STAT_SET_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH2STAT_SET_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error is signalled because the next pointer is 0x00000000.
+ *  0b00000010..Error is signalled because the semaphore is of a non-zero value and neither of the chain bits is set.
+ *  0b00000011..Error is signalled because an error was reported while reading/writing the context buffer.
+ *  0b00000100..Error is signalled because an error was reported while reading/writing the payload.
+ *  0b00000101..Error is signalled because the control packet specifies an invalid mode select (for instance, blit + hash).
+ */
+#define DCP_CH2STAT_SET_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_SET_ERROR_CODE_SHIFT)) & DCP_CH2STAT_SET_ERROR_CODE_MASK)
+#define DCP_CH2STAT_SET_TAG_MASK                 (0xFF000000U)
+#define DCP_CH2STAT_SET_TAG_SHIFT                (24U)
+#define DCP_CH2STAT_SET_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_SET_TAG_SHIFT)) & DCP_CH2STAT_SET_TAG_MASK)
+/*! @} */
+
+/*! @name CH2STAT_CLR - DCP channel 2 status register */
+/*! @{ */
+#define DCP_CH2STAT_CLR_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH2STAT_CLR_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH2STAT_CLR_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_CLR_RSVD_COMPLETE_SHIFT)) & DCP_CH2STAT_CLR_RSVD_COMPLETE_MASK)
+#define DCP_CH2STAT_CLR_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH2STAT_CLR_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH2STAT_CLR_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_CLR_HASH_MISMATCH_SHIFT)) & DCP_CH2STAT_CLR_HASH_MISMATCH_MASK)
+#define DCP_CH2STAT_CLR_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH2STAT_CLR_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH2STAT_CLR_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_CLR_ERROR_SETUP_SHIFT)) & DCP_CH2STAT_CLR_ERROR_SETUP_MASK)
+#define DCP_CH2STAT_CLR_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH2STAT_CLR_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH2STAT_CLR_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_CLR_ERROR_PACKET_SHIFT)) & DCP_CH2STAT_CLR_ERROR_PACKET_MASK)
+#define DCP_CH2STAT_CLR_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH2STAT_CLR_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH2STAT_CLR_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_CLR_ERROR_SRC_SHIFT)) & DCP_CH2STAT_CLR_ERROR_SRC_MASK)
+#define DCP_CH2STAT_CLR_ERROR_DST_MASK           (0x20U)
+#define DCP_CH2STAT_CLR_ERROR_DST_SHIFT          (5U)
+#define DCP_CH2STAT_CLR_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_CLR_ERROR_DST_SHIFT)) & DCP_CH2STAT_CLR_ERROR_DST_MASK)
+#define DCP_CH2STAT_CLR_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH2STAT_CLR_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH2STAT_CLR_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_CLR_ERROR_PAGEFAULT_SHIFT)) & DCP_CH2STAT_CLR_ERROR_PAGEFAULT_MASK)
+#define DCP_CH2STAT_CLR_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH2STAT_CLR_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error is signalled because the next pointer is 0x00000000.
+ *  0b00000010..Error is signalled because the semaphore is of a non-zero value and neither of the chain bits is set.
+ *  0b00000011..Error is signalled because an error was reported while reading/writing the context buffer.
+ *  0b00000100..Error is signalled because an error was reported while reading/writing the payload.
+ *  0b00000101..Error is signalled because the control packet specifies an invalid mode select (for instance, blit + hash).
+ */
+#define DCP_CH2STAT_CLR_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_CLR_ERROR_CODE_SHIFT)) & DCP_CH2STAT_CLR_ERROR_CODE_MASK)
+#define DCP_CH2STAT_CLR_TAG_MASK                 (0xFF000000U)
+#define DCP_CH2STAT_CLR_TAG_SHIFT                (24U)
+#define DCP_CH2STAT_CLR_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_CLR_TAG_SHIFT)) & DCP_CH2STAT_CLR_TAG_MASK)
+/*! @} */
+
+/*! @name CH2STAT_TOG - DCP channel 2 status register */
+/*! @{ */
+#define DCP_CH2STAT_TOG_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH2STAT_TOG_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH2STAT_TOG_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TOG_RSVD_COMPLETE_SHIFT)) & DCP_CH2STAT_TOG_RSVD_COMPLETE_MASK)
+#define DCP_CH2STAT_TOG_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH2STAT_TOG_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH2STAT_TOG_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TOG_HASH_MISMATCH_SHIFT)) & DCP_CH2STAT_TOG_HASH_MISMATCH_MASK)
+#define DCP_CH2STAT_TOG_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH2STAT_TOG_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH2STAT_TOG_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TOG_ERROR_SETUP_SHIFT)) & DCP_CH2STAT_TOG_ERROR_SETUP_MASK)
+#define DCP_CH2STAT_TOG_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH2STAT_TOG_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH2STAT_TOG_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TOG_ERROR_PACKET_SHIFT)) & DCP_CH2STAT_TOG_ERROR_PACKET_MASK)
+#define DCP_CH2STAT_TOG_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH2STAT_TOG_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH2STAT_TOG_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TOG_ERROR_SRC_SHIFT)) & DCP_CH2STAT_TOG_ERROR_SRC_MASK)
+#define DCP_CH2STAT_TOG_ERROR_DST_MASK           (0x20U)
+#define DCP_CH2STAT_TOG_ERROR_DST_SHIFT          (5U)
+#define DCP_CH2STAT_TOG_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TOG_ERROR_DST_SHIFT)) & DCP_CH2STAT_TOG_ERROR_DST_MASK)
+#define DCP_CH2STAT_TOG_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH2STAT_TOG_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH2STAT_TOG_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TOG_ERROR_PAGEFAULT_SHIFT)) & DCP_CH2STAT_TOG_ERROR_PAGEFAULT_MASK)
+#define DCP_CH2STAT_TOG_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH2STAT_TOG_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error is signalled because the next pointer is 0x00000000.
+ *  0b00000010..Error is signalled because the semaphore is of a non-zero value and neither of the chain bits is set.
+ *  0b00000011..Error is signalled because an error was reported while reading/writing the context buffer.
+ *  0b00000100..Error is signalled because an error was reported while reading/writing the payload.
+ *  0b00000101..Error is signalled because the control packet specifies an invalid mode select (for instance, blit + hash).
+ */
+#define DCP_CH2STAT_TOG_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TOG_ERROR_CODE_SHIFT)) & DCP_CH2STAT_TOG_ERROR_CODE_MASK)
+#define DCP_CH2STAT_TOG_TAG_MASK                 (0xFF000000U)
+#define DCP_CH2STAT_TOG_TAG_SHIFT                (24U)
+#define DCP_CH2STAT_TOG_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH2STAT_TOG_TAG_SHIFT)) & DCP_CH2STAT_TOG_TAG_MASK)
+/*! @} */
+
 /*! @name CH2OPTS - DCP channel 2 options register */
 /*! @{ */
 #define DCP_CH2OPTS_RECOVERY_TIMER_MASK          (0xFFFFU)
@@ -10154,6 +10894,36 @@ typedef struct {
 #define DCP_CH2OPTS_RSVD_MASK                    (0xFFFF0000U)
 #define DCP_CH2OPTS_RSVD_SHIFT                   (16U)
 #define DCP_CH2OPTS_RSVD(x)                      (((uint32_t)(((uint32_t)(x)) << DCP_CH2OPTS_RSVD_SHIFT)) & DCP_CH2OPTS_RSVD_MASK)
+/*! @} */
+
+/*! @name CH2OPTS_SET - DCP channel 2 options register */
+/*! @{ */
+#define DCP_CH2OPTS_SET_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH2OPTS_SET_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH2OPTS_SET_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH2OPTS_SET_RECOVERY_TIMER_SHIFT)) & DCP_CH2OPTS_SET_RECOVERY_TIMER_MASK)
+#define DCP_CH2OPTS_SET_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH2OPTS_SET_RSVD_SHIFT               (16U)
+#define DCP_CH2OPTS_SET_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH2OPTS_SET_RSVD_SHIFT)) & DCP_CH2OPTS_SET_RSVD_MASK)
+/*! @} */
+
+/*! @name CH2OPTS_CLR - DCP channel 2 options register */
+/*! @{ */
+#define DCP_CH2OPTS_CLR_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH2OPTS_CLR_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH2OPTS_CLR_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH2OPTS_CLR_RECOVERY_TIMER_SHIFT)) & DCP_CH2OPTS_CLR_RECOVERY_TIMER_MASK)
+#define DCP_CH2OPTS_CLR_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH2OPTS_CLR_RSVD_SHIFT               (16U)
+#define DCP_CH2OPTS_CLR_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH2OPTS_CLR_RSVD_SHIFT)) & DCP_CH2OPTS_CLR_RSVD_MASK)
+/*! @} */
+
+/*! @name CH2OPTS_TOG - DCP channel 2 options register */
+/*! @{ */
+#define DCP_CH2OPTS_TOG_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH2OPTS_TOG_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH2OPTS_TOG_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH2OPTS_TOG_RECOVERY_TIMER_SHIFT)) & DCP_CH2OPTS_TOG_RECOVERY_TIMER_MASK)
+#define DCP_CH2OPTS_TOG_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH2OPTS_TOG_RSVD_SHIFT               (16U)
+#define DCP_CH2OPTS_TOG_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH2OPTS_TOG_RSVD_SHIFT)) & DCP_CH2OPTS_TOG_RSVD_MASK)
 /*! @} */
 
 /*! @name CH3CMDPTR - DCP channel 3 command pointer address register */
@@ -10211,6 +10981,120 @@ typedef struct {
 #define DCP_CH3STAT_TAG(x)                       (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TAG_SHIFT)) & DCP_CH3STAT_TAG_MASK)
 /*! @} */
 
+/*! @name CH3STAT_SET - DCP channel 3 status register */
+/*! @{ */
+#define DCP_CH3STAT_SET_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH3STAT_SET_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH3STAT_SET_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_SET_RSVD_COMPLETE_SHIFT)) & DCP_CH3STAT_SET_RSVD_COMPLETE_MASK)
+#define DCP_CH3STAT_SET_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH3STAT_SET_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH3STAT_SET_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_SET_HASH_MISMATCH_SHIFT)) & DCP_CH3STAT_SET_HASH_MISMATCH_MASK)
+#define DCP_CH3STAT_SET_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH3STAT_SET_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH3STAT_SET_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_SET_ERROR_SETUP_SHIFT)) & DCP_CH3STAT_SET_ERROR_SETUP_MASK)
+#define DCP_CH3STAT_SET_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH3STAT_SET_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH3STAT_SET_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_SET_ERROR_PACKET_SHIFT)) & DCP_CH3STAT_SET_ERROR_PACKET_MASK)
+#define DCP_CH3STAT_SET_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH3STAT_SET_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH3STAT_SET_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_SET_ERROR_SRC_SHIFT)) & DCP_CH3STAT_SET_ERROR_SRC_MASK)
+#define DCP_CH3STAT_SET_ERROR_DST_MASK           (0x20U)
+#define DCP_CH3STAT_SET_ERROR_DST_SHIFT          (5U)
+#define DCP_CH3STAT_SET_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_SET_ERROR_DST_SHIFT)) & DCP_CH3STAT_SET_ERROR_DST_MASK)
+#define DCP_CH3STAT_SET_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH3STAT_SET_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH3STAT_SET_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_SET_ERROR_PAGEFAULT_SHIFT)) & DCP_CH3STAT_SET_ERROR_PAGEFAULT_MASK)
+#define DCP_CH3STAT_SET_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH3STAT_SET_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error is signalled because the next pointer is 0x00000000.
+ *  0b00000010..Error is signalled because the semaphore is of a non-zero value and neither of the chain bits is set.
+ *  0b00000011..Error is signalled because an error was reported while reading/writing the context buffer.
+ *  0b00000100..Error is signalled because an error was reported while reading/writing the payload.
+ *  0b00000101..Error is signalled because the control packet specifies an invalid mode select (for example, blit + hash).
+ */
+#define DCP_CH3STAT_SET_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_SET_ERROR_CODE_SHIFT)) & DCP_CH3STAT_SET_ERROR_CODE_MASK)
+#define DCP_CH3STAT_SET_TAG_MASK                 (0xFF000000U)
+#define DCP_CH3STAT_SET_TAG_SHIFT                (24U)
+#define DCP_CH3STAT_SET_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_SET_TAG_SHIFT)) & DCP_CH3STAT_SET_TAG_MASK)
+/*! @} */
+
+/*! @name CH3STAT_CLR - DCP channel 3 status register */
+/*! @{ */
+#define DCP_CH3STAT_CLR_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH3STAT_CLR_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH3STAT_CLR_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_CLR_RSVD_COMPLETE_SHIFT)) & DCP_CH3STAT_CLR_RSVD_COMPLETE_MASK)
+#define DCP_CH3STAT_CLR_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH3STAT_CLR_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH3STAT_CLR_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_CLR_HASH_MISMATCH_SHIFT)) & DCP_CH3STAT_CLR_HASH_MISMATCH_MASK)
+#define DCP_CH3STAT_CLR_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH3STAT_CLR_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH3STAT_CLR_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_CLR_ERROR_SETUP_SHIFT)) & DCP_CH3STAT_CLR_ERROR_SETUP_MASK)
+#define DCP_CH3STAT_CLR_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH3STAT_CLR_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH3STAT_CLR_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_CLR_ERROR_PACKET_SHIFT)) & DCP_CH3STAT_CLR_ERROR_PACKET_MASK)
+#define DCP_CH3STAT_CLR_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH3STAT_CLR_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH3STAT_CLR_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_CLR_ERROR_SRC_SHIFT)) & DCP_CH3STAT_CLR_ERROR_SRC_MASK)
+#define DCP_CH3STAT_CLR_ERROR_DST_MASK           (0x20U)
+#define DCP_CH3STAT_CLR_ERROR_DST_SHIFT          (5U)
+#define DCP_CH3STAT_CLR_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_CLR_ERROR_DST_SHIFT)) & DCP_CH3STAT_CLR_ERROR_DST_MASK)
+#define DCP_CH3STAT_CLR_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH3STAT_CLR_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH3STAT_CLR_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_CLR_ERROR_PAGEFAULT_SHIFT)) & DCP_CH3STAT_CLR_ERROR_PAGEFAULT_MASK)
+#define DCP_CH3STAT_CLR_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH3STAT_CLR_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error is signalled because the next pointer is 0x00000000.
+ *  0b00000010..Error is signalled because the semaphore is of a non-zero value and neither of the chain bits is set.
+ *  0b00000011..Error is signalled because an error was reported while reading/writing the context buffer.
+ *  0b00000100..Error is signalled because an error was reported while reading/writing the payload.
+ *  0b00000101..Error is signalled because the control packet specifies an invalid mode select (for example, blit + hash).
+ */
+#define DCP_CH3STAT_CLR_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_CLR_ERROR_CODE_SHIFT)) & DCP_CH3STAT_CLR_ERROR_CODE_MASK)
+#define DCP_CH3STAT_CLR_TAG_MASK                 (0xFF000000U)
+#define DCP_CH3STAT_CLR_TAG_SHIFT                (24U)
+#define DCP_CH3STAT_CLR_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_CLR_TAG_SHIFT)) & DCP_CH3STAT_CLR_TAG_MASK)
+/*! @} */
+
+/*! @name CH3STAT_TOG - DCP channel 3 status register */
+/*! @{ */
+#define DCP_CH3STAT_TOG_RSVD_COMPLETE_MASK       (0x1U)
+#define DCP_CH3STAT_TOG_RSVD_COMPLETE_SHIFT      (0U)
+#define DCP_CH3STAT_TOG_RSVD_COMPLETE(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TOG_RSVD_COMPLETE_SHIFT)) & DCP_CH3STAT_TOG_RSVD_COMPLETE_MASK)
+#define DCP_CH3STAT_TOG_HASH_MISMATCH_MASK       (0x2U)
+#define DCP_CH3STAT_TOG_HASH_MISMATCH_SHIFT      (1U)
+#define DCP_CH3STAT_TOG_HASH_MISMATCH(x)         (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TOG_HASH_MISMATCH_SHIFT)) & DCP_CH3STAT_TOG_HASH_MISMATCH_MASK)
+#define DCP_CH3STAT_TOG_ERROR_SETUP_MASK         (0x4U)
+#define DCP_CH3STAT_TOG_ERROR_SETUP_SHIFT        (2U)
+#define DCP_CH3STAT_TOG_ERROR_SETUP(x)           (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TOG_ERROR_SETUP_SHIFT)) & DCP_CH3STAT_TOG_ERROR_SETUP_MASK)
+#define DCP_CH3STAT_TOG_ERROR_PACKET_MASK        (0x8U)
+#define DCP_CH3STAT_TOG_ERROR_PACKET_SHIFT       (3U)
+#define DCP_CH3STAT_TOG_ERROR_PACKET(x)          (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TOG_ERROR_PACKET_SHIFT)) & DCP_CH3STAT_TOG_ERROR_PACKET_MASK)
+#define DCP_CH3STAT_TOG_ERROR_SRC_MASK           (0x10U)
+#define DCP_CH3STAT_TOG_ERROR_SRC_SHIFT          (4U)
+#define DCP_CH3STAT_TOG_ERROR_SRC(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TOG_ERROR_SRC_SHIFT)) & DCP_CH3STAT_TOG_ERROR_SRC_MASK)
+#define DCP_CH3STAT_TOG_ERROR_DST_MASK           (0x20U)
+#define DCP_CH3STAT_TOG_ERROR_DST_SHIFT          (5U)
+#define DCP_CH3STAT_TOG_ERROR_DST(x)             (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TOG_ERROR_DST_SHIFT)) & DCP_CH3STAT_TOG_ERROR_DST_MASK)
+#define DCP_CH3STAT_TOG_ERROR_PAGEFAULT_MASK     (0x40U)
+#define DCP_CH3STAT_TOG_ERROR_PAGEFAULT_SHIFT    (6U)
+#define DCP_CH3STAT_TOG_ERROR_PAGEFAULT(x)       (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TOG_ERROR_PAGEFAULT_SHIFT)) & DCP_CH3STAT_TOG_ERROR_PAGEFAULT_MASK)
+#define DCP_CH3STAT_TOG_ERROR_CODE_MASK          (0xFF0000U)
+#define DCP_CH3STAT_TOG_ERROR_CODE_SHIFT         (16U)
+/*! ERROR_CODE
+ *  0b00000001..Error is signalled because the next pointer is 0x00000000.
+ *  0b00000010..Error is signalled because the semaphore is of a non-zero value and neither of the chain bits is set.
+ *  0b00000011..Error is signalled because an error was reported while reading/writing the context buffer.
+ *  0b00000100..Error is signalled because an error was reported while reading/writing the payload.
+ *  0b00000101..Error is signalled because the control packet specifies an invalid mode select (for example, blit + hash).
+ */
+#define DCP_CH3STAT_TOG_ERROR_CODE(x)            (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TOG_ERROR_CODE_SHIFT)) & DCP_CH3STAT_TOG_ERROR_CODE_MASK)
+#define DCP_CH3STAT_TOG_TAG_MASK                 (0xFF000000U)
+#define DCP_CH3STAT_TOG_TAG_SHIFT                (24U)
+#define DCP_CH3STAT_TOG_TAG(x)                   (((uint32_t)(((uint32_t)(x)) << DCP_CH3STAT_TOG_TAG_SHIFT)) & DCP_CH3STAT_TOG_TAG_MASK)
+/*! @} */
+
 /*! @name CH3OPTS - DCP channel 3 options register */
 /*! @{ */
 #define DCP_CH3OPTS_RECOVERY_TIMER_MASK          (0xFFFFU)
@@ -10219,6 +11103,36 @@ typedef struct {
 #define DCP_CH3OPTS_RSVD_MASK                    (0xFFFF0000U)
 #define DCP_CH3OPTS_RSVD_SHIFT                   (16U)
 #define DCP_CH3OPTS_RSVD(x)                      (((uint32_t)(((uint32_t)(x)) << DCP_CH3OPTS_RSVD_SHIFT)) & DCP_CH3OPTS_RSVD_MASK)
+/*! @} */
+
+/*! @name CH3OPTS_SET - DCP channel 3 options register */
+/*! @{ */
+#define DCP_CH3OPTS_SET_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH3OPTS_SET_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH3OPTS_SET_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH3OPTS_SET_RECOVERY_TIMER_SHIFT)) & DCP_CH3OPTS_SET_RECOVERY_TIMER_MASK)
+#define DCP_CH3OPTS_SET_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH3OPTS_SET_RSVD_SHIFT               (16U)
+#define DCP_CH3OPTS_SET_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH3OPTS_SET_RSVD_SHIFT)) & DCP_CH3OPTS_SET_RSVD_MASK)
+/*! @} */
+
+/*! @name CH3OPTS_CLR - DCP channel 3 options register */
+/*! @{ */
+#define DCP_CH3OPTS_CLR_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH3OPTS_CLR_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH3OPTS_CLR_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH3OPTS_CLR_RECOVERY_TIMER_SHIFT)) & DCP_CH3OPTS_CLR_RECOVERY_TIMER_MASK)
+#define DCP_CH3OPTS_CLR_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH3OPTS_CLR_RSVD_SHIFT               (16U)
+#define DCP_CH3OPTS_CLR_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH3OPTS_CLR_RSVD_SHIFT)) & DCP_CH3OPTS_CLR_RSVD_MASK)
+/*! @} */
+
+/*! @name CH3OPTS_TOG - DCP channel 3 options register */
+/*! @{ */
+#define DCP_CH3OPTS_TOG_RECOVERY_TIMER_MASK      (0xFFFFU)
+#define DCP_CH3OPTS_TOG_RECOVERY_TIMER_SHIFT     (0U)
+#define DCP_CH3OPTS_TOG_RECOVERY_TIMER(x)        (((uint32_t)(((uint32_t)(x)) << DCP_CH3OPTS_TOG_RECOVERY_TIMER_SHIFT)) & DCP_CH3OPTS_TOG_RECOVERY_TIMER_MASK)
+#define DCP_CH3OPTS_TOG_RSVD_MASK                (0xFFFF0000U)
+#define DCP_CH3OPTS_TOG_RSVD_SHIFT               (16U)
+#define DCP_CH3OPTS_TOG_RSVD(x)                  (((uint32_t)(((uint32_t)(x)) << DCP_CH3OPTS_TOG_RSVD_SHIFT)) & DCP_CH3OPTS_TOG_RSVD_MASK)
 /*! @} */
 
 /*! @name DBGSELECT - DCP debug select register */

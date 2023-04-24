@@ -30,8 +30,8 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief GPIO driver version 2.0.1. */
-#define FSL_GPIO_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
+/*! @brief GPIO driver version 2.0.2. */
+#define FSL_GPIO_DRIVER_VERSION (MAKE_VERSION(2, 0, 2))
 /*@}*/
 
 /*! @brief GPIO direction definition. */

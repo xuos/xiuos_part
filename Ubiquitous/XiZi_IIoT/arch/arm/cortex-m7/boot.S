@@ -49,6 +49,61 @@ Modification:
     .weak    Reset_Handler
     .type    Reset_Handler, %function
 Reset_Handler:
+#ifdef __BOOTLOADER /* BOOT */
+    cpsid   i               /* Mask interrupts */
+    .equ    VTOR, 0xE000ED08
+    ldr     r0, =VTOR
+    ldr     r1, =__isr_vector
+    str     r1, [r0]
+    ldr     r2, [r1]
+    msr     msp, r2
+
+    ldr   r0,=SystemInit
+    blx   r0
+
+/*     Loop to copy data from read only memory to RAM. The ranges
+ *      of copy from/to are specified by following symbols evaluated in
+ *      linker script.
+ *      __bootloader_end: End of code section, i.e., begin of data sections to copy from.
+ *      __data_start__/__data_end__: RAM address range that data should be
+ *      __noncachedata_start__/__noncachedata_end__ : none cachable region
+ *      copied to. Both must be aligned to 4 bytes boundary.  */
+
+    ldr    r1, =__etext
+    ldr    r2, =__data_start__
+    ldr    r3, =__data_end__
+
+    /* Here are two copies of loop implemenations. First one favors code size
+    * and the second one favors performance. Default uses the first one.
+    * Change to "#if 0" to use the second one */
+.LoopCopy0:
+    cmp     r2, r3
+    ittt    lt
+    ldrlt   r0, [r1], #4
+    strlt   r0, [r2], #4
+    blt    .LoopCopy0
+
+    /*     This part of work usually is done in C library startup code. Otherwise,
+    *     define this macro to enable it in this startup.
+    *
+    *     Loop to zero out BSS section, which uses following symbols
+    *     in linker script:
+    *      __bss_start__: start of BSS section. Must align to 4
+    *      __bss_end__: end of BSS section. Must align to 4
+    */
+    ldr r1, =__bss_start__
+    ldr r2, =__bss_end__
+
+    movs    r0, 0
+.LoopCopy1:
+    cmp     r1, r2
+    itt    lt
+    strlt   r0, [r1], #4
+    blt    .LoopCopy1
+
+    ldr   r0,=BootLoaderJumpApp
+    blx   r0
+#else /* APP */
     cpsid   i               /* Mask interrupts */
     .equ    VTOR, 0xE000ED08
     ldr     r0, =VTOR
@@ -122,7 +177,7 @@ Reset_Handler:
     blt    .LC4
 #endif /* __STARTUP_INITIALIZE_NONCACHEDATA */
 
-#ifdef __STARTUP_CLEAR_BSS
+#if 1
 /*     This part of work usually is done in C library startup code. Otherwise,
  *     define this macro to enable it in this startup.
  *
@@ -144,5 +199,6 @@ Reset_Handler:
 
     ldr   r0,=entry
     blx   r0
+#endif /* MCUBOOT_BOOTLOADER */
 
 .size Reset_Handler, . - Reset_Handler
