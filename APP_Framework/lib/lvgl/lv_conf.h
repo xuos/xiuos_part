@@ -686,7 +686,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 //#define LV_FS_STDIO_PATH "/home/john/"    /*Set the working directory. If commented it will be "./" */
 
 #define LV_USE_FS_POSIX '\0'        /*Uses open, read, etc*/
-//#define LV_FS_POSIX_PATH "/home/john/"    /*Set the working directory. If commented it will be "./" */
+// #define LV_FS_POSIX_PATH "G:"    /*Set the working directory. If commented it will be "./" */
 
 #define LV_USE_FS_WIN32 '\0'        /*Uses CreateFile, ReadFile, etc*/
 //#define LV_FS_WIN32_PATH "C:\\Users\\john\\"    /*Set the working directory. If commented it will be ".\\" */
@@ -714,6 +714,13 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #if LV_USE_FREETYPE
 /*Memory used by FreeType to cache characters [bytes] (-1: no caching)*/
 # define LV_FREETYPE_CACHE_SIZE (16 * 1024)
+#endif
+
+/* Built-in TTF decoder */
+#define LV_USE_TINY_TTF 1
+#if LV_USE_TINY_TTF
+    /* Enable loading TTF data from files */
+    #define LV_TINY_TTF_FILE_SUPPORT 0
 #endif
 
 /*Rlottie library*/

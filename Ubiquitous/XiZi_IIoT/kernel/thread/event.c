@@ -288,7 +288,7 @@ int32 KEventTrigger(int32 id, uint32 events)
  * @param events  events flag
  * @param options trigger way
  * @param msec timeout
- * @processed event processed flag
+ * @param processed event processed flag
  *
  * @return EOK on success.
  */

@@ -270,7 +270,7 @@ static uint16_t Melsec3eqlGenerateCommand(uint8_t *p_command, uint32_t command_c
     uint16_t head_device_number = 0;
     for (uint8_t i = 0; i < 6; i++) {
         if (0 != p_read_item->head_device_number_string[i])
-            head_device_number = TransformAsciiToHex(p_read_item->head_device_number_string[i]) + head_device_number * (((0x9c == (uint8_t)p_read_item->device_code) || (0x9d == (uint8_t)p_read_item->device_code)) ? 16 : 10);
+            head_device_number = TransformAsciiToHex(p_read_item->head_device_number_string[i]) + head_device_number * (((0x9c == (uint8_t)p_read_item->device_code) || (0x9d == (uint8_t)p_read_item->device_code) || (0xa0 == (uint8_t)p_read_item->device_code) || (0xb4 == (uint8_t)p_read_item->device_code)) ? 16 : 10);
         else
             break;
     }
@@ -297,7 +297,7 @@ static uint16_t Melsec3eiqrGenerateCommand(uint8_t *p_command, uint32_t command_
     uint16_t head_device_number = 0;
     for (uint8_t i = 0; i < 6; i++) {
         if (0 != p_read_item->head_device_number_string[i])
-            head_device_number = TransformAsciiToHex(p_read_item->head_device_number_string[i]) + head_device_number * (((0x9c == (uint8_t)p_read_item->device_code) || (0x9d == (uint8_t)p_read_item->device_code)) ? 16 : 10);
+            head_device_number = TransformAsciiToHex(p_read_item->head_device_number_string[i]) + head_device_number * (((0x9c == (uint8_t)p_read_item->device_code) || (0x9d == (uint8_t)p_read_item->device_code)|| (0xa0 == (uint8_t)p_read_item->device_code)|| (0xb4 == (uint8_t)p_read_item->device_code)) ? 16 : 10);
         else
             break;
     }
@@ -567,7 +567,7 @@ static int MelsecTransformRecvBuffToData(MelsecReadItem *p_read_item, uint8_t *r
                 p_data[2 * i] = TransformAsciiToHex(recv_buff[recv_buff_index]) * 16 + TransformAsciiToHex(recv_buff[recv_buff_index + 1]);
                 p_data[2 * i + 1] = TransformAsciiToHex(recv_buff[recv_buff_index + 2]) * 16 + TransformAsciiToHex(recv_buff[recv_buff_index + 3]);
             }
-            printf("0x%x 0x%x", p_data[2 * i], p_data[2 * i + 1]);
+            printf("0x%x 0x%x ", p_data[2 * i], p_data[2 * i + 1]);
         }
     }
     printf("\n");
@@ -629,16 +629,51 @@ static int MelsecGetDataBySocket(int32_t socket, MelsecReadItem *p_read_item)
  */
 static int MelsecGetDataBySerial(MelsecReadItem *p_read_item)
 {
-    uint32_t read_length = 0;
+    uint32_t cmd_length,read_length = 0;
     memset(recv_buff, 0, sizeof(recv_buff));
 
     MelsecDataInfo *p_melsec_data_info = &(p_read_item->data_info);
-    BasicPlcDataInfo *p_base_data_info = &(p_melsec_data_info->base_data_info);    
+    BasicPlcDataInfo *p_base_data_info = &(p_melsec_data_info->base_data_info); 
+    MelsecCommandType melsec_command_type = p_melsec_data_info->command_type;//++
+    MelsecFrameType melsec_frame_type= p_melsec_data_info->frame_type;//++
+
+    uint16_t device_points_count = p_read_item->device_points_count;//++
 
     ControlPrintfList("SEND", p_base_data_info->p_command, p_base_data_info->command_length);
     SerialWrite(p_base_data_info->p_command, p_base_data_info->command_length);
+    //++
+   if (MELSEC_1C_FRAME == melsec_frame_type) {
+      if (READ_IN_BITS == melsec_command_type ) {
+          cmd_length = 9;
+      } else if (READ_IN_WORD == melsec_command_type && device_points_count==1 ) {
+          cmd_length = 12;
+      } else if (READ_IN_WORD == melsec_command_type && device_points_count==2 ) {
+          cmd_length = 16;
+      } else if (READ_IN_WORD == melsec_command_type && device_points_count==4 ) {
+          cmd_length = 24;
+      } else {
+        //MULTIPLE_COIL and MULTIPLE_REGISTER to do
+        cmd_length = 0;
+     }
+   }else  if(MELSEC_3C_FRAME == melsec_frame_type){
+    if (READ_IN_BITS == melsec_command_type ) {
+          cmd_length = 15;
+      } else if (READ_IN_WORD == melsec_command_type && device_points_count==1 ) {
+          cmd_length = 18;
+      } else if (READ_IN_WORD == melsec_command_type && device_points_count==2 ) {
+          cmd_length = 22;
+      } else if (READ_IN_WORD == melsec_command_type && device_points_count==4 ) {
+          cmd_length = 30;
+      } else {
+        //MULTIPLE_COIL and MULTIPLE_REGISTER to do
+        cmd_length = 0;
+     }
 
-    read_length = SerialRead(recv_buff, sizeof(recv_buff));
+   }
+//++
+
+
+    read_length = SerialRead(recv_buff, cmd_length);
     if (read_length) {
         ControlPrintfList("RECV", recv_buff, read_length);
         return MelsecTransformRecvBuffToData(p_read_item, recv_buff);

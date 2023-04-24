@@ -17,6 +17,10 @@ ifeq ($(CONFIG_SEPARATE_COMPILE),y)
 		SRC_FILES += user_msg.c
 	endif
 
+	ifeq ($(CONFIG_KERNEL_SOFTTIMER),y)
+		SRC_FILES += user_timer.c
+	endif
+
 	ifeq ($(CONFIG_FS_VFS),y)
 		SRC_FILES += user_fs.c
 	endif

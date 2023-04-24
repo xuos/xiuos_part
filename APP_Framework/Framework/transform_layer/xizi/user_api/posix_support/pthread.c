@@ -67,8 +67,8 @@ int pthread_attr_init(pthread_attr_t *attr)
 int pthread_attr_setschedparam(pthread_attr_t           *attr,
                                struct sched_param const *param)
 {
-    NULL_PARAM_CHECK(attr != NULL);
-    NULL_PARAM_CHECK(param != NULL);
+    // NULL_PARAM_CHECK(attr);
+    // NULL_PARAM_CHECK(param);
 
     attr->schedparam.sched_priority = param->sched_priority;
 

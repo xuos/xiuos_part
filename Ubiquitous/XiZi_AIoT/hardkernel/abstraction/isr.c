@@ -118,12 +118,12 @@ static int32_t FreeHwIrq(uint32_t irq_num)
  *
  * @return 0 on success; -1 on failure
  */
-static int32_t EnableHwIrq(uint32_t irq_num)
+static int32_t EnableHwIrq(uint32_t irq_num, uint32_t cpu_id)
 {
     if (irq_num >=   ARCH_MAX_IRQ_NUM  )
         return -1;
 
-    return ArchEnableHwIrq(irq_num);
+    return ArchEnableHwIrq(irq_num, cpu_id);
 }
 /**
  * This function will disable a irq.
@@ -133,12 +133,12 @@ static int32_t EnableHwIrq(uint32_t irq_num)
  * @return 0 on success; -1 on failure
  */
 
-static int32_t DisableHwIrq(uint32_t irq_num)
+static int32_t DisableHwIrq(uint32_t irq_num, uint32_t cpu_id)
 {
     if (irq_num >=   ARCH_MAX_IRQ_NUM  )
         return -1;
 
-    return ArchDisableHwIrq(irq_num);
+    return ArchDisableHwIrq(irq_num, cpu_id);
 }
 
 /* called from arch-specific ISR wrapper */
