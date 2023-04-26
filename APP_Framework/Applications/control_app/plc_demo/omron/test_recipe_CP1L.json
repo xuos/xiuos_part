@@ -31,20 +31,20 @@
             "data_length": 1
         },
         {
-            "value_name": "整型1",
-            "value_type": 3,
-            "area_char": "D",
-            "data_type": 1,
-            "start_address": 100,
-            "bit_address": 0,
-            "data_length": 1
-        },
-        {
-            "value_name": "整型2",
+            "value_name": "转速",
             "value_type": 3,
             "area_char": "D",
             "data_type": 1,
             "start_address": 101,
+            "bit_address": 0,
+            "data_length": 1
+        },
+        {
+            "value_name": "产量",
+            "value_type": 3,
+            "area_char": "D",
+            "data_type": 1,
+            "start_address": 102,
             "bit_address": 0,
             "data_length": 1
         }
