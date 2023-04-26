@@ -20,28 +20,6 @@
 
 #include <s7.h>
 
-sem_t union_plc_data_updata_sem;
-pthread_mutex_t union_plc_data_read_mutex;
-static BasicSocketPlc plc_socket = {0};
-void KPrintf(const char *fmt, ...);
-#define BASIC_PLC_PRINTF KPrintf
-
-/**
- * @description: Printf Hex Number List 
- * @param name - number list name 
- * @param number_list - number list pointer
- * @param length - numner list length
- * @return
- */
-void PrintHexNumberList(char name[4], uint8_t* number_list, uint16_t length)
-{
-    BASIC_PLC_PRINTF("\n******************%4s****************\n", name);
-    for (int32_t i = 0;i < length;i++) {
-        BASIC_PLC_PRINTF("%03x ", number_list[i]);
-    }
-    BASIC_PLC_PRINTF("\n**************************************\n");
-}
-
 /**
  * @description: S7 Receive Plc Data Task
  * @param parameter - parameter pointer
@@ -70,11 +48,7 @@ int S7Open(struct ControlProtocol *control_protocol)
  * @return success : 0 error
  */
 int S7Close(struct ControlProtocol *control_protocol)
-{
-#ifdef CONTROL_USING_SOCKET
-    ControlDisconnectSocket(&plc_socket);
-#endif
-    
+{    
     ControlProtocolCloseDef();
 
     return 0;
@@ -112,12 +86,9 @@ static struct ControlDone s7_protocol_done =
 void PushDataIntoStack(uint8_t *datastack,uint8_t* args,uint16_t length)
 {
     static int index = 8;    
-    for(int i =0; i<length;i++)
-    {
+    for(int i =0; i < length; i ++) {
         datastack[index] = args[i];
-        //printf("DEBUG:%d%4X\n",__LINE__,datapush[8+index]);
         index++;
-        //printf("DEBUG:%d  %d  %d\n",__LINE__,index, length);
         if(index >= control_protocol->recipe->protocol_data.data_length){
             index = 8;
         }     
@@ -131,50 +102,46 @@ void PushDataIntoStack(uint8_t *datastack,uint8_t* args,uint16_t length)
  */
 int8_t ReadPlcDataByRecipe(struct ControlRecipe *p_recipe)
 {   
-    uint16_t data_length = 0;
-    uint8_t *s7_data;
-    data_length = control_protocol->recipe->protocol_data.data_length;
-    s7_data = control_protocol->recipe->protocol_data.data;
+    uint16_t data_length = control_protocol->recipe->protocol_data.data_length;
+    uint8_t *s7_data = control_protocol->recipe->protocol_data.data;
     struct CircularAreaApp *circular_area = (struct CircularAreaApp *)control_protocol->args;
-    BasicSocketPlc base_socket_plc = {0};
+
     S7Object s7_plc = {0};
     char plc_ip_string[15] = {0};
-        s7_plc = Cli_Create();
-        sprintf(plc_ip_string, "%u.%u.%u.%u",
-            p_recipe->socket_config.plc_ip[0],
-            p_recipe->socket_config.plc_ip[1],
-            p_recipe->socket_config.plc_ip[2],
-            p_recipe->socket_config.plc_ip[3]);
+    s7_plc = Cli_Create();
+    sprintf(plc_ip_string, "%u.%u.%u.%u",
+        p_recipe->socket_config.plc_ip[0],
+        p_recipe->socket_config.plc_ip[1],
+        p_recipe->socket_config.plc_ip[2],
+        p_recipe->socket_config.plc_ip[3]);
     int16_t read_item_count = p_recipe->read_item_count;
-    uint8_t* p_read_item = (uint8_t*)(p_recipe->read_item);
+    uint8_t *p_read_item = (uint8_t *)(p_recipe->read_item);
+
     while (1) {
         int8_t error = 0;
         while (!error) {
             uint16_t i = 0;
-            for (i; i < read_item_count; i++) {
+            for (i = 0; i < read_item_count; i ++) {
                 int is_connected = 0;
                 Cli_GetConnected(s7_plc, &is_connected);  
                 while (!is_connected) {
                     if (Cli_ConnectTo(s7_plc, plc_ip_string, 0, 1) != 0) {
-                        MdelayKTask(1000);
+                        PrivTaskDelay(1000);
                     } else {
                         break;
-                      }
                     }
+                }
                 TS7DataItem data_info = ((S7ReadItem*)p_read_item + i)->data_info;
                 Cli_ReadMultiVars(s7_plc, &data_info, 1);
                 uint16_t Size = GetValueTypeMemorySize(((S7ReadItem*)p_read_item + i)->value_type);
-                PrintHexNumberList("s7 recv", data_info.pdata,Size);          
+                ControlPrintfList("S7 RECV", data_info.pdata,Size);          
                 PushDataIntoStack(s7_data,data_info.pdata,Size);
-                MdelayKTask(100);
+                PrivTaskDelay(100);
             }
+
             /*read all variable item data, put them into circular_area*/
             if (i == read_item_count) {
                 printf("%s get %d item %d length\n", __func__, i, data_length);
-                //  for(int j = 0; j < data_length; j++)
-                //      {
-                //      printf("DEBUG:%X %d\n",s7_data[j],__LINE__);
-                //      }
                 CircularAreaAppWrite(circular_area, s7_data, data_length, 0);
             }    
         }
@@ -241,14 +208,14 @@ static uint8_t InitialS7ReadItem(S7ReadItem* p_read_item, cJSON* read_item_json,
 int S7ProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *protocol_format_info)
 {
     int ret = 0;
-    uint8_t* S7_plc_read_data = malloc(p_recipe->protocol_data.data_length);
+    uint8_t *S7_plc_read_data = PrivMalloc(p_recipe->protocol_data.data_length);
     uint16_t S7_plc_read_data_index = 8;
     cJSON *read_single_item_json = protocol_format_info->read_single_item_json;
     int i = protocol_format_info->read_item_index;
-    if (i == 0)
-        p_recipe->read_item = malloc(sizeof(S7ReadItem) * p_recipe->read_item_count);
-        S7_plc_read_data_index += InitialS7ReadItem((S7ReadItem*)(p_recipe->read_item) + i,
-        read_single_item_json,S7_plc_read_data + S7_plc_read_data_index);
+    if (0 == i)
+        p_recipe->read_item = PrivMalloc(sizeof(S7ReadItem) * p_recipe->read_item_count);
+        S7_plc_read_data_index += InitialS7ReadItem((S7ReadItem *)(p_recipe->read_item) + i,
+            read_single_item_json, S7_plc_read_data + S7_plc_read_data_index);
         if (S7_plc_read_data_index == 8) {
             ret = -1;
             printf("%s read %d item failed!\n", __func__, i);
@@ -270,5 +237,6 @@ int S7ProtocolInit(struct ControlRecipe *p_recipe)
     memset(p_recipe->read_item, 0, sizeof(S7ReadItem));
     p_recipe->ControlProtocolFormatCmd = S7ProtocolFormatCmd;
     p_recipe->done = &s7_protocol_done;
+
     return 0;
 }
