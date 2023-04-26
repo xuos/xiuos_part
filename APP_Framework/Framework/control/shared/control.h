@@ -64,6 +64,15 @@ typedef enum
     CONTROL_UNREGISTERED,
 }ProtocolStatus;
 
+struct ControlDevice
+{
+    char *dev_name;
+    int status;
+
+    //to do
+    void *dev_done;
+};
+
 struct ControlProtocol
 {
     char *name;
@@ -72,6 +81,7 @@ struct ControlProtocol
 
     struct ControlRecipe *recipe;
     struct ControlDone *done;
+    struct ControlDevice *device;
     
     void *args;
 

@@ -22,7 +22,7 @@
 
 static struct HardwareDev *g_spi_lora_dev;
 static BusType buspin;
-tRadioDriver *Radio = NONE;
+static tRadioDriver *Radio = NONE;
 void SX1276InitIo(void)
 {
     struct PinParam PinCfg;

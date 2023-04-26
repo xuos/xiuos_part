@@ -418,13 +418,7 @@ static struct pbuf *low_level_input(struct netif *netif)
     rxBuffer = (uint8_t *)(EthHandle.stcRxFrame).u32Buf;
     if (len > 0UL) {
         /* Allocate a pbuf chain of pbufs from the buffer */
-        p = (struct pbuf *)malloc(sizeof(struct pbuf) + len);
-        if (NULL != p) {
-            p->next = NULL;
-            p->payload = &((uint8_t *)p)[sizeof(struct pbuf)];
-            p->len = len;
-            (void)memset(p->payload, 0, p->len);
-        }
+        p = pbuf_alloc(PBUF_TRANSPORT, len, PBUF_RAM);
     }
     if (p != NULL) {
         DmaRxDesc = (EthHandle.stcRxFrame).pstcFSDesc;

@@ -68,6 +68,30 @@ int PrivSemaphoreAbandon(sem_t *sem)
     return sem_post(sem);
 }
 
+/**********************event****************************/
+#ifndef SEPARATE_COMPILE
+int PrivEventCreate(uint8_t flag)
+{
+    return UserEventCreate(flag);
+}
+
+int PrivEvenDelete(int event)
+{
+    UserEventDelete(event);
+    return 1;
+}
+
+int PrivEvenTrigger(int event, uint32_t set)
+{
+    return UserEventTrigger(event, set);
+}
+
+int PrivEventProcess(int event, uint32_t set, uint8_t option, int32_t wait_time, unsigned int *Recved)
+{
+    return UserEventProcess(event, set, option, wait_time, Recved);
+}
+#endif
+
 /**************************task*************************/
 int PrivTaskCreate(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*start_routine)(void *), void *arg)
@@ -107,6 +131,36 @@ uint32_t PrivGetTickTime()
     return CalculateTimeMsFromTick(CurrentTicksGain());
 }
 #endif
+
+/******************Soft Timer*********************/
+int PrivTimerCreate(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
+{
+    return timer_create(clockid, evp, timerid);
+}
+
+int PrivTimerDelete(timer_t timerid)
+{
+    return timer_delete(timerid);
+}
+
+int PrivTimerStartRun(timer_t timerid)
+{
+    return UserTimerStartRun(timerid);
+}
+
+int PrivTimerQuitRun(timer_t timerid)
+{
+    return UserTimerQuitRun(timerid);
+}
+
+int PrivTimerModify(timer_t timerid, int flags, const struct itimerspec *restrict value,
+                  struct itimerspec *restrict ovalue)
+{
+    return timer_settime(timerid, flags, value, ovalue);
+}
+
+/*************************************************/
+
 /*********************fs**************************/
 #ifdef FS_VFS
 /************************Driver Posix Transform***********************/
@@ -165,6 +219,7 @@ int PrivIoctl(int fd, int cmd, void *args)
     case LCD_TYPE:
         ret = PrivLcdIoctl(fd, cmd, ioctl_cfg->args);
         break;
+    case SPI_TYPE:
     case I2C_TYPE:
     case RTC_TYPE:
     case ADC_TYPE:

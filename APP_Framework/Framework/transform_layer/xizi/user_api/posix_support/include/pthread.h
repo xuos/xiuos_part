@@ -60,6 +60,16 @@ extern "C" {
 //     PTHREAD_SCOPE_SYSTEM,
 // };
 
+// #define NULL_PARAM_CHECK(param)                                                                  \
+//     do                                                                                         \
+//     {                                                                                          \
+//         if(param == NULL) {                                                                    \
+//             printf("PARAM CHECK FAILED ...%s %d %s is NULL.\n", __func__, __LINE__, #param);   \
+//             while(1);                                                                          \
+//         }                                                                                      \
+//     }while (0) 
+
+
 typedef int   pid_t;
 // typedef int pthread_mutex_t ;
 

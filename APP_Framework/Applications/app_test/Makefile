@@ -97,5 +97,9 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
         SRC_FILES += test_can.c
     endif    
 
+    ifeq ($(CONFIG_USER_TEST_TIMER),y)
+        SRC_FILES += test_timer.c
+    endif    
+
     include $(KERNEL_ROOT)/compiler.mk
 endif

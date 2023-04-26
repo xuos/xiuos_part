@@ -12,12 +12,13 @@
 
 #include <fcntl.h>
 #include <stdio.h>
-#ifndef WIN32
-#include <dirent.h>
+// #ifdef __linux__
+// #include <dirent.h>
 #include <unistd.h>
-#else
-#include <windows.h>
-#endif
+#include <transform.h>
+// #else
+// #include <windows.h>
+// #endif
 
 /*********************
  *      DEFINES
@@ -101,6 +102,8 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
     else if(mode == LV_FS_MODE_RD) flags = O_RDONLY;
     else if(mode == (LV_FS_MODE_WR | LV_FS_MODE_RD)) flags = O_RDWR;
 
+    
+
 #ifdef LV_FS_POSIX_PATH
     /*Make the path relative to the current directory (the projects root folder)*/
     char buf[256];
@@ -109,6 +112,7 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
     int f = open(buf, flags);
 #else
     int f = open(path, flags);
+
 #endif
     if(f < 0) return NULL;
 
@@ -263,7 +267,7 @@ static lv_fs_res_t fs_dir_read(lv_fs_drv_t * drv, void * dir_p, char * fn)
     do {
         entry = readdir(dir_p);
         if(entry) {
-            if(entry->d_type == DT_DIR) sprintf(fn, "/%s", entry->d_name);
+            if(entry->d_kind == FTYPE_DIR) sprintf(fn, "/%s", entry->d_name);
             else strcpy(fn, entry->d_name);
         } else {
             strcpy(fn, "");

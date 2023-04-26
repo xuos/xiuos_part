@@ -158,7 +158,7 @@ int CircularAreaAppRead(CircularAreaAppType circular_area, uint8_t *output_buffe
 {
     CA_PARAM_CHECK(circular_area);
     CA_PARAM_CHECK(output_buffer);
-    CHECK(data_length > 0);
+    CA_CHECK(data_length > 0);
 
     if(CircularAreaAppIsEmpty(circular_area)) {
         return -1;
@@ -199,7 +199,7 @@ int CircularAreaAppWrite(CircularAreaAppType circular_area, uint8_t *input_buffe
 {
     CA_PARAM_CHECK(circular_area);
     CA_PARAM_CHECK(input_buffer);
-    CHECK(data_length > 0);
+    CA_CHECK(data_length > 0);
 
     if(CircularAreaAppIsFull(circular_area) && (!b_force)) {
         return -1;
@@ -248,7 +248,7 @@ static struct CircularAreaAppOps CircularAreaAppOperations =
  */
 CircularAreaAppType CircularAreaAppInit(uint32_t circular_area_length)
 {
-    CHECK(circular_area_length > 0);
+    CA_CHECK(circular_area_length > 0);
 
     circular_area_length = CA_ALIGN_DOWN(circular_area_length, 8);
 
