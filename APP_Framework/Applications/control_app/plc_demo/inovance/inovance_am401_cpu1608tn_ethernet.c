@@ -11,29 +11,38 @@
  */
 
 /**
- * @file xdh-60t4-e.c
- * @brief PLC XINJE XDH-60T4-E app
+ * @file inovance_am401_cpu1608tn_ethernet.c
+ * @brief PLC inovance am401 app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2023.4.5
+ * @date 2023.4.25
  */
 
 #include <control.h>
 
-void ControlXDHTest(void)
+extern int Adapter4GActive(void);
+
+void ControlInovanceam401EthernetTest(void)
 {
     int i, j = 0;
     int read_data_length = 0;
     uint8_t read_data[128] = {0};
+
+#ifdef CONNECTION_ADAPTER_4G
+    Adapter4GActive();
+#endif
+
     ControlProtocolType modbus_tcp_protocol = ControlProtocolFind();
     if (NULL == modbus_tcp_protocol) {
         printf("%s get modbus tcp protocol %p failed\n", __func__, modbus_tcp_protocol);
         return;
     }
+
     printf("%s get modbus tcp protocol %p successfull\n", __func__, modbus_tcp_protocol);
 
     if (CONTROL_REGISTERED == modbus_tcp_protocol->protocol_status) {
         ControlProtocolOpen(modbus_tcp_protocol);
+
         for (;;) {
             read_data_length = ControlProtocolRead(modbus_tcp_protocol, read_data, sizeof(read_data));
             printf("%s read [%d] modbus tcp data %d using receipe file\n", __func__, i, read_data_length);
@@ -43,10 +52,13 @@ void ControlXDHTest(void)
                 }
             }
             i++;
-            memset(read_data, 0, sizeof(read_data));          
+            memset(read_data, 0, sizeof(read_data));
             PrivTaskDelay(10000);
         }
+
         //ControlProtocolClose(modbus_tcp_protocol);
     }
 }
-PRIV_SHELL_CMD_FUNCTION(ControlXDHTest, Xinje Plc XDH_60T4_E Demo, PRIV_SHELL_CMD_MAIN_ATTR);
+PRIV_SHELL_CMD_FUNCTION(ControlInovanceam401EthernetTest, inovance am401 ethernet Demo, PRIV_SHELL_CMD_MAIN_ATTR);
+
+
