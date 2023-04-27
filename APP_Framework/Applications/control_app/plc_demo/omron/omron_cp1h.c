@@ -18,3 +18,32 @@
  * @date 2023.4.1
  */
 
+#include <control.h>
+
+void ControlOmronCP1HTest(void)
+{
+    int i = 0;
+    uint16_t read_data_length = 0;
+    uint8_t read_data[1024] = {0};
+    ControlProtocolType fins_protocol = ControlProtocolFind();
+    if (NULL == fins_protocol) {
+        printf("%s get fins protocol %p failed\n", __func__, fins_protocol);
+        return;
+    }
+
+    printf("%s get fins protocol %p successfull\n", __func__, fins_protocol);
+
+    if (CONTROL_REGISTERED == fins_protocol->protocol_status) {
+        ControlProtocolOpen(fins_protocol);
+
+        for (;;) {
+            read_data_length = ControlProtocolRead(fins_protocol, read_data, sizeof(read_data));
+            printf("%s read [%d] fins data %d using receipe file\n", __func__, i, read_data_length);
+            i++;
+            PrivTaskDelay(100000);
+        }
+
+        //ControlProtocolClose(fins_protocol);
+    }
+}
+PRIV_SHELL_CMD_FUNCTION(ControlOmronCP1HTest, Omron Plc Cp1h Demo, PRIV_SHELL_CMD_MAIN_ATTR);
