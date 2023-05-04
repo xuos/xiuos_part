@@ -58,11 +58,11 @@ static const lookuptable_t FlashLookupTable={
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: Flexspi_Nor_Wait_Busy
-* ¹¦ÄÜÃèÊö: µÈ´ıFlexSPI NOR FlashÃ¦Âµ×´Ì¬½áÊø
-* ĞÎ    ²Î: instance:FlexSPIÊµÀıºÅ
-            baseAddr:¿ªÊ¼¶ÁÈ¡µÄFlashµØÖ·(32bit)
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: Flexspi_Nor_Wait_Busy
+* åŠŸèƒ½æè¿°: ç­‰å¾…FlexSPI NOR Flashå¿™ç¢ŒçŠ¶æ€ç»“æŸ
+* å½¢    å‚: instance:FlexSPIå®ä¾‹å·
+            baseAddr:å¼€å§‹è¯»å–çš„Flashåœ°å€(32bit)
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 static status_t Flexspi_Nor_Wait_Busy(uint32_t instance, uint32_t baseAddr)
 {
@@ -101,11 +101,11 @@ static status_t Flexspi_Nor_Wait_Busy(uint32_t instance, uint32_t baseAddr)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: Flexspi_Nor_Write_Enable
-* ¹¦ÄÜÃèÊö: Ê¹ÄÜ FlexSPI NOR FlashµÄĞ´Èë²Ù×÷
-* ĞÎ    ²Î: instance:FlexSPIÊµÀıºÅ
-            baseAddr:¿ªÊ¼¶ÁÈ¡µÄFlashµØÖ·(32bit)
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: Flexspi_Nor_Write_Enable
+* åŠŸèƒ½æè¿°: ä½¿èƒ½ FlexSPI NOR Flashçš„å†™å…¥æ“ä½œ
+* å½¢    å‚: instance:FlexSPIå®ä¾‹å·
+            baseAddr:å¼€å§‹è¯»å–çš„Flashåœ°å€(32bit)
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 static status_t Flexspi_Nor_Write_Enable(uint32_t instance, uint32_t baseAddr)
 {
@@ -125,12 +125,12 @@ static status_t Flexspi_Nor_Write_Enable(uint32_t instance, uint32_t baseAddr)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flexspi_clock_config
-* ¹¦ÄÜÃèÊö: ÅäÖÃFlexSPIÄ£¿éµÄÊ±ÖÓ
-* ĞÎ    ²Î: instance:FlexSPIÊµÀıºÅ
-            freq:±íÊ¾ËùĞèµÄFlexSPIÊ±ÖÓÆµÂÊ
-            sampleClkMode:Ö¸¶¨FlexSPIÊ±ÖÓµÄ²ÉÑùÊ±ÖÓÄ£Ê½,¿ÉÒÔÑ¡ÔñSDR»òDDRÄ£Ê½
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: flexspi_clock_config
+* åŠŸèƒ½æè¿°: é…ç½®FlexSPIæ¨¡å—çš„æ—¶é’Ÿ
+* å½¢    å‚: instance:FlexSPIå®ä¾‹å·
+            freq:è¡¨ç¤ºæ‰€éœ€çš„FlexSPIæ—¶é’Ÿé¢‘ç‡
+            sampleClkMode:æŒ‡å®šFlexSPIæ—¶é’Ÿçš„é‡‡æ ·æ—¶é’Ÿæ¨¡å¼,å¯ä»¥é€‰æ‹©SDRæˆ–DDRæ¨¡å¼
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 static void flexspi_clock_config(uint32_t instance, uint32_t freq, uint32_t sampleClkMode)
 {
@@ -210,10 +210,10 @@ static void flexspi_clock_config(uint32_t instance, uint32_t freq, uint32_t samp
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flexspi_clock_gate_enable
-* ¹¦ÄÜÃèÊö: ¿ªÆôFlexSPIÄ£¿éµÄÊ±ÖÓÃÅ¿Ø
-* ĞÎ    ²Î: ÎŞ
-* ·µ »Ø Öµ: ÎŞ 
+* å‡½ æ•° å: flexspi_clock_gate_enable
+* åŠŸèƒ½æè¿°: å¼€å¯FlexSPIæ¨¡å—çš„æ—¶é’Ÿé—¨æ§
+* å½¢    å‚: æ— 
+* è¿” å› å€¼: æ—  
 *******************************************************************************/
 static void flexspi_clock_gate_enable(void)
 {
@@ -222,10 +222,10 @@ static void flexspi_clock_gate_enable(void)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flexspi_clock_gate_disable
-* ¹¦ÄÜÃèÊö: ¹Ø±ÕFlexSPIÄ£¿éµÄÊ±ÖÓÃÅ¿Ø
-* ĞÎ    ²Î: ÎŞ
-* ·µ »Ø Öµ: ÎŞ 
+* å‡½ æ•° å: flexspi_clock_gate_disable
+* åŠŸèƒ½æè¿°: å…³é—­FlexSPIæ¨¡å—çš„æ—¶é’Ÿé—¨æ§
+* å½¢    å‚: æ— 
+* è¿” å› å€¼: æ—  
 *******************************************************************************/
 static void flexspi_clock_gate_disable(void)
 {
@@ -234,12 +234,12 @@ static void flexspi_clock_gate_disable(void)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flexspi_get_clock
-* ¹¦ÄÜÃèÊö: »ñÈ¡FlexSPIÊ±ÖÓÆµÂÊ
-* ĞÎ    ²Î: instance:FlexSPIÊµÀıºÅ
-            type:ËùĞèÊ±ÖÓÀàĞÍ
-            freq:ÓÃÓÚ´æ´¢»ñÈ¡µ½µÄÊ±ÖÓÆµÂÊÀàĞÍ
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: flexspi_get_clock
+* åŠŸèƒ½æè¿°: è·å–FlexSPIæ—¶é’Ÿé¢‘ç‡
+* å½¢    å‚: instance:FlexSPIå®ä¾‹å·
+            type:æ‰€éœ€æ—¶é’Ÿç±»å‹
+            freq:ç”¨äºå­˜å‚¨è·å–åˆ°çš„æ—¶é’Ÿé¢‘ç‡ç±»å‹
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 static status_t flexspi_get_clock(uint32_t instance, flexspi_clock_type_t type, uint32_t *freq)
 {
@@ -291,13 +291,13 @@ static status_t flexspi_get_clock(uint32_t instance, flexspi_clock_type_t type, 
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flexspi_get_ticks
-* ¹¦ÄÜÃèÊö: ¼ÆËãFlexSPIÊ±ÖÓÖÜÆÚÊı
-* ĞÎ    ²Î: ticks:ÓÃÓÚ´æ´¢¼ÆËã½á¹ûµÄÖ¸Õë£¬¼´ËùĞèµÄÊ±ÖÓÖÜÆÚÊı£»
-            intervalNs:ËùĞèµÄÊ±¼ä¼ä¸ô£¬ÒÔÄÉÃë£¨ns£©Îªµ¥Î»£»
-            freq:FlexSPIÊ±ÖÓÆµÂÊ£¬µ¥Î»ÎªMHz£»
-            unit:Ê±ÖÓÖÜÆÚµ¥Î»,¼´¼ÆËã½á¹ûÖĞÃ¿¸öÊ±ÖÓÖÜÆÚ´ú±íµÄÊ±¼ä³¤¶È,ÒÔnsÎªµ¥Î»
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: flexspi_get_ticks
+* åŠŸèƒ½æè¿°: è®¡ç®—FlexSPIæ—¶é’Ÿå‘¨æœŸæ•°
+* å½¢    å‚: ticks:ç”¨äºå­˜å‚¨è®¡ç®—ç»“æœçš„æŒ‡é’ˆï¼Œå³æ‰€éœ€çš„æ—¶é’Ÿå‘¨æœŸæ•°ï¼›
+            intervalNs:æ‰€éœ€çš„æ—¶é—´é—´éš”ï¼Œä»¥çº³ç§’ï¼ˆnsï¼‰ä¸ºå•ä½ï¼›
+            freq:FlexSPIæ—¶é’Ÿé¢‘ç‡ï¼Œå•ä½ä¸ºMHzï¼›
+            unit:æ—¶é’Ÿå‘¨æœŸå•ä½,å³è®¡ç®—ç»“æœä¸­æ¯ä¸ªæ—¶é’Ÿå‘¨æœŸä»£è¡¨çš„æ—¶é—´é•¿åº¦,ä»¥nsä¸ºå•ä½
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 static status_t flexspi_get_ticks(uint32_t *ticks, uint32_t intervalNs, uint32_t freq, uint32_t unit)
 {
@@ -330,11 +330,11 @@ static status_t flexspi_get_ticks(uint32_t *ticks, uint32_t intervalNs, uint32_t
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flexspi_configure_dll
-* ¹¦ÄÜÃèÊö: ÓÃÀ´ÅäÖÃFLEXSPI´æ´¢Æ÷µÄDLL(ÑÓ³ÙËø´æÆ÷)
-* ĞÎ    ²Î: instance:FLEXSPIÊµÀıºÅ
-            config:´æ´¢Æ÷ÅäÖÃĞÅÏ¢£¬°üÀ¨¶ÁÈ¡Ê±ÖÓÔ´¡¢Êı¾İÓĞĞ§Ê±¼äµÈ²ÎÊı
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: flexspi_configure_dll
+* åŠŸèƒ½æè¿°: ç”¨æ¥é…ç½®FLEXSPIå­˜å‚¨å™¨çš„DLL(å»¶è¿Ÿé”å­˜å™¨)
+* å½¢    å‚: instance:FLEXSPIå®ä¾‹å·
+            config:å­˜å‚¨å™¨é…ç½®ä¿¡æ¯ï¼ŒåŒ…æ‹¬è¯»å–æ—¶é’Ÿæºã€æ•°æ®æœ‰æ•ˆæ—¶é—´ç­‰å‚æ•°
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 static status_t flexspi_configure_dll(uint32_t instance, flexspi_mem_config_t *config)
 {
@@ -473,11 +473,11 @@ static status_t flexspi_configure_dll(uint32_t instance, flexspi_mem_config_t *c
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flexspi_config_mcr1
-* ¹¦ÄÜÃèÊö: ÅäÖÃFlexSPIÄ£¿éµÄMCR1¼Ä´æÆ÷
-* ĞÎ    ²Î: instance:FLEXSPIÊµÀıºÅ
-            onfigÖ¸ÏòFlexSPI´æ´¢Æ÷ÅäÖÃ½á¹¹ÌåµÄÖ¸Õë
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: flexspi_config_mcr1
+* åŠŸèƒ½æè¿°: é…ç½®FlexSPIæ¨¡å—çš„MCR1å¯„å­˜å™¨
+* å½¢    å‚: instance:FLEXSPIå®ä¾‹å·
+            onfigæŒ‡å‘FlexSPIå­˜å‚¨å™¨é…ç½®ç»“æ„ä½“çš„æŒ‡é’ˆ
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 static status_t flexspi_config_mcr1(uint32_t instance, flexspi_mem_config_t *config)
 {
@@ -513,10 +513,10 @@ static status_t flexspi_config_mcr1(uint32_t instance, flexspi_mem_config_t *con
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: FLASH_GetSectorSize
-* ¹¦ÄÜÃèÊö: »ñÈ¡ÉÈÇø´óĞ¡
-* ĞÎ    ²Î: ÎŞ
-* ·µ »Ø Öµ: ·µ»ØÉÈÇø´óĞ¡,HYPER FLASHÎª64K×Ö½Ú,NOR FLASHÎª4K×Ö½Ú
+* å‡½ æ•° å: FLASH_GetSectorSize
+* åŠŸèƒ½æè¿°: è·å–æ‰‡åŒºå¤§å°
+* å½¢    å‚: æ— 
+* è¿” å› å€¼: è¿”å›æ‰‡åŒºå¤§å°,HYPER FLASHä¸º64Kå­—èŠ‚,NOR FLASHä¸º4Kå­—èŠ‚
 *******************************************************************************/
 uint32_t FLASH_GetSectorSize(void)
 {
@@ -529,10 +529,10 @@ uint32_t FLASH_GetSectorSize(void)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: FLASH_GetProgramCmd
-* ¹¦ÄÜÃèÊö: »ñÈ¡Ò³´óĞ¡
-* ĞÎ    ²Î: ÎŞ
-* ·µ »Ø Öµ: ·µ»ØÒ³´óĞ¡,HYPER FLASHÎª512×Ö½Ú,NOR FLASHÎª256×Ö½Ú
+* å‡½ æ•° å: FLASH_GetProgramCmd
+* åŠŸèƒ½æè¿°: è·å–é¡µå¤§å°
+* å½¢    å‚: æ— 
+* è¿” å› å€¼: è¿”å›é¡µå¤§å°,HYPER FLASHä¸º512å­—èŠ‚,NOR FLASHä¸º256å­—èŠ‚
 *******************************************************************************/
 uint32_t FLASH_GetProgramCmd(void)
 {
@@ -548,10 +548,10 @@ uint32_t FLASH_GetProgramCmd(void)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: FLASH_Init
-* ¹¦ÄÜÃèÊö: Flash½Ó¿Ú³õÊ¼»¯,ĞèÔÚ½øĞĞFlashÏà¹Ø²Ù×÷Ç°½øĞĞµ÷ÓÃ
-* ĞÎ    ²Î: ÎŞ
-* ·µ »Ø Öµ: ÎŞ
+* å‡½ æ•° å: FLASH_Init
+* åŠŸèƒ½æè¿°: Flashæ¥å£åˆå§‹åŒ–,éœ€åœ¨è¿›è¡ŒFlashç›¸å…³æ“ä½œå‰è¿›è¡Œè°ƒç”¨
+* å½¢    å‚: æ— 
+* è¿” å› å€¼: æ— 
 *******************************************************************************/
 void FLASH_Init(void)
 {
@@ -567,10 +567,10 @@ void FLASH_Init(void)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: FLASH_DeInit
-* ¹¦ÄÜÃèÊö: Flash½Ó¿Ú·´³õÊ¼»¯£¬ĞèÔÚÍê³ÉFlashÏà¹Ø²Ù×÷ºó½øĞĞµ÷ÓÃ
-* ĞÎ    ²Î: ÎŞ
-* ·µ »Ø Öµ: ÎŞ
+* å‡½ æ•° å: FLASH_DeInit
+* åŠŸèƒ½æè¿°: Flashæ¥å£ååˆå§‹åŒ–ï¼Œéœ€åœ¨å®ŒæˆFlashç›¸å…³æ“ä½œåè¿›è¡Œè°ƒç”¨
+* å½¢    å‚: æ— 
+* è¿” å› å€¼: æ— 
 *******************************************************************************/
 void FLASH_DeInit(void)
 {
@@ -583,11 +583,11 @@ void FLASH_DeInit(void)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: FLASH_EraseSector
-* ¹¦ÄÜÃèÊö: ²Á³ıÒ»¸öFlashÉÈÇø
-* ĞÎ    ²Î: addr:²Á³ıÇøÓòÆğÊ¼µØÖ·
-* ·µ »Ø Öµ: None 
-* ×¢    ÊÍ: ²Á³ıÒ»¸öÉÈÇøµÄ×îÉÙÊ±¼ä:30ms~200/400ms
+* å‡½ æ•° å: FLASH_EraseSector
+* åŠŸèƒ½æè¿°: æ“¦é™¤ä¸€ä¸ªFlashæ‰‡åŒº
+* å½¢    å‚: addr:æ“¦é™¤åŒºåŸŸèµ·å§‹åœ°å€
+* è¿” å› å€¼: None 
+* æ³¨    é‡Š: æ“¦é™¤ä¸€ä¸ªæ‰‡åŒºçš„æœ€å°‘æ—¶é—´:30ms~200/400ms
 *******************************************************************************/
 uint8_t FLASH_EraseSector(uint32_t addr)
 {
@@ -613,13 +613,13 @@ uint8_t FLASH_EraseSector(uint32_t addr)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: FLASH_WritePage
-* ¹¦ÄÜÃèÊö: Ğ´FlashÒ»¸öÒ³
-* ĞÎ    ²Î: addr:Ğ´ÈëÇøÓòÆğÊ¼µØÖ·
-            buf:Êı¾İ´æ´¢Çø
-            len:ÒªĞ´ÈëµÄ×Ö½ÚÊı(×î´ó256)
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
-* ×¢    ÊÍ: ÔÚÖ¸¶¨µØÖ·¿ªÊ¼Ğ´Èë×î´ó256×Ö½ÚµÄÊı¾İ
+* å‡½ æ•° å: FLASH_WritePage
+* åŠŸèƒ½æè¿°: å†™Flashä¸€ä¸ªé¡µ
+* å½¢    å‚: addr:å†™å…¥åŒºåŸŸèµ·å§‹åœ°å€
+            buf:æ•°æ®å­˜å‚¨åŒº
+            len:è¦å†™å…¥çš„å­—èŠ‚æ•°(æœ€å¤§256)
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
+* æ³¨    é‡Š: åœ¨æŒ‡å®šåœ°å€å¼€å§‹å†™å…¥æœ€å¤§256å­—èŠ‚çš„æ•°æ®
 *******************************************************************************/
 uint8_t FLASH_WritePage(uint32_t addr, const uint32_t *buf, uint32_t len)
 {
@@ -648,12 +648,12 @@ uint8_t FLASH_WritePage(uint32_t addr, const uint32_t *buf, uint32_t len)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: FLASH_Read
-* ¹¦ÄÜÃèÊö: ¶ÁFlashÄÚÈİ
-* ĞÎ    ²Î: addr:¶ÁÈ¡ÇøÓòÆğÊ¼µØÖ·
-            buf:Êı¾İ´æ´¢Çø
-            len:Òª¶ÁÈ¡µÄ×Ö½ÚÊı
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: FLASH_Read
+* åŠŸèƒ½æè¿°: è¯»Flashå†…å®¹
+* å½¢    å‚: addr:è¯»å–åŒºåŸŸèµ·å§‹åœ°å€
+            buf:æ•°æ®å­˜å‚¨åŒº
+            len:è¦è¯»å–çš„å­—èŠ‚æ•°
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 status_t FLASH_Read(uint32_t addr, uint32_t *buf, uint32_t len)
 {
@@ -680,12 +680,12 @@ status_t FLASH_Read(uint32_t addr, uint32_t *buf, uint32_t len)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flash_erase
-* ¹¦ÄÜÃèÊö: ²Á³ıFlashÖ¸¶¨³¤¶ÈµÄ¿Õ¼ä
-* ĞÎ    ²Î: addr:²Á³ıÇøÓòÆğÊ¼µØÖ·
-            byte_cnt:Òª²Á³ıµÄ×Ö½ÚÊı,ÒÔ4k×Ö½ÚÎª×îĞ¡²Á³ıµ¥Î»
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë
-* ×¢    ÊÍ: ²»Âú4k×Ö½ÚµÄ£¬Ò²ĞèÒª²Á³ıµô4k×Ö½Ú
+* å‡½ æ•° å: flash_erase
+* åŠŸèƒ½æè¿°: æ“¦é™¤FlashæŒ‡å®šé•¿åº¦çš„ç©ºé—´
+* å½¢    å‚: addr:æ“¦é™¤åŒºåŸŸèµ·å§‹åœ°å€
+            byte_cnt:è¦æ“¦é™¤çš„å­—èŠ‚æ•°,ä»¥4kå­—èŠ‚ä¸ºæœ€å°æ“¦é™¤å•ä½
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç 
+* æ³¨    é‡Š: ä¸æ»¡4kå­—èŠ‚çš„ï¼Œä¹Ÿéœ€è¦æ“¦é™¤æ‰4kå­—èŠ‚
 *******************************************************************************/
 status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt)
 {
@@ -707,12 +707,12 @@ status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flash_write
-* ¹¦ÄÜÃèÊö: ÔÚÖ¸¶¨µÄflashÆğÊ¼µØÖ·Ğ´ÈëÖ¸¶¨³¤¶ÈµÄÊı¾İ
-* ĞÎ    ²Î: addr:Ğ´ÈëÇøÓòÆğÊ¼µØÖ·
-            buf:Êı¾İ´æ´¢Çø
-            byte_cnt:ÒªĞ´ÈëµÄ×Ö½ÚÊı
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: flash_write
+* åŠŸèƒ½æè¿°: åœ¨æŒ‡å®šçš„flashèµ·å§‹åœ°å€å†™å…¥æŒ‡å®šé•¿åº¦çš„æ•°æ®
+* å½¢    å‚: addr:å†™å…¥åŒºåŸŸèµ·å§‹åœ°å€
+            buf:æ•°æ®å­˜å‚¨åŒº
+            byte_cnt:è¦å†™å…¥çš„å­—èŠ‚æ•°
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt)
 {
@@ -736,12 +736,12 @@ status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flash_read
-* ¹¦ÄÜÃèÊö: ¶ÁFlashÄÚÈİ
-* ĞÎ    ²Î: addr:¶ÁÈ¡ÇøÓòÆğÊ¼µØÖ·
-            buf:Êı¾İ´æ´¢Çø
-            len:Òª¶ÁÈ¡µÄ×Ö½ÚÊı
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: flash_read
+* åŠŸèƒ½æè¿°: è¯»Flashå†…å®¹
+* å½¢    å‚: addr:è¯»å–åŒºåŸŸèµ·å§‹åœ°å€
+            buf:æ•°æ®å­˜å‚¨åŒº
+            len:è¦è¯»å–çš„å­—èŠ‚æ•°
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len)
 {   
@@ -768,12 +768,12 @@ status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: flash_copy
-* ¹¦ÄÜÃèÊö: ÊµÏÖflashÊı¾İÔÚ·ÖÇøÖ®¼äµÄ¿½±´
-* ĞÎ    ²Î: srcAddr:Ô´flashµÄÆğÊ¼µØÖ·
-            dstAddr:Ä¿±êflashµÄÆğÊ¼µØÖ·;
-            imageSize:Òª¿½±´µÄflash¿Õ¼ä´óĞ¡,µ¥Î»Îª×Ö½Ú
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
+* å‡½ æ•° å: flash_copy
+* åŠŸèƒ½æè¿°: å®ç°flashæ•°æ®åœ¨åˆ†åŒºä¹‹é—´çš„æ‹·è´
+* å½¢    å‚: srcAddr:æºflashçš„èµ·å§‹åœ°å€
+            dstAddr:ç›®æ ‡flashçš„èµ·å§‹åœ°å€;
+            imageSize:è¦æ‹·è´çš„flashç©ºé—´å¤§å°,å•ä½ä¸ºå­—èŠ‚
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
 *******************************************************************************/
 status_t flash_copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
 {   
@@ -834,11 +834,11 @@ status_t flash_copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: NOR_FLASH_Erase
-* ¹¦ÄÜÃèÊö: ÒÔÉÈÇøÎª²Á³ıµ¥Î»²Á³ıFlashÖ¸¶¨³¤¶ÈµÄ¿Õ¼ä,×îÖÕ²Á³ıµÄ×Ö½Ú¿ÉÄÜ´óÓÚimageSize
-* ĞÎ    ²Î: addr:²Á³ıÇøÓòÆğÊ¼µØÖ·
-            imageSize:Òª²Á³ıµÄ×Ö½ÚÊı
-* ·µ »Ø Öµ: None 
+* å‡½ æ•° å: NOR_FLASH_Erase
+* åŠŸèƒ½æè¿°: ä»¥æ‰‡åŒºä¸ºæ“¦é™¤å•ä½æ“¦é™¤FlashæŒ‡å®šé•¿åº¦çš„ç©ºé—´,æœ€ç»ˆæ“¦é™¤çš„å­—èŠ‚å¯èƒ½å¤§äºimageSize
+* å½¢    å‚: addr:æ“¦é™¤åŒºåŸŸèµ·å§‹åœ°å€
+            imageSize:è¦æ“¦é™¤çš„å­—èŠ‚æ•°
+* è¿” å› å€¼: None 
 *******************************************************************************/
 status_t NOR_FLASH_Erase(uint32_t app_base_addr,uint32_t imageSize)
 {
@@ -860,13 +860,13 @@ status_t NOR_FLASH_Erase(uint32_t app_base_addr,uint32_t imageSize)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: NorFlash_Write_PageProgram
-* ¹¦ÄÜÃèÊö: Ğ´ÈëFlashÖ¸¶¨³¤¶ÈµÄÊı¾İ
-* ĞÎ    ²Î: pBuffer:Êı¾İ´æ´¢Çø
-            WriteAddr:Ğ´ÈëÇøÓòÆğÊ¼µØÖ·
-            NumByteToWrite:ÒªĞ´ÈëµÄ×Ö½ÚÊı(×î´ó256)
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë 
-* ×¢    ÊÍ: ÔÚÖ¸¶¨µØÖ·¿ªÊ¼Ğ´Èë×î´ó256×Ö½ÚµÄÊı¾İ
+* å‡½ æ•° å: NorFlash_Write_PageProgram
+* åŠŸèƒ½æè¿°: å†™å…¥FlashæŒ‡å®šé•¿åº¦çš„æ•°æ®
+* å½¢    å‚: pBuffer:æ•°æ®å­˜å‚¨åŒº
+            WriteAddr:å†™å…¥åŒºåŸŸèµ·å§‹åœ°å€
+            NumByteToWrite:è¦å†™å…¥çš„å­—èŠ‚æ•°(æœ€å¤§256)
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç  
+* æ³¨    é‡Š: åœ¨æŒ‡å®šåœ°å€å¼€å§‹å†™å…¥æœ€å¤§256å­—èŠ‚çš„æ•°æ®
 *******************************************************************************/
 void NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 {
@@ -883,24 +883,24 @@ void NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t Num
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: NorFlash_Write_NoCheck
-* ¹¦ÄÜÃèÊö: ÎŞ¼ìÑéĞ´ÈëW25QXX´ÓÖ¸¶¨µØÖ·¿ªÊ¼Ö¸¶¨³¤¶ÈµÄÊı¾İ
-* ĞÎ    ²Î: pBuffer:Êı¾İ´æ´¢Çø
-            WriteAddr:¿ªÊ¼Ğ´ÈëµÄµØÖ·(24bit)
-            NumByteToWrite:ÒªĞ´ÈëµÄ×Ö½ÚÊı(×î´ó65535)
-* ·µ »Ø Öµ: ÎŞ
-* ×¢    ÊÍ: ±ØĞëÈ·±£ËùĞ´µÄµØÖ··¶Î§ÄÚµÄÊı¾İÈ«²¿Îª0XFF,·ñÔòÔÚ·Ç0XFF´¦Ğ´ÈëµÄÊı¾İ½«Ê§°Ü!
-            ¾ßÓĞ×Ô¶¯»»Ò³¹¦ÄÜ,ÔÚÖ¸¶¨µØÖ·¿ªÊ¼Ğ´ÈëÖ¸¶¨³¤¶ÈµÄÊı¾İ,µ«ÊÇÒªÈ·±£µØÖ·²»Ô½½ç!
+* å‡½ æ•° å: NorFlash_Write_NoCheck
+* åŠŸèƒ½æè¿°: æ— æ£€éªŒå†™å…¥W25QXXä»æŒ‡å®šåœ°å€å¼€å§‹æŒ‡å®šé•¿åº¦çš„æ•°æ®
+* å½¢    å‚: pBuffer:æ•°æ®å­˜å‚¨åŒº
+            WriteAddr:å¼€å§‹å†™å…¥çš„åœ°å€(24bit)
+            NumByteToWrite:è¦å†™å…¥çš„å­—èŠ‚æ•°(æœ€å¤§65535)
+* è¿” å› å€¼: æ— 
+* æ³¨    é‡Š: å¿…é¡»ç¡®ä¿æ‰€å†™çš„åœ°å€èŒƒå›´å†…çš„æ•°æ®å…¨éƒ¨ä¸º0XFF,å¦åˆ™åœ¨é0XFFå¤„å†™å…¥çš„æ•°æ®å°†å¤±è´¥!
+            å…·æœ‰è‡ªåŠ¨æ¢é¡µåŠŸèƒ½,åœ¨æŒ‡å®šåœ°å€å¼€å§‹å†™å…¥æŒ‡å®šé•¿åº¦çš„æ•°æ®,ä½†æ˜¯è¦ç¡®ä¿åœ°å€ä¸è¶Šç•Œ!
 *******************************************************************************/
 void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 {
     uint16_t pageRemain;	
     
-    pageRemain = 256 - WriteAddr%256;//µ¥Ò³Ê£ÓàµÄ×Ö½ÚÊı
+    pageRemain = 256 - WriteAddr%256;//å•é¡µå‰©ä½™çš„å­—èŠ‚æ•°
     
     if(NumByteToWrite <= pageRemain)
     {
-        pageRemain = NumByteToWrite;//²»´óÓÚ256¸ö×Ö½Ú
+        pageRemain = NumByteToWrite;//ä¸å¤§äº256ä¸ªå­—èŠ‚
     }
 
     while(1)
@@ -908,21 +908,21 @@ void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByte
         NorFlash_Write_PageProgram(pBuffer,WriteAddr,pageRemain);
         if(NumByteToWrite == pageRemain)
         {
-            break;//Ğ´Èë½áÊøÁË	
+            break;//å†™å…¥ç»“æŸäº†	
         }
         else //NumByteToWrite>pageRemain
         {
             pBuffer += pageRemain;
             WriteAddr += pageRemain;
 
-            NumByteToWrite -= pageRemain;//¼õÈ¥ÒÑ¾­Ğ´ÈëÁËµÄ×Ö½ÚÊı
+            NumByteToWrite -= pageRemain;//å‡å»å·²ç»å†™å…¥äº†çš„å­—èŠ‚æ•°
             if(NumByteToWrite > 256)
             {
-                pageRemain = 256;//Ò»´Î¿ÉÒÔĞ´Èë256¸ö×Ö½Ú
+                pageRemain = 256;//ä¸€æ¬¡å¯ä»¥å†™å…¥256ä¸ªå­—èŠ‚
             }
             else 
             {
-                pageRemain = NumByteToWrite;//²»¹»256¸ö×Ö½ÚÁË
+                pageRemain = NumByteToWrite;//ä¸å¤Ÿ256ä¸ªå­—èŠ‚äº†
             }
         }
     }
@@ -930,13 +930,13 @@ void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByte
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: NorFlash_Write
-* ¹¦ÄÜÃèÊö: Ğ´ÈëW25QXXÔÚÖ¸¶¨µØÖ·¿ªÊ¼Ğ´ÈëÖ¸¶¨³¤¶ÈµÄÊı¾İ 
-* ĞÎ    ²Î: pBuffer:Êı¾İ´æ´¢Çø
-            WriteAddr:¿ªÊ¼Ğ´ÈëµÄµØÖ·(24bit)
-            NumByteToWrite:ÒªĞ´ÈëµÄ×Ö½ÚÊı(×î´ó65535)  
-* ·µ »Ø Öµ: None 
-* ×¢    ÊÍ: ¸Ãº¯Êı´ø²Á³ı²Ù×÷
+* å‡½ æ•° å: NorFlash_Write
+* åŠŸèƒ½æè¿°: å†™å…¥W25QXXåœ¨æŒ‡å®šåœ°å€å¼€å§‹å†™å…¥æŒ‡å®šé•¿åº¦çš„æ•°æ® 
+* å½¢    å‚: pBuffer:æ•°æ®å­˜å‚¨åŒº
+            WriteAddr:å¼€å§‹å†™å…¥çš„åœ°å€(24bit)
+            NumByteToWrite:è¦å†™å…¥çš„å­—èŠ‚æ•°(æœ€å¤§65535)  
+* è¿” å› å€¼: None 
+* æ³¨    é‡Š: è¯¥å‡½æ•°å¸¦æ“¦é™¤æ“ä½œ
 *******************************************************************************/
 void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 { 
@@ -946,61 +946,61 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
     uint16_t i;    
     uint8_t *NorFlash_BUF = 0;
 
-    NorFlash_BUF = NorFlash_BUFFER;//RAM»º³åÇø4K
+    NorFlash_BUF = NorFlash_BUFFER;//RAMç¼“å†²åŒº4K
 
     WriteAddr &= 0x0FFFFFFF;
     
-    secPos = WriteAddr/SECTOR_SIZE;//ÉÈÇøµØÖ·
-    secOff = WriteAddr%SECTOR_SIZE;//ÔÚÉÈÇøÄÚµÄÆ«ÒÆ
-    secRemain = SECTOR_SIZE - secOff;//ÉÈÇøÊ£Óà¿Õ¼ä´óĞ¡
+    secPos = WriteAddr/SECTOR_SIZE;//æ‰‡åŒºåœ°å€
+    secOff = WriteAddr%SECTOR_SIZE;//åœ¨æ‰‡åŒºå†…çš„åç§»
+    secRemain = SECTOR_SIZE - secOff;//æ‰‡åŒºå‰©ä½™ç©ºé—´å¤§å°
     
     if(NumByteToWrite <= secRemain)
     {
-        secRemain = NumByteToWrite;//²»´óÓÚ4096¸ö×Ö½Ú
+        secRemain = NumByteToWrite;//ä¸å¤§äº4096ä¸ªå­—èŠ‚
     }
     while(1) 
     {
-        FLASH_Read(FLASH_BASE + secPos*SECTOR_SIZE, (void *)NorFlash_BUF, SECTOR_SIZE);//¶Á³öÕû¸öÉÈÇøµÄÄÚÈİ
-        for(i=0;i<secRemain;i++)//Ğ£ÑéÊı¾İ
+        FLASH_Read(FLASH_BASE + secPos*SECTOR_SIZE, (void *)NorFlash_BUF, SECTOR_SIZE);//è¯»å‡ºæ•´ä¸ªæ‰‡åŒºçš„å†…å®¹
+        for(i=0;i<secRemain;i++)//æ ¡éªŒæ•°æ®
         {
             if(NorFlash_BUF[secOff+i] != 0xFF)
             {
-                break;//ĞèÒª²Á³ı
+                break;//éœ€è¦æ“¦é™¤
             }
         }
-        if(i < secRemain)//ĞèÒª²Á³ı
+        if(i < secRemain)//éœ€è¦æ“¦é™¤
         {
             FLASH_EraseSector(FLASH_BASE + secPos*SECTOR_SIZE);
-            for(i=0;i<secRemain;i++)//¸´ÖÆ
+            for(i=0;i<secRemain;i++)//å¤åˆ¶
             {
                 NorFlash_BUF[i+secOff] = pBuffer[i];                       
             }
-            NorFlash_Write_NoCheck(NorFlash_BUF,FLASH_BASE + secPos*SECTOR_SIZE,SECTOR_SIZE);//Ğ´ÈëÕû¸öÉÈÇø  
+            NorFlash_Write_NoCheck(NorFlash_BUF,FLASH_BASE + secPos*SECTOR_SIZE,SECTOR_SIZE);//å†™å…¥æ•´ä¸ªæ‰‡åŒº  
         }
         else
         {
-            NorFlash_Write_NoCheck(pBuffer,FLASH_BASE + WriteAddr,secRemain);//Ğ´ÒÑ¾­²Á³ıÁËµÄ,Ö±½ÓĞ´ÈëÉÈÇøÊ£ÓàÇø¼ä. 		
+            NorFlash_Write_NoCheck(pBuffer,FLASH_BASE + WriteAddr,secRemain);//å†™å·²ç»æ“¦é™¤äº†çš„,ç›´æ¥å†™å…¥æ‰‡åŒºå‰©ä½™åŒºé—´. 		
         }
                            
         if(NumByteToWrite == secRemain)
         {
-            break;//Ğ´Èë½áÊøÁË
+            break;//å†™å…¥ç»“æŸäº†
         }
-        else//Ğ´ÈëÎ´½áÊø
+        else//å†™å…¥æœªç»“æŸ
         {
-            secPos++;//ÉÈÇøµØÖ·Ôö1
-            secOff=0;//Æ«ÒÆÎ»ÖÃÎª0
+            secPos++;//æ‰‡åŒºåœ°å€å¢1
+            secOff=0;//åç§»ä½ç½®ä¸º0
 
-            pBuffer += secRemain;//Ö¸ÕëÆ«ÒÆ
-            WriteAddr += secRemain;//Ğ´µØÖ·Æ«ÒÆ
-            NumByteToWrite -= secRemain;//×Ö½ÚÊıµİ¼õ
+            pBuffer += secRemain;//æŒ‡é’ˆåç§»
+            WriteAddr += secRemain;//å†™åœ°å€åç§»
+            NumByteToWrite -= secRemain;//å­—èŠ‚æ•°é€’å‡
             if(NumByteToWrite > SECTOR_SIZE)
             {
-                secRemain = SECTOR_SIZE;//ÏÂÒ»¸öÉÈÇø»¹ÊÇĞ´²»Íê	
+                secRemain = SECTOR_SIZE;//ä¸‹ä¸€ä¸ªæ‰‡åŒºè¿˜æ˜¯å†™ä¸å®Œ	
             }
             else
             {
-                secRemain = NumByteToWrite;//ÏÂÒ»¸öÉÈÇø¿ÉÒÔĞ´ÍêÁË	
+                secRemain = NumByteToWrite;//ä¸‹ä¸€ä¸ªæ‰‡åŒºå¯ä»¥å†™å®Œäº†	
             }
         }
     }
@@ -1008,12 +1008,12 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: NOR_FLASH_Write
-* ¹¦ÄÜÃèÊö: Ğ´ÈëW25QXXÔÚÖ¸¶¨µØÖ·¿ªÊ¼Ğ´ÈëÖ¸¶¨³¤¶ÈµÄÊı¾İ 
-* ĞÎ    ²Î: FlashAddress:ÓÃÓÚ´æ´¢µ±Ç°Ğ´ÈëFlashµØÖ·µÄÖ¸Õë£¬Ğ´Èë¹ı³ÌÖĞ»áÒÆ¶¯
-            Data:ÒªĞ´ÈëÊı¾İ´æ´¢Çø
-            DataLength:ÒªĞ´ÈëµÄ×Ö½ÚÊı
-* ·µ »Ø Öµ: 0 
+* å‡½ æ•° å: NOR_FLASH_Write
+* åŠŸèƒ½æè¿°: å†™å…¥W25QXXåœ¨æŒ‡å®šåœ°å€å¼€å§‹å†™å…¥æŒ‡å®šé•¿åº¦çš„æ•°æ® 
+* å½¢    å‚: FlashAddress:ç”¨äºå­˜å‚¨å½“å‰å†™å…¥Flashåœ°å€çš„æŒ‡é’ˆï¼Œå†™å…¥è¿‡ç¨‹ä¸­ä¼šç§»åŠ¨
+            Data:è¦å†™å…¥æ•°æ®å­˜å‚¨åŒº
+            DataLength:è¦å†™å…¥çš„å­—èŠ‚æ•°
+* è¿” å› å€¼: 0 
 *******************************************************************************/
 #ifndef  USE_HIGHT_SPEED_TRANS
 uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength)

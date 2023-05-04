@@ -94,11 +94,11 @@ static const uint32_t crc32tab[] = {
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: calculate_crc32
-* ¹¦ÄÜÃèÊö: ¼ÆËã¸ø¶¨FlashÄÚ´æµØÖ··¶Î§ÖĞÊı¾İµÄCRC32Ğ£ÑéºÍ
-* ĞÎ    ²Î: addr:±íÊ¾FlashµØÖ·µÄÆğÊ¼Î»ÖÃ
-            len:±íÊ¾ĞèÒª¼ÆËãCRC32µÄÊı¾İ³¤¶È
-* ·µ »Ø Öµ: ¼ÆËãµÃµ½µÄCRC32Öµ
+* å‡½ æ•° å: calculate_crc32
+* åŠŸèƒ½æè¿°: è®¡ç®—ç»™å®šFlashå†…å­˜åœ°å€èŒƒå›´ä¸­æ•°æ®çš„CRC32æ ¡éªŒå’Œ
+* å½¢    å‚: addr:è¡¨ç¤ºFlashåœ°å€çš„èµ·å§‹ä½ç½®
+            len:è¡¨ç¤ºéœ€è¦è®¡ç®—CRC32çš„æ•°æ®é•¿åº¦
+* è¿” å› å€¼: è®¡ç®—å¾—åˆ°çš„CRC32å€¼
 *******************************************************************************/
 uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 {
@@ -115,10 +115,10 @@ uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 
 
 /*******************************************************************************
-* º¯ Êı Ãû: UpdateOTAFlag
-* ¹¦ÄÜÃèÊö: ¸üĞÂOTA FlagÇøÓòµÄĞÅÏ¢£¬°æ±¾Íê³ÉÏÂÔØºóÔÚappÀï½øĞĞµ÷ÓÃ
-* ĞÎ    ²Î: ptr:ota_info_t½á¹¹ÌåÖ¸Õë,ÃèÊöOTAÉı¼¶Ïà¹ØĞÅÏ¢
-* ·µ »Ø Öµ: Èç¹ûº¯ÊıÖ´ĞĞ³É¹¦£¬×´Ì¬ÖµÎª kStatus_Success£¬·ñÔò×´Ì¬ÖµÎªÆäËû´íÎóÂë
+* å‡½ æ•° å: UpdateOTAFlag
+* åŠŸèƒ½æè¿°: æ›´æ–°OTA FlagåŒºåŸŸçš„ä¿¡æ¯ï¼Œç‰ˆæœ¬å®Œæˆä¸‹è½½ååœ¨appé‡Œè¿›è¡Œè°ƒç”¨
+* å½¢    å‚: ptr:ota_info_tç»“æ„ä½“æŒ‡é’ˆ,æè¿°OTAå‡çº§ç›¸å…³ä¿¡æ¯
+* è¿” å› å€¼: å¦‚æœå‡½æ•°æ‰§è¡ŒæˆåŠŸï¼ŒçŠ¶æ€å€¼ä¸º kStatus_Successï¼Œå¦åˆ™çŠ¶æ€å€¼ä¸ºå…¶ä»–é”™è¯¯ç 
 *******************************************************************************/
 status_t UpdateOTAFlag(ota_info_t *ptr)
 {
@@ -135,31 +135,31 @@ status_t UpdateOTAFlag(ota_info_t *ptr)
 }
 
 /*******************************************************************************
-* º¯ Êı Ãû: UpdateApplication
-* ¹¦ÄÜÃèÊö: ÔÚbootloaderÀï½øĞĞµ÷ÓÃ,¸ù¾İFlashÖĞFlag·ÖÇøÖĞµÄĞÅÏ¢¾ö¶¨ÊÇ·ñ½øĞĞ°æ±¾¸üĞÂ
-* ĞÎ    ²Î: ÎŞ
-* ·µ »Ø Öµ: ÎŞ
-* ×¢    ÊÍ: ¸Ãº¯Êıµ÷ÓÃºóÎŞÂÛ½á¹ûÈçºÎ¶¼½«Ìø×ªµ½app·ÖÇø
+* å‡½ æ•° å: UpdateApplication
+* åŠŸèƒ½æè¿°: åœ¨bootloaderé‡Œè¿›è¡Œè°ƒç”¨,æ ¹æ®Flashä¸­Flagåˆ†åŒºä¸­çš„ä¿¡æ¯å†³å®šæ˜¯å¦è¿›è¡Œç‰ˆæœ¬æ›´æ–°
+* å½¢    å‚: æ— 
+* è¿” å› å€¼: æ— 
+* æ³¨    é‡Š: è¯¥å‡½æ•°è°ƒç”¨åæ— è®ºç»“æœå¦‚ä½•éƒ½å°†è·³è½¬åˆ°appåˆ†åŒº
 *******************************************************************************/
 void UpdateApplication(void)
 {
     status_t status;
-    ota_info_t ota_info;  // ¶¨ÒåOTAĞÅÏ¢½á¹¹Ìå
+    ota_info_t ota_info;  // å®šä¹‰OTAä¿¡æ¯ç»“æ„ä½“
 
-    // ´ÓFlashÖĞ¶ÁÈ¡OTAĞÅÏ¢
+    // ä»Flashä¸­è¯»å–OTAä¿¡æ¯
     memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
 
-    // Èç¹ûOTAÉı¼¶×´Ì¬Îª×¼±¸×´Ì¬£¬ÇÒAPP·ÖÇøÓëdownload·ÖÇø°æ±¾²»Í¬,²Å¿ÉÒÔ½øĞĞÉı¼¶
+    // å¦‚æœOTAå‡çº§çŠ¶æ€ä¸ºå‡†å¤‡çŠ¶æ€ï¼Œä¸”APPåˆ†åŒºä¸downloadåˆ†åŒºç‰ˆæœ¬ä¸åŒ,æ‰å¯ä»¥è¿›è¡Œå‡çº§
     if((ota_info.status == OTA_STATUS_READY) && (ota_info.os.crc32 != ota_info.down.crc32)) 
     {
         Serial_PutString("\r\n------Start to update the app!------\r\n");
-        // Ğ£Ñédownlad·ÖÇø¹Ì¼şCRC
+        // æ ¡éªŒdownladåˆ†åŒºå›ºä»¶CRC
         if(calculate_crc32(DOWN_FLAH_ADDRESS, ota_info.down.size) == ota_info.down.crc32) 
         {
             ota_info.status = OTA_STATUS_UPDATING;
             UpdateOTAFlag(&ota_info);
 
-            // 1.Èç¹ûCRCĞ£ÑéÍ¨¹ı,¿ªÊ¼Éı¼¶,Öğ×Ö½Ú¿½±´Flash,ÏÈ±¸·İµ±Ç°XiUOS System·ÖÇøÄÚÈİ
+            // 1.å¦‚æœCRCæ ¡éªŒé€šè¿‡,å¼€å§‹å‡çº§,é€å­—èŠ‚æ‹·è´Flash,å…ˆå¤‡ä»½å½“å‰XiUOS Systemåˆ†åŒºå†…å®¹
             status = flash_copy(XIUOS_FLAH_ADDRESS, BAKUP_FLAH_ADDRESS, ota_info.os.size);
             if((status == kStatus_Success) &&(calculate_crc32(BAKUP_FLAH_ADDRESS, ota_info.os.size) == ota_info.os.crc32))
             {
@@ -179,7 +179,7 @@ void UpdateApplication(void)
                 goto finish;
             }
 
-            // 2.¿½±´download·ÖÇøµ½XiUOS System·ÖÇø
+            // 2.æ‹·è´downloadåˆ†åŒºåˆ°XiUOS Systemåˆ†åŒº
             status = flash_copy(DOWN_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.down.size);
             if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.down.size) == ota_info.down.crc32))
             {
@@ -189,7 +189,7 @@ void UpdateApplication(void)
                 ota_info.os.crc32 = ota_info.down.crc32;
                 ota_info.os.version = ota_info.down.version;
                 strncpy(ota_info.os.description, ota_info.down.description, sizeof(ota_info.down.description));
-                ota_info.status == OTA_STATUS_IDLE; // ¿½±´download·ÖÇøµ½XiUOS System·ÖÇø³É¹¦,½«OTAÉı¼¶×´Ì¬ÉèÖÃÎªIDLE
+                ota_info.status == OTA_STATUS_IDLE; // æ‹·è´downloadåˆ†åŒºåˆ°XiUOS Systemåˆ†åŒºæˆåŠŸ,å°†OTAå‡çº§çŠ¶æ€è®¾ç½®ä¸ºIDLE
                 UpdateOTAFlag(&ota_info); 
             }
             else
@@ -206,7 +206,7 @@ void UpdateApplication(void)
         }
         else
         {
-            // Èç¹ûdownload·ÖÇøCRCĞ£ÑéÊ§°Ü£¬Éı¼¶Ê§°Ü
+            // å¦‚æœdownloadåˆ†åŒºCRCæ ¡éªŒå¤±è´¥ï¼Œå‡çº§å¤±è´¥
             Serial_PutString("\r\n------Download Firmware CRC check failed!------\r\n");
             ota_info.status = OTA_STATUS_ERROR;
             strncpy(ota_info.error_message, "Download Firmware CRC check failed!",sizeof(ota_info.error_message));

@@ -459,6 +459,10 @@ void InitBoardHardware()
 #ifdef BSP_USING_OTA
     FLASH_Init();
     //跳转成功将对应跳转失败标志清零
+    ota_info_t ota_info;
+    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+    ota_info.lastjumpflag=0x00000000;
+    UpdateOTAFlag(&ota_info);
     FLASH_DeInit();
 #endif
 }

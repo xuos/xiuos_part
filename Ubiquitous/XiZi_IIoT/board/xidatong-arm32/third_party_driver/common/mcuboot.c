@@ -39,9 +39,53 @@ static void InitialVersion(void)
     }
 }
 
+static void BackupVersion(void)
+{
+    status_t status;
+    ota_info_t ota_info;
+    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+
+    ota_info.status = OTA_STATUS_BACKUP;
+    UpdateOTAFlag(&ota_info);
+    status = flash_copy(BAKUP_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.bak.size);
+    if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.bak.size) == ota_info.bak.crc32))
+    {
+        Serial_PutString("\r\n------Backup app version success!------\r\n");
+        ota_info.os.size = ota_info.bak.size;
+        ota_info.os.crc32 = ota_info.bak.crc32;
+        ota_info.os.version = ota_info.bak.version;
+        ota_info.lastjumpflag=0xABABABAB;
+        strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
+        UpdateOTAFlag(&ota_info);
+    }
+    else
+    {
+        Serial_PutString("\r\n------Backup app version failed!------\r\n");
+        ota_info.status = OTA_STATUS_ERROR;
+        strncpy(ota_info.error_message, "Backup app version failed!",sizeof(ota_info.error_message));
+        UpdateOTAFlag(&ota_info);
+    }
+}
 
 void jump_to_application(void)
 {
+    ota_info_t ota_info;
+    FLASH_Init();
+    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+    if (ota_info.lastjumpflag!=0x00000000)
+    {
+        Serial_PutString("\r\n------Bootloader false, begin backup!------\r\n");
+        BackupVersion();
+        
+    }
+    else
+    {
+        ota_info.lastjumpflag=0xABABABAB;
+        UpdateOTAFlag(&ota_info);
+    }
+
+    FLASH_DeInit();
+
     SCB->VTOR = (uint32_t)XIUOS_FLAH_ADDRESS;
 
     asm volatile("LDR   R0, = 0x60100000");
@@ -77,19 +121,25 @@ void BootLoaderJumpApp(void)
         ImxrtMsDelay(10);
     }
 
+    
+
     while(1)
     {
+
         if((ret)&&(ch1 == 0x20))
         {
             Serial_PutString("\r\nPlease slecet:");
+            
             Serial_PutString("\r\n 1:run app");
             Serial_PutString("\r\n 2:update app");
             Serial_PutString("\r\n 3:reboot \r\n");
+
 
             ch2 = GetKey();
             switch(ch2)
             {
                 case 0x31:
+                    
                     jump_to_application();
                     break;
 
@@ -106,6 +156,7 @@ void BootLoaderJumpApp(void)
                     {
                         UpdateApplication();
                     }
+                   
                     FLASH_DeInit();
                     jump_to_application();
                     break;
