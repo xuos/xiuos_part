@@ -101,7 +101,7 @@ Reset_Handler:
     strlt   r0, [r1], #4
     blt    .LoopCopy1
 
-    ldr   r0,=BootLoaderJumpApp
+    ldr   r0,=ota_entry
     blx   r0
 #else /* APP */
     cpsid   i               /* Mask interrupts */

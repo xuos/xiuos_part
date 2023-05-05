@@ -17,7 +17,7 @@
 * @author:  AIIT XUOS Lab
 * @date:    2023/3/24
 */
-
+#include <xs_base.h>
 #include "ymodem.h"
 #include "string.h"
 #include "flash.h"

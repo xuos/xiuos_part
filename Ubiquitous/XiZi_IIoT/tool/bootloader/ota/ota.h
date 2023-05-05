@@ -1,32 +1,22 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
-* XiUOS is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*        http://license.coscl.org.cn/MulanPSL2
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-* See the Mulan PSL v2 for more details.
-*/
-
+ * Copyright 2018-2020 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+ 
 /**
-* @file:    imxrt_ota.h
-* @brief:   file imxrt_ota.h
-* @version: 1.0
-* @author:  AIIT XUOS Lab
-* @date:    2023/3/24
+* @file ota.h
+* @brief file ota.h
+* @version 2.0 
+* @author AIIT XUOS Lab
+* @date 2023-04-03
 */
+#ifndef __OTA_DEF_H__
+#define __OTA_DEF_H__
 
-#ifndef __IMXRT_OTA__H__
-#define __IMXRT_OTA__H__
+#include "flash_ops.h"
 
-#include <stdint.h>
-#include "mcuboot.h"
-#include "flash.h"
-#include "ymodem.h"
-
-/* OTA升级过程中的状态描述 */
 typedef enum {
     OTA_STATUS_IDLE = 0,     // 空闲状态,没有进行OTA升级
     OTA_STATUS_READY,        // 准备状态,可以进行OTA升级
@@ -59,9 +49,8 @@ typedef struct {
     uint8_t  error_message[128];  // 错误信息,最多128个字符
 } ota_info_t;
 
-
-uint32_t calculate_crc32(uint32_t addr, uint32_t len);
-status_t UpdateOTAFlag(ota_info_t *ptr);
-void UpdateApplication(void);
-
+#ifdef MCUBOOT_APPLICATION
+void app_clear_jumpflag(void);
+#endif
+void ota_entry(void);
 #endif

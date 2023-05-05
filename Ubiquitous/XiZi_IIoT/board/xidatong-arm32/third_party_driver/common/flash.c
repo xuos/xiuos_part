@@ -14,7 +14,6 @@
 */
  
 #include <stdio.h>
-#include <xs_base.h>
 #include "flash.h"
 #include "MIMXRT1052.h"
 
@@ -960,7 +959,7 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
     }
     while(1) 
     {
-        FLASH_Read(FLASH_BASE + secPos*SECTOR_SIZE, (void *)NorFlash_BUF, SECTOR_SIZE);//读出整个扇区的内容
+        FLASH_Read(CHIP_FLAH_BASE + secPos*SECTOR_SIZE, (void *)NorFlash_BUF, SECTOR_SIZE);//读出整个扇区的内容
         for(i=0;i<secRemain;i++)//校验数据
         {
             if(NorFlash_BUF[secOff+i] != 0xFF)
@@ -970,16 +969,16 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
         }
         if(i < secRemain)//需要擦除
         {
-            FLASH_EraseSector(FLASH_BASE + secPos*SECTOR_SIZE);
+            FLASH_EraseSector(CHIP_FLAH_BASE + secPos*SECTOR_SIZE);
             for(i=0;i<secRemain;i++)//复制
             {
                 NorFlash_BUF[i+secOff] = pBuffer[i];                       
             }
-            NorFlash_Write_NoCheck(NorFlash_BUF,FLASH_BASE + secPos*SECTOR_SIZE,SECTOR_SIZE);//写入整个扇区  
+            NorFlash_Write_NoCheck(NorFlash_BUF,CHIP_FLAH_BASE + secPos*SECTOR_SIZE,SECTOR_SIZE);//写入整个扇区  
         }
         else
         {
-            NorFlash_Write_NoCheck(pBuffer,FLASH_BASE + WriteAddr,secRemain);//写已经擦除了的,直接写入扇区剩余区间. 		
+            NorFlash_Write_NoCheck(pBuffer,CHIP_FLAH_BASE + WriteAddr,secRemain);//写已经擦除了的,直接写入扇区剩余区间. 		
         }
                            
         if(NumByteToWrite == secRemain)
