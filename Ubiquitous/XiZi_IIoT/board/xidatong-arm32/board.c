@@ -414,8 +414,7 @@ void InitBoardHardware()
     KPrintf("start kernel...\n");
 
 #ifdef TOOL_USING_OTA
-    FLASH_Init();
-    //跳转成功将对应跳转失败标志设置
-    FLASH_DeInit();
+    //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
+    app_clear_jumpflag();
 #endif
 }
