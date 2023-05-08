@@ -123,7 +123,7 @@ static void UpdateApplication(void)
     ota_info_t ota_info;  // 定义OTA信息结构体
 
     // 从Flash中读取OTA信息
-    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
 
     // 如果OTA升级状态为准备状态，且APP分区与download分区版本不同,才可以进行升级
     if((ota_info.status == OTA_STATUS_READY) && (ota_info.os.crc32 != ota_info.down.crc32)) 
@@ -233,7 +233,7 @@ static void BackupVersion(void)
 {
     status_t status;
     ota_info_t ota_info;
-    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
 
     ota_info.status = OTA_STATUS_BACKUP;
     UpdateOTAFlag(&ota_info);
@@ -244,7 +244,6 @@ static void BackupVersion(void)
         ota_info.os.size = ota_info.bak.size;
         ota_info.os.crc32 = ota_info.bak.crc32;
         ota_info.os.version = ota_info.bak.version;
-        ota_info.lastjumpflag = 0xABABABAB;
         strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
         UpdateOTAFlag(&ota_info);
     }
@@ -268,19 +267,18 @@ static void BootLoaderJumpApp(void)
 {
     ota_info_t ota_info;
     mcuboot.flash_init();
-    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    if (ota_info.lastjumpflag != 0x00000000)
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
+
+    if(ota_info.lastjumpflag == JUMP_FAILED_FLAG)
     {
         mcuboot.print_string("\r\n------Bootloader false, begin backup!------\r\n");
-        BackupVersion();
-        
+        BackupVersion();   
     }
     else
     {
-        ota_info.lastjumpflag = 0xABABABAB;
+        ota_info.lastjumpflag = JUMP_FAILED_FLAG;
         UpdateOTAFlag(&ota_info);
     }
-
     mcuboot.flash_deinit();
     mcuboot.op_jump();
 }
@@ -306,7 +304,7 @@ static status_t UpdateOTAFlag(ota_info_t *ptr)
     return status;
 }
 
-#ifdef MCUBOOT_APPLICATION
+
 /*******************************************************************************
 * 函 数 名: app_ota
 * 功能描述: 在app中通过命令来进行ota升级,该函数与升级的命令关联
@@ -321,7 +319,7 @@ static void app_ota(void)
     mcuboot.flash_init();
     mcuboot.serial_init();
 
-    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
     ota_info.status = OTA_STATUS_DOWNLOADING;
     UpdateOTAFlag(&ota_info);
     size = mcuboot.download_by_serial(DOWN_FLAH_ADDRESS);
@@ -348,24 +346,23 @@ static void app_ota(void)
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, app_ota, ota function);
 
+
 /*******************************************************************************
 * 函 数 名: app_clear_jumpflag
-* 功能描述: 跳转app成功后,在app中调用将lastjumpflag重置为0x00000000
+* 功能描述: 跳转app成功后,在app中调用将lastjumpflag重置为0XCDCDCDCD
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
 void app_clear_jumpflag(void)
 {
     mcuboot.flash_init();
-    //跳转成功将对应跳转失败标志清零
+    //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
     ota_info_t ota_info;
-    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    ota_info.lastjumpflag = 0x00000000;
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
+    ota_info.lastjumpflag = JUMP_SUCCESS_FLAG;
     UpdateOTAFlag(&ota_info);
     mcuboot.flash_deinit();
 }
-
-#endif
 
 
 /*******************************************************************************
@@ -414,7 +411,7 @@ void ota_entry(void)
 
                 case 0x32:
                     mcuboot.flash_init();
-                    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+                    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
                     /* 此时APP分区还没有有效的固件,需要在bootloader下通过iap烧写出厂固件 */
                     if((ota_info.os.size > APP_FLASH_SIZE) || (calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.os.size) != ota_info.os.crc32))
                     {

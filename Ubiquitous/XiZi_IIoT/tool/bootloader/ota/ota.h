@@ -17,6 +17,9 @@
 
 #include "flash_ops.h"
 
+#define JUMP_FAILED_FLAG  0XABABABAB
+#define JUMP_SUCCESS_FLAG 0XCDCDCDCD
+
 typedef enum {
     OTA_STATUS_IDLE = 0,     // 空闲状态,没有进行OTA升级
     OTA_STATUS_READY,        // 准备状态,可以进行OTA升级
@@ -44,13 +47,11 @@ typedef struct {
     firmware_t bak;               // Bakup分区属性信息
     firmware_t down;              // Download分区属性信息
     uint32_t status;              // 升级状态,取值来自于ota_status_t类型
-    uint32_t lastjumpflag;        // bootloaer跳转失败的标志,bootloader里置0xABABABAB,跳转成功后在应用里置0x00000000
+    uint32_t lastjumpflag;        // bootloaer跳转失败的标志,bootloader里置0xABABABAB,跳转成功后在应用里置0xCDCDCDCD
     uint32_t reserve[2];          // 保留字段
     uint8_t  error_message[128];  // 错误信息,最多128个字符
 } ota_info_t;
 
-#ifdef MCUBOOT_APPLICATION
 void app_clear_jumpflag(void);
-#endif
 void ota_entry(void);
 #endif
