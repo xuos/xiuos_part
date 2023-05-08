@@ -244,7 +244,6 @@ static void BackupVersion(void)
         ota_info.os.size = ota_info.bak.size;
         ota_info.os.crc32 = ota_info.bak.crc32;
         ota_info.os.version = ota_info.bak.version;
-        ota_info.lastjumpflag = 0xABABABAB;
         strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
         UpdateOTAFlag(&ota_info);
     }
@@ -269,7 +268,8 @@ static void BootLoaderJumpApp(void)
     ota_info_t ota_info;
     mcuboot.flash_init();
     memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    if (ota_info.lastjumpflag != 0x00000000)
+
+    if(ota_info.lastjumpflag == JUMP_FAILED_FLAG)
     {
         mcuboot.print_string("\r\n------Bootloader false, begin backup!------\r\n");
         BackupVersion();
@@ -277,10 +277,9 @@ static void BootLoaderJumpApp(void)
     }
     else
     {
-        ota_info.lastjumpflag = 0xABABABAB;
+        ota_info.lastjumpflag = JUMP_FAILED_FLAG;
         UpdateOTAFlag(&ota_info);
     }
-
     mcuboot.flash_deinit();
     mcuboot.op_jump();
 }
@@ -306,7 +305,7 @@ static status_t UpdateOTAFlag(ota_info_t *ptr)
     return status;
 }
 
-#ifdef MCUBOOT_APPLICATION
+
 /*******************************************************************************
 * 函 数 名: app_ota
 * 功能描述: 在app中通过命令来进行ota升级,该函数与升级的命令关联
@@ -348,24 +347,23 @@ static void app_ota(void)
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, app_ota, ota function);
 
+
 /*******************************************************************************
 * 函 数 名: app_clear_jumpflag
-* 功能描述: 跳转app成功后,在app中调用将lastjumpflag重置为0x00000000
+* 功能描述: 跳转app成功后,在app中调用将lastjumpflag重置为0XCDCDCDCD
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
 void app_clear_jumpflag(void)
 {
     mcuboot.flash_init();
-    //跳转成功将对应跳转失败标志清零
+    //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
     ota_info_t ota_info;
     memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    ota_info.lastjumpflag = 0x00000000;
+    ota_info.lastjumpflag = JUMP_SUCCESS_FLAG;
     UpdateOTAFlag(&ota_info);
     mcuboot.flash_deinit();
 }
-
-#endif
 
 
 /*******************************************************************************
@@ -409,7 +407,7 @@ void ota_entry(void)
             switch(ch2)
             {
                 case 0x31:   
-                    BootLoaderJumpApp();
+                    mcuboot.op_jump();
                     break;
 
                 case 0x32:
@@ -427,7 +425,7 @@ void ota_entry(void)
                     }
                    
                     mcuboot.flash_deinit();
-                    BootLoaderJumpApp();
+                    mcuboot.op_jump();
                     break;
 
                 case 0x33:
@@ -438,7 +436,7 @@ void ota_entry(void)
         }
         else
         {
-            BootLoaderJumpApp();
+            mcuboot.op_jump();
         } 
     }
 }

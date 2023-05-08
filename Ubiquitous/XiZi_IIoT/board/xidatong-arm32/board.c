@@ -413,8 +413,9 @@ void InitBoardHardware()
     KPrintf("board init done.\n");
     KPrintf("start kernel...\n");
 
-#ifdef MCUBOOT_APPLICATION
-    /* Clear the lastjumpflag after the jump is successful.*/
-    app_clear_jumpflag();
+#ifdef TOOL_USING_OTA
+    FLASH_Init();
+    //跳转成功将对应跳转失败标志设置
+    FLASH_DeInit();
 #endif
 }
