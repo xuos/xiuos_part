@@ -64,8 +64,8 @@ Modification:
 #include <connect_wdt.h>
 #endif
 
-#ifdef BSP_USING_OTA
-#include <imxrt_ota.h>
+#ifdef TOOL_USING_OTA
+#include <ota.h>
 #endif
 
 #ifdef BSP_USING_SEMC
@@ -365,49 +365,6 @@ struct InitSequenceDesc _board_init[] =
     { " NONE ",NONE },
 };
 
-
-#ifdef BSP_USING_OTA
-static void OtaCmd(void)
-{
-    int32_t size;
-    ota_info_t ota_info;
-
-    FLASH_Init();
-    UartConfig();
-
-    memcpy(&ota_info, (const void *)FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    ota_info.status = OTA_STATUS_DOWNLOADING;
-    UpdateOTAFlag(&ota_info);
-    size = SerialDownload(DOWN_FLAH_ADDRESS);
-    ota_info.status = OTA_STATUS_DOWNLOADED;
-    UpdateOTAFlag(&ota_info);
-    if(size > 0)
-    {
-        ota_info.down.size = size;
-        ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, size);
-        ota_info.down.version = ota_info.os.version + 1;
-        strncpy(ota_info.down.description, "OTA Test!",sizeof(ota_info.down.description));
-        ota_info.status = OTA_STATUS_READY;
-        strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
-        UpdateOTAFlag(&ota_info);
-    }
-    else
-    {
-        ota_info.status = OTA_STATUS_ERROR;
-        strncpy(ota_info.error_message, "Failed to download firmware to download partition!",sizeof(ota_info.error_message));
-        UpdateOTAFlag(&ota_info);
-    }
-    
-    FLASH_DeInit();
-
-    __set_FAULTMASK(1);
-    NVIC_SystemReset();
-}
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, OtaCmd, ota function);
-
-#endif
-
 /**
  * This function will initial imxrt1050 board.
  */
@@ -456,9 +413,8 @@ void InitBoardHardware()
     KPrintf("board init done.\n");
     KPrintf("start kernel...\n");
 
-#ifdef BSP_USING_OTA
-    FLASH_Init();
-    //跳转成功将对应跳转失败标志清零
-    FLASH_DeInit();
+#ifdef TOOL_USING_OTA
+    //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
+    app_clear_jumpflag();
 #endif
 }

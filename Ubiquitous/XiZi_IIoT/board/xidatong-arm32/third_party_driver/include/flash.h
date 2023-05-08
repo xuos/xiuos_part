@@ -6,7 +6,7 @@
  */
  
 /**
-* @file fsl_flash.h
+* @file flash.h
 * @brief support flexspi norflash function
 * @version 2.0 
 * @author AIIT XUOS Lab
@@ -16,24 +16,18 @@
 #ifndef __FLASH_H__
 #define __FLASH_H__
 
+#include <xs_base.h>
 #include <stdint.h>
 #include "fsl_romapi.h"
 
 #define USE_HIGHT_SPEED_TRANS  1
-#define FLASH_BASE 0x60000000
 #define SECTOR_SIZE 0x1000 
 #define FLASH_PAGE_SIZE 256
-#define APP_FLASH_SIZE  0x100000   //Application package size is limited to 1M
 
 #define FLEXSPI_WAIT_TIMEOUT_NS (500000000UL) //FlexSPI timeout value, 500ms
 #define FLEXSPI_FREQ_1GHz (1000000000UL)
 #define FREQ_1MHz (1000000UL)
 #define FLEXSPI_DLLCR_DEFAULT (0x100UL)
-
-#define XIUOS_FLAH_ADDRESS  0x60100000
-#define BAKUP_FLAH_ADDRESS  0x60300000
-#define DOWN_FLAH_ADDRESS   0x60500000
-#define FLAG_FLAH_ADDRESS   0x60700000
 
 enum
 {

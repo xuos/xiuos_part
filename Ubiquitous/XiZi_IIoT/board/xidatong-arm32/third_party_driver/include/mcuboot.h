@@ -22,8 +22,12 @@
 #include "fsl_iomuxc.h"
 #include "fsl_gpio.h"
 #include "fsl_lpuart.h"
+#include "common.h"
 
-void jump_to_application(void);
+void mcuboot_bord_init(void);
+void mcuboot_reset(void);
+void mcuboot_jump(void);
+void mcuboot_delay(uint32_t ms);
 
 #endif
 
