@@ -225,7 +225,7 @@ static int ModbusTcpInitialDataInfo(ModbusTcpReadItem *p_read_item, uint16_t ind
         p_base_data_info->p_command[5] = 0x09;
     }
 
-    p_base_data_info->p_command[6] = MODBUS_TCP_UNIT_ID;
+    p_base_data_info->p_command[6] = control_protocol->recipe->device_id;
     p_base_data_info->p_command[7] = function_code;
     p_base_data_info->p_command[8] = start_address >> 8;
     p_base_data_info->p_command[9] = start_address;

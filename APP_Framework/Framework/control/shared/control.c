@@ -21,8 +21,6 @@
 #include <control.h>
 #include <control_def.h>
 
-ControlProtocolType control_protocol;
-
 /**
  * @description: Control Framework Find certain Protocol
  * @param void
@@ -292,6 +290,8 @@ int ControlFrameworkInit(void)
         PrivFree(control_protocol);
         goto _out;
     }
+    
+    printf("%u %u\n",control_protocol->recipe->total_data_length,control_protocol->recipe->device_id);
 
     printf("%s ControlPeripheralInit done\n", __func__);
 

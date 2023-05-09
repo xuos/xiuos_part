@@ -11,38 +11,41 @@
  */
 
 /**
- * @file schneider_m241.c
- * @brief PLC SCHNEIDER M241 app
+ * @file br_ppc2100.c
+ * @brief PLC BR PPC2100 app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2023.2.1
+ * @date 2023.5.8
  */
 
 #include <control.h>
-void ControlM241Test(void)
+
+extern int Adapter4GActive(void);
+
+void ControlBrTest_PPC2100(void)
 {
     int i, j = 0;
     int read_data_length = 0;
     uint8_t read_data[128] = {0};
 
-    #ifdef CONNECTION_ADAPTER_4G
-        Adapter4GActive();
-    #endif
+#ifdef CONNECTION_ADAPTER_4G
+    Adapter4GActive();
+#endif
 
-    ControlProtocolType modbus_rtu_protocol = ControlProtocolFind();
-    if (NULL == modbus_rtu_protocol) {
-        printf("%s get modbus rtu protocol %p failed\n", __func__, modbus_rtu_protocol);
+    ControlProtocolType modbus_tcp_protocol = ControlProtocolFind();
+    if (NULL == modbus_tcp_protocol) {
+        printf("%s get modbus tcp protocol %p failed\n", __func__, modbus_tcp_protocol);
         return;
     }
 
-    printf("%s get modbus rtu protocol %p successfull\n", __func__, modbus_rtu_protocol);
+    printf("%s get modbus tcp protocol %p successfull\n", __func__, modbus_tcp_protocol);
 
-    if (CONTROL_REGISTERED == modbus_rtu_protocol->protocol_status) {
-        ControlProtocolOpen(modbus_rtu_protocol);
+    if (CONTROL_REGISTERED == modbus_tcp_protocol->protocol_status) {
+        ControlProtocolOpen(modbus_tcp_protocol);
 
         for (;;) {
-            read_data_length = ControlProtocolRead(modbus_rtu_protocol, read_data, sizeof(read_data));
-            printf("%s read [%d] modbus rtu data %d using receipe file\n", __func__, i, read_data_length);
+            read_data_length = ControlProtocolRead(modbus_tcp_protocol, read_data, sizeof(read_data));
+            printf("%s read [%d] modbus tcp data %d using receipe file\n", __func__, i, read_data_length);
             if (read_data_length) {
                 for (j = 0; j < read_data_length; j ++) {
                     printf("j %d data 0x%x\n", j, read_data[j]);
@@ -53,9 +56,9 @@ void ControlM241Test(void)
             PrivTaskDelay(10000);
         }
 
-        //ControlProtocolClose(modbus_rtu_protocol);
+        //ControlProtocolClose(modbus_tcp_protocol);
     }
 }
-PRIV_SHELL_CMD_FUNCTION(ControlM241Test, Schneider M241 Demo, PRIV_SHELL_CMD_MAIN_ATTR);
+PRIV_SHELL_CMD_FUNCTION(ControlBrTest_PPC2100, Delta ppc2100 Demo, PRIV_SHELL_CMD_MAIN_ATTR);
 
 

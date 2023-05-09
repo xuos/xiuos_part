@@ -45,4 +45,4 @@ void ControlOmronCP1LTest(void)
         //ControlProtocolClose(fins_protocol);
     }
 }
-PRIV_SHELL_CMD_FUNCTION(ControlOmronCP1LTest, Omron Plc FINS Demo, PRIV_SHELL_CMD_MAIN_ATTR);
+PRIV_SHELL_CMD_FUNCTION(ControlOmronCP1LTest, Omron Plc Cp1l Demo, PRIV_SHELL_CMD_MAIN_ATTR);
