@@ -53,11 +53,9 @@ STACK_SIZE = 0x4000;
 /* Specify the memory areas */
 MEMORY
 {
-  m_boot_data           (RX)  : ORIGIN = 0x60000000, LENGTH = 0x00001000
-  m_image_vertor_table  (RX)  : ORIGIN = 0x60001000, LENGTH = 0x00001000  
-    
-  m_interrupts          (RX)  : ORIGIN = 0x60002000, LENGTH = 0x00000400
-  m_text                (RX)  : ORIGIN = 0x60002400, LENGTH = 0x03FFDC00
+  m_interrupts          (RX)  : ORIGIN = 0x60100000, LENGTH = 0x00000400
+  m_text                (RX)  : ORIGIN = 0x60100400, LENGTH = 0x000FFC00
+
   m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00020000
   m_data2               (RW)  : ORIGIN = 0x20200000, LENGTH = 0x00060000
 
@@ -67,19 +65,7 @@ MEMORY
 
 /* Define output sections */
 SECTIONS
-{
-  .boot_data :
-  {
-    KEEP(*(.boot_hdr.conf))
-  } > m_boot_data
-
-  .image_vertor_table :
-  {
-    KEEP(*(.boot_hdr.ivt))
-    KEEP(*(.boot_hdr.boot_data))
-    KEEP(*(.boot_hdr.dcd_data))
-  } > m_image_vertor_table
-  
+{ 
   /* The startup code goes first into internal RAM */
   .interrupts :
   {
@@ -96,8 +82,16 @@ SECTIONS
   .text :
   {
     . = ALIGN(4);
-    *(.text)                 /* .text sections (code) */
-    *(.text*)                /* .text* sections (code) */
+    *(EXCLUDE_FILE(
+        /* Exclude flash and frequently executed functions from XIP */
+        *fsl_romapi.o
+        *flash.o
+    ) .text)                 /* .text sections (code) */
+    *(EXCLUDE_FILE(
+        /* Exclude flash and frequently executed functions from XIP */
+        *fsl_romapi.o
+        *flash.o
+    ) .text*)                 /* .text* sections (code) */
     *(.rodata)               /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)              /* .rodata* sections (constants, strings, etc.) */
     *(.glue_7)               /* glue arm to thumb code */
@@ -109,22 +103,22 @@ SECTIONS
 
 
     /* section information for  shell */
-        . = ALIGN(4);
-        _shell_command_start = .;
-        KEEP (*(shellCommand))
-        _shell_command_end = .;
-        . = ALIGN(4);
+    . = ALIGN(4);
+    _shell_command_start = .;
+    KEEP (*(shellCommand))
+    _shell_command_end = .;
+    . = ALIGN(4);
 
-        __isrtbl_idx_start = .;
-        KEEP(*(.isrtbl.idx))
-        __isrtbl_start = .;
-        KEEP(*(.isrtbl))
-        __isrtbl_end = .;
-        . = ALIGN(4);
+    __isrtbl_idx_start = .;
+    KEEP(*(.isrtbl.idx))
+    __isrtbl_start = .;
+    KEEP(*(.isrtbl))
+    __isrtbl_end = .;
+    . = ALIGN(4);
 
-        PROVIDE(g_service_table_start = ABSOLUTE(.));
-        KEEP(*(.g_service_table))
-        PROVIDE(g_service_table_end = ABSOLUTE(.));
+    PROVIDE(g_service_table_start = ABSOLUTE(.));
+    KEEP(*(.g_service_table))
+    PROVIDE(g_service_table_end = ABSOLUTE(.));
   } > m_text
 
   .ARM.extab :
@@ -205,10 +199,16 @@ SECTIONS
     . = ALIGN(4);
     __DATA_RAM = .;
     __data_start__ = .;      /* create a global symbol at data start */
+    /* Explicit placement of flash and frequently executed functions in RAM */
+    *fsl_romapi.o
+    *flash.o
     *(.data)                 /* .data sections */
     *(.data*)                /* .data* sections */
     KEEP(*(.jcr*))
     . = ALIGN(4);
+    PROVIDE(_sramfuncs = ABSOLUTE(.));
+    KEEP(*(RamFunction))
+    PROVIDE(_eramfuncs = ABSOLUTE(.));  
     __data_end__ = .;        /* define a global symbol at data end */
   } > m_data
 
@@ -261,3 +261,4 @@ SECTIONS
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
+

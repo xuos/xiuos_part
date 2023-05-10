@@ -30,8 +30,8 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief LPUART driver version 2.2.6. */
-#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 2, 6))
+/*! @brief LPUART driver version 2.2.7. */
+#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 2, 7))
 /*@}*/
 
 /*! @brief Error codes for the LPUART driver. */
@@ -166,9 +166,8 @@ enum _lpuart_flags
         (LPUART_STAT_FE_MASK), /*!< Frame error flag, sets if logic 0 was detected where stop bit expected */
     kLPUART_ParityErrorFlag = (LPUART_STAT_PF_MASK), /*!< If parity enabled, sets upon parity error detection */
 #if defined(FSL_FEATURE_LPUART_HAS_LIN_BREAK_DETECT) && FSL_FEATURE_LPUART_HAS_LIN_BREAK_DETECT
-    kLPUART_LinBreakFlag =
-        (int)(LPUART_STAT_LBKDIF_MASK), /*!< LIN break detect interrupt flag, sets when LIN break char
-                                      detected and LIN circuit enabled */
+    kLPUART_LinBreakFlag = (int)(LPUART_STAT_LBKDIF_MASK), /*!< LIN break detect interrupt flag, sets when LIN break
+                                                         char detected and LIN circuit enabled */
 #endif
     kLPUART_RxActiveEdgeFlag =
         (LPUART_STAT_RXEDGIF_MASK), /*!< Receive pin active edge interrupt flag, sets when active edge detected */
@@ -624,7 +623,7 @@ static inline uint8_t LPUART_ReadByte(LPUART_Type *base)
         return base->DATA;
     }
 #else
-    return base->DATA;
+    return (uint8_t)(base->DATA);
 #endif
 }
 

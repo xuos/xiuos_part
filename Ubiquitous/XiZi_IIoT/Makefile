@@ -62,6 +62,10 @@ PART += COMPILE_KERNEL
 else ifeq ($(CONFIG_COMPILER_APP)_$(CONFIG_COMPILER_KERNEL),y_y)
 PART := COMPILE_APP COMPILE_KERNEL
 
+else ifeq ($(CONFIG_MCUBOOT_BOOTLOADER), y)
+PART := COMPILE_BOOTLOADER
+else ifeq ($(CONFIG_MCUBOOT_APPLICATION), y)
+PART := COMPILE_APPLICATION
 else
 PART := 
 
@@ -86,6 +90,22 @@ COMPILE_ALL:
        done
 	@cp link.mk build/Makefile
 	@$(MAKE) -C build TARGET=XiZi-$(BOARD).elf LINK_FLAGS=LFLAGS
+	@rm build/Makefile build/make.obj
+
+COMPILE_BOOTLOADER:
+	@for dir in $(SRC_DIR);do    \
+               $(MAKE) -C $$dir;          \
+       done
+	@cp link.mk build/Makefile
+	@$(MAKE) -C build COMPILE_TYPE="-boot" TARGET=XiZi-$(BOARD)-boot.elf LINK_FLAGS=LFLAGS
+	@rm build/Makefile build/make.obj
+
+COMPILE_APPLICATION:
+	@for dir in $(SRC_DIR);do    \
+               $(MAKE) -C $$dir;          \
+       done
+	@cp link.mk build/Makefile
+	@$(MAKE) -C build COMPILE_TYPE="-app" TARGET=XiZi-$(BOARD)-app.elf LINK_FLAGS=LFLAGS
 	@rm build/Makefile build/make.obj
 
 COMPILE_MUSL:
