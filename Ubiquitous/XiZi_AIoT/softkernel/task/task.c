@@ -5,306 +5,347 @@
 #include <stdint.h>
 #include <errno.h>
 
-// 创建线程
-static pid_t next_pid = 0;
+#define DEF_STACK_SIZE (128 * 1024)
+// 定义全局的任务调度器
+scheduler_t *scheduler;
 
 /*******************************************************************************
-* 函 数 名: start_thread
-* 功能描述: 启动线程
-* 形    参: 无
-* 返 回 值: 栈指针
+* 函 数 名: scheduler_init
+* 功能描述: 初始化任务调度器
+* 形    参: num_cpus:cpu个数,num_tasks_per_cpu:每个CPU的任务数量
+* 返 回 值: 任务调度器结构体指针
 *******************************************************************************/
-tcb_t *task_create(char *name, int pri, uint32_t stack_size, void (*entry)(void *arg), void *arg) {
-    tcb_t *tcb;
-    uint32_t stack_top;
-    uint32_t kstack_top;
-    int r;
-
-    /* 分配任务控制块 */
-    tcb = (tcb_t *)malloc(sizeof(tcb_t));
-    if (tcb == NULL) {
-        return NULL;
+scheduler_t *scheduler_init(int num_cpus, int num_tasks_per_cpu) {
+    // 分配并初始化任务调度器
+    scheduler = malloc(sizeof(scheduler_t));
+    scheduler->num_cpus = num_cpus;
+    scheduler->num_tasks_per_cpu = num_tasks_per_cpu;
+    scheduler->ready_queue = malloc(sizeof(task_t*) * num_cpus * num_tasks_per_cpu);
+    scheduler->interrupt_stack_ptr = NULL;
+    for (int i = 0; i < num_cpus * num_tasks_per_cpu; i++) {
+        scheduler->ready_queue[i] = NULL;
     }
-
-    /* 分配任务栈 */
-    tcb->stack_size = stack_size;
-    tcb->stack_top = (uint32_t)malloc(stack_size);
-    if (tcb->stack_top == 0) {
-        free(tcb);
-        return NULL;
-    }
-
-    /* 分配内核栈 */
-    tcb->kstack_size = K_STACK_SIZE;
-    tcb->kstack_top = (uint32_t)malloc(tcb->kstack_size);
-    if (tcb->kstack_top == 0) {
-        free((void *)tcb->stack_top);
-        free(tcb);
-        return NULL;
-    }
-
-    /* 初始化任务控制块 */
-    tcb->state.flags = 0;
-    tcb->state.exit_code = 0;
-    tcb->state.trap_type = 0;
-    tcb->priority = pri;
-    tcb->flags = 0;
-    tcb->message_queue.head = NULL;
-    tcb->message_queue.tail = NULL;
-    tcb->async_flags = 0;
-    tcb->cpu_affinity = 0;
-    tcb->private = NULL;
-
-    /* 初始化任务上下文 */
-    r = setup_context(&tcb->context, (void *)entry, arg, (void *)tcb->stack_top + tcb->stack_size, tcb->kstack_top + tcb->kstack_size);
-    if (r != 0) {
-        free((void *)tcb->kstack_top);
-        free((void *)tcb->stack_top);
-        free(tcb);
-        return NULL;
-    }
-
-    /* 设置任务ID */
-    tcb->pid = next_pid++;
-
-    /* 向任务列表中添加任务 */
-    r = add_task(tcb);
-    if (r != 0) {
-        free((void *)tcb->kstack_top);
-        free((void *)tcb->stack_top);
-        free(tcb);
-        return NULL;
-    }
-
-    /* 设置任务名称 */
-    strncpy(tcb->name, name, TASK_NAME_MAX_LENGTH);
-
-    /* 返回任务控制块 */
-    return tcb;
-}
-
-void task_destroy(tcb_t *tcb) {
-    /* 从任务列表中移除任务 */
-    remove_task(tcb);
-
-    /* 释放任务栈和内核栈 */
-    free((void *)tcb->stack_top);
-    free((void *)tcb->kstack_top);
-
-    /* 释放任务控制块 */
-    free(tcb);
-}
-
-void task_suspend(tcb_t *tcb) {
-    /* 设置任务状态为挂起 */
-    task_set_state(tcb, TASK_STATE_SUSPENDED);
-
-    /* 将任务从调度队列中移除 */
-    remove_from_schedule_queue(tcb);
-}
-
-void task_resume(tcb_t *tcb) {
-    /* 设置任务状态为就绪 */
-    task_set_state(tcb, TASK_STATE_READY);
-
-    /* 将任务添加到调度队列中 */
-    add_to_schedule_queue(tcb);
-}
-
-void task_delay(uint32_t ticks) {
-    tcb_t *tcb;
-
-    /* 获取当前任务的控制块 */
-    tcb = get_current_task();
-
-    /* 设置任务的延迟计数器 */
-    tcb->delay_ticks = ticks;
-
-    /* 将任务从调度队列中移除 */
-    remove_from_schedule_queue(tcb);
-
-    /* 将任务添加到延迟队列中 */
-    add_to_delay_queue(tcb);
-}
-
-void task_notify_async(tcb_t *tcb, int flags) {
-    /* 设置任务的异步通知标志 */
-    tcb->async_flags |= flags;
-
-    /* 将该任务添加到等待列表中 */
-    add_to_wait_queue(tcb, flags);
-}
-
-int task_wait_async(int flags) {
-    tcb_t *tcb;
-
-    /* 获取当前任务的控制块 */
-    tcb = get_current_task();
-
-    /* 设置任务的等待标志 */
-    tcb->wait_flags = flags;
-
-    /* 将当前任务从调度队列中移除 */
-    remove_from_schedule_queue(tcb);
-
-    /* 将当前任务添加到等待列表中 */
-    add_to_wait_queue(tcb, flags);
-
-    /* 切换到下一个任务 */
-    switch_to_next_task();
-
-    /* 被唤醒后，返回当前任务的异步通知标志 */
-    return tcb->async_flags;
+    scheduler->current_task = NULL;
+    scheduler->current_cpu_id = 0;
+    return scheduler;
 }
 
 
-int task_send_msg(tcb_t *tcb, void *msg, int len) {
-    int ret = 0;
-    msg_t *new_msg;
+/*******************************************************************************
+* 函 数 名: create_task
+* 功能描述: 创建任务
+* 形    参: func:任务入口函数,arg:入口函数参数指针,
+            priority:任务优先级,stack_size:栈大小
+* 返 回 值: 任务的id
+*******************************************************************************/
+int create_task(void (*func)(void *), void *arg, int priority, size_t stack_size) {
+    // 分配并初始化任务控制块
+    tcb *task = malloc(sizeof(tcb));
+    task->id = generate_task_id();
+    task->priority = priority;
+    task->state = THREAD_READY;
+    task->stack_size = stack_size;
+    task->stack_bottom = malloc(stack_size);
+    task->stack_ptr = (uint32_t*)(task->stack_bottom + stack_size / sizeof(uint32_t));
+    task->entry_point = func;
+    task->arg = arg;
+    task->cpu_id = get_current_cpu_id();
+    // 初始化任务堆栈
+    init_stack(task->stack_ptr, stack_size, func, arg,task);
+    // 添加任务到就绪队列
+    add_task_to_ready_queue(task);
+    return task->id;
+}
 
-    /* 如果目标任务的消息队列已满，则返回错误码 */
-    if (is_msg_queue_full(tcb)) {
+
+/*******************************************************************************
+* 函 数 名: destroy_task
+* 功能描述: 销毁任务
+* 形    参: task_id:任务的id
+* 返 回 值: 销毁成功返回0
+*******************************************************************************/
+int destroy_task(int task_id) {
+    // 获取要销毁的任务控制块
+    tcb *task = get_task_by_id(task_id);
+    if (task == NULL) {
         return -1;
     }
-
-    /* 分配新的消息结构体 */
-    new_msg = alloc_msg(msg, len);
-    if (new_msg == NULL) {
-        return -1;
+    if (task->state == TASK_RUNNING) {
+        // 如果要销毁的任务正在运行，则直接切换到下一个任务
+        switch_to_next_task();
     }
-
-    /* 将新的消息添加到目标任务的消息队列中 */
-    add_msg_to_queue(tcb, new_msg);
-
-    /* 如果目标任务正在等待消息，则唤醒该任务 */
-    if (is_waiting_for_msg(tcb)) {
-        wake_up_task(tcb);
-    }
-
-    return ret;
+    // 从就绪队列中移除任务
+    remove_task_from_ready_queue(task);
+    // 释放任务堆栈
+    free(task->stack_bottom);
+    // 释放任务控制块
+    free(task);
+    return 0;
 }
 
 
-int task_recv_msg(void *msg, int len) {
-    int ret = 0;
-    msg_t *recv_msg;
-
-    /* 如果当前任务的消息队列为空，则挂起当前任务 */
-    if (is_msg_queue_empty()) {
-        wait_for_msg();
-    }
-
-    /* 从消息队列中取出一条消息 */
-    recv_msg = get_msg_from_queue();
-    if (recv_msg == NULL) {
+/*******************************************************************************
+* 函 数 名: suspend_task
+* 功能描述: 挂起任务
+* 形    参: task_id:任务的id
+* 返 回 值: 挂起成功返回0
+*******************************************************************************/
+int suspend_task(int task_id) {
+    // 获取要挂起的任务控制块
+    tcb *task = get_task_by_id(task_id);
+    if (task == NULL) {
         return -1;
     }
-
-    /* 如果消息的长度大于接收缓冲区的长度，则返回错误码 */
-    if (recv_msg->len > len) {
-        ret = -1;
-    } else {
-        /* 复制消息的内容到接收缓冲区中 */
-        memcpy(msg, recv_msg->data, recv_msg->len);
+    if (task->state == TASK_RUNNING) {
+        // 如果要挂起的任务正在运行，则切换到下一个任务
+        switch_to_next_task();
     }
-
-    /* 释放消息结构体 */
-    free_msg(recv_msg);
-
-    return ret;
+    // 修改任务状态为阻塞状态
+    task->state = TASK_BLOCKED;
+    return 0;
 }
 
-tcb_t *task_get_current_tcb(void) {
-    tcb_t *tcb;
 
-    /* 获取当前任务的堆栈指针 */
-    void *sp = get_current_sp();
+/*******************************************************************************
+* 函 数 名: resume_task
+* 功能描述: 恢复任务
+* 形    参: task_id:任务的id
+* 返 回 值: 恢复成功返回0
+*******************************************************************************/
+int resume_task(int task_id) {
+    // 获取要恢复的任务控制块
+    tcb *task = get_task_by_id(task_id);
+    if (task == NULL) {
+        return -1;
+    }
+    if (task->state != TASK_BLOCKED) {
+        // 如果要恢复的任务不是阻塞状态，则直接返回
+        return -1;
+    }
+    // 修改任务状态为就绪状态
+    task->state = task_READY;
+    // 添加任务到就绪队列
+    add_task_to_ready_queue(task);
+    return 0;
+}
 
-    /* 从任务列表中查找与当前堆栈指针对应的控制块 */
-    for (int i = 0; i < NUM_TASKS; i++) {
-        tcb = &task_list[i];
-        if (tcb->sp == sp) {
-            return tcb;
+
+/*******************************************************************************
+* 函 数 名: set_task_priority
+* 功能描述: 调整任务优先级
+* 形    参: task_id:任务的id，priority:要调整的优先级
+* 返 回 值: 销毁成功返回0
+*******************************************************************************/
+int set_task_priority(int task_id, int priority) {
+    // 获取要调整优先级的任务控制块
+    tcb *task = get_task_by_id(task_id);
+    if (task == NULL) {
+        return -1;
+    }
+    // 修改任务优先级
+    task->priority = priority;
+    return 0;
+}
+
+/*******************************************************************************
+* 函 数 名: get_current_task_id
+* 功能描述: 获取当前任务的ID
+* 形    参: 无
+* 返 回 值: 获取成功返回0
+*******************************************************************************/
+int get_current_task_id() {
+    if (scheduler->current_task == NULL) {
+        return -1;
+    }
+    return scheduler->current_task->id;
+}
+
+
+/*******************************************************************************
+* 函 数 名: get_current_cpu_id
+* 功能描述: 获取当前CPU的ID
+* 形    参: 无
+* 返 回 值: 获取到的当前CPU的ID
+* 说    名: 不同的处理器获取方式不同,这里以ARM-A9系列芯片为例
+*******************************************************************************/
+uint16_t get_current_cpu_id() {
+    uint32_t mpidr;
+    asm volatile ("mrc p15, 0, %0, c0, c0, 5" : "=r" (mpidr));
+    return mpidr & 0xff;
+}
+
+
+/*******************************************************************************
+* 函 数 名: get_task_by_id
+* 功能描述: 通过任务ID获取任务控制块
+* 形    参: task_id:任务的id
+* 返 回 值: 获取到的任务控制块的指针
+*******************************************************************************/
+tcb *get_task_by_id(int task_id) {
+    // 遍历就绪队列和当前任务，寻找任务控制块
+    for (int i = 0; i < scheduler->num_cpus * scheduler->num_tasks_per_cpu; i++) {
+        tcb *task = scheduler->ready_queue[i];
+        if (task != NULL && task->id == task_id) {
+            return task;
         }
     }
-
-    /* 如果没有找到对应的控制块，则返回空指针 */
+    tcb *task = scheduler->current_task;
+    if (task != NULL && task->id == task_id) {
+        return task;
+    }
     return NULL;
 }
 
-pid_t task_get_pid(tcb_t *tcb) {
-    return tcb->pid;
+
+/*******************************************************************************
+* 函 数 名: generate_task_id
+* 功能描述: 生成任务ID
+* 形    参: 无
+* 返 回 值: 生成的任务ID
+*******************************************************************************/
+int generate_task_id() {
+    static int next_task_id = 1;     // 静态变量，记录下一个可用的任务ID
+    int task_id = next_task_id++;  // 生成任务ID，并将next_task_id加1
+    return task_id;
 }
 
-int task_get_priority(tcb_t *tcb) {
-    return tcb->priority;
-}
 
-void task_set_priority(tcb_t *tcb, int pri) {
-    /* 确保优先级的值在合法范围内 */
-    if (pri < MIN_PRIORITY) {
-        pri = MIN_PRIORITY;
-    } else if (pri > MAX_PRIORITY) {
-        pri = MAX_PRIORITY;
+/*******************************************************************************
+* 函 数 名: switch_to_next_task
+* 功能描述: 切换到下一个任务
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+void switch_to_next_task() {
+    // 保存当前任务的上下文
+    // TODO: 保存当前任务的上下文
+    // 从就绪队列中取出下一个任务
+    task_t *next_task = NULL;
+    for (int i = scheduler->current_cpu_id * scheduler->num_tasks_per_cpu; i < (scheduler->current_cpu_id + 1) * scheduler->num_tasks_per_cpu; i++) {
+        task_t *task = scheduler->ready_queue[i];
+        if (task != NULL && (next_task == NULL ||task->priority > next_task->priority)) {
+            next_task = task;
+        }
     }
-
-    /* 设置任务的优先级 */
-    tcb->priority = pri;
-}
-
-int task_get_state(tcb_t *tcb) {
-    return tcb->state;
-}
-
-void task_set_state(tcb_t *tcb, int state) {
-    /* 确保状态的值在合法范围内 */
-    if (state < TASK_STATE_CREATED || state > TASK_STATE_TERMINATED) {
-        return;
+    if (next_task == NULL) {
+        // 如果就绪队列为空，则切换到空闲任务
+        // TODO: 切换到空闲任务
+    } else {
+        // 切换到下一个任务
+        scheduler->current_task = next_task;
+        scheduler->current_task->state = TASK_RUNNING;
+        // TODO: 恢复下一个任务的上下文
     }
-
-    /* 设置任务的状态 */
-    tcb->state = state;
 }
 
-int task_get_async_flags(tcb_t *tcb) {
-    return tcb->async_flags;
-}
 
-void task_set_async_flags(tcb_t *tcb, int flags) {
-    /* 设置任务的异步事件标志 */
-    tcb->async_flags = flags;
-}
-
-uint32_t task_get_time_quantum(tcb_t *tcb) {
-    return tcb->time_quantum;
-}
-
-void task_set_time_quantum(tcb_t *tcb, uint32_t quantum) {
-    /* 确保时间片大小的值在合法范围内 */
-    if (quantum < MIN_TIME_QUANTUM) {
-        quantum = MIN_TIME_QUANTUM;
-    } else if (quantum > MAX_TIME_QUANTUM) {
-        quantum = MAX_TIME_QUANTUM;
+/*******************************************************************************
+* 函 数 名: add_task_to_ready_queue
+* 功能描述: 添加任务到就绪队列
+* 形    参: task:任务控制块的指针
+* 返 回 值: 无
+*******************************************************************************/
+void add_task_to_ready_queue(task_t *task) {
+    // 找到任务所在的CPU的就绪队列
+    int cpu_id = task->cpu_id;
+    int start_index = cpu_id * scheduler->num_tasks_per_cpu;
+    int end_index = (cpu_id + 1) * scheduler->num_tasks_per_cpu;
+    // 找到一个空闲的位置插入任务
+    for (int i = start_index; i < end_index; i++) {
+        if (scheduler->ready_queue[i] == NULL) {
+            scheduler->ready_queue[i] = task;
+            return;
+        }
     }
-
-    /* 设置任务的时间片大小 */
-    tcb->time_quantum = quantum;
+    // 如果没有空闲的位置，则替换掉优先级最低的任务
+    task_t *lowest_priority_task = NULL;
+    int lowest_priority = 0;
+    for (int i = start_index; i < end_index; i++) {
+        task_t *t = scheduler->ready_queue[i];
+        if (t != NULL && (lowest_priority_task == NULL || t->priority < lowest_priority)) {
+            lowest_priority_task = t;
+            lowest_priority = t->priority;
+        }
+    }
+    scheduler->ready_queue[lowest_priority_task - scheduler->ready_queue] = task;
 }
 
-uint32_t task_get_stack_size(tcb_t *tcb) {
-    return tcb->stack_size;
+
+/*******************************************************************************
+* 函 数 名: remove_task_from_ready_queue
+* 功能描述: 从就绪队列中移除任务
+* 形    参: task:任务控制块的指针
+* 返 回 值: 无
+*******************************************************************************/
+void remove_task_from_ready_queue(task_t *task) {
+    // 找到任务所在的CPU的就绪队列
+    int cpu_id = task->cpu_id;
+    int start_index = cpu_id * scheduler->num_tasks_per_cpu;
+    int end_index = (cpu_id + 1) * scheduler->num_tasks_per_cpu;
+    // 从就绪队列中移除任务
+    for (int i = start_index; i < end_index; i++) {
+        if (scheduler->ready_queue[i] == task) {
+            scheduler->ready_queue[i] = NULL;
+            return;
+        }
+    }
 }
 
-void *task_get_stack_top(tcb_t *tcb) {
-    return tcb->stack_top;
+
+/*******************************************************************************
+* 函 数 名: init_stack
+* 功能描述: 初始化任务堆栈
+* 形    参: stack_ptr:任务堆栈指针,stack_size:堆栈大小
+            func:入口函数的指针,arg:入口函数的参数指针
+            task:任务控制块指针
+* 返 回 值: 无
+*******************************************************************************/
+void init_stack(uint32_t *stack_ptr, size_t stack_size, void (*func)(void *), void *arg,tcb* task) {
+    // 计算堆栈底部指针
+    uint32_t *stack_bottom = stack_ptr - stack_size / sizeof(uint32_t);
+    // 将任务参数压入堆栈中
+    *(--stack_ptr) = (uint32_t)arg;
+    // 将任务入口函数压入堆栈中
+    *(--stack_ptr) = (uint32_t)func;
+    // 设置堆栈指针和堆栈底部指针
+    task->stack_ptr = stack_ptr;
+    task->stack_bottom = stack_bottom;
 }
 
-uint32_t task_get_cpu_affinity(tcb_t *tcb) {
-    return tcb->cpu_affinity;
+
+/*******************************************************************************
+* 函 数 名: idle_task
+* 功能描述: 空闲任务的入口函数
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+void idle_task(void *arg) {
+    while (1) {
+        // 休眠等待，直到接收到调度器的唤醒信号
+        asm volatile ("wfi");
+    }
 }
 
-void task_set_cpu_affinity(tcb_t *tcb, uint32_t affinity) {
-    /* 设置任务的CPU亲和性 */
-    tcb->cpu_affinity = affinity;
+/*******************************************************************************
+* 函 数 名: init_idle_task
+* 功能描述: 初始化空闲任务
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+void init_idle_task() {
+    // 创建空闲任务的TCB
+    tcb *task = (tcb *)malloc(sizeof(tcb));
+    memset(task, 0, sizeof(tcb));
+    task->state = task_READY;
+    task->priority = 0;
+    task->cpu_id = get_current_cpu_id();
+    task->task_id = generate_task_id();
+    // 初始化空闲任务的堆栈
+    uint32_t *stack_ptr = (uint32_t *)malloc(DEF_STACK_SIZE);
+    memset(stack_ptr, 0, DEF_STACK_SIZE);
+    init_stack(stack_ptr + DEF_STACK_SIZE / sizeof(uint32_t), DEF_STACK_SIZE, idle_task, NULL,task);
+    task->stack_ptr = stack_ptr + DEF_STACK_SIZE / sizeof(uint32_t) - 1;
+    task->stack_bottom = stack_ptr;
+    // 将空闲任务添加到就绪队列中
+    add_tcbo_ready_queue(task);
 }
-
