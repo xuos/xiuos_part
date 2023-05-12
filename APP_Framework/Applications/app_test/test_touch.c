@@ -48,7 +48,7 @@ void TestTouch(void)
 #define LCD_DOT_TYPE 1
 #define LCD_SIZE 320
 
-#elif ADD_XIZI_FETURES
+#elif defined ADD_XIZI_FETURES
 
 void TestTouch(void)
 {

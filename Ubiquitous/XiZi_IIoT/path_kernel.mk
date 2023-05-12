@@ -555,6 +555,11 @@ KERNELPATHS +=-I$(KERNEL_ROOT)/tool/shell/letter-shell \
 	-I$(KERNEL_ROOT)/tool/shell/letter-shell/file_ext #
 endif
 
+ifeq ($(CONFIG_TOOL_USING_OTA), y)
+KERNELPATHS +=-I$(KERNEL_ROOT)/tool/bootloader/flash \
+	-I$(KERNEL_ROOT)/tool/bootloader/ota #
+endif
+
 ifeq ($(CONFIG_FS_LWEXT4),y)
 KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/blockdev/xiuos #
 KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/include #

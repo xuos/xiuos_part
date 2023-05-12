@@ -19,9 +19,6 @@
  */
 
 #include <control.h>
-
-extern int Adapter4GActive(void);
-
 void ControlM241Test(void)
 {
     int i, j = 0;

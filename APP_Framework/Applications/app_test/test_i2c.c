@@ -17,10 +17,10 @@
 * @author:  AIIT XUOS Lab
 * @date:    2022/12/17
 */
-#ifdef ADD_XIZI_FETURES
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
+#ifdef ADD_XIZI_FETURES
 
 #define I2C_SLAVE_ADDRESS 0x0012U
 

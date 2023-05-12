@@ -17,10 +17,10 @@
 * @author:  AIIT XUOS Lab
 * @date:    2023/2/17
 */
-#ifdef ADD_XIZI_FETURES
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
+#ifdef ADD_XIZI_FETURES
 
 
 void TestCAN(void)

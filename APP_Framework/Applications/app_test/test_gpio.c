@@ -17,19 +17,24 @@
 * @author:  AIIT XUOS Lab
 * @date:    2022/12/17
 */
-#ifdef ADD_XIZI_FETURES
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
+#ifdef ADD_XIZI_FETURES
 
+#ifdef BOARD_EDU_RISCV64_EVB
 #define BSP_LED_PIN 29
 #define BSP_KEY_PIN 31
+#elif defined BOARD_HC32F4A0_EVB
+#define BSP_LED_PIN 134
+#define BSP_KEY_PIN 176
+#endif
 #define NULL_PARAMETER 0
 
 void  TestGpio(void)
 {
     int pin_fd = PrivOpen(GPIO_DEV_DRIVER, O_RDWR);
-    if(pin_fd<0){
+    if(pin_fd < 0) {
         printf("open pin fd error:%d\n",pin_fd);
         return;
     }
@@ -51,8 +56,8 @@ void  TestGpio(void)
     }
 
     //config key pin in board
-     parameter.pin = BSP_KEY_PIN;
-     parameter.mode = GPIO_CFG_INPUT;
+    parameter.pin = BSP_KEY_PIN;   
+    parameter.mode = GPIO_CFG_INPUT;
 
     if (0 != PrivIoctl(pin_fd, OPE_CFG, &ioctl_cfg)) {
         printf("ioctl pin fd error %d\n", pin_fd);
@@ -68,7 +73,7 @@ void  TestGpio(void)
     
     //recycle read pin and write pin until key break
     while(1){
-        if(0>PrivRead(pin_fd,&pin_key,NULL_PARAMETER)){
+        if(0 > PrivRead(pin_fd, &pin_key, NULL_PARAMETER)) {
             printf("read pin fd error %d\n", pin_fd);
             PrivClose(pin_fd);
             return;
@@ -81,12 +86,11 @@ void  TestGpio(void)
             pin_led.val = GPIO_LOW;
         }            
         
-        if(0>PrivWrite(pin_fd,&pin_led,NULL_PARAMETER)){
-                printf("write pin fd error %d\n", pin_fd);
-                PrivClose(pin_fd);
-                return;
-         }           
-
+        if(0 > PrivWrite(pin_fd, &pin_led, NULL_PARAMETER)) {
+            printf("write pin fd error %d\n", pin_fd);
+            PrivClose(pin_fd);
+            return;
+        }           
     }
 }
 
