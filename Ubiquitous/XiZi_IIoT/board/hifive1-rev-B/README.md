@@ -19,7 +19,7 @@ $ sudo apt install build-essential pkg-config
 $ sudo apt install gcc make libncurses5-dev openssl libssl-dev bison flex libelf-dev autoconf libtool gperf libc6-dev  git
 ```
 
-**源码下载：** XiUOS [下载链接：https://pan.baidu.com/s/1mWlR86FMc-xPQwDXJ_hiQg 提取码：XUOS]
+**源码下载：** XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
 
 新建一个空文件夹并进入文件夹中，并下载源码，具体命令如下：
 
