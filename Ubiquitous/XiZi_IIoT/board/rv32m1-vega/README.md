@@ -68,7 +68,7 @@ cd kconfig-frontends
 
 ### 编译工具链：
 
-RISC-V: riscv-none-embed-，默认安装到Ubuntu的/opt/，下载并解压。[下载网址 https://open-isa.org/downloads/]
+RISC-V: riscv-none-embed-，默认安装到Ubuntu的/opt/，下载并解压。[下载链接：https://pan.baidu.com/s/1mWlR86FMc-xPQwDXJ_hiQg 提取码：XUOS
 ![gnu](img/riscv_gnu.png)
 
 
