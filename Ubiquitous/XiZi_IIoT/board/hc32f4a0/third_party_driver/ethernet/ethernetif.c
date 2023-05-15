@@ -110,6 +110,7 @@ static char txBuf[] = "Ethernet Loop-Back Test";
 /*******************************************************************************
  * Local variable definitions ('static')
  ******************************************************************************/
+
 /* Global Ethernet handle*/
 static stc_eth_handle_t EthHandle;
 /* Ethernet Tx DMA Descriptor */
