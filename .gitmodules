@@ -12,10 +12,10 @@
 	url = https://gitlink.org.cn/xuos/lwext4_filesystem_support_XiUOS.git
 [submodule "Ubiquitous/Nuttx_Fusion_XiUOS/nuttx"]
 	path = Ubiquitous/Nuttx_Fusion_XiUOS/nuttx
-	url = https://code.gitlink.org.cn/wgzAIIT/incubator-nuttx.git
+	url = https://gitlink.org.cn/wgzAIIT/incubator-nuttx.git
 [submodule "Ubiquitous/Nuttx_Fusion_XiUOS/apps"]
 	path = Ubiquitous/Nuttx_Fusion_XiUOS/apps
-	url = https://code.gitlink.org.cn/wgzAIIT/incubator-nuttx-apps.git
+	url = https://gitlink.org.cn/wgzAIIT/incubator-nuttx-apps.git
 [submodule "APP_Framework/Applications/webnet/WebNet_XiUOS"]
 	path = APP_Framework/Applications/webnet/WebNet_XiUOS
 	url = https://gitlink.org.cn/xuos/WebNet_XiUOS.git
