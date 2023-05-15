@@ -24,9 +24,12 @@
 #include <transform.h>
 #include <list.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
 
 struct ControlProtocol;
 typedef struct ControlProtocol *ControlProtocolType;
@@ -62,6 +65,15 @@ typedef enum
     CONTROL_UNREGISTERED,
 }ProtocolStatus;
 
+struct ControlDevice
+{
+    char *dev_name;
+    int status;
+
+    //to do
+    void *dev_done;
+};
+
 struct ControlProtocol
 {
     char *name;
@@ -70,6 +82,7 @@ struct ControlProtocol
 
     struct ControlRecipe *recipe;
     struct ControlDone *done;
+    struct ControlDevice *device;
     
     void *args;
 
@@ -97,6 +110,9 @@ int ControlProtocolWrite(struct ControlProtocol *control_protocol, const void *b
 
 /*Control Framework Protocol Ioctl*/
 int ControlProtocolIoctl(struct ControlProtocol *control_protocol, int cmd, void *args);
+
+/*Control Framework new certain Protocol*/
+ControlProtocolType control_protocol;
 
 #ifdef __cplusplus
 }

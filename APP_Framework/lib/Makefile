@@ -14,4 +14,8 @@ ifeq ($(CONFIG_LIB_USING_CJSON),y)
 	SRC_DIR += cJSON
 endif
 
+ifeq ($(CONFIG_LIB_USING_LORAWAN),y)
+	SRC_DIR += lorawan
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

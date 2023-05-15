@@ -45,6 +45,10 @@ extern int ModbusTcpProtocolInit(struct ControlRecipe *p_recipe);
 extern int ModbusUartProtocolInit(struct ControlRecipe *p_recipe);
 #endif
 
+#ifdef CONTROL_PROTOCOL_S7
+extern int S7ProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
 /*
 CONTROL FRAMEWORK READ DATA FORMAT:
 |  HEAD |device_id|read data length|read item count|         data         |
@@ -79,6 +83,9 @@ static struct ControlProtocolInitParam protocol_init[] =
 #endif
 #ifdef CONTROL_PROTOCOL_MODBUS_UART
     { PROTOCOL_MODBUS_UART, ModbusUartProtocolInit },
+#endif
+#ifdef CONTROL_PROTOCOL_S7
+    { PROTOCOL_S7, S7ProtocolInit },
 #endif
 
 	{ PROTOCOL_END, NULL },
@@ -445,30 +452,24 @@ void RecipeReadVariableItem(struct ControlRecipe *p_recipe, cJSON *p_recipe_file
         p_recipe->protocol_data.data = PrivMalloc(CONTROL_DATA_HEAD_LENGTH + p_recipe->total_data_length);
         p_recipe->protocol_data.data_length = CONTROL_DATA_HEAD_LENGTH + p_recipe->total_data_length;
         memset(p_recipe->protocol_data.data, 0, p_recipe->protocol_data.data_length);
-
         protocol_format_info.p_read_item_data = p_recipe->protocol_data.data + CONTROL_DATA_HEAD_LENGTH;
-
         /*Init The Control Protocol*/
         ControlProtocolInitDesc(p_recipe, protocol_init);
-
         /*Format Data Header, Reference "CONTROL FRAMEWORK READ DATA FORMAT"*/
         FormatDataHeader(p_recipe);
-
         uint16_t read_item_count = p_recipe->read_item_count;
-
         for (i = 0; i < read_item_count; i ++) {
             cJSON *read_single_item_json = cJSON_GetArrayItem(read_item_list_json, i);
-
             protocol_format_info.read_single_item_json = read_single_item_json;
             protocol_format_info.read_item_index = i;
-
             /*Format Protocol Cmd By Analyze Variable Item One By One*/
             ret = p_recipe->ControlProtocolFormatCmd(p_recipe, &protocol_format_info);
-            if (ret < 0) {
-                printf("%s read %d item failed!\n", __func__, i);
-                continue;
+                if (ret < 0) {
+                    printf("%s read %d item failed!\n", __func__, i);
+                    continue;
             }
         }
     }
+  
 }
 

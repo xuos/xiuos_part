@@ -11,13 +11,10 @@
  */
 
 /**
- * @file siemens_s7_200_smart.c
- * @brief PLC SIEMENS S7-200 SMART app
+ * @file siemens_s7_200 smart.c
+ * @brief PLC SIEMENS S7-200 smart app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2022.9.27
+ * @date 2023.3.27
  */
-
-
-
 

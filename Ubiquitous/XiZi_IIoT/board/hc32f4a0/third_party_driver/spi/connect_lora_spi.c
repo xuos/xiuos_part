@@ -25,7 +25,7 @@
 #define LORA_RST_PIN                      (GPIO_PIN_02)
 
 static struct HardwareDev *g_spi_lora_dev;
-tRadioDriver *Radio = NONE;
+static tRadioDriver *Radio = NONE;
 
 void SX1276InitIo(void)
 {
