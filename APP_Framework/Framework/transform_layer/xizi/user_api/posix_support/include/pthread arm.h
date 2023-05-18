@@ -29,6 +29,7 @@ extern "C" {
 #include <time.h>
 #include <sys/time.h>
 
+#if !defined(_SYS_SCHED_H_) && !defined(_SYS__PTHREADTYPES_H_)
 typedef int   pid_t;
 typedef unsigned long int pthread_t; 
 
@@ -59,6 +60,7 @@ typedef struct pthread_mutexattr {
 } pthread_mutexattr_t;
 
 typedef int pthread_mutex_t ;
+#endif
 
 #ifdef __cplusplus
 }
