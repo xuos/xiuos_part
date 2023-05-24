@@ -6,14 +6,7 @@
 */
 
 #include <transform.h>
-
-#define NODE_SIZE 128
-#define MAX_WORD_LEN 128
-
-typedef struct _node {
-    void* value;
-    struct _node* next[NODE_SIZE];
-} node;
+#include "test_radix_tree.h"
 
 /**
  * @description: Create a radix tree node
