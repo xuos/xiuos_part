@@ -1,17 +1,21 @@
-# 基数树
+# 基于k210-emulator实现基数树并测试验证
 
-## 代码实现
+## 1. 简介
+
+基于矽璓模拟器k210-emulator，实现基数树，并编写测试程序在shell终端打印结果。
+
+## 2. 数据结构设计说明
 
 基数树节点设计为：
 
-```C
+```c
 typedef struct _node {
-    void* value;
-    struct _node* next[NODE_SIZE];
+​    void* value;
+​    struct _node* next[NODE_SIZE];
 } node;
 ```
 
-其中，`NODE_SIZE` 定义为 128，足以容纳所有 ASCII 值。
+其中，节点在树中的路径即为键，`value` 存储值，`NODE_SIZE` 定义为 128，足以容纳所有 ASCII 值。
 
 一共实现了 5 个函数，分别为：
 
@@ -21,7 +25,7 @@ typedef struct _node {
 - `FindNode`：查找指定键对应的值
 - `DestroyTree`：销毁整个基数树
 
-## 程序测试
+## 3. 测试程序说明
 
 测试程序 `TestRadix` 已经注册为 shell 命令，可以调用执行。
 
@@ -45,7 +49,7 @@ int values[] = {1, 2, 3, 4, 5, 6, 7};
 3. 程序的第三部分重新插入了已删除的 `where` 和未插入过的 `12345` ，再次分别查找 7 个键，新插入的值可以检索到
 4. 程序的第四部分将基数树销毁，再次分别查找 7 个键，所有的键值对均无法找到
 
-## 流程记录
+## 4. 运行结果（##需结合运行测试截图按步骤说明##）
 
 1. 在工作区终端中输入命令：`make BOARD=k210-emulator menuconfig`，进入配置页面
 ![fig1](fig1.png)
