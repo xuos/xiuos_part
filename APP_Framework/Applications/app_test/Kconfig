@@ -240,5 +240,9 @@ menu "test app"
                 bool "Config test soft timer"
                 default n
             
+            menuconfig USER_TEST_RADIX
+                bool "Config test radix tree"
+                default n
+            
         endif
 endmenu
