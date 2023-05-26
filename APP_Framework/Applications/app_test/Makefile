@@ -100,6 +100,10 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
     ifeq ($(CONFIG_USER_TEST_TIMER),y)
         SRC_FILES += test_timer.c
     endif    
+    
+    ifeq ($(CONFIG_USER_TEST_HASH),y)
+        SRC_FILES += test_hash/test_hash.c
+    endif  
 
     include $(KERNEL_ROOT)/compiler.mk
 endif
