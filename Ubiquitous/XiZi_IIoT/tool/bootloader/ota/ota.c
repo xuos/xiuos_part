@@ -1,22 +1,33 @@
 /*
- * Copyright 2018-2020 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
- 
-/**
-* @file ota.c
-* @brief file ota.c
-* @version 2.0 
-* @author AIIT XUOS Lab
-* @date 2023-04-03
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
 */
+
+/**
+* @file:    ota.c
+* @brief:   file ota.c
+* @version: 1.0
+* @author:  AIIT XUOS Lab
+* @date:    2023/4/23
+*
+*/
+#include <transform.h>
 #include "shell.h"
 #include "xsconfig.h"
 #include "mcuboot.h"
 #include "ymodem.h"
 #include "ota.h"
+
+#ifdef CONNECTION_ADAPTER_4G
+#include <adapter.h>
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -109,6 +120,29 @@ static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
     return crc^0xFFFFFFFF;
 }
 
+
+/*******************************************************************************
+* 函 数 名: calculate_crc16
+* 功能描述: 计算给定长度的数据的crc16的值,用于OTA传输过程中数据帧的校验
+* 形    参: data:数据buffer
+            len:表示需要计算CRC16的数据长度
+* 返 回 值: 计算得到的CRC16值
+*******************************************************************************/
+static uint16_t calculate_crc16(uint8_t * data, uint32_t len)
+{
+    uint16_t reg_crc=0xFFFF;
+    while(len--) {
+        reg_crc ^= *data++;
+        for (int j=0;j<8;j++) {
+            if(reg_crc & 0x01)
+                reg_crc=reg_crc >>1 ^ 0xA001;
+            else
+                reg_crc=reg_crc >>1;
+        }
+    }
+    printf(" crc = [0x%x]\n",reg_crc);
+    return reg_crc;
+}
 
 /*******************************************************************************
 * 函 数 名: UpdateApplication
@@ -305,13 +339,13 @@ static status_t UpdateOTAFlag(ota_info_t *ptr)
 }
 
 
-/*******************************************************************************
-* 函 数 名: app_ota
-* 功能描述: 在app中通过命令来进行ota升级,该函数与升级的命令关联
+/*********************************************************************************
+* 函 数 名: app_ota_by_iap
+* 功能描述: 通过命令来进行ota升级,该函数与升级的命令关联,通过串口iap方式传输bin文件
 * 形    参: 无
 * 返 回 值: 无
-*******************************************************************************/
-static void app_ota(void)
+*********************************************************************************/
+static void app_ota_by_iap(void)
 {
     int32_t size;
     ota_info_t ota_info;
@@ -344,7 +378,7 @@ static void app_ota(void)
     mcuboot.flash_deinit();
     mcuboot.op_reset();
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, app_ota, ota function);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, app_ota_by_iap, ota by iap function);
 
 
 /*******************************************************************************
@@ -439,3 +473,160 @@ void ota_entry(void)
         } 
     }
 }
+
+
+#ifdef CONNECTION_ADAPTER_4G
+/*******************************************************************************
+* 函 数 名: ota_data_recv
+* 功能描述: 通过4G方式从服务端接收数据
+* 形    参: adapter:Adapter指针,指向注册的4G设备
+* 返 回 值: 0:传输成功,-1:传输失败
+*******************************************************************************/
+static int ota_data_recv(struct Adapter* adapter)
+{
+    struct ota_data recv_msg;
+    char reply[16] = {0};
+    int ret = 0;
+    int try_times = 10;
+    int frame_cnt = 0;
+
+    while(1) {
+        memset(&recv_msg, 0, sizeof(struct ota_data));
+        ret = AdapterDeviceRecv(adapter, &recv_msg, sizeof(struct ota_data));
+        if(ret >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
+        {
+            if(0 == strncmp("aiit_ota_end",recv_msg.frame.frame_data, strlen("aiit_ota_end"))) //说明当前是结束帧
+            {
+                printf("total [%d]frames [%d]Bytes crc[%x],receive successful,\n",frame_cnt,recv_msg.header.total_len,recv_msg.frame.crc);
+                memset(reply, 0, 16);
+                memcpy(reply, "ok", strlen("ok"));
+
+                AdapterDeviceSend(adapter, reply, strlen(reply));
+                ret = 0;
+                break;
+            }
+            frame_cnt = recv_msg.frame.frame_id;
+
+            if (recv_msg.frame.crc == calculate_crc16(recv_msg.frame.frame_data,recv_msg.frame.frame_len))
+            {
+                printf("current [%d] frame,length[%d] Bytes.\n",frame_cnt,recv_msg.frame.frame_len);
+                /*写入flash待实现*/
+            }  
+            else 
+            {
+                printf("current [%d] frame crc check failed,try again!\n",frame_cnt);
+                goto try_again;
+            }
+            
+send_ok_again:
+            memset(reply, 0, 16);
+            memcpy(reply, "ok", strlen("ok"));
+
+            ret = AdapterDeviceSend(adapter, reply, strlen(reply));
+            if(ret < 0){
+                printf("send ok failed.\n");
+                goto send_ok_again;
+            }
+            printf("send reply[%s] done.\n",reply);
+            //send ok后把try_times重置为10
+            try_times = 10;
+            continue;
+        }
+
+        //没有接收到数据或者接收到的数据帧frame_flag不等于0x5A5A,需要发个retry的命令告诉服务器需要重传
+        else 
+        {
+try_again:
+            if(try_times == 0)
+            {
+                printf("current [%d] frame try 10 times failed,break out!\n",frame_cnt);
+                ret = -1;
+                break;
+            }
+            memset(reply, 0, 16);
+            memcpy(reply, "retry", strlen("retry"));
+            printf("[%d] frame receive failed. retry\n",frame_cnt);
+            AdapterDeviceSend(adapter, reply, strlen(reply));
+            try_times--;
+            continue;
+        }
+    }
+
+    if(0 == ret) {
+        printf("ota file done,start application.\n");
+        //传输完成需要干什么;
+    }
+    return ret;
+}
+
+
+/*******************************************************************************
+* 函 数 名: OtaKTaskEntry
+* 功能描述: 通过命令来进行ota升级,该函数与升级的命令关联,通过4g方式传输bin文件
+* 形    参: adapter:Adapter指针,指向注册的4G设备
+* 返 回 值: 0:传输成功,-1:传输失败
+*******************************************************************************/
+void app_ota_by_4g(void)
+{
+    struct ota_data recv_msg;
+    char reply[16] = {0};
+    int baud_rate = BAUD_RATE_115200;
+    int len = 0;
+    int ret = 0;
+
+    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_4G_NAME);
+    uint8 server_addr[64] = "115.238.53.60";
+    uint8 server_port[64] = "7777";
+
+    adapter->socket.socket_id = 0;
+
+    AdapterDeviceOpen(adapter);
+    AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+    AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
+    PrivTaskDelay(100);
+    while(1)
+    {
+        memset(&recv_msg, 0, sizeof(struct ota_data));
+        /* step1: Confirm the start signal of transmission*/
+        printf("waiting for start msg...\n");
+        ret = AdapterDeviceRecv(adapter, &recv_msg, sizeof(struct ota_data));
+        if(ret >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
+        {
+            if (0 == strncmp("aiit_ota_start",recv_msg.frame.frame_data, strlen("aiit_ota_start"))) 
+            {
+                memset(reply, 0, 16);
+                memcpy(reply, "ready", strlen("ready"));
+                printf("receive start signal,send [ready] signal to server\n");
+send_ready_again:
+                ret = AdapterDeviceSend(adapter, reply, strlen(reply));
+                if(ret < 0)
+                {
+                    goto send_ready_again;
+                }
+                printf("start receive ota file.\n");
+                /* step2: start receive bin file */
+                ret = ota_data_recv(adapter);
+                if (0 != ret)
+                {
+                    memset(reply, 0, 16);
+                    memcpy(reply, "ota_restart", strlen("ota_restart"));
+                    AdapterDeviceSend(adapter, reply, strlen(reply));
+                    continue;
+                } 
+                else
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            memset(reply, 0, 16);
+            memcpy(reply, "notready", strlen("notready"));
+            ret = AdapterDeviceSend(adapter, reply, strlen(reply));
+        }
+    }
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota4g, app_ota_by_4g, ota by 4g function);
+#endif

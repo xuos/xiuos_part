@@ -1,16 +1,22 @@
 /*
- * Copyright 2018-2020 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
- 
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
+
 /**
-* @file ota.h
-* @brief file ota.h
-* @version 2.0 
-* @author AIIT XUOS Lab
-* @date 2023-04-03
+* @file:    ota.h
+* @brief:   file ota.h
+* @version: 1.0
+* @author:  AIIT XUOS Lab
+* @date:    2023/4/23
+*
 */
 #ifndef __OTA_DEF_H__
 #define __OTA_DEF_H__
@@ -19,6 +25,7 @@
 
 #define JUMP_FAILED_FLAG  0XABABABAB
 #define JUMP_SUCCESS_FLAG 0XCDCDCDCD
+#define LENGTH 64   //每帧数据的数据包长度
 
 typedef enum {
     OTA_STATUS_IDLE = 0,     // 空闲状态,没有进行OTA升级
@@ -51,6 +58,30 @@ typedef struct {
     uint32_t reserve[2];          // 保留字段
     uint8_t  error_message[128];  // 错误信息,最多128个字符
 } ota_info_t;
+
+
+/*bin包传输过程中的数据帧相关的结构体*/
+struct ota_header_t
+{
+    uint16_t frame_flag;          // frame start flag 2 Bytes
+    uint16_t dev_sid;             // device software version
+    uint32_t total_len;           // send data total length caculated from each frame_len 
+};
+
+struct ota_frame_t
+{
+    uint32_t frame_id;               // Current frame id
+    uint8_t  frame_data[LENGTH];     // Current frame data,max length 256
+    uint16_t frame_len;              // Current frame data length
+    uint16_t crc;                    // Current frame data crc
+};
+
+struct ota_data
+{
+    struct ota_header_t header;
+    struct ota_frame_t frame;
+};
+
 
 void app_clear_jumpflag(void);
 void ota_entry(void);

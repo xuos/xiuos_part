@@ -1,0 +1,417 @@
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
+
+/**
+* @file:    ota_server.c
+* @brief:   a application ota task of system running in Linux
+* @version: 1.0
+* @author:  AIIT XUOS Lab
+* @date:    2023/5/26
+*
+*/
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <pthread.h>
+#include <time.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <sys/time.h>
+#include <assert.h>
+#include <netdb.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+
+
+#define PORT 7777    //socket端口号
+#define SIZE 100     //socket链接限制为100
+#define LENGTH 64   //每帧数据的数据包长度
+#define BIN_PATH   "/home/aep05/wgz/XiZi-xidatong-arm32-app.bin"  //bin包的路径
+
+struct ota_header_t
+{
+    uint16_t frame_flag;          // frame start flag 2 Bytes
+    uint16_t dev_sid;             // device software version
+    uint32_t total_len;           // send data total length caculated from each frame_len 
+};
+
+struct ota_frame_t
+{
+    uint32_t frame_id;               // Current frame id
+    uint8_t  frame_data[LENGTH];     // Current frame data,max length 256
+    uint16_t frame_len;              // Current frame data length
+    uint16_t crc;                    // Current frame data crc
+};
+
+struct ota_data
+{
+    struct ota_header_t header;
+    struct ota_frame_t frame;
+};
+
+
+static int serverfd;             // 服务器socket
+static int clientfd[SIZE] = {0}; // 客户端的socketfd,100个元素，clientfd[0]~clientfd[99]
+
+
+/*******************************************************************************
+* 函 数 名: calculate_crc16
+* 功能描述: 计算给定长度的数据的crc16的值,用于OTA传输过程中数据帧的校验
+* 形    参: data:数据buffer
+            len:表示需要计算CRC16的数据长度
+* 返 回 值: 计算得到的CRC16值
+*******************************************************************************/
+static uint16_t calculate_crc16(uint8_t * data, uint32_t len)
+{
+    uint16_t reg_crc=0xFFFF;
+    while(len--) {
+        reg_crc ^= *data++;
+        for (int j=0;j<8;j++) {
+            if(reg_crc & 0x01)
+                reg_crc=reg_crc >>1 ^ 0xA001;
+            else
+                reg_crc=reg_crc >>1;
+        }
+    }
+    printf(" crc = [0x%x]\n",reg_crc);
+    return reg_crc;
+}
+
+
+/*******************************************************************************
+* 函 数 名: sockt_init
+* 功能描述: 用于在TCP Server上创建socet监听
+* 形    参: data:数据buffer
+            len:表示需要计算CRC16的数据长度
+* 返 回 值: 计算得到的CRC16值
+*******************************************************************************/
+void sockt_init(void)
+{
+    struct sockaddr_in addr, *sa;//存储套接字的信息
+    struct ifaddrs *ifap, *ifa;
+    char *ipaddr;
+
+    serverfd = socket(AF_INET,SOCK_STREAM,0);
+
+    if (serverfd == -1)
+    {
+        perror("创建socket失败");
+        exit(-1);
+    }
+
+    //为套接字设置ip协议 设置端口号并自动获取本机ip转化为网络ip
+    addr.sin_family = AF_INET;//地址族
+    addr.sin_port = htons(PORT);//设置server端端口号,随便设置,当sin_port = 0时，系统随机选择一个未被使用的端口号
+    addr.sin_addr.s_addr = htons(INADDR_ANY);//当sin_addr=INADDR_ANY时表示从本机的任一网卡接收数据
+
+    /*显示当前TCP server的*/
+    getifaddrs(&ifap);
+    for (ifa = ifap; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr->sa_family == AF_INET) {
+            sa = (struct sockaddr_in *) ifa->ifa_addr;
+            ipaddr = inet_ntoa(sa->sin_addr);
+            printf("Interface: %s\tAddress: %s\n", ifa->ifa_name, ipaddr);
+        }
+    }
+    freeifaddrs(ifap);
+  
+    //绑定套接字
+    struct timeval timeout;
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
+    if(setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &timeout, sizeof(struct timeval)) < 0)
+    {
+        perror("端口设置失败");
+        exit(-1);
+    }
+
+    if (bind(serverfd,(struct sockaddr*)&addr,sizeof(addr)) == -1)
+    {
+       perror("绑定失败");
+       exit(-1);
+    }
+
+    //监听最大连接数
+    if (listen(serverfd,SIZE) == -1)
+    {
+        perror("设置监听失败");
+        exit(-1);
+    }
+}
+
+
+/*******************************************************************************
+* 函 数 名: ota_file_send
+* 功能描述: 用于在TCP Server发送bin文件
+* 形    参: fd:监听的客户端连接的fd
+* 返 回 值: 发送成功返回0，失败返回-1
+*******************************************************************************/
+int ota_file_send(int fd)
+{
+    unsigned char buf[32] = { 0 };
+    struct ota_data data;
+    FILE *file_fd;
+    int length = 0;
+    int try_times;
+    int recv_end_times = 3;
+    int ret = 0;
+    int  frame_cnt = 0;
+    int file_length = 0;
+    char * file_buf = NULL;
+
+    file_fd = fopen(BIN_PATH, "r");
+    if (NULL == file_fd){
+        printf("open file failed.\n");
+        return -1;
+    }
+    fseek(file_fd, 0, SEEK_SET);
+    printf("start send file.\n");
+
+
+    while(!feof(file_fd))
+    {
+        memset(&data, 0, sizeof(data));
+
+        data.header.frame_flag = 0x5A5A;
+        length = fread(data.frame.frame_data, 1, LENGTH, file_fd);
+        if(length > 0) 
+        {
+            printf("read %d Bytes\n",length);
+            data.frame.frame_id = frame_cnt;
+            data.frame.frame_len = length;
+            data.frame.crc = calculate_crc16(data.frame.frame_data, length);
+            file_length += length;
+        }
+
+send_again:
+        printf("ota send current[%d] frame.\n",frame_cnt);
+        length = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
+        if(length < 0){
+            printf("send [%d] frame faile.go to send again\n",frame_cnt);
+            goto send_again;
+        }
+        
+recv_again:
+        memset(buf, 0, 32);
+        length = recv(fd, buf, sizeof(buf), 0);
+        if(length < 0 ){
+            printf("[%d] frame waiting for ok timeout,receive again.\n",frame_cnt);
+            goto recv_again;
+        }
+
+        //接收到的回复不是ok,说明刚发的包有问题，需要再发一次
+        printf("receive buf[%s] length = %d\n",buf, length);
+        if(0 == strncmp(buf, "ok", length))
+        {
+            try_times = 10;
+            printf("[%d]frame data send done.\n",frame_cnt);
+            frame_cnt++;
+            continue;
+        } 
+        else
+        {
+            if(try_times > 0)
+            {
+                try_times--;
+                goto send_again;
+            } 
+            else
+            {
+                printf("send frame[%d] 10 times failed.\n",frame_cnt);
+                ret = -1;
+                break;
+            }
+        }
+    }
+
+    /* finally,crc check total bin file.*/
+    if (ret == 0)
+    {
+        printf("total send file length[%d] Bytes [%d] frames.\n",file_length,frame_cnt);
+        printf("now crc check total bin file.\n");
+        file_buf = malloc(file_length);
+        memset(file_buf, 0, file_length);
+        memset(&data, 0, sizeof(data));
+
+        data.header.frame_flag = 0x5A5A;
+
+        file_fd = fopen(BIN_PATH, "r");
+        if (NULL == file_fd){
+            printf("open file failed.\n");
+            return -1;
+        }
+        fseek(file_fd, 0, SEEK_SET);
+        length = fread(file_buf,1, file_length, file_fd);
+        printf("read file length = %d\n",length);
+        if(length > 0) {
+            data.frame.frame_id = frame_cnt;
+            data.header.total_len = file_length;
+            data.frame.frame_len = strlen("aiit_ota_end");
+            data.frame.crc = calculate_crc16(file_buf, length);
+            memcpy(data.frame.frame_data,"aiit_ota_end",strlen("aiit_ota_end"));
+        }
+
+send_end_signal:
+        printf("send aiit_ota_end signal.\n");
+        length = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
+        if(length < 0){
+            printf("send end signal faile,send end signal again\n");
+            goto send_end_signal;
+        }
+
+recv_end_signal:
+        memset(buf, 0, 32);
+        length = recv(fd, buf, sizeof(buf), 0);
+        if(length < 0 )
+        {
+            recv_end_times--;
+            printf("end signal waiting for ok timeout,receive again.\n");
+            if(recv_end_times > 0)
+            {
+                goto recv_end_signal;
+            }
+            else
+            {
+                ret = -1;
+            }
+        }
+
+        if(0 != strncmp(buf, "ok", length))
+        {
+            printf("error end !!!\n");
+            ret = -1;
+        } 
+
+        free(file_buf);
+    }
+
+    fclose(file_fd);
+    return ret;
+}
+
+
+/*******************************************************************************
+* 函 数 名: server_thread
+* 功能描述: TCP Server的服务线程入口函数
+* 形    参: p:入口函数的参数
+* 返 回 值: 无
+*******************************************************************************/
+void* server_thread(void* p)
+{
+    int fd = *(int*)p;
+    unsigned char buf[32] = { 0 };
+    struct ota_data data;
+    int ret = 0;
+    int length = 0;
+
+    printf("pthread = %d\n",fd);
+    sleep(8);
+    while(1)
+    {
+        memset(&data, 0x0 , sizeof(struct ota_data));
+        data.header.frame_flag = 0x5A5A;
+        memcpy(data.frame.frame_data,"aiit_ota_start",strlen("aiit_ota_start"));
+        data.frame.frame_len = strlen("aiit_ota_start");
+
+        printf("send start signal.\n");
+        ret = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
+        if (ret > 0){
+            printf("send %s[%d] Bytes\n",data.frame.frame_data,ret);
+        }
+        
+        memset(buf, 0, 32);
+        length = recv(fd, buf, sizeof(buf), 0);
+        if (length <= 0)
+        {
+            continue;
+        }
+        else 
+        {
+            printf("recv buf %s length %d\n",buf,length);
+            if(0 == strncmp(buf, "ready", length))
+            {
+                ret = ota_file_send(fd);
+                if (ret == 0) {
+                    printf("ota file send successful.\n");
+                    break;
+                } else { 
+                    /* ota failed then restart the ota process */
+                    continue;
+                }
+            }
+        }
+    }
+    printf("exit fd = %d\n",fd);
+    close(fd);
+    pthread_exit(0);
+}
+
+
+/*******************************************************************************
+* 函 数 名: server
+* 功能描述: TCP Server的服务函数
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+void server(void)
+{
+    int i = 0;
+    printf("ota Server startup\n");
+    while(1)
+    {
+        struct sockaddr_in fromaddr;
+        socklen_t len = sizeof(fromaddr);
+        int fd = accept(serverfd,(struct sockaddr*)&fromaddr,&len);//调用accept进入堵塞状态，等待客户端的连接
+
+        if (fd == -1)
+        {
+            printf("The client connection is wrong...\n");
+            continue;
+        }
+
+        for (i = 0;i < SIZE;i++)
+        {
+            if(clientfd[i] == 0)
+            {
+                //记录客户端的socket
+                clientfd[i] = fd;
+
+                //有客户端连接之后，启动线程给此客户服务
+                pthread_t tid;
+                pthread_create(&tid,0,server_thread,&fd);
+                break;
+            }
+
+            if (SIZE == i)
+            {
+                //发送给客户端聊天室满了
+                char* str = "Devices full";
+                printf("%s", str);
+                send(fd,str,strlen(str),0);
+                close(fd);
+            }
+        }
+    }
+}
+
+int main(void)
+{
+    sockt_init();
+    server();
+}
+
