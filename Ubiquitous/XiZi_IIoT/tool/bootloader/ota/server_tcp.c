@@ -40,7 +40,7 @@
 
 #define PORT 7777    //socket端口号
 #define SIZE 100     //socket链接限制为100
-#define LENGTH 64   //每帧数据的数据包长度
+#define LENGTH 256   //每帧数据的数据包长度
 #define BIN_PATH   "/home/aep05/wgz/XiZi-xidatong-arm32-app.bin"  //bin包的路径
 
 struct ota_header_t
@@ -156,6 +156,50 @@ void sockt_init(void)
 
 
 /*******************************************************************************
+* 函 数 名: ota_start_signal
+* 功能描述: 发送开始信号,等待接收端回应ready
+* 形    参: fd:监听的客户端连接的fd
+* 返 回 值: 0:成功,-1:失败
+*******************************************************************************/
+void ota_start_signal(int fd)
+{
+    struct ota_data data;
+    uint8_t buf[32];
+    int ret;
+    int length = 0;
+
+    while(1)
+    {
+        memset(&data, 0x0 , sizeof(struct ota_data));
+        data.header.frame_flag = 0x5A5A;
+        memcpy(data.frame.frame_data,"aiit_ota_start",strlen("aiit_ota_start"));
+        data.frame.frame_len = strlen("aiit_ota_start");
+
+        printf("send start signal.\n");
+        ret = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
+        if (ret > 0){
+            printf("send %s[%d] Bytes\n",data.frame.frame_data,ret);
+        }
+        
+        memset(buf, 0, 32);
+        length = recv(fd, buf, sizeof(buf), 0);
+        if (length > 0 && (0 == strncmp(buf, "ready", length)))
+        {
+            printf("recv buf %s length %d\n",buf,length);
+            break;
+        }
+
+        else 
+        {
+            continue;
+        }
+
+    }
+    
+}
+
+
+/*******************************************************************************
 * 函 数 名: ota_file_send
 * 功能描述: 用于在TCP Server发送bin文件
 * 形    参: fd:监听的客户端连接的fd
@@ -165,14 +209,24 @@ int ota_file_send(int fd)
 {
     unsigned char buf[32] = { 0 };
     struct ota_data data;
+    struct stat st;
     FILE *file_fd;
     int length = 0;
     int try_times;
     int recv_end_times = 3;
     int ret = 0;
-    int  frame_cnt = 0;
+    int file_frame_cnt, frame_cnt = 0;
     int file_length = 0;
     char * file_buf = NULL;
+
+    if (stat(BIN_PATH, &st) == 0) {
+        //获取文件大小(以字节为单位)
+        file_frame_cnt = (st.st_size%LENGTH != 0)? (st.st_size/LENGTH + 1):(st.st_size/LENGTH);
+        printf("File size is %ld bytes,file frame count is %d!\n", st.st_size, file_frame_cnt);
+    }else{
+        printf("get file size failed.\n");
+        return -1;
+    }
 
     file_fd = fopen(BIN_PATH, "r");
     if (NULL == file_fd){
@@ -320,40 +374,17 @@ void* server_thread(void* p)
     int length = 0;
 
     printf("pthread = %d\n",fd);
-    sleep(8);
+    sleep(5);
+    ota_start_signal(fd);
     while(1)
     {
-        memset(&data, 0x0 , sizeof(struct ota_data));
-        data.header.frame_flag = 0x5A5A;
-        memcpy(data.frame.frame_data,"aiit_ota_start",strlen("aiit_ota_start"));
-        data.frame.frame_len = strlen("aiit_ota_start");
-
-        printf("send start signal.\n");
-        ret = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
-        if (ret > 0){
-            printf("send %s[%d] Bytes\n",data.frame.frame_data,ret);
-        }
-        
-        memset(buf, 0, 32);
-        length = recv(fd, buf, sizeof(buf), 0);
-        if (length <= 0)
-        {
+        ret = ota_file_send(fd);
+        if (ret == 0) {
+            printf("ota file send successful.\n");
+            break;
+        } else { 
+            /* ota failed then restart the ota process */
             continue;
-        }
-        else 
-        {
-            printf("recv buf %s length %d\n",buf,length);
-            if(0 == strncmp(buf, "ready", length))
-            {
-                ret = ota_file_send(fd);
-                if (ret == 0) {
-                    printf("ota file send successful.\n");
-                    break;
-                } else { 
-                    /* ota failed then restart the ota process */
-                    continue;
-                }
-            }
         }
     }
     printf("exit fd = %d\n",fd);

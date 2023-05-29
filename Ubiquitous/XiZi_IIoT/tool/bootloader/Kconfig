@@ -14,6 +14,8 @@ menu "OTA function"
 
             config MCUBOOT_APPLICATION
                     bool "Config as application."
+                    select SUPPORT_CONNECTION_FRAMEWORK
+                    select CONNECTION_ADAPTER_4G
         endchoice
 
 
