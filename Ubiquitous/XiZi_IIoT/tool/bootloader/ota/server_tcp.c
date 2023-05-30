@@ -376,6 +376,7 @@ void* server_thread(void* p)
     printf("pthread = %d\n",fd);
     sleep(5);
     ota_start_signal(fd);
+    sleep(5);
     while(1)
     {
         ret = ota_file_send(fd);

@@ -610,7 +610,8 @@ send_ready_again:
                     goto send_ready_again;
                 }
                 printf("start receive ota file.\n");
-                /* step2: start receive bin file */
+                /* step2: start receive bin file,first wait for 5s*/
+                PrivTaskDelay(5000);
                 ret = ota_data_recv(adapter);
                 if (0 != ret)
                 {
