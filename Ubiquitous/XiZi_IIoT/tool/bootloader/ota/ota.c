@@ -39,11 +39,6 @@ static void BackupVersion(void);
 static void BootLoaderJumpApp(void);
 static status_t UpdateOTAFlag(ota_info_t *ptr);
 
-#ifdef MCUBOOT_APPLICATION
-static void app_ota(void);
-#endif
-
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -54,10 +49,10 @@ static const mcuboot_t mcuboot =
     Serial_PutString,
     FLASH_Init,
     FLASH_DeInit,
-    flash_erase,
-    flash_write,
-    flash_read,
-    flash_copy,
+    Flash_Erase,
+    Flash_Write,
+    Flash_Read,
+    Flash_Copy,
     SerialDownload,
     mcuboot_reset,
     mcuboot_jump,
