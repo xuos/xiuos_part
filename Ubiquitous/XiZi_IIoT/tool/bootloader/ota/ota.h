@@ -25,7 +25,7 @@
 
 #define JUMP_FAILED_FLAG  0XABABABAB
 #define JUMP_SUCCESS_FLAG 0XCDCDCDCD
-#define LENGTH 256   //每帧数据的数据包长度
+#define LENGTH 1024   //每帧数据的数据包长度
 
 typedef enum {
     OTA_STATUS_IDLE = 0,     // 空闲状态,没有进行OTA升级

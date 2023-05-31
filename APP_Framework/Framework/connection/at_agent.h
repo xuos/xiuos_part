@@ -26,12 +26,6 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#if defined(CONNECTION_ADAPTER_4G) && defined(TOOL_USING_OTA)
-#define ENTM_RECV_MAX 1024
-#else
-#define ENTM_RECV_MAX 256
-#endif
-
 #define REPLY_TIME_OUT 10
 
 enum ReceiveMode
@@ -76,6 +70,7 @@ struct ATAgent
 #endif
     pthread_t at_handler;
 
+    #define ENTM_RECV_MAX 2048
     char entm_recv_buf[ENTM_RECV_MAX];
     uint32 entm_recv_len;
     enum ReceiveMode receive_mode;

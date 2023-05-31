@@ -131,16 +131,18 @@ static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 static uint16_t calculate_crc16(uint8_t * data, uint32_t len)
 {
     uint16_t reg_crc=0xFFFF;
-    while(len--) {
+    while(len--) 
+    {
         reg_crc ^= *data++;
-        for (int j=0;j<8;j++) {
+        for(int j=0;j<8;j++) 
+        {
             if(reg_crc & 0x01)
                 reg_crc=reg_crc >>1 ^ 0xA001;
             else
                 reg_crc=reg_crc >>1;
         }
     }
-    printf(" crc = [0x%x]\n",reg_crc);
+    printf("crc = [0x%x]\n",reg_crc);
     return reg_crc;
 }
 
@@ -490,7 +492,8 @@ static int ota_data_recv(struct Adapter* adapter)
     int try_times = 10;
     int frame_cnt = 0;
 
-    while(1) {
+    while(1)
+    {
         memset(&recv_msg, 0, sizeof(struct ota_data));
         ret = AdapterDeviceRecv(adapter, &recv_msg, sizeof(struct ota_data));
         if(ret >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
@@ -506,14 +509,13 @@ static int ota_data_recv(struct Adapter* adapter)
                 printf("total [%d]frames [%d]Bytes crc[%x],receive successful,\n",frame_cnt,recv_msg.header.total_len,recv_msg.frame.crc);
                 memset(reply, 0, 16);
                 memcpy(reply, "ok", strlen("ok"));
-
                 AdapterDeviceSend(adapter, reply, strlen(reply));
                 ret = 0;
                 break;
             }
             frame_cnt = recv_msg.frame.frame_id;
 
-            if (recv_msg.frame.crc == calculate_crc16(recv_msg.frame.frame_data,recv_msg.frame.frame_len))
+            if(recv_msg.frame.crc == calculate_crc16(recv_msg.frame.frame_data,recv_msg.frame.frame_len))
             {
                 printf("current [%d] frame,length[%d] Bytes.\n",frame_cnt,recv_msg.frame.frame_len);
                 /*写入flash待实现*/
@@ -529,7 +531,8 @@ send_ok_again:
             memcpy(reply, "ok", strlen("ok"));
 
             ret = AdapterDeviceSend(adapter, reply, strlen(reply));
-            if(ret < 0){
+            if(ret < 0)
+            {
                 printf("send ok failed.\n");
                 goto send_ok_again;
             }
@@ -558,7 +561,8 @@ try_again:
         }
     }
 
-    if(0 == ret) {
+    if(0 == ret)
+	{ 
         printf("ota file done,start application.\n");
         //传输完成需要干什么;
     }
@@ -593,12 +597,12 @@ void app_ota_by_4g(void)
     while(1)
     {
         memset(&recv_msg, 0, sizeof(struct ota_data));
-        /* step1: Confirm the start signal of transmission*/
+        /* step1:Confirm the start signal of transmission. */
         printf("waiting for start msg...\n");
         ret = AdapterDeviceRecv(adapter, &recv_msg, sizeof(struct ota_data));
         if(ret >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
         {
-            if (0 == strncmp("aiit_ota_start",recv_msg.frame.frame_data, strlen("aiit_ota_start"))) 
+            if(0 == strncmp("aiit_ota_start",recv_msg.frame.frame_data, strlen("aiit_ota_start"))) 
             {
                 memset(reply, 0, 16);
                 memcpy(reply, "ready", strlen("ready"));
@@ -610,10 +614,10 @@ send_ready_again:
                     goto send_ready_again;
                 }
                 printf("start receive ota file.\n");
-                /* step2: start receive bin file,first wait for 5s*/
-                PrivTaskDelay(5000);
+                /* step2:start receive bin file,first wait for 4s. */
+                PrivTaskDelay(4000);
                 ret = ota_data_recv(adapter);
-                if (0 != ret)
+                if(0 != ret)
                 {
                     memset(reply, 0, 16);
                     memcpy(reply, "ota_restart", strlen("ota_restart"));

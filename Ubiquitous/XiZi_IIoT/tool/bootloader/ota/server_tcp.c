@@ -38,9 +38,9 @@
 #include <ifaddrs.h>
 
 
-#define PORT 7777    //socket端口号
-#define SIZE 100     //socket链接限制为100
-#define LENGTH 256   //每帧数据的数据包长度
+#define PORT 7777     //socket端口号
+#define SIZE  100     //socket链接限制为100
+#define LENGTH 1024   //每帧数据的数据包长度
 #define BIN_PATH   "/home/aep05/wgz/XiZi-xidatong-arm32-app.bin"  //bin包的路径
 
 struct ota_header_t
@@ -79,16 +79,18 @@ static int clientfd[SIZE] = {0}; // 客户端的socketfd,100个元素，clientfd
 static uint16_t calculate_crc16(uint8_t * data, uint32_t len)
 {
     uint16_t reg_crc=0xFFFF;
-    while(len--) {
+    while(len--)
+    {
         reg_crc ^= *data++;
-        for (int j=0;j<8;j++) {
+        for(int j=0;j<8;j++) 
+        {
             if(reg_crc & 0x01)
                 reg_crc=reg_crc >>1 ^ 0xA001;
             else
                 reg_crc=reg_crc >>1;
         }
     }
-    printf(" crc = [0x%x]\n",reg_crc);
+    printf("crc = [0x%x]\n",reg_crc);
     return reg_crc;
 }
 
@@ -108,7 +110,7 @@ void sockt_init(void)
 
     serverfd = socket(AF_INET,SOCK_STREAM,0);
 
-    if (serverfd == -1)
+    if(serverfd == -1)
     {
         perror("创建socket失败");
         exit(-1);
@@ -121,8 +123,10 @@ void sockt_init(void)
 
     /*显示当前TCP server的*/
     getifaddrs(&ifap);
-    for (ifa = ifap; ifa != NULL; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr->sa_family == AF_INET) {
+    for(ifa = ifap; ifa != NULL; ifa = ifa->ifa_next) 
+    {
+        if(ifa->ifa_addr->sa_family == AF_INET) 
+        {
             sa = (struct sockaddr_in *) ifa->ifa_addr;
             ipaddr = inet_ntoa(sa->sin_addr);
             printf("Interface: %s\tAddress: %s\n", ifa->ifa_name, ipaddr);
@@ -140,14 +144,14 @@ void sockt_init(void)
         exit(-1);
     }
 
-    if (bind(serverfd,(struct sockaddr*)&addr,sizeof(addr)) == -1)
+    if(bind(serverfd,(struct sockaddr*)&addr,sizeof(addr)) == -1)
     {
        perror("绑定失败");
        exit(-1);
     }
 
     //监听最大连接数
-    if (listen(serverfd,SIZE) == -1)
+    if(listen(serverfd,SIZE) == -1)
     {
         perror("设置监听失败");
         exit(-1);
@@ -177,13 +181,14 @@ void ota_start_signal(int fd)
 
         printf("send start signal.\n");
         ret = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
-        if (ret > 0){
+        if(ret > 0)
+        {
             printf("send %s[%d] Bytes\n",data.frame.frame_data,ret);
         }
         
         memset(buf, 0, 32);
         length = recv(fd, buf, sizeof(buf), 0);
-        if (length > 0 && (0 == strncmp(buf, "ready", length)))
+        if(length > 0 && (0 == strncmp(buf, "ready", length)))
         {
             printf("recv buf %s length %d\n",buf,length);
             break;
@@ -219,17 +224,21 @@ int ota_file_send(int fd)
     int file_length = 0;
     char * file_buf = NULL;
 
-    if (stat(BIN_PATH, &st) == 0) {
+    if(stat(BIN_PATH, &st) == 0)
+    {
         //获取文件大小(以字节为单位)
         file_frame_cnt = (st.st_size%LENGTH != 0)? (st.st_size/LENGTH + 1):(st.st_size/LENGTH);
         printf("File size is %ld bytes,file frame count is %d!\n", st.st_size, file_frame_cnt);
-    }else{
+    }
+    else
+    {
         printf("get file size failed.\n");
         return -1;
     }
 
     file_fd = fopen(BIN_PATH, "r");
-    if (NULL == file_fd){
+    if(NULL == file_fd)
+    {
         printf("open file failed.\n");
         return -1;
     }
@@ -255,7 +264,8 @@ int ota_file_send(int fd)
 send_again:
         printf("ota send current[%d] frame.\n",frame_cnt);
         length = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
-        if(length < 0){
+        if(length < 0)
+        {
             printf("send [%d] frame faile.go to send again\n",frame_cnt);
             goto send_again;
         }
@@ -263,7 +273,8 @@ send_again:
 recv_again:
         memset(buf, 0, 32);
         length = recv(fd, buf, sizeof(buf), 0);
-        if(length < 0 ){
+        if(length < 0 )
+        {
             printf("[%d] frame waiting for ok timeout,receive again.\n",frame_cnt);
             goto recv_again;
         }
@@ -294,7 +305,7 @@ recv_again:
     }
 
     /* finally,crc check total bin file.*/
-    if (ret == 0)
+    if(ret == 0)
     {
         printf("total send file length[%d] Bytes [%d] frames.\n",file_length,frame_cnt);
         printf("now crc check total bin file.\n");
@@ -305,14 +316,16 @@ recv_again:
         data.header.frame_flag = 0x5A5A;
 
         file_fd = fopen(BIN_PATH, "r");
-        if (NULL == file_fd){
+        if(NULL == file_fd)
+        {
             printf("open file failed.\n");
             return -1;
         }
         fseek(file_fd, 0, SEEK_SET);
         length = fread(file_buf,1, file_length, file_fd);
         printf("read file length = %d\n",length);
-        if(length > 0) {
+        if(length > 0) 
+        {
             data.frame.frame_id = frame_cnt;
             data.header.total_len = file_length;
             data.frame.frame_len = strlen("aiit_ota_end");
@@ -323,7 +336,8 @@ recv_again:
 send_end_signal:
         printf("send aiit_ota_end signal.\n");
         length = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
-        if(length < 0){
+        if(length < 0)
+        {
             printf("send end signal faile,send end signal again\n");
             goto send_end_signal;
         }
@@ -374,16 +388,19 @@ void* server_thread(void* p)
     int length = 0;
 
     printf("pthread = %d\n",fd);
-    sleep(5);
+    sleep(3);
     ota_start_signal(fd);
     sleep(5);
     while(1)
     {
         ret = ota_file_send(fd);
-        if (ret == 0) {
+        if(ret == 0) 
+        {
             printf("ota file send successful.\n");
             break;
-        } else { 
+        } 
+        else 
+        { 
             /* ota failed then restart the ota process */
             continue;
         }
@@ -410,13 +427,13 @@ void server(void)
         socklen_t len = sizeof(fromaddr);
         int fd = accept(serverfd,(struct sockaddr*)&fromaddr,&len);//调用accept进入堵塞状态，等待客户端的连接
 
-        if (fd == -1)
+        if(fd == -1)
         {
             printf("The client connection is wrong...\n");
             continue;
         }
 
-        for (i = 0;i < SIZE;i++)
+        for(i = 0;i < SIZE;i++)
         {
             if(clientfd[i] == 0)
             {
@@ -429,7 +446,7 @@ void server(void)
                 break;
             }
 
-            if (SIZE == i)
+            if(SIZE == i)
             {
                 //发送给客户端聊天室满了
                 char* str = "Devices full";
