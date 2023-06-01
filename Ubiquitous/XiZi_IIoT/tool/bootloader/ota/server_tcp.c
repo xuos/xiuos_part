@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <libgen.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -112,7 +113,7 @@ void sockt_init(void)
 
     if(serverfd == -1)
     {
-        perror("创建socket失败");
+        perror("Failed to create socket");
         exit(-1);
     }
 
@@ -140,20 +141,20 @@ void sockt_init(void)
     timeout.tv_usec = 0;
     if(setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &timeout, sizeof(struct timeval)) < 0)
     {
-        perror("端口设置失败");
+        perror("Failed to set setsock option");
         exit(-1);
     }
 
     if(bind(serverfd,(struct sockaddr*)&addr,sizeof(addr)) == -1)
     {
-       perror("绑定失败");
+       perror("Failed to bind socket port");
        exit(-1);
     }
 
     //监听最大连接数
     if(listen(serverfd,SIZE) == -1)
     {
-        perror("设置监听失败");
+        perror("Failed to set socket listening");
         exit(-1);
     }
 }
@@ -168,14 +169,39 @@ void sockt_init(void)
 void ota_start_signal(int fd)
 {
     struct ota_data data;
+    struct stat st;
     uint8_t buf[32];
-    int ret;
-    int length = 0;
+    int ret, length = 0, file_size = 0, file_frame_cnt = 0;
+
+    if (access(BIN_PATH, F_OK) == 0) 
+    {
+        printf("%s exists\n", basename(BIN_PATH));
+    } 
+    else 
+    {
+        printf("%s does not exist,please cheack!\n", BIN_PATH);
+        return;
+    }
+
+    //获取文件大小(以字节为单位)
+    if(stat(BIN_PATH, &st) == 0)
+    {
+        file_size = st.st_size;
+        file_frame_cnt = ((file_size%LENGTH) != 0)? (file_size/LENGTH + 1):(file_size/LENGTH);
+        printf("%s size is %d bytes,frame count is %d!\n",basename(BIN_PATH), file_size, file_frame_cnt);
+    } 
+    else 
+    {
+        printf("Failed to get file size\n");
+        return;
+    }
 
     while(1)
     {
         memset(&data, 0x0 , sizeof(struct ota_data));
         data.header.frame_flag = 0x5A5A;
+        //发送起始帧时把bin文件的大小一并发送出去
+        data.header.total_len = file_size;
         memcpy(data.frame.frame_data,"aiit_ota_start",strlen("aiit_ota_start"));
         data.frame.frame_len = strlen("aiit_ota_start");
 
@@ -183,14 +209,14 @@ void ota_start_signal(int fd)
         ret = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
         if(ret > 0)
         {
-            printf("send %s[%d] Bytes\n",data.frame.frame_data,ret);
+            printf("send %s %d bytes\n",data.frame.frame_data,ret);
         }
         
         memset(buf, 0, 32);
         length = recv(fd, buf, sizeof(buf), 0);
         if(length > 0 && (0 == strncmp(buf, "ready", length)))
         {
-            printf("recv buf %s length %d\n",buf,length);
+            printf("recv buf %s length %d.\n",buf,length);
             break;
         }
 
@@ -214,27 +240,14 @@ int ota_file_send(int fd)
 {
     unsigned char buf[32] = { 0 };
     struct ota_data data;
-    struct stat st;
     FILE *file_fd;
     int length = 0;
     int try_times;
     int recv_end_times = 3;
     int ret = 0;
-    int file_frame_cnt, frame_cnt = 0;
+    int frame_cnt = 0;
     int file_length = 0;
     char * file_buf = NULL;
-
-    if(stat(BIN_PATH, &st) == 0)
-    {
-        //获取文件大小(以字节为单位)
-        file_frame_cnt = (st.st_size%LENGTH != 0)? (st.st_size/LENGTH + 1):(st.st_size/LENGTH);
-        printf("File size is %ld bytes,file frame count is %d!\n", st.st_size, file_frame_cnt);
-    }
-    else
-    {
-        printf("get file size failed.\n");
-        return -1;
-    }
 
     file_fd = fopen(BIN_PATH, "r");
     if(NULL == file_fd)
@@ -254,7 +267,7 @@ int ota_file_send(int fd)
         length = fread(data.frame.frame_data, 1, LENGTH, file_fd);
         if(length > 0) 
         {
-            printf("read %d Bytes\n",length);
+            printf("read %d bytes\n",length);
             data.frame.frame_id = frame_cnt;
             data.frame.frame_len = length;
             data.frame.crc = calculate_crc16(data.frame.frame_data, length);
@@ -280,7 +293,7 @@ recv_again:
         }
 
         //接收到的回复不是ok,说明刚发的包有问题，需要再发一次
-        printf("receive buf[%s] length = %d\n",buf, length);
+        printf("receive buf[%s] length %d.\n",buf, length);
         if(0 == strncmp(buf, "ok", length))
         {
             try_times = 10;
@@ -307,7 +320,7 @@ recv_again:
     /* finally,crc check total bin file.*/
     if(ret == 0)
     {
-        printf("total send file length[%d] Bytes [%d] frames.\n",file_length,frame_cnt);
+        printf("total send file length %d bytes, %d frames.\n",file_length,frame_cnt);
         printf("now crc check total bin file.\n");
         file_buf = malloc(file_length);
         memset(file_buf, 0, file_length);
