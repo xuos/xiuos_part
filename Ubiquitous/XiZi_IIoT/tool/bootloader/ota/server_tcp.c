@@ -130,7 +130,7 @@ void sockt_init(void)
         {
             sa = (struct sockaddr_in *) ifa->ifa_addr;
             ipaddr = inet_ntoa(sa->sin_addr);
-            printf("Interface: %s\tAddress: %s\n", ifa->ifa_name, ipaddr);
+            printf("Interface:%-16s Address:%-16s\n", ifa->ifa_name, ipaddr);
         }
     }
     freeifaddrs(ifap);
@@ -202,24 +202,29 @@ void ota_start_signal(int fd)
         data.header.frame_flag = 0x5A5A;
         //发送起始帧时把bin文件的大小一并发送出去
         data.header.total_len = file_size;
-        memcpy(data.frame.frame_data,"aiit_ota_start",strlen("aiit_ota_start"));
-        data.frame.frame_len = strlen("aiit_ota_start");
+        memcpy(data.frame.frame_data,"ota_start_signal",strlen("ota_start_signal"));
+        data.frame.frame_len = strlen("ota_start_signal");
 
-        printf("send start signal.\n");
+        printf("send start signal to client %d.\n", fd);
         ret = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
         if(ret > 0)
         {
-            printf("send %s %d bytes\n",data.frame.frame_data,ret);
+            printf("send %s %d bytes to client %d\n", data.frame.frame_data, ret, fd);
         }
         
         memset(buf, 0, 32);
         length = recv(fd, buf, sizeof(buf), 0);
-        if(length > 0 && (0 == strncmp(buf, "ready", length)))
+        if(length == 0)
         {
-            printf("recv buf %s length %d.\n",buf,length);
+            printf("The current socket %d is disconnected,please check it!\n",fd);
+            close(fd);
+            pthread_exit(0);
+        }
+        else if(length > 0 && (0 == strncmp(buf, "ready", length)))
+        {
+            printf("recv buf %s length %d from client %d.\n", buf, length, fd);
             break;
         }
-
         else 
         {
             continue;
@@ -256,7 +261,7 @@ int ota_file_send(int fd)
         return -1;
     }
     fseek(file_fd, 0, SEEK_SET);
-    printf("start send file.\n");
+    printf("start send bin file to client %d.\n", fd);
 
 
     while(!feof(file_fd))
@@ -275,32 +280,40 @@ int ota_file_send(int fd)
         }
 
 send_again:
-        printf("ota send current[%d] frame.\n",frame_cnt);
+        printf("send frame[%d] to client %d.\n", frame_cnt, fd);
         length = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
         if(length < 0)
         {
-            printf("send [%d] frame faile.go to send again\n",frame_cnt);
+            printf("send frame[%d] to client %d failed,send again\n", frame_cnt, fd);
             goto send_again;
         }
         
 recv_again:
         memset(buf, 0, 32);
         length = recv(fd, buf, sizeof(buf), 0);
-        if(length < 0 )
+        if(length == 0)
         {
-            printf("[%d] frame waiting for ok timeout,receive again.\n",frame_cnt);
+            printf("current socket %d is disconnected,please check it!\n", fd);
+            ret = -1;
+            close(fd);
+            pthread_exit(0);
+            break;
+        }
+        else if(length < 0 )
+        {
+            printf("send frame[%d] to client %d waiting for ok timeout,receive again.\n", frame_cnt, fd);
             goto recv_again;
         }
-
-        //接收到的回复不是ok,说明刚发的包有问题，需要再发一次
-        printf("receive buf[%s] length %d.\n",buf, length);
-        if(0 == strncmp(buf, "ok", length))
+        else if(0 == strncmp(buf, "ok", length))
         {
+            printf("receive buf[%s] length %d from client %d.\n", buf, length, fd);
             try_times = 10;
-            printf("[%d]frame data send done.\n",frame_cnt);
+            printf("send to client %d frame[%d] data send done.\n",fd, frame_cnt);
             frame_cnt++;
             continue;
-        } 
+        }
+
+        //接收到的回复不是ok,说明刚发的包有问题，需要再发一次 
         else
         {
             if(try_times > 0)
@@ -310,7 +323,7 @@ recv_again:
             } 
             else
             {
-                printf("send frame[%d] 10 times failed.\n",frame_cnt);
+                printf("send to client %d frame[%d] 10 times failed.\n",fd, frame_cnt);
                 ret = -1;
                 break;
             }
@@ -320,7 +333,7 @@ recv_again:
     /* finally,crc check total bin file.*/
     if(ret == 0)
     {
-        printf("total send file length %d bytes, %d frames.\n",file_length,frame_cnt);
+        printf("total send file length %d bytes, %d frames to client %d.\n", file_length, frame_cnt, fd);
         printf("now crc check total bin file.\n");
         file_buf = malloc(file_length);
         memset(file_buf, 0, file_length);
@@ -341,42 +354,47 @@ recv_again:
         {
             data.frame.frame_id = frame_cnt;
             data.header.total_len = file_length;
-            data.frame.frame_len = strlen("aiit_ota_end");
+            data.frame.frame_len = strlen("ota_end_signal");
             data.frame.crc = calculate_crc16(file_buf, length);
-            memcpy(data.frame.frame_data,"aiit_ota_end",strlen("aiit_ota_end"));
+            memcpy(data.frame.frame_data,"ota_end_signal",strlen("ota_end_signal"));
         }
 
 send_end_signal:
-        printf("send aiit_ota_end signal.\n");
+        printf("send ota end signal to client %d.\n", fd);
         length = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
         if(length < 0)
         {
-            printf("send end signal faile,send end signal again\n");
+            printf("send to client %d ota end signal faile,send again\n",fd);
             goto send_end_signal;
         }
 
 recv_end_signal:
         memset(buf, 0, 32);
         length = recv(fd, buf, sizeof(buf), 0);
-        if(length < 0 )
+        if(length == 0)
+        {
+            printf("current socket %d is disconnected,please check it!\n",fd);
+            ret = -1;
+        	free(file_buf);
+    		fclose(file_fd);
+            close(fd);
+            pthread_exit(0);
+
+        }
+        if(length < 0 || (0 != strncmp(buf, "ok", length)))
         {
             recv_end_times--;
-            printf("end signal waiting for ok timeout,receive again.\n");
+            printf("from client %d end signal waiting for ok timeout,receive again.\n", fd);
             if(recv_end_times > 0)
             {
                 goto recv_end_signal;
             }
             else
             {
+                printf("client %d error end !!!\n", fd);
                 ret = -1;
             }
         }
-
-        if(0 != strncmp(buf, "ok", length))
-        {
-            printf("error end !!!\n");
-            ret = -1;
-        } 
 
         free(file_buf);
     }
@@ -409,7 +427,7 @@ void* server_thread(void* p)
         ret = ota_file_send(fd);
         if(ret == 0) 
         {
-            printf("ota file send successful.\n");
+            printf("ota file send to client %d successful.\n", fd);
             break;
         } 
         else 

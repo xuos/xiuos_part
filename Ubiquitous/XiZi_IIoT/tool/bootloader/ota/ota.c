@@ -498,13 +498,13 @@ static int ota_data_recv(struct Adapter* adapter)
         ret = AdapterDeviceRecv(adapter, &recv_msg, sizeof(struct ota_data));
         if(ret >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
         {
-            if(0 == strncmp("aiit_ota_start",recv_msg.frame.frame_data, strlen("aiit_ota_start"))) 
+            if(0 == strncmp("ota_start_signal",recv_msg.frame.frame_data, strlen("ota_start_signal"))) 
             {
                 //这里不应该再出现开始信号,丢弃当前数据继续接收
                 continue;
             }
             
-            if(0 == strncmp("aiit_ota_end",recv_msg.frame.frame_data, strlen("aiit_ota_end"))) //说明当前是结束帧
+            if(0 == strncmp("ota_end_signal",recv_msg.frame.frame_data, strlen("ota_end_signal"))) //说明当前是结束帧
             {
                 printf("total %d frames %d bytes crc[0x%x],receive successful,\n",frame_cnt,recv_msg.header.total_len,recv_msg.frame.crc);
                 memset(reply, 0, 16);
@@ -628,7 +628,7 @@ void app_ota_by_4g(void)
         ret = AdapterDeviceRecv(adapter, &recv_msg, sizeof(struct ota_data));
         if(ret >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
         {
-            if(0 == strncmp("aiit_ota_start",recv_msg.frame.frame_data, strlen("aiit_ota_start"))) 
+            if(0 == strncmp("ota_start_signal",recv_msg.frame.frame_data, strlen("ota_start_signal"))) 
             {
                 if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,recv_msg.header.total_len) != kStatus_Success)
                 {
