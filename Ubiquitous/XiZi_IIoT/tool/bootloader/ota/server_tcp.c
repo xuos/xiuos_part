@@ -171,16 +171,16 @@ void ota_start_signal(int fd)
     struct ota_data data;
     struct stat st;
     uint8_t buf[32];
-    int ret, length = 0, file_size = 0, file_frame_cnt = 0;
+    int file_size = 0, file_frame_cnt = 0, length = 0;
 
     if (access(BIN_PATH, F_OK) == 0) 
     {
-        printf("%s exists\n", basename(BIN_PATH));
+        printf("%s exists.\n", basename(BIN_PATH));
     } 
     else 
     {
         printf("%s does not exist,please cheack!\n", BIN_PATH);
-        return;
+        exit(-1);
     }
 
     //获取文件大小(以字节为单位)
@@ -193,26 +193,22 @@ void ota_start_signal(int fd)
     else 
     {
         printf("Failed to get file size\n");
-        return;
+        exit(-1);
     }
 
     while(1)
     {
-        memset(&data, 0x0 , sizeof(struct ota_data));
+        memset(&data, 0x0, sizeof(struct ota_data));
         data.header.frame_flag = 0x5A5A;
         //发送起始帧时把bin文件的大小一并发送出去
         data.header.total_len = file_size;
         memcpy(data.frame.frame_data,"ota_start_signal",strlen("ota_start_signal"));
         data.frame.frame_len = strlen("ota_start_signal");
 
+        while(send(fd, &data, sizeof(data), MSG_NOSIGNAL) <= 0);
         printf("send start signal to client %d.\n", fd);
-        ret = send(fd, &data, sizeof(data), MSG_NOSIGNAL);
-        if(ret > 0)
-        {
-            printf("send %s %d bytes to client %d\n", data.frame.frame_data, ret, fd);
-        }
         
-        memset(buf, 0, 32);
+        memset(buf, 0, sizeof(buf));
         length = recv(fd, buf, sizeof(buf), 0);
         if(length == 0)
         {
@@ -289,7 +285,7 @@ send_again:
         }
         
 recv_again:
-        memset(buf, 0, 32);
+        memset(buf, 0, sizeof(buf));
         length = recv(fd, buf, sizeof(buf), 0);
         if(length == 0)
         {
@@ -313,7 +309,7 @@ recv_again:
             continue;
         }
 
-        //接收到的回复不是ok,说明刚发的包有问题，需要再发一次 
+        //接收到的回复不是ok,说明刚发的包有问题,需要再发一次 
         else
         {
             if(try_times > 0)
@@ -369,7 +365,7 @@ send_end_signal:
         }
 
 recv_end_signal:
-        memset(buf, 0, 32);
+        memset(buf, 0, sizeof(buf));
         length = recv(fd, buf, sizeof(buf), 0);
         if(length == 0)
         {
@@ -415,25 +411,18 @@ void* server_thread(void* p)
     int fd = *(int*)p;
     unsigned char buf[32] = { 0 };
     struct ota_data data;
-    int ret = 0;
-    int length = 0;
 
     printf("pthread = %d\n",fd);
     sleep(3);
-    ota_start_signal(fd);
-    sleep(5);
     while(1)
     {
-        ret = ota_file_send(fd);
-        if(ret == 0) 
+        /* if ota failed then restart the ota process */
+        ota_start_signal(fd);
+        sleep(5);
+        if(0 == ota_file_send(fd)) 
         {
             printf("ota file send to client %d successful.\n", fd);
             break;
-        } 
-        else 
-        { 
-            /* ota failed then restart the ota process */
-            continue;
         }
     }
     printf("exit fd = %d\n",fd);

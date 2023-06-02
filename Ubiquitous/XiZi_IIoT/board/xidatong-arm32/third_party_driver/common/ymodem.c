@@ -373,13 +373,12 @@ int32_t SerialDownload(const uint32_t addr)
     Size = Ymodem_Receive(&tab_1024[0], addr);
     if(Size > 0)
     {
-        Serial_PutString("\n\n\r Programming Completed Successfully!\n\r--------------------------------\r\n Name: ");
+        Serial_PutString("\n\n\rProgramming Completed Successfully!\n\r\r\nName: ");
         Serial_PutString(FileName);
         Int2Str(Number, Size);
-        Serial_PutString("\n\r Size: ");
+        Serial_PutString("\n\rSize: ");
         Serial_PutString(Number);
         Serial_PutString(" Bytes\r\n");
-        Serial_PutString("-------------------\n");
     }
     else if(Size == -1)
     {
