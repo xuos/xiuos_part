@@ -254,6 +254,7 @@ int ota_file_send(int fd)
     if(NULL == file_fd)
     {
         printf("open file failed.\n");
+        fclose(file_fd);
         return -1;
     }
     fseek(file_fd, 0, SEEK_SET);
@@ -266,13 +267,36 @@ int ota_file_send(int fd)
 
         data.header.frame_flag = 0x5A5A;
         length = fread(data.frame.frame_data, 1, LENGTH, file_fd);
-        if(length > 0) 
+        if(length == LENGTH) 
         {
             printf("read %d bytes\n",length);
             data.frame.frame_id = frame_cnt;
             data.frame.frame_len = length;
             data.frame.crc = calculate_crc16(data.frame.frame_data, length);
             file_length += length;
+        }
+        else if(length > 0 && length < LENGTH)
+        {
+             if(ferror(file_fd)) 
+             {
+                printf("read %s file error!\n", basename(BIN_PATH));
+                ret = -1;
+                break;
+             }
+             else
+             {
+                printf("read %d bytes\n",length);
+                data.frame.frame_id = frame_cnt;
+                data.frame.frame_len = length;
+                data.frame.crc = calculate_crc16(data.frame.frame_data, length);
+                file_length += length;
+             }
+        }
+        //fread返回值为0,此时是个空包,不需要再发送了否则是冗余数据
+        else
+        {
+            printf("read %s file done!\n", basename(BIN_PATH));
+            break;
         }
 
 send_again:
@@ -303,7 +327,7 @@ recv_again:
         else if(0 == strncmp(buf, "ok", length))
         {
             printf("receive buf[%s] length %d from client %d.\n", buf, length, fd);
-            try_times = 10;
+            try_times = 5;
             printf("send to client %d frame[%d] data send done.\n",fd, frame_cnt);
             frame_cnt++;
             continue;
@@ -319,7 +343,7 @@ recv_again:
             } 
             else
             {
-                printf("send to client %d frame[%d] 10 times failed.\n",fd, frame_cnt);
+                printf("send to client %d frame[%d] 5 times failed.\n",fd, frame_cnt);
                 ret = -1;
                 break;
             }

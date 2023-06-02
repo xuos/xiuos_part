@@ -33,12 +33,20 @@
  * Private Function Prototypes
  ****************************************************************************/
 static uint32_t calculate_crc32(uint32_t addr, uint32_t len);
+static uint16_t calculate_crc16(uint8_t * data, uint32_t len);
 static void UpdateNewApplication(void);
 static void InitialVersion(void);
 static void BackupVersion(void);
 static void BootLoaderJumpApp(void);
 static status_t UpdateOTAFlag(ota_info_t *ptr);
+static void app_ota_by_iap(void);
 static void Update(void);
+
+#ifdef CONNECTION_ADAPTER_4G
+static void get_start_signal(struct Adapter* adapter);
+static int ota_data_recv(struct Adapter* adapter);
+static void app_ota_by_4g(void);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -59,6 +67,7 @@ static const mcuboot_t mcuboot =
     mcuboot_jump,
     mcuboot_delay
 };
+
 
 static const uint32_t crc32tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -141,6 +150,7 @@ static uint16_t calculate_crc16(uint8_t * data, uint32_t len)
     printf("crc = [0x%x]\n",reg_crc);
     return reg_crc;
 }
+
 
 /*******************************************************************************
 * 函 数 名: UpdateNewApplication
@@ -254,6 +264,7 @@ static void InitialVersion(void)
         UpdateOTAFlag(&ota_info);
     }
 }
+
 
 /*******************************************************************************
 * 函 数 名: BackupVersion
@@ -396,13 +407,14 @@ void app_clear_jumpflag(void)
     mcuboot.flash_deinit();
 }
 
+
 /*******************************************************************************
 * 函 数 名: Update
 * 功能描述: 根据实际情况进行初始化版本的烧录或者新版本的升级
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
-void Update(void)
+static void Update(void)
 {
     ota_info_t ota_info;
     mcuboot.flash_init();
@@ -419,6 +431,7 @@ void Update(void)
     }
     mcuboot.flash_deinit();
 }
+
 
 /*******************************************************************************
 * 函 数 名: ota_entry
@@ -667,7 +680,7 @@ try_again:
 * 形    参: adapter:Adapter指针,指向注册的4G设备
 * 返 回 值: 0:传输成功,-1:传输失败
 *******************************************************************************/
-void app_ota_by_4g(void)
+static void app_ota_by_4g(void)
 {
     struct ota_data recv_msg;
     char reply[16] = {0};
