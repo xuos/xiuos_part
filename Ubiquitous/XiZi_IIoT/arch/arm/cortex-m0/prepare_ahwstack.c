@@ -16,6 +16,7 @@
 #include "svc_handle.h"
 #include <board.h>
 #include <shell.h>
+#include <stdint.h>
 
 #if (defined ( __GNUC__ ) && defined ( __VFP_FP__ ) && !defined(__SOFTFP__))
 #define USE_FPU   1
