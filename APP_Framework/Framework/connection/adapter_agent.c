@@ -264,23 +264,25 @@ int AtSetReplyCharNum(ATAgentType agent, unsigned int num)
 
 int EntmSend(ATAgentType agent, const char *data, int len)
 {
-    char send_buf[128];
-    if(len > 128){
-        printf("send length %d more then max 128 Bytes.\n",len);
+    if(len > 256){
+        printf("send length %d more then max 256 Bytes.\n",len);
         return -1;
     }
+    char *send_buff = (char *)PrivMalloc(256);
 
     PrivMutexObtain(&agent->lock);
-    memset(send_buf, 0, 128);
+    memset(send_buff, 0, 256);
 
     agent->receive_mode = ENTM_MODE;
 
-    memcpy(send_buf, data, len);
-    // memcpy(send_buf + len, "!@", 2);
+    memcpy(send_buff, data, len);
 
-	PrivWrite(agent->fd, send_buf, len);
+    PrivWrite(agent->fd, send_buff, len);
     PrivMutexAbandon(&agent->lock);
-    printf("entm send %s length %d\n",send_buf, len);
+    printf("entm send length %d\n", len);
+
+    PrivFree(send_buff);
+
     return 0;
 }
 

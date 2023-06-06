@@ -104,6 +104,10 @@ static const uint32_t crc32tab[] = {
     0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
+#ifdef CONNECTION_ADAPTER_4G
+static ota_data start_msg;
+static ota_data recv_msg;
+#endif
 
 /*******************************************************************************
 * 函 数 名: calculate_crc32
@@ -147,7 +151,7 @@ static uint16_t calculate_crc16(uint8_t * data, uint32_t len)
                 reg_crc=reg_crc >>1;
         }
     }
-    printf("crc = [0x%x]\n",reg_crc);
+    KPrintf("crc = [0x%x]\n",reg_crc);
     return reg_crc;
 }
 
@@ -163,7 +167,8 @@ static void UpdateNewApplication(void)
 {
     status_t status;
     ota_info_t ota_info;  // 定义OTA信息结构体
-
+	
+	memset(&ota_info, 0, sizeof(ota_info_t));
     // 从Flash中读取OTA信息
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
 
@@ -260,7 +265,7 @@ static void InitialVersion(void)
         ota_info.os.size = size;
         ota_info.os.crc32 = calculate_crc32(XIUOS_FLAH_ADDRESS, size);
         ota_info.os.version = 0x1;
-        strncpy(ota_info.os.description, "This is the initial firmware for the device!", sizeof(ota_info.os.description));
+        strncpy(ota_info.os.description, "The initial firmware.", sizeof(ota_info.os.description));
         UpdateOTAFlag(&ota_info);
     }
 }
@@ -275,7 +280,9 @@ static void InitialVersion(void)
 static void BackupVersion(void)
 {
     status_t status;
-    ota_info_t ota_info;
+
+	ota_info_t ota_info;
+    memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
 
     ota_info.status = OTA_STATUS_BACKUP;
@@ -309,7 +316,9 @@ static void BackupVersion(void)
 static void BootLoaderJumpApp(void)
 {
     ota_info_t ota_info;
+
     mcuboot.flash_init();
+    memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
 
     if(ota_info.lastjumpflag == JUMP_FAILED_FLAG)
@@ -361,7 +370,7 @@ static void app_ota_by_iap(void)
 
     mcuboot.flash_init();
     mcuboot.serial_init();
-
+    memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
     ota_info.status = OTA_STATUS_DOWNLOADING;
     UpdateOTAFlag(&ota_info);
@@ -373,7 +382,7 @@ static void app_ota_by_iap(void)
         ota_info.down.size = size;
         ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, size);
         ota_info.down.version = ota_info.os.version + 1;
-        strncpy(ota_info.down.description, "OTA Test!",sizeof(ota_info.down.description));
+        strncpy(ota_info.down.description, "OTA Test bin.",sizeof(ota_info.down.description));
         ota_info.status = OTA_STATUS_READY;
         strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
         UpdateOTAFlag(&ota_info);
@@ -398,9 +407,10 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHE
 *******************************************************************************/
 void app_clear_jumpflag(void)
 {
-    mcuboot.flash_init();
+	ota_info_t ota_info;
+	mcuboot.flash_init();
     //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
-    ota_info_t ota_info;
+    memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
     ota_info.lastjumpflag = JUMP_SUCCESS_FLAG;
     UpdateOTAFlag(&ota_info);
@@ -418,6 +428,7 @@ static void Update(void)
 {
     ota_info_t ota_info;
     mcuboot.flash_init();
+    memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
     /* 此时APP分区还没有有效的固件,需要在bootloader下通过iap烧写出厂固件 */
     if((ota_info.os.size > APP_FLASH_SIZE) || (calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.os.size) != ota_info.os.crc32))
@@ -443,7 +454,6 @@ void ota_entry(void)
 {
     uint8_t ch1, ch2;
     uint32_t ret;
-    ota_info_t ota_info;
     uint32_t timeout = 1000;
 
     mcuboot.board_init();
@@ -500,51 +510,48 @@ void ota_entry(void)
 
 #ifdef CONNECTION_ADAPTER_4G
 /*******************************************************************************
-* 函 数 名: ota_data_recv
+* 函 数 名: get_start_signal
 * 功能描述: 通过4G方式从服务端接收开始信号
 * 形    参: adapter:Adapter指针,指向注册的4G设备
 * 返 回 值: 0:传输成功,-1:传输失败
 *******************************************************************************/
 static void get_start_signal(struct Adapter* adapter)
 {
-    struct ota_data recv_msg;
     ota_info_t ota_info;
     char reply[16] = {0};  
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
 
+    memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
     ota_info.status = OTA_STATUS_DOWNLOADING;
     UpdateOTAFlag(&ota_info);
     while(1)
     {
-        memset(&recv_msg, 0, sizeof(recv_msg));
+        memset(&start_msg, 0, sizeof(ota_data));
         /* step1:Confirm the start signal of transmission. */
-        printf("waiting for start msg...\n");
-        if(AdapterDeviceRecv(adapter, &recv_msg, sizeof(recv_msg)) >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
+        KPrintf("waiting for start msg...\n");
+        if(AdapterDeviceRecv(adapter, &start_msg, sizeof(start_msg)) >= 0 && start_msg.header.frame_flag == STARTFLAG) 
         {
-            if(0 == strncmp("ota_start_signal",recv_msg.frame.frame_data, strlen("ota_start_signal"))) 
+            if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,start_msg.header.total_len) != kStatus_Success)
             {
-                if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,recv_msg.header.total_len) != kStatus_Success)
-                {
-                    printf("Failed to erase target fash!\n");
-                    break;
-                } 
-                else 
-                {
-                    printf("Erase flash successful,erase length is %d bytes.\n",recv_msg.header.total_len);
-                }
-                memset(reply, 0, sizeof(reply));
-                memcpy(reply, "ready", strlen("ready"));
-                printf("receive start signal,send [ready] signal to server\n");
-                while(AdapterDeviceSend(adapter, reply, strlen(reply)) < 0);
+                KPrintf("Failed to erase target fash!\n");
                 break;
+            } 
+            else 
+            {
+                KPrintf("Erase flash successful,erase length is %d bytes.\n",start_msg.header.total_len);
             }
+            memset(reply, 0, sizeof(reply));
+            memcpy(reply, "ready", strlen("ready"));
+            KPrintf("receive start signal,send [ready] signal to server\n");
+            while(AdapterDeviceSend(adapter, reply, strlen(reply)) < 0);
+            break;
         }
         else
         {
             memset(reply, 0, sizeof(reply));
             memcpy(reply, "notready", strlen("notready"));
-			printf("not receive start signal,send [notready] signal to server\n");
+			KPrintf("not receive start signal,send [notready] signal to server\n");
             while(AdapterDeviceSend(adapter, reply, strlen(reply)) < 0);
             continue;
         }
@@ -560,31 +567,53 @@ static void get_start_signal(struct Adapter* adapter)
 *******************************************************************************/
 static int ota_data_recv(struct Adapter* adapter)
 {
-    struct ota_data recv_msg;
     ota_info_t ota_info;
     char reply[16] = {0};
     int ret = 0, frame_cnt = 0, try_times = 5;
     uint32_t file_size = 0;  
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
 
+    memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
     ota_info.status = OTA_STATUS_DOWNLOADING;
     UpdateOTAFlag(&ota_info);
     
     while(1)
     {
-        memset(&recv_msg, 0, sizeof(recv_msg));
-        if(AdapterDeviceRecv(adapter, &recv_msg, sizeof(recv_msg)) >= 0 && recv_msg.header.frame_flag == 0x5A5A) 
+        memset(&recv_msg, 0, sizeof(ota_data));
+        if(AdapterDeviceRecv(adapter, &recv_msg, sizeof(recv_msg)) >= 0) 
         {
-            if(0 == strncmp("ota_start_signal",recv_msg.frame.frame_data, strlen("ota_start_signal"))) 
+            if(recv_msg.header.frame_flag == STARTFLAG) //这里不应该再出现开始帧,丢弃当前数据继续接收
             {
-                //这里不应该再出现开始信号,丢弃当前数据继续接收
                 continue;
-            }
-            
-            if(0 == strncmp("ota_end_signal",recv_msg.frame.frame_data, strlen("ota_end_signal"))) //说明当前是结束帧
+            }  
+            else if(recv_msg.header.frame_flag == DATAFLAG)  //说明当前是bin包里数据封装成的数据帧
             {
-                printf("total %d frames %d bytes crc[0x%x],receive successful.\n",frame_cnt,recv_msg.header.total_len,recv_msg.frame.crc);
+                frame_cnt = recv_msg.frame.frame_id;
+                if(recv_msg.frame.crc == calculate_crc16(recv_msg.frame.frame_data,recv_msg.frame.frame_len))
+                {
+                    KPrintf("current frame[%d],length %d bytes.\n",frame_cnt,recv_msg.frame.frame_len);
+                    if(mcuboot.op_flash_write(flashdestination, recv_msg.frame.frame_data, recv_msg.frame.frame_len) != kStatus_Success)
+                    {
+                        KPrintf("current frame[%d] flash failed.\n",frame_cnt);
+                        ret = -1;
+                        break;
+                    }
+                    else
+                    {
+                        KPrintf("current frame[%d] is written to flash 0x%x address successful.\n", frame_cnt, flashdestination);
+                        flashdestination += recv_msg.frame.frame_len;
+                    } 
+                }  
+                else 
+                {
+                    KPrintf("current frame[%d] crc check failed,try again!\n",frame_cnt);
+                    goto try_again;
+                }
+            }
+            else if(recv_msg.header.frame_flag == ENDTFLAG)  //说明当前是结束帧
+            {
+                KPrintf("total %d frames %d bytes crc[0x%x],receive successful.\n",frame_cnt,recv_msg.header.total_len,recv_msg.frame.crc);
                 memset(reply, 0, sizeof(reply));
                 memcpy(reply, "ok", strlen("ok"));
                 AdapterDeviceSend(adapter, reply, strlen(reply));
@@ -596,25 +625,8 @@ static int ota_data_recv(struct Adapter* adapter)
                 ret = 0;
                 break;
             }
-            frame_cnt = recv_msg.frame.frame_id;
-            if(recv_msg.frame.crc == calculate_crc16(recv_msg.frame.frame_data,recv_msg.frame.frame_len))
+            else //说明当前接收的数据帧不是上述三种数据帧的任意一种
             {
-                printf("current frame[%d],length %d bytes.\n",frame_cnt,recv_msg.frame.frame_len);
-                if(mcuboot.op_flash_write(flashdestination, recv_msg.frame.frame_data, recv_msg.frame.frame_len) != kStatus_Success)
-                {
-                    printf("current frame[%d] flash failed.\n",frame_cnt);
-                    ret = -1;
-                    break;
-                }
-                else
-                {
-                    printf("current frame[%d] is written to flash 0x%x address successful.\n", frame_cnt, flashdestination);
-                    flashdestination += recv_msg.frame.frame_len;
-                } 
-            }  
-            else 
-            {
-                printf("current frame[%d] crc check failed,try again!\n",frame_cnt);
                 goto try_again;
             }
             
@@ -625,28 +637,28 @@ send_ok_again:
             ret = AdapterDeviceSend(adapter, reply, strlen(reply));
             if(ret < 0)
             {
-                printf("send ok failed.\n");
+                KPrintf("send ok failed.\n");
                 goto send_ok_again;
             }
-            printf("send reply[%s] done.\n",reply);
+            KPrintf("send reply[%s] done.\n",reply);
             //send ok后把try_times重置为5
             try_times = 5;
             continue;
         }
 
-        //没有接收到数据或者接收到的数据帧frame_flag不等于0x5A5A,需要发个retry的命令告诉服务器需要重传
+        //没有接收到数据或者接收到的数据帧不满足条件,需要发个retry的命令告诉服务器需要重传
         else 
         {
 try_again:
             if(try_times == 0)
             {
-                printf("current frame[%d] try 5 times failed,break out!\n",frame_cnt);
+                KPrintf("current frame[%d] try 5 times failed,break out!\n",frame_cnt);
                 ret = -1;
                 break;
             }
             memset(reply, 0, sizeof(reply));
             memcpy(reply, "retry", strlen("retry"));
-            printf("current frame[%d] receive failed. retry\n",frame_cnt);
+            KPrintf("current frame[%d] receive failed. retry\n",frame_cnt);
             AdapterDeviceSend(adapter, reply, strlen(reply));
             try_times--;
             continue;
@@ -659,7 +671,7 @@ try_again:
         ota_info.down.size = file_size;
         ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, file_size);
         ota_info.down.version = ota_info.os.version + 1;
-        strncpy(ota_info.down.description, "4G OTA bin package !",sizeof(ota_info.down.description));
+        strncpy(ota_info.down.description, "4G OTA bin.",sizeof(ota_info.down.description));
         ota_info.status = OTA_STATUS_READY;
         strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
         UpdateOTAFlag(&ota_info);
@@ -675,18 +687,17 @@ try_again:
 
 
 /*******************************************************************************
-* 函 数 名: OtaKTaskEntry
+* 函 数 名: app_ota_by_4g
 * 功能描述: 通过命令来进行ota升级,该函数与升级的命令关联,通过4g方式传输bin文件
 * 形    参: adapter:Adapter指针,指向注册的4G设备
 * 返 回 值: 0:传输成功,-1:传输失败
 *******************************************************************************/
 static void app_ota_by_4g(void)
 {
-    struct ota_data recv_msg;
     char reply[16] = {0};
     uint32_t baud_rate = BAUD_RATE_115200;
-    uint8 server_addr[64] = "115.238.53.60";
-    uint8 server_port[64] = "7777";
+    uint8_t server_addr[16] = "115.238.53.60";
+    uint8_t server_port[8] = "7777";
 
     mcuboot.flash_init();
 
@@ -701,7 +712,7 @@ static void app_ota_by_4g(void)
     {
         /* step1:Confirm the start signal of transmission. */
         get_start_signal(adapter);
-        printf("start receive ota bin file.\n");
+        KPrintf("start receive ota bin file.\n");
         /* step2:start receive bin file,first wait for 4s. */
         PrivTaskDelay(4000);
         if(0 == ota_data_recv(adapter))
@@ -710,7 +721,7 @@ static void app_ota_by_4g(void)
         } 
     }
     mcuboot.flash_deinit();
-    printf("ota file done,start reboot.\n");
+    KPrintf("ota file done,start reboot.\n");
     PrivTaskDelay(2000);
     mcuboot.op_reset();
 }

@@ -25,7 +25,10 @@
 
 #define JUMP_FAILED_FLAG  0XABABABAB
 #define JUMP_SUCCESS_FLAG 0XCDCDCDCD
-#define LENGTH 1024   //每帧数据的数据包长度
+#define STARTFLAG             0x1A2B   //数据帧开始信号标记
+#define DATAFLAG              0x3C4D   //数据帧数据信号标记
+#define ENDTFLAG              0x5E6F   //数据帧结束信号标记
+#define LENGTH                  1024   //每帧数据的数据包长度
 
 typedef enum {
     OTA_STATUS_IDLE = 0,     // 空闲状态,没有进行OTA升级
@@ -43,8 +46,7 @@ typedef struct {
     uint32_t size;              // 应用程序大小,记录分区固件的大小
     uint32_t crc32;             // 应用程序CRC32校验值,记录分区固件的crc32值
     uint32_t version;           // 应用程序版本号,记录分区固件的版本号
-    uint32_t reserve;           // 保留字段
-    uint8_t  description[128];  // 固件的描述信息,最多128个字符
+    uint8_t  description[32];   // 固件的描述信息,最多32个字符
 } firmware_t;
 
 
@@ -55,32 +57,31 @@ typedef struct {
     firmware_t down;              // Download分区属性信息
     uint32_t status;              // 升级状态,取值来自于ota_status_t类型
     uint32_t lastjumpflag;        // bootloaer跳转失败的标志,bootloader里置0xABABABAB,跳转成功后在应用里置0xCDCDCDCD
-    uint32_t reserve[2];          // 保留字段
-    uint8_t  error_message[128];  // 错误信息,最多128个字符
+    uint8_t  error_message[64];   // 错误信息,最多64个字符
 } ota_info_t;
 
 
 /*bin包传输过程中的数据帧相关的结构体*/
-struct ota_header_t
+typedef struct
 {
     uint16_t frame_flag;          // frame start flag 2 Bytes
     uint16_t dev_sid;             // device software version
     uint32_t total_len;           // send data total length caculated from each frame_len 
-};
+} ota_header_t;
 
-struct ota_frame_t
+typedef struct
 {
     uint32_t frame_id;               // Current frame id
-    uint8_t  frame_data[LENGTH];     // Current frame data,max length 256
+    uint8_t  frame_data[LENGTH];     // Current frame data
     uint16_t frame_len;              // Current frame data length
     uint16_t crc;                    // Current frame data crc
-};
+} ota_frame_t;
 
-struct ota_data
+typedef struct
 {
-    struct ota_header_t header;
-    struct ota_frame_t frame;
-};
+    ota_header_t header;
+    ota_frame_t frame;
+} ota_data;
 
 
 void app_clear_jumpflag(void);

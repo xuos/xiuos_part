@@ -38,32 +38,34 @@
 #include <fcntl.h>
 #include <ifaddrs.h>
 
+#define STARTFLAG  0x1A2B   //数据帧开始信号标记
+#define DATAFLAG   0x3C4D   //数据帧数据信号标记
+#define ENDTFLAG   0x5E6F   //数据帧结束信号标记
+#define PORT         7777   //socket端口号
+#define SIZE          100   //socket链接限制为100
+#define LENGTH        1024  //每帧数据的数据包长度
+#define BIN_PATH     "/home/aep05/wgz/XiZi-xidatong-arm32-app.bin"  //bin包的路径
 
-#define PORT 7777     //socket端口号
-#define SIZE  100     //socket链接限制为100
-#define LENGTH 1024   //每帧数据的数据包长度
-#define BIN_PATH   "/home/aep05/wgz/XiZi-xidatong-arm32-app.bin"  //bin包的路径
-
-struct ota_header_t
+typedef struct
 {
     uint16_t frame_flag;          // frame start flag 2 Bytes
     uint16_t dev_sid;             // device software version
     uint32_t total_len;           // send data total length caculated from each frame_len 
-};
+} ota_header_t;
 
-struct ota_frame_t
+typedef struct
 {
     uint32_t frame_id;               // Current frame id
-    uint8_t  frame_data[LENGTH];     // Current frame data,max length 256
+    uint8_t  frame_data[LENGTH];     // Current frame data
     uint16_t frame_len;              // Current frame data length
     uint16_t crc;                    // Current frame data crc
-};
+} ota_frame_t;
 
-struct ota_data
+typedef struct
 {
-    struct ota_header_t header;
-    struct ota_frame_t frame;
-};
+    ota_header_t header;
+    ota_frame_t frame;
+} ota_data;
 
 
 static int serverfd;             // 服务器socket
@@ -168,7 +170,7 @@ void sockt_init(void)
 *******************************************************************************/
 void ota_start_signal(int fd)
 {
-    struct ota_data data;
+    ota_data data;
     struct stat st;
     uint8_t buf[32];
     int file_size = 0, file_frame_cnt = 0, length = 0;
@@ -198,12 +200,10 @@ void ota_start_signal(int fd)
 
     while(1)
     {
-        memset(&data, 0x0, sizeof(struct ota_data));
-        data.header.frame_flag = 0x5A5A;
+        memset(&data, 0x0, sizeof(ota_data));
+        data.header.frame_flag = STARTFLAG;
         //发送起始帧时把bin文件的大小一并发送出去
         data.header.total_len = file_size;
-        memcpy(data.frame.frame_data,"ota_start_signal",strlen("ota_start_signal"));
-        data.frame.frame_len = strlen("ota_start_signal");
 
         while(send(fd, &data, sizeof(data), MSG_NOSIGNAL) <= 0);
         printf("send start signal to client %d.\n", fd);
@@ -240,7 +240,7 @@ void ota_start_signal(int fd)
 int ota_file_send(int fd)
 {
     unsigned char buf[32] = { 0 };
-    struct ota_data data;
+    ota_data data;
     FILE *file_fd;
     int length = 0;
     int try_times;
@@ -265,7 +265,7 @@ int ota_file_send(int fd)
     {
         memset(&data, 0, sizeof(data));
 
-        data.header.frame_flag = 0x5A5A;
+        data.header.frame_flag = DATAFLAG;
         length = fread(data.frame.frame_data, 1, LENGTH, file_fd);
         if(length == LENGTH) 
         {
@@ -359,7 +359,7 @@ recv_again:
         memset(file_buf, 0, file_length);
         memset(&data, 0, sizeof(data));
 
-        data.header.frame_flag = 0x5A5A;
+        data.header.frame_flag = ENDTFLAG;
 
         file_fd = fopen(BIN_PATH, "r");
         if(NULL == file_fd)
@@ -374,9 +374,7 @@ recv_again:
         {
             data.frame.frame_id = frame_cnt;
             data.header.total_len = file_length;
-            data.frame.frame_len = strlen("ota_end_signal");
             data.frame.crc = calculate_crc16(file_buf, length);
-            memcpy(data.frame.frame_data,"ota_end_signal",strlen("ota_end_signal"));
         }
 
 send_end_signal:
@@ -434,7 +432,7 @@ void* server_thread(void* p)
 {
     int fd = *(int*)p;
     unsigned char buf[32] = { 0 };
-    struct ota_data data;
+    ota_data data;
 
     printf("pthread = %d\n",fd);
     sleep(3);
