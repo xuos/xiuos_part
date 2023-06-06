@@ -18,6 +18,7 @@
 #ifdef TOOL_SHELL
 #include <shell.h>
 #endif
+#include <stdint.h>
 
 #if (defined ( __GNUC__ ) && defined ( __VFP_FP__ ) && !defined(__SOFTFP__))
 #define USE_FPU   1
