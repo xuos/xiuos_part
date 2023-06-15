@@ -45,11 +45,14 @@ typedef struct{
 }MQTT_TCB;
 
 int AdapterNetActive(void);
+int MQTT_Send(const uint8_t* buf, int buflen);
+int MQTT_Recv(uint8_t* buf, int buflen);
 int MQTT_Connect(void);
 void MQTT_Disconnect(void);
 int MQTT_SubscribeTopic(uint8_t *topic_name);
 int MQTT_UnSubscribeTopic(uint8_t *topic_name);
-void MQTT_PublishQs0(uint8_t *topic_name,uint8_t *data, uint16_t data_len);
+void MQTT_PublishDataQs0(uint8_t *topic_name,uint8_t *data, uint16_t data_len);
+void MQTT_PublishDataQs1(uint8_t *topic_name,uint8_t *data, uint16_t data_len);
 int MQTT_SendHeart(void);
 void MQTT_DealPublishData(uint8_t *data, uint16_t data_len);
 #endif
