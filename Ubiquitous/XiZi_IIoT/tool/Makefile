@@ -8,4 +8,8 @@ ifeq ($(CONFIG_TOOL_USING_OTA),y)
   SRC_DIR += bootloader
 endif
 
+ifeq ($(CONFIG_TOOL_USING_MQTT),y)
+  SRC_DIR += mqtt
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

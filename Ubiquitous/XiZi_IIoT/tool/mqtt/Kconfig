@@ -1,0 +1,12 @@
+menu "MQTT function"
+
+    menuconfig TOOL_USING_MQTT
+        bool "Enable support MQTT function"
+        default n
+        select SUPPORT_CONNECTION_FRAMEWORK
+        select CONNECTION_ADAPTER_4G
+        
+    if TOOL_USING_MQTT
+    endif
+
+endmenu
