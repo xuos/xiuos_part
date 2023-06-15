@@ -14,9 +14,27 @@ menu "OTA function"
 
             config MCUBOOT_APPLICATION
                     bool "Config as application."
+        endchoice
+
+        if MCUBOOT_APPLICATION
+            menu "The way of OTA firmware upgrade."
+                config OTA_BY_IAP
+                    bool "Through serial port IAP."
+                    default y
+
+                config OTA_BY_TCPSERVER
+                    bool "Through the public network TCP server."
+                    default n
                     select SUPPORT_CONNECTION_FRAMEWORK
                     select CONNECTION_ADAPTER_4G
-        endchoice
+
+                config OTA_BY_PLATFORM
+                    bool "Through IoT management platform."
+                    default n
+                    select SUPPORT_CONNECTION_FRAMEWORK
+                    select CONNECTION_ADAPTER_4G
+            endmenu
+        endif
 
 
         menu "Flash area address and size configuration."

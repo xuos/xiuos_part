@@ -33,20 +33,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 static uint32_t calculate_crc32(uint32_t addr, uint32_t len);
-static uint16_t calculate_crc16(uint8_t * data, uint32_t len);
-static void UpdateNewApplication(void);
+static status_t UpdateOTAFlag(ota_info_t *ptr);
 static void InitialVersion(void);
 static void BackupVersion(void);
-static void BootLoaderJumpApp(void);
-static status_t UpdateOTAFlag(ota_info_t *ptr);
-static void app_ota_by_iap(void);
+static void UpdateNewApplication(void);
 static void Update(void);
-
-#ifdef CONNECTION_ADAPTER_4G
-static void get_start_signal(struct Adapter* adapter);
-static int ota_data_recv(struct Adapter* adapter);
-static void app_ota_by_4g(void);
-#endif
+static void BootLoaderJumpApp(void);
 
 /****************************************************************************
  * Private Data
@@ -67,8 +59,6 @@ static const mcuboot_t mcuboot =
     mcuboot_jump,
     mcuboot_delay
 };
-
-
 static const uint32_t crc32tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
     0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
@@ -104,10 +94,6 @@ static const uint32_t crc32tab[] = {
     0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
-#ifdef CONNECTION_ADAPTER_4G
-static ota_data start_msg;
-static ota_data recv_msg;
-#endif
 
 /*******************************************************************************
 * 函 数 名: calculate_crc32
@@ -131,28 +117,83 @@ static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 
 
 /*******************************************************************************
-* 函 数 名: calculate_crc16
-* 功能描述: 计算给定长度的数据的crc16的值,用于OTA传输过程中数据帧的校验
-* 形    参: data:数据buffer
-            len:表示需要计算CRC16的数据长度
-* 返 回 值: 计算得到的CRC16值
+* 函 数 名: UpdateOTAFlag
+* 功能描述: 更新OTA Flag区域的信息，版本完成下载后在app里进行调用
+* 形    参: ptr:ota_info_t结构体指针,描述OTA升级相关信息
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码
 *******************************************************************************/
-static uint16_t calculate_crc16(uint8_t * data, uint32_t len)
+static status_t UpdateOTAFlag(ota_info_t *ptr)
 {
-    uint16_t reg_crc=0xFFFF;
-    while(len--) 
+    status_t status;
+
+    status = mcuboot.op_flash_erase(FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
+    if(status != kStatus_Success)
     {
-        reg_crc ^= *data++;
-        for(int j=0;j<8;j++) 
-        {
-            if(reg_crc & 0x01)
-                reg_crc=reg_crc >>1 ^ 0xA001;
-            else
-                reg_crc=reg_crc >>1;
-        }
+        return status;
     }
-    KPrintf("crc = [0x%x]\n",reg_crc);
-    return reg_crc;
+    status = mcuboot.op_flash_write(FLAG_FLAH_ADDRESS,(void *)ptr,sizeof(ota_info_t));
+
+    return status;
+}
+
+
+/*******************************************************************************
+* 函 数 名: InitialVersion
+* 功能描述: 该函数可以烧写APP分区的初始化版本,初始化版本的版本号为0x1
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+static void InitialVersion(void)
+{
+    int32_t size;
+    ota_info_t ota_info;
+
+    memset(&ota_info, 0, sizeof(ota_info_t));
+    size = mcuboot.download_by_serial(XIUOS_FLAH_ADDRESS);
+    if(size > 0)
+    {
+        ota_info.os.size = size;
+        ota_info.os.crc32 = calculate_crc32(XIUOS_FLAH_ADDRESS, size);
+        ota_info.os.version = 0x1;
+        strncpy(ota_info.os.description, "The initial firmware.", sizeof(ota_info.os.description));
+        UpdateOTAFlag(&ota_info);
+    }
+}
+
+
+/*******************************************************************************
+* 函 数 名: BackupVersion
+* 功能描述: 版本回退函数,如果升级的APP存在bug导致无法跳转需调用此函数进行版本回退
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+static void BackupVersion(void)
+{
+    status_t status;
+
+	ota_info_t ota_info;
+    memset(&ota_info, 0, sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
+
+    ota_info.status = OTA_STATUS_BACKUP;
+    UpdateOTAFlag(&ota_info);
+    status = mcuboot.op_flash_copy(BAKUP_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.bak.size);
+    if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.bak.size) == ota_info.bak.crc32))
+    {
+        mcuboot.print_string("\r\n------Backup app version success!------\r\n");
+        ota_info.os.size = ota_info.bak.size;
+        ota_info.os.crc32 = ota_info.bak.crc32;
+        ota_info.os.version = ota_info.bak.version;
+        strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
+        UpdateOTAFlag(&ota_info);
+    }
+    else
+    {
+        mcuboot.print_string("\r\n------Backup app version failed!------\r\n");
+        ota_info.status = OTA_STATUS_ERROR;
+        strncpy(ota_info.error_message, "Backup app version failed!",sizeof(ota_info.error_message));
+        UpdateOTAFlag(&ota_info);
+    }
 }
 
 
@@ -248,62 +289,28 @@ finish:
 
 
 /*******************************************************************************
-* 函 数 名: InitialVersion
-* 功能描述: 该函数可以烧写APP分区的初始化版本,初始化版本的版本号为0x1
+* 函 数 名: Update
+* 功能描述: 根据实际情况进行初始化版本的烧录或者新版本的升级
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
-static void InitialVersion(void)
+static void Update(void)
 {
-    int32_t size;
     ota_info_t ota_info;
-
-    memset(&ota_info, 0, sizeof(ota_info_t));
-    size = mcuboot.download_by_serial(XIUOS_FLAH_ADDRESS);
-    if(size > 0)
-    {
-        ota_info.os.size = size;
-        ota_info.os.crc32 = calculate_crc32(XIUOS_FLAH_ADDRESS, size);
-        ota_info.os.version = 0x1;
-        strncpy(ota_info.os.description, "The initial firmware.", sizeof(ota_info.os.description));
-        UpdateOTAFlag(&ota_info);
-    }
-}
-
-
-/*******************************************************************************
-* 函 数 名: BackupVersion
-* 功能描述: 版本回退函数,如果升级的APP存在bug导致无法跳转需调用此函数进行版本回退
-* 形    参: 无
-* 返 回 值: 无
-*******************************************************************************/
-static void BackupVersion(void)
-{
-    status_t status;
-
-	ota_info_t ota_info;
+    mcuboot.flash_init();
     memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
-
-    ota_info.status = OTA_STATUS_BACKUP;
-    UpdateOTAFlag(&ota_info);
-    status = mcuboot.op_flash_copy(BAKUP_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.bak.size);
-    if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.bak.size) == ota_info.bak.crc32))
+    /* 此时APP分区还没有有效的固件,需要在bootloader下通过iap烧写出厂固件 */
+    if((ota_info.os.size > APP_FLASH_SIZE) || (calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.os.size) != ota_info.os.crc32))
     {
-        mcuboot.print_string("\r\n------Backup app version success!------\r\n");
-        ota_info.os.size = ota_info.bak.size;
-        ota_info.os.crc32 = ota_info.bak.crc32;
-        ota_info.os.version = ota_info.bak.version;
-        strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
-        UpdateOTAFlag(&ota_info);
+        mcuboot.print_string("\r\nNeed to flash initial firmware!\r\n");
+        InitialVersion();
     }
     else
     {
-        mcuboot.print_string("\r\n------Backup app version failed!------\r\n");
-        ota_info.status = OTA_STATUS_ERROR;
-        strncpy(ota_info.error_message, "Backup app version failed!",sizeof(ota_info.error_message));
-        UpdateOTAFlag(&ota_info);
+        UpdateNewApplication();
     }
+    mcuboot.flash_deinit();
 }
 
 
@@ -336,27 +343,7 @@ static void BootLoaderJumpApp(void)
 }
 
 
-/*******************************************************************************
-* 函 数 名: UpdateOTAFlag
-* 功能描述: 更新OTA Flag区域的信息，版本完成下载后在app里进行调用
-* 形    参: ptr:ota_info_t结构体指针,描述OTA升级相关信息
-* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码
-*******************************************************************************/
-static status_t UpdateOTAFlag(ota_info_t *ptr)
-{
-    status_t status;
-
-    status = mcuboot.op_flash_erase(FLAG_FLAH_ADDRESS,sizeof(ota_info_t));
-    if(status != kStatus_Success)
-    {
-        return status;
-    }
-    status = mcuboot.op_flash_write(FLAG_FLAH_ADDRESS,(void *)ptr,sizeof(ota_info_t));
-
-    return status;
-}
-
-
+#ifdef OTA_BY_IAP
 /*********************************************************************************
 * 函 数 名: app_ota_by_iap
 * 功能描述: 通过命令来进行ota升级,该函数与升级的命令关联,通过串口iap方式传输bin文件
@@ -397,118 +384,42 @@ static void app_ota_by_iap(void)
     mcuboot.op_reset();
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),iap, app_ota_by_iap, ota by iap function);
+#endif
 
 
-/*******************************************************************************
-* 函 数 名: app_clear_jumpflag
-* 功能描述: 跳转app成功后,在app中调用将lastjumpflag重置为0XCDCDCDCD
-* 形    参: 无
-* 返 回 值: 无
-*******************************************************************************/
-void app_clear_jumpflag(void)
-{
-	ota_info_t ota_info;
-	mcuboot.flash_init();
-    //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
-    memset(&ota_info, 0, sizeof(ota_info_t));
-    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
-    ota_info.lastjumpflag = JUMP_SUCCESS_FLAG;
-    UpdateOTAFlag(&ota_info);
-    mcuboot.flash_deinit();
-}
-
+#ifdef OTA_BY_TCPSERVER
+static uint16_t calculate_crc16(uint8_t * data, uint32_t len);
+static void get_start_signal(struct Adapter* adapter);
+static int ota_data_recv(struct Adapter* adapter);
+static ota_data start_msg;
+static ota_data recv_msg;
 
 /*******************************************************************************
-* 函 数 名: Update
-* 功能描述: 根据实际情况进行初始化版本的烧录或者新版本的升级
-* 形    参: 无
-* 返 回 值: 无
+* 函 数 名: calculate_crc16
+* 功能描述: 计算给定长度的数据的crc16的值,用于OTA传输过程中数据帧的校验
+* 形    参: data:数据buffer
+            len:表示需要计算CRC16的数据长度
+* 返 回 值: 计算得到的CRC16值
 *******************************************************************************/
-static void Update(void)
+static uint16_t calculate_crc16(uint8_t * data, uint32_t len)
 {
-    ota_info_t ota_info;
-    mcuboot.flash_init();
-    memset(&ota_info, 0, sizeof(ota_info_t));
-    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
-    /* 此时APP分区还没有有效的固件,需要在bootloader下通过iap烧写出厂固件 */
-    if((ota_info.os.size > APP_FLASH_SIZE) || (calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.os.size) != ota_info.os.crc32))
+    uint16_t reg_crc=0xFFFF;
+    while(len--) 
     {
-        mcuboot.print_string("\r\nNeed to flash initial firmware!\r\n");
-        InitialVersion();
-    }
-    else
-    {
-        UpdateNewApplication();
-    }
-    mcuboot.flash_deinit();
-}
-
-
-/*******************************************************************************
-* 函 数 名: ota_entry
-* 功能描述: bootloader的入口函数
-* 形    参: 无
-* 返 回 值: 无
-*******************************************************************************/
-void ota_entry(void)
-{
-    uint8_t ch1, ch2;
-    uint32_t ret;
-    uint32_t timeout = 1000;
-
-    mcuboot.board_init();
-
-    mcuboot.print_string("Please press 'space' key into menu in 10s !!!\r\n");
-    
-    while(timeout)
-    { 
-        ret = (SerialKeyPressed((uint8_t*)&ch1));
-        if(ret) break;
-        timeout--;
-        mcuboot.op_delay(10);
-    }
-
-    while(1)
-    {
-
-        if((ret)&&(ch1 == 0x20))
+        reg_crc ^= *data++;
+        for(int j=0;j<8;j++) 
         {
-            mcuboot.print_string("\r\nPlease slecet:");
-            
-            mcuboot.print_string("\r\n 1:run app");
-            mcuboot.print_string("\r\n 2:update app");
-            mcuboot.print_string("\r\n 3:reboot \r\n");
-
-
-            ch2 = GetKey();
-            switch(ch2)
-            {
-                case 0x31:   
-                    BootLoaderJumpApp();
-                    break;
-
-                case 0x32:
-                    Update();
-                    BootLoaderJumpApp();
-                    break;
-
-                case 0x33:
-                    mcuboot.op_reset();
-                default:
-                    break;
-            }
+            if(reg_crc & 0x01)
+                reg_crc=reg_crc >>1 ^ 0xA001;
+            else
+                reg_crc=reg_crc >>1;
         }
-        //10s内不按下空格键默然进行升级,升级完成后跳转
-        else
-        {
-            Update();
-            BootLoaderJumpApp();
-        } 
     }
+    KPrintf("crc = [0x%x]\n",reg_crc);
+    return reg_crc;
 }
 
 
-#ifdef CONNECTION_ADAPTER_4G
 /*******************************************************************************
 * 函 数 名: get_start_signal
 * 功能描述: 通过4G方式从服务端接收开始信号
@@ -728,3 +639,90 @@ static void app_ota_by_4g(void)
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, app_ota_by_4g, ota by 4g function);
 #endif
+
+
+#ifdef OTA_BY_PLATFORM
+#endif
+
+
+/*******************************************************************************
+* 函 数 名: app_clear_jumpflag
+* 功能描述: 跳转app成功后,在app中调用将lastjumpflag重置为0XCDCDCDCD
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+void app_clear_jumpflag(void)
+{
+	ota_info_t ota_info;
+	mcuboot.flash_init();
+    //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
+    memset(&ota_info, 0, sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
+    ota_info.lastjumpflag = JUMP_SUCCESS_FLAG;
+    UpdateOTAFlag(&ota_info);
+    mcuboot.flash_deinit();
+}
+
+
+/*******************************************************************************
+* 函 数 名: ota_entry
+* 功能描述: bootloader的入口函数
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+void ota_entry(void)
+{
+    uint8_t ch1, ch2;
+    uint32_t ret;
+    uint32_t timeout = 1000;
+
+    mcuboot.board_init();
+
+    mcuboot.print_string("Please press 'space' key into menu in 10s !!!\r\n");
+    
+    while(timeout)
+    { 
+        ret = (SerialKeyPressed((uint8_t*)&ch1));
+        if(ret) break;
+        timeout--;
+        mcuboot.op_delay(10);
+    }
+
+    while(1)
+    {
+
+        if((ret)&&(ch1 == 0x20))
+        {
+            mcuboot.print_string("\r\nPlease slecet:");
+            
+            mcuboot.print_string("\r\n 1:run app");
+            mcuboot.print_string("\r\n 2:update app");
+            mcuboot.print_string("\r\n 3:reboot \r\n");
+
+
+            ch2 = GetKey();
+            switch(ch2)
+            {
+                case 0x31:   
+                    BootLoaderJumpApp();
+                    break;
+
+                case 0x32:
+                    Update();
+                    BootLoaderJumpApp();
+                    break;
+
+                case 0x33:
+                    mcuboot.op_reset();
+                default:
+                    break;
+            }
+        }
+        //10s内不按下空格键默然进行升级,升级完成后跳转
+        else
+        {
+            Update();
+            BootLoaderJumpApp();
+        } 
+    }
+}
