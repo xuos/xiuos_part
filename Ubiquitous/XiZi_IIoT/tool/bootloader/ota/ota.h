@@ -23,6 +23,11 @@
 
 #include "flash_ops.h"
 
+
+#define MAX_MAJOR 99   //最大主版本号
+#define MAX_MINOR 99   //最大次版本号
+#define MAX_PATCH 99   //最大修订版本号
+
 #define JUMP_FAILED_FLAG  0XABABABAB
 #define JUMP_SUCCESS_FLAG 0XCDCDCDCD
 #define STARTFLAG             0x1A2B   //数据帧开始信号标记
@@ -45,8 +50,8 @@ typedef enum {
 typedef struct {
     uint32_t size;              // 应用程序大小,记录分区固件的大小
     uint32_t crc32;             // 应用程序CRC32校验值,记录分区固件的crc32值
-    uint32_t version;           // 应用程序版本号,记录分区固件的版本号
-    uint8_t  description[32];   // 固件的描述信息,最多32个字符
+    uint8_t version[32];        // 应用程序版本号,记录分区固件的版本
+    uint8_t description[32];   // 固件的描述信息,最多32个字符
 } firmware_t;
 
 

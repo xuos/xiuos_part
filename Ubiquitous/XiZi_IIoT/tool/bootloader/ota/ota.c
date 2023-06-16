@@ -18,6 +18,7 @@
 * @date:    2023/4/23
 *
 */
+#include <stdio.h>
 #include <transform.h>
 #include "shell.h"
 #include "xsconfig.h"
@@ -33,6 +34,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 static uint32_t calculate_crc32(uint32_t addr, uint32_t len);
+static int create_version(uint8_t* cur_version, uint8_t* new_version);
 static status_t UpdateOTAFlag(ota_info_t *ptr);
 static void InitialVersion(void);
 static void BackupVersion(void);
@@ -117,6 +119,44 @@ static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 
 
 /*******************************************************************************
+* 函 数 名: create_version
+* 功能描述: 根据当前版本号生成新的三段式版本号,适用于iap方式和TCPSERVER
+* 形    参: cur_version:当前版本号,new_version:生成的新版本号
+* 返 回 值: 0:生成成功,-1:生成失败
+* 说    明: 为保持一致,平台通过OTA传输而来的版本号也要保持这样三段式的形式
+            版本形式为major.minor.patch,如1.2.3
+*******************************************************************************/
+static int create_version(uint8_t* cur_version, uint8_t* new_version) 
+{
+    int major, minor, patch; //三段式版本号的各个部分
+
+    //解析当前版本号,版本号格式不对直接返回
+    if (sscanf(cur_version, "%d.%d.%d", &major, &minor, &patch) != 3) {
+        return -1;
+    }
+
+    //将当前版本号加1
+    patch++;
+    if(patch > MAX_PATCH) {
+        minor++;
+        patch = 0;
+        if (minor > MAX_MINOR) {
+            major++;
+            minor = 0;
+            patch = 0;
+            if (major > MAX_MAJOR) {
+                return -1;
+            }
+        }
+    }
+
+    //更新版本号
+    sprintf(new_version, "%d.%d.%d", major, minor, patch);
+	return 0;
+}
+
+
+/*******************************************************************************
 * 函 数 名: UpdateOTAFlag
 * 功能描述: 更新OTA Flag区域的信息，版本完成下载后在app里进行调用
 * 形    参: ptr:ota_info_t结构体指针,描述OTA升级相关信息
@@ -154,8 +194,10 @@ static void InitialVersion(void)
     {
         ota_info.os.size = size;
         ota_info.os.crc32 = calculate_crc32(XIUOS_FLAH_ADDRESS, size);
-        ota_info.os.version = 0x1;
+
+        strncpy(ota_info.os.version,"1.0.0",sizeof(ota_info.os.version));
         strncpy(ota_info.os.description, "The initial firmware.", sizeof(ota_info.os.description));
+
         UpdateOTAFlag(&ota_info);
     }
 }
@@ -171,7 +213,7 @@ static void BackupVersion(void)
 {
     status_t status;
 
-	ota_info_t ota_info;
+    ota_info_t ota_info;
     memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
 
@@ -183,15 +225,23 @@ static void BackupVersion(void)
         mcuboot.print_string("\r\n------Backup app version success!------\r\n");
         ota_info.os.size = ota_info.bak.size;
         ota_info.os.crc32 = ota_info.bak.crc32;
-        ota_info.os.version = ota_info.bak.version;
+
+        memset(ota_info.os.version,0,sizeof(ota_info.os.version)); 
+        strncpy(ota_info.os.version, ota_info.bak.version, sizeof(ota_info.bak.version));
+
+        memset(ota_info.os.description,0,sizeof(ota_info.os.description)); 
         strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
+
         UpdateOTAFlag(&ota_info);
     }
     else
     {
         mcuboot.print_string("\r\n------Backup app version failed!------\r\n");
         ota_info.status = OTA_STATUS_ERROR;
+
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
         strncpy(ota_info.error_message, "Backup app version failed!",sizeof(ota_info.error_message));
+
         UpdateOTAFlag(&ota_info);
     }
 }
@@ -208,8 +258,8 @@ static void UpdateNewApplication(void)
 {
     status_t status;
     ota_info_t ota_info;  // 定义OTA信息结构体
-	
-	memset(&ota_info, 0, sizeof(ota_info_t));
+
+    memset(&ota_info, 0, sizeof(ota_info_t));
     // 从Flash中读取OTA信息
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
 
@@ -230,15 +280,23 @@ static void UpdateNewApplication(void)
                 mcuboot.print_string("\r\n------Backup app success!------\r\n");
                 ota_info.bak.size = ota_info.os.size;
                 ota_info.bak.crc32 = ota_info.os.crc32;
-                ota_info.bak.version = ota_info.os.version;
+
+                memset(ota_info.bak.version,0,sizeof(ota_info.bak.version)); 
+                strncpy(ota_info.bak.version, ota_info.os.version, sizeof(ota_info.os.version));
+
+                memset(ota_info.bak.description,0,sizeof(ota_info.bak.description)); 
                 strncpy(ota_info.bak.description, ota_info.os.description, sizeof(ota_info.os.description));
+
                 UpdateOTAFlag(&ota_info);;
             }
             else
             {
                 mcuboot.print_string("\r\n------Backup app failed!------\r\n");
                 ota_info.status = OTA_STATUS_ERROR;
+
+                memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
                 strncpy(ota_info.error_message, "Backup app failed!",sizeof(ota_info.error_message));
+
                 UpdateOTAFlag(&ota_info);;
                 goto finish;
             }
@@ -251,8 +309,13 @@ static void UpdateNewApplication(void)
 
                 ota_info.os.size = ota_info.down.size;
                 ota_info.os.crc32 = ota_info.down.crc32;
-                ota_info.os.version = ota_info.down.version;
+
+                memset(ota_info.os.version,0,sizeof(ota_info.os.version)); 
+                strncpy(ota_info.os.version, ota_info.down.version, sizeof(ota_info.down.version));
+
+                memset(ota_info.os.description,0,sizeof(ota_info.os.description)); 
                 strncpy(ota_info.os.description, ota_info.down.description, sizeof(ota_info.down.description));
+
                 ota_info.status == OTA_STATUS_IDLE; // 拷贝download分区到XiUOS System分区成功,将OTA升级状态设置为IDLE
                 UpdateOTAFlag(&ota_info);; 
             }
@@ -260,7 +323,10 @@ static void UpdateNewApplication(void)
             {
                 mcuboot.print_string("\r\n------The download partition copy failed!------\r\n");
                 ota_info.status = OTA_STATUS_ERROR;
+
+                memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
                 strncpy(ota_info.error_message, "The download partition copy failed!",sizeof(ota_info.error_message));
+
                 UpdateOTAFlag(&ota_info);;
                 goto finish;
             }
@@ -273,7 +339,10 @@ static void UpdateNewApplication(void)
             // 如果download分区CRC校验失败，升级失败
             mcuboot.print_string("\r\n------Download Firmware CRC check failed!------\r\n");
             ota_info.status = OTA_STATUS_ERROR;
+
+            memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
             strncpy(ota_info.error_message, "Download Firmware CRC check failed!",sizeof(ota_info.error_message));
+
             UpdateOTAFlag(&ota_info);;
             goto finish;  
         }  
@@ -368,16 +437,26 @@ static void app_ota_by_iap(void)
     {
         ota_info.down.size = size;
         ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, size);
-        ota_info.down.version = ota_info.os.version + 1;
+    
+        memset(ota_info.down.version,0,sizeof(ota_info.down.version)); 
+        create_version(ota_info.os.version, ota_info.down.version);
+     
+        memset(ota_info.down.description,0,sizeof(ota_info.down.description)); 
         strncpy(ota_info.down.description, "OTA Test bin.",sizeof(ota_info.down.description));
+
         ota_info.status = OTA_STATUS_READY;
+    
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
         strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
         UpdateOTAFlag(&ota_info);
     }
     else
     {
         ota_info.status = OTA_STATUS_ERROR;
+
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
         strncpy(ota_info.error_message, "Failed to download firmware to download partition!",sizeof(ota_info.error_message));
+
         UpdateOTAFlag(&ota_info);
     }
     mcuboot.flash_deinit();
@@ -429,7 +508,7 @@ static uint16_t calculate_crc16(uint8_t * data, uint32_t len)
 static void get_start_signal(struct Adapter* adapter)
 {
     ota_info_t ota_info;
-    char reply[16] = {0};  
+    uint8_t reply[16] = {0};  
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
 
     memset(&ota_info, 0, sizeof(ota_info_t));
@@ -462,7 +541,7 @@ static void get_start_signal(struct Adapter* adapter)
         {
             memset(reply, 0, sizeof(reply));
             memcpy(reply, "notready", strlen("notready"));
-			KPrintf("not receive start signal,send [notready] signal to server\n");
+            KPrintf("not receive start signal,send [notready] signal to server\n");
             while(AdapterDeviceSend(adapter, reply, strlen(reply)) < 0);
             continue;
         }
@@ -479,7 +558,7 @@ static void get_start_signal(struct Adapter* adapter)
 static int ota_data_recv(struct Adapter* adapter)
 {
     ota_info_t ota_info;
-    char reply[16] = {0};
+    uint8_t reply[16] = {0};
     int ret = 0, frame_cnt = 0, try_times = 5;
     uint32_t file_size = 0;  
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
@@ -581,16 +660,27 @@ try_again:
     {
         ota_info.down.size = file_size;
         ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, file_size);
-        ota_info.down.version = ota_info.os.version + 1;
+
+        memset(ota_info.down.version,0,sizeof(ota_info.down.version)); 
+        create_version(ota_info.os.version, ota_info.down.version);
+
+        memset(ota_info.down.description,0,sizeof(ota_info.down.description)); 
         strncpy(ota_info.down.description, "4G OTA bin.",sizeof(ota_info.down.description));
+
         ota_info.status = OTA_STATUS_READY;
+    
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
         strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
+
         UpdateOTAFlag(&ota_info);
     } 
     else 
     {
         ota_info.status = OTA_STATUS_ERROR;
+
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
         strncpy(ota_info.error_message, "Failed to download firmware to download partition!",sizeof(ota_info.error_message));
+
         UpdateOTAFlag(&ota_info);
     }
     return ret;
@@ -605,7 +695,6 @@ try_again:
 *******************************************************************************/
 static void app_ota_by_4g(void)
 {
-    char reply[16] = {0};
     uint32_t baud_rate = BAUD_RATE_115200;
     uint8_t server_addr[16] = "115.238.53.60";
     uint8_t server_port[8] = "7777";
@@ -618,14 +707,14 @@ static void app_ota_by_4g(void)
     AdapterDeviceOpen(adapter);
     AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
     AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
-    PrivTaskDelay(100);
+    MdelayKTask(100);
     while(1)
     {
         /* step1:Confirm the start signal of transmission. */
         get_start_signal(adapter);
         KPrintf("start receive ota bin file.\n");
         /* step2:start receive bin file,first wait for 4s. */
-        PrivTaskDelay(4000);
+        MdelayKTask(4000);
         if(0 == ota_data_recv(adapter))
         {
             break;
@@ -633,7 +722,7 @@ static void app_ota_by_4g(void)
     }
     mcuboot.flash_deinit();
     KPrintf("ota file done,start reboot.\n");
-    PrivTaskDelay(2000);
+    MdelayKTask(2000);
     mcuboot.op_reset();
 }
 
@@ -653,8 +742,8 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHE
 *******************************************************************************/
 void app_clear_jumpflag(void)
 {
-	ota_info_t ota_info;
-	mcuboot.flash_init();
+    ota_info_t ota_info;
+    mcuboot.flash_init();
     //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
     memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
