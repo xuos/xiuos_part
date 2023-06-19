@@ -29,7 +29,6 @@
 #define PASSWORD    "2e5e585ec5fc8665dd8bc1a17444fc8ffcb07ed515b220785883d478e49666e5"
 #define SERVERIP   "101.133.196.127"
 #define SERVERPORT "1883"
-#define TOPIC      "/sys/iv74JbFgzhv/D001/thing/service/property/set"
 
 #define  PACK_SIZE 512  //存放报文数据缓冲区大小
 #define  CMD_SIZE  512  //保存推送的PUBLISH报文中的数据缓冲区大小
@@ -44,6 +43,8 @@ typedef struct{
     uint8_t  cmdbuff[CMD_SIZE];    //保存推送的PUBLISH报文中的数据缓冲区
 }MQTT_TCB;
 
+extern MQTT_TCB Aliyun_mqtt; //外部变量声明
+ 
 int AdapterNetActive(void);
 int MQTT_Send(const uint8_t* buf, int buflen);
 int MQTT_Recv(uint8_t* buf, int buflen);

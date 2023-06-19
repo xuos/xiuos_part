@@ -27,15 +27,14 @@
 #include <adapter.h>
 #include "aliyun_mqtt.h"
 
-
+MQTT_TCB Aliyun_mqtt;  //创建一个用于连接阿里云mqtt的结构体
 static struct Adapter *adapter;
-static MQTT_TCB Aliyun_mqtt;  //创建一个用于连接阿里云mqtt的结构体
 static const uint8_t parket_connetAck[] = {0x20,0x02,0x00,0x00};   //连接成功服务器回应报文
 static const uint8_t parket_disconnet[] = {0xe0,0x00};             //客户端主动断开连接发送报文
 static const uint8_t parket_heart[] = {0xc0,0x00};                 //客户端发送保活心跳包
 static const uint8_t parket_subAck[] = {0x90,0x03,0x00,0x0A,0x01}; //订阅成功服务器回应报文
 static const uint8_t parket_unsubAck[] = {0xB0,0x02,0x00,0x0A};    //取消订阅成功服务器回应报文
-static uint8_t mqtt_rxbuf[512];
+static uint8_t mqtt_rxbuf[16];
 
 
 /*******************************************************************************
@@ -431,41 +430,3 @@ void MQTT_DealPublishData(uint8_t *data, uint16_t data_len)
         memcpy(Aliyun_mqtt.cmdbuff, &data[cmdpos], cmdlen);
     }
 }
-
-
-void testmqtt(void)
-{
-    int ret = 0;
-    int len;
-    ret = AdapterNetActive();
-    if(ret == 0)
-    {
-        KPrintf("The network connection is successful.\n");
-    }
-    ret = MQTT_Connect();
-    if(ret == 0)
-    {
-        KPrintf("Log in to aliyun mqtt successfully.\n");
-    }
-    MdelayKTask(2000);
-    ret = MQTT_SubscribeTopic(TOPIC);
-    if(ret == 0)
-    {
-        KPrintf("mqtt sub successfully.\n");
-    }
-    while(1)
-    {
-        memset(mqtt_rxbuf,0,sizeof(mqtt_rxbuf));
-        len = MQTT_Recv(mqtt_rxbuf, 256);
-        if(len > 0 && (mqtt_rxbuf[0] == 0x30))
-        {
-            MQTT_DealPublishData(mqtt_rxbuf, len);
-            KPrintf("%s",Aliyun_mqtt.cmdbuff);
-            KPrintf("\r\n");  
-        }
-        MdelayKTask(200);
-        MQTT_SendHeart();
-    }
-}
-
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),mqtt, testmqtt, test mqtt);

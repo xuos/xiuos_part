@@ -30,6 +30,10 @@
 #include <adapter.h>
 #endif
 
+#ifdef OTA_BY_PLATFORM
+#include "aliyun_mqtt.h"
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -124,34 +128,37 @@ static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 * 形    参: cur_version:当前版本号,new_version:生成的新版本号
 * 返 回 值: 0:生成成功,-1:生成失败
 * 说    明: 为保持一致,平台通过OTA传输而来的版本号也要保持这样三段式的形式
-            版本形式为major.minor.patch,如1.2.3
+            版本形式为major.minor.patch,如01.02.03
 *******************************************************************************/
 static int create_version(uint8_t* cur_version, uint8_t* new_version) 
 {
     int major, minor, patch; //三段式版本号的各个部分
 
     //解析当前版本号,版本号格式不对直接返回
-    if (sscanf(cur_version, "%d.%d.%d", &major, &minor, &patch) != 3) {
+    if (sscanf(cur_version, "%03d.%03d.%03d", &major, &minor, &patch) != 3) {
         return -1;
     }
 
     //将当前版本号加1
     patch++;
-    if(patch > MAX_PATCH) {
+    if(patch > 999)
+    {
         minor++;
         patch = 0;
-        if (minor > MAX_MINOR) {
+        if(minor > 999) 
+        {
             major++;
             minor = 0;
             patch = 0;
-            if (major > MAX_MAJOR) {
+            if(major > 999) 
+            {
                 return -1;
             }
         }
     }
 
     //更新版本号
-    sprintf(new_version, "%d.%d.%d", major, minor, patch);
+    sprintf(new_version, "%03d.%03d.%03d", major, minor, patch);
 	return 0;
 }
 
@@ -690,8 +697,8 @@ try_again:
 /*******************************************************************************
 * 函 数 名: app_ota_by_4g
 * 功能描述: 通过命令来进行ota升级,该函数与升级的命令关联,通过4g方式传输bin文件
-* 形    参: adapter:Adapter指针,指向注册的4G设备
-* 返 回 值: 0:传输成功,-1:传输失败
+* 形    参: 无
+* 返 回 值: 无
 *******************************************************************************/
 static void app_ota_by_4g(void)
 {
@@ -731,6 +738,175 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHE
 
 
 #ifdef OTA_BY_PLATFORM
+#define FRAME_LEN   256   //每帧数据的数据包长度
+static uint8_t MqttRxbuf[512];
+static uint8_t FrameBuf[FRAME_LEN];
+static OTA_TCB AliOTA;
+/*******************************************************************************
+* 函 数 名: PropertyVersion
+* 功能描述: 向服务器上传当前设备版本信息
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+static void PropertyVersion(void)
+{
+    uint8_t tempbuff[128];
+    ota_info_t ota_info;
+
+    memset(tempbuff,0,128);  
+    memset(&ota_info, 0, sizeof(ota_info_t));
+
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t)); 					                                                                       //清空临时缓冲区	
+	sprintf(tempbuff,"{\"id\": \"1\",\"params\": {\"version\": \"%s\"}}",ota_info.os.version);
+
+	MQTT_PublishDataQs1("/ota/device/inform/iv74JbFgzhv/D001",tempbuff,strlen(tempbuff));  //发送等级QS=1的PUBLISH报文  	
+}
+
+
+/*-------------------------------------------------*/
+/*函数名：OTA下载数据                              */
+/*参  数：size：本次下载量                         */
+/*参  数：offset：本次下载偏移量                   */
+/*返回值：无                                       */
+/*-------------------------------------------------*/
+void OTA_Download(int size, int offset)
+{
+	uint8_t temp[256];
+	memset(temp,0,256);
+	sprintf(temp,"{\"id\": \"1\",\"params\": {\"fileInfo\":{\"streamId\":%d,\"fileId\":1},\"fileBlock\":{\"size\":%d,\"offset\":%d}}}",AliOTA.streamId,size,offset);
+	MQTT_PublishDataQs0("/sys/iv74JbFgzhv/D001/thing/file/download",temp,strlen(temp));
+}
+
+/*******************************************************************************
+* 函 数 名: app_ota_by_platform
+* 功能描述: 通过命令来进行ota升级,该函数与升级的命令关联,通过云平台MQTT进行升级
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+static void app_ota_by_platform(void)
+{
+    int datalen;
+    int ret = 0;
+    ota_info_t ota_info;
+    uint32_t flashdestination = DOWN_FLAH_ADDRESS;
+
+    mcuboot.flash_init();
+    memset(&ota_info, 0, sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
+    ota_info.status = OTA_STATUS_DOWNLOADING;
+    UpdateOTAFlag(&ota_info);
+
+    if((AdapterNetActive() == 0) && (MQTT_Connect() == 0))
+    {
+        KPrintf("Log in to aliyun mqtt successfully.\n");
+        MQTT_SubscribeTopic("/sys/iv74JbFgzhv/D001/thing/service/property/set");  //发送订阅Topic报文
+        MQTT_SubscribeTopic("/sys/iv74JbFgzhv/D001/thing/file/download_reply");   //发送订阅Topic报文
+        PropertyVersion();
+    } 
+    while(1)
+    {
+        memset(MqttRxbuf,0,sizeof(MqttRxbuf));
+        datalen = MQTT_Recv(MqttRxbuf, 512);
+        if(datalen > 0 && (MqttRxbuf[0] == 0x30))
+        {
+            MQTT_DealPublishData(MqttRxbuf, datalen);
+            if(sscanf((char *)Aliyun_mqtt.cmdbuff,"/ota/device/upgrade/iv74JbFgzhv/D001{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&AliOTA.size,&AliOTA.streamId,AliOTA.version)==3)
+            {
+                KPrintf("ota file size:%d\r\n",AliOTA.size);
+                KPrintf("ota file id:%d\r\n",AliOTA.streamId);
+                KPrintf("ota file version:%s\r\n",AliOTA.version);
+                if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,AliOTA.size != kStatus_Success))
+                {
+                    KPrintf("Failed to erase target fash!\n");
+                    ret = -1;
+                    break;
+                }
+                AliOTA.counter = (AliOTA.size%FRAME_LEN != 0)? (AliOTA.size/FRAME_LEN + 1):(AliOTA.size/FRAME_LEN);
+				AliOTA.num = 1;                                          //下载次数,初始值为1
+				AliOTA.downlen = FRAME_LEN;                              //记录本次下载量
+				OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
+            }
+
+            if(strstr((char *)Aliyun_mqtt.cmdbuff,"download_reply"))
+            {
+                memset(FrameBuf,0,sizeof(FrameBuf));
+                memcpy(FrameBuf, &MqttRxbuf[datalen-AliOTA.downlen-2], AliOTA.downlen);
+                if(mcuboot.op_flash_write(flashdestination,FrameBuf,AliOTA.downlen) != kStatus_Success)
+                {
+                    KPrintf("current frame[%d] flash failed.\n",AliOTA.num-1);
+                    ret = -1;
+                    break;
+                }
+                else
+                {
+                    KPrintf("current frame[%d] is written to flash 0x%x address successful.\n", AliOTA.num -1, flashdestination);
+                    KPrintf("Current progress is %d/%d\r\n",AliOTA.num,AliOTA.counter); 
+                    flashdestination += AliOTA.downlen;
+                    AliOTA.num++; 
+                }
+
+                if(AliOTA.num < AliOTA.counter) //如果小于总下载次数
+                {                                     
+                    AliOTA.downlen = FRAME_LEN;                                //记录本次下载量
+                    OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN);   //发送要下载的数据信息给服务器
+                }
+                else if(AliOTA.num == AliOTA.counter) //如果等于总下载次数,说明是最后一次下载
+                {
+                    if(AliOTA.size%FRAME_LEN == 0)    //判断固件大小是否是FRAME_LEN的整数倍
+                    {
+                        AliOTA.downlen = FRAME_LEN;                              //记录本次下载量
+                        OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
+                    }
+                    else
+                    {
+                        AliOTA.downlen = AliOTA.size%FRAME_LEN;                   //记录本次下载量
+                        OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN);  //发送要下载的数据信息给服务器	
+                    }
+                }
+
+                else //下载完毕
+                {
+                    ret = 0;
+                    break;
+                }
+            }
+
+        }
+    }
+    if(0 == ret) 
+    {
+        ota_info.down.size = AliOTA.size;
+        ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, AliOTA.size);
+
+        memset(ota_info.down.version,0,sizeof(ota_info.down.version)); 
+        create_version(ota_info.os.version, ota_info.down.version);
+
+        memset(ota_info.down.description,0,sizeof(ota_info.down.description)); 
+        strncpy(ota_info.down.description, "MQTT OTA bin.",sizeof(ota_info.down.description));
+
+        ota_info.status = OTA_STATUS_READY;
+    
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
+        strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
+
+        UpdateOTAFlag(&ota_info);
+    } 
+    else 
+    {
+        ota_info.status = OTA_STATUS_ERROR;
+
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+        strncpy(ota_info.error_message, "Failed to download firmware to download partition!",sizeof(ota_info.error_message));
+
+        UpdateOTAFlag(&ota_info);
+    }
+    mcuboot.flash_deinit();
+    KPrintf("ota file done,start reboot.\n");
+    MdelayKTask(2000);
+    mcuboot.op_reset();
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),aliyun, app_ota_by_platform, ota by 4g function);
 #endif
 
 

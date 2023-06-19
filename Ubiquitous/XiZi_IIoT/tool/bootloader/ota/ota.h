@@ -23,11 +23,6 @@
 
 #include "flash_ops.h"
 
-
-#define MAX_MAJOR 99   //最大主版本号
-#define MAX_MINOR 99   //最大次版本号
-#define MAX_PATCH 99   //最大修订版本号
-
 #define JUMP_FAILED_FLAG  0XABABABAB
 #define JUMP_SUCCESS_FLAG 0XCDCDCDCD
 #define STARTFLAG             0x1A2B   //数据帧开始信号标记
@@ -66,6 +61,7 @@ typedef struct {
 } ota_info_t;
 
 
+#ifdef OTA_BY_TCPSERVER
 /*bin包传输过程中的数据帧相关的结构体*/
 typedef struct
 {
@@ -87,7 +83,18 @@ typedef struct
     ota_header_t header;
     ota_frame_t frame;
 } ota_data;
+#endif
 
+#ifdef OTA_BY_PLATFORM
+typedef struct{
+	uint32_t size;            //OTA固件大小
+	uint32_t streamId;        //OTA固件下载时ID编号
+	uint32_t counter;         //OTA总下载次数
+	uint32_t num;             //OTA当前下载次数
+	uint32_t downlen;         //OTA当前下载次数的下载量
+	uint8_t  version[32];     //OTA下载时存储版本号的缓存区
+}OTA_TCB;
+#endif
 
 void app_clear_jumpflag(void);
 void ota_entry(void);

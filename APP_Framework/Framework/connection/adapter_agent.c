@@ -293,6 +293,7 @@ int EntmSend(ATAgentType agent, const char *data, int len)
 int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
 {
     struct timespec abstime;
+    uint32 real_recv_len = 0;
 
     abstime.tv_sec = timeout_s;
     if(buffer_len > ENTM_RECV_MAX){
@@ -316,13 +317,14 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
     printf("EntmRecv once len %d.\n", agent->entm_recv_len);
 #endif
     memcpy(rev_buffer, agent->entm_recv_buf, agent->entm_recv_len);
-
     memset(agent->entm_recv_buf, 0, ENTM_RECV_MAX);
+
+    real_recv_len = agent->entm_recv_len;
     agent->entm_recv_len = 0;
     agent->read_len = 0;
     PrivMutexAbandon(&agent->lock);
 
-    return buffer_len;
+    return real_recv_len;
 }
 
 static int GetCompleteATReply(ATAgentType agent)
@@ -330,21 +332,22 @@ static int GetCompleteATReply(ATAgentType agent)
     uint32_t read_len = 0;
     char ch = 0, last_ch = 0;
     bool is_full = false;
+    int res;
 
     PrivMutexObtain(&agent->lock);
 
     memset(agent->maintain_buffer, 0x00, agent->maintain_max);
     agent->maintain_len = 0;
 
-    memset(agent->entm_recv_buf, 0x00, 256);
+    memset(agent->entm_recv_buf, 0x00, ENTM_RECV_MAX);
     agent->entm_recv_len = 0;
 
     PrivMutexAbandon(&agent->lock);
 
     while (1) {
-        PrivRead(agent->fd, &ch, 1);
+        res = PrivRead(agent->fd, &ch, 1);
 #ifdef CONNECTION_FRAMEWORK_DEBUG
-        if(ch != 0) {
+        if((res == 1) && (ch != 0)) {
             printf(" %c (0x%x)\n", ch, ch);
         }
 #endif
@@ -352,10 +355,9 @@ static int GetCompleteATReply(ATAgentType agent)
         PrivMutexObtain(&agent->lock);
         if (agent->receive_mode == ENTM_MODE) {
             if (agent->entm_recv_len < ENTM_RECV_MAX) {
-                agent->entm_recv_buf[agent->entm_recv_len] = ch;
-                agent->entm_recv_len++;
-
-                if(agent->entm_recv_len < agent->read_len) {
+                if((res == 1) && (agent->entm_recv_len < agent->read_len)) {
+                    agent->entm_recv_buf[agent->entm_recv_len] = ch;
+                    agent->entm_recv_len++;
                     PrivMutexAbandon(&agent->lock);
                     continue;
                 } else {
