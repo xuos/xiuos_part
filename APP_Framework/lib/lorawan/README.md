@@ -9,7 +9,7 @@ xiuos/APP_Framework/lib/lorawan
     ├── README.md    
     ├── lora_radio_driver                   lora_radio驱动库
     ├── lorawan_devicenode                  lorawan节点协议栈
-    ├── lorawan_gateway_single_channel      lorawan节点协议栈
+    ├── lorawan_gateway_single_channel      lorawan单通道网关协议栈
     ├── Kconfig                             lorawan Kconfig配置
     └── Makefile                            lorawan Makefile
 ```
