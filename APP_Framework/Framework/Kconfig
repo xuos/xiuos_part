@@ -8,13 +8,13 @@ menu "Framework"
             default ADD_XIZI_FEATURES
 
             config ADD_XIZI_FEATURES
-                bool "add xizi fetures"
+                bool "add xizi features"
             
             config ADD_NUTTX_FEATURES
-                bool "add nuttx fetures"
+                bool "add nuttx features"
 
             config ADD_RTTHREAD_FEATURES
-                bool "add rt_thread fetures"
+                bool "add rt_thread features"
         endchoice
 
 
