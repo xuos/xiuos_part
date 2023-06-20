@@ -38,7 +38,7 @@ config SENSOR_PS5308
                                 default "pm10_1"
                     endif
 
-                if ADD_XIZI_FETURES
+                if ADD_XIZI_FEATURES
                         config SENSOR_PS5308_DRIVER_EXTUART
                                 bool "Using extra uart to support PS5308"
                                 default y
@@ -59,7 +59,7 @@ config SENSOR_PS5308
                         endif
                 endif
 
-                if ADD_NUTTX_FETURES
+                if ADD_NUTTX_FEATURES
                        config SENSOR_DEVICE_PS5308_DEV
                                string "PS5308 device name"
                                default "/dev/ttyS1"
@@ -68,7 +68,7 @@ config SENSOR_PS5308
 
                 endif
 
-                if ADD_RTTHREAD_FETURES
+                if ADD_RTTHREAD_FEATURES
 
                 endif
         endif

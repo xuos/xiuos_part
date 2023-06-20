@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 
 void TestAdc(void)
 {

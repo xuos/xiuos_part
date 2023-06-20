@@ -68,7 +68,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     return result;
 }
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 static int PinOpen(void){
     int pin_fd = PrivOpen(SENSOR_DEVICE_QS_FS_PIN_DEV, O_RDWR);
     if (pin_fd < 0) {
@@ -106,7 +106,7 @@ static int PinOpen(void){
  */
 static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
 {
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     int pin_fd=PinOpen();
     struct PinStat pin_dir;
     pin_dir.pin = SENSOR_DEVICE_QS_FS_PIN_NUMBER;
@@ -121,7 +121,7 @@ static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
         return -1;
     PrivTaskDelay(20);
     
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     pin_dir.val = GPIO_LOW;
     if (PrivWrite(pin_fd,&pin_dir,0) < 0)   // pull-down pin to configure as rx mode
         return -1;        

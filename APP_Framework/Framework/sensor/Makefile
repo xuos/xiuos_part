@@ -6,7 +6,7 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
 
 endif
 
-ifeq ($(ADD_XIZI_FETURES),y)
+ifeq ($(ADD_XIZI_FEATURES),y)
     include $(APPDIR)/Make.defs
     CSRCS += sensor.c
     include $(APPDIR)/Application.mk
