@@ -533,6 +533,10 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_deviceno
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Mac/Crypto #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Phy/region #
 endif
+
+ifeq ($(CONFIG_LIB_USING_LORAWAN_GATEWAY_SC),y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_gateway_single_channel/inc #
+endif
 endif
 
 ifeq ($(CONFIG_CRYPTO), y)
