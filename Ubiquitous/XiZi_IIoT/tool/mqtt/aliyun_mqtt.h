@@ -30,8 +30,8 @@
 #define SERVERIP   "101.133.196.127"
 #define SERVERPORT "1883"
 
-#define  PACK_SIZE 512  //存放报文数据缓冲区大小
-#define  CMD_SIZE  512  //保存推送的PUBLISH报文中的数据缓冲区大小
+#define  PACK_SIZE 512   //存放报文数据缓冲区大小
+#define  CMD_SIZE  2048  //保存推送的PUBLISH报文中的数据缓冲区大小
 
 typedef struct{ 
     uint8_t  Pack_buff[PACK_SIZE]; //存放发送报文数据缓冲区

@@ -738,8 +738,8 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHE
 
 
 #ifdef OTA_BY_PLATFORM
-#define FRAME_LEN   256   //每帧数据的数据包长度
-static uint8_t MqttRxbuf[512];
+#define FRAME_LEN   1024   //每帧数据的数据包长度
+static uint8_t MqttRxbuf[2048];
 static uint8_t FrameBuf[FRAME_LEN];
 static OTA_TCB AliOTA;
 /*******************************************************************************
@@ -806,7 +806,7 @@ static void app_ota_by_platform(void)
     while(1)
     {
         memset(MqttRxbuf,0,sizeof(MqttRxbuf));
-        datalen = MQTT_Recv(MqttRxbuf, 512);
+        datalen = MQTT_Recv(MqttRxbuf, sizeof(MqttRxbuf));
         if(datalen > 0 && (MqttRxbuf[0] == 0x30))
         {
             MQTT_DealPublishData(MqttRxbuf, datalen);
@@ -879,7 +879,7 @@ static void app_ota_by_platform(void)
         ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, AliOTA.size);
 
         memset(ota_info.down.version,0,sizeof(ota_info.down.version)); 
-        create_version(ota_info.os.version, ota_info.down.version);
+        strncpy(ota_info.down.version, AliOTA.version, sizeof(ota_info.down.version));
 
         memset(ota_info.down.description,0,sizeof(ota_info.down.description)); 
         strncpy(ota_info.down.description, "MQTT OTA bin.",sizeof(ota_info.down.description));
