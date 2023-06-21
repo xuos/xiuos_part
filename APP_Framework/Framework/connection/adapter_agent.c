@@ -355,12 +355,25 @@ static int GetCompleteATReply(ATAgentType agent)
         PrivMutexObtain(&agent->lock);
         if (agent->receive_mode == ENTM_MODE) {
             if (agent->entm_recv_len < ENTM_RECV_MAX) {
-                if((res == 1) && (agent->entm_recv_len < agent->read_len)) {
+#ifdef TOOL_USING_MQTT
+                if((res == 1) && (agent->entm_recv_len < agent->read_len)) 
+                {
                     agent->entm_recv_buf[agent->entm_recv_len] = ch;
                     agent->entm_recv_len++;
                     PrivMutexAbandon(&agent->lock);
                     continue;
-                } else {
+                } 
+#else
+                agent->entm_recv_buf[agent->entm_recv_len] = ch;
+                agent->entm_recv_len++;
+                if(agent->entm_recv_len < agent->read_len) 
+                {
+                    PrivMutexAbandon(&agent->lock);
+                    continue;
+                }
+#endif       
+                else 
+                {
 #ifdef CONNECTION_FRAMEWORK_DEBUG
                     printf("ENTM_MODE recv %d Bytes done.\n",agent->entm_recv_len);
 #endif

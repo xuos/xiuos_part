@@ -1,3 +1,3 @@
-SRC_FILES := aliyun_mqtt.c
+SRC_FILES := platform_mqtt.c
 
 include $(KERNEL_ROOT)/compiler.mk

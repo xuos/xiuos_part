@@ -28,6 +28,12 @@
 
 #define REPLY_TIME_OUT 10
 
+#ifdef TOOL_USING_OTA
+#define ENTM_RECV_MAX OTA_RX_BUFFERSIZE
+#else
+#define ENTM_RECV_MAX 256
+#endif
+
 enum ReceiveMode
 {
     DEFAULT_MODE = 0,
@@ -70,7 +76,6 @@ struct ATAgent
 #endif
     pthread_t at_handler;
 
-    #define ENTM_RECV_MAX 2048
     char entm_recv_buf[ENTM_RECV_MAX];
     uint32 entm_recv_len;
     enum ReceiveMode receive_mode;

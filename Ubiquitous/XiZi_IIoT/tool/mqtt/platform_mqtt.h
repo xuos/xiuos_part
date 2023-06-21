@@ -11,16 +11,16 @@
 */
 
 /**
-* @file:    aliyun_mqtt.h
-* @brief:   connect aliyun mqtt
+* @file:    platform_mqtt.h
+* @brief:   platform_mqtt.h file
 * @version: 1.0
 * @author:  AIIT XUOS Lab
 * @date:    2023/6/14
 *
 */
 
-#ifndef _ALIYUN_MQTT_H_
-#define	_ALIYUN_MQTT_H_
+#ifndef _PLATFORM_MQTT_H_
+#define	_PLATFORM_MQTT_H_
 
 #include <stdint.h>
 
@@ -31,7 +31,7 @@
 #define SERVERPORT "1883"
 
 #define  PACK_SIZE 512   //存放报文数据缓冲区大小
-#define  CMD_SIZE  2048  //保存推送的PUBLISH报文中的数据缓冲区大小
+#define  CMD_SIZE  3072  //保存推送的PUBLISH报文中的数据缓冲区大小
 
 typedef struct{ 
     uint8_t  Pack_buff[PACK_SIZE]; //存放发送报文数据缓冲区
@@ -43,7 +43,7 @@ typedef struct{
     uint8_t  cmdbuff[CMD_SIZE];    //保存推送的PUBLISH报文中的数据缓冲区
 }MQTT_TCB;
 
-extern MQTT_TCB Aliyun_mqtt; //外部变量声明
+extern MQTT_TCB Platform_mqtt; //外部变量声明
  
 int AdapterNetActive(void);
 int MQTT_Send(const uint8_t* buf, int buflen);

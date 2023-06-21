@@ -31,7 +31,7 @@
 #endif
 
 #ifdef OTA_BY_PLATFORM
-#include "aliyun_mqtt.h"
+#include "platform_mqtt.h"
 #endif
 
 /****************************************************************************
@@ -159,7 +159,7 @@ static int create_version(uint8_t* cur_version, uint8_t* new_version)
 
     //更新版本号
     sprintf(new_version, "%03d.%03d.%03d", major, minor, patch);
-	return 0;
+    return 0;
 }
 
 
@@ -419,7 +419,6 @@ static void BootLoaderJumpApp(void)
 }
 
 
-#ifdef OTA_BY_IAP
 /*********************************************************************************
 * 函 数 名: app_ota_by_iap
 * 功能描述: 通过命令来进行ota升级,该函数与升级的命令关联,通过串口iap方式传输bin文件
@@ -470,7 +469,6 @@ static void app_ota_by_iap(void)
     mcuboot.op_reset();
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),iap, app_ota_by_iap, ota by iap function);
-#endif
 
 
 #ifdef OTA_BY_TCPSERVER
@@ -738,8 +736,8 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHE
 
 
 #ifdef OTA_BY_PLATFORM
-#define FRAME_LEN   1024   //每帧数据的数据包长度
-static uint8_t MqttRxbuf[2048];
+#define FRAME_LEN   2048   //每帧数据的数据包长度
+static uint8_t MqttRxbuf[3072];
 static uint8_t FrameBuf[FRAME_LEN];
 static OTA_TCB AliOTA;
 /*******************************************************************************
@@ -783,7 +781,7 @@ void OTA_Download(int size, int offset)
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
-static void app_ota_by_platform(void)
+static void app_ota_by_platform(void* parameter)
 {
     int datalen;
     int ret = 0;
@@ -810,7 +808,7 @@ static void app_ota_by_platform(void)
         if(datalen > 0 && (MqttRxbuf[0] == 0x30))
         {
             MQTT_DealPublishData(MqttRxbuf, datalen);
-            if(sscanf((char *)Aliyun_mqtt.cmdbuff,"/ota/device/upgrade/iv74JbFgzhv/D001{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&AliOTA.size,&AliOTA.streamId,AliOTA.version)==3)
+            if(sscanf((char *)Platform_mqtt.cmdbuff,"/ota/device/upgrade/iv74JbFgzhv/D001{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&AliOTA.size,&AliOTA.streamId,AliOTA.version)==3)
             {
                 KPrintf("ota file size:%d\r\n",AliOTA.size);
                 KPrintf("ota file id:%d\r\n",AliOTA.streamId);
@@ -822,12 +820,12 @@ static void app_ota_by_platform(void)
                     break;
                 }
                 AliOTA.counter = (AliOTA.size%FRAME_LEN != 0)? (AliOTA.size/FRAME_LEN + 1):(AliOTA.size/FRAME_LEN);
-				AliOTA.num = 1;                                          //下载次数,初始值为1
-				AliOTA.downlen = FRAME_LEN;                              //记录本次下载量
-				OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
+                AliOTA.num = 1;                                          //下载次数,初始值为1
+                AliOTA.downlen = FRAME_LEN;                              //记录本次下载量
+                OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
             }
 
-            if(strstr((char *)Aliyun_mqtt.cmdbuff,"download_reply"))
+            if(strstr((char *)Platform_mqtt.cmdbuff,"download_reply"))
             {
                 memset(FrameBuf,0,sizeof(FrameBuf));
                 memcpy(FrameBuf, &MqttRxbuf[datalen-AliOTA.downlen-2], AliOTA.downlen);
@@ -906,7 +904,18 @@ static void app_ota_by_platform(void)
     mcuboot.op_reset();
 }
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),aliyun, app_ota_by_platform, ota by 4g function);
+int OtaTask(void)
+{
+    int32 ota_task = 0;
+    ota_task = KTaskCreate("ota_platform", app_ota_by_platform, NULL,8192, 10);
+    if(ota_task < 0) {
+        KPrintf("ota_task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
+        return ERROR;
+    }
+
+    StartupKTask(ota_task);
+    return 0;
+}
 #endif
 
 

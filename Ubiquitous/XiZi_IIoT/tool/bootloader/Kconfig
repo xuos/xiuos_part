@@ -17,23 +17,19 @@ menu "OTA function"
         endchoice
 
         if MCUBOOT_APPLICATION
-            menu "The way of OTA firmware upgrade."
-                config OTA_BY_IAP
-                    bool "Through serial port IAP."
-                    default y
-
-                config OTA_BY_TCPSERVER
-                    bool "Through the public network TCP server."
-                    default n
-                    select SUPPORT_CONNECTION_FRAMEWORK
-                    select CONNECTION_ADAPTER_4G
+            choice 
+                prompt "The way of OTA firmware upgrade."
+                default OTA_BY_PLATFORM
 
                 config OTA_BY_PLATFORM
                     bool "Through IoT management platform."
-                    default n
+                    select TOOL_USING_MQTT
+
+                config OTA_BY_TCPSERVER
+                    bool "Through the public network TCP server."
                     select SUPPORT_CONNECTION_FRAMEWORK
                     select CONNECTION_ADAPTER_4G
-            endmenu
+            endchoice
         endif
 
 
@@ -62,7 +58,18 @@ menu "OTA function"
                 hex "Application package size,the default size is limited to 1M."
                 default 0x00100000
         endmenu
-    
+
+        config OTA_RX_TIMEOUT
+            int "OTA receive data timeout(ms)."
+            default 600 if OTA_BY_PLATFORM
+            default 10000 if OTA_BY_TCPSERVER
+            default 10000 if MCUBOOT_BOOTLOADER
+        
+        config OTA_RX_BUFFERSIZE
+            int "OTA receive data buffer size."
+            default 3072 if OTA_BY_PLATFORM
+            default 2048 if OTA_BY_TCPSERVER
+            default 256 if MCUBOOT_BOOTLOADER
     endif
 
 endmenu
