@@ -24,14 +24,10 @@
 
 #include <stdint.h>
 
-#define CLIENTID   "iv74JbFgzhv.D001|securemode=2,signmethod=hmacsha256,timestamp=1686617772433|"
-#define USERNAME   "D001&iv74JbFgzhv"
-#define PASSWORD    "2e5e585ec5fc8665dd8bc1a17444fc8ffcb07ed515b220785883d478e49666e5"
-#define SERVERIP   "101.133.196.127"
-#define SERVERPORT "1883"
-
-#define  PACK_SIZE 512   //存放报文数据缓冲区大小
-#define  CMD_SIZE  3072  //保存推送的PUBLISH报文中的数据缓冲区大小
+#define  KEEPALIVE_TIME 300    //保活时间(单位s),300s
+#define  HEART_TIME   60000    //空闲时发送心跳包的时间间隔(单位ms),60s
+#define  PACK_SIZE      512    //存放报文数据缓冲区大小
+#define  CMD_SIZE      3072    //保存推送的PUBLISH报文中的数据缓冲区大小
 
 typedef struct{ 
     uint8_t  Pack_buff[PACK_SIZE]; //存放发送报文数据缓冲区

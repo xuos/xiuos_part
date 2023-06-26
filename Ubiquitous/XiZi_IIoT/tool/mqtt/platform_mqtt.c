@@ -30,8 +30,8 @@
 MQTT_TCB Platform_mqtt;  //创建一个用于连接云平台mqtt的结构体
 static struct Adapter *adapter;
 static const uint8_t parket_connetAck[] = {0x20,0x02,0x00,0x00};   //连接成功服务器回应报文
-static const uint8_t parket_disconnet[] = {0xe0,0x00};             //客户端主动断开连接发送报文
-static const uint8_t parket_heart[] = {0xc0,0x00};                 //客户端发送保活心跳包
+static const uint8_t parket_disconnet[] = {0xE0,0x00};             //客户端主动断开连接发送报文
+static const uint8_t parket_heart[] = {0xC0,0x00};                 //客户端发送保活心跳包
 static const uint8_t parket_subAck[] = {0x90,0x03,0x00,0x0A,0x01}; //订阅成功服务器回应报文
 static const uint8_t parket_unsubAck[] = {0xB0,0x02,0x00,0x0A};    //取消订阅成功服务器回应报文
 static uint8_t mqtt_rxbuf[16];
@@ -62,7 +62,7 @@ int AdapterNetActive(void)
         goto out;
     }
 
-    ret = AdapterDeviceConnect(adapter, CLIENT, SERVERIP, SERVERPORT, IPV4);
+    ret = AdapterDeviceConnect(adapter, CLIENT, PLATFORM_SERVERIP, PLATFORM_SERVERPORT, IPV4);
     if (ret < 0) 
     {
         goto out;
@@ -142,8 +142,8 @@ int MQTT_Connect(void)
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+5] = 0x54;  //CONNECT报文,可变报头第6个字节:固定0x54,大写字母T
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+6] = 0x04;  //CONNECT报文,可变报头第7个字节:固定0x04
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+7] = 0xC2;  //CONNECT报文,可变报头第8个字节:使能用户名和密码校验,不使用遗嘱功能,不保留会话功能
-    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+8] = 0x00;  //CONNECT报文,可变报头第9个字节:保活时间高字节
-    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+9] = 0x64;  //CONNECT报文,可变报头第10个字节:保活时间高字节
+    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+8] = KEEPALIVE_TIME/256;  //CONNECT报文,可变报头第9个字节:保活时间高字节
+    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+9] = KEEPALIVE_TIME%256;  //CONNECT报文,可变报头第10个字节:保活时间低字节,单位s
 
     /* CLIENT_ID */
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+10] = strlen(CLIENTID)/256;             //客户端ID长度高字节

@@ -7,6 +7,39 @@ menu "MQTT function"
         select CONNECTION_ADAPTER_4G
         
     if TOOL_USING_MQTT
+        menu "MQTT connection parameter configuration."
+            config PLATFORM_PRODUCTKEY
+                string "Product Key, used to identify a product."
+                default "iywhcgnuezz"
+
+            config CLIENT_DEVICENAME
+                string "Device name, used to identify a client device."
+                default "D001"
+
+            config CLIENT_DEVICESECRET
+                string "Device secret, used for device authentication and data encryption."
+                default "43b3c332233e2204a0612bfbfe21bb67"
+
+            config CLIENTID
+                string "mqtt client id."
+                default "iywhcgnuezz.D001|securemode=2,signmethod=hmacsha256,timestamp=1687917392547|"
+
+            config USERNAME
+                string "mqtt client username."
+                default "D001&iywhcgnuezz"
+
+            config PASSWORD
+                string "mqtt client login passwd."
+                default "2af06ed86b9f6cbeb66beff402e3e882d41a838180695fced70edcf568052857"
+        
+            config PLATFORM_SERVERIP
+                string "mqtt platform server ip."
+                default "101.133.196.127"
+
+            config PLATFORM_SERVERPORT
+                string "mqtt platform server port."
+                default "1883"
+        endmenu
     endif
 
 endmenu
