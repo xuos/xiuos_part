@@ -436,18 +436,18 @@ KERNELPATHS +=-I$(KERNEL_ROOT)/fs/compatibility_ch376 #
 endif
 
 ifeq ($(CONFIG_TRANSFORM_LAYER_ATTRIUBUTE), y)
-ifeq ($(CONFIG_ADD_XIZI_FETURES), y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES), y)
 ifeq ($(CONFIG_LIB_MUSLLIB), )
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi/user_api/posix_support/include #
 endif
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi #
 endif
 
-ifeq ($(CONFIG_ADD_NUTTX_FETURES), y)
+ifeq ($(CONFIG_ADD_NUTTX_FEATURES), y)
 #
 endif
 
-ifeq ($(CONFIG_ADD_RTTHREAD_FETURES), y)
+ifeq ($(CONFIG_ADD_RTTHREAD_FEATURES), y)
 #
 endif
 
