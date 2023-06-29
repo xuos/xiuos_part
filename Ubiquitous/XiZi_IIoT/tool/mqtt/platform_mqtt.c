@@ -112,11 +112,19 @@ int MQTT_Recv(uint8_t* buf, int buflen)
 int MQTT_Connect(void)
 {
     uint8_t TryConnect_time = 10;  //尝试登录次数
+	uint8_t passwdtemp[PASSWARD_SIZE];
+	
+	memset(&Platform_mqtt,0,sizeof(Platform_mqtt)); 
+	sprintf(Platform_mqtt.ClientID,"%s|securemode=3,signmethod=hmacsha1|",CLIENT_DEVICENAME);   //构建客户端ID并存入缓冲区
+	sprintf(Platform_mqtt.Username,"%s&%s",CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);              //构建用户名并存入缓冲区	
+	memset(passwdtemp,0,sizeof(passwdtemp)); 
+	sprintf(passwdtemp,"clientId%sdeviceName%sproductKey%s",CLIENT_DEVICENAME,CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);  //构建加密时的明文   
+	utils_hmac_sha1(passwdtemp,strlen(passwdtemp),Platform_mqtt.Passward,(char *)CLIENT_DEVICESECRET,strlen(CLIENT_DEVICESECRET)); //以DeviceSecret为秘钥对temp中的明文进行hmacsha1加密即为密码
 
     Platform_mqtt.MessageID = 0;      //报文标识符清零,CONNECT报文虽然不需要添加报文标识符,但是CONNECT报文是第一个发送的报文,在此清零报文标识符为后续报文做准备
     Platform_mqtt.Fixed_len = 1;      //CONNECT报文固定报头长度暂定为1
     Platform_mqtt.Variable_len = 10;  //CONNECT报文可变报头长度为10
-    Platform_mqtt.Payload_len = (2+strlen(CLIENTID)) + (2+strlen(USERNAME)) + (2+strlen(PASSWORD)); //CONNECT报文中负载长度
+    Platform_mqtt.Payload_len = (2+strlen(Platform_mqtt.ClientID)) + (2+strlen(Platform_mqtt.Username)) + (2+strlen(Platform_mqtt.Passward)); //CONNECT报文中负载长度
     Platform_mqtt.Remaining_len = Platform_mqtt.Variable_len + Platform_mqtt.Payload_len; //剩余长度=可变报头长度+负载长度
     memset(Platform_mqtt.Pack_buff,0,sizeof(Platform_mqtt.Pack_buff));
 
@@ -146,17 +154,17 @@ int MQTT_Connect(void)
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+9] = KEEPALIVE_TIME%256;  //CONNECT报文,可变报头第10个字节:保活时间低字节,单位s
 
     /* CLIENT_ID */
-    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+10] = strlen(CLIENTID)/256;             //客户端ID长度高字节
-    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+11] = strlen(CLIENTID)%256;             //客户端ID长度低字节
-    memcpy(&Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+12],CLIENTID,strlen(CLIENTID)); //复制过来客户端ID字串
+    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+10] = strlen(Platform_mqtt.ClientID)/256;   //客户端ID长度高字节
+    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+11] = strlen(Platform_mqtt.ClientID)%256;   //客户端ID长度低字节
+    memcpy(&Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+12],Platform_mqtt.ClientID,strlen(Platform_mqtt.ClientID)); //复制过来客户端ID字串
     /* USER_NAME */
-    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+12+strlen(CLIENTID)] = strlen(USERNAME)/256;             //用户名长度高字节
-    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+13+strlen(CLIENTID)] = strlen(USERNAME)%256;             //用户名长度低字节
-    memcpy(&Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+14+strlen(CLIENTID)],USERNAME,strlen(USERNAME)); //复制过来用户名字串
+    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+12+strlen(Platform_mqtt.ClientID)] = strlen(Platform_mqtt.Username)/256;  //用户名长度高字节
+    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+13+strlen(Platform_mqtt.ClientID)] = strlen(Platform_mqtt.Username)%256;  //用户名长度低字节
+    memcpy(&Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+14+strlen(Platform_mqtt.ClientID)],Platform_mqtt.Username,strlen(Platform_mqtt.Username)); //复制过来用户名字串
     /* PASSWARD */
-    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+14+strlen(CLIENTID)+strlen(USERNAME)] = strlen(PASSWORD)/256;             //密码长度高字节
-    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+15+strlen(CLIENTID)+strlen(USERNAME)] = strlen(PASSWORD)%256;             //密码长度低字节
-    memcpy(&Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+16+strlen(CLIENTID)+strlen(USERNAME)],PASSWORD,strlen(PASSWORD)); //复制过来密码字串
+    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+14+strlen(Platform_mqtt.ClientID)+strlen(Platform_mqtt.Username)] = strlen(Platform_mqtt.Passward)/256;  //密码长度高字节
+    Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+15+strlen(Platform_mqtt.ClientID)+strlen(Platform_mqtt.Username)] = strlen(Platform_mqtt.Passward)%256;  //密码长度低字节
+    memcpy(&Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+16+strlen(Platform_mqtt.ClientID)+strlen(Platform_mqtt.Username)],Platform_mqtt.Passward,strlen(Platform_mqtt.Passward)); //复制过来密码字串
     
     while(TryConnect_time > 0)
     {

@@ -19,18 +19,6 @@ menu "MQTT function"
             config CLIENT_DEVICESECRET
                 string "Device secret, used for device authentication and data encryption."
                 default "43b3c332233e2204a0612bfbfe21bb67"
-
-            config CLIENTID
-                string "mqtt client id."
-                default "iywhcgnuezz.D001|securemode=2,signmethod=hmacsha256,timestamp=1687917392547|"
-
-            config USERNAME
-                string "mqtt client username."
-                default "D001&iywhcgnuezz"
-
-            config PASSWORD
-                string "mqtt client login passwd."
-                default "2af06ed86b9f6cbeb66beff402e3e882d41a838180695fced70edcf568052857"
         
             config PLATFORM_SERVERIP
                 string "mqtt platform server ip."

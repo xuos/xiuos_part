@@ -796,6 +796,7 @@ static void app_ota_by_platform(void* parameter)
 {
     int datalen;
     int ret = 0;
+    int freecnt = 0;
     ota_info_t ota_info;
     uint32_t heart_time = 0;
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
@@ -816,13 +817,23 @@ reconnect:
         KPrintf("Log in to the cloud platform and subscribe to the topic successfully.\n"); 
         PropertyVersion();
     }
+    else
+    {
+        KPrintf("Log in to the cloud platform failed, retry!\n");
+        goto reconnect;  
+    }
 
     while(1)
     {
         memset(MqttRxbuf,0,sizeof(MqttRxbuf));
         datalen = MQTT_Recv(MqttRxbuf, sizeof(MqttRxbuf));
-        if(MqttRxbuf[0] == 0x30)
+        if(datalen <= 0)
         {
+           freecnt++; 
+        }
+        else if(MqttRxbuf[0] == 0x30)
+        {
+            freecnt = 0;
             MQTT_DealPublishData(MqttRxbuf, datalen);
             ptr = strstr((char *)Platform_mqtt.cmdbuff,"{\"code\":\"1000\""); 
             if(ptr != NULL)
@@ -896,16 +907,23 @@ reconnect:
             }
 
         }
+        else
+        {
+            freecnt = 0;
+            continue;
+        }
 
-        if((datalen <= 0) && (CalculateTimeMsFromTick(CurrentTicksGain()) - heart_time >= HEART_TIME)) //空闲状态下每隔一段时间发送需要发送心跳包保活
+        if((freecnt >= 10) && (CalculateTimeMsFromTick(CurrentTicksGain()) - heart_time >= HEART_TIME)) //连续10次未收到数据默认为为空闲状态,需每隔一段时间发送需要发送心跳包保活
         {
             heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
-            KPrintf("Send heartbeat packet!\n"); 
             if(MQTT_SendHeart() != 0) //发送心跳包失败可能连接断开,需要重连
             {
+                KPrintf("The connection has been disconnected, reconnecting!\n");
+                freecnt = 0;
                 heart_time = 0;
                 goto reconnect;  
             }
+            KPrintf("Send heartbeat packet successful!\n"); 
         }
     }
 
