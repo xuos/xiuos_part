@@ -38,6 +38,7 @@
  *
  */
 
+#include <sys/time.h>
 #include <xs_ktask.h>
 #include "lwip/opt.h"
 
@@ -123,7 +124,9 @@ ping_prepare_echo( struct icmp_echo_hdr *iecho, u16_t len)
     ((char*)iecho)[sizeof(struct icmp_echo_hdr) + i] = (char)i;
   }
 
+#ifndef CHECKSUM_GEN_ICMP
   iecho->chksum = inet_chksum(iecho, len);
+#endif
 }
 
 #if PING_USE_SOCKETS
@@ -274,7 +277,7 @@ ping_thread(void *arg)
   lw_print("lw: [%s] ping start!\n", __func__);
 
   ret = lwip_setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-  LWIP_ASSERT("setting receive timeout failed", ret != 0);
+  LWIP_ASSERT("setting receive timeout failed", ret == 0);
   LWIP_UNUSED_ARG(ret);
 
   while (cnt --) {
