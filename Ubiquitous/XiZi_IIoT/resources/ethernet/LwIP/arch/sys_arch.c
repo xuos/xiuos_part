@@ -85,25 +85,16 @@ char lwip_flag = 0;
 
 x_ticks_t lwip_sys_now;
 
-struct sys_timeouts {
-  struct sys_timeo *next;
-};
-
-struct timeoutlist {
-  struct sys_timeouts timeouts;
-  int32 pid;
-};
-
 #define SYS_THREAD_MAX 4
-
-static struct timeoutlist s_timeoutlist[SYS_THREAD_MAX];
-
-static u16_t s_nextthread = 0;
 
 struct netif gnetif;
 sys_sem_t* get_eth_recv_sem() {
     static sys_sem_t g_recv_sem = 0;
     return &g_recv_sem;
+}
+
+void sys_init(void) {
+  // do nothing
 }
 
 u32_t
@@ -116,31 +107,6 @@ u32_t
 sys_now(void) {
   lwip_sys_now = CurrentTicksGain();
   return CalculateTimeMsFromTick(lwip_sys_now);
-}
-
-void
-sys_init(void) {
-  int i;
-  for(i = 0; i < SYS_THREAD_MAX; i++) {
-    s_timeoutlist[i].pid = 0;
-    s_timeoutlist[i].timeouts.next = NULL;
-  }
-  s_nextthread = 0;
-}
-
-struct sys_timeouts *sys_arch_timeouts(void) {
-  int i;
-  int32 pid;
-  struct timeoutlist *tl;
-  pid = (int32)GetKTaskDescriptor()->id.id;
-  for(i = 0; i < s_nextthread; i++) {
-    tl = &(s_timeoutlist[i]);
-    if(tl->pid == pid)
-    {
-      return &(tl->timeouts);
-    }
-  }
-  return NULL;
 }
 
 sys_prot_t sys_arch_protect(void) {
