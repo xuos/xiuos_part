@@ -72,7 +72,8 @@ typedef int32 sys_mbox_t;
 typedef int32 sys_thread_t;
 typedef x_base sys_prot_t;
 
-#define MS_PER_SYSTICK (1000 / TICK_PER_SECOND)
+#define MS_PER_SYSTICK (float)(1000 / TICK_PER_SECOND)
+#define TICKS_PER_MS (TICK_PER_SECOND / 1000)
 
 //debug rtos with IRQ
 //#define FSL_RTOS_XIUOS
@@ -99,6 +100,7 @@ extern char lwip_eth1_netmask[];
 extern char lwip_eth1_gwaddr[];
 
 extern struct netif gnetif;
+extern sys_sem_t* get_eth_recv_sem();
 
 void lwip_tcp_init(void);
 void lwip_config_net(uint8_t enet_port, char *ip, char *mask, char *gw);

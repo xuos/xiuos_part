@@ -133,9 +133,37 @@ extern "C"
  * @addtogroup ETH_IF_Global_Functions
  * @{
  */
+/* Define those to better describe your network interface. */
+#define IFNAME0                         'h'
+#define IFNAME1                         'd'
+
+/* PHY hardware reset time */
+#define PHY_HW_RST_DELAY                (0x40U)
+
+/* ETH_RST = PH11 */
+#define ETH_RST_PORT                    (GPIO_PORT_H)
+#define ETH_RST_PIN                     (GPIO_PIN_11)
+
+/* ETH_LINK_LED = PD00 LED2 */
+#define ETH_LINK_LED_PORT               (GPIO_PORT_D)
+#define ETH_LINK_LED_PIN                (GPIO_PIN_00)
+
+//#define ETHERNET_LOOPBACK_TEST
+#ifdef ETHERNET_LOOPBACK_TEST
+
+#define USER_KEY_PORT                  (GPIO_PORT_I)
+#define USER_KEY_PIN                   (GPIO_PIN_07)
+
+/* ethe global netif */
+static struct netif testnetif;
+/* eth tx buffer */
+static struct pbuf txPbuf;
+static char txBuf[] = "Ethernet Loop-Back Test";
+#endif
+
 err_t   ethernetif_init(struct netif *netif);
-void    ethernetif_input(struct netif *netif);
-err_t low_level_output(struct netif *netif, struct pbuf *p);
+void    ethernetif_input(void *netif);
+// err_t low_level_output(struct netif *netif, struct pbuf *p);
 
 void    EthernetIF_CheckLink(struct netif *netif);
 void    EthernetIF_UpdateLink(struct netif *netif);

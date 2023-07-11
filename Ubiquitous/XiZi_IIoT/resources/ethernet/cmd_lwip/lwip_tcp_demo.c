@@ -19,13 +19,13 @@
 */
 
 #include "board.h"
-#include "lwip_demo.h"
 #include "sys_arch.h"
-#include "lwip/sockets.h"
-#include "tcpecho_raw.h"
 #include <shell.h>
 #include <sys.h>
 #include <xizi.h>
+#include "lwip_demo.h"
+#include "lwip/sockets.h"
+#include "tcpecho_raw.h"
 char tcp_demo_msg[LWIP_TEST_MSG_SIZE] = { 0 };
 char tcp_demo_ip[] = {192, 168, 250, 252};
 u16_t tcp_demo_port = LWIP_TARGET_PORT;

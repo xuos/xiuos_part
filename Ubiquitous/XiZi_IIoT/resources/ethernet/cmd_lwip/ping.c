@@ -211,7 +211,9 @@ ping_recv(int s)
 
       LWIP_DEBUGF( PING_DEBUG, ("ping: recv "));
       ip_addr_debug_print_val(PING_DEBUG, fromaddr);
+#ifdef LWIP_DEBUG
       LWIP_DEBUGF( PING_DEBUG, (" %"U32_F" ms\n", (sys_now() - ping_time)));
+#endif
 
       /* todo: support ICMP6 echo */
 #if LWIP_IPV4
@@ -235,7 +237,9 @@ ping_recv(int s)
   }
 
   if (len == 0) {
+#ifdef LWIP_DEBUG
     LWIP_DEBUGF( PING_DEBUG, ("ping: recv - %"U32_F" ms - timeout\n", (sys_now()-ping_time)));
+#endif
   }
 
   /* do some ping result processing */
@@ -524,8 +528,10 @@ int get_url_ip(char* url)
 #endif /* LWIP_DEBUG */
             if ((recv_len = lwip_ping_recv(s, &ttl)) >= 0)
             {
+#ifdef LWIP_DEBUG
                 lw_notice("%d bytes from %s icmp_seq=%d ttl=%d time=%d ms\n", recv_len, inet_ntoa(ina), cnt,
                 ttl, sys_now() - ping_time);
+#endif
             }
             else
             {

@@ -18,6 +18,7 @@
 #include <sys_arch.h>
 #include "lwip/sockets.h"
 #include <netdb.h>
+#include <lwiperf.h>
 
 #define IPERF_PORT          5001
 #define IPERF_BUFSZ         (4 * 1024)
@@ -33,9 +34,9 @@ typedef struct{
 } IPERF_PARAM;
 static IPERF_PARAM param = {IPERF_MODE_STOP, NULL, IPERF_PORT};
 
-char tcp_iperf_ip[] = {192, 168, 131, 77};
+char tcp_iperf_ip[] = {192, 168, 130, 77};
 char tcp_iperf_mask[] = {255, 255, 254, 0};
-char tcp_iperf_gw[] = {192, 168, 131, 1};
+char tcp_iperf_gw[] = {192, 168, 130, 1};
 
 static void iperf_udp_client(void *thread_param)
 {
@@ -226,15 +227,14 @@ static void iperf_client(void *thread_param)
         while (param.mode != IPERF_MODE_STOP){
             tick2 = CurrentTicksGain();
             if (tick2 - tick1 >= TICK_PER_SECOND * 5){
-                long data;
-                int integer, decimal;
+                double speed;
+                // int integer, decimal;
                 KTaskDescriptorType tid;
 
                 tid = GetKTaskDescriptor();
-                data = sentlen * TICK_PER_SECOND / 125 / (tick2 - tick1);
-                integer = data/1000;
-                decimal = data%1000;
-                KPrintf("%s: %d.%03d0 Mbps!\n", tid->task_base_info.name, integer, decimal);
+                speed = (double)(sentlen * TICK_PER_SECOND / 125 / (tick2 - tick1));
+                speed = speed / 1000.0f;
+                printf("%s: %2.4f Mbps!\n", tid->task_base_info.name, speed);
                 tick1 = tick2;
                 sentlen = 0;
             }
@@ -301,14 +301,15 @@ void iperf_server(void *thread_param)
         FD_ZERO(&readset);
         FD_SET(sock, &readset);
 
-        if (select(sock + 1, &readset, NULL, NULL, &timeout) == 0)
+        if (select(sock + 1, &readset, NULL, NULL, &timeout) == 0) {
             continue;
+        }
 
         sin_size = sizeof(struct sockaddr_in);
 
         connected = accept(sock, (struct sockaddr *)&client_addr, &sin_size);
 
-        KPrintf("new client connected from (%s, %d)",
+        printf("new client connected from (%s, %d)\n",
                    inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
         int flag = 1;
@@ -318,33 +319,36 @@ void iperf_server(void *thread_param)
                     (void *) &flag,  /* the cast is historical cruft */
                     sizeof(int));    /* length of option value */
 
-        printf(" \n");  //BUG
-
         recvlen = 0;
         tick1 = CurrentTicksGain();
         while (param.mode != IPERF_MODE_STOP){
             bytes_received = recv(connected, recv_data, IPERF_BUFSZ, 0);
-            if (bytes_received <= 0) break;
+            if (bytes_received == 0) {
+                KPrintf("client disconnected (%s, %d)\n",
+                   inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+                break;
+            } else if (bytes_received < 0) {
+                KPrintf("recv error, client: (%s, %d)\n",
+                   inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+                break;
+            }
 
             recvlen += bytes_received;
 
             tick2 = CurrentTicksGain();
-            if (tick2 - tick1 >= TICK_PER_SECOND * 5){
-                long data;
-                int integer, decimal;
+            if (tick2 - tick1 >= TICK_PER_SECOND * 5) {
+                double speed;
+                // int integer, decimal;
                 KTaskDescriptorType tid;
 
                 tid = GetKTaskDescriptor();
-                data = recvlen * TICK_PER_SECOND / 125 / (tick2 - tick1);
-                integer = data/1000;
-                decimal = data%1000;
-                KPrintf("%s: %d.%03d0 Mbps!\n", tid->task_base_info.name, integer, decimal);
+                speed = (double)(recvlen * TICK_PER_SECOND / (125 * (tick2 - tick1)));
+                speed = speed / 1000.0f;
+                printf("%s: %2.4f Mbps!\n", tid->task_base_info.name, speed);
                 tick1 = tick2;
                 recvlen = 0;
             }
         }
-        KPrintf("client disconnected (%s, %d)\n",
-                   inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
         if (connected >= 0) closesocket(connected);
         connected = -1;
     }
@@ -399,6 +403,7 @@ int iperf(int argc, char **argv)
     {
         /* stop iperf */
         param.mode = IPERF_MODE_STOP;
+        printf("iperf stop.\n");
         return 0;
     }
     else if (strcmp(argv[index], "-s") == 0)
@@ -506,5 +511,39 @@ __usage:
     return 0;
 }
 
+#if LWIP_TCP
+static void
+lwiperf_report(void *arg, enum lwiperf_report_type report_type,
+  const ip_addr_t* local_addr, u16_t local_port, const ip_addr_t* remote_addr, u16_t remote_port,
+  u32_t bytes_transferred, u32_t ms_duration, u32_t bandwidth_kbitpsec)
+{
+  LWIP_UNUSED_ARG(arg);
+  LWIP_UNUSED_ARG(local_addr);
+  LWIP_UNUSED_ARG(local_port);
+ 
+  printf("IPERF report: type=%d, remote: %s:%d, total bytes: %"U32_F", duration in ms: %"U32_F", kbits/s: %"U32_F"\n",
+    (int)report_type, ipaddr_ntoa(remote_addr), (int)remote_port, bytes_transferred, ms_duration, bandwidth_kbitpsec);
+}
+#endif /* LWIP_TCP */
+ 
+ 
+void
+lwiperf_example_init(void)
+{
+#if LWIP_TCP
+  ip4_addr_t ipaddr;
+ 
+ lwiperf_start_tcp_server_default(lwiperf_report, NULL);
+ 
+  // IP4_ADDR(&ipaddr,192,168,0,181);
+  // lwiperf_start_tcp_client_default(&ipaddr, lwiperf_report, NULL);
+#endif
+ 
+}
+
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(8),
     iperf, iperf, netutils iperf);
+
+extern void *lwiperf_start_tcp_server_default(lwiperf_report_fn report_fn, void *report_arg);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(8),
+    lwiperf_tcp_server, lwiperf_example_init, netutils lwipperf);

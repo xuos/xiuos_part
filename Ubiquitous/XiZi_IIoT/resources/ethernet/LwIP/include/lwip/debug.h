@@ -142,18 +142,22 @@
 #endif
 
 #ifdef LWIP_DEBUG
+#define LWIP_DEBUG_FLAG 1
 #define LWIP_DEBUGF(debug, message) do { \
                                if ( \
-                                   ((debug) & LWIP_DBG_ON) && \
-                                   ((debug) & LWIP_DBG_TYPES_ON) && \
-                                   ((s16_t)((debug) & LWIP_DBG_MASK_LEVEL) >= LWIP_DBG_MIN_LEVEL)) { \
+                                   ((LWIP_DEBUG_FLAG) & LWIP_DBG_ON) && \
+                                   ((LWIP_DEBUG_FLAG) & LWIP_DBG_TYPES_ON) && \
+                                   ((s16_t)((LWIP_DEBUG_FLAG) & LWIP_DBG_MASK_LEVEL) >= LWIP_DBG_MIN_LEVEL)) { \
                                  LWIP_PLATFORM_DIAG(message); \
-                                 if ((debug) & LWIP_DBG_HALT) { \
+                                 if ((LWIP_DEBUG_FLAG) & LWIP_DBG_HALT) { \
                                    while(1); \
                                  } \
                                } \
                              } while(0)
 
+// #define LWIP_DEBUGF(debug, message) do { \
+//                                  LWIP_PLATFORM_DIAG(message); \
+//                              } while(0)
 #else  /* LWIP_DEBUG */
 #define LWIP_DEBUGF(debug, message)
 #endif /* LWIP_DEBUG */
