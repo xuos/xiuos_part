@@ -256,6 +256,143 @@ static void iperf_client(void *thread_param)
     free(send_buf);
 }
 
+// iperf tcp server running thread
+struct sock_conn_cb {
+    struct sockaddr_in server_addr;
+    struct sockaddr_in client_addr;
+    int connected;
+    int parent_id;
+};
+
+void iperf_sever_worker(void* arg) {
+    struct sock_conn_cb *sccb = (struct sock_conn_cb *)arg;
+    x_ticks_t tick1, tick2;
+
+    uint8_t *recv_data = (uint8_t *)malloc(IPERF_BUFSZ);
+    if(recv_data == NULL) {
+        KPrintf("[%s] No Memory.\n", __func__);
+        goto exit__;
+    }
+
+    uint64 recvlen = 0;
+    int32_t bytes_received = 0;
+    
+    int flag = 1;
+    setsockopt(sccb->connected,
+                IPPROTO_TCP,     /* set option at TCP level */
+                TCP_NODELAY,     /* name of option */
+                (void *) &flag,  /* the cast is historical cruft */
+                sizeof(int));    /* length of option value */
+
+    int cur_tid = GetKTaskDescriptor()->id.id;
+
+    tick1 = CurrentTicksGain();
+    while (param.mode != IPERF_MODE_STOP){
+        bytes_received = recv(sccb->connected, recv_data, IPERF_BUFSZ, 0);
+        if (bytes_received == 0) {
+            KPrintf("client disconnected (%s, %d)\n",
+                inet_ntoa(sccb->client_addr.sin_addr), ntohs(sccb->client_addr.sin_port));
+            break;
+        } else if (bytes_received < 0) {
+            KPrintf("recv error, client: (%s, %d)\n",
+                inet_ntoa(sccb->client_addr.sin_addr), ntohs(sccb->client_addr.sin_port));
+            break;
+        }
+
+        recvlen += bytes_received;
+
+        tick2 = CurrentTicksGain();
+        if (tick2 - tick1 >= TICK_PER_SECOND * 5) {
+            double speed;
+            // int integer, decimal;
+            KTaskDescriptorType tid;
+
+            tid = GetKTaskDescriptor();
+            speed = (double)(recvlen * TICK_PER_SECOND / (125 * (tick2 - tick1)));
+            speed = speed / 1000.0f;
+            printf("%s%d: %2.4f Mbps!\n",
+                tid->task_base_info.name, cur_tid - sccb->parent_id, speed);
+            tick1 = tick2;
+            recvlen = 0;
+        }
+    }
+    free(recv_data);
+
+exit__:
+    if (sccb->connected >= 0) closesocket(sccb->connected);
+    sccb->connected = -1;
+    free(sccb);
+    KPrintf("iperf server %d quiting.\n", cur_tid - sccb->parent_id);
+}
+
+void iperf_server_multithread(void *thread_param)
+{
+    socklen_t sin_size;
+    x_ticks_t tick1, tick2;
+    int sock;
+    int connected;
+    struct sockaddr_in server_addr, client_addr;
+    fd_set readset;
+    struct timeval timeout;
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0){
+        KPrintf("[%s:%d] Socket error!\n", __FILE__, __LINE__);
+        goto __exit;
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(param.port);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    memset(&(server_addr.sin_zero), 0x0, sizeof(server_addr.sin_zero));
+
+    if (bind(sock, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1){
+        KPrintf("Unable to bind!\n");
+        goto __exit;
+    }
+
+    if (listen(sock, 5) == -1){
+        KPrintf("Listen error!\n");
+        goto __exit;
+    }
+
+    int cur_tid = GetKTaskDescriptor()->id.id;
+
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
+    while (param.mode != IPERF_MODE_STOP){
+        FD_ZERO(&readset);
+        FD_SET(sock, &readset);
+
+        if (select(sock + 1, &readset, NULL, NULL, &timeout) == 0) {
+            continue;
+        }
+
+        sin_size = sizeof(struct sockaddr_in);
+
+        connected = accept(sock, (struct sockaddr *)&client_addr, &sin_size);
+
+        printf("new client connected from (%s, %d)\n",
+                   inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+        struct sock_conn_cb *sccb = malloc(sizeof(struct sock_conn_cb));
+        sccb->connected = connected;
+        sccb->client_addr = client_addr;
+        sccb->server_addr = server_addr;
+        sccb->parent_id = cur_tid;
+        int tid = KTaskCreate("iperf server", iperf_sever_worker, sccb, LWIP_TASK_STACK_SIZE, 20);
+        // iperf_sever_worker(sccb);
+        if (tid) {
+            StartupKTask(tid);
+        } else {
+            KPrintf("[%s] Failed to create server worker.\n", __func__);
+            free(sccb);
+        }
+    }
+
+__exit:
+    if (sock >= 0) closesocket(sock);
+}
+
 void iperf_server(void *thread_param)
 {
     uint8_t *recv_data;
@@ -490,7 +627,7 @@ int iperf(int argc, char **argv)
                 else if (mode == IPERF_MODE_SERVER)
                 {
                     snprintf(tid_name, sizeof(tid_name), "iperfd%02d", i + 1);
-                    function = iperf_server;
+                    function = iperf_server_multithread;
                 }
             }
 
@@ -541,6 +678,8 @@ lwiperf_example_init(void)
  
 }
 
+// SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(8),
+//     iperf, iperf, netutils iperf);
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(8),
     iperf, iperf, netutils iperf);
 
