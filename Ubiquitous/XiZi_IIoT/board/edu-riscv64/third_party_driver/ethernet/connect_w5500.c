@@ -30,7 +30,7 @@ uint32_t get_gbuf_size() {
 
 wiz_NetInfo *get_gnetinfo() {
   static wiz_NetInfo g_wiz_netinfo = {.mac = {0x00, 0x08, 0xdc, 0x11, 0x11, 0x11},
-                                      .ip = {192, 168, 131, 42},
+                                      .ip = {192, 168, 130, 77},
                                       .sn = {255, 255, 254, 0},
                                       .gw = {192, 168, 130, 1},
                                       .dns = {0, 0, 0, 0},

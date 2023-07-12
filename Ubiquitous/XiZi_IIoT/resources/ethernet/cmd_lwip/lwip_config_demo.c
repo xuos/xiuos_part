@@ -30,6 +30,7 @@ static void LwipSetIPTask(void *param)
 {
     uint8_t enet_port = *(uint8_t *)param; ///< test enet port 
     printf("lw: [%s] config netport id[%d]\n", __func__, enet_port);
+    // lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     lwip_config_tcp(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 }
 

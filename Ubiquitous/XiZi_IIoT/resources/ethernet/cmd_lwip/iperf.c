@@ -678,8 +678,6 @@ lwiperf_example_init(void)
  
 }
 
-// SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(8),
-//     iperf, iperf, netutils iperf);
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(8),
     iperf, iperf, netutils iperf);
 

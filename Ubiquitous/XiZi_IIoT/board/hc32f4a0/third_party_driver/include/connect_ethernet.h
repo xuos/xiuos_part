@@ -62,6 +62,8 @@ int32_t low_level_init(struct netif *netif);
 err_t low_level_output(struct netif *netif, struct pbuf *p);
 struct pbuf *low_level_input(struct netif *netif);
 
+int HwEthInit(void);
+
 
 #ifdef __cplusplus
 }

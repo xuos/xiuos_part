@@ -32,7 +32,7 @@
 
 /* ---------- Debug options ---------- */
 #ifndef LWIP_DEBUG
-#define LWIP_DEBUG 
+#define LWIP_DEBUG  1
 #endif
 
 #ifdef LWIP_DEBUG

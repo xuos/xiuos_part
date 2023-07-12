@@ -13,6 +13,8 @@
 #include <lwip/timeouts.h>
 #include <netif/etharp.h>
 
+#include <sys_arch.h>
+
 void eth_irq_handler(void) {
     static x_base eth_irq_lock;
     eth_irq_lock = DISABLE_INTERRUPT();
@@ -275,5 +277,11 @@ struct pbuf *low_level_input(struct netif *netif)
     return p;
 }
 
+extern void LwipSetIPTest(int argc, char *argv[]);
+int HwEthInit(void) {
+//   lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+  LwipSetIPTest(1, NULL);
+  return EOK;
+}
 
 
