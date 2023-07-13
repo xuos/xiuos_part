@@ -14,7 +14,7 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
 	ifeq ($(CONFIG_RESOURCES_LWIP),y)
 		SRC_DIR += socket_demo
 	endif
-
+	SRC_DIR +=mqtt_demo
     include $(KERNEL_ROOT)/compiler.mk
 endif
 
