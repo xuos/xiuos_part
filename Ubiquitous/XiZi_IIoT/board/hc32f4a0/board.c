@@ -78,6 +78,10 @@ Modification:
 #include <connect_can.h>
 #endif
 
+#ifdef BSP_USING_LWIP
+#include <connect_ethernet.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
 
@@ -209,6 +213,8 @@ struct InitSequenceDesc _board_init[] =
 #endif
 #ifdef BSP_USING_CAN
 	{ "can", HwCanInit },
+#endif
+#ifdef BSP_USING_LWIP
 #endif
     { " NONE ", NONE },
 };

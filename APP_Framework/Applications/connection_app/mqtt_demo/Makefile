@@ -1,5 +1,6 @@
 ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
-SRC_FILES := lwip_mqtt_demo.c
+SRC_FILES += lwip_mqtt_demo.c
+SRC_FILES += online_mqtt.c
 include $(KERNEL_ROOT)/compiler.mk
 endif
 

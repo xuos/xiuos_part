@@ -60,7 +60,7 @@ uint8_t cJSON_Update(const cJSON * const object,const char * const string,void *
 
 void Proscess(void* data)
 {
-  lw_print("��ʼ����JSON����");
+  
   cJSON *root,*json_name,*json_temp_num,*json_hum_num;
   root = cJSON_Parse((char*)data); //解析成json形式
 

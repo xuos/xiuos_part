@@ -32,9 +32,9 @@ int32_t transport_sendPacketBuffer( uint8_t* buf, int32_t buflen)
 int transport_getdata(unsigned char* buf, int count)
 {
 	int32_t rc;
-	//������������ﲻ����
+	
   rc = recv(mysock, buf, count, 0);
-  lw_print("get data : %d\n",rc);
+  lw_print("get data : %lx\n",rc);
 	return rc;
 }
 

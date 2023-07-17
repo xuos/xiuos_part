@@ -1,6 +1,6 @@
 #include <transform.h>
 #include "lwip_mqtt_demo.h"
-
+#include <stdio.h>
 #ifdef ADD_XIZI_FETURES
 #include <sys_arch.h>
 #include <lwip/sockets.h>
@@ -27,9 +27,9 @@
 #define LWIP_MQTT_DEMO_TASK_STACK_SIZE        4096
 #define LWIP_MQTT_DEMO_TASK_PRIO              20
 
-static char mqtt_demo_ipaddr[] = {192, 168, 131, 77};
+static char mqtt_demo_ipaddr[] = {192, 168, 130, 77};
 static char mqtt_demo_netmask[] = {255, 255, 254, 0};
-static char mqtt_demo_gwaddr[] = {192, 168, 131, 1};
+static char mqtt_demo_gwaddr[] = {192, 168, 130, 1};
 
 static pthread_t mqtt_client_task;
 static pthread_t mqtt_server_task;
@@ -76,7 +76,7 @@ uint8_t MQTT_Connect(void)
     len = MQTTSerialize_connect((unsigned char *)buf, buflen, &data);
     //发送消息
     transport_sendPacketBuffer(buf, len);
-
+    
     /* 等待连接响应 */
     if (MQTTPacket_read(buf, buflen, transport_getdata) == CONNACK)
     {
@@ -149,7 +149,7 @@ int32_t MQTTSubscribe(int32_t sock,char *topic,enum QoS pos)
 	  MQTTString topicString = MQTTString_initializer;  
 		int32_t len;
 	  int32_t req_qos,qosbk;
-	
+
 		fd_set readfd;
 	  struct timeval tv;
 	  tv.tv_sec = 2;
@@ -342,6 +342,7 @@ void mqtt_pktype_ctl(uint8_t packtype,uint8_t *buf,uint32_t buflen)
 
 static void *MqttSocketRecvTask(void *arg)
 {
+MQTT_START: 
     lw_print("Recv begin**********\n");
     int fd = -1, clientfd;
     int recv_len;
@@ -371,7 +372,7 @@ static void *MqttSocketRecvTask(void *arg)
         return NULL;
     }
 
-    lw_print("MQTT connect %s:%d success, begin to verify hostname and password.\n", mqtt_ip_str, mqtt_socket_port);
+    lw_print("MQTT connect %s:%d success, begin to verify username and password.\n", mqtt_ip_str, mqtt_socket_port);
     
     if(MQTT_Connect() != Connect_OK)
     {
@@ -379,7 +380,8 @@ static void *MqttSocketRecvTask(void *arg)
         shutdown(fd, SHUT_WR);
         recv(fd, NULL, (size_t)0, 0);
         close(fd);
-        return NULL;
+        PrivTaskDelay(1000);
+        goto MQTT_START;
     }
 
     lw_print("MQTT subscribe begin.\n");

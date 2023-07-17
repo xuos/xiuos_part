@@ -1,8 +1,8 @@
 #include <stdint.h>
 
-#define   MSG_MAX_LEN     500
+#define   MSG_MAX_LEN     1024
 #define   MSG_TOPIC_LEN   50
-#define   KEEPLIVE_TIME   50
+#define   KEEPLIVE_TIME   650
 #define   MQTT_VERSION    4
 
 #ifdef    LWIP_DNS
@@ -15,11 +15,11 @@
 //#define   HOST_IP       "129.204.201.235"
 #define   HOST_PORT     1883    //由于是TCP连接，端口必须是1883
 
-#define   CLIENT_ID     "mqttx_24d1dccf"         //随机的id
-#define   USER_NAME     "test"     //用户名
-#define   PASSWORD      "hc123456"  //秘钥
+#define   CLIENT_ID     "iw3rn3pa11K.test|securemode=2,signmethod=hmacsha256,timestamp=1689296035604|"         //随机的id
+#define   USER_NAME     "test&iw3rn3pa11K"     //用户名
+#define   PASSWORD      "7b948d22fe46f0f63d1a403376d26e7cb298abc227d29e44311d7040307a71f8"  //秘钥
 
-#define   TOPIC         "temp"      //订阅的主题
+#define   TOPIC         "/iw3rn3pa11K/test/user/Test"      //订阅的主题
 
 #define   TEST_MESSAGE  "test_message"  //发送测试消息
 
