@@ -28,7 +28,7 @@
 #include "tcpecho_raw.h"
 char tcp_demo_msg[LWIP_TEST_MSG_SIZE] = { 0 };
 char tcp_demo_ip[] = {192, 168, 250, 252};
-u16_t tcp_demo_port = LWIP_TARGET_PORT;
+u16_t tcp_demo_port = 80;
 int tcp_send_num = 0;
 int tcp_send_task_on = 0;
 uint32 tcp_interval = 50;

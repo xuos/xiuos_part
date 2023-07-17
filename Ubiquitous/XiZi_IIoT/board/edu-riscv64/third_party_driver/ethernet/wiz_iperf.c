@@ -2,6 +2,8 @@
 #include "w5500.h"
 #include "connect_w5500.h"
 
+#ifdef BSP_WIZ_USE_IPERF
+
 #define IPERF_PORT          5001
 #define IPERF_BUFSZ         (4 * 1024)
 
@@ -460,3 +462,4 @@ __usage:
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
                  iperf, iperf,
                  iperf throughput test);
+#endif
