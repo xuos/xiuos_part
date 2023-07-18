@@ -38,6 +38,7 @@
  *
  */
 
+#include <sys/time.h>
 #include <xs_ktask.h>
 #include "lwip/opt.h"
 
@@ -123,7 +124,9 @@ ping_prepare_echo( struct icmp_echo_hdr *iecho, u16_t len)
     ((char*)iecho)[sizeof(struct icmp_echo_hdr) + i] = (char)i;
   }
 
+#ifndef CHECKSUM_GEN_ICMP
   iecho->chksum = inet_chksum(iecho, len);
+#endif
 }
 
 #if PING_USE_SOCKETS
@@ -208,7 +211,9 @@ ping_recv(int s)
 
       LWIP_DEBUGF( PING_DEBUG, ("ping: recv "));
       ip_addr_debug_print_val(PING_DEBUG, fromaddr);
+#ifdef LWIP_DEBUG
       LWIP_DEBUGF( PING_DEBUG, (" %"U32_F" ms\n", (sys_now() - ping_time)));
+#endif
 
       /* todo: support ICMP6 echo */
 #if LWIP_IPV4
@@ -232,7 +237,9 @@ ping_recv(int s)
   }
 
   if (len == 0) {
+#ifdef LWIP_DEBUG
     LWIP_DEBUGF( PING_DEBUG, ("ping: recv - %"U32_F" ms - timeout\n", (sys_now()-ping_time)));
+#endif
   }
 
   /* do some ping result processing */
@@ -274,7 +281,7 @@ ping_thread(void *arg)
   lw_print("lw: [%s] ping start!\n", __func__);
 
   ret = lwip_setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-  LWIP_ASSERT("setting receive timeout failed", ret != 0);
+  LWIP_ASSERT("setting receive timeout failed", ret == 0);
   LWIP_UNUSED_ARG(ret);
 
   while (cnt --) {
@@ -521,8 +528,10 @@ int get_url_ip(char* url)
 #endif /* LWIP_DEBUG */
             if ((recv_len = lwip_ping_recv(s, &ttl)) >= 0)
             {
+#ifdef LWIP_DEBUG
                 lw_notice("%d bytes from %s icmp_seq=%d ttl=%d time=%d ms\n", recv_len, inet_ntoa(ina), cnt,
                 ttl, sys_now() - ping_time);
+#endif
             }
             else
             {

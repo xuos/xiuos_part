@@ -163,7 +163,7 @@ static int BoardHwtimerDevBend(void)
     return ret;
 }
 
-/*K210 BOARD HWTIMER INIT*/
+/*HC32F4A0 BOARD HWTIMER INIT*/
 int HwTimerInit(void)
 {
     x_err_t ret = EOK;
