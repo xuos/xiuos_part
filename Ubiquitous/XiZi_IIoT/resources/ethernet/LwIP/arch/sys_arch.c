@@ -69,96 +69,58 @@
 #include "ethernet.h"
 #include "connect_ethernet.h"
 
-char lwip_ipaddr[20] = {192, 168, 131, 77};
+char lwip_ipaddr[20] = {192, 168, 130, 77};
 char lwip_netmask[20] = {255, 255, 254, 0};
-char lwip_gwaddr[20] = {192, 168, 131, 23};
+char lwip_gwaddr[20] = {192, 168, 130, 1};
 
-char lwip_eth0_ipaddr[20] = {192, 168, 131, 77};
+char lwip_eth0_ipaddr[20] = {192, 168, 130, 77};
 char lwip_eth0_netmask[20] = {255, 255, 254, 0};
-char lwip_eth0_gwaddr[20] = {192, 168, 131, 23};
+char lwip_eth0_gwaddr[20] = {192, 168, 130, 1};
 
-char lwip_eth1_ipaddr[20] = {192, 168, 131, 99};
+char lwip_eth1_ipaddr[20] = {192, 168, 130, 99};
 char lwip_eth1_netmask[20] = {255, 255, 254, 0};
-char lwip_eth1_gwaddr[20] = {192, 168, 131, 23};
+char lwip_eth1_gwaddr[20] = {192, 168, 130, 23};
 
 char lwip_flag = 0;
 
 x_ticks_t lwip_sys_now;
 
-struct sys_timeouts {
-  struct sys_timeo *next;
-};
-
-struct timeoutlist
-{
-  struct sys_timeouts timeouts;
-  int32 pid;
-};
-
 #define SYS_THREAD_MAX 4
 
-static struct timeoutlist s_timeoutlist[SYS_THREAD_MAX];
+struct netif gnetif;
+sys_sem_t* get_eth_recv_sem() {
+    static sys_sem_t g_recv_sem = 0;
+    return &g_recv_sem;
+}
 
-static u16_t s_nextthread = 0;
+void sys_init(void) {
+  // do nothing
+}
 
 u32_t
-sys_jiffies(void)
-{
+sys_jiffies(void) {
   lwip_sys_now = CurrentTicksGain();
   return lwip_sys_now;
 }
 
 u32_t
-sys_now(void)
-{
+sys_now(void) {
   lwip_sys_now = CurrentTicksGain();
-  return lwip_sys_now;
+  return CalculateTimeMsFromTick(lwip_sys_now);
 }
 
-void
-sys_init(void)
-{
-  int i;
-  for(i = 0; i < SYS_THREAD_MAX; i++)
-  {
-    s_timeoutlist[i].pid = 0;
-    s_timeoutlist[i].timeouts.next = NULL;
-  }
-  s_nextthread = 0;
-}
-
-struct sys_timeouts *sys_arch_timeouts(void)
-{
-  int i;
-  int32 pid;
-  struct timeoutlist *tl;
-  pid = (int32)GetKTaskDescriptor()->id.id;
-  for(i = 0; i < s_nextthread; i++)
-  {
-    tl = &(s_timeoutlist[i]);
-    if(tl->pid == pid)
-    {
-      return &(tl->timeouts);
-    }
-  }
-  return NULL;
-}
-
-sys_prot_t sys_arch_protect(void)
-{
+sys_prot_t sys_arch_protect(void) {
   return CriticalAreaLock();
 }
 
-void sys_arch_unprotect(sys_prot_t pval)
-{
+void sys_arch_unprotect(sys_prot_t pval) {
   CriticalAreaUnLock(pval);
 }
 
 #if !NO_SYS
 
 err_t
-sys_sem_new(sys_sem_t *sem, u8_t count)
-{
+sys_sem_new(sys_sem_t *sem, u8_t count) {
   *sem = KSemaphoreCreate((uint16)count);
 
 #if SYS_STATS
@@ -170,8 +132,7 @@ sys_sem_new(sys_sem_t *sem, u8_t count)
 
   if(*sem >= 0)
     return ERR_OK;
-  else
-  {
+  else {
 #if SYS_STATS
     ++lwip_stats.sys.sem.err;
 #endif /* SYS_STATS */
@@ -181,8 +142,7 @@ sys_sem_new(sys_sem_t *sem, u8_t count)
 }
 
 void
-sys_sem_free(sys_sem_t *sem)
-{
+sys_sem_free(sys_sem_t *sem) {
 #if SYS_STATS
    --lwip_stats.sys.sem.used;
 #endif /* SYS_STATS */
@@ -190,19 +150,16 @@ sys_sem_free(sys_sem_t *sem)
   *sem = SYS_SEM_NULL;
 }
 
-int sys_sem_valid(sys_sem_t *sem)
-{
+int sys_sem_valid(sys_sem_t *sem) {
   return (*sem > SYS_SEM_NULL);
 }
 
 void
-sys_sem_set_invalid(sys_sem_t *sem)
-{
+sys_sem_set_invalid(sys_sem_t *sem) {
   *sem = SYS_SEM_NULL;
 }
 
-u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
-{
+u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout) {
   x_ticks_t start_tick = 0 ;
   int32 wait_time = 0;
 
@@ -220,61 +177,51 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
 
 
   if(KSemaphoreObtain(*sem, wait_time) == EOK)
-    return ((CurrentTicksGain()-start_tick)*MS_PER_SYSTICK);
+    return CalculateTimeMsFromTick(CurrentTicksGain()-start_tick);
   else
     return SYS_ARCH_TIMEOUT;
 }
 
-void sys_sem_signal(sys_sem_t *sem)
-{
-  if(KSemaphoreAbandon( *sem ) != EOK)
+void sys_sem_signal(sys_sem_t *sem) {
+  if(KSemaphoreAbandon(*sem) != EOK)
     KPrintf("[sys_arch]:sem signal fail!\n");
 }
 
-err_t sys_mutex_new(sys_mutex_t *mutex)
-{
+err_t sys_mutex_new(sys_mutex_t *mutex) {
   *mutex = KMutexCreate();
-  if(*mutex > SYS_MRTEX_NULL)
+  if (*mutex > SYS_MRTEX_NULL)
     return ERR_OK;
-  else
-  {
+  else {
     KPrintf("[sys_arch]:new mutex fail!\n");
     return ERR_MEM;
   }
 }
 
-void sys_mutex_free(sys_mutex_t *mutex)
-{
+void sys_mutex_free(sys_mutex_t *mutex) {
   KMutexDelete(*mutex);
 }
 
-void sys_mutex_set_invalid(sys_mutex_t *mutex)
-{
+void sys_mutex_set_invalid(sys_mutex_t *mutex) {
   *mutex = SYS_MRTEX_NULL;
 }
 
-void sys_mutex_lock(sys_mutex_t *mutex)
-{
-  KMutexObtain(*mutex,
-                 WAITING_FOREVER);
+void sys_mutex_lock(sys_mutex_t *mutex) {
+  KMutexObtain(*mutex, WAITING_FOREVER);
 }
 
-void sys_mutex_unlock(sys_mutex_t *mutex)
-{
-  KMutexAbandon( *mutex );
+void sys_mutex_unlock(sys_mutex_t *mutex) {
+  KMutexAbandon(*mutex);
 }
 
 
-sys_thread_t sys_thread_new(const char *name, lwip_thread_fn function, void *arg, int stacksize, int prio)
-{
+sys_thread_t sys_thread_new(const char *name, lwip_thread_fn function, void *arg, int stacksize, int prio) {
   sys_thread_t handle = -1;
   handle =  KTaskCreate(name,
                          function,
                          arg,
                          (uint32)stacksize,
                          (uint8)prio);
-  if (handle >= 0)
-  {
+  if (handle >= 0) {
     StartupKTask(handle);
     lw_print("lw: [%s] create %s handle %x\n", __func__, name, handle);
     return handle;
@@ -283,8 +230,7 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn function, void *arg
   return -ERROR;
 }
 
-err_t sys_mbox_new(sys_mbox_t *mbox, int size)
-{
+err_t sys_mbox_new(sys_mbox_t *mbox, int size) {
   *mbox = KCreateMsgQueue(sizeof(void *), size);
 
 #if SYS_STATS
@@ -293,8 +239,7 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
          lwip_stats.sys.mbox.max = lwip_stats.sys.mbox.used;
     }
 #endif /* SYS_STATS */
-  if(*mbox < 0)
-  {
+  if(*mbox < 0) {
     lw_print("lw: [%s] alloc %d mbox %p failed\n", __func__, size, mbox);
     return ERR_MEM;
   }
@@ -303,44 +248,38 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
   return ERR_OK;
 }
 
-void sys_mbox_free(sys_mbox_t *mbox)
-{
+void sys_mbox_free(sys_mbox_t *mbox) {
   KDeleteMsgQueue(*mbox);
 }
 
-int sys_mbox_valid(sys_mbox_t *mbox)
-{
+int sys_mbox_valid(sys_mbox_t *mbox) {
   if (*mbox <= SYS_MBOX_NULL)
     return 0;
   else
     return 1;
 }
 
-void sys_mbox_set_invalid(sys_mbox_t *mbox)
-{
+void sys_mbox_set_invalid(sys_mbox_t *mbox) {
   *mbox = SYS_MBOX_NULL;
 }
 
-void sys_mbox_post(sys_mbox_t *q, void *msg)
-{
-  while(KMsgQueueSendwait( *q, &msg, sizeof(void *), WAITING_FOREVER) != EOK);
+void sys_mbox_post(sys_mbox_t *q, void *msg) {
+  KMsgQueueSendwait(*q, &msg, sizeof(void *), WAITING_FOREVER);
 }
 
-err_t sys_mbox_trypost(sys_mbox_t *q, void *msg)
-{
+err_t sys_mbox_trypost(sys_mbox_t *q, void *msg) {
+  // if(KMsgQueueSend(*q, &msg, sizeof(void *)) == EOK)
   if(KMsgQueueSend(*q, &msg, sizeof(void *)) == EOK)
     return ERR_OK;
   else
     return ERR_MEM;
 }
 
-err_t sys_mbox_trypost_fromisr(sys_mbox_t *q, void *msg)
-{
+err_t sys_mbox_trypost_fromisr(sys_mbox_t *q, void *msg) {
   return sys_mbox_trypost(q, msg);
 }
 
-u32_t sys_arch_mbox_fetch(sys_mbox_t *q, void **msg, u32_t timeout)
-{
+u32_t sys_arch_mbox_fetch(sys_mbox_t *q, void **msg, u32_t timeout) {
   x_ticks_t start_tick = 0 ;
   int32 wait_time = 0;
 
@@ -351,17 +290,15 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *q, void **msg, u32_t timeout)
   else
     wait_time = timeout;
 
-  if(KMsgQueueRecv(*q, &(*msg), sizeof(void *), wait_time) == EOK)
-    return ((CurrentTicksGain()-start_tick)*MS_PER_SYSTICK);
-  else{
-    *msg = NULL;
+  if(KMsgQueueRecv(*q, &(*msg), sizeof(void *), wait_time) == EOK) {
+    return CalculateTimeMsFromTick(CurrentTicksGain() - start_tick);
+  } else {
     return SYS_ARCH_TIMEOUT;
   }
 }
 
-u32_t sys_arch_mbox_tryfetch(sys_mbox_t *q, void **msg)
-{
-  if(KMsgQueueRecv(*q, &(*msg), sizeof(void *), 0) == EOK)
+u32_t sys_arch_mbox_tryfetch(sys_mbox_t *q, void **msg) {
+  if (KMsgQueueRecv(*q, &(*msg), sizeof(void *), 0) == EOK)
     return ERR_OK;
   else
     return SYS_MBOX_EMPTY;
@@ -374,97 +311,15 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *q, void **msg)
 #endif /* !NO_SYS */
 
 /* Variables Initialization */
-struct netif gnetif;
 ip4_addr_t ipaddr;
 ip4_addr_t netmask;
 ip4_addr_t gw;
 
-void lwip_tcp_init(void)
-{
-  tcpip_init(NULL, NULL);
-
-  /* IP addresses initialization */
-  /* USER CODE BEGIN 0 */
-#if LWIP_DHCP
-  ip_addr_set_zero_ip4(&ipaddr);
-  ip_addr_set_zero_ip4(&netmask);
-  ip_addr_set_zero_ip4(&gw);
-#else
-  IP4_ADDR(&ipaddr, lwip_ipaddr[0], lwip_ipaddr[1], lwip_ipaddr[2], lwip_ipaddr[3]);
-  IP4_ADDR(&netmask, lwip_netmask[0], lwip_netmask[1], lwip_netmask[2], lwip_netmask[3]);
-  IP4_ADDR(&gw, lwip_gwaddr[0], lwip_gwaddr[1], lwip_gwaddr[2], lwip_gwaddr[3]);
-#endif /* USE_DHCP */
-  /* USER CODE END 0 */
-  /* Initilialize the LwIP stack without RTOS */
-  /* add the network interface (IPv4/IPv6) without RTOS */
-#ifdef NETIF_ENET0_INIT_FUNC
-  netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, NETIF_ENET0_INIT_FUNC, &tcpip_input);
-#endif
-
-  /* Registers the default network interface */
-  netif_set_default(&gnetif);
-
-  if (netif_is_link_up(&gnetif))
-  {
-    /* When the netif is fully configured this function must be called */
-    KPrintf("%s : netif_set_up\n", __func__);
-    netif_set_up(&gnetif);
-  }
-  else
-  {
-    /* When the netif link is down this function must be called */
-    KPrintf("%s : netif_set_down\n", __func__);
-    netif_set_down(&gnetif);
-  }
-
-#if LWIP_DHCP
-  int err;
-  /*  Creates a new DHCP client for this interface on the first call.
-  Note: you must call dhcp_fine_tmr() and dhcp_coarse_tmr() at
-  the predefined regular intervals after starting the client.
-  You can peek in the netif->dhcp struct for the actual DHCP status.*/
-
-
-  err = dhcp_start(&gnetif);
-  if(err == ERR_OK)
-    KPrintf("lwip dhcp init success...\n\n");
-  else
-    KPrintf("lwip dhcp init fail...\n\n");
-  while(ip_addr_cmp(&(gnetif.ip_addr),&ipaddr))
-  {
-    DelayKTask(1);
-  }
-#endif
-  KPrintf("\n\nIP:%d.%d.%d.%d\n\n",  \
-        ((gnetif.ip_addr.addr)&0x000000ff),       \
-        (((gnetif.ip_addr.addr)&0x0000ff00)>>8),  \
-        (((gnetif.ip_addr.addr)&0x00ff0000)>>16), \
-        ((gnetif.ip_addr.addr)&0xff000000)>>24);
-}
-
-// lwip input thread to get network packet
-void lwip_input_thread(void *param)
-{
-  struct netif *net = param;
-
-  while (1)
-  {
-#ifdef FSL_RTOS_XIUOS
-    if (lwip_obtain_semaphore(net) == EOK)
-#endif
-    {
-        /* Poll the driver, get any outstanding frames */
-        ethernetif_input(net);
-        sys_check_timeouts(); /* Handle all system timeouts for all core protocols */
-    }
-  }
-}
-
-void lwip_config_input(struct netif *net)
-{
+void lwip_config_input(struct netif *net) {
   sys_thread_t th_id = 0;
 
-  th_id = sys_thread_new("eth_input", lwip_input_thread, net, LWIP_TASK_STACK_SIZE, 15);
+  extern void ethernetif_input(void *netif_arg);
+  th_id = sys_thread_new("eth_input", ethernetif_input, net, LWIP_TASK_STACK_SIZE, 20);
 
   if (th_id >= 0) {
     lw_print("%s %d successfully!\n", __func__, th_id);
@@ -473,15 +328,65 @@ void lwip_config_input(struct netif *net)
   }
 }
 
-void lwip_config_net(uint8_t enet_port, char *ip, char *mask, char *gw)
-{
+void lwip_config_tcp(uint8_t enet_port, char *ip, char *mask, char *gw) {
   ip4_addr_t net_ipaddr, net_netmask, net_gw;
   char* eth_cfg;
 
   eth_cfg = ethernetif_config_enet_set(enet_port);
 
-  if(chk_lwip_bit(LWIP_INIT_FLAG))
-  {
+  if(chk_lwip_bit(LWIP_INIT_FLAG)) {
+    lw_print("lw: [%s] already ...\n", __func__);
+    return;
+  }
+
+  set_lwip_bit(LWIP_INIT_FLAG);
+
+  tcpip_init(NULL, NULL);
+
+  lw_print("lw: [%s] start ...\n", __func__);
+
+  IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
+  IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
+  IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
+
+  if (0 == enet_port) {
+#ifdef NETIF_ENET0_INIT_FUNC
+    printf("[%s:%d] call netif_add\n", __func__, __LINE__);
+    netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET0_INIT_FUNC,
+        tcpip_input);
+#endif
+  } else if (1 == enet_port) {
+#ifdef NETIF_ENET1_INIT_FUNC
+    netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET1_INIT_FUNC,
+        tcpip_input);
+#endif
+  }
+
+  netif_set_default(&gnetif);
+  netif_set_up(&gnetif);
+
+  lw_print("\r\n************************************************\r\n");
+  lw_print(" Network Configuration\r\n");
+  lw_print("************************************************\r\n");
+  lw_print(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
+       ((u8_t *)&net_ipaddr)[2], ((u8_t *)&net_ipaddr)[3]);
+  lw_print(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
+       ((u8_t *)&net_netmask)[2], ((u8_t *)&net_netmask)[3]);
+  lw_print(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
+       ((u8_t *)&net_gw)[2], ((u8_t *)&net_gw)[3]);
+  lw_print("************************************************\r\n");
+
+  lwip_config_input(&gnetif);
+}
+
+
+void lwip_config_net(uint8_t enet_port, char *ip, char *mask, char *gw) {
+  ip4_addr_t net_ipaddr, net_netmask, net_gw;
+  char* eth_cfg;
+
+  eth_cfg = ethernetif_config_enet_set(enet_port);
+
+  if(chk_lwip_bit(LWIP_INIT_FLAG)) {
     lw_print("lw: [%s] already ...\n", __func__);
 
     IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
@@ -521,8 +426,7 @@ void lwip_config_net(uint8_t enet_port, char *ip, char *mask, char *gw)
   netif_set_default(&gnetif);
   netif_set_up(&gnetif);
 
-  if(chk_lwip_bit(LWIP_PRINT_FLAG))
-  {
+  if(chk_lwip_bit(LWIP_PRINT_FLAG)) {
     lw_notice("\r\n************************************************\r\n");
     lw_notice(" Network Configuration\r\n");
     lw_notice("************************************************\r\n");
@@ -534,58 +438,6 @@ void lwip_config_net(uint8_t enet_port, char *ip, char *mask, char *gw)
          ((u8_t *)&net_gw)[2], ((u8_t *)&net_gw)[3]);
     lw_notice("************************************************\r\n");
   }
-  lwip_config_input(&gnetif);
-}
-
-void lwip_config_tcp(uint8_t enet_port, char *ip, char *mask, char *gw)
-{
-  ip4_addr_t net_ipaddr, net_netmask, net_gw;
-  char* eth_cfg;
-
-  eth_cfg = ethernetif_config_enet_set(enet_port);
-
-  if(chk_lwip_bit(LWIP_INIT_FLAG))
-  {
-    lw_print("lw: [%s] already ...\n", __func__);
-    return;
-  }
-
-  set_lwip_bit(LWIP_INIT_FLAG);
-
-  tcpip_init(NULL, NULL);
-
-  lw_print("lw: [%s] start ...\n", __func__);
-
-  IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
-  IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
-  IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
-
-  if(0 == enet_port) {
-#ifdef NETIF_ENET0_INIT_FUNC
-    netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET0_INIT_FUNC,
-        ethernet_input);
-#endif
-  } else if (1 == enet_port) {
-#ifdef NETIF_ENET1_INIT_FUNC
-    netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET1_INIT_FUNC,
-        ethernet_input);
-#endif
-  }
-
-  netif_set_default(&gnetif);
-  netif_set_up(&gnetif);
-
-  lw_print("\r\n************************************************\r\n");
-  lw_print(" Network Configuration\r\n");
-  lw_print("************************************************\r\n");
-  lw_print(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t *)&net_ipaddr)[0], ((u8_t *)&net_ipaddr)[1],
-       ((u8_t *)&net_ipaddr)[2], ((u8_t *)&net_ipaddr)[3]);
-  lw_print(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&net_netmask)[0], ((u8_t *)&net_netmask)[1],
-       ((u8_t *)&net_netmask)[2], ((u8_t *)&net_netmask)[3]);
-  lw_print(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&net_gw)[0], ((u8_t *)&net_gw)[1],
-       ((u8_t *)&net_gw)[2], ((u8_t *)&net_gw)[3]);
-  lw_print("************************************************\r\n");
-
   lwip_config_input(&gnetif);
 }
 
