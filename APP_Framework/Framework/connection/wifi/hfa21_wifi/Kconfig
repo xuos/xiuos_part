@@ -2,7 +2,7 @@ config ADAPTER_WIFI_HFA21
         string "HFA21 WIFI adapter name"
         default "hfa21_wifi"
 
-if ADD_XIZI_FETURES
+if ADD_XIZI_FEATURES
 
         config ADAPTER_HFA21_DRIVER_EXTUART
                 bool "Using extra uart to support wifi"
@@ -24,11 +24,11 @@ if ADD_XIZI_FETURES
         endif
 endif
 
-if ADD_NUTTX_FETURES
+if ADD_NUTTX_FEATURES
 
 endif
 
-if ADD_RTTHREAD_FETURES
+if ADD_RTTHREAD_FEATURES
         config ADAPTER_HFA21_DRIVER
                 string "HFA21 device uart driver path"
                 default "/dev/uart3" 

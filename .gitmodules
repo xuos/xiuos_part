@@ -29,3 +29,6 @@
 	path = APP_Framework/lib/lorawan/lorawan_devicenode
 	url = https://gitlink.org.cn/IACU/lorawan_devicenode.git
 	branch = master
+[submodule "APP_Framework/lib/lorawan/lorawan_gateway_single_channel"]
+	path = APP_Framework/lib/lorawan/lorawan_gateway_single_channel
+	url = https://gitlink.org.cn/IACU/lorawan_gateway_single_channel.git

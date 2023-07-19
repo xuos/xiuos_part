@@ -1,13 +1,13 @@
 include $(KERNEL_ROOT)/.config
 
-ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
+ifeq ($(CONFIG_ADD_NUTTX_FEATURES),y)
     include $(APPDIR)/Make.defs
     CSRCS +=
     include $(APPDIR)/Application.mk
 endif
 
 
-ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     SRC_DIR := general_functions app_test 
 
     SRC_FILES := main.c

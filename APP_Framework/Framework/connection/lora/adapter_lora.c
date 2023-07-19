@@ -930,7 +930,7 @@ int AdapterLoraTest(void)
 
     //create lora gateway task
 #ifdef AS_LORA_GATEWAY_ROLE
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     pthread_attr_t lora_gateway_attr = PTHREAD_ATTR_INITIALIZER;
     lora_gateway_attr.priority = 20;
     lora_gateway_attr.stacksize = 2048;
@@ -943,7 +943,7 @@ int AdapterLoraTest(void)
     PrivTaskCreate(&lora_recv_data_task, &lora_gateway_attr, &LoraReceiveTask, (void *)adapter);
     PrivTaskStartup(&lora_recv_data_task);
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     lora_gateway_attr.priority = 19;
 #else   
     lora_gateway_attr.schedparam.sched_priority = 19;
@@ -953,7 +953,7 @@ int AdapterLoraTest(void)
     PrivTaskStartup(&lora_gateway_task);
 
 #else //AS_LORA_CLIENT_ROLE
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     pthread_attr_t lora_client_attr = PTHREAD_ATTR_INITIALIZER;
     lora_client_attr.priority = 20;
     lora_client_attr.stacksize = 2048;
@@ -965,7 +965,7 @@ int AdapterLoraTest(void)
     PrivTaskCreate(&lora_recv_data_task, &lora_client_attr, &LoraReceiveTask, (void *)adapter);
     PrivTaskStartup(&lora_recv_data_task);
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     lora_client_attr.priority = 19;
 #else   
     lora_client_attr.schedparam.sched_priority = 19;

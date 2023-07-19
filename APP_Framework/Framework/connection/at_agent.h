@@ -58,7 +58,7 @@ struct ATAgent
     uint32 maintain_len;
     uint32 maintain_max;
 
-#ifdef ADD_XIZI_FETURES   
+#ifdef ADD_XIZI_FEATURES   
     int lock;
 #else
     pthread_mutex_t lock;
@@ -69,7 +69,7 @@ struct ATAgent
     char reply_end_last_char;
     char reply_end_char;
     uint32 reply_char_num;
-#ifdef ADD_XIZI_FETURES  
+#ifdef ADD_XIZI_FEATURES  
 	int rsp_sem;
 #else
     sem_t rsp_sem;
@@ -79,7 +79,7 @@ struct ATAgent
     char entm_recv_buf[ENTM_RECV_MAX];
     uint32 entm_recv_len;
     enum ReceiveMode receive_mode;
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     int entm_rx_notice;
 #else
     sem_t entm_rx_notice;

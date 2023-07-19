@@ -26,10 +26,10 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 # include <user_api.h>
 #endif
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
 #include <rtthread.h>
 #endif
 #define AT_CMD_MAX_LEN 128
@@ -450,26 +450,26 @@ int DeleteATAgent(ATAgentType agent)
         PrivClose(agent->fd);
     }
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     if (agent->lock.sem.semcount > 0) {
         printf("delete agent lock = %d\n",agent->lock.sem.semcount);
         PrivMutexDelete(&agent->lock);
     }
-#elif defined ADD_RTTHREAD_FETURES
+#elif defined ADD_RTTHREAD_FEATURES
 #else
     if (agent->lock) {
         printf("delete agent lock = %d\n",agent->lock);
         PrivMutexDelete(&agent->lock);
     }
 #endif
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     if (agent->entm_rx_notice) {
         printf("delete agent entm_rx_notice = %d\n",agent->entm_rx_notice);
         PrivSemaphoreDelete(&agent->entm_rx_notice);
     }
 #else
 #endif
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
      if (agent->rsp_sem) {
          printf("delete agent rsp_sem = %d\n",agent->rsp_sem);
          PrivSemaphoreDelete(&agent->rsp_sem);
@@ -544,7 +544,7 @@ static int ATAgentInit(ATAgentType agent)
 
     agent->receive_mode = DEFAULT_MODE;
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
     attr.priority = 18;
     attr.stacksize = 8192;

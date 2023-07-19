@@ -21,7 +21,7 @@
 #include <adapter.h>
 
 #define E220_GATEWAY_ADDRESS 0xFFFF
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
 #define E220_CHANNEL 0x02
 #else
 #define E220_CHANNEL 0x05
@@ -35,7 +35,7 @@
 #define E220_ADDRESS ADAPTER_LORA_NET_ROLE_ID
 #endif
 
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
 #define E220_UART_BAUD_RATE 9600
 #else
 #define E220_UART_BAUD_RATE 115200
@@ -54,7 +54,7 @@ enum E220LoraMode
  * @param mode Lora working mode
  * @return NULL
  */
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 static void E220LoraModeConfig(enum E220LoraMode mode)
 {
     int m0_fd, m1_fd;
@@ -338,7 +338,7 @@ static int E220GetRegisterParam(uint8 *buf)
  * @param adapter - Lora device pointer
  * @return success: 0, failure: -1
  */
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
 static int E220Open(struct Adapter *adapter)
 {
      /*step1: open e220 uart port*/
@@ -614,7 +614,7 @@ static void LoraOpen(void)
 
     E220Open(adapter);
 }
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
 MSH_CMD_EXPORT(LoraOpen,Lora open test sample);
 
 static void LoraRead(void *parameter)
@@ -692,7 +692,7 @@ static void LoraRead(void *parameter)
 #endif
 
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 static void LoraTest(void)
 {
     int ret;
@@ -727,7 +727,7 @@ static void LoraSend(int argc, char *argv[])
 PRIV_SHELL_CMD_FUNCTION(LoraSend, a lora test send sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 void E220LoraReceive(void)
 {
     int ret;
@@ -763,7 +763,7 @@ void E220LoraSend(int argc, char *argv[])
 }
 #endif
 
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
 static void LoraReadStart(void)
 {
     int ret;

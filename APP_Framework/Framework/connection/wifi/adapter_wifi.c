@@ -297,7 +297,7 @@ int WifiRecv(int argc, char *argv[])
 }
 PRIV_SHELL_CMD_FUNCTION(WifiRecv, a WiFi receive sample, PRIV_SHELL_CMD_MAIN_ATTR);
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 
 enum
 {
