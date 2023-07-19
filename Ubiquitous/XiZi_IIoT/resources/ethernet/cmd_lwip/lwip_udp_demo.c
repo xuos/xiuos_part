@@ -23,14 +23,18 @@
 #include "lwip/sockets.h"
 #include <shell.h>
 #include <sys.h>
+#include <xizi.h>
 
 
 #define PBUF_SIZE 27
 
 static struct udp_pcb *udpecho_raw_pcb;
 
-char udp_demo_ip[] = {192, 168, 250, 252};
+char udp_demo_ip[] = {192, 168, 131, 1};
 u16_t udp_demo_port = LWIP_TARGET_PORT;
+int32 udp_send_num = 0;
+int8 udp_send_task_on = 0;
+uint32 udp_interval = 50;
 
 char hello_str[] = {"hello world\r\n"};
 char udp_demo_msg[] = "\nThis one is UDP package!!!\n";
@@ -66,21 +70,37 @@ static void LwipUDPSendTask(void *arg)
 
     lw_notice("UDP connect success, start to send.\n");
     lw_notice("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
+    udp_send_task_on = 1;
 
-    sendto(socket_fd, udp_demo_msg, strlen(udp_demo_msg), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
-    lw_notice("Send UDP msg: %s ", udp_demo_msg);
+    while(udp_send_num > 0 || udp_send_num == -1)
+    {
+        sendto(socket_fd, udp_demo_msg, strlen(udp_demo_msg), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
+        lw_notice("Send UDP msg: %s \n", udp_demo_msg);
+        DelayKTask(udp_interval);
+        udp_send_num--;
+    }
     closesocket(socket_fd);
+    udp_send_task_on = 0;
     return;
 }
 
 void *LwipUdpSendTest(int argc, char *argv[])
 {
+    if(udp_send_task_on){
+        udp_send_num = 0;
+        printf("waitting send task exit...\n");
+        while(udp_send_task_on){
+            DelayKTask(1000);
+        }
+        udp_send_num = 1;
+    }
+
     uint8_t enet_port = 0; ///< test enet port 0
     memset(udp_demo_msg, 0, sizeof(udp_demo_msg));
 
     if(argc == 1)
     {
-        lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3]);
+        lw_print("lw: [%s] gw %d.%d.%d.%d:%d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3], udp_demo_port);
         strncpy(udp_demo_msg, hello_str, strlen(hello_str));
     }
     else
@@ -89,18 +109,23 @@ void *LwipUdpSendTest(int argc, char *argv[])
         strncat(udp_demo_msg, "\r\n", 2);
         if(argc == 3)
         {
-            sscanf(argv[2], "%d.%d.%d.%d", &udp_demo_ip[0], &udp_demo_ip[1], &udp_demo_ip[2], &udp_demo_ip[3]);
+            sscanf(argv[2], "%d.%d.%d.%d:%d", &udp_demo_ip[0], &udp_demo_ip[1], &udp_demo_ip[2], &udp_demo_ip[3], &udp_demo_port);
+        }
+        if(argc > 3)
+        {
+            sscanf(argv[3], "%d", &udp_send_num);
+            sscanf(argv[4], "%d", &udp_interval);
         }
     }
 
-    lw_print("lw: [%s] gw %d.%d.%d.%d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3]);
+    lw_print("lw: [%s] gw %d.%d.%d.%d:%d send time %d udp_interval %d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3], udp_demo_port, udp_send_num, udp_interval);
 
     lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, udp_demo_ip);
     sys_thread_new("udp send", LwipUDPSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     UDPSend, LwipUdpSendTest, UDP send echo);
+     UDPSend, LwipUdpSendTest, UDPSend msg [ip:port [num [interval]]]);
 
 static void LwipUdpRecvTask(void *arg, struct udp_pcb *upcb, struct pbuf *p,
                  const ip_addr_t *addr, u16_t port)

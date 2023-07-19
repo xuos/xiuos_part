@@ -46,13 +46,14 @@ Modification:
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include <hardware_ethernetif.h>
-#include <hc32_ll_eth.h>
+#include <connect_ethernet.h>
 #include <hc32_ll_gpio.h>
 #include <hc32_ll_utility.h>
 #include <hc32_ll_fcg.h>
 #include <lwip/timeouts.h>
 #include <netif/etharp.h>
+
+#include <xs_isr.h>
 
 /**
  * @addtogroup HC32F4A0_DDL_Examples
@@ -71,33 +72,7 @@ Modification:
 /*******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
-/* Define those to better describe your network interface. */
-#define IFNAME0                         'h'
-#define IFNAME1                         'd'
 
-/* PHY hardware reset time */
-#define PHY_HW_RST_DELAY                (0x40U)
-
-/* ETH_RST = PH11 */
-#define ETH_RST_PORT                    (GPIO_PORT_H)
-#define ETH_RST_PIN                     (GPIO_PIN_11)
-
-/* ETH_LINK_LED = PD00 LED2 */
-#define ETH_LINK_LED_PORT               (GPIO_PORT_D)
-#define ETH_LINK_LED_PIN                (GPIO_PIN_00)
-
-//#define ETHERNET_LOOPBACK_TEST
-#ifdef ETHERNET_LOOPBACK_TEST
-
-#define USER_KEY_PORT                  (GPIO_PORT_I)
-#define USER_KEY_PIN                   (GPIO_PIN_07)
-
-/* ethe global netif */
-static struct netif testnetif;
-/* eth tx buffer */
-static struct pbuf txPbuf;
-static char txBuf[] = "Ethernet Loop-Back Test";
-#endif
 
 /*******************************************************************************
  * Global variable definitions (declared in header file with 'extern')
@@ -110,19 +85,7 @@ static char txBuf[] = "Ethernet Loop-Back Test";
 /*******************************************************************************
  * Local variable definitions ('static')
  ******************************************************************************/
-/* Global Ethernet handle*/
-static stc_eth_handle_t EthHandle;
-/* Ethernet Tx DMA Descriptor */
-__ALIGN_BEGIN static stc_eth_dma_desc_t EthDmaTxDscrTab[ETH_TX_BUF_NUM];
-/* Ethernet Rx DMA Descriptor */
-__ALIGN_BEGIN static stc_eth_dma_desc_t EthDmaRxDscrTab[ETH_RX_BUF_NUM];
-/* Ethernet Transmit Buffer */
-__ALIGN_BEGIN static uint8_t EthTxBuff[ETH_TX_BUF_NUM][ETH_TX_BUF_SIZE];
-/* Ethernet Receive Buffer */
-__ALIGN_BEGIN static uint8_t EthRxBuff[ETH_RX_BUF_NUM][ETH_RX_BUF_SIZE];
 
-/* Ethernet link status */
-static uint8_t u8PhyLinkStatus = 0U, u8EthInitStatus = 0U;
 
 /*******************************************************************************
  * Function implementation - global ('extern') and local ('static')
@@ -132,22 +95,12 @@ static uint8_t u8PhyLinkStatus = 0U, u8EthInitStatus = 0U;
  * @{
  */
 
-void *ethernetif_config_enet_set(uint8_t enet_port)
-{
-    return NONE;
-}
-
-void Time_Update_LwIP(void)
-{
-    //no need to do
-}
-
 /**
  * @brief  Initializes the Ethernet GPIO.
  * @param  None
  * @retval None
  */
-static void Ethernet_GpioInit(void)
+void Ethernet_GpioInit(void)
 {
     /* ETH_RST */
     stc_gpio_init_t stcGpioInit;
@@ -227,241 +180,12 @@ static void Ethernet_GpioInit(void)
 #endif
 }
 
-/**
- * @brief  In this function, the hardware should be initialized.
- * @param  netif                         The already initialized network interface structure for this ethernetif.
- * @retval int32_t:
- *           - LL_OK: Initialize success
- *           - LL_ERR: Initialize failed
- */
-static int32_t low_level_init(struct netif *netif)
-{
-    int32_t i32Ret = LL_ERR;
-    stc_eth_init_t stcEthInit;
-    uint16_t u16RegVal;
-
-    /* Enable ETH clock */
-    FCG_Fcg1PeriphClockCmd(FCG1_PERIPH_ETHMAC, ENABLE);
-    /* Init Ethernet GPIO */
-    Ethernet_GpioInit();
-    /* Reset ETHERNET */
-    (void)ETH_DeInit();
-    /* Configure structure initialization */
-    (void)ETH_CommStructInit(&EthHandle.stcCommInit);
-    (void)ETH_StructInit(&stcEthInit);
-#ifdef ETH_INTERFACE_RMII
-    EthHandle.stcCommInit.u32Interface  = ETH_MAC_IF_RMII;
-#else
-    EthHandle.stcCommInit.u32Interface  = ETH_MAC_IF_MII;
-#endif
-    stcEthInit.stcMacInit.u32ReceiveAll = ETH_MAC_RX_ALL_ENABLE;
-
-    /* Configure ethernet peripheral */
-    if (LL_OK == ETH_Init(&EthHandle, &stcEthInit)) {
-        u8EthInitStatus = 1U;
-        i32Ret = LL_OK;
-    }
-
-#ifdef ETHERNET_LOOPBACK_TEST
-    /* Enable PHY loopback */
-    (void)ETH_PHY_LoopBackCmd(&EthHandle, ENABLE);
-#endif
-
-    /* Initialize Tx Descriptors list: Chain Mode */
-    (void)ETH_DMA_TxDescListInit(&EthHandle, EthDmaTxDscrTab, &EthTxBuff[0][0], ETH_TX_BUF_NUM);
-    /* Initialize Rx Descriptors list: Chain Mode  */
-    (void)ETH_DMA_RxDescListInit(&EthHandle, EthDmaRxDscrTab, &EthRxBuff[0][0], ETH_RX_BUF_NUM);
-
-    /* set MAC hardware address length */
-    netif->hwaddr_len = 6U;
-    /* set MAC hardware address */
-    netif->hwaddr[0] = (EthHandle.stcCommInit).au8MacAddr[0];
-    netif->hwaddr[1] = (EthHandle.stcCommInit).au8MacAddr[1];
-    netif->hwaddr[2] = (EthHandle.stcCommInit).au8MacAddr[2];
-    netif->hwaddr[3] = (EthHandle.stcCommInit).au8MacAddr[3];
-    netif->hwaddr[4] = (EthHandle.stcCommInit).au8MacAddr[4];
-    netif->hwaddr[5] = (EthHandle.stcCommInit).au8MacAddr[5];
-    /* maximum transfer unit */
-    netif->mtu = 1500U;
-
-    /* device capabilities */
-    netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
-
-    /* Enable MAC and DMA transmission and reception */
-    (void)ETH_Start();
-
-    /* Configure PHY LED mode */
-    u16RegVal = PHY_PAGE_ADDR_7;
-    (void)ETH_PHY_WriteReg(&EthHandle, PHY_PSR, u16RegVal);
-    (void)ETH_PHY_ReadReg(&EthHandle, PHY_P7_IWLFR, &u16RegVal);
-    MODIFY_REG16(u16RegVal, PHY_LED_SELECT, PHY_LED_SELECT_10);
-    (void)ETH_PHY_WriteReg(&EthHandle, PHY_P7_IWLFR, u16RegVal);
-    u16RegVal = PHY_PAGE_ADDR_0;
-    (void)ETH_PHY_WriteReg(&EthHandle, PHY_PSR, u16RegVal);
-
-#ifdef ETH_INTERFACE_RMII
-    /* Disable Power Saving Mode */
-    (void)ETH_PHY_ReadReg(&EthHandle, PHY_PSMR, &u16RegVal);
-    CLR_REG16_BIT(u16RegVal, PHY_EN_PWR_SAVE);
-    (void)ETH_PHY_WriteReg(&EthHandle, PHY_PSMR, u16RegVal);
-
-    /* Configure PHY to generate an interrupt when Eth Link state changes */
-    u16RegVal = PHY_PAGE_ADDR_7;
-    (void)ETH_PHY_WriteReg(&EthHandle, PHY_PSR, u16RegVal);
-    /* Enable Interrupt on change of link status */
-    (void)ETH_PHY_ReadReg(&EthHandle, PHY_P7_IWLFR, &u16RegVal);
-    SET_REG16_BIT(u16RegVal, PHY_INT_LINK_CHANGE);
-    (void)ETH_PHY_WriteReg(&EthHandle, PHY_P7_IWLFR, u16RegVal);
-    u16RegVal = PHY_PAGE_ADDR_0;
-    (void)ETH_PHY_WriteReg(&EthHandle, PHY_PSR, u16RegVal);
-#endif
-
-    return i32Ret;
+void *ethernetif_config_enet_set(uint8_t enet_port) {
+    return NONE;
 }
 
-/**
- * @brief  This function should do the actual transmission of the packet.
- * @param  netif                        The network interface structure for this ethernetif.
- * @param  p                            The MAC packet to send.
- * @retval int32_t:
- *           - LL_OK: The packet could be sent
- *           - LL_ERR: The packet couldn't be sent
- */
-err_t low_level_output(struct netif *netif, struct pbuf *p)
-{
-    err_t i32Ret;
-    struct pbuf *q;
-    uint8_t *txBuffer;
-    __IO stc_eth_dma_desc_t *DmaTxDesc;
-    uint32_t byteCnt;
-    uint32_t frameLength = 0UL;
-    uint32_t bufferOffset;
-    uint32_t payloadOffset;
-
-    DmaTxDesc = EthHandle.stcTxDesc;
-    txBuffer = (uint8_t *)((EthHandle.stcTxDesc)->u32Buf1Addr);
-    bufferOffset = 0UL;
-    /* Copy frame from pbufs to driver buffers */
-    for (q = p; q != NULL; q = q->next) {
-        /* If this buffer isn't available, goto error */
-        if (0UL != (DmaTxDesc->u32ControlStatus & ETH_DMA_TXDESC_OWN)) {
-            i32Ret = LL_ERR;
-            goto error;
-        }
-
-        /* Get bytes in current buffer */
-        byteCnt = q->len;
-        payloadOffset = 0UL;
-        /* Check if the length of data to copy is bigger than Tx buffer size */
-        while ((byteCnt + bufferOffset) > ETH_TX_BUF_SIZE) {
-            /* Copy data to Tx buffer*/
-            (void)memcpy((uint8_t *) & (txBuffer[bufferOffset]), (uint8_t *) & (((uint8_t *)q->payload)[payloadOffset]), (ETH_TX_BUF_SIZE - bufferOffset));
-            /* Point to next descriptor */
-            DmaTxDesc = (stc_eth_dma_desc_t *)(DmaTxDesc->u32Buf2NextDescAddr);
-            /* Check if the buffer is available */
-            if (0UL != (DmaTxDesc->u32ControlStatus & ETH_DMA_TXDESC_OWN)) {
-                i32Ret = LL_ERR;
-                goto error;
-            }
-
-            txBuffer = (uint8_t *)(DmaTxDesc->u32Buf1Addr);
-            byteCnt = byteCnt - (ETH_TX_BUF_SIZE - bufferOffset);
-            payloadOffset = payloadOffset + (ETH_TX_BUF_SIZE - bufferOffset);
-            frameLength = frameLength + (ETH_TX_BUF_SIZE - bufferOffset);
-            bufferOffset = 0UL;
-        }
-        /* Copy the remaining bytes */
-        (void)memcpy((uint8_t *) & (txBuffer[bufferOffset]), (uint8_t *) & (((uint8_t *)q->payload)[payloadOffset]), byteCnt);
-        bufferOffset = bufferOffset + byteCnt;
-        frameLength = frameLength + byteCnt;
-    }
-    /* Prepare transmit descriptors to give to DMA */
-    (void)ETH_DMA_SetTransFrame(&EthHandle, frameLength);
-    i32Ret = LL_OK;
-
-error:
-    /* When Transmit Underflow flag is set, clear it and issue a Transmit Poll Demand to resume transmission */
-    if (RESET != ETH_DMA_GetStatus(ETH_DMA_FLAG_UNS)) {
-        /* Clear DMA UNS flag */
-        ETH_DMA_ClearStatus(ETH_DMA_FLAG_UNS);
-        /* Resume DMA transmission */
-        WRITE_REG32(CM_ETH->DMA_TXPOLLR, 0UL);
-    }
-
-    return i32Ret;
-}
-
-/**
- * @brief  Should allocate a pbuf and transfer the bytes of the incoming packet from the interface into the pbuf.
- * @param  netif                        The network interface structure for this ethernetif.
- * @retval A pbuf filled with the received packet (including MAC header) or NULL on memory error.
- */
-static struct pbuf *low_level_input(struct netif *netif)
-{
-    struct pbuf *p = NULL;
-    struct pbuf *q;
-    uint32_t len;
-    uint8_t *rxBuffer;
-    __IO stc_eth_dma_desc_t *DmaRxDesc;
-    uint32_t byteCnt;
-    uint32_t bufferOffset;
-    uint32_t payloadOffset;
-    uint32_t i;
-
-    /* Get received frame */
-    if (LL_OK != ETH_DMA_GetReceiveFrame(&EthHandle)) {
-        return NULL;
-    }
-
-    /* Obtain the size of the packet */
-    len = (EthHandle.stcRxFrame).u32Len;
-    rxBuffer = (uint8_t *)(EthHandle.stcRxFrame).u32Buf;
-    if (len > 0UL) {
-        /* Allocate a pbuf chain of pbufs from the buffer */
-        p = pbuf_alloc(PBUF_TRANSPORT, len, PBUF_RAM);
-    }
-    if (p != NULL) {
-        DmaRxDesc = (EthHandle.stcRxFrame).pstcFSDesc;
-        bufferOffset = 0UL;
-        for (q = p; q != NULL; q = q->next) {
-            byteCnt = q->len;
-            payloadOffset = 0UL;
-
-            /* Check if the length of bytes to copy in current pbuf is bigger than Rx buffer size */
-            while ((byteCnt + bufferOffset) > ETH_RX_BUF_SIZE) {
-                /* Copy data to pbuf */
-                (void)memcpy((uint8_t *) & (((uint8_t *)q->payload)[payloadOffset]), (uint8_t *) & (rxBuffer[bufferOffset]), (ETH_RX_BUF_SIZE - bufferOffset));
-                /* Point to next descriptor */
-                DmaRxDesc = (stc_eth_dma_desc_t *)(DmaRxDesc->u32Buf2NextDescAddr);
-                rxBuffer = (uint8_t *)(DmaRxDesc->u32Buf1Addr);
-                byteCnt = byteCnt - (ETH_RX_BUF_SIZE - bufferOffset);
-                payloadOffset = payloadOffset + (ETH_RX_BUF_SIZE - bufferOffset);
-                bufferOffset = 0UL;
-            }
-
-            /* Copy remaining data in pbuf */
-            (void)memcpy((uint8_t *) & (((uint8_t *)q->payload)[payloadOffset]), (uint8_t *) & (rxBuffer[bufferOffset]), byteCnt);
-            bufferOffset = bufferOffset + byteCnt;
-        }
-    }
-    /* Release descriptors to DMA */
-    DmaRxDesc = (EthHandle.stcRxFrame).pstcFSDesc;
-    for (i = 0UL; i < (EthHandle.stcRxFrame).u32SegCount; i++) {
-        DmaRxDesc->u32ControlStatus |= ETH_DMA_RXDESC_OWN;
-        DmaRxDesc = (stc_eth_dma_desc_t *)(DmaRxDesc->u32Buf2NextDescAddr);
-    }
-    /* Clear Segment_Count */
-    (EthHandle.stcRxFrame).u32SegCount = 0UL;
-
-    /* When Rx Buffer unavailable flag is set, clear it and resume reception */
-    if (RESET != ETH_DMA_GetStatus(ETH_DMA_FLAG_RUS)) {
-        /* Clear DMA RUS flag */
-        ETH_DMA_ClearStatus(ETH_DMA_FLAG_RUS);
-        /* Resume DMA reception */
-        WRITE_REG32(CM_ETH->DMA_RXPOLLR, 0UL);
-    }
-
-    return p;
+void Time_Update_LwIP(void) {
+    //no need to do
 }
 
 /**
@@ -485,8 +209,8 @@ err_t ethernetif_init(struct netif *netif)
     * You can instead declare your own function an call etharp_output()
     * from it if you have to do some checks before sending (e.g. if link
     * is available...) */
-    netif->output = &etharp_output;
-    netif->linkoutput = &low_level_output;
+    netif->output = etharp_output;
+    netif->linkoutput = low_level_output;
 #endif
 
     /* initialize the hardware */
@@ -498,34 +222,38 @@ err_t ethernetif_init(struct netif *netif)
  * @param  netif                        The network interface structure for this ethernetif.
  * @retval None
  */
-void ethernetif_input(struct netif *netif)
+void ethernetif_input(void *netif_arg)
 {
-    err_t err;
     struct pbuf *p;
+    struct netif *netif = (struct netif *)netif_arg;
+    x_base critical_lock;
 
     /* Move received packet into a new pbuf */
-    p = low_level_input(netif);
-
+    while (1) {
+        sys_arch_sem_wait(get_eth_recv_sem(), WAITING_FOREVER);
+        while(1) {
+            p = low_level_input(netif);
 #ifndef ETHERNET_LOOPBACK_TEST
-    /* No packet could be read, silently ignore this */
-    if (NULL == p) {
-        return;
-    }
-
-    /* Entry point to the LwIP stack */
-    err = netif->input(p, netif);
-    if (err != (err_t)ERR_OK) {
-        LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
-        (void)pbuf_free(p);
-    }
+            /* Entry point to the LwIP stack */
+            if (p != NULL) {
+                if (netif->input(p, netif) != ERR_OK) {
+                    LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
+                    KPrintf("ethernetif_input: IP input error\n");
+                    pbuf_free(p);
+                    p = NULL;
+                }
+            } else {
+                break;
+            }
+#else
+            /* No packet could be read, silently ignore this */
+            if (p != NULL) {
+                EthernetIF_InputCallback(netif, p);
+                free(p);
+            }
 #endif
-#ifdef ETHERNET_LOOPBACK_TEST
-    /* No packet could be read, silently ignore this */
-    if (p != NULL) {
-        EthernetIF_InputCallback(netif, p);
-        free(p);
+        }
     }
-#endif
 }
 
 /**
@@ -725,8 +453,7 @@ __WEAKDEF void EthernetIF_NotifyLinkChange(struct netif *netif)
  * @param  p                            The MAC packet to receive
  * @retval None
  */
-__WEAKDEF void EthernetIF_InputCallback(struct netif *netif, struct pbuf *p)
-{
+__WEAKDEF void EthernetIF_InputCallback(struct netif *netif, struct pbuf *p) {
     /* This is function could be implemented in user file when the callback is needed */
 #ifdef ETHERNET_LOOPBACK_TEST
     if ((0 == (memcmp(p->payload, txPbuf.payload, p->len))) && (p->len == txPbuf.len)) {
