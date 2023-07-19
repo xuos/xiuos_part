@@ -9,7 +9,7 @@ ifeq ($(CONFIG_APP_SELECT_NEWLIB), y)
 endif
 	
 
-ifeq ($(CONFIG_ADD_XIZI_FETURES), y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi \
 	-I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi/user_api/switch_api \
 	-I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi/user_api/posix_support/include #

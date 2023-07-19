@@ -318,7 +318,6 @@ ip4_addr_t gw;
 void lwip_config_input(struct netif *net) {
   sys_thread_t th_id = 0;
 
-  extern void ethernetif_input(void *netif_arg);
   th_id = sys_thread_new("eth_input", ethernetif_input, net, LWIP_TASK_STACK_SIZE, 20);
 
   if (th_id >= 0) {

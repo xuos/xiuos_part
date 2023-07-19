@@ -142,7 +142,7 @@ out:
     return ret;
 }
 
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
 static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args){ return 0;}
 #else
 static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)

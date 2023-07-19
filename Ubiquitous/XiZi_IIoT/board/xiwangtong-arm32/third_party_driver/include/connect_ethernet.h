@@ -21,10 +21,12 @@
 #ifndef __CONNECT_ETHERNET_H_
 #define __CONNECT_ETHERNET_H_
 
+#include "enet_ethernetif.h"
+#include "enet_ethernetif_priv.h"
+
 #ifdef __cplusplus
  extern "C" {
 #endif
-
 
 #ifndef sourceClock
 #define sourceClock CLOCK_GetFreq(kCLOCK_CoreSysClk)

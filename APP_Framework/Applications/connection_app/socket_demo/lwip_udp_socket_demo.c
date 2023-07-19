@@ -19,12 +19,12 @@
 */
 #include <transform.h>
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 #include <sys_arch.h>
 #include "lwip/sockets.h"
 #endif
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -133,14 +133,14 @@ void UdpSocketRecvTest(int argc, char *argv[])
         UdpSocketConfigParam(argv[1]);
     }
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     lwip_config_tcp(0, udp_demo_ipaddr, udp_demo_netmask, udp_demo_gwaddr);
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = LWIP_UDP_DEMO_TASK_PRIO;
     attr.stacksize = LWIP_UDP_DEMO_TASK_STACK_SIZE;
 #endif
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
     attr.priority = LWIP_UDP_DEMO_TASK_PRIO;
     attr.stacksize = LWIP_UDP_DEMO_TASK_STACK_SIZE;
@@ -199,14 +199,14 @@ void UdpSocketSendTest(int argc, char *argv[])
         UdpSocketConfigParam(argv[1]);
     }
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     lwip_config_tcp(0, udp_demo_ipaddr, udp_demo_netmask, udp_demo_gwaddr);
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = LWIP_UDP_DEMO_TASK_PRIO;
     attr.stacksize = LWIP_UDP_DEMO_TASK_STACK_SIZE;
 #endif
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
     attr.priority = LWIP_UDP_DEMO_TASK_PRIO;
     attr.stacksize = LWIP_UDP_DEMO_TASK_STACK_SIZE;

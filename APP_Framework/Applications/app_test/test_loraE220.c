@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 
 #define NULL_PARAMETER 0
 #define E220_CFG_LENGTH
