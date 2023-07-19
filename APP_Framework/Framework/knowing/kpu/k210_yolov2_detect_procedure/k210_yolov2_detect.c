@@ -48,7 +48,7 @@ void k210_detect(char *json_file_path)
         return;
     }
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     kpu_fd = PrivOpen(KPU_DEV_DRIVER, O_RDONLY);
     if (camera_fd < 0)
     {
@@ -154,7 +154,7 @@ void k210_detect(char *json_file_path)
         }
     }
 
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
     dvp_set_ai_addr(
         (uintptr_t)(kpurgbbuffer +
                     detect_params.net_input_size[1] * (detect_params.net_input_size[0] - detect_params.sensor_output_size[0])),
@@ -175,7 +175,7 @@ void k210_detect(char *json_file_path)
 #endif
 
     // Load kmodel into kpu task
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
     if (kpu_load_kmodel(&detect_task, model_data_align) != 0)
     {
         printf("\nmodel init error\n");
@@ -287,7 +287,7 @@ static void *thread_detect_entry(void *parameter)
         while (shoot_flag == 2)
             PrivIoctl(camera_fd, FLAG_CHECK, &camera_cfg);
 
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
         if (dmalock_sync_take(&dma_ch, 2000))
         {
             printf("Fail to take DMA channel");
@@ -296,7 +296,7 @@ static void *thread_detect_entry(void *parameter)
         while (!g_ai_done_flag)
             ;
         dmalock_release(dma_ch);
-#elif defined ADD_XIZI_FETURES
+#elif defined ADD_XIZI_FEATURES
         struct PrivIoctlCfg kpu_cfg;
         kpu_cfg.args = kpurgbbuffer;
         kpu_cfg.ioctl_driver_type = KPU_TYPE;
@@ -309,7 +309,7 @@ static void *thread_detect_entry(void *parameter)
         }
 #endif
 
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
         float *output;
         size_t output_size;
         kpu_get_output(&detect_task, 0, (uint8_t **)&output, &output_size);
@@ -335,7 +335,7 @@ static void *thread_detect_entry(void *parameter)
         }
 #ifdef BSP_USING_LCD
 
-#ifdef ADD_RTTHREAD_FETURES
+#ifdef ADD_RTTHREAD_FEATURES
         extern void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint32_t * ptr);
         lcd_draw_picture(0, 0, (uint16_t)detect_params.sensor_output_size[1] - 1,
                          (uint16_t)detect_params.sensor_output_size[0] - 1, (uint32_t *)showbuffer);

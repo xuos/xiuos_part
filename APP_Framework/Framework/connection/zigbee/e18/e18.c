@@ -43,7 +43,7 @@ char *cmd_set_ch = "AT+CH=11";    /*set channel as 11*/
 
 static int E18HardwareModeGet()
 {
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 #ifdef CONFIG_ARCH_BOARD_XIDATONG_ARM32
     int ret = 0;
     int pin_fd;
@@ -96,7 +96,7 @@ static int E18HardwareModeGet()
 
 static int E18HardwareModeSet(void)
 {
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 #ifdef CONFIG_ARCH_BOARD_XIDATONG_ARM32
     int ret = 0;
     int pin_fd;
@@ -227,7 +227,7 @@ static int E18NetworkModeConfig(struct Adapter *adapter)
     }
 
 out:
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     if(E18_AS_HEX_MODE == mode)
 #else
     if(E18_AS_AT_MODE == mode)
@@ -302,7 +302,7 @@ static int E18NetRoleConfig(struct Adapter *adapter)
     }
 
 out:
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     if(E18_AS_HEX_MODE == mode)
 #else
     if(E18_AS_AT_MODE == mode)
@@ -449,7 +449,7 @@ static int E18Join(struct Adapter *adapter, unsigned char *priv_net_group)
 
     // }
     if(!ret){
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
         if(E18_AS_HEX_MODE == mode)
 #else
         if(E18_AS_AT_MODE == mode)

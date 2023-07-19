@@ -51,7 +51,7 @@ static void *ReadTask(void *parameter)
  * @param sdev - sensor device pointer
  * @return success: 1 , failure: other
  */
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 static int SensorDeviceOpen(struct SensorDevice *sdev)
 {
     int result = 0;

@@ -20,7 +20,7 @@
 
 #include <adapter.h>
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
  /**
  * @description: Sx127x_Nuttx_Write function for nuttx
  * @param fd - file descriptor to write to
@@ -104,7 +104,7 @@ static int Sx1278Ioctl(struct Adapter *adapter, int cmd, void *args)
  * @param priv_net_group - priv_net_group params
  * @return success: 0, failure: -1
  */
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 static int Sx1278Join(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret;
@@ -140,7 +140,7 @@ static int Sx1278Join(struct Adapter *adapter, unsigned char *priv_net_group)
  * @param len - data len
  * @return success: 0, failure: -1
  */
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 static int Sx1278Send(struct Adapter *adapter, const void *buf, size_t len)
 {
     int ret;
@@ -170,7 +170,7 @@ static int Sx1278Send(struct Adapter *adapter, const void *buf, size_t len)
  * @param len - data len
  * @return success: 0, failure: -1
  */
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 static int Sx1278Recv(struct Adapter *adapter, void *buf, size_t len)
 {
     int ret;
@@ -196,7 +196,7 @@ static int Sx1278Recv(struct Adapter *adapter, void *buf, size_t len)
  * @param priv_net_group - priv_net_group params
  * @return success: 0, failure: -1
  */
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 static int Sx1278Quit(struct Adapter *adapter, unsigned char *priv_net_group)
 {
     int ret;

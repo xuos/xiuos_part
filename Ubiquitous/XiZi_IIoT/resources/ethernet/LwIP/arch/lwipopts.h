@@ -30,6 +30,8 @@
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
+#include <xsconfig.h>
+
 /* ---------- Debug options ---------- */
 #ifndef LWIP_DEBUG
 #define LWIP_DEBUG  1

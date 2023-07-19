@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 
 #ifdef BOARD_EDU_RISCV64_EVB
 #define BSP_LED_PIN 29

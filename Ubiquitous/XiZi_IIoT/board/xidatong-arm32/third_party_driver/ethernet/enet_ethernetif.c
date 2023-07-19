@@ -201,9 +201,10 @@ void ethernetif_phy_init(struct ethernetif *ethernetif,
  * @param netif the lwip network interface structure for this ethernetif
  */
 
-void ethernetif_input(struct netif *netif)
+void ethernetif_input(void *netif_arg)
 {
     struct pbuf *p;
+    struct netif *netif = (struct netif *)netif_arg;
     err_t ret = 0;
 
     LWIP_ASSERT("netif != NULL", (netif != NULL));

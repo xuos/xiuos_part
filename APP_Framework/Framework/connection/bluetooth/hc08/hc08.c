@@ -353,7 +353,7 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
     }
 
     PrivTaskDelay(500);
-    #ifdef ADD_RTTHREAD_FETURES
+    #ifdef ADD_RTTHREAD_FEATURES
     //Step3 : show hc08 device info, hc08_get send "AT+RX" response device info
     char device_info[HC08_RESP_DEFAULT_SIZE * 2] = {0};
     if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_GET_DEVICE_INFO, NULL, device_info) < 0) {
@@ -369,7 +369,7 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
     if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_GET_LUUID, NULL, NULL) < 0) {
         return -1;
     }
-    #ifdef ADD_RTTHREAD_FETURES
+    #ifdef ADD_RTTHREAD_FEATURES
 		uint32_t suuid=1234;
 		if (Hc08AtConfigure(adapter->agent, HC08_AT_CMD_SET_SUUID, &luuid, NULL) < 0) {
         return -1;
