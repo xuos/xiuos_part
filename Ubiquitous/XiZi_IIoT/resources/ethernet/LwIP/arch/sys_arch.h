@@ -54,7 +54,7 @@
 #define LWIP_TARGET_PORT            LWIP_LOCAL_PORT
 
 #define LWIP_DEMO_TIMES             10
-#define LWIP_TASK_STACK_SIZE        1536
+#define LWIP_TASK_STACK_SIZE        4096
 #define LWIP_DEMO_TASK_PRIO         20
 
 // /* MAC address configuration. */
