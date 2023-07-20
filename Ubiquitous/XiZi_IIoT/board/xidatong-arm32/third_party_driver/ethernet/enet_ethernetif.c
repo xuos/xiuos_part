@@ -57,11 +57,7 @@
 #include "netif/ppp/pppoe.h"
 #include "lwip/igmp.h"
 #include "lwip/mld6.h"
-
-#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
-//#include "FreeRTOS.h"
-//#include "event_groups.h"
-#endif
+#include "lwip/sys.h"
 
 #include "netif/ethernet.h"
 #include "enet_ethernetif.h"
@@ -210,6 +206,7 @@ void ethernetif_input(void *netif_arg)
     LWIP_ASSERT("netif != NULL", (netif != NULL));
 
     while (1) {
+        sys_arch_sem_wait(get_eth_recv_sem(), WAITING_FOREVER);
         /* move received packet into a new pbuf */
         while ((p = ethernetif_linkinput(netif)) != NULL)
         {

@@ -58,22 +58,9 @@
 #include "netif/ppp/pppoe.h"
 #include "lwip/igmp.h"
 #include "lwip/mld6.h"
+#include "lwip/sys.h"
 
-#ifdef FSL_RTOS_XIUOS
-#define USE_RTOS 1
-#define FSL_RTOS_FREE_RTOS
-#endif
-
-#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
-
-#ifdef FSL_RTOS_XIUOS
-#include "xs_sem.h"
-
-#else
-#include "FreeRTOS.h"
-#include "event_groups.h"
-#include "list.h"
-#endif
+#include <xs_sem.h>
 
 typedef uint32_t     TickType_t;
 #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
@@ -90,27 +77,6 @@ typedef unsigned long    UBaseType_t;
 
 #define pdPASS           ( pdTRUE )
 #define pdFAIL           ( pdFALSE )
-
-#ifndef FSL_RTOS_XIUOS
-typedef struct EventGroupDef_t
-{
-    EventBits_t uxEventBits;
-    List_t xTasksWaitingForBits; /*< List of tasks waiting for a bit to be set. */
-
-    #if ( configUSE_TRACE_FACILITY == 1 )
-        UBaseType_t uxEventGroupNumber;
-    #endif
-
-    #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
-        uint8_t ucStaticallyAllocated; /*< Set to pdTRUE if the event group is statically allocated to ensure no attempt is made to free the memory. */
-    #endif
-} EventGroup_t;
-
-struct EventGroupDef_t;
-typedef struct EventGroupDef_t   * EventGroupHandle_t;
-#endif
-
-#endif
 
 #include "enet_ethernetif.h"
 #include "enet_ethernetif_priv.h"
@@ -130,19 +96,13 @@ typedef struct EventGroupDef_t   * EventGroupHandle_t;
 struct ethernetif
 {
     ENET_Type *base;
-#if (defined(FSL_FEATURE_SOC_ENET_COUNT) && (FSL_FEATURE_SOC_ENET_COUNT > 0)) || \
-    (USE_RTOS && defined(FSL_RTOS_FREE_RTOS))
+#if (defined(FSL_FEATURE_SOC_ENET_COUNT) && (FSL_FEATURE_SOC_ENET_COUNT > 0))
     enet_handle_t handle;
 #endif
-#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
 
-#ifdef FSL_RTOS_XIUOS
     int enetSemaphore;
-#else
-    EventGroupHandle_t enetTransmitAccessEvent;
-#endif
     EventBits_t txFlag;
-#endif
+
     enet_rx_bd_struct_t *RxBuffDescrip;
     enet_tx_bd_struct_t *TxBuffDescrip;
     rx_buffer_t *RxDataBuff;
@@ -153,14 +113,6 @@ struct ethernetif
 /*******************************************************************************
  * Code
  ******************************************************************************/
-#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
-
-int32 lwip_obtain_semaphore(struct netif *netif)
-{
-    struct ethernetif *ethernetif = netif->state;
-    return (KSemaphoreObtain(ethernetif->enetSemaphore, WAITING_FOREVER) == EOK);
-}
-
 #if FSL_FEATURE_ENET_QUEUE > 1
 static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, uint32_t ringId, enet_event_t event, void *param)
 #else
@@ -169,44 +121,19 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
 {
     struct netif *netif = (struct netif *)param;
     struct ethernetif *ethernetif = netif->state;
-    BaseType_t xResult;
 
     switch (event)
     {
         case kENET_RxEvent:
-            ethernetif_input(netif);
+            ENET_DisableInterrupts(ethernetif->base, kENET_RxFrameInterrupt);
+            sys_sem_signal(get_eth_recv_sem());
             break;
         case kENET_TxEvent:
-#ifndef FSL_RTOS_XIUOS
-        {
-            portBASE_TYPE taskToWake = pdFALSE;
-
-#ifdef __CA7_REV
-            if (SystemGetIRQNestingLevel())
-#else
-            if (__get_IPSR())
-#endif
-            {
-                xResult = xEventGroupSetBitsFromISR(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag, &taskToWake);
-                if ((pdPASS == xResult) && (pdTRUE == taskToWake))
-                {
-                    portYIELD_FROM_ISR(taskToWake);
-                }
-            }
-            else
-            {
-                xEventGroupSetBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag);
-            }
-        }
-#endif
-        break;
+            break;
         default:
             break;
     }
-
-    KSemaphoreAbandon(ethernetif->enetSemaphore);
 }
-#endif
 
 #if LWIP_IPV4 && LWIP_IGMP
 err_t ethernetif_igmp_mac_filter(struct netif *netif, const ip4_addr_t *group,
@@ -312,11 +239,9 @@ void ethernetif_enet_init(struct netif *netif, struct ethernetif *ethernetif,
 
     ENET_GetDefaultConfig(&config);
     config.ringNum = ENET_RING_NUM;
-    config.macSpecialConfig |= kENET_ControlPromiscuousEnable;
 
     ethernetif_phy_init(ethernetif, ethernetifConfig, &config);
 
-#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
     uint32_t instance;
     static ENET_Type *const enetBases[] = ENET_BASE_PTRS;
     static const IRQn_Type enetTxIrqId[] = ENET_Transmit_IRQS;
@@ -328,53 +253,37 @@ void ethernetif_enet_init(struct netif *netif, struct ethernetif *ethernetif,
 #endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
 
     /* Create the Event for transmit busy release trigger. */
-#ifdef FSL_RTOS_XIUOS
     if(ethernetif->enetSemaphore < 0)
     {
         ethernetif->enetSemaphore = KSemaphoreCreate(0);
     }
-#else
-    ethernetif->enetTransmitAccessEvent = xEventGroupCreate();
-#endif
     ethernetif->txFlag = 0x1;
 
+    sys_sem_new(get_eth_recv_sem(), 0);
     config.interrupt |= kENET_RxFrameInterrupt | kENET_TxFrameInterrupt | kENET_TxBufferInterrupt;
 
     for (instance = 0; instance < ARRAY_SIZE(enetBases); instance++)
     {
         if (enetBases[instance] == ethernetif->base)
         {
-#ifdef __CA7_REV
-            GIC_SetPriority(enetRxIrqId[instance], ENET_PRIORITY);
-            GIC_SetPriority(enetTxIrqId[instance], ENET_PRIORITY);
-#if defined(ENET_ENHANCEDBUFFERDESCRIPTOR_MODE) && ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
-            GIC_SetPriority(enetTsIrqId[instance], ENET_1588_PRIORITY);
-#endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
-#else
             NVIC_SetPriority(enetRxIrqId[instance], ENET_PRIORITY);
             NVIC_SetPriority(enetTxIrqId[instance], ENET_PRIORITY);
 #if defined(ENET_ENHANCEDBUFFERDESCRIPTOR_MODE) && ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
             NVIC_SetPriority(enetTsIrqId[instance], ENET_1588_PRIORITY);
 #endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
-#endif /* __CA7_REV */
             break;
         }
     }
 
     LWIP_ASSERT("Input Ethernet base error!", (instance != ARRAY_SIZE(enetBases)));
-#endif /* USE_RTOS */
 
     config.txAccelerConfig = kENET_TxAccelIpCheckEnabled | kENET_TxAccelProtoCheckEnabled;
 
     /* Initialize the ENET module.*/
     ENET_Init(ethernetif->base, &ethernetif->handle, &config, &buffCfg[0], netif->hwaddr, sysClock);
-
-#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
     ENET_SetCallback(&ethernetif->handle, ethernet_callback, netif);
-#endif
 
     ENET_ActiveRead(ethernetif->base);
-//    low_level_init();
 }
 
 ENET_Type **ethernetif_enet_ptr(struct ethernetif *ethernetif)
@@ -397,45 +306,17 @@ static unsigned char *enet_get_tx_buffer(struct ethernetif *ethernetif)
  */
 static err_t enet_send_frame(struct ethernetif *ethernetif, unsigned char *data, const uint32_t length)
 {
-#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
+    uint32_t counter;
+
+    for (counter = ENET_TIMEOUT; counter != 0U; counter--)
     {
-        status_t result;
-
-        lw_print("lw: [%s] len %d\n", __func__, length);
-
-        do
+        if (ENET_SendFrame(ethernetif->base, &ethernetif->handle, data, length) != kStatus_ENET_TxFrameBusy)
         {
-            result = ENET_SendFrame(ethernetif->base, &ethernetif->handle, data, length);
-
-            if (result == kStatus_ENET_TxFrameBusy)
-            {
-#ifdef FSL_RTOS_XIUOS
-                KSemaphoreObtain(ethernetif->enetSemaphore, portMAX_DELAY);
-#else
-                xEventGroupWaitBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag, pdTRUE, (BaseType_t) false,
-                                    portMAX_DELAY);
-#endif
-            }
-
-        } while (result == kStatus_ENET_TxFrameBusy);
-
-        return ERR_OK;
-    }
-#else
-    {
-        uint32_t counter;
-
-        for (counter = ENET_TIMEOUT; counter != 0U; counter--)
-        {
-            if (ENET_SendFrame(ethernetif->base, &ethernetif->handle, data, length) != kStatus_ENET_TxFrameBusy)
-            {
-                return ERR_OK;
-            }
+            return ERR_OK;
         }
-
-        return ERR_TIMEOUT;
     }
-#endif
+
+    return ERR_TIMEOUT;
 }
 
 struct pbuf *ethernetif_linkinput(struct netif *netif)
@@ -540,6 +421,7 @@ struct pbuf *ethernetif_linkinput(struct netif *netif)
         }
     }
 
+    ENET_EnableInterrupts(ethernetif->base, kENET_RxFrameInterrupt);
     return p;
 }
 
