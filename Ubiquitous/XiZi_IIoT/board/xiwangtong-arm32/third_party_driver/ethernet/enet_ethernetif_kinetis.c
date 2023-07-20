@@ -363,6 +363,8 @@ void ethernetif_enet_init(struct netif *netif, struct ethernetif *ethernetif,
     LWIP_ASSERT("Input Ethernet base error!", (instance != ARRAY_SIZE(enetBases)));
 #endif /* USE_RTOS */
 
+    config.txAccelerConfig = kENET_TxAccelIpCheckEnabled | kENET_TxAccelProtoCheckEnabled;
+
     /* Initialize the ENET module.*/
     ENET_Init(ethernetif->base, &ethernetif->handle, &config, &buffCfg[0], netif->hwaddr, sysClock);
 

@@ -209,16 +209,18 @@ void ethernetif_input(void *netif_arg)
 
     LWIP_ASSERT("netif != NULL", (netif != NULL));
 
-    /* move received packet into a new pbuf */
-    while ((p = ethernetif_linkinput(netif)) != NULL)
-    {
-        /* pass all packets to ethernet_input, which decides what packets it supports */
-        if ((ret = netif->input(p, netif)) != ERR_OK)
+    while (1) {
+        /* move received packet into a new pbuf */
+        while ((p = ethernetif_linkinput(netif)) != NULL)
         {
-            LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
-            lw_print("lw: [%s] ret %d p %p\n", __func__, ret, p);
-            pbuf_free(p);
-            p = NULL;
+            /* pass all packets to ethernet_input, which decides what packets it supports */
+            if ((ret = netif->input(p, netif)) != ERR_OK)
+            {
+                LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
+                lw_print("lw: [%s] ret %d p %p\n", __func__, ret, p);
+                pbuf_free(p);
+                p = NULL;
+            }
         }
     }
 }
