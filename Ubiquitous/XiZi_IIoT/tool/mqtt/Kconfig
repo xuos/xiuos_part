@@ -18,7 +18,7 @@ menu "MQTT function"
 
             config CLIENT_DEVICESECRET
                 string "Device secret, used for device authentication and data encryption."
-                default "43b3c332233e2204a0612bfbfe21bb67"
+                default "c9a4ce03e9382065fc089e9ff54b771d"
         
             config PLATFORM_SERVERIP
                 string "mqtt platform server ip."
