@@ -101,5 +101,9 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
         SRC_FILES += test_timer.c
     endif    
 
+    ifeq ($(CONFIG_USER_TEST_MODBUS_TCP),y)
+        SRC_DIR += test_modbus_tcp
+    endif  
+
     include $(KERNEL_ROOT)/compiler.mk
 endif

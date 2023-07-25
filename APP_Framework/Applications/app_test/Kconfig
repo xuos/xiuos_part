@@ -239,6 +239,9 @@ menu "test app"
             menuconfig USER_TEST_TIMER
                 bool "Config test soft timer"
                 default n
-            
+
+            menuconfig USER_TEST_MODBUS_TCP
+                bool "Config test modbus_tcp"
+                default n
         endif
 endmenu
