@@ -20,7 +20,7 @@
 
 #include <transform.h>
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 
 #if defined(CONFIG_MUSL_LIBC) && defined(CONFIG_FS_AUTOMOUNTER)
 

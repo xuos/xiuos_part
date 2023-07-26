@@ -57,11 +57,7 @@
 #include "netif/ppp/pppoe.h"
 #include "lwip/igmp.h"
 #include "lwip/mld6.h"
-
-#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
-//#include "FreeRTOS.h"
-//#include "event_groups.h"
-#endif
+#include "lwip/sys.h"
 
 #include "netif/ethernet.h"
 #include "enet_ethernetif.h"
@@ -201,23 +197,27 @@ void ethernetif_phy_init(struct ethernetif *ethernetif,
  * @param netif the lwip network interface structure for this ethernetif
  */
 
-void ethernetif_input(struct netif *netif)
+void ethernetif_input(void *netif_arg)
 {
     struct pbuf *p;
+    struct netif *netif = (struct netif *)netif_arg;
     err_t ret = 0;
 
     LWIP_ASSERT("netif != NULL", (netif != NULL));
 
-    /* move received packet into a new pbuf */
-    while ((p = ethernetif_linkinput(netif)) != NULL)
-    {
-        /* pass all packets to ethernet_input, which decides what packets it supports */
-        if ((ret = netif->input(p, netif)) != ERR_OK)
+    while (1) {
+        sys_arch_sem_wait(get_eth_recv_sem(), WAITING_FOREVER);
+        /* move received packet into a new pbuf */
+        while ((p = ethernetif_linkinput(netif)) != NULL)
         {
-            LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
-            lw_print("lw: [%s] ret %d p %p\n", __func__, ret, p);
-            pbuf_free(p);
-            p = NULL;
+            /* pass all packets to ethernet_input, which decides what packets it supports */
+            if ((ret = netif->input(p, netif)) != ERR_OK)
+            {
+                LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
+                lw_print("lw: [%s] ret %d p %p\n", __func__, ret, p);
+                pbuf_free(p);
+                p = NULL;
+            }
         }
     }
 }

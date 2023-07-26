@@ -12,7 +12,7 @@ config SENSOR_D124
                         string "D124 quantity voice name"
                         default "voice_1"
                 
-                if ADD_XIZI_FETURES
+                if ADD_XIZI_FEATURES
                         config SENSOR_D124_DRIVER_EXTUART
                                 bool "Using extra uart to support D124"
                                 default y
@@ -33,7 +33,7 @@ config SENSOR_D124
                         endif
                 endif
 
-                if ADD_NUTTX_FETURES
+                if ADD_NUTTX_FEATURES
                        config SENSOR_DEVICE_D124_DEV
                                string "D124 device name"
                                default "/dev/ttyS1"
@@ -42,7 +42,7 @@ config SENSOR_D124
 
                 endif
 
-                if ADD_RTTHREAD_FETURES
+                if ADD_RTTHREAD_FEATURES
                         config SENSOR_D124_DRIVER_EXTUART
                                 bool "Using extra uart to support D124"
                                 default y

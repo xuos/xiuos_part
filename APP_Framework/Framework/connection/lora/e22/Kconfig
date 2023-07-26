@@ -2,7 +2,7 @@ config ADAPTER_LORA_E22
         string "E22-400T30S adapter name"
         default "e22"
 
-if ADD_NUTTX_FETURES
+if ADD_NUTTX_FEATURES
 
         config ADAPTER_E22_M0_PATH
                 string "E22 M0 pin device"
