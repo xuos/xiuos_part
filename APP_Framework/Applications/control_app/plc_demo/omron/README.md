@@ -6,9 +6,9 @@
 
 * CP1L本体无接口,增加CP1W-CIF41网络板卡,CP1H自带网口,采用网线直连的方式
 * FINS协议，PLC IP：192.168.250.31，Port：9600
-* ![CP1H](./CP1H.jpg)
-* ![CP1L](./CP1L.jpg)
-* ![xidatong](./xidatong.jpg)
+* ![CP1H](./image/CP1H.jpg)
+* ![CP1L](./image/CP1L.jpg)
+* ![xidatong](./image/xidatong.jpg)
 
 ## 存储区
 
