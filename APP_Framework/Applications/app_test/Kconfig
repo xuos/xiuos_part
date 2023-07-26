@@ -239,14 +239,6 @@ menu "test app"
             menuconfig USER_TEST_TIMER
                 bool "Config test soft timer"
                 default n
-
-            menuconfig USER_TEST_HASH
-                bool "Config test hash"
-                default n
-            
-            menuconfig USER_TEST_RADIX
-                bool "Config test radix tree"
-                default n
             
         endif
 endmenu
