@@ -1,7 +1,7 @@
 #include <transform.h>
 #include "lwip_mqtt_demo.h"
 #include <stdio.h>
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 #include <sys_arch.h>
 #include <lwip/sockets.h>
 #include "lwip/sys.h"
@@ -14,7 +14,7 @@
 
 #endif
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -482,7 +482,7 @@ void MqttSocketRecvTest(int argc, char *argv[])
     // MqttSocketConfigParam(host_ip);
 
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     lwip_config_tcp(0, mqtt_demo_ipaddr, mqtt_demo_netmask, mqtt_demo_gwaddr);
 
     pthread_attr_t attr;
@@ -490,7 +490,7 @@ void MqttSocketRecvTest(int argc, char *argv[])
     attr.stacksize = LWIP_MQTT_DEMO_TASK_STACK_SIZE;
 #endif
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
     attr.priority = LWIP_mqtt_DEMO_TASK_PRIO;
     attr.stacksize = LWIP_mqtt_DEMO_TASK_STACK_SIZE;
@@ -706,7 +706,7 @@ void MqttSocketSendTest(int argc, char *argv[])
     // MqttSocketConfigParam(host_ip);
 
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     lwip_config_tcp(0, mqtt_demo_ipaddr, mqtt_demo_netmask, mqtt_demo_gwaddr);
 
     pthread_attr_t attr;
@@ -714,7 +714,7 @@ void MqttSocketSendTest(int argc, char *argv[])
     attr.stacksize = LWIP_MQTT_DEMO_TASK_STACK_SIZE;
 #endif
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
     attr.priority = LWIP_mqtt_DEMO_TASK_PRIO;
     attr.stacksize = LWIP_mqtt_DEMO_TASK_STACK_SIZE;
