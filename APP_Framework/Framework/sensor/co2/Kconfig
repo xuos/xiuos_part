@@ -12,7 +12,7 @@ config SENSOR_ZG09
                         string "zg09 quantity name"
                         default "co2_1"
                 
-                if ADD_XIZI_FETURES
+                if ADD_XIZI_FEATURES
                         config SENSOR_ZG09_DRIVER_EXTUART
                                 bool "Using extra uart to support zg09"
                                 default y
@@ -33,7 +33,7 @@ config SENSOR_ZG09
                         endif
                 endif
 
-                if ADD_NUTTX_FETURES
+                if ADD_NUTTX_FEATURES
                        config SENSOR_DEVICE_ZG09_DEV
                                string "CO2 device name"
                                default "/dev/ttyS1"
@@ -42,7 +42,7 @@ config SENSOR_ZG09
 
                 endif
 
-                if ADD_RTTHREAD_FETURES
+                if ADD_RTTHREAD_FEATURES
                         config SENSOR_ZG09_DRIVER_EXTUART
                                 bool "Using extra uart to support zg09"
                                 default y
@@ -78,7 +78,7 @@ config SENSOR_G8S
                         string "g8-s quantity name"
                         default "co2_2"
                 
-                if ADD_XIZI_FETURES
+                if ADD_XIZI_FEATURES
                         config SENSOR_G8S_DRIVER_EXTUART
                                 bool "Using extra uart to support g8-s"
                                 default n
@@ -99,7 +99,7 @@ config SENSOR_G8S
                         endif
                 endif
 
-                if ADD_NUTTX_FETURES
+                if ADD_NUTTX_FEATURES
                        config SENSOR_DEVICE_G8S_DEV
                                string "CO2 device name"
                                default "/dev/ttyS3"
@@ -107,7 +107,7 @@ config SENSOR_G8S
                                    If USART1 is selected, then fill in /dev/ttyS1 here.
                 endif
 
-                if ADD_RTTHREAD_FETURES
+                if ADD_RTTHREAD_FEATURES
 
                 endif                
         endif

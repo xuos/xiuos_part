@@ -11,7 +11,7 @@ menuconfig BSP_USING_SPI
     bool "Using SPI device"
     default n
     select RESOURCES_SPI
-    select  BSP_USING_DMA
+    select BSP_USING_DMA
     if BSP_USING_SPI
         source "$BSP_DIR/third_party_driver/spi/Kconfig"
     endif
@@ -117,6 +117,7 @@ menuconfig BSP_USING_WIZCHIP
     bool "Using w5500 as network device"
     default n
     select RESOURCES_WIZCHIP
+    select BSP_USING_SPI
     if BSP_USING_WIZCHIP
         source "$BSP_DIR/third_party_driver/ethernet/Kconfig"
     endif

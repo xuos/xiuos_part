@@ -20,7 +20,7 @@
 
 #include <transform.h>
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 
 #ifdef CONFIG_K210_LCD
 void LcdDemo(void)

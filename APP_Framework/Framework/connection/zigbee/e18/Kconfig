@@ -17,7 +17,7 @@ choice
 endchoice
 
 
-if ADD_XIZI_FETURES
+if ADD_XIZI_FEATURES
         config ADAPTER_E18_MODEPIN
                 int "E18 MODE pin number"
                 default "61"
@@ -46,7 +46,7 @@ if ADD_XIZI_FETURES
         endif
 endif
 
-if ADD_NUTTX_FETURES
+if ADD_NUTTX_FEATURES
 if ARCH_BOARD_XIDATONG_ARM32
         config ADAPTER_E18_MODEPIN
                 int "E18 MODE pin number"
@@ -84,6 +84,6 @@ endif
 
 endif
 
-if ADD_RTTHREAD_FETURES
+if ADD_RTTHREAD_FEATURES
 
 endif

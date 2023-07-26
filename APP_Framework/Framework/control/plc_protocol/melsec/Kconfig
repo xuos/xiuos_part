@@ -24,7 +24,7 @@ choice
 endchoice
 
 if CONTROL_USING_SERIAL_485
-    if ADD_XIZI_FETURES
+    if ADD_XIZI_FEATURES
             config CONTROL_FRAMEWORK_UART_485_DIR
                     int "control framework 485 direction pin number"
                     default "2"
@@ -53,11 +53,11 @@ if CONTROL_USING_SERIAL_485
             endif
     endif
 
-    if ADD_NUTTX_FETURES
+    if ADD_NUTTX_FEATURES
 
     endif
 
-    if ADD_RTTHREAD_FETURES
+    if ADD_RTTHREAD_FEATURES
 
     endif
 

@@ -1,6 +1,5 @@
 include $(KERNEL_ROOT)/.config
-
-ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
+ifeq ($(CONFIG_ADD_NUTTX_FEATURES),y)
     include $(APPDIR)/Make.defs
 
     ifeq ($(CONFIG_USER_TEST_SEMC),y)
@@ -23,7 +22,7 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
 
 endif
 
-ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     SRC_FILES := test_shell.c
     SRC_FILES += test_hash.c
     ifeq ($(CONFIG_USER_TEST_ADC),y)

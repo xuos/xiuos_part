@@ -30,6 +30,8 @@
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
+#include <xsconfig.h>
+
 /* ---------- Debug options ---------- */
 #ifndef LWIP_DEBUG
 #define LWIP_DEBUG  1
@@ -535,10 +537,10 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 #define DEFAULT_ACCEPTMBOX_SIZE         10
 
 #define DEFAULT_THREAD_PRIO             20
-#define DEFAULT_THREAD_STACKSIZE        1024
+#define DEFAULT_THREAD_STACKSIZE        2048
 
 #define TCPIP_THREAD_NAME               "tcp"
-#define TCPIP_THREAD_STACKSIZE          4096
+#define TCPIP_THREAD_STACKSIZE          2048
 #define TCPIP_MBOX_SIZE                 16
 #define TCPIP_THREAD_PRIO               20
 
