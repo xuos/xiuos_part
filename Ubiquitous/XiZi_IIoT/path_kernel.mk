@@ -391,7 +391,7 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include #
 endif
 
-ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/hc32f4a0)
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/edu-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4/hc32f4a0 \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \

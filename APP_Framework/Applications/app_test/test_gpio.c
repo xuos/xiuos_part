@@ -25,7 +25,7 @@
 #ifdef BOARD_EDU_RISCV64_EVB
 #define BSP_LED_PIN 29
 #define BSP_KEY_PIN 31
-#elif defined BOARD_HC32F4A0_EVB
+#elif defined BOARD_EDU_ARM32_EVB
 #define BSP_LED_PIN 134
 #define BSP_KEY_PIN 176
 #endif
