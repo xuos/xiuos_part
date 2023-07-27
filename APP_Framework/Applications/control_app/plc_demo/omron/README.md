@@ -1,12 +1,14 @@
-# OMRON_CP1L通信测试
+# OMRON_CP1L/H通信测试
 
 [TOC]
 
 ## 通信接线及参数设置
 
-* 本体无接口，增加CP1W-CIF41网络板卡
-
+* CP1L本体无接口,增加CP1W-CIF41网络板卡,CP1H自带网口,采用网线直连的方式
 * FINS协议，PLC IP：192.168.250.31，Port：9600
+* ![CP1H](./image/CP1H.jpg)
+* ![CP1L](./image/CP1L.jpg)
+* ![xidatong](./image/xidatong.jpg)
 
 ## 存储区
 
