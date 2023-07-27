@@ -15,16 +15,14 @@
 * @brief:   platform_mqtt.c file
 * @version: 1.0
 * @author:  AIIT XUOS Lab
-* @date:    2023/6/14
+* @date:    2023/7/27
 *
 */
 
 #include <string.h>
 #include <stdint.h>
 #include <adapter.h>
-#include "shell.h"
-#include "xsconfig.h"
-#include <adapter.h>
+#include <transform.h>
 #include "platform_mqtt.h"
 
 MQTT_TCB Platform_mqtt;  //创建一个用于连接云平台mqtt的结构体

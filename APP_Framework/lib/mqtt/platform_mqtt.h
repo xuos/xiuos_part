@@ -15,7 +15,7 @@
 * @brief:   platform_mqtt.h file
 * @version: 1.0
 * @author:  AIIT XUOS Lab
-* @date:    2023/6/14
+* @date:    2023/7/27
 *
 */
 

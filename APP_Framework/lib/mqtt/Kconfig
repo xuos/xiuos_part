@@ -1,4 +1,4 @@
-menu "MQTT function"
+menu "lib using MQTT"
 
     menuconfig TOOL_USING_MQTT
         bool "Enable support MQTT function"
