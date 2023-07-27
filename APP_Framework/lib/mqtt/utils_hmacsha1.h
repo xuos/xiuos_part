@@ -15,7 +15,7 @@
 * @brief:   utils_hmacsha1.h file
 * @version: 1.0
 * @author:  AIIT XUOS Lab
-* @date:    2023/6/29
+* @date:    2023/7/27
 *
 */
 

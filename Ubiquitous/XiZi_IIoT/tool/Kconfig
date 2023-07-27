@@ -1,6 +1,5 @@
 menu "Tool feature"
 
     source "$KERNEL_DIR/tool/bootloader/Kconfig"
-    source "$KERNEL_DIR/tool/mqtt/Kconfig"
 
 endmenu
