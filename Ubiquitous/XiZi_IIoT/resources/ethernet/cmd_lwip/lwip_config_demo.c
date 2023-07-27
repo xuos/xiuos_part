@@ -18,8 +18,8 @@
  * @date 2021.12.15
  */
 
-#include "board.h"
-#include "sys_arch.h"
+#include <board.h>
+#include <sys_arch.h>
 #include <shell.h>
 #include <sys.h>
 #include <string.h>
@@ -30,7 +30,8 @@ static void LwipSetIPTask(void *param)
 {
     uint8_t enet_port = *(uint8_t *)param; ///< test enet port 
     printf("lw: [%s] config netport id[%d]\n", __func__, enet_port);
-    lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    // lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    lwip_config_tcp(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 }
 
 void LwipSetIPTest(int argc, char *argv[])
@@ -64,7 +65,8 @@ void LwipSetIPTest(int argc, char *argv[])
         sscanf(argv[1], "%d.%d.%d.%d", &lwip_ipaddr[0], &lwip_ipaddr[1], &lwip_ipaddr[2], &lwip_ipaddr[3]);
         memcpy(lwip_eth0_ipaddr, lwip_ipaddr, strlen(lwip_ipaddr));
     }
-    sys_thread_new("SET ip address", LwipSetIPTask, &enet_id, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    // sys_thread_new("SET ip address", LwipSetIPTask, &enet_id, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    LwipSetIPTask(&enet_id);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(5),
@@ -73,7 +75,9 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) |
 
 void LwipShowIPTask(int argc, char *argv[])
 {
+#ifdef configMAC_ADDR
     char mac_addr0[] = configMAC_ADDR;
+#endif
 
     lw_notice("\r\n************************************************\r\n");
     lw_notice(" Network Configuration\r\n");
@@ -84,8 +88,10 @@ void LwipShowIPTask(int argc, char *argv[])
         ((u8_t *)&lwip_eth0_netmask)[2], ((u8_t *)&lwip_eth0_netmask)[3]);
     lw_notice(" ETH0 IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t *)&lwip_gwaddr)[0], ((u8_t *)&lwip_eth0_gwaddr)[1],
         ((u8_t *)&lwip_eth0_gwaddr)[2], ((u8_t *)&lwip_eth0_gwaddr)[3]);
+#ifdef configMAC_ADDR
     lw_notice(" ETH0 MAC Address    : %x:%x:%x:%x:%x:%x\r\n", mac_addr0[0], mac_addr0[1], mac_addr0[2],
         mac_addr0[3], mac_addr0[4], mac_addr0[5]);
+#endif
 #ifdef BOARD_NET_COUNT
     if(BOARD_NET_COUNT > 1)
     {

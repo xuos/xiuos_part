@@ -24,6 +24,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <semaphore.h>
+#include <timer.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -41,6 +42,16 @@ extern "C" {
 #define OPER_WDT_KEEPALIVE      0x0003
 
 #define NAME_NUM_MAX            32
+
+#ifndef EVENT_AND
+#define EVENT_AND          (1 << 0)
+#endif
+#ifndef EVENT_OR
+#define EVENT_OR           (1 << 1)
+#endif
+#ifndef EVENT_AUTOCLEAN
+#define EVENT_AUTOCLEAN    (1 << 2)
+#endif
 
 /*********************GPIO define*********************/
 #define GPIO_LOW    0x00
@@ -93,6 +104,30 @@ extern "C" {
 #define SERIAL_RB_BUFSZ         128
 #endif
 
+/********************SPI define*******************/
+#define SPI_MAX_CLOCK            40000000
+#define spi_device_max_num       4
+
+#define SPI_LINE_CPHA            (1 << 0)                           
+#define SPI_LINE_CPOL            (1 << 1)                          
+
+#define SPI_LSB                  (0 << 2)                             
+#define SPI_MSB                  (1 << 2)                             
+
+#define SPI_DEV_MASTER           (0 << 3)                            
+#define SPI_DEV_SLAVE            (1 << 3)      
+
+#define SPI_MODE_0               (0 | 0)                        
+#define SPI_MODE_1               (0 | SPI_LINE_CPHA)              
+#define SPI_MODE_2               (SPI_LINE_CPOL | 0)            
+#define SPI_MODE_3               (SPI_LINE_CPOL | SPI_LINE_CPHA)    
+#define SPI_MODE_MASK            (SPI_LINE_CPHA | SPI_LINE_CPOL | SPI_MSB)
+
+#define SPI_CS_HIGH              (1 << 4)                            
+#define SPI_NO_CS                (1 << 5)                           
+#define SPI_3WIRE                (1 << 6)                             
+#define SPI_READY                (1 << 7)
+
 struct PinDevIrq
 {
     int irq_mode;//< RISING/FALLING/HIGH/LOW
@@ -139,6 +174,15 @@ struct SerialDataCfg
     enum ExtSerialPortConfigure port_configure;
 };
 
+struct SpiMasterParam
+{
+    uint8 spi_work_mode;//CPOL CPHA
+    uint8 spi_frame_format;//frame format
+    uint8 spi_data_bit_width;//bit width
+    uint8 spi_data_endian;//little endian：0，big endian：1
+    uint32 spi_maxfrequency;//work frequency
+};
+
 enum IoctlDriverType
 {
     SERIAL_TYPE = 0,
@@ -149,8 +193,22 @@ enum IoctlDriverType
     ADC_TYPE,
     DAC_TYPE,
     WDT_TYPE,
+    RTC_TYPE,
+    CAMERA_TYPE,
+    CAN_TYPE,
+    KPU_TYPE,
+    FLASH_TYPE,
+    TIME_TYPE,
     DEFAULT_TYPE,
 };
+
+
+struct DvpRegConfigureInfo
+{
+    uint8_t device_addr;
+    uint16_t reg_addr;
+    uint8_t reg_value;
+} ;
 
 struct PrivIoctlCfg
 {
@@ -179,6 +237,18 @@ typedef struct
     void* pixel_color;
 }LcdPixelParam;
 
+struct CameraCfg
+{
+    uint16_t window_w;
+    uint16_t window_h;
+    uint16_t window_xoffset;
+    uint16_t window_yoffset;
+    uint16_t output_w;
+    uint16_t output_h;
+    uint8_t gain;
+    uint8_t gain_manu_enable;
+};
+
 typedef struct 
 {
     char type; // 0:write string;1:write dot
@@ -193,6 +263,67 @@ typedef struct
     uint16_t press;
 }TouchDataParam;
 
+struct TouchDataStandard
+{
+    uint16 x;
+    uint16 y;
+};
+
+struct RtcDrvConfigureParam
+{
+    int rtc_operation_cmd;
+    time_t *time;
+};
+
+typedef struct 
+{
+    uintptr_t pdata; 
+    uint32_t length;
+}_ioctl_shoot_para;
+
+typedef struct 
+{
+    uint32_t width;         // width   The width  of image
+    uint32_t height;        // height  The height of image
+}_ioctl_set_reso;
+
+typedef struct 
+{
+    uintptr_t r_addr;
+    uintptr_t g_addr;
+    uintptr_t b_addr;
+}RgbAddress;
+
+enum TCP_OPTION {
+    SEND_DATA = 0,
+    RECV_DATA,
+};
+
+struct CanDriverConfigure 
+{
+    uint8 tsjw;
+    uint8 tbs2 ;
+    uint8 tbs1;
+    uint8 mode;
+    uint16 brp;
+};
+
+struct CanSendConfigure
+{
+    uint32 stdid;
+    uint32 exdid;
+    uint8 ide;
+    uint8 rtr;
+    uint8 data_lenth;
+    uint8 *data;
+};
+
+typedef struct
+{
+    uint8_t *buffer;
+    size_t length;
+}KpuOutputBuffer;
+
 #define PRIV_SYSTICK_GET (CurrentTicksGain())
 #define PRIV_LCD_DEV "/dev/lcd_dev"
 #define MY_DISP_HOR_RES BSP_LCD_Y_MAX
@@ -202,7 +333,38 @@ typedef struct
 #define MY_INDEV_X BSP_LCD_Y_MAX
 #define MY_INDEV_Y BSP_LCD_X_MAX
 
+#define LCD_STRING_TYPE 0
+#define LCD_DOT_TYPE 1
+#define LCD_SIZE 320
+#define IMAGE_HEIGHT 240
+#define IMAGE_WIDTH 320
+#define NULL_PARAMETER 0
+
+#define REG_SCCB_READ 0xA2U
+#define REG_SCCB_WRITE 0xA3U
+#define SCCB_REG_LENGTH 0x08U
+
+#define SET_DISPLAY_ADDR (0xD1)
+#define SET_AI_ADDR (0xD2)
+#define FLAG_CHECK (0xD4)
+
+#define LOAD_KMODEL 0xA0
+#define RUN_KMODEL 0xA1
+#define GET_OUTPUT 0xA2
+#define WAIT_FLAG 0xA3
+
+#define IOCTRL_CAMERA_START_SHOT            (22)     // start shoot
+#define IOCTRL_CAMERA_OUT_SIZE_RESO (23)
+#define IOCTRL_CAMERA_SET_WINDOWS_SIZE      (21)     // user set specific windows outsize
+#define IOCTRL_CAMERA_SET_LIGHT             (24)     //set light mode
+#define IOCTRL_CAMERA_SET_COLOR             (25)     //set color saturation
+#define IOCTRL_CAMERA_SET_BRIGHTNESS        (26)     //set color brightness
+#define IOCTRL_CAMERA_SET_CONTRAST          (27)     //set contrast
+#define IOCTRL_CAMERA_SET_EFFECT            (28)     //set effect
+#define IOCTRL_CAMERA_SET_EXPOSURE          (29)     //set auto exposure
 /*********************shell***********************/
+
+#ifndef SEPARATE_COMPILE
 //for int func(int argc, char *agrv[])
 #define PRIV_SHELL_CMD_MAIN_ATTR (SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN))
 
@@ -219,6 +381,15 @@ typedef struct
 #define PRIV_SHELL_CMD_FUNCTION(_func, _desc, _attr)  \
     SHELL_EXPORT_CMD(_attr, _func, _func, _desc)
 
+#else
+//for int func(int argc, char *agrv[])
+#define PRIV_SHELL_CMD_MAIN_ATTR() 
+
+//for int func(int i, char ch, char *str)
+#define PRIV_SHELL_CMD_FUNC_ATTR()
+#define PRIV_SHELL_CMD_FUNCTION(_func, _desc, _attr) 
+
+#endif
 /**********************mutex**************************/
 
 int PrivMutexCreate(pthread_mutex_t *p_mutex, const pthread_mutexattr_t *attr);
@@ -234,6 +405,14 @@ int PrivSemaphoreObtainWait(sem_t *sem, const struct timespec *abstime);
 int PrivSemaphoreObtainNoWait(sem_t *sem);
 int PrivSemaphoreAbandon(sem_t *sem);
 int32_t PrivSemaphoreSetValue(int32_t sem, uint16_t val);
+
+/*********************event**********************/
+#ifndef SEPARATE_COMPILE
+int PrivEventCreate(uint8_t flag);
+int PrivEvenDelete(int event);
+int PrivEvenTrigger(int event, uint32_t set);
+int PrivEventProcess(int event, uint32_t set, uint8_t option, int32_t wait_time, unsigned int *Recved);
+#endif
 
 /*********************task**************************/
 
@@ -261,6 +440,13 @@ void *PrivRealloc(void *pointer, size_t size);
 void *PrivCalloc(size_t  count, size_t size);
 void PrivFree(void *pointer);
 
+/******************soft timer*********************/
+int PrivTimerCreate(clockid_t clockid, struct sigevent * evp, timer_t * timerid);
+int PrivTimerDelete(timer_t timerid);
+int PrivTimerStartRun(timer_t timerid);
+int PrivTimerQuitRun(timer_t timerid);
+int PrivTimerModify(timer_t timerid, int flags, const struct itimerspec *restrict value,
+                  struct itimerspec *restrict ovalue);
 
 #ifdef __cplusplus
 }

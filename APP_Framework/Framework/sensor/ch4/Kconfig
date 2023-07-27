@@ -12,7 +12,7 @@ config SENSOR_AS830
                         string "as830 quantity name"
                         default "ch4_1"
                 
-                if ADD_XIZI_FETURES
+                if ADD_XIZI_FEATURES
                         config SENSOR_AS830_DRIVER_EXTUART
                                 bool "Using extra uart to support as830"
                                 default y
@@ -33,7 +33,7 @@ config SENSOR_AS830
                         endif
                 endif
 
-                if ADD_NUTTX_FETURES
+                if ADD_NUTTX_FEATURES
                         config SENSOR_DEVICE_AS830_DEV
                                 string "as830 device uart path"
                                 default "/dev/ttyS1"
@@ -42,7 +42,7 @@ config SENSOR_AS830
 
                 endif
 
-                if ADD_RTTHREAD_FETURES
+                if ADD_RTTHREAD_FEATURES
                         config SENSOR_AS830_DRIVER_EXTUART
                                 bool "Using extra uart to support as830"
                                 default y

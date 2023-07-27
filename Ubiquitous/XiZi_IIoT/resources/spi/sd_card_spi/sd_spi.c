@@ -28,7 +28,7 @@ static uint32 SdReady(SpiSdDeviceType spi_sd_dev)
     NULL_PARAM_CHECK(spi_sd_dev);
 
     uint8 data = 0xFF;
-    uint8 read;
+    uint8 read = 0x00;
     uint32 start_time;
 
     struct BusBlockWriteParam write_param;
@@ -42,7 +42,7 @@ static uint32 SdReady(SpiSdDeviceType spi_sd_dev)
     start_time = 0;
     do
     {
-        BusDevWriteData(&spi_sd_dev->spi_dev->haldev, &write_param);
+        // BusDevWriteData(&spi_sd_dev->spi_dev->haldev, &write_param);
 
         BusDevReadData(&spi_sd_dev->spi_dev->haldev, &read_param);
 
@@ -96,9 +96,8 @@ static uint32 SdSendCmdByte(SpiSdDeviceType spi_sd_dev, struct SdCmdParam *sd_cm
         if ((SD_CMD_17  == sd_cmd_param->sd_cmd_type) || (SD_CMD_18  == sd_cmd_param->sd_cmd_type)) {
             MdelayKTask(100);
         }
-
         SD_TIMEOUT(start_time, 2 * SPI_SD_TIMEOUT_NUM);
-    }while((0 != (read[0] & 0x80)));
+    }while(0 != (read[0] & 0x80));
 
     switch (sd_cmd_param->sd_respone_type)
     {
@@ -672,7 +671,7 @@ static uint32 SdHwReadCSD(SpiSdDeviceType spi_sd_dev)
     g_sd_cmd_param.sd_cmd_type = SD_CMD_9;
     g_sd_cmd_param.sd_cmd_args = 0x00;
     g_sd_cmd_param.sd_cmd_crc = 0x00;
-    g_sd_cmd_param.sd_respone_type = SD_RESPONE_2;
+    g_sd_cmd_param.sd_respone_type = SD_RESPONE_1;
 
     /*pull down the cs pin*/
     SpiDevConfigureCs(&spi_sd_dev->spi_dev->haldev, 1, 0);
@@ -691,7 +690,7 @@ static uint32 SdHwReadCSD(SpiSdDeviceType spi_sd_dev)
     if (0xFE != g_sd_cmd_param.sd_respone_data[1]) {
         /*Step2 : SPI write data 0xFF until read 0xFE*/
         uint8 data = 0xFF;
-        uint8 read_spi; 
+        uint8 read_spi = 0x00; 
         uint32 start_time;
 
         write_param.buffer = (void *)&data;
@@ -703,9 +702,8 @@ static uint32 SdHwReadCSD(SpiSdDeviceType spi_sd_dev)
 
         do
         {
-            BusDevWriteData(&spi_sd_dev->spi_dev->haldev, &write_param);
+            // BusDevWriteData(&spi_sd_dev->spi_dev->haldev, &write_param);
             BusDevReadData(&spi_sd_dev->spi_dev->haldev, &read_param);
-
             SD_TIMEOUT(start_time, 10 * SPI_SD_TIMEOUT_NUM);
         }while(0xFE != read_spi);
     }
@@ -768,9 +766,9 @@ static uint32 SdReadSingleBlock(SpiSdDeviceType spi_sd_dev, uint32 id, uint8 *re
         return ERROR;
     }
 
-    /*Step2 : SPI write data 0xFF until read 0xFE*/
+    /*Step2 : SPI read until 0xFE*/
     uint8 data = 0xFF;
-    uint8 read[2];
+    uint8 read[2]={0};
     uint32 start_time;
 
     write_param.buffer = (void *)&data;
@@ -782,7 +780,6 @@ static uint32 SdReadSingleBlock(SpiSdDeviceType spi_sd_dev, uint32 id, uint8 *re
 
     do
     {
-        BusDevWriteData(&spi_sd_dev->spi_dev->haldev, &write_param);
         BusDevReadData(&spi_sd_dev->spi_dev->haldev, &read_param);
 
         SD_TIMEOUT(start_time, 100 * SPI_SD_TIMEOUT_NUM);
@@ -840,7 +837,7 @@ static uint32 SdReadMultiBlock(SpiSdDeviceType spi_sd_dev, uint32 id, const uint
     /*Step2 : SPI write data 0xFF until read 0xFE*/
     uint32 i = 0;
     uint8 data = 0xFF;
-    uint8 read[2];
+    uint8 read[2] = {0};
     uint32 start_time;
 
     for (i = 0 ; i < block_num ; i ++) {
@@ -850,10 +847,9 @@ static uint32 SdReadMultiBlock(SpiSdDeviceType spi_sd_dev, uint32 id, const uint
         read_param.size = 1;
 
         start_time = 0;
-
+        read[0] = 0;
         do
         {
-            BusDevWriteData(&spi_sd_dev->spi_dev->haldev, &write_param);
             BusDevReadData(&spi_sd_dev->spi_dev->haldev, &read_param);
 
             SD_TIMEOUT(start_time, 10 * SPI_SD_TIMEOUT_NUM);
@@ -863,12 +859,12 @@ static uint32 SdReadMultiBlock(SpiSdDeviceType spi_sd_dev, uint32 id, const uint
         read_param.buffer = (void *)((uint8 *)read_buffer + i * spi_sd_dev->sd_param.block_param.block_size);
         read_param.size = spi_sd_dev->sd_param.block_param.block_size;
         BusDevReadData(&spi_sd_dev->spi_dev->haldev, &read_param);
-    }
 
-    /*Step4 : SPI read 2 bytes CRC*/
-    read_param.buffer = (void *)read;
-    read_param.size = 2;
-    BusDevReadData(&spi_sd_dev->spi_dev->haldev, &read_param);
+        /*Step4 : SPI read 2 bytes CRC*/
+        read_param.buffer = (void *)read;
+        read_param.size = 2;
+        BusDevReadData(&spi_sd_dev->spi_dev->haldev, &read_param);        
+    }
 
     /*Step5 : CMD12 stop read*/
     g_sd_cmd_param.sd_cmd_type = SD_CMD_12;
@@ -925,7 +921,7 @@ static uint32 SdWriteSingleBlock(SpiSdDeviceType spi_sd_dev, uint32 id, const ui
 
     /*Step2 : SPI write data 0xFE*/
     uint8 data = 0xFE;
-    uint8 read;
+    uint8 read = 0x00;
     uint8 write[2] = {0xFF, 0xFF};
 
     write_param.buffer = (void *)&data;
@@ -1038,7 +1034,7 @@ static uint32 SdWriteMultiBlock(SpiSdDeviceType spi_sd_dev, uint32 id, const voi
     /*Step3 : SPI write data 0xFC*/
     uint32 i;
     uint8 data = 0xFC;
-    uint8 read;
+    uint8 read = 0x00;
     uint8 write[2] = {0xFF, 0xFF};
 
     for (i = 0 ; i < block_num; i ++) {
@@ -1061,6 +1057,7 @@ static uint32 SdWriteMultiBlock(SpiSdDeviceType spi_sd_dev, uint32 id, const voi
         read_param.size = 1;
 
         start_time = 0;
+        read = 0xFF;
         do
         {
             BusDevReadData(&spi_sd_dev->spi_dev->haldev, &read_param);
@@ -1077,6 +1074,7 @@ static uint32 SdWriteMultiBlock(SpiSdDeviceType spi_sd_dev, uint32 id, const voi
     }
 
     /*Step8 : SPI write 0xFD, multi block write data done*/
+    data = 0xFD;
     write_param.buffer = (void *)&data;
     write_param.size = 1;
     BusDevWriteData(&spi_sd_dev->spi_dev->haldev, &write_param);
@@ -1235,7 +1233,6 @@ uint32 SdRead(void *dev, struct BusBlockReadParam *read_param)
         KMutexAbandon(spi_sd_dev->spi_dev->haldev.owner_bus->bus_lock);
         return ERROR;
     }
-
     /*Step2 : read SD block*/
     if (1 == block_num) {
         ret = SdReadSingleBlock(spi_sd_dev, id, read_buffer);

@@ -68,6 +68,30 @@ int PrivSemaphoreAbandon(sem_t *sem)
     return sem_post(sem);
 }
 
+/**********************event****************************/
+#ifndef SEPARATE_COMPILE
+int PrivEventCreate(uint8_t flag)
+{
+    return UserEventCreate(flag);
+}
+
+int PrivEvenDelete(int event)
+{
+    UserEventDelete(event);
+    return 1;
+}
+
+int PrivEvenTrigger(int event, uint32_t set)
+{
+    return UserEventTrigger(event, set);
+}
+
+int PrivEventProcess(int event, uint32_t set, uint8_t option, int32_t wait_time, unsigned int *Recved)
+{
+    return UserEventProcess(event, set, option, wait_time, Recved);
+}
+#endif
+
 /**************************task*************************/
 int PrivTaskCreate(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*start_routine)(void *), void *arg)
@@ -104,9 +128,39 @@ int PrivTaskDelay(int32_t ms)
 #ifndef SEPARATE_COMPILE
 uint32_t PrivGetTickTime()
 {
-    return CalculteTimeMsFromTick(CurrentTicksGain());
+    return CalculateTimeMsFromTick(CurrentTicksGain());
 }
 #endif
+
+/******************Soft Timer*********************/
+int PrivTimerCreate(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
+{
+    return timer_create(clockid, evp, timerid);
+}
+
+int PrivTimerDelete(timer_t timerid)
+{
+    return timer_delete(timerid);
+}
+
+int PrivTimerStartRun(timer_t timerid)
+{
+    return UserTimerStartRun(timerid);
+}
+
+int PrivTimerQuitRun(timer_t timerid)
+{
+    return UserTimerQuitRun(timerid);
+}
+
+int PrivTimerModify(timer_t timerid, int flags, const struct itimerspec *restrict value,
+                  struct itimerspec *restrict ovalue)
+{
+    return timer_settime(timerid, flags, value, ovalue);
+}
+
+/*************************************************/
+
 /*********************fs**************************/
 #ifdef FS_VFS
 /************************Driver Posix Transform***********************/
@@ -154,7 +208,6 @@ int PrivIoctl(int fd, int cmd, void *args)
 {
     int ret;
     struct PrivIoctlCfg *ioctl_cfg = (struct PrivIoctlCfg *)args;
-    
     switch (ioctl_cfg->ioctl_driver_type)
     {
     case SERIAL_TYPE:
@@ -163,15 +216,20 @@ int PrivIoctl(int fd, int cmd, void *args)
     case PIN_TYPE:
         ret = PrivPinIoctl(fd, cmd, ioctl_cfg->args);
         break;
-    case I2C_TYPE:
-        ret = ioctl(fd, cmd, ioctl_cfg->args);
-        break;
     case LCD_TYPE:
         ret = PrivLcdIoctl(fd, cmd, ioctl_cfg->args);
         break;
+    case SPI_TYPE:
+    case I2C_TYPE:
+    case RTC_TYPE:
     case ADC_TYPE:
     case DAC_TYPE:
     case WDT_TYPE:
+    case CAMERA_TYPE:
+    case KPU_TYPE:
+    case TIME_TYPE:
+    case FLASH_TYPE:
+    case CAN_TYPE:
         ret = ioctl(fd, cmd, ioctl_cfg->args);
         break;
     default:

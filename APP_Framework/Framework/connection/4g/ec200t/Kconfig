@@ -2,7 +2,7 @@ config ADAPTER_4G_EC200T
         string "EC200T adapter name"
         default "ec200t"
 
-if ADD_XIZI_FETURES
+if ADD_XIZI_FEATURES
         config ADAPTER_EC200T_USING_PWRKEY
                 bool "EC200T using PWRKEY pin number"
                 default n
@@ -37,7 +37,7 @@ if ADD_XIZI_FETURES
         endif
 endif
 
-if ADD_NUTTX_FETURES
+if ADD_NUTTX_FEATURES
         config ADAPTER_EC200T_USING_PWRKEY
                 bool "EC200T using PWRKEY pin number"
                 default n
@@ -72,7 +72,7 @@ if ADD_NUTTX_FETURES
         endif
 endif
 
-if ADD_RTTHREAD_FETURES
+if ADD_RTTHREAD_FEATURES
         config ADAPTER_EC200T_PWRKEY
                 int "EC200T PWRKEY pin number"
                 default "97"

@@ -40,4 +40,32 @@ ifeq ($(CONFIG_BSP_USING_LCD),y)
   SRC_DIR += lcd
 endif
 
+ifeq ($(CONFIG_BSP_USING_SOFT_SPI),y)
+  SRC_DIR += soft_spi
+endif
+
+ifeq ($(CONFIG_BSP_USING_RTC),y)
+  SRC_DIR += rtc
+endif
+
+ifeq ($(CONFIG_BSP_USING_HWTIMER),y)
+  SRC_DIR += timer
+endif
+
+ifeq ($(CONFIG_BSP_USING_WDT),y)
+  SRC_DIR += watchdog
+endif
+
+ifeq ($(CONFIG_BSP_USING_WIZCHIP),y)
+  SRC_DIR += ethernet
+endif
+
+ifeq ($(CONFIG_BSP_USING_CAMERA),y)
+  SRC_DIR += dvp
+endif
+
+ifeq ($(CONFIG_BSP_USING_KPU),y)
+  SRC_DIR += kpu
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

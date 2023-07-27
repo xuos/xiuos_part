@@ -71,7 +71,9 @@ void mnist_nnom(int argc, char **argv)
 	printf("Predicted label: %d\n", predic_label);
 	printf("Probability: %d%%\n", (int)(prob * 100));
 }
-
+#ifdef ADD_XIZI_FEATURES
+PRIV_SHELL_CMD_FUNCTION(mnist_nnom, a mnist_nnom test sample, PRIV_SHELL_CMD_MAIN_ATTR);
+#endif
 #ifdef __RT_THREAD_H__
 MSH_CMD_EXPORT(mnist_nnom, nnom mnist demo and image number should be followed);
 #endif

@@ -78,8 +78,6 @@ extern "C"
 #endif
 
 /*************************** GPIO define ***************************/
-/* Connected to red led */
-#define BOARD_LED_PAD       14 
 
 /* UART IO */
 #define GPIO_WIFI_RXD       7
@@ -88,6 +86,8 @@ extern "C"
 #define GPIO_EC200T_TXD     20
 #define GPIO_CH376T_RXD     22
 #define GPIO_CH376T_TXD     23
+#define GPIO_CAN_RXD        18
+#define GPIO_CAN_TXD        19
 
 /* ch438 IO */
 #define CH438_ALE_PIN   24
@@ -128,12 +128,12 @@ extern "C"
 #define GPIO_E220_M1   45
 #define GPIO_E18_MODE  46
 #define GPIO_WIFI_EN   8
+#define GPIO_CAN_CFG   43
 
 /************************** end GPIO define **************************/
 
 
 /*************************** FPIOA define ***************************/
-#define BOARD_LED_IO          0
 
 /* UART FPOA */
 #define FPOA_USART1_RX        K210_IO_FUNC_UART1_RX
@@ -182,6 +182,7 @@ extern "C"
 #define FPIOA_E220_M1   2
 #define FPIOA_E18_MODE  3
 #define FPIOA_WIFI_EN   4
+#define FPIOA_CAN_NCFG  5
 
 /************************** end FPIOA define **************************/
 

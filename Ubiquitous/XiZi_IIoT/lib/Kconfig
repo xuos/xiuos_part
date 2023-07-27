@@ -1,4 +1,4 @@
-menu "Lib"
+menu "Kernel Lib"
 
 menuconfig LIB
     bool "Enable libc APIs from toolchain"
@@ -19,6 +19,10 @@ menuconfig LIB
 
         config LIB_MUSLLIB
             bool "use musllib as libc realization."
+        
+        config LIB_OTHER
+                bool "use other lib"
+
     endchoice
 
 source "$KERNEL_DIR/lib/libcpp/Kconfig"

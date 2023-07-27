@@ -702,6 +702,14 @@ config ARCH_BOARD_XIDATONG_RISCV64
 		This is the board configuration for the port of NuttX to the
 		xidatong-riscv64 board. This board features the RISC-V K210
 
+config ARCH_BOARD_EDU_RISCV64
+	bool "edu riscv64  board"
+	depends on ARCH_CHIP_K210
+	select ARCH_HAVE_LEDS if !K210_WITH_QEMU
+	---help---
+		This is the board configuration for the port of NuttX to the
+		edu-riscv64 board. This board features the RISC-V K210
+
 config ARCH_BOARD_SMARTL_C906
 	bool "smartl evaluation board for C906"
 	depends on ARCH_CHIP_C906
@@ -1547,6 +1555,16 @@ config ARCH_BOARD_S32K148EVB
 
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
+	depends on ARCH_CHIP_IMX6_6QUAD
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP/Freescale Sabre
+		board featuring the iMX 6Quad CPU.
+
+config ARCH_BOARD_SABRE_LITE
+	bool "NXP/Freescale i.MX6 Sabre Lite board"
 	depends on ARCH_CHIP_IMX6_6QUAD
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
@@ -2477,7 +2495,7 @@ config ARCH_BOARD
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1020-evk"            if ARCH_BOARD_IMXRT1020_EVK
 	default "imxrt1050-evk"            if ARCH_BOARD_IMXRT1050_EVK
-	default "xidatong-arm32"                 if ARCH_BOARD_XIDATONG_ARM32
+	default "xidatong-arm32"           if ARCH_BOARD_XIDATONG_ARM32
 	default "imxrt1060-evk"            if ARCH_BOARD_IMXRT1060_EVK
 	default "imxrt1064-evk"            if ARCH_BOARD_IMXRT1064_EVK
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
@@ -2502,6 +2520,7 @@ config ARCH_BOARD
 	default "maix-bit"                 if ARCH_BOARD_MAIX_BIT
 	default "aiit-riscv64-board"       if ARCH_BOARD_AIIT_RISCV64
 	default "xidatong-riscv64"         if ARCH_BOARD_XIDATONG_RISCV64
+	default "edu-riscv64"              if ARCH_BOARD_EDU_RISCV64
 	default "smartl-c906"              if ARCH_BOARD_SMARTL_C906
 	default "icicle"                   if ARCH_BOARD_ICICLE_MPFS
 	default "m100pfsevp"               if ARCH_BOARD_M100PFSEVP_MPFS
@@ -2587,6 +2606,7 @@ config ARCH_BOARD
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
+	default "sabre-lite"               if ARCH_BOARD_SABRE_LITE
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"              if ARCH_BOARD_GIANT_BOARD
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
@@ -2758,6 +2778,9 @@ source "boards/arm/s32k1xx/s32k148evb/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
+endif
+if ARCH_BOARD_SABRE_LITE
+source "boards/arm/imx6/sabre-lite/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1020_EVK
 source "boards/arm/imxrt/imxrt1020-evk/Kconfig"
@@ -3337,6 +3360,9 @@ source "boards/risc-v/k210/aiit-riscv64-board/Kconfig"
 endif
 if ARCH_BOARD_XIDATONG_RISCV64
 source "boards/risc-v/k210/xidatong-riscv64/Kconfig"
+endif
+if ARCH_BOARD_EDU_RISCV64
+source "boards/risc-v/k210/edu-riscv64/Kconfig"
 endif
 if ARCH_BOARD_SMARTL_C906
 source "boards/risc-v/c906/smartl-c906/Kconfig"

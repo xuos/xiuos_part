@@ -63,26 +63,13 @@ typedef struct
 	uint16_t S[CT_MAX_TOUCH];
 }GT911_Dev;
 
-typedef struct 
+typedef struct
 {
-  uint16_t  X;
-  uint16_t  Y;
+    uint16_t x;
+    uint16_t y;
+    uint16_t press;
 }POINT;
 
-void IIC_Init(void);
-void SDA_IN(void);
-void SDA_OUT(void);
-uint8_t READ_SDA(void);
-void IIC_SCL(uint8_t val);
-void IIC_SDA(uint8_t val);
-void IIC_Start(void);
-void IIC_Stop(void);
-uint8_t IIC_Wait_Ack(void);
-void IIC_Ack(void);
-void IIC_NAck(void);
-void IIC_Send_Byte(uint8_t txd);
-uint8_t IIC_Read_Byte(uint8_t ack);
-bool GT911_Scan(POINT* point);
-void GT911_test(void);
+void board_touch_initialize(void);
 
 #endif

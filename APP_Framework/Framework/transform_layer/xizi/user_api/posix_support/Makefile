@@ -11,4 +11,8 @@ ifeq ($(CONFIG_KERNEL_MESSAGEQUEUE),y)
 	SRC_FILES += mqueue.c
 endif
 
+ifeq ($(CONFIG_KERNEL_SOFTTIMER),y)
+	SRC_FILES += timer.c
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

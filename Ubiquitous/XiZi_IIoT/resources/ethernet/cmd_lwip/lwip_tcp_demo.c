@@ -19,15 +19,19 @@
 */
 
 #include "board.h"
-#include "lwip_demo.h"
 #include "sys_arch.h"
-#include "lwip/sockets.h"
-#include "tcpecho_raw.h"
 #include <shell.h>
 #include <sys.h>
+#include <xizi.h>
+#include "lwip_demo.h"
+#include "lwip/sockets.h"
+#include "tcpecho_raw.h"
 char tcp_demo_msg[LWIP_TEST_MSG_SIZE] = { 0 };
 char tcp_demo_ip[] = {192, 168, 250, 252};
-u16_t tcp_demo_port = LWIP_TARGET_PORT;
+u16_t tcp_demo_port = 80;
+int tcp_send_num = 0;
+int tcp_send_task_on = 0;
+uint32 tcp_interval = 50;
 
 /******************************************************************************/
 
@@ -58,17 +62,34 @@ static void LwipTcpSendTask(void *arg)
 
     lw_notice("tcp connect success, start to send.\n");
     lw_notice("\n\nTarget Port:%d\n\n", tcp_sock.sin_port);
+    tcp_send_task_on = 1;
 
-    sendto(fd, tcp_demo_msg, strlen(tcp_demo_msg), 0, (struct sockaddr*)&tcp_sock, sizeof(struct sockaddr));
-
-    lw_notice("Send tcp msg: %s ", tcp_demo_msg);
+    while(tcp_send_num > 0 || tcp_send_num == -1)
+    {
+        sendto(fd, tcp_demo_msg, strlen(tcp_demo_msg), 0, (struct sockaddr*)&tcp_sock, sizeof(struct sockaddr));
+        lw_notice("Send tcp msg: %s \n", tcp_demo_msg);
+        if(tcp_send_num > 0)
+        {
+            tcp_send_num--;
+        }
+        DelayKTask(tcp_interval);
+    }
 
     closesocket(fd);
+    tcp_send_task_on = 0;
     return;
 }
 
 void LwipTcpSendTest(int argc, char *argv[])
 {
+    if(tcp_send_task_on){
+        tcp_send_num = 0;
+        printf("waitting send task exit...\n");
+        while(tcp_send_task_on){
+            DelayKTask(1000);
+        }
+        tcp_send_num = 1;
+    }
     LwipTcpSocketParamType param;
     uint8_t enet_port = 0;
     memset(tcp_demo_msg, 0, LWIP_TEST_MSG_SIZE);
@@ -88,8 +109,10 @@ void LwipTcpSendTest(int argc, char *argv[])
         {
             sscanf(argv[2], "%d.%d.%d.%d", &tcp_demo_ip[0], &tcp_demo_ip[1], &tcp_demo_ip[2], &tcp_demo_ip[3]);
         }
+        sscanf(argv[3], "%d", &tcp_send_num);
+        sscanf(argv[4], "%d", &tcp_interval);
     }
-    lw_notice("get ipaddr %d.%d.%d.%d:%d\n", tcp_demo_ip[0], tcp_demo_ip[1], tcp_demo_ip[2], tcp_demo_ip[3], tcp_demo_port);
+    lw_notice("get ipaddr %d.%d.%d.%d:%d send msg %d times\n", tcp_demo_ip[0], tcp_demo_ip[1], tcp_demo_ip[2], tcp_demo_ip[3], tcp_demo_port, tcp_send_num);
     lwip_config_tcp(enet_port, lwip_ipaddr, lwip_netmask, tcp_demo_ip);
 
     memcpy(param.ip, tcp_demo_ip, 4);
@@ -101,7 +124,7 @@ void LwipTcpSendTest(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
-     TCPSend, LwipTcpSendTest, TCP Send message);
+     TCPSend, LwipTcpSendTest, TCPSend msg [ip:port [num [interval]]]);
 
 void LwipTcpRecvTest(void)
 {

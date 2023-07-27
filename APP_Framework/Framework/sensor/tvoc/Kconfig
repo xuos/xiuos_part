@@ -12,7 +12,7 @@ config SENSOR_TB600B_TVOC10
                         string "tb600b tvoc10 quantity name"
                         default "tvoc_1"
                 
-                if ADD_XIZI_FETURES
+                if ADD_XIZI_FEATURES
                         config SENSOR_TB600B_TVOC10_DRIVER_EXTUART
                                 bool "Using extra uart to support tb600b tvoc10"
                                 default y
@@ -33,7 +33,7 @@ config SENSOR_TB600B_TVOC10
                         endif
                 endif
 
-                if ADD_NUTTX_FETURES
+                if ADD_NUTTX_FEATURES
                         config SENSOR_DEVICE_TB600B_TVOC10_DEV
                                 string "tb600b tvoc10 device uart path"
                                 default "/dev/ttyS1"
@@ -42,7 +42,7 @@ config SENSOR_TB600B_TVOC10
 
                 endif
 
-                if ADD_RTTHREAD_FETURES
+                if ADD_RTTHREAD_FEATURES
 
                 endif                
         endif

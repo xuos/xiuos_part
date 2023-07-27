@@ -2,7 +2,7 @@ config ADAPTER_WIFI_ESP07S
         string "ESP07S WIFI adapter name"
         default "esp07s_wifi"
 
-if ADD_XIZI_FETURES
+if ADD_XIZI_FEATURES
 
         config ADAPTER_ESP07S_DRIVER_EXTUART
                 bool "Using extra uart to support wifi"
@@ -24,7 +24,7 @@ if ADD_XIZI_FETURES
         endif
 endif
 
-if ADD_NUTTX_FETURES
+if ADD_NUTTX_FEATURES
         config ADAPTER_ESP07S_DRIVER_EXTUART
                 bool "Using extra uart to support wifi"
                 default n
@@ -45,8 +45,8 @@ if ADD_NUTTX_FETURES
         endif
 endif
 
-if ADD_RTTHREAD_FETURES
-        if ADD_RTTHREAD_FETURES
+if ADD_RTTHREAD_FEATURES
+        if ADD_RTTHREAD_FEATURES
         config ADAPTER_ESP07S_DRIVER_EXTUART
                 bool "Using extra uart to support wifi"
                 default n

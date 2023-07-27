@@ -5,4 +5,6 @@ source "$KERNEL_DIR/lib/Kconfig"
 
 source "$KERNEL_DIR/fs/Kconfig"
 
+source "$KERNEL_DIR/tool/Kconfig"
+
 source "$KERNEL_DIR/../../APP_Framework/Kconfig"

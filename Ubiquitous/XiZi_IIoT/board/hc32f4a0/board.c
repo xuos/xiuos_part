@@ -34,6 +34,54 @@ Modification:
 #include <hc32_ll.h>
 #include <connect_usart.h>
 
+#ifdef BSP_USING_GPIO
+#include <connect_gpio.h>
+#endif
+
+#ifdef BSP_USING_ADC
+#include <connect_adc.h>
+#endif
+
+#ifdef BSP_USING_DAC
+#include <connect_dac.h>
+#endif
+
+#ifdef BSP_USING_SDIO
+#include <connect_sdio.h>
+#endif
+
+#ifdef BSP_USING_SPI
+#include <connect_spi.h>
+#endif
+
+#ifdef BSP_USING_I2C
+#include <connect_i2c.h>
+#endif
+
+#ifdef BSP_USING_USB
+#include <connect_usb.h>
+#endif
+
+#ifdef BSP_USING_RTC
+#include <connect_rtc.h>
+#endif
+
+#ifdef BSP_USING_WDT
+#include <connect_wdt.h>
+#endif
+
+#ifdef BSP_USING_TIMER
+#include <connect_hwtimer.h>
+#endif
+
+#ifdef BSP_USING_CAN
+#include <connect_can.h>
+#endif
+
+#ifdef BSP_USING_LWIP
+#include <connect_ethernet.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
 
@@ -46,15 +94,10 @@ void SystemClockConfig(void)
     stc_clock_xtal_init_t stcXtalInit;
     stc_clock_pll_init_t stcPLLHInit;
 
-    /* PCLK0, HCLK  Max 240MHz */
-    /* PCLK1, PCLK4 Max 120MHz */
-    /* PCLK2, PCLK3 Max 60MHz  */
-    /* EX BUS Max 120MHz */
-    CLK_SetClockDiv(CLK_BUS_CLK_ALL, \
-                    (CLK_PCLK0_DIV1 | CLK_PCLK1_DIV2 | CLK_PCLK2_DIV4 | \
-                     CLK_PCLK3_DIV4 | CLK_PCLK4_DIV2 | CLK_EXCLK_DIV2 | \
+    CLK_SetClockDiv(CLK_BUS_CLK_ALL,
+                    (CLK_PCLK0_DIV1 | CLK_PCLK1_DIV2 | CLK_PCLK2_DIV4 |
+                     CLK_PCLK3_DIV4 | CLK_PCLK4_DIV2 | CLK_EXCLK_DIV2 |
                      CLK_HCLK_DIV1));
-
     (void)CLK_XtalStructInit(&stcXtalInit);
     /* Config Xtal and enable Xtal */
     stcXtalInit.u8Mode   = CLK_XTAL_MD_OSC;
@@ -64,26 +107,37 @@ void SystemClockConfig(void)
     (void)CLK_XtalInit(&stcXtalInit);
 
     (void)CLK_PLLStructInit(&stcPLLHInit);
+
+    stcPLLHInit.u8PLLState      = CLK_PLL_ON;
+    stcPLLHInit.PLLCFGR         = 0UL;
+    stcPLLHInit.PLLCFGR_f.PLLM  = 1UL - 1UL;
+
+#ifdef BSP_USING_USB
     /* VCO = (8/1)*120 = 960MHz*/
-    stcPLLHInit.u8PLLState = CLK_PLL_ON;
-    stcPLLHInit.PLLCFGR = 0UL;
-    stcPLLHInit.PLLCFGR_f.PLLM = 1UL - 1UL;
-    stcPLLHInit.PLLCFGR_f.PLLN = 120UL - 1UL;
-    stcPLLHInit.PLLCFGR_f.PLLP = 4UL - 1UL;
-    stcPLLHInit.PLLCFGR_f.PLLQ = 4UL - 1UL;
-    stcPLLHInit.PLLCFGR_f.PLLR = 4UL - 1UL;
+    stcPLLHInit.PLLCFGR_f.PLLN  = 120UL - 1UL;
+#else
+    /* VCO = (8/1)*100 = 800MHz*/
+    stcPLLHInit.PLLCFGR_f.PLLN  = 100UL - 1UL;
+#endif
+    stcPLLHInit.PLLCFGR_f.PLLP  = 4UL - 1UL;
+    stcPLLHInit.PLLCFGR_f.PLLQ  = 4UL - 1UL;
+    stcPLLHInit.PLLCFGR_f.PLLR  = 4UL - 1UL;
     stcPLLHInit.PLLCFGR_f.PLLSRC = CLK_PLL_SRC_XTAL;
     (void)CLK_PLLInit(&stcPLLHInit);
 
+#ifdef BSP_USING_USB
     /* Highspeed SRAM set to 0 Read/Write wait cycle */
     SRAM_SetWaitCycle(SRAM_SRAMH, SRAM_WAIT_CYCLE0, SRAM_WAIT_CYCLE0);
-
     /* SRAM1_2_3_4_backup set to 1 Read/Write wait cycle */
     SRAM_SetWaitCycle((SRAM_SRAM123 | SRAM_SRAM4 | SRAM_SRAMB), SRAM_WAIT_CYCLE1, SRAM_WAIT_CYCLE1);
-
+#else
+    /* Highspeed SRAM set to 1 Read/Write wait cycle */
+    SRAM_SetWaitCycle(SRAM_SRAMH, SRAM_WAIT_CYCLE1, SRAM_WAIT_CYCLE1);
+    /* SRAM1_2_3_4_backup set to 2 Read/Write wait cycle */
+    SRAM_SetWaitCycle((SRAM_SRAM123 | SRAM_SRAM4 | SRAM_SRAMB), SRAM_WAIT_CYCLE2, SRAM_WAIT_CYCLE2);
+#endif
     /* 0-wait @ 40MHz */
-    (void)EFM_SetWaitCycle(EFM_WAIT_CYCLE5);
-
+    EFM_SetWaitCycle(EFM_WAIT_CYCLE5);
     /* 4 cycles for 200 ~ 250MHz */
     GPIO_SetReadWaitCycle(GPIO_RD_WAIT4);
     CLK_SetSysClockSrc(CLK_SYSCLK_SRC_PLL);
@@ -98,7 +152,7 @@ void PeripheralClockConfig(void)
     CLK_SetCANClockSrc(CLK_CAN2, CLK_CANCLK_SYSCLK_DIV6);
 #endif
 
-#if defined(RT_USING_ADC)
+#if defined(BSP_USING_ADC)
     CLK_SetPeriClockSrc(CLK_PERIPHCLK_PCLK);
 #endif
 }
@@ -117,12 +171,52 @@ void SysTickConfiguration(void)
 
 void SysTick_Handler(void)
 {
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
     TickAndTaskTimesliceUpdate();
+
+    ENABLE_INTERRUPT(lock);
 }
 
 struct InitSequenceDesc _board_init[] = 
-{
-	{ " NONE ",NONE },
+{	
+#ifdef BSP_USING_GPIO
+    { "hw_pin", HwGpioInit },
+#endif
+#ifdef BSP_USING_SDIO
+	{ "sdio", HwSdioInit },
+#endif
+#ifdef BSP_USING_SPI
+	{ "spi", HwSpiInit },
+#endif
+#ifdef BSP_USING_I2C
+	{ "i2c", HwI2cInit },
+#endif
+#ifdef BSP_USING_ADC
+    {"hw adc init", HwAdcInit},
+#endif
+#ifdef BSP_USING_DAC
+    {"hw dac init", HwDacInit},
+#endif
+#ifdef BSP_USING_USB
+	{ "usb", HwUsbHostInit },
+#endif
+#ifdef BSP_USING_RTC
+	{ "rtc", HwRtcInit },
+#endif
+#ifdef BSP_USING_WDT
+	{ "wdt", HwWdtInit },
+#endif
+#ifdef BSP_USING_TIMER
+	{ "tmr", HwTimerInit },
+#endif
+#ifdef BSP_USING_CAN
+	{ "can", HwCanInit },
+#endif
+#ifdef BSP_USING_LWIP
+#endif
+    { " NONE ", NONE },
 };
 
 void InitBoardHardware()

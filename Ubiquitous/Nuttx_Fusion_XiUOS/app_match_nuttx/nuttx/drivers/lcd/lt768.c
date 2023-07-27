@@ -6282,7 +6282,7 @@ uint8_t Read_Key_Strobe_Data_2(void)
     return temp;
 }
 
-void Show_String(char *str)
+void Show_String(uint8_t *str)
 {
     Text_Mode(); //text mode
     LCD_CmdWrite(0x04);

@@ -1,18 +1,19 @@
 include $(KERNEL_ROOT)/.config
 
-ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
+ifeq ($(CONFIG_ADD_NUTTX_FEATURES),y)
     include $(APPDIR)/Make.defs
-    CSRCS += framework_init.c
+    CSRCS +=
     include $(APPDIR)/Application.mk
 endif
 
 
-ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     SRC_DIR := general_functions app_test 
 
-    SRC_FILES := main.c framework_init.c 
+    SRC_FILES := main.c
     ifeq ($(CONFIG_LIB_LV),y)
         SRC_DIR += lv_app
+        SRC_DIR += tinyttf_app
     endif
 
     ifeq ($(CONFIG_APPLICATION_OTA),y)

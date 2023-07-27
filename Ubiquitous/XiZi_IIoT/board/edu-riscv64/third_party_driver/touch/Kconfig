@@ -10,8 +10,8 @@ if BSP_USING_TOUCH
         default "touch_dev" 
     config BSP_TOUCH_TP_INT
         int "touch int pin"
-        default 36
+        default 30
     config FPIOA_TOUCH_TP_INT
         int "fpioa touch int pin"
-        default 12
+        default 30
 endif
