@@ -15,7 +15,7 @@ menuconfig BSP_USING_UART3
 
 menuconfig BSP_USING_UART6
     bool "Enable USART6"
-    default n
+    default y
     if BSP_USING_UART6
         config SERIAL_BUS_NAME_6
             string "serial bus 6 name"
