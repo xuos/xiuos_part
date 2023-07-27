@@ -239,9 +239,45 @@ menu "test app"
             menuconfig USER_TEST_TIMER
                 bool "Config test soft timer"
                 default n
+
+            menuconfig USER_TEST_HASH
+                bool "Config test hash"
+                default n
+
+            menuconfig USER_TEST_RADIX
+                bool "Config test radix tree"
+                default n
             
             menuconfig USER_TEST_RBTREE
                 bool "Config test red black tree"
+                default n
+
+            menuconfig USER_TEST_WEBSERVER
+                bool "Config test webserver"
+                default n
+
+            menuconfig USER_TEST_MQTTCLIENT
+                bool "Config test mqtt client"
+                default n
+
+            menuconfig USER_TEST_FTPCLIENT
+                bool "Config test ftp client"
+                default n
+            
+            menuconfig USER_TEST_LORA_P2P
+                bool "Config test lora p2p"
+                default n
+
+            menuconfig USER_TEST_LORAWAN_SINGLEGW
+                bool "Config test lorawan single channel gateway"
+                default n
+
+            menuconfig USER_TEST_CANOPEN
+                bool "Config test CanOpen"
+                default n
+
+            menuconfig USER_TEST_USB_CAMERA
+                bool "Config test usb camera"
                 default n
 
         endif
