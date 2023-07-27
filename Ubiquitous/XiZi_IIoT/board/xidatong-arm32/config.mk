@@ -1,8 +1,8 @@
 export CROSS_COMPILE ?=/usr/bin/arm-none-eabi-
 
-export CFLAGS := -mcpu=cortex-m7 -mthumb  -ffunction-sections -fdata-sections -Dgcc -O0 -gdwarf-2 -g -fgnu89-inline -Wa,-mimplicit-it=thumb
+export CFLAGS := -mcpu=cortex-m7 -mthumb  -ffunction-sections -fdata-sections -Dgcc -O1 -fgnu89-inline -Wa,-mimplicit-it=thumb
 
-export AFLAGS := -c -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -x assembler-with-cpp -Wa,-mimplicit-it=thumb  -gdwarf-2
+export AFLAGS := -c -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -x assembler-with-cpp -Wa,-mimplicit-it=thumb
 ### if use USB function, use special lds file because USB uses ITCM
 
 ifeq ($(CONFIG_LIB_MUSLLIB), y)
@@ -25,7 +25,7 @@ else
 export LFLAGS += -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Wl,--gc-sections,-Map=XiZi-xidatong-arm32.map,-cref,-u,Reset_Handler -T $(BSP_ROOT)/link.lds
 endif
 
-export CXXFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Dgcc -O0 -gdwarf-2 -g
+export CXXFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Dgcc -O1
 
 export APPLFLAGS := -mcpu=cortex-m7 -mthumb -ffunction-sections -fdata-sections -Wl,--gc-sections,-Map=XiZi-app.map,-cref,-u, -T $(BSP_ROOT)/link_userspace.lds
 
