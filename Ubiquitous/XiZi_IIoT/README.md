@@ -23,13 +23,13 @@
 
 ARM架构系列的开发板有
 
-	aiit-arm32-board nuvoton-m2354 ok1052-c stm32f103-nano stm32f407-st-discovery stm32f407zgt6 xidatong-arm32
+	aiit-arm32-board nuvoton-m2354 ok1052-c stm32f103-nano stm32f407-st-discovery stm32f407zgt6 xidatong-arm32 edu-arm32
 
 ### RISC-V
 
 RISC-V架构系列的开发板有
 
-	aiit-riscv64-board gapuino gd32vf103-rvstar hifive1-rev-B kd233 maix-go rv32m1-vega
+	aiit-riscv64-board gapuino gd32vf103-rvstar hifive1-rev-B kd233 maix-go rv32m1-vega edu-riscv64
 
 ## 开发环境
 
