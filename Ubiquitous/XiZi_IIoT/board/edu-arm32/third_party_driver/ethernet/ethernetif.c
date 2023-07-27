@@ -19,21 +19,21 @@
  */
 
 /**
-* @file ethernetif.c
-* @brief support edu-arm32-board ethernetif function and register to Lwip
-* @version 3.0 
-* @author AIIT XUOS Lab
-* @date 2022-12-05
-*/
+ * @file ethernetif.c
+ * @brief support hc32f4a0-board ethernetif function and register to Lwip
+ * @version 3.0
+ * @author AIIT XUOS Lab
+ * @date 2022-12-05
+ */
 
 /*************************************************
 File name: ethernetif.c
 Description: support edu-arm32-board ethernetif configure and register to Lwip
 Others: take projects\ev_hc32f4a0_lqfp176\examples\eth\eth_loopback\source\ethernetif.c for references
-History: 
+History:
 1. Date: 2022-12-05
 Author: AIIT XUOS Lab
-Modification: 
+Modification:
 1、include harware_ethernetif.h、hc32_ll_eth.h、hc32_ll_gpio.h、hc32_ll_utility.h、hc32_ll_fcg.h and lwip H files;
 2、modify ethernetif_init as err_t;
 3、add ETH_RST_PORT and ETH_RST_PIN;
@@ -47,13 +47,15 @@ Modification:
  * Include files
  ******************************************************************************/
 #include <connect_ethernet.h>
+#include <hc32_ll_fcg.h>
 #include <hc32_ll_gpio.h>
 #include <hc32_ll_utility.h>
-#include <hc32_ll_fcg.h>
 #include <lwip/timeouts.h>
 #include <netif/etharp.h>
 
+#include <netdev.h>
 #include <xs_isr.h>
+#include <xs_kdbg.h>
 
 /**
  * @addtogroup HC32F4A0_DDL_Examples
@@ -73,7 +75,6 @@ Modification:
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
 
-
 /*******************************************************************************
  * Global variable definitions (declared in header file with 'extern')
  ******************************************************************************/
@@ -85,7 +86,6 @@ Modification:
 /*******************************************************************************
  * Local variable definitions ('static')
  ******************************************************************************/
-
 
 /*******************************************************************************
  * Function implementation - global ('extern') and local ('static')
@@ -180,12 +180,14 @@ void Ethernet_GpioInit(void)
 #endif
 }
 
-void *ethernetif_config_enet_set(uint8_t enet_port) {
+void* ethernetif_config_enet_set(uint8_t enet_port)
+{
     return NONE;
 }
 
-void Time_Update_LwIP(void) {
-    //no need to do
+void Time_Update_LwIP(void)
+{
+    // no need to do
 }
 
 /**
@@ -195,7 +197,7 @@ void Time_Update_LwIP(void) {
  *           - LL_OK: The IF is initialized
  *           - LL_ERR: The IF is uninitialized
  */
-err_t ethernetif_init(struct netif *netif)
+err_t ethernetif_init(struct netif* netif)
 {
 #if LWIP_NETIF_HOSTNAME
     /* Initialize interface hostname */
@@ -206,15 +208,24 @@ err_t ethernetif_init(struct netif *netif)
 
 #ifndef ETHERNET_LOOPBACK_TEST
     /* We directly use etharp_output() here to save a function call.
-    * You can instead declare your own function an call etharp_output()
-    * from it if you have to do some checks before sending (e.g. if link
-    * is available...) */
+     * You can instead declare your own function an call etharp_output()
+     * from it if you have to do some checks before sending (e.g. if link
+     * is available...) */
     netif->output = etharp_output;
     netif->linkoutput = low_level_output;
 #endif
 
     /* initialize the hardware */
-    return low_level_init(netif);
+    if (LL_OK != low_level_init(netif)) {
+        return LL_ERR;
+    }
+
+    if (EOK != lwip_netdev_add(netif)) {
+        SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] LWIP add netdev failed.\n", __func__));
+    } else {
+        printf("[%s] Add Netdev successful\n", __func__);
+    }
+    return LL_OK;
 }
 
 /**
@@ -222,16 +233,16 @@ err_t ethernetif_init(struct netif *netif)
  * @param  netif                        The network interface structure for this ethernetif.
  * @retval None
  */
-void ethernetif_input(void *netif_arg)
+void ethernetif_input(void* netif_arg)
 {
-    struct pbuf *p;
-    struct netif *netif = (struct netif *)netif_arg;
+    struct pbuf* p;
+    struct netif* netif = (struct netif*)netif_arg;
     x_base critical_lock;
 
     /* Move received packet into a new pbuf */
     while (1) {
         sys_arch_sem_wait(get_eth_recv_sem(), WAITING_FOREVER);
-        while(1) {
+        while (1) {
             p = low_level_input(netif);
 #ifndef ETHERNET_LOOPBACK_TEST
             /* Entry point to the LwIP stack */
@@ -261,7 +272,7 @@ void ethernetif_input(void *netif_arg)
  * @param  netif the network interface
  * @retval None
  */
-void EthernetIF_CheckLink(struct netif *netif)
+void EthernetIF_CheckLink(struct netif* netif)
 {
     uint16_t u16RegVal = 0U;
     static uint8_t u8PreStatus = 0U;
@@ -296,7 +307,7 @@ void EthernetIF_CheckLink(struct netif *netif)
  * @param  netif                        The network interface.
  * @retval None
  */
-void EthernetIF_UpdateLink(struct netif *netif)
+void EthernetIF_UpdateLink(struct netif* netif)
 {
     uint16_t u16RegVal;
 
@@ -337,7 +348,7 @@ void EthernetIF_UpdateLink(struct netif *netif)
  * @param  netif                        The network interface
  * @retval None
  */
-void EthernetIF_PeriodicHandle(struct netif *netif)
+void EthernetIF_PeriodicHandle(struct netif* netif)
 {
 #ifndef ETH_INTERFACE_RMII
     uint32_t curTick;
@@ -358,7 +369,7 @@ void EthernetIF_PeriodicHandle(struct netif *netif)
  * @param  netif                        The network interface
  * @retval None
  */
-void EthernetIF_LinkCallback(struct netif *netif)
+void EthernetIF_LinkCallback(struct netif* netif)
 {
     __IO uint32_t tickStart = 0UL;
     uint16_t u16RegVal = 0U;
@@ -405,8 +416,7 @@ void EthernetIF_LinkCallback(struct netif *netif)
             CLR_REG16_BIT(u16RegVal, PHY_FULLDUPLEX_100M);
             /* Set MAC Speed and Duplex Mode to PHY */
             (void)ETH_PHY_WriteReg(&EthHandle, PHY_BCR,
-                                   ((uint16_t)((EthHandle.stcCommInit).u32DuplexMode >> 3U) |
-                                    (uint16_t)((EthHandle.stcCommInit).u32Speed >> 1U) | u16RegVal));
+                ((uint16_t)((EthHandle.stcCommInit).u32DuplexMode >> 3U) | (uint16_t)((EthHandle.stcCommInit).u32Speed >> 1U) | u16RegVal));
         }
         /* ETH MAC Re-Configuration */
         ETH_MAC_SetDuplexSpeed((EthHandle.stcCommInit).u32DuplexMode, (EthHandle.stcCommInit).u32Speed);
@@ -427,7 +437,7 @@ void EthernetIF_LinkCallback(struct netif *netif)
  *           - LL_OK: The IF is link up
  *           - LL_ERR: The IF is link down
  */
-int32_t EthernetIF_IsLinkUp(struct netif *netif)
+int32_t EthernetIF_IsLinkUp(struct netif* netif)
 {
     return (0U != u8PhyLinkStatus) ? LL_OK : LL_ERR;
 }
@@ -437,14 +447,14 @@ int32_t EthernetIF_IsLinkUp(struct netif *netif)
  * @param  netif                        The network interface
  * @retval None
  */
-__WEAKDEF void EthernetIF_NotifyLinkChange(struct netif *netif)
+__WEAKDEF void EthernetIF_NotifyLinkChange(struct netif* netif)
 {
     /* This is function could be implemented in user file when the callback is needed */
     if (LL_OK == EthernetIF_IsLinkUp(netif)) {
         GPIO_SetPins(ETH_LINK_LED_PORT, ETH_LINK_LED_PIN);
     } else {
         GPIO_ResetPins(ETH_LINK_LED_PORT, ETH_LINK_LED_PIN);
-    }    
+    }
 }
 
 /**
@@ -453,7 +463,8 @@ __WEAKDEF void EthernetIF_NotifyLinkChange(struct netif *netif)
  * @param  p                            The MAC packet to receive
  * @retval None
  */
-__WEAKDEF void EthernetIF_InputCallback(struct netif *netif, struct pbuf *p) {
+__WEAKDEF void EthernetIF_InputCallback(struct netif* netif, struct pbuf* p)
+{
     /* This is function could be implemented in user file when the callback is needed */
 #ifdef ETHERNET_LOOPBACK_TEST
     if ((0 == (memcmp(p->payload, txPbuf.payload, p->len))) && (p->len == txPbuf.len)) {
@@ -479,7 +490,7 @@ __WEAKDEF void EthernetIF_InputCallback(struct netif *netif, struct pbuf *p) {
 
 #ifdef ETHERNET_LOOPBACK_TEST
 
-static void EthLoopBackTask(void *parameter)
+static void EthLoopBackTask(void* parameter)
 {
     while (1) {
         if (RESET == GPIO_ReadInputPins(USER_KEY_PORT, USER_KEY_PIN)) {
@@ -489,7 +500,7 @@ static void EthLoopBackTask(void *parameter)
             }
         }
 
-        //KPrintf("ready to receive eth loop back data\n");
+        // KPrintf("ready to receive eth loop back data\n");
         /* Read a received packet */
         ethernetif_input(&testnetif);
         /* Handle periodic timers */
@@ -514,24 +525,24 @@ static void EthLoopBackTest(void)
     (void)ethernetif_init(&testnetif);
 
     /* fill data to txPbuf */
-    txPbuf.next    = NULL;
+    txPbuf.next = NULL;
     txPbuf.payload = txBuf;
-    txPbuf.len     = strlen(txBuf);
+    txPbuf.len = strlen(txBuf);
 
     int eth_loopback_task = 0;
     eth_loopback_task = KTaskCreate("eth_loopback", EthLoopBackTask, NONE,
-                           2048, 8);
-    if(eth_loopback_task < 0) {		
-		KPrintf("eth_loopback_task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
-		return;
-	}
+        2048, 8);
+    if (eth_loopback_task < 0) {
+        KPrintf("eth_loopback_task create failed ...%s %d.\n", __FUNCTION__, __LINE__);
+        return;
+    }
 
     StartupKTask(eth_loopback_task);
 
     return;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
-EthLoopBackTest, EthLoopBackTest, EthLoopBackTest);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+    EthLoopBackTest, EthLoopBackTest, EthLoopBackTest);
 
 #endif
 

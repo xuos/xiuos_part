@@ -52,6 +52,7 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
 endif 
 endif
 
@@ -419,6 +420,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
@@ -553,6 +556,12 @@ KERNELPATHS += -I$(KERNEL_ROOT)/resources/spi/third_party_spi/SFUD/sfud/inc #
 endif
 
 endif
+
+ifeq ($(CONFIG_APP_USING_WEBNET),y)
+	KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/webnet/WebNet_XiUOS/inc \
+				   -I$(KERNEL_ROOT)/../../APP_Framework/Applications/webnet/WebNet_XiUOS/samples #
+endif
+
 
 ifeq ($(CONFIG_TOOL_SHELL), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/tool/shell/letter-shell \

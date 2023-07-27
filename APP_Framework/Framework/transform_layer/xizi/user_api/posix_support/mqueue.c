@@ -21,12 +21,13 @@
 
 #include "include/mqueue.h"
 
-mqd_t mq_open(const char *name, int oflag, ...)
+mqd_t mq_open(const char* name, int oflag, mode_t mode, struct mq_attr* attr)
 {
     
     mqd_t mq;
 
-    mq = UserMsgQueueCreate( DEFAULT_MQUEUE_SIZE, DEFAULT_MAX_MSG_SIZE);
+    // Todo: config mq by mode
+    mq = UserMsgQueueCreate(attr->mq_msgsize, attr->mq_maxmsg);
     if (mq < 0) {
         return -1;
     }
@@ -39,12 +40,12 @@ int mq_close(mqd_t mqdes)
     return UserMsgQueueDelete(mqdes);
 }
 
-ssize_t mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio)
+ssize_t mq_receive(mqd_t mqdes, char* msg_ptr, size_t msg_len, unsigned* msg_prio)
 {
     ssize_t ret;
 
     *msg_prio = 0;
-    ret = UserMsgQueueRecv(mqdes, msg_ptr, (unsigned long)&msg_len, 0);
+    ret = UserMsgQueueRecv(mqdes, (void*)msg_ptr, msg_len, 100000);
 
     return ret;
 }

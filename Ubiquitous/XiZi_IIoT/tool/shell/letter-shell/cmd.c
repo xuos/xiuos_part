@@ -98,7 +98,7 @@ long ShowTask(void)
     KPrintf("*************************************************************************************************\n");
 #ifndef SCHED_POLICY_FIFO
 #ifdef ARCH_SMP
-    KPrintf(" STAT    ID  %-*.s   PRI CORE STACK_DEPTH USED  LEFT_TICKS  ERROR_STAT\n", NAME_NUM_MAX, item_title); 
+    KPrintf(" STAT    ID  %-*.s   PRI CORE STACK_DEPTH USED  LEFT_TICKS  ERROR_STAT\n", _NUM_MAX, item_title); 
 #else
     KPrintf(" STAT    ID  %-*.s  PRI STACK_DEPTH  USED  LEFT_TICKS  ERROR_STAT\n", NAME_NUM_MAX, item_title);
 #endif
