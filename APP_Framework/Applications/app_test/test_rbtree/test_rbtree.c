@@ -20,7 +20,7 @@
 #include<string.h>
 #include <transform.h>
 #include"test_rbtree.h"
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 
 void RBTreeTraversal(RBTreeType *tree, RBNodeType *node) 
 {
