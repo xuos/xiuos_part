@@ -147,7 +147,7 @@ static void *ModbusTcpServer(void *arg)
     MbMemoryFree(&mbm);//释放存储区
 }
 
-void Test_ModbusTcpServer(int argc, char *argv[])
+void TestModbusTcpServer(int argc, char *argv[])
 {
     if(argc >= 2) {
         lw_print("lw: [%s] target ip %s\n", __func__, argv[1]);
@@ -168,7 +168,7 @@ void Test_ModbusTcpServer(int argc, char *argv[])
     ModbusTcpServer(NULL);
 }
 
-PRIV_SHELL_CMD_FUNCTION(Test_ModbusTcpServer, a modbusS test sample, PRIV_SHELL_CMD_MAIN_ATTR);
+PRIV_SHELL_CMD_FUNCTION(TestModbusTcpServer, a modbusS test sample, PRIV_SHELL_CMD_MAIN_ATTR);
 
 static void *ModbusTcpClient(void *arg)
 {
@@ -225,7 +225,7 @@ static void *ModbusTcpClient(void *arg)
     return NULL;
 }
 
-void Test_ModbusTcpClient(int argc, char *argv[])
+void TestModbusTcpClient(int argc, char *argv[])
 {
     if(argc >= 2) {
         lw_print("lw: [%s] target ip %s\n", __func__, argv[1]);
@@ -244,5 +244,5 @@ void Test_ModbusTcpClient(int argc, char *argv[])
 
     ModbusTcpClient(NULL);
 }
-PRIV_SHELL_CMD_FUNCTION(Test_ModbusTcpClient, a modbustcpC test sample, PRIV_SHELL_CMD_MAIN_ATTR);
+PRIV_SHELL_CMD_FUNCTION(TestModbusTcpClient, a modbustcpC test sample, PRIV_SHELL_CMD_MAIN_ATTR);
 
