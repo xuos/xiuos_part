@@ -99,11 +99,51 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
 
     ifeq ($(CONFIG_USER_TEST_TIMER),y)
         SRC_FILES += test_timer.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_HASH),y)
+        SRC_FILES += test_hash/test_hash.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_RADIX),y)
+        SRC_FILES += test_radix_tree/test_radix_tree.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_RBTREE),y)
+        SRC_FILES += test_rbtree/test_rbtree.c
     endif    
 
     ifeq ($(CONFIG_USER_TEST_MODBUS_TCP),y)
         SRC_DIR += test_modbus_tcp
+    endif 
+
+    ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_MQTTCLIENT),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_FTPCLIENT),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_LORA_P2P),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_LORAWAN_SINGLEGW),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_CANOPEN),y)
+        SRC_FILES += 
     endif  
+
+    ifeq ($(CONFIG_USER_TEST_USB_CAMERA),y)
+        SRC_FILES += 
+    endif     
 
     include $(KERNEL_ROOT)/compiler.mk
 endif
