@@ -57,7 +57,7 @@ int InsertNode(radix_node *root, unsigned int key, void *value)
         return -3; // Repeat insertion
     if (cur->value != NULL)
         return -4; // Already occupied
-    cur->value == value;
+    cur->value = value;
     return 0;
 }
 
@@ -159,9 +159,9 @@ void TestRadix()
 
     for (int i = 0; i < num; ++i)
     {
-        int *v = (int *)FindNode(root, keys[i]);
+        char *v = (char *)FindNode(root, keys[i]);
         if (v)
-            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, *v);
+            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, v);
         else
             printf("keys[%d] %x not found\n", i, keys[i]);
     }
@@ -172,9 +172,9 @@ void TestRadix()
 
     for (int i = 0; i < num; ++i)
     {
-        int *v = (int *)FindNode(root, keys[i]);
+        char *v = (char *)FindNode(root, keys[i]);
         if (v)
-            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, *v);
+            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, v);
         else
             printf("keys[%d] %x not found\n", i, keys[i]);
     }
@@ -185,9 +185,9 @@ void TestRadix()
 
     for (int i = 0; i < num; ++i)
     {
-        int *v = (int *)FindNode(root, keys[i]);
+        char *v = (char *)FindNode(root, keys[i]);
         if (v)
-            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, *v);
+            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, v);
         else
             printf("keys[%d] %x not found\n", i, keys[i]);
     }
@@ -198,9 +198,9 @@ void TestRadix()
 
     for (int i = 0; i < num; ++i)
     {
-        int *v = (int *)FindNode(root, keys[i]);
+        char *v = (char *)FindNode(root, keys[i]);
         if (v)
-            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, *v);
+            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, v);
         else
             printf("keys[%d] %x not found\n", i, keys[i]);
     }
