@@ -793,7 +793,7 @@ void x_free(void *pointer)
 
     if (!ByteManager.dynamic_buddy_manager.done->JudgeLegal(&ByteManager.dynamic_buddy_manager, pointer)) {
 		CriticalAreaUnLock(lock);
-		SYS_ERR("[%s] Freeing a no allocated address.\n", __func__);
+		SYS_ERR("[%s] Freeing a unallocated address.\n", __func__);
 		return;
 	}
 
