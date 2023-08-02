@@ -53,8 +53,10 @@
 #define ALLOC_BLOCK_MASK                     0xc0000000
 #define DYNAMIC_REMAINING_MASK               0x3fffffff
 
-#define SIZEOF_32B	                (32)
-#define SIZEOF_64B	                (64)
+enum SmallSizeAllocSize {
+	SIZEOF_32B = 32,
+	SIZEOF_64B = 64,
+};
 
 #define SMALL_SIZE_32B(ITEMSIZE)    ((ITEMSIZE + SIZEOF_DYNAMICALLOCNODE_MEM) * SMALL_NUMBER_32B)    /* Calculate the total size for SIZEOF_32B blocks*/
 #define SMALL_SIZE_64B(ITEMSIZE)    ((ITEMSIZE + SIZEOF_DYNAMICALLOCNODE_MEM) * SMALL_NUMBER_64B)    /* Calculate the total size for SIZEOF_64B blocks*/
@@ -143,7 +145,7 @@ struct ByteMemory
 struct StaticMemoryDone
 {
 	void (*init)(struct ByteMemory *byte_memory);
-	void* (*malloc)(struct ByteMemory *byte_memory, x_size_t size);
+	void* (*malloc)(struct ByteMemory *byte_memory, enum SmallSizeAllocSize size);
 	void (*release)(void *pointer);
 };
 
@@ -182,7 +184,7 @@ static int JudgeValidAddressRange(struct DynamicBuddyMemory *dynamic_buddy, void
 	NULL_PARAM_CHECK(pointer);
 
     /* the given address is between the physical start address and physical end address */
-    if(((struct DynamicAllocNode *)pointer > dynamic_buddy->mm_dynamic_start[0]) && ((struct DynamicAllocNode *)pointer < dynamic_buddy->mm_dynamic_end[0])) {
+    if (((struct DynamicAllocNode *)pointer > dynamic_buddy->mm_dynamic_start[0]) && ((struct DynamicAllocNode *)pointer < dynamic_buddy->mm_dynamic_end[0])) {
         return RET_TRUE;
     }
     /* invalid address */
@@ -349,11 +351,18 @@ static void* BigMemMalloc(struct DynamicBuddyMemory *dynamic_buddy, x_size_t siz
 	}
 
 	/* best-fit method */
-	 for (node = dynamic_buddy->mm_freenode_list[ndx].next;
-	 		 (ndx < MEM_LINKNRS ) && (node->size < allocsize);
-	 		 node = node->next) {
-	 			 ndx++;
-	 };
+	node = dynamic_buddy->mm_freenode_list[ndx].next;
+	while(ndx < MEM_LINKNRS && (NONE == node || node->size < allocsize)) {
+		if (NONE == node) { 
+			ndx++;
+			if (ndx == MEM_LINKNRS) { // no space to allocate
+				return NONE;
+			}
+			node = dynamic_buddy->mm_freenode_list[ndx].next;
+		} else {
+			node = node->next;
+		}
+	}
 	/* get the best-fit freeNode */
 	if (node && (node->size >= allocsize)) {
 		struct DynamicFreeNode *remainder;
@@ -371,7 +380,7 @@ static void* BigMemMalloc(struct DynamicBuddyMemory *dynamic_buddy, x_size_t siz
 
 			/* create the remainder node */
 			remainder = PTR2FREENODE(((char *)node) + allocsize);
-			remainder->size		= remaining;
+			remainder->size = remaining;
 
 			remainder->prev_adj_size = allocsize;
 			remainder->flag = 0;
@@ -385,13 +394,12 @@ static void* BigMemMalloc(struct DynamicBuddyMemory *dynamic_buddy, x_size_t siz
 		}
 
 		/* handle the case of an exact size match */
-
 		node->flag = extsram_mask;
         result = (void *)((char *)node + SIZEOF_DYNAMICALLOCNODE_MEM);
 	}
 
 	/* failure allocation */
-	if(result == NONE) {
+	if (result == NONE) {
 #ifndef MEM_EXTERN_SRAM
 	    KPrintf("%s: allocation failed, size %d.\n", __func__, size);
 #endif
@@ -429,9 +437,9 @@ static void BigMemFree( struct ByteMemory *byte_memory, void *pointer)
     byte_memory->dynamic_buddy_manager.active_memory -= node->size;
 #endif
 	/* get the next sibling freeNode */
-	next = PTR2FREENODE((char*)node+node->size);
+	next = PTR2FREENODE((char*)node + node->size);
 
-	if(((next->flag & DYNAMIC_BLOCK_MASK) == 0)) {
+	if (((next->flag & DYNAMIC_BLOCK_MASK) == 0)) {
 		struct DynamicAllocNode *andbeyond;
 
 		andbeyond = PTR2ALLOCNODE((char*)next + next->size);
@@ -446,7 +454,7 @@ static void BigMemFree( struct ByteMemory *byte_memory, void *pointer)
 	}
     /* get the prev sibling freeNode */
 	prev = (struct DynamicFreeNode*)((char*)node - node->prev_adj_size );
-	if((prev->flag & DYNAMIC_BLOCK_MASK)==0) {
+	if ((prev->flag & DYNAMIC_BLOCK_MASK) == 0) {
 
 		prev->prev->next=prev->next;
 		if(prev->next){
@@ -459,7 +467,7 @@ static void BigMemFree( struct ByteMemory *byte_memory, void *pointer)
 	node->flag = 0;
 
 	/* insert freeNode into dynamic buddy memory */
-	AddNewNodeIntoBuddy(&byte_memory->dynamic_buddy_manager,node);
+	AddNewNodeIntoBuddy(&byte_memory->dynamic_buddy_manager, node);
 }
 
 static struct DynamicBuddyMemoryDone DynamicDone = {
@@ -545,12 +553,14 @@ static void SmallMemFree(void *pointer)
 	NULL_PARAM_CHECK(pointer);
 
 	/* get the allocNode */
-	node = PTR2ALLOCNODE((char*)pointer-SIZEOF_DYNAMICALLOCNODE_MEM);
+	node = PTR2ALLOCNODE((char*)pointer - SIZEOF_DYNAMICALLOCNODE_MEM);
     static_segment = (struct segment*)(x_size_t)node->size;
 
     /* update the statistic information of static_segment */
 	node->size = (x_size_t)static_segment->freelist;
     static_segment->freelist = (uint8 *)node;
+	node->flag = 0; // it's unnecessary, actually
+
     static_segment->block_free_count++;
 
     /* parameter detection */
@@ -565,7 +575,7 @@ static void SmallMemFree(void *pointer)
  *
  * @return pointer address on success; NULL on failure
  */
-static void *SmallMemMalloc(struct ByteMemory *byte_memory, x_size_t size)
+static void *SmallMemMalloc(struct ByteMemory *byte_memory, enum SmallSizeAllocSize size)
 {
 	uint8 i = 0;
 	void *result = NONE;
@@ -580,7 +590,7 @@ static void *SmallMemMalloc(struct ByteMemory *byte_memory, x_size_t size)
 	   static_segment = &byte_memory->static_manager[1];
 
 	/* current static segment has free static memory block */
-	if(static_segment->block_free_count>0) {
+	if(static_segment->block_free_count > 0) {
 	    /* get the head static memory block */
         result = static_segment->freelist;
         node = PTR2ALLOCNODE(static_segment->freelist);
@@ -592,27 +602,14 @@ static void *SmallMemMalloc(struct ByteMemory *byte_memory, x_size_t size)
 		node->size = (long)static_segment;
 	}
 
-	if(result) {
+	if (NONE != result) {
 	    /* return static memory block */
 		return (char*)result + SIZEOF_DYNAMICALLOCNODE_MEM;
 	}
 
 	/* the static memory block is exhausted, now turn to dynamic buddy memory for allocation. */
-    result = byte_memory->dynamic_buddy_manager.done->malloc(&byte_memory->dynamic_buddy_manager, size, DYNAMIC_BLOCK_NO_EXTMEM_MASK);
-#ifdef MEM_EXTERN_SRAM
-	if(NONE == result) {
-		for(i = 0; i < EXTSRAM_MAX_NUM; i++) {
-			if(NONE != ExtByteManager[i].done) {
-				result = ExtByteManager[i].dynamic_buddy_manager.done->malloc(&ExtByteManager[i].dynamic_buddy_manager, size, DYNAMIC_BLOCK_EXTMEMn_MASK(i + 1));
-				if (result){
-					CHECK(ExtByteManager[i].dynamic_buddy_manager.done->JudgeLegal(&ExtByteManager[i].dynamic_buddy_manager, ret - SIZEOF_DYNAMICALLOCNODE_MEM));
-					break;
-				}	
-			}
-		}
-	}
-#endif
-	return result;
+	// fall to dynamic allocation
+	return NONE;
 }
 
 static struct StaticMemoryDone StaticDone = {
@@ -634,41 +631,46 @@ void *x_malloc(x_size_t size)
 	void *ret = NONE;
 	register x_base lock = 0;
 
-	 /* parameter detection */
+	/* hold lock before allocation */
+	lock = CriticalAreaLock();
 
+	/* alignment */
+	size = ALIGN_MEN_UP(size, MEM_ALIGN_SIZE);
+
+	/* parameter detection */
 #ifdef MEM_EXTERN_SRAM
 		/* parameter detection */
 	if(size == 0 ){
-		 return NONE;
+		CriticalAreaUnLock(lock);
+		return NONE;
 	}
 	if((size >  ByteManager.dynamic_buddy_manager.dynamic_buddy_end - ByteManager.dynamic_buddy_manager.dynamic_buddy_start - ByteManager.dynamic_buddy_manager.active_memory)){
-		lock = CriticalAreaLock();
 		/* alignment */
 		size = ALIGN_MEN_UP(size, MEM_ALIGN_SIZE);
 		goto try_extmem;
 	}
-	   
 #else
-		/* parameter detection */
-	if((size == 0) || (size >  ByteManager.dynamic_buddy_manager.dynamic_buddy_end - ByteManager.dynamic_buddy_manager.dynamic_buddy_start - ByteManager.dynamic_buddy_manager.active_memory))
+	/* parameter detection */
+	if((size == 0) || (size >  ByteManager.dynamic_buddy_manager.dynamic_buddy_end - ByteManager.dynamic_buddy_manager.dynamic_buddy_start - ByteManager.dynamic_buddy_manager.active_memory)) {
+		CriticalAreaUnLock(lock);
 	    return NONE;
+	}
 #endif
-	/* hold lock before allocation */
-	lock = CriticalAreaLock();
-    /* alignment */
-	size = ALIGN_MEN_UP(size, MEM_ALIGN_SIZE);
+
 	/* determine allocation operation from static segments or dynamic buddy memory */
 #ifdef KERNEL_SMALL_MEM_ALLOC
 	if(size <= SIZEOF_32B) {
-		ret = ByteManager.static_manager[0].done->malloc(&ByteManager,SIZEOF_32B);
-	} else if(size <= SIZEOF_64B) {
-		ret = ByteManager.static_manager[1].done->malloc(&ByteManager,SIZEOF_64B);
-	} else
+		ret = ByteManager.static_manager[0].done->malloc(&ByteManager, SIZEOF_32B);
+	} else if (size <= SIZEOF_64B) {
+		ret = ByteManager.static_manager[1].done->malloc(&ByteManager, SIZEOF_64B);
+	} 
 #endif
-	{
+
+	if (ret == NONE) {
         ret = ByteManager.dynamic_buddy_manager.done->malloc(&ByteManager.dynamic_buddy_manager, size, DYNAMIC_BLOCK_NO_EXTMEM_MASK);
-		if(ret != NONE)
+		if (ret != NONE) {
         	CHECK(ByteManager.dynamic_buddy_manager.done->JudgeLegal(&ByteManager.dynamic_buddy_manager, ret - SIZEOF_DYNAMICALLOCNODE_MEM));
+		}
 
 #ifdef MEM_EXTERN_SRAM
 try_extmem:
@@ -686,6 +688,7 @@ try_extmem:
 		}
 #endif
 	}
+
 	/* release lock */
 	CriticalAreaUnLock(lock);
   	return ret;
@@ -781,14 +784,20 @@ void x_free(void *pointer)
 	struct DynamicAllocNode *node = NONE;
 
     /* parameter detection */
-	if (pointer == NONE)
-		return ;
-
-    CHECK(ByteManager.dynamic_buddy_manager.done->JudgeLegal(&ByteManager.dynamic_buddy_manager,pointer));
+	if (pointer == NONE) {
+		return;
+	}
 
     /* hold lock before release */
 	lock = CriticalAreaLock();
-	node = PTR2ALLOCNODE((char*)pointer-SIZEOF_DYNAMICALLOCNODE_MEM);
+
+    if (!ByteManager.dynamic_buddy_manager.done->JudgeLegal(&ByteManager.dynamic_buddy_manager, pointer)) {
+		CriticalAreaUnLock(lock);
+		SYS_ERR("[%s] Freeing a no allocated address.\n", __func__);
+		return;
+	}
+
+	node = PTR2ALLOCNODE((char*)pointer -  SIZEOF_DYNAMICALLOCNODE_MEM);
     CHECK(ByteManager.done->JudgeAllocated(node));
 	
     /* judge release the memory block ro static_segment or dynamic buddy memory */
@@ -799,19 +808,20 @@ void x_free(void *pointer)
 #endif
 	{
 #ifdef MEM_EXTERN_SRAM
-	/* judge the pointer is not malloced from extern memory*/
-	if(0 == (node->flag & 0xFF0000)) {
-		ByteManager.dynamic_buddy_manager.done->release(&ByteManager,pointer);
-	}
+		/* judge the pointer is not malloced from extern memory*/
+		if(0 == (node->flag & 0xFF0000)) {
+			ByteManager.dynamic_buddy_manager.done->release(&ByteManager,pointer);
+		}
 
-	/* judge the pointer is malloced from extern memory*/
-	if(0 != (node->flag & 0xFF0000)) {
-		ExtByteManager[((node->flag & 0xFF0000) >> 16) - 1].dynamic_buddy_manager.done->release(&ExtByteManager[((node->flag & 0xFF0000) >> 16) - 1],pointer);
-	}
+		/* judge the pointer is malloced from extern memory*/
+		if(0 != (node->flag & 0xFF0000)) {
+			ExtByteManager[((node->flag & 0xFF0000) >> 16) - 1].dynamic_buddy_manager.done->release(&ExtByteManager[((node->flag & 0xFF0000) >> 16) - 1],pointer);
+		}
 #else
-	ByteManager.dynamic_buddy_manager.done->release(&ByteManager,pointer);
+		ByteManager.dynamic_buddy_manager.done->release(&ByteManager, pointer);
 #endif		
 	}
+
 	/* release the lock */
 	CriticalAreaUnLock(lock);
 }
@@ -888,7 +898,8 @@ void InitBoardMemory(void *start_phy_address, void *end_phy_address)
     /* parameter detection */
 	if (ByteManager.dynamic_buddy_manager.dynamic_buddy_start >= ByteManager.dynamic_buddy_manager.dynamic_buddy_end) {
 		//KPrintf("InitBoardMemory, wrong address[0x%x - 0x%x]\n", (x_ubase)start_phy_address, (x_ubase)end_phy_address);
-		return;
+        SYS_KDEBUG_LOG(KDBG_MEM, ("InitBoardMemory, wrong address[0x%x - 0x%x]\n", (x_ubase)start_phy_address, (x_ubase)end_phy_address));
+        return;
 	}
 
     mheap->mm_total_size = 0;
