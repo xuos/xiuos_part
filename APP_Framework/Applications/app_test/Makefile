@@ -103,7 +103,11 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
 
     ifeq ($(CONFIG_USER_TEST_RBTREE),y)
         SRC_FILES += test_rbtree/test_rbtree.c
-    endif    
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_RADIX_TREE),y)
+        SRC_FILES += test_radix_tree/test_radix_tree.c
+    endif
 
     include $(KERNEL_ROOT)/compiler.mk
 endif

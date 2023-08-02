@@ -244,5 +244,9 @@ menu "test app"
                 bool "Config test red black tree"
                 default n
 
+            menuconfig USER_TEST_RADIX_TREE
+                bool "Config test radix tree"
+                default n
+
         endif
 endmenu
