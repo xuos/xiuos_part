@@ -11,8 +11,6 @@
 extern "C" {
 #endif
 
-#define NETDEV_DEBUG true
-
 #define NETDEV_DEBUG_PRINT_IP_INFO(ip, netmask, gw) \
         ("[%s %d]ip: %u.%u.%u.%u, netmask: %u.%u.%u.%u, gw: %u.%u.%u.%u\n", \
         __func__, __LINE__, \

@@ -45,7 +45,7 @@ ssize_t mq_receive(mqd_t mqdes, char* msg_ptr, size_t msg_len, unsigned* msg_pri
     ssize_t ret;
 
     *msg_prio = 0;
-    ret = UserMsgQueueRecv(mqdes, (void*)msg_ptr, msg_len, 100000);
+    ret = UserMsgQueueRecv(mqdes, (void*)msg_ptr, msg_len, WAITING_FOREVER);
 
     return ret;
 }

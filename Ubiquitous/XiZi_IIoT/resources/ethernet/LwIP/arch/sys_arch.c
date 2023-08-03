@@ -347,6 +347,8 @@ void lwip_config_input(struct netif* net)
 
 void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
 {
+    sys_sem_new(get_eth_recv_sem(), 0);
+
     ip4_addr_t net_ipaddr, net_netmask, net_gw;
     char* eth_cfg;
 

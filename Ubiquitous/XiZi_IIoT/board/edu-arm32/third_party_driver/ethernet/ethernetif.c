@@ -191,44 +191,6 @@ void Time_Update_LwIP(void)
 }
 
 /**
- * @brief  Should be called at the beginning of the program to set up the network interface.
- * @param  netif                        The network interface structure for this ethernetif.
- * @retval err_t:
- *           - LL_OK: The IF is initialized
- *           - LL_ERR: The IF is uninitialized
- */
-err_t ethernetif_init(struct netif* netif)
-{
-#if LWIP_NETIF_HOSTNAME
-    /* Initialize interface hostname */
-    netif->hostname = "lwip";
-#endif /* LWIP_NETIF_HOSTNAME */
-    netif->name[0] = IFNAME0;
-    netif->name[1] = IFNAME1;
-
-#ifndef ETHERNET_LOOPBACK_TEST
-    /* We directly use etharp_output() here to save a function call.
-     * You can instead declare your own function an call etharp_output()
-     * from it if you have to do some checks before sending (e.g. if link
-     * is available...) */
-    netif->output = etharp_output;
-    netif->linkoutput = low_level_output;
-#endif
-
-    /* initialize the hardware */
-    if (LL_OK != low_level_init(netif)) {
-        return LL_ERR;
-    }
-
-    if (EOK != lwip_netdev_add(netif)) {
-        SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] LWIP add netdev failed.\n", __func__));
-    } else {
-        printf("[%s] Add Netdev successful\n", __func__);
-    }
-    return LL_OK;
-}
-
-/**
  * @brief  This function should be called when a packet is ready to be read from the interface.
  * @param  netif                        The network interface structure for this ethernetif.
  * @retval None
@@ -265,6 +227,45 @@ void ethernetif_input(void* netif_arg)
 #endif
         }
     }
+}
+
+/**
+ * @brief  Should be called at the beginning of the program to set up the network interface.
+ * @param  netif                        The network interface structure for this ethernetif.
+ * @retval err_t:
+ *           - LL_OK: The IF is initialized
+ *           - LL_ERR: The IF is uninitialized
+ */
+err_t ethernetif_init(struct netif* netif)
+{
+#if LWIP_NETIF_HOSTNAME
+    /* Initialize interface hostname */
+    netif->hostname = "lwip";
+#endif /* LWIP_NETIF_HOSTNAME */
+    netif->name[0] = IFNAME0;
+    netif->name[1] = IFNAME1;
+
+#ifndef ETHERNET_LOOPBACK_TEST
+    /* We directly use etharp_output() here to save a function call.
+     * You can instead declare your own function an call etharp_output()
+     * from it if you have to do some checks before sending (e.g. if link
+     * is available...) */
+    netif->output = etharp_output;
+    netif->linkoutput = low_level_output;
+    // netif->linkoutput = ethernetif_linkoutput;
+#endif
+
+    /* initialize the hardware */
+    if (LL_OK != low_level_init(netif)) {
+        return LL_ERR;
+    }
+
+    if (EOK != lwip_netdev_add(netif)) {
+        SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] LWIP add netdev failed.\n", __func__));
+    } else {
+        printf("[%s] Add Netdev successful\n", __func__);
+    }
+    return LL_OK;
 }
 
 /**

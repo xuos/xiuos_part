@@ -43,6 +43,9 @@ extern "C" {
 #define KDBG_HOOK 0
 
 #define MSGQUEUE_DEBUG 0
+#define FILESYS_DEBUG 0
+#define NETDEV_DEBUG 0
+#define WEBNET_DEBUG 0
 
 #define SYS_KDEBUG_LOG(section, information) \
     do {                                     \
