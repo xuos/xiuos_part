@@ -30,7 +30,7 @@
 DoubleLinklistType xiaoshan_delay_head = {&xiaoshan_delay_head, &xiaoshan_delay_head};
 
 /**
- * This function will delay a task with sone ticks.
+ * This function will delay a task with some ticks.
  *
  * @param task the task needed to be delayed
  * @param ticks delay timeout
