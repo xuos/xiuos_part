@@ -35,6 +35,11 @@ SRC_DIR := shared
 SRC_DIR += cortex-m7
 endif
 
+ifeq ($(CONFIG_BOARD_CORTEX_V2M_EVB),y)
+SRC_DIR := shared
+SRC_DIR += cortex-m7
+endif
+
 ifeq ($(CONFIG_BOARD_IMXRT1176_SBC_EVB),y)
 SRC_DIR := shared
 SRC_DIR += cortex-m7
