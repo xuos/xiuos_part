@@ -8,6 +8,9 @@ ifeq ($(CONFIG_APP_SELECT_NEWLIB), y)
 	APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/app_newlib/include #
 endif
 	
+ifeq ($(CONFIG_APP_USING_WEBNET),y)
+	APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/webnet/WebNet_XiUOS/inc #
+endif
 
 ifeq ($(CONFIG_ADD_XIZI_FEATURES), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi \
@@ -35,6 +38,7 @@ endif
 ifeq ($(CONFIG_CRYPTO), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/security/crypto/include #
 endif
+
 
 # COMPILE_APP:
 # 	@$(eval CPPPATHS=$(APPPATHS))

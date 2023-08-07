@@ -91,7 +91,7 @@ InterruptVectors:
                 .long       IsrEntry
                 .long       IsrEntry
                 .long       IsrEntry
-                .long       IsrEntry
+                .long       IRQ030_Handler
                 .long       IsrEntry
                 .long       IsrEntry
                 .long       IsrEntry
