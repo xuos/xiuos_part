@@ -1,3 +1,33 @@
+/*
+ * Copyright (c) 2006-2022, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-03-18     ChenYong     First version
+ */
+
+/**
+* @file netdev_lowlevel.c
+* @brief register low-level net dev function
+* @version 3.0 
+* @author AIIT XUOS Lab
+* @date 2023-08-07
+*/
+
+/*************************************************
+File name: netdev_lowlevel.c
+Description: register low-level net dev function
+Others: take RT-Thread v4.0.2/components/driver/serial/serial.c for references
+                https://github.com/RT-Thread/rt-thread/tree/v4.0.2
+History: 
+1. Date: 2023-08-07
+Author: AIIT XUOS Lab
+Modification: 
+1. support low-level net dev set-ip, set-netmask, set-gw, set-status, set-link-status, set-dns-server and set-dhcp-status
+*************************************************/
+
 #include <netdev.h>
 #include <string.h>
 #include <xs_kdbg.h>

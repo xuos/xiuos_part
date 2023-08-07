@@ -32,6 +32,9 @@ extern "C" {
 #define sourceClock CLOCK_GetFreq(kCLOCK_CoreSysClk)
 #endif
 
+int lwip_netdev_add(struct netif* lwip_netif);
+void lwip_netdev_del(struct netif* lwip_netif);
+
 #ifdef __cplusplus
 }
 #endif

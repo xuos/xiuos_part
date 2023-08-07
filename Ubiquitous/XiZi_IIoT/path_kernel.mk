@@ -88,6 +88,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
@@ -336,6 +338,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif
 endif
 
@@ -367,6 +371,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif
 endif
 
