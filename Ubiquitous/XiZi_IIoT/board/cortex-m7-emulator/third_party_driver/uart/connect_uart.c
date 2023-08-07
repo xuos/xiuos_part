@@ -753,7 +753,7 @@ static void USARTTX_IRQHandler (USART_RESOURCES *usart) {
 
 }
 
-#if (defined (RTE_USART0) && (RTE_USART0 == 1))
+#ifdef BSP_USING_LPUART1
 // USART0 Driver Wrapper functions
        void                    UART0RX_Handler        (void);
        void                    UART0TX_Handler        (void);
@@ -793,7 +793,7 @@ extern ARM_DRIVER_USART Driver_USART0;
 };
 #endif
 
-#if (defined (RTE_USART1) && (RTE_USART1 == 1))
+#ifdef BSP_USING_LPUART2
 // USART1 Driver Wrapper functions
        void                    UART1RX_Handler        (void);
        void                    UART1TX_Handler        (void);
@@ -833,7 +833,7 @@ extern ARM_DRIVER_USART Driver_USART1;
 };
 #endif
 
-#if (defined (RTE_USART2) && (RTE_USART2 == 1))
+#ifdef BSP_USING_LPUART3
 // USART2 Driver Wrapper functions
        void                    UART2RX_Handler        (void);
        void                    UART2TX_Handler        (void);
@@ -873,7 +873,7 @@ extern ARM_DRIVER_USART Driver_USART2;
 };
 #endif
 
-#if (defined (RTE_USART3) && (RTE_USART3 == 1))
+#ifdef BSP_USING_LPUART4
 // USART3 Driver Wrapper functions
        void                    UART3RX_Handler        (void);
        void                    UART3TX_Handler        (void);
@@ -914,15 +914,20 @@ extern ARM_DRIVER_USART Driver_USART3;
 #endif
 
 
-extern int stdout_init (void);
-extern int stdout_putchar (int ch);
-extern int stdout_receivechar();
+// extern int stdout_init (void);
+// extern int stdout_putchar (int ch);
+// extern int stdout_receivechar();
 // extern void UART0TX_Handler();
 // extern void UART0RX_Handler();
 
 
+#define _USART_Driver_(n)  Driver_USART##n
+#define  USART_Driver_(n) _USART_Driver_(n)
+ 
+extern ARM_DRIVER_USART  USART_Driver_(0);
+#define ptrUSART1       (&USART_Driver_(0))
 
-
+#define USART_BAUDRATE          115200
 
 
 
@@ -972,20 +977,7 @@ static void UartIsr(struct SerialBus *serial, struct SerialDriver *serial_drv, s
     
 }
 
-// static uint32 GetUartSrcFreq(void)
-// {
-//     uint32 freq;
 
-//     /* To make it simple, we assume default PLL and divider settings, and the only variable
-//        from application is use PLL3 source or OSC source */
-//     if (CLOCK_GetMux(kCLOCK_UartMux) == 0) /* PLL3 div6 80M */ {
-//         freq = (CLOCK_GetPllFreq(kCLOCK_PllUsb1) / 6U) / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
-//     } else {
-//         freq = CLOCK_GetOscFreq() / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
-//     }
-
-//     return freq;
-// }
 
 static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInfo *configure_info)
 {
@@ -1005,7 +997,28 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
 	// config serial receive sem timeout
 	dev_param->serial_timeout = serial_cfg->data_cfg.serial_timeout;
 
-    stdout_init();
+    int32_t status;
+ 
+    status = ptrUSART1->Initialize(NULL);
+    if (status != ARM_DRIVER_OK) return (-1);
+    
+    status = ptrUSART1->PowerControl(ARM_POWER_FULL);
+    if (status != ARM_DRIVER_OK) return (-1);
+    
+    status = ptrUSART1->Control(ARM_USART_MODE_ASYNCHRONOUS |
+                                ARM_USART_DATA_BITS_8       |
+                                ARM_USART_PARITY_NONE       |
+                                ARM_USART_STOP_BITS_1       |
+                                ARM_USART_FLOW_CONTROL_NONE,
+                                USART_BAUDRATE);
+    if (status != ARM_DRIVER_OK) return (-1);
+
+    status = ptrUSART1->Control(ARM_USART_CONTROL_TX, 1);
+    if (status != ARM_DRIVER_OK) return (-1);
+
+    status = ptrUSART1->Control(ARM_USART_CONTROL_RX, 1);
+    if (status != ARM_DRIVER_OK) return (-1);
+    // stdout_init();
     // stdout_putchar(36);
 
     if (configure_info->private_data) {
@@ -1047,14 +1060,20 @@ static uint32 SerialConfigure(struct SerialDriver *serial_drv, int serial_operat
     return EOK;
 }
 
+
 static int SerialPutChar(struct SerialHardwareDevice *serial_dev, char c)
 {
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
-    // LPUART_Type *uart_base = (LPUART_Type *)serial_cfg->hw_cfg.private_data;
+    
+    uint8_t buf[1];
+ 
+    buf[0] = c;
+    if (ptrUSART1->Send(buf, 1) != ARM_DRIVER_OK) {
+        return (-1);
+    }
 
-    stdout_putchar(c);
-    // LPUART_WriteByte(uart_base, c);
-    // while (!(LPUART_GetStatusFlags(uart_base) & kLPUART_TxDataRegEmptyFlag));
+    UART0TX_Handler();
+
 
     return 1;
 }
@@ -1062,13 +1081,16 @@ static int SerialPutChar(struct SerialHardwareDevice *serial_dev, char c)
 static int SerialGetChar(struct SerialHardwareDevice *serial_dev)
 {
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
-    // LPUART_Type *uart_base = (LPUART_Type *)serial_cfg->hw_cfg.private_data;
+   
+    int c=-1;
+    int buf[1];
+    buf[0]=0;
+    do{
+        buf[0]=ptrUSART1->Receive(buf, 1);
+    }while (buf[0]==0);
+  
+    c=buf[0];
 
-    int c = -1;
-    c=stdout_receivechar();
-    // if (LPUART_GetStatusFlags(uart_base) & kLPUART_RxDataRegFullFlag) {
-    //     c = LPUART_ReadByte(uart_base);
-    // }
 
     return c;
 }
