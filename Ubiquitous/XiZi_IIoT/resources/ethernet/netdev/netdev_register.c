@@ -1,3 +1,32 @@
+/*
+ * Copyright (c) 2006-2022, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2019-03-18     ChenYong     First version
+ */
+
+/**
+* @file netdev_register.c
+* @brief register net dev function for net driver
+* @version 3.0 
+* @author AIIT XUOS Lab
+* @date 2023-08-07
+*/
+
+/*************************************************
+File name: netdev_register.c
+Description: register net dev function for net driver
+Others: take RT-Thread v4.0.2/components/driver/serial/serial.c for references
+                https://github.com/RT-Thread/rt-thread/tree/v4.0.2
+History: 
+1. Date: 2023-08-07
+Author: AIIT XUOS Lab
+Modification: 
+1. support net dev register, unregister function
+*************************************************/
 
 #include <assert.h>
 #include <def.h>

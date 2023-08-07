@@ -61,6 +61,9 @@ int32_t low_level_init(struct netif* netif);
 err_t low_level_output(struct netif* netif, struct pbuf* p);
 struct pbuf* low_level_input(struct netif* netif);
 
+int lwip_netdev_add(struct netif* lwip_netif);
+void lwip_netdev_del(struct netif* lwip_netif);
+
 int HwEthInit(void);
 
 #ifdef __cplusplus

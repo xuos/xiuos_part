@@ -5,6 +5,7 @@
 #include <netdev_ipaddr.h>
 #include <stdbool.h>
 #include <xs_klist.h>
+#include <xs_kdbg.h>
 #include <xsconfig.h>
 
 #ifdef __cplusplus

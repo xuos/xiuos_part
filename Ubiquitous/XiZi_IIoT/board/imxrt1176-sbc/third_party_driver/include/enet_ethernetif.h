@@ -164,6 +164,9 @@ void ethernetif_input( void *netif_arg);
 int ETH_BSP_Config(void);
 void *ethernetif_config_enet_set(uint8_t enet_port);
 
+int lwip_netdev_add(struct netif* lwip_netif);
+void lwip_netdev_del(struct netif* lwip_netif);
+
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */

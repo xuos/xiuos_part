@@ -30,8 +30,8 @@
 
 static struct udp_pcb *udpecho_raw_pcb;
 
-char udp_demo_ip[] = {192, 168, 131, 1};
-u16_t udp_demo_port = LWIP_TARGET_PORT;
+char udp_server_ip[] = {192, 168, 130, 2};
+u16_t udp_server_port = LWIP_TARGET_PORT;
 int32 udp_send_num = 0;
 int8 udp_send_task_on = 0;
 uint32 udp_interval = 50;
@@ -45,38 +45,35 @@ static void LwipUDPSendTask(void *arg)
 {
     int cnt = LWIP_DEMO_TIMES;
 
-    lw_print("udp_send_demo start.\n");
+    KPrintf("udp_send_demo start.\n");
 
     int socket_fd = -1;
     socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (socket_fd < 0)
-    {
-        lw_error("Socket error\n");
+    if (socket_fd < 0) {
+        KPrintf("Socket error\n");
         return;
     }
 
     struct sockaddr_in udp_sock;
     udp_sock.sin_family = AF_INET;
-    udp_sock.sin_port = htons(udp_demo_port);
-    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3]));
+    udp_sock.sin_port = htons(udp_server_port);
+    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_server_ip[0], udp_server_ip[1], udp_server_ip[2], udp_server_ip[3]));
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
-    if (connect(socket_fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)))
-    {
-        lw_error("Unable to connect\n");
+    if (connect(socket_fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr))) {
+        KPrintf("Unable to connect\n");
         closesocket(socket_fd);
         return;
     }
 
-    lw_notice("UDP connect success, start to send.\n");
-    lw_notice("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
+    KPrintf("UDP connect success, start to send.\n");
+    KPrintf("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
     udp_send_task_on = 1;
 
-    while(udp_send_num > 0 || udp_send_num == -1)
-    {
+    while(udp_send_num > 0 || udp_send_num == -1) {
         sendto(socket_fd, udp_demo_msg, strlen(udp_demo_msg), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
-        lw_notice("Send UDP msg: %s \n", udp_demo_msg);
-        DelayKTask(udp_interval);
+        KPrintf("Send UDP msg: %s \n", udp_demo_msg);
+        MdelayKTask(udp_interval);
         udp_send_num--;
     }
     closesocket(socket_fd);
@@ -86,11 +83,11 @@ static void LwipUDPSendTask(void *arg)
 
 void *LwipUdpSendTest(int argc, char *argv[])
 {
-    if(udp_send_task_on){
+    if(udp_send_task_on) {
         udp_send_num = 0;
         printf("waitting send task exit...\n");
         while(udp_send_task_on){
-            DelayKTask(1000);
+            MdelayKTask(1000);
         }
         udp_send_num = 1;
     }
@@ -98,89 +95,105 @@ void *LwipUdpSendTest(int argc, char *argv[])
     uint8_t enet_port = 0; ///< test enet port 0
     memset(udp_demo_msg, 0, sizeof(udp_demo_msg));
 
-    if(argc == 1)
-    {
-        lw_print("lw: [%s] gw %d.%d.%d.%d:%d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3], udp_demo_port);
+    if(argc == 1) {
+        KPrintf("lw: [%s] gw %d.%d.%d.%d:%d\n", __func__, udp_server_ip[0], udp_server_ip[1], udp_server_ip[2], udp_server_ip[3], udp_server_port);
         strncpy(udp_demo_msg, hello_str, strlen(hello_str));
-    }
-    else
-    {
+        udp_send_num = 10;
+        udp_interval = 100;
+    } else {
         strncpy(udp_demo_msg, argv[1], strlen(argv[1]));
         strncat(udp_demo_msg, "\r\n", 2);
-        if(argc == 3)
-        {
-            sscanf(argv[2], "%d.%d.%d.%d:%d", &udp_demo_ip[0], &udp_demo_ip[1], &udp_demo_ip[2], &udp_demo_ip[3], &udp_demo_port);
+        if(argc == 3) {
+            sscanf(argv[2], "%d.%d.%d.%d:%d", &udp_server_ip[0], &udp_server_ip[1], &udp_server_ip[2], &udp_server_ip[3], &udp_server_port);
         }
-        if(argc > 3)
-        {
+        if(argc > 3) {
             sscanf(argv[3], "%d", &udp_send_num);
             sscanf(argv[4], "%d", &udp_interval);
         }
     }
 
-    lw_print("lw: [%s] gw %d.%d.%d.%d:%d send time %d udp_interval %d\n", __func__, udp_demo_ip[0], udp_demo_ip[1], udp_demo_ip[2], udp_demo_ip[3], udp_demo_port, udp_send_num, udp_interval);
+    KPrintf("lw: [%s] gw %d.%d.%d.%d:%d send time %d udp_interval %d\n", __func__, udp_server_ip[0], udp_server_ip[1], udp_server_ip[2], udp_server_ip[3], udp_server_port, udp_send_num, udp_interval);
 
-    lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, udp_demo_ip);
+    //init lwip and net dirver
+    lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     sys_thread_new("udp send", LwipUDPSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
      UDPSend, LwipUdpSendTest, UDPSend msg [ip:port [num [interval]]]);
 
-static void LwipUdpRecvTask(void *arg, struct udp_pcb *upcb, struct pbuf *p,
-                 const ip_addr_t *addr, u16_t port)
-{
-    int udp_len;
-    err_t err;
-    struct pbuf* udp_buf;
-
-    LWIP_UNUSED_ARG(arg);
-
-    if (p == NULL)
-    {
-        return;
-    }
-
-    udp_len = p->tot_len;
-    lw_notice("Receive data :%dB\r\n", udp_len);
-
-    if(udp_len <= 80)
-    {
-        lw_notice("%.*s\r\n", udp_len, (char *)(p->payload));
-    }
-
-    udp_buf = pbuf_alloc(PBUF_TRANSPORT, PBUF_SIZE, PBUF_RAM);
-
-    memset(udp_buf->payload, 0, PBUF_SIZE);
-
-    err = pbuf_take(udp_buf, "Client receive success!\r\n", 27);
-
-    /* send received packet back to sender */
-    udp_sendto(upcb, udp_buf, addr, port);
-
-    /* free the pbuf */
-    pbuf_free(p);
-    pbuf_free(udp_buf);
-}
-
 void LwipUdpRecvTest(void)
 {
-    err_t err;
     uint8_t enet_port = 0; ///< test enet port 0
 
+    //init lwip and net dirver
     lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 
-    udpecho_raw_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
-    if (udpecho_raw_pcb == NULL)
-    {
-        return;
+    uint8_t *recv_data;
+    socklen_t sin_size;
+    int sock = -1, connected, bytes_received, i;
+    struct sockaddr_in server_addr, client_addr;
+    fd_set readset;
+    struct timeval timeout;
+
+    sock = socket(PF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        KPrintf("[%s:%d] Socket error!\n", __FILE__, __LINE__);
+        goto __exit;
     }
 
-    err = udp_bind(udpecho_raw_pcb, IP_ANY_TYPE, LWIP_LOCAL_PORT);
-    if (err == ERR_OK)
-    {
-        udp_recv(udpecho_raw_pcb, LwipUdpRecvTask, NULL);
+    recv_data = (uint8_t *)malloc(128);
+    if (recv_data == NULL) {
+        KPrintf("No memory!\n");
+        goto __exit;
     }
+
+    //configure udp server param
+    server_addr.sin_family = PF_INET;
+    server_addr.sin_port = htons(udp_server_port);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    memset(&(server_addr.sin_zero), 0x0, sizeof(server_addr.sin_zero));
+
+    if (bind(sock, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1) {
+        KPrintf("Unable to bind!\n");
+        goto __exit;
+    }
+
+    timeout.tv_sec = 30;
+    timeout.tv_usec = 0;
+
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1) {
+        KPrintf("setsockopt failed!");
+        goto __exit;
+    }
+
+    while (1) {
+        bytes_received = recvfrom(sock, recv_data, 128, 0, (struct sockaddr *)&client_addr, (socklen_t*)&sin_size);
+        if (bytes_received == 0) {
+            KPrintf("client disconnected (%s, %d)\n",
+                inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+            break;
+        } else if (bytes_received < 0) {
+            KPrintf("recv error, client: (%s, %d)\n",
+                inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+            break;
+        } else {
+            KPrintf("new client connected from (%s, %d)\n",
+                inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+            KPrintf("recv data length %d Bytes\n", bytes_received);
+            for (i = 0; i < bytes_received; i ++) {
+                KPrintf("data 0x%x\n", recv_data[i]);
+            }
+            if (i = bytes_received) {
+                KPrintf("\r\n");
+                memset(recv_data, 0, sizeof(recv_data));
+            }
+        }
+    }
+
+__exit:
+    if (sock >= 0) closesocket(sock);
+    if (recv_data) free(recv_data);
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
