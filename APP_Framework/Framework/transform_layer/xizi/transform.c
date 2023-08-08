@@ -164,7 +164,7 @@ int PrivTimerModify(timer_t timerid, int flags, const struct itimerspec *restric
 /*********************fs**************************/
 #ifdef FS_VFS
 /************************Driver Posix Transform***********************/
-int PrivOpen(const char *path, int flags)
+int PrivOpen(const char *path, int flags, ...)
 {
     return open(path, flags);
 }

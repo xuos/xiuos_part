@@ -36,5 +36,9 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
         SRC_DIR += control_app
     endif
 
+    ifeq ($(CONFIG_APP_USING_WEBNET),y)
+        SRC_DIR += webnet
+    endif
+
     include $(KERNEL_ROOT)/compiler.mk
 endif

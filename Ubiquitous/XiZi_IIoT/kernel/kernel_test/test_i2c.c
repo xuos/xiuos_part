@@ -35,6 +35,7 @@
 #define ADDR                                  0x44                                      /* slave address */
 
 static struct Bus *i2c_bus = NONE;     /* I2C bus handle */
+static char addr = 0x44;
 
 typedef struct Hs300xData
 {
@@ -49,6 +50,9 @@ Hs300xDataType g_hs300x_data;
 static x_err_t WriteReg(struct HardwareDev *dev)
 {
     struct BusBlockWriteParam write_param;
+
+    write_param.buffer = &addr;
+    write_param.size = 1;
 
     /* use I2C device API transfer data */
     if(1 == BusDevWriteData(dev, &write_param)) {

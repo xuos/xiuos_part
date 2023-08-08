@@ -15,7 +15,6 @@
 // #include <user_api.h>
 #include <transform.h>
 
-
 extern int FrameworkInit();
 extern void ApplicationOtaTaskInit(void);
 
