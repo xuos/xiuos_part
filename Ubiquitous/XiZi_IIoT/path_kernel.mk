@@ -584,6 +584,13 @@ ifeq ($(CONFIG_TOOL_USING_MQTT), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/../../APP_Framework/lib/mqtt
 endif
 
+ifeq ($(CONFIG_PKG_USING_JERRYSCRIPT), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/JerryScript
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/JerryScript/jerryscript/jerry-core/include
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/JerryScript/jerryscript/jerry-ext/include
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/JerryScript/jerryscript/jerry-math/include
+endif
+
 ifeq ($(CONFIG_FS_LWEXT4),y)
 KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/blockdev/xiuos #
 KERNELPATHS += -I$(KERNEL_ROOT)/fs/lwext4/lwext4_submodule/include #

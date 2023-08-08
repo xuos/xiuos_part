@@ -22,4 +22,8 @@ ifeq ($(CONFIG_TOOL_USING_MQTT),y)
   SRC_DIR += mqtt
 endif
 
+ifeq ($(CONFIG_PKG_USING_JERRYSCRIPT),y)
+    SRC_DIR += JerryScript
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

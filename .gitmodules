@@ -32,3 +32,6 @@
 [submodule "APP_Framework/lib/lorawan/lorawan_gateway_single_channel"]
 	path = APP_Framework/lib/lorawan/lorawan_gateway_single_channel
 	url = https://gitlink.org.cn/IACU/lorawan_gateway_single_channel.git
+[submodule "APP_Framework/lib/JerryScript/jerryscript"]
+	path = APP_Framework/lib/JerryScript/jerryscript
+	url = https://gitlink.org.cn/wgzAIIT/jerryscript.git
