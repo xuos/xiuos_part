@@ -21,6 +21,7 @@
 
 #include <xizi.h>
 #include <xs_delay.h>
+#include <xs_kdbg.h>
 
 DECLARE_ID_MANAGER(k_mq_id_manager, ID_NUM_MAX);
 DoubleLinklistType k_mq_list = {&k_mq_list, &k_mq_list};
@@ -41,17 +42,17 @@ static struct MsgQueue *GetMsgQueueById(int32 id)
 
     lock = CriticalAreaLock();
     idnode = IdGetObj(&k_mq_id_manager, id);
-    if (idnode == NONE){
-        CriticalAreaUnLock(lock);
-        return NONE;
+    if (idnode == NONE) {
+       CriticalAreaUnLock(lock);
+       return NONE;
     }
     mq = CONTAINER_OF(idnode, struct MsgQueue, id);
     CriticalAreaUnLock(lock);
+
     return mq;
 }
 
-static x_err_t _InitMsgQueue( struct MsgQueue *mq ,x_size_t   msg_size,
-                            x_size_t   max_msgs )
+static x_err_t _InitMsgQueue(struct MsgQueue* mq, x_size_t msg_size, x_size_t max_msgs)
 {
     x_base lock = 0;
 
@@ -62,10 +63,12 @@ static x_err_t _InitMsgQueue( struct MsgQueue *mq ,x_size_t   msg_size,
     mq->each_len = ALIGN_MEN_UP(msg_size, MEM_ALIGN_SIZE);
     mq->index = 0;
 
+    SYS_KDEBUG_LOG(MSGQUEUE_DEBUG, ("[%s] Msg attr, max_msg_num: %d, block size: %d\n", __func__, mq->max_msgs, mq->each_len));
+
     InitDoubleLinkList(&mq->send_pend_list);
     InitDoubleLinkList(&(mq->recv_pend_list));
 
-    mq->msg_buf = x_malloc( mq->each_len * mq->max_msgs);
+    mq->msg_buf = x_malloc(mq->each_len * mq->max_msgs);
     if (mq->msg_buf == NONE) {
         lock = CriticalAreaLock();
         DoubleLinkListRmNode(&(mq->link));
@@ -77,26 +80,28 @@ static x_err_t _InitMsgQueue( struct MsgQueue *mq ,x_size_t   msg_size,
     return EOK;
 }
 
-static x_err_t _MsgQueueSend(struct MsgQueue *mq,
-                              const void *buffer,
-                              x_size_t   size,
-                              int32  msec)
+static x_err_t _MsgQueueSend(struct MsgQueue* mq,
+    const void* buffer,
+    x_size_t size,
+    int32 msec)
 {
     x_ubase lock = 0;
     uint32 tick_delta = 0;
     int32  timeout = 0;
-     uint8 *msg = NONE;
+    uint8* msg = NONE;
     struct TaskDescriptor *task = NONE;
 
     NULL_PARAM_CHECK(mq);
     NULL_PARAM_CHECK(buffer);
+
+    SYS_KDEBUG_LOG(MSGQUEUE_DEBUG, ("[%s] mq_num_msgs: %d, block size: %d, needed size: %d\n", __func__, mq->num_msgs, mq->each_len, size));
 
     if (size > mq->each_len)
         return -ERROR;
 
     tick_delta = 0;
     task = GetKTaskDescriptor();
-    if(WAITING_FOREVER == msec)
+    if (WAITING_FOREVER == msec)
         timeout = WAITING_FOREVER;
     else
         timeout = CalculateTickFromTimeMs(msec);
@@ -107,8 +112,7 @@ static x_err_t _MsgQueueSend(struct MsgQueue *mq,
         return -EFULL;
     }
 
-    while(mq->num_msgs >= mq->max_msgs ) {
-
+    while (mq->num_msgs >= mq->max_msgs) {
         task->exstatus = EOK;
         if (timeout == 0) {
             CriticalAreaUnLock(lock);
@@ -121,7 +125,7 @@ static x_err_t _MsgQueueSend(struct MsgQueue *mq,
             tick_delta = CurrentTicksGain();
             SYS_KDEBUG_LOG(KDBG_IPC, ("mq_send_wait: start timer of task:%s\n",
                                         task->task_base_info.name));
-            KTaskSetDelay(task,timeout);
+            KTaskSetDelay(task, timeout);
         }
 
         CriticalAreaUnLock(lock);
@@ -139,19 +143,19 @@ static x_err_t _MsgQueueSend(struct MsgQueue *mq,
             if (timeout < 0)
                 timeout = 0;
         }
-    }
+    } // end with lock here
 
-    msg = mq->msg_buf + ( ( mq->index + mq->num_msgs ) % mq->max_msgs ) * mq->each_len ;
+    msg = mq->msg_buf + ((mq->index + mq->num_msgs) % mq->max_msgs) * mq->each_len;
     memcpy(msg, buffer, size);
-    mq->num_msgs ++;
+    mq->num_msgs++;
     if (!IsDoubleLinkListEmpty(&mq->recv_pend_list)) {
         LinklistResume(&(mq->recv_pend_list));
         CriticalAreaUnLock(lock);
         DO_KTASK_ASSIGN;
         return EOK;
     }
-
     CriticalAreaUnLock(lock);
+
     return EOK;
 }
 
@@ -191,15 +195,15 @@ static x_err_t _MsgQueueUrgentSend(struct MsgQueue *mq, const void *buffer, x_si
     return EOK;
 }
 
-static x_err_t _MsgQueueRecv(struct MsgQueue *mq,
-                          void *buffer,
-                          x_size_t  size,
-                          int32 msec)
+static x_err_t _MsgQueueRecv(struct MsgQueue* mq,
+    void* buffer,
+    x_size_t size,
+    int32 msec)
 {
     x_ubase lock = 0;
     uint32 tick_delta = 0;
     int32 timeout = 0;
-    struct MqMessage *msg = NONE;
+    uint8* msg = NONE;
     struct TaskDescriptor *task = NONE;
 
     NULL_PARAM_CHECK(mq);
@@ -208,14 +212,14 @@ static x_err_t _MsgQueueRecv(struct MsgQueue *mq,
     tick_delta = 0;
     task = GetKTaskDescriptor();
     timeout = CalculateTickFromTimeMs(msec);
-    lock = CriticalAreaLock();
 
+    lock = CriticalAreaLock();
     if (mq->index == 0 && timeout == 0) {
         CriticalAreaUnLock(lock);
         return -ETIMEOUT;
     }
 
-    for( ; mq->num_msgs <= 0 ; ) {
+    while (mq->num_msgs <= 0) {
         KDEBUG_IN_KTASK_CONTEXT;
 
         task->exstatus = EOK;
@@ -225,19 +229,16 @@ static x_err_t _MsgQueueRecv(struct MsgQueue *mq,
             return -ETIMEOUT;
         }
 
-        LinklistSuspend(&(mq->recv_pend_list),
-                            task,
-                            LINKLIST_FLAG_FIFO);
+        LinklistSuspend(&(mq->recv_pend_list), task, LINKLIST_FLAG_FIFO);
 
         if (timeout > 0) {
             tick_delta = CurrentTicksGain();
             SYS_KDEBUG_LOG(KDBG_IPC, ("set task:%s to timer list\n",
                                         task->task_base_info.name));
-            KTaskSetDelay(task,timeout);
+            KTaskSetDelay(task, timeout);
         }
 
         CriticalAreaUnLock(lock);
-
         DO_KTASK_ASSIGN;
 
         if (task->exstatus != EOK) {
@@ -256,8 +257,8 @@ static x_err_t _MsgQueueRecv(struct MsgQueue *mq,
 
     msg = mq->msg_buf + mq->index * mq->each_len;
     mq->index = (mq->index + 1) % mq->max_msgs;
-    memcpy(buffer, msg , size > mq->each_len ? mq->each_len : size);
-    mq->num_msgs --;
+    memcpy(buffer, msg, size > mq->each_len ? mq->each_len : size);
+    mq->num_msgs--;
 
     if (!IsDoubleLinkListEmpty(&(mq->send_pend_list))) {
         LinklistResume(&(mq->send_pend_list));
@@ -326,8 +327,7 @@ static struct MsgQueueDone Done = {
  *
  * @return id on success;ENOMEMORY/ERROR on failure
  */
-int32 KCreateMsgQueue(x_size_t   msg_size,
-                            x_size_t   max_msgs)
+int32 KCreateMsgQueue(x_size_t msg_size, x_size_t max_msgs)
 {
     int32 id = 0;
     x_base temp = 0;
@@ -337,11 +337,12 @@ int32 KCreateMsgQueue(x_size_t   msg_size,
     mq = (struct MsgQueue *)x_malloc(sizeof(struct MsgQueue));
     if (mq == NONE)
         return -ENOMEMORY;
-    memset(mq,0x0,sizeof(struct MsgQueue));
+    memset(mq, 0x0, sizeof(struct MsgQueue));
 
     lock = CriticalAreaLock();
     id = IdInsertObj(&k_mq_id_manager, &mq->id);
     CriticalAreaUnLock(lock);
+
     if (id < 0) {
         x_free(mq);
         return -ENOMEMORY;
@@ -350,11 +351,12 @@ int32 KCreateMsgQueue(x_size_t   msg_size,
     lock = CriticalAreaLock();
     DoubleLinkListInsertNodeAfter(&k_mq_list, &mq->link);
     CriticalAreaUnLock(lock);
+
     mq->Done = &Done;
-    if( mq->Done->init(mq, msg_size,max_msgs) == EOK )
-      return mq->id.id;
+    if (mq->Done->init(mq, msg_size, max_msgs) == EOK)
+        return mq->id.id;
     else
-       return -ERROR;
+        return -ERROR;
 }
 
 /**
@@ -401,7 +403,7 @@ x_err_t KMsgQueueRecv(int32 id,
 
     mq = GetMsgQueueById(id);
     if (mq != NONE)
-       return mq->Done->recv(mq,buffer,size,timeout);
+       return mq->Done->recv(mq, buffer, size, timeout);
     else
       return -EINVALED;
 
@@ -471,10 +473,11 @@ x_err_t KMsgQueueSend(int32 id, const void *buffer, x_size_t size)
 
     mq = GetMsgQueueById(id);
     if (mq != NONE)
-      return mq->Done->send(mq,buffer,size,0);
+      return mq->Done->send(mq, buffer, size, WAITING_FOREVER);
     else
       return -EINVALED;
 }
+
 /**
  * send message with waiting time,current suspend task will be resumed
  *

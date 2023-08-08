@@ -1,21 +1,22 @@
 /**
-* @file ethernetif.c
-* @brief support edu-arm32-board ethernetif function and register to Lwip
-* @version 3.0 
-* @author AIIT XUOS Lab
-* @date 2022-12-05
-*/
+ * @file ethernetif.c
+ * @brief support hc32f4a0-board ethernetif function and register to Lwip
+ * @version 3.0
+ * @author AIIT XUOS Lab
+ * @date 2022-12-05
+ */
 
 #include <connect_ethernet.h>
+#include <hc32_ll_fcg.h>
 #include <hc32_ll_gpio.h>
 #include <hc32_ll_utility.h>
-#include <hc32_ll_fcg.h>
 #include <lwip/timeouts.h>
 #include <netif/etharp.h>
 
 #include <sys_arch.h>
 
-void eth_irq_handler(void) {
+void eth_irq_handler(void)
+{
     static x_base eth_irq_lock;
     eth_irq_lock = DISABLE_INTERRUPT();
 
@@ -24,7 +25,7 @@ void eth_irq_handler(void) {
         sys_sem_signal(get_eth_recv_sem());
         ETH_DMA_ClearStatus(ETH_DMA_FLAG_RIS | ETH_DMA_FLAG_NIS);
     }
-    
+
     ENABLE_INTERRUPT(eth_irq_lock);
 }
 
@@ -35,7 +36,7 @@ void eth_irq_handler(void) {
  *           - LL_OK: Initialize success
  *           - LL_ERR: Initialize failed
  */
-int32_t low_level_init(struct netif *netif)
+int32_t low_level_init(struct netif* netif)
 {
     int32_t i32Ret = LL_ERR;
     stc_eth_init_t stcEthInit;
@@ -52,9 +53,9 @@ int32_t low_level_init(struct netif *netif)
     (void)ETH_StructInit(&stcEthInit);
 
 #ifdef ETH_INTERFACE_RMII
-    EthHandle.stcCommInit.u32Interface  = ETH_MAC_IF_RMII;
+    EthHandle.stcCommInit.u32Interface = ETH_MAC_IF_RMII;
 #else
-    EthHandle.stcCommInit.u32Interface  = ETH_MAC_IF_MII;
+    EthHandle.stcCommInit.u32Interface = ETH_MAC_IF_MII;
 #endif
     // stcEthInit.stcMacInit.u32ReceiveAll = ETH_MAC_RX_ALL_ENABLE;
     EthHandle.stcCommInit.u32ReceiveMode = ETH_RX_MD_INT;
@@ -125,7 +126,7 @@ int32_t low_level_init(struct netif *netif)
     u16RegVal = PHY_PAGE_ADDR_0;
     (void)ETH_PHY_WriteReg(&EthHandle, PHY_PSR, u16RegVal);
 #endif
-    
+
     return i32Ret;
 }
 
@@ -137,19 +138,19 @@ int32_t low_level_init(struct netif *netif)
  *           - LL_OK: The packet could be sent
  *           - LL_ERR: The packet couldn't be sent
  */
-err_t low_level_output(struct netif *netif, struct pbuf *p)
+err_t low_level_output(struct netif* netif, struct pbuf* p)
 {
     err_t i32Ret;
-    struct pbuf *q;
-    uint8_t *txBuffer;
-    __IO stc_eth_dma_desc_t *DmaTxDesc;
+    struct pbuf* q;
+    uint8_t* txBuffer;
+    __IO stc_eth_dma_desc_t* DmaTxDesc;
     uint32_t byteCnt;
     uint32_t frameLength = 0UL;
     uint32_t bufferOffset;
     uint32_t payloadOffset;
 
     DmaTxDesc = EthHandle.stcTxDesc;
-    txBuffer = (uint8_t *)((EthHandle.stcTxDesc)->u32Buf1Addr);
+    txBuffer = (uint8_t*)((EthHandle.stcTxDesc)->u32Buf1Addr);
     bufferOffset = 0UL;
     /* Copy frame from pbufs to driver buffers */
     for (q = p; q != NULL; q = q->next) {
@@ -165,28 +166,28 @@ err_t low_level_output(struct netif *netif, struct pbuf *p)
         /* Check if the length of data to copy is bigger than Tx buffer size */
         while ((byteCnt + bufferOffset) > ETH_TX_BUF_SIZE) {
             /* Copy data to Tx buffer*/
-            (void)memcpy((uint8_t *) & (txBuffer[bufferOffset]), (uint8_t *) & (((uint8_t *)q->payload)[payloadOffset]), (ETH_TX_BUF_SIZE - bufferOffset));
+            (void)memcpy((uint8_t*)&(txBuffer[bufferOffset]), (uint8_t*)&(((uint8_t*)q->payload)[payloadOffset]), (ETH_TX_BUF_SIZE - bufferOffset));
             /* Point to next descriptor */
-            DmaTxDesc = (stc_eth_dma_desc_t *)(DmaTxDesc->u32Buf2NextDescAddr);
+            DmaTxDesc = (stc_eth_dma_desc_t*)(DmaTxDesc->u32Buf2NextDescAddr);
             /* Check if the buffer is available */
             if (0UL != (DmaTxDesc->u32ControlStatus & ETH_DMA_TXDESC_OWN)) {
                 i32Ret = (err_t)ERR_USE;
                 goto error;
             }
 
-            txBuffer = (uint8_t *)(DmaTxDesc->u32Buf1Addr);
+            txBuffer = (uint8_t*)(DmaTxDesc->u32Buf1Addr);
             byteCnt = byteCnt - (ETH_TX_BUF_SIZE - bufferOffset);
             payloadOffset = payloadOffset + (ETH_TX_BUF_SIZE - bufferOffset);
             frameLength = frameLength + (ETH_TX_BUF_SIZE - bufferOffset);
             bufferOffset = 0UL;
         }
         /* Copy the remaining bytes */
-        (void)memcpy((uint8_t *) & (txBuffer[bufferOffset]), (uint8_t *) & (((uint8_t *)q->payload)[payloadOffset]), byteCnt);
+        (void)memcpy((uint8_t*)&(txBuffer[bufferOffset]), (uint8_t*)&(((uint8_t*)q->payload)[payloadOffset]), byteCnt);
         bufferOffset = bufferOffset + byteCnt;
         frameLength = frameLength + byteCnt;
     }
     /* Prepare transmit descriptors to give to DMA */
-    if(LL_OK != ETH_DMA_SetTransFrame(&EthHandle, frameLength)) {
+    if (LL_OK != ETH_DMA_SetTransFrame(&EthHandle, frameLength)) {
         KPrintf("[%s] Error sending eth DMA frame\n", __func__);
     }
     i32Ret = (err_t)ERR_OK;
@@ -208,13 +209,13 @@ error:
  * @param  netif                        The network interface structure for this ethernetif.
  * @retval A pbuf filled with the received packet (including MAC header) or NULL on memory error.
  */
-struct pbuf *low_level_input(struct netif *netif)
+struct pbuf* low_level_input(struct netif* netif)
 {
-    struct pbuf *p = NULL;
-    struct pbuf *q;
+    struct pbuf* p = NULL;
+    struct pbuf* q;
     uint32_t len;
-    uint8_t *rxBuffer;
-    __IO stc_eth_dma_desc_t *DmaRxDesc;
+    uint8_t* rxBuffer;
+    __IO stc_eth_dma_desc_t* DmaRxDesc;
     uint32_t byteCnt;
     uint32_t bufferOffset;
     uint32_t payloadOffset;
@@ -227,7 +228,7 @@ struct pbuf *low_level_input(struct netif *netif)
 
     /* Obtain the size of the packet */
     len = (EthHandle.stcRxFrame).u32Len;
-    rxBuffer = (uint8_t *)(EthHandle.stcRxFrame).u32Buf;
+    rxBuffer = (uint8_t*)(EthHandle.stcRxFrame).u32Buf;
     if (len > 0UL) {
         /* Allocate a pbuf chain of pbufs from the buffer */
         p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL);
@@ -243,17 +244,17 @@ struct pbuf *low_level_input(struct netif *netif)
             /* Check if the length of bytes to copy in current pbuf is bigger than Rx buffer size */
             while ((byteCnt + bufferOffset) > ETH_RX_BUF_SIZE) {
                 /* Copy data to pbuf */
-                (void)memcpy((uint8_t *) & (((uint8_t *)q->payload)[payloadOffset]), (uint8_t *) & (rxBuffer[bufferOffset]), (ETH_RX_BUF_SIZE - bufferOffset));
+                (void)memcpy((uint8_t*)&(((uint8_t*)q->payload)[payloadOffset]), (uint8_t*)&(rxBuffer[bufferOffset]), (ETH_RX_BUF_SIZE - bufferOffset));
                 /* Point to next descriptor */
-                DmaRxDesc = (stc_eth_dma_desc_t *)(DmaRxDesc->u32Buf2NextDescAddr);
-                rxBuffer = (uint8_t *)(DmaRxDesc->u32Buf1Addr);
+                DmaRxDesc = (stc_eth_dma_desc_t*)(DmaRxDesc->u32Buf2NextDescAddr);
+                rxBuffer = (uint8_t*)(DmaRxDesc->u32Buf1Addr);
                 byteCnt = byteCnt - (ETH_RX_BUF_SIZE - bufferOffset);
                 payloadOffset = payloadOffset + (ETH_RX_BUF_SIZE - bufferOffset);
                 bufferOffset = 0UL;
             }
 
             /* Copy remaining data in pbuf */
-            (void)memcpy((uint8_t *) & (((uint8_t *)q->payload)[payloadOffset]), (uint8_t *) & (rxBuffer[bufferOffset]), byteCnt);
+            (void)memcpy((uint8_t*)&(((uint8_t*)q->payload)[payloadOffset]), (uint8_t*)&(rxBuffer[bufferOffset]), byteCnt);
             bufferOffset = bufferOffset + byteCnt;
         }
     }
@@ -261,7 +262,7 @@ struct pbuf *low_level_input(struct netif *netif)
     DmaRxDesc = (EthHandle.stcRxFrame).pstcFSDesc;
     for (i = 0UL; i < (EthHandle.stcRxFrame).u32SegCount; i++) {
         DmaRxDesc->u32ControlStatus |= ETH_DMA_RXDESC_OWN;
-        DmaRxDesc = (stc_eth_dma_desc_t *)(DmaRxDesc->u32Buf2NextDescAddr);
+        DmaRxDesc = (stc_eth_dma_desc_t*)(DmaRxDesc->u32Buf2NextDescAddr);
     }
     /* Clear Segment_Count */
     (EthHandle.stcRxFrame).u32SegCount = 0UL;
@@ -277,11 +278,10 @@ struct pbuf *low_level_input(struct netif *netif)
     return p;
 }
 
-extern void LwipSetIPTest(int argc, char *argv[]);
-int HwEthInit(void) {
-//   lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-  LwipSetIPTest(1, NULL);
-  return EOK;
+extern void LwipSetIPTest(int argc, char* argv[]);
+int HwEthInit(void)
+{
+    //   lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    LwipSetIPTest(1, NULL);
+    return EOK;
 }
-
-

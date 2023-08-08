@@ -50,7 +50,7 @@ static void iperf_udp_client(void *thread_param)
     send_size = IPERF_BUFSZ > 1470 ? 1470 : IPERF_BUFSZ;
 
     sock = socket(PF_INET, SOCK_DGRAM, 0);
-    if(sock < 0){
+    if(sock < 0) {
         KPrintf("[%s:%d] can't create socket! exit!\n", __FILE__, __LINE__);
         return;
     }
@@ -60,21 +60,21 @@ static void iperf_udp_client(void *thread_param)
     server.sin_addr.s_addr = inet_addr(param.host);
     memset(&(server.sin_zero), 0, sizeof(server.sin_zero));
 
-    if (connect(sock, (struct sockaddr *)&server, sizeof(struct sockaddr))){
+    if (connect(sock, (struct sockaddr *)&server, sizeof(struct sockaddr))) {
         lw_error("Unable to connect\n");
         closesocket(sock);
         return;
     }
     
     buffer = malloc(IPERF_BUFSZ);
-    if (buffer == NULL){
+    if (buffer == NULL) {
         printf("[%s:%d] malloc failed\n", __FILE__, __LINE__);
         return;
     }
     memset(buffer, 0x00, IPERF_BUFSZ);
 
     KPrintf("iperf udp mode run...\n");
-    while (param.mode != IPERF_MODE_STOP){
+    while (param.mode != IPERF_MODE_STOP) {
         packet_count++;
         tick = CurrentTicksGain();
         buffer[0] = htonl(packet_count);
@@ -101,12 +101,12 @@ static void iperf_udp_server(void *thread_param)
     struct timeval timeout;
 
     buffer = malloc(IPERF_BUFSZ);
-    if (buffer == NULL){
+    if (buffer == NULL) {
         return;
     }
 
     sock = socket(PF_INET, SOCK_DGRAM, 0);
-    if(sock < 0){
+    if(sock < 0) {
         KPrintf("can't create socket! exit!");
         return;
     }
@@ -117,35 +117,34 @@ static void iperf_udp_server(void *thread_param)
 
     timeout.tv_sec = 2;
     timeout.tv_usec = 0;
-    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1){
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1) {
         KPrintf("setsockopt failed!");
         closesocket(sock);
         free(buffer);
         return;
     }
 
-    if (bind(sock, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0){
+    if (bind(sock, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0) {
         KPrintf("iperf server bind failed! exit!");
         closesocket(sock);
         free(buffer);
         return;
     }
 
-    while (param.mode != IPERF_MODE_STOP){
+    while (param.mode != IPERF_MODE_STOP) {
         tick1 = CurrentTicksGain();
         tick2 = tick1;
         lost = 0;
         total = 0;
         sentlen = 0;
-        while ((tick2 - tick1) < (TICK_PER_SECOND * 5)){
+        while ((tick2 - tick1) < (TICK_PER_SECOND * 5)) {
             r_size = recvfrom(sock, buffer, IPERF_BUFSZ, 0, (struct sockaddr *)&sender, (socklen_t*)&sender_len);
-            if (r_size > 12){
+            if (r_size > 12) {
                 pcount = ntohl(buffer[0]);
-                if (last_pcount < pcount){
+                if (last_pcount < pcount) {
                     lost += pcount - last_pcount - 1;
                     total += pcount - last_pcount;
-                }
-                else{
+                } else {
                     last_pcount = pcount;
                 }
                 last_pcount = pcount;
@@ -153,7 +152,7 @@ static void iperf_udp_server(void *thread_param)
             }
             tick2 = CurrentTicksGain();
         }
-        if (sentlen > 0){
+        if (sentlen > 0) {
             long data;
             int integer, decimal;
             KTaskDescriptorType tid;
@@ -186,10 +185,9 @@ static void iperf_client(void *thread_param)
     for (i = 0; i < IPERF_BUFSZ; i ++)
         send_buf[i] = i & 0xff;
 
-    while (param.mode != IPERF_MODE_STOP)
-    {
+    while (param.mode != IPERF_MODE_STOP) {
         sock = socket(AF_INET, SOCK_STREAM, 0);
-        if (sock < 0){
+        if (sock < 0) {
             KPrintf("create socket failed!");
             DelayKTask(TICK_PER_SECOND);
             continue;
@@ -200,8 +198,8 @@ static void iperf_client(void *thread_param)
         addr.sin_addr.s_addr = inet_addr((char *)param.host);
 
         ret = connect(sock, (const struct sockaddr *)&addr, sizeof(addr));
-        if (ret == -1){
-            if (tips){
+        if (ret == -1) {
+            if (tips) {
                 KPrintf("Connect to iperf server faile, Waiting for the server to open!");
                 tips = 0;
             }
@@ -224,9 +222,9 @@ static void iperf_client(void *thread_param)
         sentlen = 0;
 
         tick1 = CurrentTicksGain();
-        while (param.mode != IPERF_MODE_STOP){
+        while (param.mode != IPERF_MODE_STOP) {
             tick2 = CurrentTicksGain();
-            if (tick2 - tick1 >= TICK_PER_SECOND * 5){
+            if (tick2 - tick1 >= TICK_PER_SECOND * 5) {
                 double speed;
                 // int integer, decimal;
                 KTaskDescriptorType tid;
@@ -240,7 +238,7 @@ static void iperf_client(void *thread_param)
             }
 
             ret = send(sock, send_buf, IPERF_BUFSZ, 0);
-            if (ret > 0){
+            if (ret > 0) {
                 sentlen += ret;
             }
 
@@ -264,7 +262,7 @@ struct sock_conn_cb {
     int parent_id;
 };
 
-void iperf_sever_worker(void* arg) {
+void iperf_server_worker(void* arg) {
     struct sock_conn_cb *sccb = (struct sock_conn_cb *)arg;
     x_ticks_t tick1, tick2;
 
@@ -287,7 +285,7 @@ void iperf_sever_worker(void* arg) {
     int cur_tid = GetKTaskDescriptor()->id.id;
 
     tick1 = CurrentTicksGain();
-    while (param.mode != IPERF_MODE_STOP){
+    while (param.mode != IPERF_MODE_STOP) {
         bytes_received = recv(sccb->connected, recv_data, IPERF_BUFSZ, 0);
         if (bytes_received == 0) {
             KPrintf("client disconnected (%s, %d)\n",
@@ -336,7 +334,7 @@ void iperf_server_multithread(void *thread_param)
     struct timeval timeout;
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0){
+    if (sock < 0) {
         KPrintf("[%s:%d] Socket error!\n", __FILE__, __LINE__);
         goto __exit;
     }
@@ -346,12 +344,12 @@ void iperf_server_multithread(void *thread_param)
     server_addr.sin_addr.s_addr = INADDR_ANY;
     memset(&(server_addr.sin_zero), 0x0, sizeof(server_addr.sin_zero));
 
-    if (bind(sock, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1){
+    if (bind(sock, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1) {
         KPrintf("Unable to bind!\n");
         goto __exit;
     }
 
-    if (listen(sock, 5) == -1){
+    if (listen(sock, 5) == -1) {
         KPrintf("Listen error!\n");
         goto __exit;
     }
@@ -360,7 +358,7 @@ void iperf_server_multithread(void *thread_param)
 
     timeout.tv_sec = 5;
     timeout.tv_usec = 0;
-    while (param.mode != IPERF_MODE_STOP){
+    while (param.mode != IPERF_MODE_STOP) {
         FD_ZERO(&readset);
         FD_SET(sock, &readset);
 
@@ -379,8 +377,8 @@ void iperf_server_multithread(void *thread_param)
         sccb->client_addr = client_addr;
         sccb->server_addr = server_addr;
         sccb->parent_id = cur_tid;
-        int tid = KTaskCreate("iperf server", iperf_sever_worker, sccb, LWIP_TASK_STACK_SIZE, 20);
-        // iperf_sever_worker(sccb);
+        int tid = KTaskCreate("iperf server", iperf_server_worker, sccb, LWIP_TASK_STACK_SIZE, 20);
+        // iperf_server_worker(sccb);
         if (tid) {
             StartupKTask(tid);
         } else {
@@ -405,13 +403,13 @@ void iperf_server(void *thread_param)
     struct timeval timeout;
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0){
+    if (sock < 0) {
         KPrintf("[%s:%d] Socket error!\n", __FILE__, __LINE__);
         goto __exit;
     }
 
     recv_data = (uint8_t *)malloc(IPERF_BUFSZ);
-    if (recv_data == NULL){
+    if (recv_data == NULL) {
         KPrintf("No memory!\n");
         goto __exit;
     }
@@ -421,12 +419,12 @@ void iperf_server(void *thread_param)
     server_addr.sin_addr.s_addr = INADDR_ANY;
     memset(&(server_addr.sin_zero), 0x0, sizeof(server_addr.sin_zero));
 
-    if (bind(sock, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1){
+    if (bind(sock, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1) {
         KPrintf("Unable to bind!\n");
         goto __exit;
     }
 
-    if (listen(sock, 5) == -1){
+    if (listen(sock, 5) == -1) {
         KPrintf("Listen error!\n");
         goto __exit;
     }
@@ -434,7 +432,7 @@ void iperf_server(void *thread_param)
     timeout.tv_sec = 3;
     timeout.tv_usec = 0;
 
-    while (param.mode != IPERF_MODE_STOP){
+    while (param.mode != IPERF_MODE_STOP) {
         FD_ZERO(&readset);
         FD_SET(sock, &readset);
 
@@ -458,7 +456,7 @@ void iperf_server(void *thread_param)
 
         recvlen = 0;
         tick1 = CurrentTicksGain();
-        while (param.mode != IPERF_MODE_STOP){
+        while (param.mode != IPERF_MODE_STOP) {
             bytes_received = recv(connected, recv_data, IPERF_BUFSZ, 0);
             if (bytes_received == 0) {
                 KPrintf("client disconnected (%s, %d)\n",
@@ -526,48 +524,37 @@ int iperf(int argc, char **argv)
     int use_udp = 0;
     int index = 1;
 
-    if (argc == 1)
-    {
+    if (argc == 1) {
         goto __usage;
     }
-    if (strcmp(argv[1], "-u") == 0)
-    {
+    if (strcmp(argv[1], "-u") == 0) {
         index = 2;
         use_udp = 1;
     }
     if (strcmp(argv[index], "-h") == 0) goto __usage;
-    else if (strcmp(argv[index], "--stop") == 0)
-    {
+    else if (strcmp(argv[index], "--stop") == 0) {
         /* stop iperf */
         param.mode = IPERF_MODE_STOP;
         printf("iperf stop.\n");
         return 0;
-    }
-    else if (strcmp(argv[index], "-s") == 0)
-    {
+    } else if (strcmp(argv[index], "-s") == 0) {
         mode = IPERF_MODE_SERVER; /* server mode */
 
         /* iperf -s -p 5000 */
-        if (argc >= 4)
-        {
-            if (strcmp(argv[index + 1], "-p") == 0)
-            {
+        if (argc >= 4) {
+            if (strcmp(argv[index + 1], "-p") == 0) {
                 port = atoi(argv[index + 2]);
             }
             else goto __usage;
         }
-    }
-    else if (strcmp(argv[index], "-c") == 0)
-    {
+    } else if (strcmp(argv[index], "-c") == 0) {
         mode = IPERF_MODE_CLIENT; /* client mode */
         if (argc < 3) goto __usage;
 
         host = argv[index + 1];
-        if (argc >= 5)
-        {
+        if (argc >= 5) {
             /* iperf -c host -p port */
-            if (strcmp(argv[index + 2], "-p") == 0)
-            {
+            if (strcmp(argv[index + 2], "-p") == 0) {
                 port = atoi(argv[index + 3]);
             }
             else goto __usage;
@@ -575,57 +562,43 @@ int iperf(int argc, char **argv)
     }
     else goto __usage;
 
-    if (argc >= 7)
-    {
-        if(strcmp(argv[argc - 2], "-m") == 0)
-        {
+    if (argc >= 7) {
+        if(strcmp(argv[argc - 2], "-m") == 0) {
             numtid = atoi(argv[argc - 1]);
         }
         else  goto __usage;
     }
 
     /* start iperf */
-    if (param.mode == IPERF_MODE_STOP)
-    {
+    if (param.mode == IPERF_MODE_STOP) {
         int i = 0;
         char tid_name[NAME_NUM_MAX + 1] = {0};
 
         param.mode = mode;
         param.port = port;
-        if (param.host)
-        {
+        if (param.host) {
             free(param.host);
             param.host = NULL;
         }
         if (host) param.host = strdup(host);
 
-        for (i = 0; i < numtid; i++)
-        {
+        for (i = 0; i < numtid; i++) {
             int32 tid = 0;
             void (*function)(void *parameter);
 
-            if (use_udp)
-            {
-                if (mode == IPERF_MODE_CLIENT)
-                {
+            if (use_udp) {
+                if (mode == IPERF_MODE_CLIENT) {
                     snprintf(tid_name, sizeof(tid_name), "iperfc%02d", i + 1);
                     function = iperf_udp_client;
-                }
-                else if (mode == IPERF_MODE_SERVER)
-                {
+                } else if (mode == IPERF_MODE_SERVER) {
                     snprintf(tid_name, sizeof(tid_name), "iperfd%02d", i + 1);
                     function = iperf_udp_server;
                 }
-            }
-            else
-            {
-                if (mode == IPERF_MODE_CLIENT)
-                {
+            } else {
+                if (mode == IPERF_MODE_CLIENT) {
                     snprintf(tid_name, sizeof(tid_name), "iperfc%02d", i + 1);
                     function = iperf_client;
-                }
-                else if (mode == IPERF_MODE_SERVER)
-                {
+                } else if (mode == IPERF_MODE_SERVER) {
                     snprintf(tid_name, sizeof(tid_name), "iperfd%02d", i + 1);
                     function = iperf_server_multithread;
                 }
@@ -634,9 +607,7 @@ int iperf(int argc, char **argv)
             tid = KTaskCreate(tid_name, function, NULL, LWIP_TASK_STACK_SIZE, 20);
             if (tid) StartupKTask(tid);
         }
-    }
-    else
-    {
+    } else {
         KPrintf("Please stop iperf firstly, by:\n");
         KPrintf("iperf --stop\n");
     }
