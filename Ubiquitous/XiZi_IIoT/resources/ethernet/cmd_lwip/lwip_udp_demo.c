@@ -20,10 +20,10 @@
 #include "board.h"
 #include "sys_arch.h"
 #include "lwip/udp.h"
-#include "lwip/sockets.h"
 #include <shell.h>
 #include <sys.h>
 #include <xizi.h>
+#include "lwip/sockets.h"
 
 
 #define PBUF_SIZE 27
@@ -102,8 +102,8 @@ void *LwipUdpSendTest(int argc, char *argv[])
         udp_interval = 100;
     } else {
         strncpy(udp_demo_msg, argv[1], strlen(argv[1]));
-        strncat(udp_demo_msg, "\r\n", 2);
-        if(argc == 3) {
+        strncat(udp_demo_msg, "\r\n", 3);
+        if(argc >= 3) {
             sscanf(argv[2], "%d.%d.%d.%d:%d", &udp_server_ip[0], &udp_server_ip[1], &udp_server_ip[2], &udp_server_ip[3], &udp_server_port);
         }
         if(argc > 3) {
@@ -119,7 +119,7 @@ void *LwipUdpSendTest(int argc, char *argv[])
     sys_thread_new("udp send", LwipUDPSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
 }
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(3),
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(5),
      UDPSend, LwipUdpSendTest, UDPSend msg [ip:port [num [interval]]]);
 
 void LwipUdpRecvTest(void)
