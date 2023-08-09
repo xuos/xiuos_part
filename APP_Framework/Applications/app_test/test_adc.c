@@ -26,9 +26,8 @@
 void TestAdc(void)
 {
     int adc_fd;
-    uint8 adc_channel = 0x0;
-    uint16 adc_sample, adc_value_decimal = 0;
-    float adc_value;
+    uint8 adc_channel = 0x1;
+    uint16 adc_sample = 0;
 
     adc_fd = PrivOpen(ADC_DEV_DRIVER, O_RDWR);
     if (adc_fd < 0) {
@@ -45,13 +44,11 @@ void TestAdc(void)
         return;
     }
 
-    PrivRead(adc_fd, &adc_sample, 2);
-
-    adc_value = (float)adc_sample * (3.3 / 4096);
-
-    adc_value_decimal = (adc_value - (uint16)adc_value) * 1000;
-
-    printf("adc sample %u value integer %u decimal %u\n", adc_sample, (uint16)adc_value, adc_value_decimal);
+    for (int i = 0; i < 10; i ++) {
+        PrivRead(adc_fd, &adc_sample, 2);
+        printf("adc sample %u mv\n", adc_sample);
+        PrivTaskDelay(500);
+    }
 
     PrivClose(adc_fd);
 
