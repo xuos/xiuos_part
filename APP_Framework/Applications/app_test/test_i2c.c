@@ -24,7 +24,7 @@
 
 #define I2C_SLAVE_ADDRESS 0x0012U
 
-int open_iic(void)
+int OpenIic(void)
 {
     int iic_fd = PrivOpen(I2C_DEV_DRIVER, O_RDWR);
     if (iic_fd < 0)
