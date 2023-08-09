@@ -272,6 +272,41 @@ static void register_js_function (const char *name_p,jerry_external_handler_t ha
   jerry_release_value (result_val);
 }
 
+void js_add_function(const jerry_value_t obj, const char *name,
+                     jerry_external_handler_t func)
+{
+    jerry_value_t str = jerry_create_string((const jerry_char_t *)name);
+    jerry_value_t jfunc = jerry_create_external_function(func);
+
+    jerry_set_property(obj, str, jfunc);
+
+    jerry_release_value(str);
+    jerry_release_value(jfunc);
+}
+
+void js_set_property(const jerry_value_t obj, const char *name,
+                     const jerry_value_t prop)
+{
+    jerry_value_t str = jerry_create_string((const jerry_char_t *)name);
+    jerry_set_property(obj, str, prop);
+    jerry_release_value (str);
+}
+
+int js_console_init(void)
+{
+    jerry_value_t console = jerry_create_object();
+    jerry_value_t global_obj = jerry_get_global_object();
+
+    js_add_function(console, "log", jerryx_handler_print);
+
+    js_set_property(global_obj, "console", console);
+
+    jerry_release_value(global_obj);
+    jerry_release_value(console);
+
+    return 0;
+}
+
 static jerry_log_level_t jerry_log_level = JERRY_LOG_LEVEL_ERROR;
 
 
@@ -360,6 +395,8 @@ int jerrytest(int argc, char *argv[])
 
   register_js_function ("gc", jerryx_handler_gc);
   register_js_function ("print", jerryx_handler_print);
+  js_console_init();
+  
 
   jerry_value_t ret_value = jerry_create_undefined ();
 

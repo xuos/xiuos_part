@@ -107,6 +107,7 @@ SECTIONS
 
         . = ALIGN(4);
         _etext = .;
+        _exit = .;
     } >FLASH
 
     .rodata :
