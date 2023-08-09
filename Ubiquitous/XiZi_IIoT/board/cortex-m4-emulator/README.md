@@ -146,13 +146,13 @@ make BOARD=cortex-m4-emulator menuconfig
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）
 
 <div align= "center">
-<img src = img/menuconfig.png  width =1000>
+<img src="img/menuconfig.png"  width =1000>
   </div>
 
 退出时选择`yes`保存上面所配置的内容，如下图所示：
 
 <div align= "center">
-<img src = img/menuconfig1.png  width =1000>
+<img src="img/menuconfig1.png"  width =1000>
   </div>
 
 3.继续执行以下命令，进行编译
@@ -184,7 +184,7 @@ qemu-system-arm -machine netduinoplus2  -nographic -kernel build/XiZi-cortex-m4-
 QEMU运行起来后将会在终端上看到信息打印输出
 
 <div align= "center">
-<img src = img/terminal.png  width =1000>
+<img src="img/terminal.png"  width =1000>
   </div>
 
 ### 4.3 调试
