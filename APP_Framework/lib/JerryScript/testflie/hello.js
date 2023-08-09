@@ -7,4 +7,3 @@ console.log("helo js engine!!");
 console.log("helo world!!" + str2);
 console.log("num=" + num);
 console.log("[hello world] end");
-
