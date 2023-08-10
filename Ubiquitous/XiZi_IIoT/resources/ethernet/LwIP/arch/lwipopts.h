@@ -37,6 +37,8 @@
 #define LWIP_DEBUG  1
 #endif
 
+// #define LWIP_SOCKETS_DEBUG 1
+
 #ifdef LWIP_DEBUG
 #ifdef LWIP_SYS_DEBUG
 #define SYS_DEBUG                   LWIP_DBG_ON
