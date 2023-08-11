@@ -110,7 +110,7 @@ static void* TestIperfServer(void* param)
     };
 
     fd_set readset;
-    while (GetGlobalMode() != IPERF_MODE_STOP) {
+    while (GetGlobalMode() == IPERF_MODE_SERVER) {
         FD_ZERO(&readset);
         FD_SET(sock, &readset);
 
@@ -134,7 +134,7 @@ static void* TestIperfServer(void* param)
         int recvlen = 0;
         int tick_beg = PrivGetTickTime();
         int tick_end = tick_beg;
-        while (GetGlobalMode() != IPERF_MODE_STOP) {
+        while (GetGlobalMode() == IPERF_MODE_SERVER) {
             int bytes_received = recv(connection, recv_data, IPERF_BUFSZ, 0);
             if (bytes_received == 0) {
                 KPrintf("client disconnected (%s, %d)\n",
@@ -188,7 +188,7 @@ static void* TestIperfClient(void* param)
     }
 
     struct sockaddr_in addr;
-    while (GetGlobalMode() != IPERF_MODE_STOP) {
+    while (GetGlobalMode() == IPERF_MODE_CLIENT) {
         int sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
             printf("[%s] Warning: Can't create socker.\n", __func__);
@@ -219,7 +219,7 @@ static void* TestIperfClient(void* param)
         int tick_beg = PrivGetTickTime();
         int tick_end = tick_beg;
         int sentlen = 0;
-        while (GetGlobalMode() != IPERF_MODE_STOP) {
+        while (GetGlobalMode() == IPERF_MODE_CLIENT) {
             tick_end = PrivGetTickTime();
             /* Print every 5 second */
             if (tick_end - tick_beg >= 5000) {
