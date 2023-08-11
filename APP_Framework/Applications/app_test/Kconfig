@@ -77,6 +77,19 @@ menu "test app"
                 bool "Config test socket(lwip)"
                 default n
 
+            menuconfig USER_TEST_UART
+                select BSP_USING_UART
+                select BSP_USING_UART6
+                bool "Config test uart"
+                default n
+                if USER_TEST_UART
+                    if ADD_XIZI_FEATURES
+                        config UART_DEV_DRIVER
+                            string "Set uart dev path"
+                            default "/dev/usart6_dev6"
+                    endif
+                endif
+
             menuconfig USER_TEST_RS485
                 select BSP_USING_UART
                 select BSP_USING_GPIO
