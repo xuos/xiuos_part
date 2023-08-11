@@ -256,7 +256,7 @@ enum IperfParamEnum {
     IPERF_PARAM_PORT = 'p',
 };
 
-void TestIperf(int argc, char* argv[])
+void TestSocket(int argc, char* argv[])
 {
     lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 
