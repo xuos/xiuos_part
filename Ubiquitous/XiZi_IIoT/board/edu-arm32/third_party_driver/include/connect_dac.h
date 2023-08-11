@@ -34,13 +34,6 @@ struct HwDac
     uint16 digital_data;
 };
 
-typedef struct {
-    CM_DAC_TypeDef *pUnit;
-    // en_dac_cvt_t enCvtType;
-    uint16_t u16Ch;
-} stc_dac_handle_t;
-
-
 int HwDacInit(void);
 
 #ifdef __cplusplus
