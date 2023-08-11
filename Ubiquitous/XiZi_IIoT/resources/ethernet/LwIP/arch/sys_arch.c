@@ -336,7 +336,7 @@ void lwip_config_input(struct netif* net)
 {
     sys_thread_t th_id = 0;
 
-    th_id = sys_thread_new("eth_input", ethernetif_input, net, LWIP_TASK_STACK_SIZE, 20);
+    th_id = sys_thread_new("eth_input", ethernetif_input, net, LWIP_TASK_STACK_SIZE, 30);
 
     if (th_id >= 0) {
         lw_print("%s %d successfully!\n", __func__, th_id);
@@ -347,6 +347,12 @@ void lwip_config_input(struct netif* net)
 
 void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
 {
+    static char is_init = 0;
+    if (is_init != 0) {
+        return;
+    }
+    is_init = 1;
+
     sys_sem_new(get_eth_recv_sem(), 0);
 
     ip4_addr_t net_ipaddr, net_netmask, net_gw;
@@ -371,7 +377,6 @@ void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
 
     if (0 == enet_port) {
 #ifdef NETIF_ENET0_INIT_FUNC
-        printf("[%s:%d] call netif_add\n", __func__, __LINE__);
         netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET0_INIT_FUNC,
             tcpip_input);
 #endif

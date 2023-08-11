@@ -72,6 +72,11 @@ menu "test app"
                     endif
                 endif
 
+            menuconfig USER_TEST_SOCKET
+                select BSP_USING_LWIP
+                bool "Config test socket(lwip)"
+                default n
+
             menuconfig USER_TEST_RS485
                 select BSP_USING_UART
                 select BSP_USING_GPIO

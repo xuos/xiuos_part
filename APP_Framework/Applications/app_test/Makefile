@@ -113,6 +113,10 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
         SRC_FILES += test_rbtree/test_rbtree.c
     endif    
 
+    ifeq ($(CONFIG_USER_TEST_SOCKET),y)
+        SRC_FILES += test_socket.c
+    endif    
+
     ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
         SRC_FILES += 
     endif
