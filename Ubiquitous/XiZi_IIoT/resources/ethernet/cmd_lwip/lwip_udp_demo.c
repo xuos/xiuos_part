@@ -19,27 +19,67 @@
 */
 #include "board.h"
 #include "sys_arch.h"
-#include "lwip/udp.h"
-#include <shell.h>
 #include <sys.h>
 #include <xizi.h>
-#include "lwip/sockets.h"
 
+#include <stdbool.h>
+#include <unistd.h>
+
+#include "lwip/sockets.h"
+#include "lwip/udp.h"
+
+#include <argparse.h>
+#include <shell.h>
 
 #define PBUF_SIZE 27
 
 static struct udp_pcb *udpecho_raw_pcb;
 
-char udp_server_ip[] = {192, 168, 130, 2};
 u16_t udp_server_port = LWIP_TARGET_PORT;
-int32 udp_send_num = 0;
-int8 udp_send_task_on = 0;
-uint32 udp_interval = 50;
-
+#define UDP_BUFFER_SIZE 50
 char hello_str[] = {"hello world\r\n"};
-char udp_demo_msg[] = "\nThis one is UDP package!!!\n";
+char udp_demo_buffer[UDP_BUFFER_SIZE] = { '\0' };
 
 /******************************************************************************/
+enum LwipUdpSendParamEnum {
+    TARGET_IP = 0,
+    TARGET_PORT = 'p',
+    SEND_MESSAGE = 'm',
+    SEND_NUM = 'n',
+    SEND_INTERVAL = 'i',
+};
+
+struct LwipUdpSendParam {
+    uint32_t num;
+    uint32_t interval;
+    uint16_t port;
+    uint8_t ip[4];
+    bool task_on;
+    bool given_ip;
+    bool given_port;
+    bool given_msg;
+};
+
+struct LwipUdpSendParam* get_udp_test_info()
+{
+    /* init once and init when used. */
+    static struct LwipUdpSendParam g_udp_send_param = {
+        .interval = 100,
+        .num = 10,
+        .port = LWIP_TARGET_PORT,
+        .ip = { 127, 0, 0, 1 },
+        .task_on = false,
+        .given_ip = false,
+        .given_port = false,
+        .given_msg = false,
+    };
+    return &g_udp_send_param;
+}
+
+static const char* const usages[] = {
+    "UDPSend [--options arg] [-option arg]",
+    NULL,
+};
 
 static void LwipUDPSendTask(void *arg)
 {
@@ -56,8 +96,8 @@ static void LwipUDPSendTask(void *arg)
 
     struct sockaddr_in udp_sock;
     udp_sock.sin_family = AF_INET;
-    udp_sock.sin_port = htons(udp_server_port);
-    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(udp_server_ip[0], udp_server_ip[1], udp_server_ip[2], udp_server_ip[3]));
+    udp_sock.sin_port = htons(get_udp_test_info()->port);
+    udp_sock.sin_addr.s_addr = PP_HTONL(LWIP_MAKEU32(get_udp_test_info()->ip[0], get_udp_test_info()->ip[1], get_udp_test_info()->ip[2], get_udp_test_info()->ip[3]));
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
     if (connect(socket_fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr))) {
@@ -68,59 +108,81 @@ static void LwipUDPSendTask(void *arg)
 
     KPrintf("UDP connect success, start to send.\n");
     KPrintf("\n\nTarget Port:%d\n\n", udp_sock.sin_port);
-    udp_send_task_on = 1;
+    get_udp_test_info()->task_on = true;
 
-    while(udp_send_num > 0 || udp_send_num == -1) {
-        sendto(socket_fd, udp_demo_msg, strlen(udp_demo_msg), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
-        KPrintf("Send UDP msg: %s \n", udp_demo_msg);
-        MdelayKTask(udp_interval);
-        udp_send_num--;
+    while (get_udp_test_info()->num > 0 || get_udp_test_info()->num == -1) {
+        sendto(socket_fd, udp_demo_buffer, strlen(udp_demo_buffer), 0, (struct sockaddr*)&udp_sock, sizeof(struct sockaddr));
+        KPrintf("Send UDP msg: %s \n", udp_demo_buffer);
+        MdelayKTask(get_udp_test_info()->interval);
+        get_udp_test_info()->num--;
     }
     closesocket(socket_fd);
-    udp_send_task_on = 0;
+    get_udp_test_info()->task_on = false;
     return;
 }
 
-void *LwipUdpSendTest(int argc, char *argv[])
+static int LwipUdpSend(int argc, char* argv[])
 {
-    if(udp_send_task_on) {
-        udp_send_num = 0;
-        printf("waitting send task exit...\n");
-        while(udp_send_task_on){
-            MdelayKTask(1000);
-        }
-        udp_send_num = 1;
+    static char usage_info[] = "Send udp NUM message to IP:PORT with time INTERVAL between each message send.";
+    static char program_info[] = "UDP SEND TEST DEMO.";
+
+    /* Wait if there are former udp task */
+    if (get_udp_test_info()->task_on) {
+        KPrintf("[%s] Waiting former udp send task to exit.\n");
+    }
+    while (get_udp_test_info()->task_on) {
+        MdelayKTask(1000);
     }
 
-    uint8_t enet_port = 0; ///< test enet port 0
-    memset(udp_demo_msg, 0, sizeof(udp_demo_msg));
+    get_udp_test_info()->given_ip = false;
+    get_udp_test_info()->given_port = false;
+    get_udp_test_info()->given_msg = false;
 
-    if(argc == 1) {
-        KPrintf("lw: [%s] gw %d.%d.%d.%d:%d\n", __func__, udp_server_ip[0], udp_server_ip[1], udp_server_ip[2], udp_server_ip[3], udp_server_port);
-        strncpy(udp_demo_msg, hello_str, strlen(hello_str));
-        udp_send_num = 10;
-        udp_interval = 100;
-    } else {
-        strncpy(udp_demo_msg, argv[1], strlen(argv[1]));
-        strncat(udp_demo_msg, "\r\n", 3);
-        if(argc >= 3) {
-            sscanf(argv[2], "%d.%d.%d.%d:%d", &udp_server_ip[0], &udp_server_ip[1], &udp_server_ip[2], &udp_server_ip[3], &udp_server_port);
-        }
-        if(argc > 3) {
-            sscanf(argv[3], "%d", &udp_send_num);
-            sscanf(argv[4], "%d", &udp_interval);
-        }
+    /* Parse options */
+    char* msg_ptr = NULL;
+    char* ip_ptr = NULL;
+    bool is_help = false;
+    struct argparse_option options[] = {
+        OPT_HELP(&is_help),
+        OPT_STRING(SEND_MESSAGE, "message", &msg_ptr, "MESSAGE to send", NULL, 0, 0),
+        OPT_STRING(TARGET_IP, "ip", &ip_ptr, "target IP to send upd messages", NULL, 0, 0),
+        OPT_INTEGER(TARGET_PORT, "port", &get_udp_test_info()->port, "target PORT to send udp messages", NULL, 0, 0),
+        OPT_INTEGER(SEND_NUM, "num", &get_udp_test_info()->num, "send NUM udp messages", NULL, 0, 0),
+        OPT_INTEGER(SEND_INTERVAL, "interval", &get_udp_test_info()->interval, "time INTERVAL between messages", NULL, 0, 0),
+        OPT_END(),
+    };
+
+    struct argparse argparse;
+    argparse_init(&argparse, options, usages, 0);
+    argparse_describe(&argparse, usage_info, program_info);
+    argc = argparse_parse(&argparse, argc, (const char**)argv);
+    if (argc < 0) {
+        KPrintf("Error options.\n");
+        return -ERROR;
+    }
+    if (is_help) {
+        return EOK;
     }
 
-    KPrintf("lw: [%s] gw %d.%d.%d.%d:%d send time %d udp_interval %d\n", __func__, udp_server_ip[0], udp_server_ip[1], udp_server_ip[2], udp_server_ip[3], udp_server_port, udp_send_num, udp_interval);
+    // translate string to array
+    sscanf(ip_ptr, "%d.%d.%d.%d", &get_udp_test_info()->ip[0], &get_udp_test_info()->ip[1], &get_udp_test_info()->ip[2], &get_udp_test_info()->ip[3]);
+    int msg_len = strlen(msg_ptr);
+    strncpy(udp_demo_buffer, msg_ptr, msg_len < UDP_BUFFER_SIZE ? msg_len : UDP_BUFFER_SIZE);
 
-    //init lwip and net dirver
-    lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    /* start task */
+    KPrintf("[%s] gw %d.%d.%d.%d:%d send time %d udp_interval %d\n", __func__,
+        get_udp_test_info()->ip[0], get_udp_test_info()->ip[1], get_udp_test_info()->ip[2], get_udp_test_info()->ip[3],
+        get_udp_test_info()->port,
+        get_udp_test_info()->num,
+        get_udp_test_info()->interval);
+
+    lwip_config_net(0, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     sys_thread_new("udp send", LwipUDPSendTask, NULL, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
+    return EOK;
 }
 
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(5),
-     UDPSend, LwipUdpSendTest, UDPSend msg [ip:port [num [interval]]]);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(16),
+    UDPSend, LwipUdpSend, UDPSend Demo);
 
 void LwipUdpRecvTest(void)
 {

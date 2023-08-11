@@ -57,7 +57,7 @@ void TestMasterI2c(void)
 {
     char recv_buff[13] = { 0 };
 
-    int iic_fd = open_iic();
+    int iic_fd = OpenIic();
     if (iic_fd < 0) {
         printf("[%s] Error open iic\n", __func__);
         return;
@@ -78,7 +78,7 @@ void TestSlaveI2c(void)
 {
     char send_buff[] = "Hello, World";
 
-    int iic_fd = open_iic();
+    int iic_fd = OpenIic();
 
     for (int transmit_cnt = 0; transmit_cnt < nr_transmit; transmit_cnt++) {
         // wait if you like.
