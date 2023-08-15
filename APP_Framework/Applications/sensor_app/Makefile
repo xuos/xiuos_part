@@ -1,6 +1,6 @@
 include $(KERNEL_ROOT)/.config
 
-ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
+ifeq ($(CONFIG_ADD_NUTTX_FEATURES),y)
     include $(APPDIR)/Make.defs
  
     ifeq ($(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS), y)
@@ -64,7 +64,7 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
 
 endif
 
-ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     SRC_FILES := 
 
     ifeq ($(CONFIG_APPLICATION_SENSOR_HCHO_TB600B_WQ_HCHO1OS), y)

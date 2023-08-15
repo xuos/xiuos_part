@@ -193,7 +193,7 @@
 /* Framework */
 
 #define TRANSFORM_LAYER_ATTRIUBUTE
-#define ADD_XIZI_FETURES
+#define ADD_XIZI_FEATURES
 
 /* Security */
 

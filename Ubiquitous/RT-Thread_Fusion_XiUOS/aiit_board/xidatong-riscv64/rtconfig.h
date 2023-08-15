@@ -217,7 +217,7 @@
 /* Framework */
 
 #define TRANSFORM_LAYER_ATTRIUBUTE
-#define ADD_RTTHREAD_FETURES
+#define ADD_RTTHREAD_FEATURES
 
 /* Security */
 

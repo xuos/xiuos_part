@@ -20,22 +20,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 
 #define I2C_SLAVE_ADDRESS 0x0012U
 
-void TestI2C(void)
+int OpenIic(void)
 {
-    // config IIC pin(SCL:34.SDA:35) in menuconfig
     int iic_fd = PrivOpen(I2C_DEV_DRIVER, O_RDWR);
     if (iic_fd < 0)
     {
-        printf("open iic_fd fd error:%d\n", iic_fd);
-        return;
+        printf("[TestI2C] Open iic_fd fd error: %d\n", iic_fd);
+        return -ERROR;
     }
-    printf("IIC open successful!\n");
+    printf("[TestI2C] IIC open successful!\n");
 
-    // init iic
     uint16 iic_address = I2C_SLAVE_ADDRESS;
 
     struct PrivIoctlCfg ioctl_cfg;
@@ -44,28 +42,55 @@ void TestI2C(void)
 
     if (0 != PrivIoctl(iic_fd, OPE_INT, &ioctl_cfg))
     {
-        printf("ioctl iic fd error %d\n", iic_fd);
+        printf("[TestI2C] Ioctl iic fd error %d\n", iic_fd);
         PrivClose(iic_fd);
-        return;
+        return -ERROR;
     }
     printf("IIC configure successful!\n");
 
-    // I2C read and write
-    char tmp_buff[100];
-    while (1)
-    {
-        PrivTaskDelay(1000);
-        PrivWrite(iic_fd, "Hello World!\n", sizeof("Hello World!\n"));
-        printf("msg send:%s\n", "Hello World!\n");
-        PrivTaskDelay(1000);
-        memset(tmp_buff, 0, sizeof(tmp_buff));
-        PrivRead(iic_fd, tmp_buff, sizeof(tmp_buff));
-        printf("msg recv:%s\n", tmp_buff);
+    return iic_fd;
+}
+
+static const int nr_transmit = 15;
+
+void TestMasterI2c(void)
+{
+    char recv_buff[13] = { 0 };
+
+    int iic_fd = OpenIic();
+    if (iic_fd < 0) {
+        printf("[%s] Error open iic\n", __func__);
+        return;
+    }
+
+    for (int transmit_cnt = 0; transmit_cnt < nr_transmit; transmit_cnt++) {
+        // wait if you like.
+        PrivTaskDelay(500);
+        memset(recv_buff, 0, sizeof(recv_buff));
+        PrivRead(iic_fd, recv_buff, sizeof(recv_buff));
+        printf("[%s] Msg recv: %s\n", __func__, recv_buff);
     }
 
     PrivClose(iic_fd);
-    return;
 }
 
-PRIV_SHELL_CMD_FUNCTION(TestI2C, a iic test sample, PRIV_SHELL_CMD_MAIN_ATTR);
+void TestSlaveI2c(void)
+{
+    char send_buff[] = "Hello, World";
+
+    int iic_fd = OpenIic();
+
+    for (int transmit_cnt = 0; transmit_cnt < nr_transmit; transmit_cnt++) {
+        // wait if you like.
+        PrivTaskDelay(500);
+        PrivWrite(iic_fd, send_buff, sizeof(send_buff));
+        printf("[%s] Msg send: %s\n", __func__, send_buff);
+    }
+
+    PrivClose(iic_fd);
+}
+
+PRIV_SHELL_CMD_FUNCTION(TestMasterI2c, a iic test sample, PRIV_SHELL_CMD_MAIN_ATTR);
+PRIV_SHELL_CMD_FUNCTION(TestSlaveI2c, a iic test sample, PRIV_SHELL_CMD_MAIN_ATTR);
+
 #endif

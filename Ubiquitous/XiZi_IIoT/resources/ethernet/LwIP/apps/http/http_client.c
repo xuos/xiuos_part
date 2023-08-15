@@ -64,7 +64,8 @@
  * HTTPC_DEBUG: Enable debugging for HTTP client.
  */
 #ifndef HTTPC_DEBUG
-#define HTTPC_DEBUG                 LWIP_DBG_OFF
+#define HTTPC_DEBUG                 LWIP_DBG_ON
+// #define HTTPC_DEBUG                 LWIP_DBG_OFF
 #endif
 
 /** Set this to 1 to keep server name and uri in request state */

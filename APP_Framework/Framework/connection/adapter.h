@@ -53,6 +53,7 @@ extern "C" {
 #define ADAPTER_NBIOT_NAME "nbiot"
 #define ADAPTER_WIFI_NAME "wifi"
 #define ADAPTER_ZIGBEE_NAME "zigbee"
+#define ADAPTER_MODBUS_RTU_NAME "modbus_rtu"
 
 struct Adapter;
 struct AdapterProductInfo;

@@ -20,13 +20,13 @@
 
 #include <transform.h>
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 #include <sys_arch.h>
 #include <lwip/sockets.h>
 #include "lwip/sys.h"
 #endif
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -45,7 +45,7 @@ static char tcp_demo_ipaddr[] = {192, 168, 131, 77};
 static char tcp_demo_netmask[] = {255, 255, 254, 0};
 static char tcp_demo_gwaddr[] = {192, 168, 131, 1};
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 #define lw_print printf
 #define lw_notice printf
 #define lw_error printf
@@ -151,7 +151,7 @@ void TcpSocketRecvTest(int argc, char *argv[])
         TcpSocketConfigParam(argv[1]);
     }
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     lwip_config_tcp(0, tcp_demo_ipaddr, tcp_demo_netmask, tcp_demo_gwaddr);
 
     pthread_attr_t attr;
@@ -159,7 +159,7 @@ void TcpSocketRecvTest(int argc, char *argv[])
     attr.stacksize = LWIP_TCP_DEMO_TASK_STACK_SIZE;
 #endif
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
     attr.priority = LWIP_TCP_DEMO_TASK_PRIO;
     attr.stacksize = LWIP_TCP_DEMO_TASK_STACK_SIZE;
@@ -222,14 +222,14 @@ void TcpSocketSendTest(int argc, char *argv[])
         TcpSocketConfigParam(argv[1]);
     }
 
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
     lwip_config_tcp(0, tcp_demo_ipaddr, tcp_demo_netmask, tcp_demo_gwaddr);
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = LWIP_TCP_DEMO_TASK_PRIO;
     attr.stacksize = LWIP_TCP_DEMO_TASK_STACK_SIZE;
 #endif
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
     pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
     attr.priority = LWIP_TCP_DEMO_TASK_PRIO;
     attr.stacksize = LWIP_TCP_DEMO_TASK_STACK_SIZE;

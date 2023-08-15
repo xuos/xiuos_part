@@ -2,7 +2,7 @@ config ADAPTER_LORA_E220
         string "E220-400T22S adapter name"
         default "e220"
 
-if ADD_XIZI_FETURES
+if ADD_XIZI_FEATURES
         config ADAPTER_E220_M0
                 int "E220 M0 pin number"
                 default "11"
@@ -35,7 +35,7 @@ if ADD_XIZI_FETURES
         endif
 endif
 
-if ADD_NUTTX_FETURES
+if ADD_NUTTX_FEATURES
 
         config ADAPTER_E220_M0_PATH
                 string "E220 M0 pin device"
@@ -66,7 +66,7 @@ if ADD_NUTTX_FETURES
 
 endif
 
-if ADD_RTTHREAD_FETURES
+if ADD_RTTHREAD_FEATURES
      config ADAPTER_E220_M0
                 int "E220 M0 pin number"
                 default "11"

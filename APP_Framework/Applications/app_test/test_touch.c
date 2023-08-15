@@ -24,7 +24,7 @@
 
 #include <transform.h>
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 
 #ifdef CONFIG_BSP_USING_TOUCH
 void TestTouch(void)
@@ -48,7 +48,7 @@ void TestTouch(void)
 #define LCD_DOT_TYPE 1
 #define LCD_SIZE 320
 
-#elif defined ADD_XIZI_FETURES
+#elif defined ADD_XIZI_FEATURES
 
 void TestTouch(void)
 {

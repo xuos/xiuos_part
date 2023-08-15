@@ -1,5 +1,5 @@
 include $(KERNEL_ROOT)/.config
-ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
+ifeq ($(CONFIG_ADD_NUTTX_FEATURES),y)
     include $(APPDIR)/Make.defs
 
     ifeq ($(CONFIG_USER_TEST_SEMC),y)
@@ -22,7 +22,7 @@ ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
 
 endif
 
-ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     SRC_FILES := test_shell.c
 
     ifeq ($(CONFIG_USER_TEST_ADC),y)
@@ -47,6 +47,10 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
 
     ifeq ($(CONFIG_USER_TEST_I2C),y)
         SRC_FILES += test_i2c.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_UART),y)
+        SRC_FILES += test_uart.c
     endif
 
     ifeq ($(CONFIG_USER_TEST_GPIO),y)
@@ -99,7 +103,51 @@ ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
 
     ifeq ($(CONFIG_USER_TEST_TIMER),y)
         SRC_FILES += test_timer.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_HASH),y)
+        SRC_FILES += test_hash/test_hash.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_RADIX),y)
+        SRC_FILES += test_radix_tree/test_radix_tree.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_RBTREE),y)
+        SRC_FILES += test_rbtree/test_rbtree.c
     endif    
+
+    ifeq ($(CONFIG_USER_TEST_SOCKET),y)
+        SRC_FILES += test_socket.c
+    endif    
+
+    ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_MQTTCLIENT),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_FTPCLIENT),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_LORA_P2P),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_LORAWAN_SINGLEGW),y)
+        SRC_FILES += 
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_CANOPEN),y)
+        SRC_FILES += 
+    endif  
+
+    ifeq ($(CONFIG_USER_TEST_USB_CAMERA),y)
+        SRC_FILES += 
+    endif     
 
     include $(KERNEL_ROOT)/compiler.mk
 endif

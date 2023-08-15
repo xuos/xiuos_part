@@ -179,11 +179,16 @@ err_t ethernetif1_init(struct netif *netif);
  *
  * @param netif the lwip network interface structure for this ethernetif
  */
-void ethernetif_input( struct netif *netif);
+void ethernetif_input( void *netif_arg);
 
-void ETH_BSP_Config(void);
-
+int ETH_BSP_Config(void);
+void *ethernetif_config_enet_set(uint8_t enet_port);
 int32 lwip_obtain_semaphore(struct netif *netif);
+
+int lwip_netdev_add(struct netif* lwip_netif);
+void lwip_netdev_del(struct netif* lwip_netif);
+
+#define NETIF_ENET0_INIT_FUNC ethernetif0_init
 
 #if defined(__cplusplus)
 }

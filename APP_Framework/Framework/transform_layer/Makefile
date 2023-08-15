@@ -1,6 +1,6 @@
 SRC_DIR := 
 
-ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
 	SRC_DIR += xizi
 endif
 

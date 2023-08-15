@@ -52,6 +52,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
@@ -86,6 +88,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
@@ -334,6 +338,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif
 endif
 
@@ -365,6 +371,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif
 endif
 
@@ -391,7 +399,7 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include #
 endif
 
-ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/hc32f4a0)
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/edu-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4/hc32f4a0 \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
@@ -419,6 +427,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
@@ -436,18 +446,18 @@ KERNELPATHS +=-I$(KERNEL_ROOT)/fs/compatibility_ch376 #
 endif
 
 ifeq ($(CONFIG_TRANSFORM_LAYER_ATTRIUBUTE), y)
-ifeq ($(CONFIG_ADD_XIZI_FETURES), y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES), y)
 ifeq ($(CONFIG_LIB_MUSLLIB), )
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi/user_api/posix_support/include #
 endif
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi #
 endif
 
-ifeq ($(CONFIG_ADD_NUTTX_FETURES), y)
+ifeq ($(CONFIG_ADD_NUTTX_FEATURES), y)
 #
 endif
 
-ifeq ($(CONFIG_ADD_RTTHREAD_FETURES), y)
+ifeq ($(CONFIG_ADD_RTTHREAD_FEATURES), y)
 #
 endif
 
@@ -533,6 +543,10 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_deviceno
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Mac/Crypto #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Phy/region #
 endif
+
+ifeq ($(CONFIG_LIB_USING_LORAWAN_GATEWAY_SC),y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_gateway_single_channel/inc #
+endif
 endif
 
 ifeq ($(CONFIG_CRYPTO), y)
@@ -550,9 +564,16 @@ endif
 
 endif
 
+ifeq ($(CONFIG_APP_USING_WEBNET),y)
+	KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/webnet/WebNet_XiUOS/inc \
+				   -I$(KERNEL_ROOT)/../../APP_Framework/Applications/webnet/WebNet_XiUOS/samples #
+endif
+
+
 ifeq ($(CONFIG_TOOL_SHELL), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/tool/shell/letter-shell \
-	-I$(KERNEL_ROOT)/tool/shell/letter-shell/file_ext #
+	-I$(KERNEL_ROOT)/tool/shell/letter-shell/file_ext \
+	-I$(KERNEL_ROOT)/tool/shell/
 endif
 
 ifeq ($(CONFIG_TOOL_USING_OTA), y)

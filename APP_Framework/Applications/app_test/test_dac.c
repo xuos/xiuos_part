@@ -20,19 +20,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <transform.h>
-#ifdef ADD_XIZI_FETURES
+#ifdef ADD_XIZI_FEATURES
 
-void TestDac(void)
+static pthread_t test_dac_task;
+
+static void *TestDacTask(void *parameter)
 {
     int dac_fd;
-    uint16 dac_set_value = 800;
-    uint16 dac_sample, dac_value_decimal = 0;
-    float dac_value;
+    uint16 dac_set_value = 4096 * 10;//sin length
 
     dac_fd = PrivOpen(DAC_DEV_DRIVER, O_RDWR);
     if (dac_fd < 0) {
         KPrintf("open dac fd error %d\n", dac_fd);
-        return;
     }
 
     struct PrivIoctlCfg ioctl_cfg;
@@ -41,20 +40,24 @@ void TestDac(void)
     if (0 != PrivIoctl(dac_fd, OPE_CFG, &ioctl_cfg)) {
         KPrintf("ioctl dac fd error %d\n", dac_fd);
         PrivClose(dac_fd);
-        return;
     }
 
-    PrivRead(dac_fd, &dac_sample, 2);
-
-    dac_value = (float)dac_sample * (3.3 / 4096);//Vref+ need to be 3.3V
-
-    dac_value_decimal = (dac_value - (uint16)dac_value) * 1000;
-
-    printf("dac sample %u value integer %u decimal %u\n", dac_sample, (uint16)dac_value, dac_value_decimal);
+    while (1) {
+        //start dac output sin
+        PrivWrite(dac_fd, NULL, 0);
+    }
 
     PrivClose(dac_fd);
+}
 
-    return;
+void TestDac(void)
+{
+    pthread_attr_t tid;
+    tid.schedparam.sched_priority = 20;
+    tid.stacksize = 4096;
+
+    PrivTaskCreate(&test_dac_task, &tid, &TestDacTask, NULL);
+    PrivTaskStartup(&test_dac_task);
 }
 PRIV_SHELL_CMD_FUNCTION(TestDac, a dac test sample, PRIV_SHELL_CMD_MAIN_ATTR);
 #endif

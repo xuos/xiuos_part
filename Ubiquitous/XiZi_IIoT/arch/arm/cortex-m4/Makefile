@@ -14,7 +14,7 @@ SRC_FILES += svc_handle.c mpu.c
 endif
 endif
 
-ifeq ($(CONFIG_BOARD_HC32F4A0_EVB),y)
+ifeq ($(CONFIG_BOARD_EDU_ARM32_EVB),y)
 SRC_DIR += hc32f4a0
 endif
 
