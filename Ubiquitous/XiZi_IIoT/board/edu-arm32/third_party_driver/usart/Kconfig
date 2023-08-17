@@ -13,6 +13,21 @@ menuconfig BSP_USING_UART3
             default "usart3_dev3"   
     endif
 
+menuconfig BSP_USING_UART4
+    bool "Enable USART4 for RS485"
+    default y
+    if BSP_USING_UART4
+        config SERIAL_BUS_NAME_4
+            string "serial bus 4 name"
+            default "usart4"
+        config SERIAL_DRV_NAME_4
+            string "serial bus 4 driver name"
+            default "usart4_drv"
+        config SERIAL_4_DEVICE_NAME_0
+            string "serial bus 4 device 0 name"
+            default "usart4_dev4"   
+    endif
+
 menuconfig BSP_USING_UART6
     bool "Enable USART6"
     default n
