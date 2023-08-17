@@ -263,7 +263,7 @@ err_t ethernetif_init(struct netif* netif)
     if (EOK != lwip_netdev_add(netif)) {
         SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] LWIP add netdev failed.\n", __func__));
     } else {
-        printf("[%s] Add Netdev successful\n", __func__);
+        // printf("[%s] Add Netdev successful\n", __func__);
     }
     return LL_OK;
 }
