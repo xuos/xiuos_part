@@ -117,6 +117,9 @@ static uint32 I2cDrvConfigure(void *drv, struct BusConfigureInfo *configure_info
 
 static uint32 I2cMasterWriteData(struct I2cHardwareDevice *i2c_dev, struct I2cDataStandard *msg)
 {
+    if (msg->len == 0) {
+            return EOK;
+    }
     uint32 i32Ret;
 
     I2C_Cmd(I2C_UNIT, ENABLE);
@@ -171,6 +174,9 @@ static uint32 I2cMasterReadData(struct I2cHardwareDevice *i2c_dev, struct I2cDat
 }
 
 static uint32 I2cSlaveWriteData(struct I2cHardwareDevice *i2c_dev, struct I2cDataStandard *msg) {
+    if (msg->len == 0) {
+        return EOK;
+    }
     uint32 i32Ret;
 
     I2C_Cmd(I2C_UNIT, ENABLE);
@@ -222,7 +228,7 @@ static uint32 I2cSlaveReadData(struct I2cHardwareDevice *i2c_dev, struct I2cData
     if (RESET == I2C_GetStatus(I2C_UNIT, I2C_FLAG_TRA)) {
         /* Slave receive data*/
         i32Ret = I2C_ReceiveData(I2C_UNIT, msg->buf, msg->len, I2C_TIMEOUT);
-		KPrintf("Slave receive success!\r\n");
+        KPrintf("Slave receive success!\r\n");
 
         if ((LL_OK == i32Ret) || (LL_ERR_TIMEOUT == i32Ret)) {
             /* Wait stop condition */
@@ -336,7 +342,7 @@ int HwI2cInit(void)
     return ret;
 }
 
-//#define I2C_TEST
+// #define I2C_TEST
 #ifdef I2C_TEST
 
 #define USER_KEY_PORT                  (GPIO_PORT_I)

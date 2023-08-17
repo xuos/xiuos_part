@@ -540,7 +540,7 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 #define TCPIP_THREAD_NAME               "tcp"
 #define TCPIP_THREAD_STACKSIZE          2048
 #define TCPIP_MBOX_SIZE                 16
-#define TCPIP_THREAD_PRIO               20
+#define TCPIP_THREAD_PRIO 30
 
 /*
    ----------------------------------------

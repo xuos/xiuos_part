@@ -572,7 +572,8 @@ endif
 
 ifeq ($(CONFIG_TOOL_SHELL), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/tool/shell/letter-shell \
-	-I$(KERNEL_ROOT)/tool/shell/letter-shell/file_ext #
+	-I$(KERNEL_ROOT)/tool/shell/letter-shell/file_ext \
+	-I$(KERNEL_ROOT)/tool/shell/
 endif
 
 ifeq ($(CONFIG_TOOL_USING_OTA), y)

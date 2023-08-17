@@ -22,26 +22,94 @@
 #include <transform.h>
 #ifdef ADD_XIZI_FEATURES
 
-#define BSP_485_DIR_PIN 24
+//edu-arm board dir pin PG01----no.67 in XiZi_IIoT/board/edu_arm32/third_party_driver/gpio/connect_gpio.c
+#define BSP_485_DIR_PIN 67
+
+static int pin_fd;
+static int uart_fd;
+static char write_485_data[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+static char read_485_data[8] = {0};
+
+/**
+ * @description: Set Uart 485 Input
+ * @return 
+ */
+static void Set485Input(void)
+{
+    struct PinStat pin_stat;
+    pin_stat.pin = BSP_485_DIR_PIN;
+    pin_stat.val = GPIO_LOW;
+    PrivWrite(pin_fd, &pin_stat, 1);
+}
+
+/**
+ * @description: Set Uart 485 Output
+ * @return
+ */
+static void Set485Output(void)
+{
+    struct PinStat pin_stat;
+    pin_stat.pin = BSP_485_DIR_PIN;
+    pin_stat.val = GPIO_HIGH;
+    PrivWrite(pin_fd, &pin_stat, 1);
+}
+
+/**
+ * @description: Control Framework Serial Write
+ * @param write_data - write data
+ * @param length - length
+ * @return
+ */
+void Rs485Write(uint8_t *write_data, int length)
+{
+    Set485Output();
+    PrivTaskDelay(20);
+
+    PrivWrite(uart_fd, write_data, length);
+
+    PrivTaskDelay(15);
+    Set485Input();
+}
+
+/**
+ * @description: Control Framework Serial Read
+ * @param read_data - read data
+ * @param length - length
+ * @return read data size
+ */
+int Rs485Read(uint8_t *read_data, int length)
+{
+    int data_size = 0;
+    int data_recv_size = 0;
+
+    while (data_size < length) {
+        data_recv_size = PrivRead(uart_fd, read_data + data_size, length - data_size);
+        data_size += data_recv_size;
+    }
+
+    //need to wait 30ms , make sure write cmd again and receive data successfully
+    PrivTaskDelay(30);
+
+    return data_size;
+}
 
 void Test485(void)
 {
-    int pin_fd = PrivOpen(RS485_PIN_DEV_DRIVER, O_RDWR);
-    if (pin_fd < 0)
-    {
+    int read_data_length = 0;
+    pin_fd = PrivOpen(RS485_PIN_DEV_DRIVER, O_RDWR);
+    if (pin_fd < 0) {
         printf("open pin fd error:%d\n", pin_fd);
         return;
     }
 
-    int uart_fd = PrivOpen(RS485_UART_DEV_DRIVER, O_RDWR);
-    if (uart_fd < 0)
-    {
+    uart_fd = PrivOpen(RS485_UART_DEV_DRIVER, O_RDWR);
+    if (uart_fd < 0) {
         printf("open pin fd error:%d\n", uart_fd);
         return;
     }
     printf("uart and pin fopen success\n");
 
-    //config led pin in board
+    //config dir pin in board
     struct PinParam pin_parameter;
     memset(&pin_parameter, 0, sizeof(struct PinParam));
     pin_parameter.cmd = GPIO_CONFIG_MODE;
@@ -68,36 +136,34 @@ void Test485(void)
     uart_cfg.serial_bit_order = BIT_ORDER_LSB;
     uart_cfg.serial_invert_mode = NRZ_NORMAL;
     uart_cfg.serial_buffer_size = SERIAL_RB_BUFSZ;
-    uart_cfg.serial_timeout = 1000;
+    uart_cfg.serial_timeout = -1;
     uart_cfg.is_ext_uart = 0;
 
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
     ioctl_cfg.args = (void *)&uart_cfg;
 
-    if (0 != PrivIoctl(uart_fd, OPE_INT, &ioctl_cfg))
-    {
+    if (0 != PrivIoctl(uart_fd, OPE_INT, &ioctl_cfg)) {
         printf("ioctl uart fd error %d\n", uart_fd);
         PrivClose(uart_fd);
         return;
     }
 
-    struct PinStat pin_dir;
-    pin_dir.pin = BSP_485_DIR_PIN;
-    while (1)
-    {
-        pin_dir.val = GPIO_HIGH;
-        PrivWrite(pin_fd,&pin_dir,0);
-        PrivWrite(uart_fd,"Hello world!\n",sizeof("Hello world!\n"));
-        PrivTaskDelay(100);
+    Rs485Write(write_485_data, sizeof(write_485_data));
 
-        pin_dir.val = GPIO_LOW;
-        PrivWrite(pin_fd,&pin_dir,0);
-        char recv_buff[100];
-        memset(recv_buff,0,sizeof(recv_buff));
-        PrivRead(uart_fd,recv_buff,20);
-        printf("%s",recv_buff);
-        PrivTaskDelay(100);
+    while(1) {
+        printf("ready to read data\n");
+
+        read_data_length = Rs485Read(read_485_data, sizeof(read_485_data));
+        printf("%s read data length %d\n", __func__, read_data_length);
+        for (int i = 0; i < read_data_length; i ++) {
+            printf("i %d read data 0x%x\n", i, read_485_data[i]);
+        }
+        Rs485Write(read_485_data, read_data_length);
+        memset(read_485_data, 0, sizeof(read_485_data));
+
+        printf("read data done\n");
     }
+
     PrivClose(pin_fd);
     PrivClose(uart_fd);
     return;
