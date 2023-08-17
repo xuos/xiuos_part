@@ -50,6 +50,14 @@ Modification:
 #define USART3_TX_PIN                   (GPIO_PIN_10)
 #endif
 
+#if defined(BSP_USING_UART4)
+#define USART4_RX_PORT                  (GPIO_PORT_E)
+#define USART4_RX_PIN                   (GPIO_PIN_07)
+
+#define USART4_TX_PORT                  (GPIO_PORT_G)
+#define USART4_TX_PIN                   (GPIO_PIN_00)
+#endif
+
 #if defined(BSP_USING_UART6)
 #define USART6_RX_PORT                  (GPIO_PORT_H)
 #define USART6_RX_PIN                   (GPIO_PIN_06)
@@ -70,6 +78,12 @@ static x_err_t UartGpioInit(CM_USART_TypeDef *USARTx)
     case (uint32)CM_USART3:
         GPIO_SetFunc(USART3_RX_PORT, USART3_RX_PIN, GPIO_FUNC_33);
         GPIO_SetFunc(USART3_TX_PORT, USART3_TX_PIN, GPIO_FUNC_32);
+        break;
+#endif
+#ifdef BSP_USING_UART4
+    case (uint32)CM_USART4:
+        GPIO_SetFunc(USART4_RX_PORT, USART4_RX_PIN, GPIO_FUNC_33);
+        GPIO_SetFunc(USART4_TX_PORT, USART4_TX_PIN, GPIO_FUNC_32);
         break;
 #endif
 #ifdef BSP_USING_UART6
@@ -118,6 +132,32 @@ void Uart3RxErrIrqHandler(void)
     lock = DISABLE_INTERRUPT();
 
     UartRxErrIsr(&serial_bus_3, &serial_driver_3, &serial_device_3);
+
+    ENABLE_INTERRUPT(lock);
+}
+#endif
+
+#ifdef BSP_USING_UART4
+struct SerialBus serial_bus_4;
+struct SerialDriver serial_driver_4;
+struct SerialHardwareDevice serial_device_4;
+
+void Uart4RxIrqHandler(void)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    SerialSetIsr(&serial_device_4, SERIAL_EVENT_RX_IND);
+
+    ENABLE_INTERRUPT(lock);
+}
+
+void Uart4RxErrIrqHandler(void)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    UartRxErrIsr(&serial_bus_4, &serial_driver_4, &serial_device_4);
 
     ENABLE_INTERRUPT(lock);
 }
@@ -495,6 +535,57 @@ int HwUsartInit(void)
     ret = BoardSerialDevBend(&serial_device_3, (void *)&serial_cfg_3, SERIAL_BUS_NAME_3, SERIAL_3_DEVICE_NAME_0);
     if (EOK != ret) {
         KPrintf("HwUartInit uart3 error ret %u\n", ret);
+        return ERROR;
+    }  
+#endif
+
+#ifdef BSP_USING_UART4
+    static struct SerialCfgParam serial_cfg_4;
+    memset(&serial_cfg_4, 0, sizeof(struct SerialCfgParam));
+
+    static struct SerialDevParam serial_dev_param_4;
+    memset(&serial_dev_param_4, 0, sizeof(struct SerialDevParam));
+    
+    static struct UsartHwCfg serial_hw_cfg_4;
+    memset(&serial_hw_cfg_4, 0, sizeof(struct UsartHwCfg));
+
+    serial_driver_4.drv_done = &drv_done;
+    serial_driver_4.configure = SerialDrvConfigure;
+    serial_device_4.hwdev_done = &hwdev_done;
+
+    serial_cfg_4.data_cfg = data_cfg_init;
+
+    //default irq configure
+    serial_hw_cfg_4.uart_device = CM_USART4;
+    serial_hw_cfg_4.usart_clock = FCG3_PERIPH_USART4;
+    serial_hw_cfg_4.rx_err_irq.irq_config.irq_num = BSP_UART4_RXERR_IRQ_NUM;
+    serial_hw_cfg_4.rx_err_irq.irq_config.irq_prio = BSP_UART4_RXERR_IRQ_PRIO;
+    serial_hw_cfg_4.rx_err_irq.irq_config.int_src = INT_SRC_USART4_EI;
+
+    serial_hw_cfg_4.rx_irq.irq_config.irq_num = BSP_UART4_RX_IRQ_NUM;
+    serial_hw_cfg_4.rx_irq.irq_config.irq_prio = BSP_UART4_RX_IRQ_PRIO;
+    serial_hw_cfg_4.rx_irq.irq_config.int_src = INT_SRC_USART4_RI;
+
+    serial_hw_cfg_4.rx_err_irq.irq_callback = Uart4RxErrIrqHandler;
+    serial_hw_cfg_4.rx_irq.irq_callback = Uart4RxIrqHandler;
+
+    hc32_install_irq_handler(&serial_hw_cfg_4.rx_err_irq.irq_config, serial_hw_cfg_4.rx_err_irq.irq_callback, 0);
+
+    serial_cfg_4.hw_cfg.private_data = (void *)&serial_hw_cfg_4;
+    serial_driver_4.private_data = (void *)&serial_cfg_4;
+
+    serial_dev_param_4.serial_work_mode = SIGN_OPER_INT_RX;
+    serial_device_4.haldev.private_data = (void *)&serial_dev_param_4;
+
+    ret = BoardSerialBusInit(&serial_bus_4, &serial_driver_4, SERIAL_BUS_NAME_4, SERIAL_DRV_NAME_4);
+    if (EOK != ret) {
+        KPrintf("HwUartInit uart4 error ret %u\n", ret);
+        return ERROR;
+    }
+
+    ret = BoardSerialDevBend(&serial_device_4, (void *)&serial_cfg_4, SERIAL_BUS_NAME_4, SERIAL_4_DEVICE_NAME_0);
+    if (EOK != ret) {
+        KPrintf("HwUartInit uart4 error ret %u\n", ret);
         return ERROR;
     }  
 #endif
