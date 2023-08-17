@@ -50,6 +50,7 @@ Modification:
 #include <bus_serial.h>
 #include <dev_serial.h>
 
+static int serial_isr_cnt = 0;
 static DoubleLinklistType serialdev_linklist;
 
 static int SerialWorkModeCheck(struct SerialDevParam *serial_dev_param)
@@ -138,6 +139,9 @@ static inline int SerialDevIntRead(struct SerialHardwareDevice *serial_dev, stru
         if (serial_dev->serial_fifo.serial_rx->serial_recv_num == serial_dev->serial_fifo.serial_rx->serial_send_num) {
             if (RET_FALSE == serial_dev->serial_fifo.serial_rx->serial_rx_full) {
                 CriticalAreaUnLock(lock);
+                if (0 == serial_isr_cnt) {
+                    KSemaphoreSetValue(serial_dev->haldev.dev_sem, 0);
+                }
                 break;
             }
         }
@@ -151,10 +155,12 @@ static inline int SerialDevIntRead(struct SerialHardwareDevice *serial_dev, stru
         if (RET_TRUE == serial_dev->serial_fifo.serial_rx->serial_rx_full) {
             serial_dev->serial_fifo.serial_rx->serial_rx_full = RET_FALSE;
         }
+        
+        if (serial_isr_cnt > 0) {
+            serial_isr_cnt--;
+        }
 
         CriticalAreaUnLock(lock);
-
-        //MdelayKTask(20);
 
         *read_data = get_char;
         read_data++; 
@@ -713,6 +719,10 @@ void SerialSetIsr(struct SerialHardwareDevice *serial_dev, int event)
                 if (serial_dev->haldev.dev_recv_callback) {
                     serial_dev->haldev.dev_recv_callback((void *)serial_dev, serial_rx_length);
                 }
+
+                lock = CriticalAreaLock();
+                serial_isr_cnt += 1;
+                CriticalAreaUnLock(lock);
                 
                 KSemaphoreAbandon(serial_dev->haldev.dev_sem);
             }
