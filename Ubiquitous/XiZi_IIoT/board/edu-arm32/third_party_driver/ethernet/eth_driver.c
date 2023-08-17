@@ -281,7 +281,7 @@ struct pbuf* low_level_input(struct netif* netif)
 extern void LwipSetIPTest(int argc, char* argv[]);
 int HwEthInit(void)
 {
-    //   lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    // lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     LwipSetIPTest(1, NULL);
     return EOK;
 }
