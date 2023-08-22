@@ -81,6 +81,10 @@ struct LoraHeaderFormat
     uint8_t crc_hi; //2
 };
 
+static int LoraClientJoinNet();
+static int LoraClientSendData(void* data, uint16_t raw_data_length);
+static int LoraClientQuitNet();
+
 /**************************gateway_handlers*********************************/
 static int ClientJoinNetHandler(struct Adapter* adapter,struct LoraHeaderFormat* header);
 static int ClientQuitNetHandler(struct Adapter* adapter,struct LoraHeaderFormat* header);
