@@ -66,7 +66,12 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     endif
 
     ifeq ($(CONFIG_USER_TEST_RS485),y)
-        SRC_FILES += test_rs485.c
+        ifeq ($(CONFIG_ARCH_RISCV),y)
+        SRC_FILES += test_rs485_riscv.c
+        endif
+        ifeq ($(CONFIG_ARCH_ARM),y)
+        SRC_FILES += test_rs485_arm.c
+        endif
     endif    
 
     ifeq ($(CONFIG_USER_TEST_HWTIMER),y)
