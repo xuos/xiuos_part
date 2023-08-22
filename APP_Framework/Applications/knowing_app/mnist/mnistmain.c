@@ -26,3 +26,4 @@ void mnist_app(void);
 int tfmnist(void) {
     mnist_app();
 }
+PRIV_SHELL_CMD_FUNCTION(tfmnist, a tenorflow_lite_for_microcontroller sample, PRIV_SHELL_CMD_FUNC_ATTR);
