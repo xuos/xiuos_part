@@ -39,14 +39,14 @@ void* ttf_thread(void *parameter)
     }
 }
 
-pthread_t lvgl_task;
+pthread_t lvgl_task_2;
 static int ttf_demo_init(void)
 {
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 25;
     attr.stacksize = 4096;
 
-    PrivTaskCreate(&lvgl_task, &attr, ttf_thread, NULL);
+    PrivTaskCreate(&lvgl_task_2, &attr, ttf_thread, NULL);
 
     return 0;
 }

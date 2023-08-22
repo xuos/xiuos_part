@@ -4,11 +4,11 @@
 
 void lv_example_aoteman(void)
 {
-    LV_IMG_DECLARE(aoteman);
+    LV_IMG_DECLARE(xiuos);
     lv_obj_t * img1 = lv_img_create(lv_scr_act());
-    lv_img_set_src(img1, &aoteman);
+    lv_img_set_src(img1, &xiuos);
     lv_obj_align(img1, LV_ALIGN_CENTER, 0, -20);
-    lv_obj_set_size(img1, 320, 240);
+    lv_obj_set_size(img1, 320, 320);
 
     lv_obj_t * img2 = lv_img_create(lv_scr_act());
     lv_img_set_src(img2, LV_SYMBOL_OK "Accept");
