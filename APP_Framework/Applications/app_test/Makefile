@@ -121,6 +121,11 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
         SRC_FILES += test_socket.c
     endif    
 
+    ifeq ($(CONFIG_USER_TEST_FTPCLIENT),y)
+        SRC_FILES += test_ftpclient/test_ftpclient.c test_ftpclient/ftp_client/ftp_client.c\
+                     test_ftpclient/ftp_client/my_socket.c
+    endif 
+
     ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
         SRC_FILES += 
     endif
