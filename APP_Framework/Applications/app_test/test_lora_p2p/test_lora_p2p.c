@@ -122,13 +122,13 @@ struct LoraHeaderFormat header_recv_buffer;
 
 static int LoraRecvHeader(struct Adapter* adapter, struct LoraHeaderFormat* header)
 {
-    UserTaskDelay(1000);
+    PrivTaskDelay(1000);
 
     if (LORA_HEADER_LENGTH == AdapterDeviceRecv(adapter,header,LORA_HEADER_LENGTH ))
     {
         if (0 == CheckHeaderCrc(header))
         {
-            UserTaskDelay(500);
+            PrivTaskDelay(500);
             return LORA_HEADER_LENGTH;
         }
     }
@@ -138,13 +138,13 @@ static int LoraRecvHeader(struct Adapter* adapter, struct LoraHeaderFormat* head
 
 static int LoraSendHeader(struct Adapter* adapter, struct LoraHeaderFormat* header)
 {
-    UserTaskDelay(500);
+    PrivTaskDelay(500);
 
     CalHeaderCrc(header);
 
     if (LORA_HEADER_LENGTH == AdapterDeviceSend(adapter,header,LORA_HEADER_LENGTH ))
     {
-        UserTaskDelay(1000);
+        PrivTaskDelay(1000);
         return LORA_HEADER_LENGTH;
     }
 
@@ -159,7 +159,7 @@ static int LoraSendData(struct Adapter* adapter,uint8_t* src_data, uint16_t raw_
         return -1;
     }
 
-    UserTaskDelay(500);
+    PrivTaskDelay(500);
     
     CalCrc(src_data,raw_data_length,src_data + raw_data_length, src_data + raw_data_length + 1);
 
@@ -171,7 +171,7 @@ static int LoraSendData(struct Adapter* adapter,uint8_t* src_data, uint16_t raw_
 
         printf("Send data : %s crc_lo: %X crc_hi: %X \n",src_data,crc_lo,crc_hi);
 
-        UserTaskDelay(1000);
+        PrivTaskDelay(1000);
         return raw_data_length + 2;
     }
     
@@ -187,11 +187,11 @@ static int LoraRecvData(struct Adapter* adapter, uint8_t* dest_data, uint16_t da
         return -1;
     }
 
-    UserTaskDelay(1000);
+    PrivTaskDelay(1000);
 
     if (data_length == AdapterDeviceRecv(adapter,dest_data,data_length))
     {
-        UserTaskDelay(500);
+        PrivTaskDelay(500);
         if (0 == CheckCrc(dest_data,data_length -2,dest_data[data_length-2],dest_data[data_length-1]))
         {
             return data_length;
@@ -218,7 +218,7 @@ static int LoraClientJoinNet()
         printf("The Lora device failed to open\n");
         return -1;
     }
-    UserMutexObtain(client_param->client_mtx, -1);
+    PrivMutexObtain(&client_param->client_mtx);
 
     memset(&header_send_buffer,0,LORA_HEADER_LENGTH);
 
@@ -229,7 +229,7 @@ static int LoraClientJoinNet()
     if (LORA_HEADER_LENGTH != LoraSendHeader(adapter,&header_send_buffer))
     {
         printf("The header of the incoming request failed to be sent\n");
-        UserMutexAbandon(client_param->client_mtx);
+        PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
     
@@ -238,14 +238,14 @@ static int LoraClientJoinNet()
     if (LORA_HEADER_LENGTH != LoraRecvHeader(adapter,&header_recv_buffer))
     {
         printf("Failed to receive the gateway inbound response data\n");
-        UserMutexAbandon(client_param->client_mtx);
+        PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
 
     if (header_recv_buffer.lora_data_type == GATEWAY_REPLY_CLIENT_RESULT_UN_EXPECTED)
     {
         printf("The gateway cannot accept the client from the network\n");
-        UserMutexAbandon(client_param->client_mtx);
+       PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
     
@@ -253,7 +253,7 @@ static int LoraClientJoinNet()
     client_param->gateway_id = header_recv_buffer.gateway_id;
 
     printf("The client successfully joins the network through the gateway\n");
-    UserMutexAbandon(client_param->client_mtx);
+    PrivMutexAbandon(&client_param->client_mtx);
 
     return 0;
 }
@@ -287,7 +287,7 @@ static int LoraClientSendData(void* data, uint16_t raw_data_length)
         return -1;
     }
 
-    UserMutexObtain(client_param->client_mtx, -1);
+    PrivMutexObtain(&client_param->client_mtx);
     
     memset(&header_send_buffer,0,LORA_HEADER_LENGTH);
 
@@ -300,7 +300,7 @@ static int LoraClientSendData(void* data, uint16_t raw_data_length)
     if (LORA_HEADER_LENGTH != LoraSendHeader(adapter,&header_send_buffer))
     {
         printf("The header of the incoming request failed to be sent\n");
-        UserMutexAbandon(client_param->client_mtx);
+        PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
     
@@ -309,25 +309,25 @@ static int LoraClientSendData(void* data, uint16_t raw_data_length)
     if (LORA_HEADER_LENGTH != LoraRecvHeader(adapter,&header_recv_buffer))
     {
         printf("Failed to receive the gateway inbound response data\n");
-        UserMutexAbandon(client_param->client_mtx);
+        PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
 
     if (header_recv_buffer.lora_data_type == GATEWAY_REPLY_CLIENT_RESULT_UN_EXPECTED)
     {
         printf("The gateway cannot accept client data\n");
-        UserMutexAbandon(client_param->client_mtx);
+        PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
 
     if ((raw_data_length + 2)!= LoraSendData(adapter,data,raw_data_length))
     {
         printf("The client gets permission to upload the data, but the send fails\n");
-        UserMutexAbandon(client_param->client_mtx);
+        PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
     
-    UserMutexAbandon(client_param->client_mtx);
+    PrivMutexAbandon(&client_param->client_mtx);
     printf("The client successfully sends the data\n");
 
     return 0;
@@ -350,7 +350,7 @@ static int LoraClientQuitNet()
         return -1;
     }
 
-    UserMutexObtain(client_param->client_mtx, -1);
+    PrivMutexObtain(&client_param->client_mtx);
     memset(&header_send_buffer,0,LORA_HEADER_LENGTH);
 
     header_send_buffer.client_id=client_param->client_id;
@@ -361,7 +361,7 @@ static int LoraClientQuitNet()
     if (LORA_HEADER_LENGTH != LoraSendHeader(adapter,&header_send_buffer))
     {
         printf("The header of the incoming request failed to be sent\n");
-        UserMutexAbandon(client_param->client_mtx);
+        PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
     
@@ -370,14 +370,14 @@ static int LoraClientQuitNet()
     if (LORA_HEADER_LENGTH != LoraRecvHeader(adapter,&header_recv_buffer))
     {
         printf("Failed to receive the gateway inbound response data\n");
-        UserMutexAbandon(client_param->client_mtx);
+        PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
 
     if (header_recv_buffer.lora_data_type == GATEWAY_REPLY_CLIENT_RESULT_UN_EXPECTED)
     {
         printf("Client exit from the network failed\n");
-        UserMutexAbandon(client_param->client_mtx);
+        PrivMutexAbandon(&client_param->client_mtx);
         return -1;
     }
     
@@ -385,7 +385,7 @@ static int LoraClientQuitNet()
     client_param->gateway_id = 0;
 
     printf("The client successfully quit the network through the gateway\n");
-    UserMutexAbandon(client_param->client_mtx);
+    PrivMutexAbandon(&client_param->client_mtx);
 
     return 0;
 }
@@ -538,7 +538,7 @@ static void * LoraGatewayAutoTask(void * parameter)
 
     while (1)
     {
-        UserMutexObtain(gateway_param->gateway_mtx,-1);
+        PrivMutexObtain(&gateway_param->gateway_mtx);
         memset(&header_recv_buffer, 0, LORA_HEADER_LENGTH);
 
         if (LORA_HEADER_LENGTH == LoraRecvHeader(gateway_adapter,&header_recv_buffer))
@@ -553,7 +553,7 @@ static void * LoraGatewayAutoTask(void * parameter)
             }
         }
         
-        UserMutexAbandon(gateway_param->gateway_mtx);
+        PrivMutexAbandon(&gateway_param->gateway_mtx);
     }
 
 END:
@@ -582,7 +582,7 @@ static int UsrAdapterLoraRegister(struct Adapter *adapter)
     lora_gateway->gateway_id = DEAFULT_GATEWAY_ID;
     lora_gateway->panid = DEAFULT_PANID;
     lora_gateway->gateway_mtx = UserMutexCreate();
-    if (lora_gateway->gateway_mtx < 0)
+    if (PrivMutexCreate(&lora_gateway->gateway_mtx,0) < 0)
     {
         printf("create lora gateway mutex fail\n");
         return -1;
@@ -603,8 +603,7 @@ static int UsrAdapterLoraRegister(struct Adapter *adapter)
     lora_client->client_id = DEAFULT_CLIENT_ID;
     lora_client->client_state = CLIENT_DISCONNECT;
     lora_client->panid = DEAFULT_PANID;
-    lora_client->client_mtx = UserMutexCreate();
-    if (lora_client->client_mtx < 0)
+    if (PrivMutexCreate(&lora_client->client_mtx,0)< 0)
     {
         printf("create lora client mutex fail\n");
         return -1;

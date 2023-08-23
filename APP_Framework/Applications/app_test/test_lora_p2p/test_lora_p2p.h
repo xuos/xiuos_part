@@ -47,7 +47,7 @@ struct LoraClientParam
     uint8_t panid;
     uint8_t gateway_id;
     enum ClientState client_state;
-    int client_mtx;
+    pthread_mutex_t client_mtx;
 };
 
 struct LoraGatewayParam 
@@ -56,7 +56,7 @@ struct LoraGatewayParam
     uint8_t panid;
     uint8_t client_id[GATEWAY_MAX_CLIENT_NUM];
     int client_num;
-    int gateway_mtx;
+    pthread_mutex_t gateway_mtx;
 };
 
 enum LoraDataType
