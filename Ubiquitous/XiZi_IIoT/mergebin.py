@@ -1,4 +1,5 @@
 import os
+import sys
 
 def mergeBinProccess( files, fileSaveName):
     bin = b''
@@ -17,11 +18,11 @@ def mergeBinProccess( files, fileSaveName):
          f.write(bin)
          
 if __name__ == '__main__':
-    file1 = r'./build/XiZi-edu-riscv64_kernel.bin'
+    file1 = r'./build/XiZi-'+sys.argv[1]+'_kernel.bin'
     file1_start_addr = 0
-    file2 = r'./build/XiZi-edu-riscv64_app.bin'
+    file2 = r'./build/XiZi-'+sys.argv[1]+'_app.bin'
     file2_start_addr = 1024 * 1024 + 4096
-    newfile = r'./build/XiZi-edu-riscv64.bin'
+    newfile = r'./build/XiZi-'+sys.argv[1]+'.bin'
 
     file = [ [file1 , file1_start_addr] , [file2 , file2_start_addr]  ]
     mergeBinProccess(file, newfile)
