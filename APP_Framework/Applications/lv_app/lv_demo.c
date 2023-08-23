@@ -48,7 +48,7 @@ void* lvgl_thread(void *parameter)
     }
 }
 
-pthread_t lvgl_task;
+static pthread_t lvgl_task;
 static int lvgl_demo_init(void)
 {
     pthread_attr_t attr;
