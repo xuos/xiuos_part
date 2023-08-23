@@ -52,7 +52,7 @@ int lv_port_init(void)
 #endif
 
 #ifndef PKG_USING_LVGL_INDEV_DEVICE
-    lv_port_indev_init();
+    // lv_port_indev_init();
 #endif
 
     return 0;

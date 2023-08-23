@@ -64,14 +64,14 @@ static uint32 I2cDeviceRead(void *dev, struct BusBlockReadParam *read_param)
     struct I2cHardwareDevice *i2c_dev = (struct I2cHardwareDevice *)dev;
     struct I2cDataStandard i2c_msg_write, i2c_msg_read;
 
-    i2c_msg_write.addr = i2c_dev->i2c_dev_addr;
-    i2c_msg_write.flags = I2C_WR;
-    i2c_msg_write.buf = NONE;
-    i2c_msg_write.len = 0;
-    i2c_msg_write.retries = 10;
-    i2c_msg_write.next = NONE;
+    // i2c_msg_write.addr = i2c_dev->i2c_dev_addr;
+    // i2c_msg_write.flags = I2C_WR;
+    // i2c_msg_write.buf = NONE;
+    // i2c_msg_write.len = 0;
+    // i2c_msg_write.retries = 10;
+    // i2c_msg_write.next = NONE;
 
-    i2c_dev->i2c_dev_done->dev_write(i2c_dev, &i2c_msg_write);
+    // i2c_dev->i2c_dev_done->dev_write(i2c_dev, &i2c_msg_write);
 
     i2c_msg_read.addr = i2c_dev->i2c_dev_addr;
     i2c_msg_read.flags = I2C_RD;
