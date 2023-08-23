@@ -2,7 +2,7 @@
 #if LV_USE_IMG && LV_BUILD_EXAMPLES
 
 
-void lv_example_aoteman(void)
+void lv_example_xiuos(void)
 {
     LV_IMG_DECLARE(xiuos);
     lv_obj_t * img1 = lv_img_create(lv_scr_act());

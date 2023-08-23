@@ -30,7 +30,7 @@
 // extern void lv_example_img_3(void);
 // extern void lv_example_img_4(void);
 // extern void lv_example_line_1(void);
-extern void lv_example_aoteman(void);
+extern void lv_example_xiuos(void);
 void* lvgl_thread(void *parameter)
 {
     /* display demo; you may replace with your LVGL application at here */
@@ -39,7 +39,7 @@ void* lvgl_thread(void *parameter)
     // lv_example_chart_2();
     // lv_example_table_1();
     // lv_example_line_1();
-    lv_example_aoteman();
+    lv_example_xiuos();
     /* handle the tasks of LVGL */
     while(1)
     {
