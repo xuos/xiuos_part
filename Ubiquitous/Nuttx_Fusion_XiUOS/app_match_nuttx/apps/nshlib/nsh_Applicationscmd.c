@@ -68,11 +68,11 @@ int cmd_w5500(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_Touch
  ****************************************************************************/
 #if defined(CONFIG_BSP_USING_TOUCH) && !defined(CONFIG_NSH_DISABLE_TOUCH)
-extern void GT911_test(void);
+extern void TestTouch(void);
 int cmd_Touch(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, world!\n");
-    GT911_test();
+    TestTouch();
     return OK;
 }
 #endif
@@ -425,6 +425,16 @@ int cmd_AdapterLoraTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 }
 #endif
 
+#if defined(CONFIG_ARCH_BOARD_EDU_RISCV64) && defined(CONFIG_K210_UART2)
+extern void TestLora(void);
+int cmd_TestLora(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    TestLora();
+    return OK;
+}
+#endif
+
 #if defined(CONFIG_ADAPTER_4G_EC200T) && !defined(CONFIG_NSH_DISABLE_ADAPTER_4GTEST)
 extern int Adapter4GTest(void);
 int cmd_Adapter4GTest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
@@ -497,6 +507,26 @@ int cmd_fft(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
     nsh_output(vtbl, "Hello, fft!\n");
     nuttx_k210_fft_test();
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_MUSL_LIBC) && !defined(CONFIG_NSH_DISABLE_MUSL_TEST)
+extern void Testmusl(void);
+int cmd_musl(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, test musl!\n");
+    Testmusl();
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_BSP_USING_CAN) && !defined(CONFIG_NSH_DISABLE_CAN_TEST)
+extern void can_test(void);
+int cmd_cantest(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+    nsh_output(vtbl, "Hello, world!\n");
+    can_test();
     return OK;
 }
 #endif

@@ -56,8 +56,16 @@ Modification:
 #include <connect_sdio.h>
 #endif
 
+#ifdef BSP_USING_USB
+#include <connect_usb.h>
+#endif
+
 #ifdef BSP_USING_WDT
 #include <connect_wdt.h>
+#endif
+
+#ifdef TOOL_USING_OTA
+#include <ota.h>
 #endif
 
 #ifdef BSP_USING_SEMC
@@ -78,6 +86,33 @@ extern int Imxrt1052HwLcdInit(void);
 #ifdef BSP_USING_TOUCH
 extern int HwTouchInit();
 #endif
+
+void ImxrtMsDelay(uint32 ms)
+{
+    uint64 ticks = 0;
+    uint32 told, tnow, tcnt = 0;
+    uint32 reload = SysTick->LOAD;
+
+    ticks = ((uint64)ms * ((uint64)reload + 1) * TICK_PER_SECOND) / 1000;
+    told = SysTick->VAL;
+
+    //KPrintf("%s reload %u ms %u ticks %u told %u\n", __func__, reload, ms, ticks, told);
+
+    while (1) {
+        tnow = SysTick->VAL;
+        if (tnow != told) {
+            if (tnow < told) {
+                tcnt += told - tnow;
+            } else {
+                tcnt += reload - tnow + told;
+            }
+            told = tnow;
+            if (tcnt >= ticks) {
+                break;
+            }
+        }
+    }
+}
 
 void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength)
 {
@@ -287,7 +322,6 @@ void SysTick_Handler(int irqn, void *arg)
 {
     TickAndTaskTimesliceUpdate();
 }
-DECLARE_HW_IRQ(SYSTICK_IRQN, SysTick_Handler, NONE);
 
 struct InitSequenceDesc _board_init[] = 
 {
@@ -296,11 +330,17 @@ struct InitSequenceDesc _board_init[] =
 #endif
 
 #ifdef BSP_USING_CH438
-    {"ch438", Imxrt1052HwCh438Init()},
+    {"ch438", Imxrt1052HwCh438Init },
 #endif
 
 #ifdef BSP_USING_SDIO
-	{ "sdio", Imxrt1052HwSdioInit },
+    { "sdio", Imxrt1052HwSdioInit },
+#endif
+
+#ifdef BSP_USING_USB
+#ifdef BSP_USING_NXP_USBH
+    { "nxp hw usb", Imxrt1052HwUsbHostInit },
+#endif
 #endif
 
 #ifdef BSP_USING_I2C
@@ -308,7 +348,7 @@ struct InitSequenceDesc _board_init[] =
 #endif
 
 #ifdef BSP_USING_LCD
-	{ "hw_lcd", Imxrt1052HwLcdInit },
+    { "hw_lcd", Imxrt1052HwLcdInit },
 #endif
 
 #ifdef BSP_USING_TOUCH
@@ -322,7 +362,7 @@ struct InitSequenceDesc _board_init[] =
 #ifdef BSP_USING_WDT
     { "hw_wdt", Imxrt1052HwWdgInit },
 #endif
-	{ " NONE ",NONE },
+    { " NONE ",NONE },
 };
 
 /**
@@ -331,7 +371,7 @@ struct InitSequenceDesc _board_init[] =
 void InitBoardHardware()
 {
     int i = 0;
-	int ret = 0;
+    int ret = 0;
 
     BOARD_ConfigMPU();
     BOARD_InitPins();
@@ -367,10 +407,14 @@ void InitBoardHardware()
     KPrintf("board initialization......\n");
 
     for(i = 0; _board_init[i].fn != NONE; i++) {
-		ret = _board_init[i].fn();
-		KPrintf("initialize %s %s\n",_board_init[i].fn_name, ret == 0 ? "success" : "failed");
-	}
+        ret = _board_init[i].fn();
+        KPrintf("initialize %s %s\n",_board_init[i].fn_name, ret == 0 ? "success" : "failed");
+    }
     KPrintf("board init done.\n");
-	KPrintf("start kernel...\n");
-}
+    KPrintf("start kernel...\n");
 
+#ifdef TOOL_USING_OTA
+    //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
+    app_clear_jumpflag();
+#endif
+}

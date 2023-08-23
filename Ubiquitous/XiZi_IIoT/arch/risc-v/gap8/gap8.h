@@ -37,7 +37,7 @@
 
 /**
 * @file gap8.h
-* @brief support gap8 chip fetures
+* @brief support gap8 chip features
 * @version 1.0 
 * @author AIIT XUOS Lab
 * @date 2021-09-02
@@ -45,7 +45,7 @@
 
 /*************************************************
 File name: gap8.h
-Description: support gap8 chip fetures
+Description: support gap8 chip features
 Others: take nuttx/arch/risc-v/src/gap8/gap8.h  for references
                 https://github.com/apache/incubator-nuttx.git
 History: 

@@ -12,15 +12,23 @@ config SENSOR_QS_FS
                         string "qs-fs quantity name"
                         default "windspeed_1"
                 
-                if ADD_XIZI_FETURES
+                if ADD_XIZI_FEATURES
                         config SENSOR_QS_FS_DRIVER_EXTUART
                                 bool "Using extra uart to support qs-fx"
                                 default y
 
                         config SENSOR_DEVICE_QS_FS_DEV
                                 string "qs-fx device name"
-                                default "/dev/uart2_dev2"
+                                default "/dev/uart1_dev1"
                                 depends on !SENSOR_QS_FS_DRIVER_EXTUART
+
+                        config SENSOR_DEVICE_QS_FS_PIN_DEV
+                                string "qs-fx pin device name"
+                                default "/dev/pin_dev"
+
+                        config SENSOR_DEVICE_QS_FS_PIN_NUMBER
+                                int "qs-fs pin device number"
+                                default 24
 
                         if SENSOR_QS_FS_DRIVER_EXTUART
                                 config SENSOR_DEVICE_QS_FS_DEV
@@ -33,7 +41,7 @@ config SENSOR_QS_FS
                         endif
                 endif
 
-                if ADD_NUTTX_FETURES
+                if ADD_NUTTX_FEATURES
                         config SENSOR_DEVICE_QS_FS_DEV
                                 string "qs-fx device name"
                                 default "/dev/ttyS1"
@@ -42,7 +50,7 @@ config SENSOR_QS_FS
 
                 endif
 
-                if ADD_RTTHREAD_FETURES
+                if ADD_RTTHREAD_FEATURES
 
                 endif
         endif

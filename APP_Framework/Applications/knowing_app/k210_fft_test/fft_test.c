@@ -155,7 +155,7 @@ void k210_fft_test(void)
             cycle[FFT_SOFT][FFT_DIR_BACKWARD]/(sysctl_clock_get_freq(SYSCTL_CLOCK_CPU)/1000000));
 }
 
-#ifdef ADD_NUTTX_FETURES
+#ifdef ADD_NUTTX_FEATURES
 void nuttx_k210_fft_test(void)
 {
     pthread_t thread;

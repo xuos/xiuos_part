@@ -57,21 +57,18 @@
 #include "netif/ppp/pppoe.h"
 #include "lwip/igmp.h"
 #include "lwip/mld6.h"
-
-#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
-//#include "FreeRTOS.h"
-//#include "event_groups.h"
-#endif
+#include "lwip/sys.h"
 
 #include "netif/ethernet.h"
 #include "enet_ethernetif.h"
 #include "enet_ethernetif_priv.h"
-
+#include <board.h>
 #include "fsl_enet.h"
 #include "fsl_phy.h"
 #include "fsl_gpio.h"
 #include "fsl_iomuxc.h"
 
+#include "netdev.h"
 #include "sys_arch.h"
 
 /*******************************************************************************
@@ -81,18 +78,29 @@
 /*******************************************************************************
  * Code
  ******************************************************************************/
+extern void ImxrtMsDelay(uint32 ms);
 
-void enet_delay(void)
+void enet_delay(uint32 ms)
 {
-    volatile uint32_t i = 0;
-    for (i = 0; i < 1000000; ++i)
-    {
-        __asm("NOP"); /* delay */
-    }
+    ImxrtMsDelay(ms);
 }
 
 void Time_Update_LwIP(void)
 {
+}
+
+ethernetif_config_t enet_cfg = {
+    .phyAddress = BOARD_ENET0_PHY_ADDRESS,
+    .clockName = kCLOCK_CoreSysClk,
+    .macAddress = configMAC_ADDR,
+#if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
+    .non_dma_memory = non_dma_memory,
+#endif /* FSL_FEATURE_SOC_LPC_ENET_COUNT */ 
+};
+
+void *ethernetif_config_enet_set(uint8_t enet_port)
+{
+    return (void *)&enet_cfg;
 }
 
 void ethernetif_clk_init(void)
@@ -112,11 +120,11 @@ void ethernetif_gpio_init(void)
     /* pull up the ENET_INT before RESET. */
     GPIO_WritePinOutput(GPIO1, 10, 1);
     GPIO_WritePinOutput(GPIO1, 3, 0);
-    enet_delay();
+    enet_delay(30);
     GPIO_WritePinOutput(GPIO1, 3, 1);
 }
 
-void ETH_BSP_Config(void)
+int ETH_BSP_Config(void)
 {
     static int flag = 0;
     if(flag == 0)
@@ -125,6 +133,7 @@ void ETH_BSP_Config(void)
         ethernetif_gpio_init();
         flag = 1;
     }
+    return 0;
 }
 
 void ethernetif_phy_init(struct ethernetif *ethernetif,
@@ -189,23 +198,27 @@ void ethernetif_phy_init(struct ethernetif *ethernetif,
  * @param netif the lwip network interface structure for this ethernetif
  */
 
-void ethernetif_input(struct netif *netif)
+void ethernetif_input(void *netif_arg)
 {
     struct pbuf *p;
+    struct netif *netif = (struct netif *)netif_arg;
     err_t ret = 0;
 
     LWIP_ASSERT("netif != NULL", (netif != NULL));
 
-    /* move received packet into a new pbuf */
-    while ((p = ethernetif_linkinput(netif)) != NULL)
-    {
-        /* pass all packets to ethernet_input, which decides what packets it supports */
-        if ((ret = netif->input(p, netif)) != ERR_OK)
+    while (1) {
+        sys_arch_sem_wait(get_eth_recv_sem(), WAITING_FOREVER);
+        /* move received packet into a new pbuf */
+        while ((p = ethernetif_linkinput(netif)) != NULL)
         {
-            LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
-            lw_print("lw: [%s] ret %d p %p\n", __func__, ret, p);
-            pbuf_free(p);
-            p = NULL;
+            /* pass all packets to ethernet_input, which decides what packets it supports */
+            if ((ret = netif->input(p, netif)) != ERR_OK)
+            {
+                LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
+                lw_print("lw: [%s] ret %d p %p\n", __func__, ret, p);
+                pbuf_free(p);
+                p = NULL;
+            }
         }
     }
 }
@@ -307,6 +320,12 @@ err_t ethernetif_init(struct netif *netif, struct ethernetif *ethernetif,
     }
 #endif /* LWIP_IPV6 && LWIP_IPV6_MLD */
 
+    SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] Adding netdev.\n", __func__));
+    if (EOK != lwip_netdev_add(netif)) {
+        SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] LWIP add netdev failed.\n", __func__));
+    } else {
+        printf("[%s] Add Netdev successful\n", __func__);
+    }
     return ERR_OK;
 }
 

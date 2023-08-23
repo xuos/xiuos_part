@@ -700,6 +700,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "AdapterLoraTest",       cmd_AdapterLoraTest,       1, 1, "[Lora test.]" },
 #endif
 
+#if defined(CONFIG_ARCH_BOARD_EDU_RISCV64) && defined(CONFIG_K210_UART2)
+  { "TestLora",       cmd_TestLora,       1, 1, "[e220 Lora test.]" },
+#endif
+
 #if defined(CONFIG_ADAPTER_4G_EC200T) && !defined(CONFIG_NSH_DISABLE_ADAPTER_4GTEST)
   { "Adapter4GTest",       cmd_Adapter4GTest,       1, 1, "[4G ec200t test.]" },
 #endif
@@ -730,6 +734,14 @@ static const struct cmdmap_s g_cmdmap[] =
 
 #if defined(CONFIG_K210_FFT_TEST) && !defined(CONFIG_NSH_DISABLE_K210_FFT)
   { "fft",       cmd_fft,       1, 1, "[K210 fft function.]" },
+#endif
+
+#if defined(CONFIG_MUSL_LIBC) && !defined(CONFIG_NSH_DISABLE_MUSL_TEST)
+  { "testmusl",       cmd_musl,       1, 1, "[test musl function.]" },
+#endif
+
+#if defined(CONFIG_BSP_USING_CAN) && !defined(CONFIG_NSH_DISABLE_CAN_TEST)
+  { "cantest",       cmd_cantest,       1, 1, "[test can function.]" },
 #endif
 
   { NULL,       NULL,         1, 1, NULL }

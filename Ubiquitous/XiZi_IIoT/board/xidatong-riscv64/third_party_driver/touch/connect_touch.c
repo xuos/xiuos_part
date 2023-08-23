@@ -205,7 +205,7 @@ static int32_t GtpGetInfo(void)
 // not used in polling mode
 static void GT9xx_PEN_IRQHandler(void* arg)
 {
-    KPrintf("int hdr working.\n");
+    //KPrintf("int hdr working.\n");
     if (!SemReleaseFlag)
     {
         KSemaphoreAbandon(touch_sem);

@@ -52,6 +52,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
@@ -86,6 +88,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
@@ -334,6 +338,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif
 endif
 
@@ -365,6 +371,8 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif
 endif
 
@@ -391,7 +399,7 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include #
 endif
 
-ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/hc32f4a0)
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/edu-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4/hc32f4a0 \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
@@ -400,7 +408,28 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/third_party_driver/CMSIS/include \
+	-I$(BSP_ROOT)/third_party_driver/spi/third_party_spi_lora/sx12xx/inc \
+	-I$(BSP_ROOT)/third_party_driver/spi/third_party_spi_lora/sx12xx/src/radio \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver/usb_host_lib \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver/usb_host_lib/host_class/msc \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver/usb_host_lib/host_core \
 	-I$(KERNEL_ROOT)/include #
+
+ifeq ($(CONFIG_RESOURCES_LWIP),y)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/compat \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/netif \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/apps \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
+endif 
 endif
 
 KERNELPATHS += -I$(KERNEL_ROOT)/arch \
@@ -417,23 +446,24 @@ KERNELPATHS +=-I$(KERNEL_ROOT)/fs/compatibility_ch376 #
 endif
 
 ifeq ($(CONFIG_TRANSFORM_LAYER_ATTRIUBUTE), y)
-ifeq ($(CONFIG_ADD_XIZI_FETURES), y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES), y)
 ifeq ($(CONFIG_LIB_MUSLLIB), )
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi/user_api/posix_support/include #
 endif
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/transform_layer/xizi #
 endif
 
-ifeq ($(CONFIG_ADD_NUTTX_FETURES), y)
+ifeq ($(CONFIG_ADD_NUTTX_FEATURES), y)
 #
 endif
 
-ifeq ($(CONFIG_ADD_RTTHREAD_FETURES), y)
+ifeq ($(CONFIG_ADD_RTTHREAD_FEATURES), y)
 #
 endif
 
 endif
 
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/general_functions/circular_area #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/general_functions/list #
 
 ifeq ($(CONFIG_SUPPORT_SENSOR_FRAMEWORK), y)
@@ -455,6 +485,21 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/gemmlowp #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/flatbuffers/include #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/tensorflow-lite/tensorflow-lite-for-mcu/source/third_party/ruy #
+
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/kpu/k210_yolov2_detect_procedure #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/kpu/yolov2 #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/kpu/yolov2_json #
+
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/nnom/inc #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/nnom/inc/layers #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/nnom/port #
+
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/cmsis_5/Core/Include #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/cmsis_5/DSP/Include #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/cmsis_5/DSP/Include/dsp #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/knowing/cmsis_5/NN/Include #
+
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/knowing_app/cmsis_5_demo/cmsisnn-cifar10/model/m4 #
 endif
 
 ifeq ($(CONFIG_LIB_LV),y)
@@ -466,14 +511,42 @@ ifeq ($(CONFIG_SUPPORT_CONTROL_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/shared #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/include #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/modbus_tcp #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/modbus_uart #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/include #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/fins #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/melsec #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/opcua #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/s7 #
+endif
+
+ifeq ($(CONFIG_LIB_USING_CJSON), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON
+endif
+
+ifeq ($(CONFIG_LIB_USING_LORAWAN), y)
+ifeq ($(CONFIG_LIB_USING_LORA_RADIO), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/lora-radio/common #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/lora-radio/include #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/lora-radio/sx126x #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/lora-radio/sx127x #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/ports/lora-module/inc #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/ports/samples/lora-radio-tester #
+endif
+
+ifeq ($(CONFIG_LIB_USING_LORAWAN_ED_STACK), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Aps/Basic #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Common #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Mac #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Mac/Crypto #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_devicenode/lorawan-ed-stack/Phy/region #
+endif
+
+ifeq ($(CONFIG_LIB_USING_LORAWAN_GATEWAY_SC),y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lorawan_gateway_single_channel/inc #
+endif
 endif
 
 ifeq ($(CONFIG_CRYPTO), y)
@@ -491,9 +564,21 @@ endif
 
 endif
 
+ifeq ($(CONFIG_APP_USING_WEBNET),y)
+	KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/webnet/WebNet_XiUOS/inc \
+				   -I$(KERNEL_ROOT)/../../APP_Framework/Applications/webnet/WebNet_XiUOS/samples #
+endif
+
+
 ifeq ($(CONFIG_TOOL_SHELL), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/tool/shell/letter-shell \
-	-I$(KERNEL_ROOT)/tool/shell/letter-shell/file_ext #
+	-I$(KERNEL_ROOT)/tool/shell/letter-shell/file_ext \
+	-I$(KERNEL_ROOT)/tool/shell/
+endif
+
+ifeq ($(CONFIG_TOOL_USING_OTA), y)
+KERNELPATHS +=-I$(KERNEL_ROOT)/tool/bootloader/flash \
+	-I$(KERNEL_ROOT)/tool/bootloader/ota #
 endif
 
 ifeq ($(CONFIG_FS_LWEXT4),y)
@@ -504,17 +589,14 @@ endif
 
 
 ifeq ($(ARCH), risc-v)
-# KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
-ifeq ($(MCU), k210)
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
+ifeq ($(MCU), k210)
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/k210
 endif
 ifeq ($(MCU), FE310)
-	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/fe310
 endif
 ifeq ($(MCU), GAP8)
-	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/shared
 	KERNELPATHS +=-I$(KERNEL_ROOT)/arch/risc-v/gap8
 endif
 ifeq ($(MCU), GD32VF103)

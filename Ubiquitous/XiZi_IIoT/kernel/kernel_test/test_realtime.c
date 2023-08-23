@@ -26,15 +26,23 @@ extern unsigned int usleep(unsigned int seconds);
 static BusType pin; 
 
 #ifdef ARCH_ARM
-#include <hardware_gpio.h>
+// #include <hardware_gpio.h>
 #define GPIO_C13 7
 #define GPIO_C2 17
+#define GPIO_C11 140
+#define GPIO_D1 143
 
-void PinIrqIsr(void *args)
+void PinIrqIsr(int vector,void *args)
 {
-    *(volatile unsigned  int *)0x40020818 = 0x2000;
-    
-    *(volatile unsigned  int  *)0x4002081a = 0x2000;     
+    /* 将GPIO D1置为高电平 */
+    asm volatile("LDR  r2, =0x40053838");  // 测试代码
+    asm volatile("MOV  r3, #0x0002");      // 测试代码
+    asm volatile("STR  r3, [r2]");         // 测试代码
+
+    /* 将GPIO D1置为低电平 */
+    asm volatile("LDR  r2, =0x4005383A");  // 测试代码
+    asm volatile("MOV  r3, #0x0002");      // 测试代码
+    asm volatile("STR  r3, [r2]");         // 测试代码 
 }
 
 int RealtimeIrqTest()
@@ -58,23 +66,23 @@ int RealtimeIrqTest()
     KPrintf("%s irq test\n",__func__);
     /* config test pin 1 as output*/
     testpin_1.cmd = GPIO_CONFIG_MODE;
-    testpin_1.pin = GPIO_C13;
+    testpin_1.pin = GPIO_D1;
     testpin_1.mode = GPIO_CFG_OUTPUT;
 
     ret = BusDrvConfigure(pin->owner_driver, &configure_info_1);
     if (ret != EOK) {
-        KPrintf("config testpin_1  %d failed!\n", GPIO_C13);
+        KPrintf("config testpin_1  %d failed!\n", GPIO_D1);
         return -ERROR;
     }
 
     /* set test pin 1 as high*/
-    testpin_1_stat.pin = GPIO_C13;
+    testpin_1_stat.pin = GPIO_D1;
     testpin_1_stat.val = GPIO_LOW;
     BusDevWriteData(pin->owner_haldev, &write_param_1);
 
     /* config test pin 2 as input*/
     testpin_2.cmd = GPIO_CONFIG_MODE;
-    testpin_2.pin = GPIO_C2;
+    testpin_2.pin = GPIO_C11;
     testpin_2.mode = GPIO_CFG_INPUT;
 
     ret = BusDrvConfigure(pin->owner_driver, &configure_info_2);
@@ -84,9 +92,9 @@ int RealtimeIrqTest()
     }
 
     testpin_2.cmd = GPIO_IRQ_REGISTER;
-    testpin_2.pin = GPIO_C2;
+    testpin_2.pin = GPIO_C11;
     testpin_2.irq_set.irq_mode = GPIO_IRQ_EDGE_BOTH;
-    testpin_2.irq_set.hdr = PinIrqIsr;
+    testpin_2.irq_set.hdr = (void(*)(void *))PinIrqIsr;
     testpin_2.irq_set.args = NONE;
 
     ret = BusDrvConfigure(pin->owner_driver, &configure_info_2);
@@ -96,7 +104,7 @@ int RealtimeIrqTest()
     }
 
     testpin_2.cmd = GPIO_IRQ_ENABLE;
-    testpin_2.pin = GPIO_C2;
+    testpin_2.pin = GPIO_C11;
 
     ret = BusDrvConfigure(pin->owner_driver, &configure_info_2);
     if (ret != EOK) {
@@ -191,14 +199,32 @@ void GpioSpeedTest()
 
 #else
 
-#define GPIO_18 18
-#define GPIO_19 19
+#define GPIO_34 34
+#define GPIO_35 35
 
 void PinIrqIsr(void *args)
 {
-    *(volatile unsigned  int  *)0x3800100c |= 0x5;
+     /* 将 GPIO18 置为高电平 */
+    asm volatile ("lui  a5, 0x38001"); // 测试代码
+    asm volatile ("addi a5, a5, 12");  // 测试代码
+    asm volatile ("lw   a5, 0(a5)");   // 测试代码
+    asm volatile ("sext.w  a4, a5");   // 测试代码
+    asm volatile ("lui  a5, 0x38001"); // 测试代码
+    asm volatile ("addi a5, a5, 12");  // 测试代码
+    asm volatile ("ori  a4, a4, 5");   // 测试代码
+    asm volatile ("sext.w a4, a4");    // 测试代码
+    asm volatile ("sw   a4, 0(a5)");   // 测试代码
 
-    *(volatile unsigned  int  *)0x3800100c &= ~0x5;
+    /* 将GPIO18 置为低电平 */
+    asm volatile ("lui  a5, 0x38001"); // 测试代码
+    asm volatile ("addi a5, a5, 12");  // 测试代码
+    asm volatile ("lw   a5, 0(a5)");   // 测试代码
+    asm volatile ("sext.w  a4, a5");   // 测试代码
+    asm volatile ("lui  a5, 0x38001"); // 测试代码
+    asm volatile ("addi a5, a5, 12");  // 测试代码
+    asm volatile ("andi  a4, a4, -6"); // 测试代码
+    asm volatile ("sext.w a4, a4");    // 测试代码
+    asm volatile ("sw   a4, 0(a5)");   // 测试代码
 }
 
 int RealtimeIrqTest()
@@ -221,29 +247,29 @@ int RealtimeIrqTest()
     KPrintf("%s irq test\n",__func__);
     /* config GPIO18 as output and set as low */
     testpin_1.cmd = GPIO_CONFIG_MODE;
-    testpin_1.pin = GPIO_18;
+    testpin_1.pin = GPIO_34;
     testpin_1.mode = GPIO_CFG_OUTPUT;
     BusDrvConfigure(pin->owner_driver, &configure_info_1);
 
-    testpin_1_stat.pin = GPIO_18;
+    testpin_1_stat.pin = GPIO_34;
     testpin_1_stat.val = GPIO_LOW;
     BusDevWriteData(pin->owner_haldev, &write_param_1);
 
     /* config GPIO18 as input */
     testpin_2.cmd = GPIO_CONFIG_MODE;
-    testpin_2.pin = GPIO_19;
+    testpin_2.pin = GPIO_35;
     testpin_2.mode = GPIO_CFG_INPUT;
     BusDrvConfigure(pin->owner_driver, &configure_info_2);
 
     testpin_2.cmd = GPIO_IRQ_REGISTER;
-    testpin_2.pin = GPIO_19;
+    testpin_2.pin = GPIO_35;
     testpin_2.irq_set.irq_mode = GPIO_IRQ_EDGE_RISING;
     testpin_2.irq_set.hdr = PinIrqIsr;
     testpin_2.irq_set.args = NONE;
     BusDrvConfigure(pin->owner_driver, &configure_info_2);
 
     testpin_2.cmd = GPIO_IRQ_ENABLE;
-    testpin_2.pin = GPIO_19;
+    testpin_2.pin = GPIO_35;
     BusDrvConfigure(pin->owner_driver, &configure_info_2);
 
     return 0;
@@ -262,16 +288,16 @@ void RealtimeTaskSwitchTest()
     write_param_1.buffer = (void *)&testpin_1_stat;
 
     testpin_1.cmd = GPIO_CONFIG_MODE;
-    testpin_1.pin = GPIO_18;
+    testpin_1.pin = GPIO_34;
     testpin_1.mode = GPIO_CFG_OUTPUT;
     BusDrvConfigure(pin->owner_driver, &configure_info_1);
 
-    testpin_1_stat.pin = GPIO_18;
+    testpin_1_stat.pin = GPIO_34;
     testpin_1_stat.val = GPIO_LOW;
     BusDevWriteData(pin->owner_haldev, &write_param_1);
 
     while (RET_TRUE) {
-        DelayKTask(10);
+        DelayKTask(1);
     }
 }
 
@@ -288,11 +314,11 @@ void GpioSpeedTest()
     write_param_1.buffer = (void *)&testpin_1_stat;
 
     testpin_1.cmd = GPIO_CONFIG_MODE;
-    testpin_1.pin = GPIO_18;
+    testpin_1.pin = GPIO_34;
     testpin_1.mode = GPIO_CFG_OUTPUT;
     BusDrvConfigure(pin->owner_driver, &configure_info_1);
 
-    testpin_1_stat.pin = GPIO_18;
+    testpin_1_stat.pin = GPIO_34;
     testpin_1_stat.val = GPIO_LOW;
     BusDevWriteData(pin->owner_haldev, &write_param_1);
 

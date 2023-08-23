@@ -211,9 +211,10 @@ void ethernetif_phy_init(struct ethernetif *ethernetif,
  *
  * @param netif the lwip network interface structure for this ethernetif
  */
-void ethernetif_input(struct netif *netif)
+void ethernetif_input(void *netif_arg)
 {
     struct pbuf *p;
+    struct netif *netif = (struct netif *)netif_arg;
 
     LWIP_ASSERT("netif != NULL", (netif != NULL));
 
@@ -352,5 +353,11 @@ err_t ethernetif_init(struct netif *netif,
     }
 #endif /* LWIP_IPV6 && LWIP_IPV6_MLD */
 
+    SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] Adding netdev.\n", __func__));
+    if (EOK != lwip_netdev_add(netif)) {
+        SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] LWIP add netdev failed.\n", __func__));
+    } else {
+        printf("[%s] Add Netdev successful\n", __func__);
+    }
     return ERR_OK;
 }

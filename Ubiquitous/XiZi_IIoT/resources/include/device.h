@@ -53,7 +53,9 @@
 #include <bus_usb.h>
 #include <dev_usb.h>
 #ifdef RESOURCES_USB_HOST
+#ifdef BSP_USING_STM32_USBH
 #include <stm32_usb_host.h>
+#endif
 #endif
 #endif
 
@@ -102,6 +104,16 @@ HardwareDevType ObtainConsole(void);
 #ifdef RESOURCES_DAC
 #include <bus_dac.h>
 #include <dev_dac.h>
+#endif
+
+#ifdef RESOURCES_CAMERA
+#include <bus_camera.h>
+#include <dev_camera.h>
+#endif
+
+#ifdef RESOURCES_KPU
+#include <bus_kpu.h>
+#include <dev_kpu.h>
 #endif
 
 #endif

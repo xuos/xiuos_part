@@ -48,8 +48,7 @@ Modification:
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x0400;
-STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x1000;
+STACK_SIZE = 0x4000;
 
 /* Specify the memory areas */
 MEMORY
@@ -59,7 +58,7 @@ MEMORY
     
   m_interrupts          (RX)  : ORIGIN = 0x60002000, LENGTH = 0x00000400
   m_text                (RX)  : ORIGIN = 0x60002400, LENGTH = 0x03FFDC00
-  m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00020000
+  m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00060000
   m_data2               (RW)  : ORIGIN = 0x20200000, LENGTH = 0x00060000
 
   m_sdram               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x01E00000
@@ -262,4 +261,3 @@ SECTIONS
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
-

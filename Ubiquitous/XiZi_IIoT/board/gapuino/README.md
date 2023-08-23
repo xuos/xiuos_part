@@ -68,7 +68,7 @@ cd kconfig-frontends
 
 ### 编译工具链：
 
-RISC-V: riscv-none-embed-，默认安装到Ubuntu的/opt/，下载源码并解压。[下载网址 http://101.36.126.201:8011/gnu-mcu-eclipse.tar.bz2](http://101.36.126.201:8011/gnu-mcu-eclipse.tar.bz2)
+RISC-V: riscv-none-embed-，默认安装到Ubuntu的/opt/，下载源码并解压。[下载链接：https://pan.baidu.com/s/1mWlR86FMc-xPQwDXJ_hiQg 提取码：XUOS]
 
 ```shell
 $ tar -xjf gnu-mcu-eclipse.tar.bz2 -C /opt/

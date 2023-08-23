@@ -27,6 +27,7 @@
 #include <xs_mutex.h>
 #include <xs_event.h>
 #include <xs_msg.h>
+#include <xs_timer.h>
 
 #ifdef FS_VFS
 #include <iot-vfs_posix.h>
@@ -401,6 +402,53 @@ uintptr_t KsMsgQueueReinit(uint32_t knum,uintptr_t *param, uint8_t num )
    return  (uintptr_t)ret;
 }
 #endif
+
+#ifdef KERNEL_SOFTTIMER
+static int32 timer_sem;
+static void KsTimerCallback(void *parameter)
+{
+   KSemaphoreAbandon(timer_sem);
+}
+
+uintptr_t KsTimerCreate(uint32_t knum, uintptr_t *param, uint8_t num)
+{
+   int32 ret;
+
+   timer_sem = *((int *)param[2]);
+
+   ret = KCreateTimer((const char *)(param[0]), KsTimerCallback, (void *)(param[2]), (x_ticks_t)(param[3]), (uint8)(param[4]));
+   return (uintptr_t)ret;
+}
+
+uintptr_t KsTimerDelete(uint32_t knum, uintptr_t *param, uint8_t num)
+{
+   x_err_t ret;
+   ret = KDeleteTimer((int32)(param[0]));
+   return (uintptr_t)ret;
+}
+
+uintptr_t KsTimerStartRun(uint32_t knum, uintptr_t *param, uint8_t num)
+{
+   x_err_t ret;
+   ret = KTimerStartRun((int32)(param[0]));
+   return (uintptr_t)ret;
+}
+
+uintptr_t KsTimerQuitRun(uint32_t knum, uintptr_t *param, uint8_t num)
+{
+   x_err_t ret;
+   ret = KTimerQuitRun((int32)(param[0]));
+   return (uintptr_t)ret;
+}
+
+uintptr_t KsTimerModify(uint32_t knum, uintptr_t *param, uint8_t num)
+{
+   x_err_t ret;
+   ret = KTimerModify((int32)(param[0]), (x_ticks_t)(param[1]));
+   return (uintptr_t)ret;
+}
+#endif
+
 /* fs posix*/
 
 #ifdef FS_VFS
@@ -566,87 +614,95 @@ uintptr_t KsStatfs(uint32_t knum,uintptr_t *param, uint8_t num )
 
 struct KernelService g_service_table[256]  __attribute__ ((section (".g_service_table"))) = 
 {
-	 [KS_USER_PRINT_INFO]           = { KsPrintInfo, 1 },
+   [KS_USER_PRINT_INFO]           = { KsPrintInfo, 1 },
 
-     /*************** Task ************/
-    [KS_USER_TASK_CREATE]          = { KsTaskCreate, 5 },
-    [KS_USER_TASK_STARTUP]         = { KsStartupTask, 1 },
-    [KS_USER_TASK_DELETE]          = { KsTaskDelete, 1 },
-    [KS_USER_TASK_SEARCH]          = { KsUserTaskSerach, 0 },
-	 [KS_USER_TASK_EXECEXIT]      = { KsTaskQuit, 0 },
-    [KS_USER_TASK_CORE_COMBINE]     = { KsTaskCoreCombine, 2 },
-    [KS_USER_TASK_CORE_UNCOMBINE]   = { KsTaskCoreUnCombine, 1 },
-    [KS_USER_TASK_DELAY]           = { KsMdelayTask, 1 },
-    [KS_USER_GET_TASK_NAME]          = { KsGetTaskName, 2 },
-    [KS_USER_GET_TASK_ID]           = { KsGetTaskID, 0 },
-    [KS_USER_GET_TASK_STAT]         = { KsGetTaskStat, 1 },
-    [KS_USER_GET_TASK_COMBINEED_CORE] = { KsGetTaskCombinedCore, 1 },
-    [KS_USER_GET_TASK_RUNNING_CORE]  = { KsGetTaskRunningCore, 1 },
-    [KS_USER_GET_TASK_ERROR_STATUS]  = { KsGetTaskErrorstatus, 1 },
-    [KS_USER_GET_TASK_PRIORITY]     = { KsGetTaskPriority, 1 },
+   /*************** Task ************/
+   [KS_USER_TASK_CREATE]          = { KsTaskCreate, 5 },
+   [KS_USER_TASK_STARTUP]         = { KsStartupTask, 1 },
+   [KS_USER_TASK_DELETE]          = { KsTaskDelete, 1 },
+   [KS_USER_TASK_SEARCH]          = { KsUserTaskSerach, 0 },
+   [KS_USER_TASK_EXECEXIT]      = { KsTaskQuit, 0 },
+   [KS_USER_TASK_CORE_COMBINE]     = { KsTaskCoreCombine, 2 },
+   [KS_USER_TASK_CORE_UNCOMBINE]   = { KsTaskCoreUnCombine, 1 },
+   [KS_USER_TASK_DELAY]           = { KsMdelayTask, 1 },
+   [KS_USER_GET_TASK_NAME]          = { KsGetTaskName, 2 },
+   [KS_USER_GET_TASK_ID]           = { KsGetTaskID, 0 },
+   [KS_USER_GET_TASK_STAT]         = { KsGetTaskStat, 1 },
+   [KS_USER_GET_TASK_COMBINEED_CORE] = { KsGetTaskCombinedCore, 1 },
+   [KS_USER_GET_TASK_RUNNING_CORE]  = { KsGetTaskRunningCore, 1 },
+   [KS_USER_GET_TASK_ERROR_STATUS]  = { KsGetTaskErrorstatus, 1 },
+   [KS_USER_GET_TASK_PRIORITY]     = { KsGetTaskPriority, 1 },
 
-     /*************** Memory ************/
-    [KS_USER_MALLOC]              = { KsMalloc, 1 },
-    [KS_USER_FREE]                = { KsFree, 1 },
+   /*************** Memory ************/
+   [KS_USER_MALLOC]              = { KsMalloc, 1 },
+   [KS_USER_FREE]                = { KsFree, 1 },
 #ifdef KERNEL_MUTEX
-     /*************** Mutex ************/
-    [KS_USER_MUTEX_CREATE]         = { KsCreateMutex, 0 },
-    [KS_USER_MUTEX_DELETE]         = { KsDeleteMutex, 1 },
-    [KS_USER_MUTEX_OBTAIN]         = { KsMutexObtain, 2 },
-    [KS_USER_MUTEX_ABANDON]        = { KsMutexAbandon, 1 },
+   /*************** Mutex ************/
+   [KS_USER_MUTEX_CREATE]         = { KsCreateMutex, 0 },
+   [KS_USER_MUTEX_DELETE]         = { KsDeleteMutex, 1 },
+   [KS_USER_MUTEX_OBTAIN]         = { KsMutexObtain, 2 },
+   [KS_USER_MUTEX_ABANDON]        = { KsMutexAbandon, 1 },
 #endif
 #ifdef KERNEL_SEMAPHORE
-     /*************** Semaphore ************/
-    [KS_USER_SEMAPHORE_CREATE]     = { KsCreateSemaphore, 1 },
-    [KS_USER_SEMAPHORE_DELETE]     = { KsDeleteSemaphore, 1 },
-    [KS_USER_SEMAPHORE_OBTAIN]     = { KsSemaphoreObtain, 2 },
-    [KS_USER_SEMAPHORE_ABANDON]    = { KsSemaphoreAbandon, 1 },
-    [KS_USER_SEMAPHORE_SETVALUE]   = { KsSemaphoreSetValue, 2 },
+   /*************** Semaphore ************/
+   [KS_USER_SEMAPHORE_CREATE]     = { KsCreateSemaphore, 1 },
+   [KS_USER_SEMAPHORE_DELETE]     = { KsDeleteSemaphore, 1 },
+   [KS_USER_SEMAPHORE_OBTAIN]     = { KsSemaphoreObtain, 2 },
+   [KS_USER_SEMAPHORE_ABANDON]    = { KsSemaphoreAbandon, 1 },
+   [KS_USER_SEMAPHORE_SETVALUE]   = { KsSemaphoreSetValue, 2 },
 #endif
-     /*************** Event ************/
+   /*************** Event ************/
 #ifdef KERNEL_EVENT
-    [KS_USER_EVENT_CREATE]         = { KsCreateEvent, 1 },
-    [KS_USER_EVENT_DELETE]         = { KsDeleteEvent, 1 },
-    [KS_USER_EVENT_TRIGGER]        = { KsEventTrigger, 2 },
-    [KS_USER_EVENT_PROCESS]        = { KsEventProcess, 5 },
+   [KS_USER_EVENT_CREATE]         = { KsCreateEvent, 1 },
+   [KS_USER_EVENT_DELETE]         = { KsDeleteEvent, 1 },
+   [KS_USER_EVENT_TRIGGER]        = { KsEventTrigger, 2 },
+   [KS_USER_EVENT_PROCESS]        = { KsEventProcess, 5 },
 #endif
 #ifdef KERNEL_MESSAGEQUEUE
-     /*************** Msg queue ************/
-    [KS_USER_MSGQUEUE_CREATE]      = { KsCreateMsgQueue, 2 },
-    [KS_USER_MSGQUEUE_DELETE]      = { KsDeleteMsgQueue, 1 },
-    [KS_USER_MSGQUEUE_SENDWAIT]    = { KsMsgQueueSendwait, 4 },
-    [KS_USER_MSGQUEUE_SEND]        = { KsMsgQueueSend, 3 },
-    [KS_USER_MSGQUEUE_URGENTSEND]  = { KsMsgQueueUrgentSend, 3 },
-    [KS_USER_MSGQUEUE_RECV]        = { KsMsgQueueRecv, 4 },
-    [KS_USER_MSGQUEUE_REINIT]      = { KsMsgQueueReinit, 1 },
+   /*************** Msg queue ************/
+   [KS_USER_MSGQUEUE_CREATE]      = { KsCreateMsgQueue, 2 },
+   [KS_USER_MSGQUEUE_DELETE]      = { KsDeleteMsgQueue, 1 },
+   [KS_USER_MSGQUEUE_SENDWAIT]    = { KsMsgQueueSendwait, 4 },
+   [KS_USER_MSGQUEUE_SEND]        = { KsMsgQueueSend, 3 },
+   [KS_USER_MSGQUEUE_URGENTSEND]  = { KsMsgQueueUrgentSend, 3 },
+   [KS_USER_MSGQUEUE_RECV]        = { KsMsgQueueRecv, 4 },
+   [KS_USER_MSGQUEUE_REINIT]      = { KsMsgQueueReinit, 1 },
+#endif
+#ifdef KERNEL_SOFTTIMER
+   /*************** Soft Timer ************/
+   [KS_USER_TIMER_CREATE]         = { KsTimerCreate, 5 },
+   [KS_USER_TIMER_DELETE]         = { KsTimerDelete, 1 },
+   [KS_USER_TIMER_STARTRUN]       = { KsTimerStartRun, 1 },
+   [KS_USER_TIMER_QUITRUN]        = { KsTimerQuitRun, 1 },
+   [KS_USER_TIMER_MODIFY]         = { KsTimerModify, 2 },
 #endif
 #ifdef FS_VFS
-    /*************** fs poxix ************/
-    [KS_USER_OPEN]                = { KsOpen , 3 },
-    [KS_USER_READ]                = { KsRead , 3 },
-    [KS_USER_WRITE]               = { KsWrite , 3 },
-    [KS_USER_CLOSE]               = { KsClose , 1 },
-    [KS_USER_IOCTL]               = { KsIoctl , 3 },
-    [KS_USER_LSEEK]               = { KsLseek , 3 },
-    [KS_USER_RENAME]              = { KsRename , 2 },
-    [KS_USER_UNLINK]              = { KsUnlink , 1 },
-    [KS_USER_STAT]                = { KsStat , 2 },
-    [KS_USER_FS_STAT]             = { KsFstat , 2 },
-    [KS_USER_FS_SYNC]             = { KsFsync , 1 },
-    [KS_USER_FTRUNCATE]           = { KsFtruncate , 2 },
-    [KS_USER_MKDIR]               = { KsMkdir , 2 },
-    [KS_USER_OPENDIR]             = { KsOpendir , 1 },
-    [KS_USER_CLOSEDIR]            = { KsClosedir , 1 },
-    [KS_USER_READDIR]             = { KsReaddir , 1 },
-    [KS_USER_RMDIR]               = { KsRmdir , 1 },
-    [KS_USER_CHDIR]               = { KsChdir , 1 },
-    [KS_USER_GETCWD]              = { KsGetcwd, 2 },
-    [KS_USER_TELLDIR]             = { KsTelldir, 1 },
-    [KS_USER_SEEKDIR]             = { KsSeekdir, 2 },
-    [KS_USER_REWIND_DIR]          = { KsRewinddir, 1 },
-    [KS_USER_STAT_FS]             = { KsStatfs, 2 },
+   /*************** fs poxix ************/
+   [KS_USER_OPEN]                = { KsOpen , 3 },
+   [KS_USER_READ]                = { KsRead , 3 },
+   [KS_USER_WRITE]               = { KsWrite , 3 },
+   [KS_USER_CLOSE]               = { KsClose , 1 },
+   [KS_USER_IOCTL]               = { KsIoctl , 3 },
+   [KS_USER_LSEEK]               = { KsLseek , 3 },
+   [KS_USER_RENAME]              = { KsRename , 2 },
+   [KS_USER_UNLINK]              = { KsUnlink , 1 },
+   [KS_USER_STAT]                = { KsStat , 2 },
+   [KS_USER_FS_STAT]             = { KsFstat , 2 },
+   [KS_USER_FS_SYNC]             = { KsFsync , 1 },
+   [KS_USER_FTRUNCATE]           = { KsFtruncate , 2 },
+   [KS_USER_MKDIR]               = { KsMkdir , 2 },
+   [KS_USER_OPENDIR]             = { KsOpendir , 1 },
+   [KS_USER_CLOSEDIR]            = { KsClosedir , 1 },
+   [KS_USER_READDIR]             = { KsReaddir , 1 },
+   [KS_USER_RMDIR]               = { KsRmdir , 1 },
+   [KS_USER_CHDIR]               = { KsChdir , 1 },
+   [KS_USER_GETCWD]              = { KsGetcwd, 2 },
+   [KS_USER_TELLDIR]             = { KsTelldir, 1 },
+   [KS_USER_SEEKDIR]             = { KsSeekdir, 2 },
+   [KS_USER_REWIND_DIR]          = { KsRewinddir, 1 },
+   [KS_USER_STAT_FS]             = { KsStatfs, 2 },
 #endif
-    [KS_USER_END ... 255]         = {NONE, 0}
+   [KS_USER_END ... 255]         = {NONE, 0}
 
 };
 #else
@@ -717,6 +773,53 @@ uint8_t UserGetTaskPriority(int32_t id)
    task = GetTaskWithIdnodeInfo(id);
    return  (uintptr_t)task->task_dync_sched_member.cur_prio;
 }
+
+#ifdef KERNEL_SOFTTIMER
+static int32 timer_sem;
+static void UserTimerCallback(void *parameter)
+{
+   KSemaphoreAbandon(timer_sem);
+}
+
+int32 UserTimerCreate(const char *name, void (*timeout)(void *parameter), void *parameter, uint32_t time, uint8_t trigger_mode)
+{
+   int32 ret;
+
+   timer_sem = *((int *)parameter);
+
+   ret = KCreateTimer(name, UserTimerCallback, NONE, time, trigger_mode);
+   return ret;
+}
+
+x_err_t UserTimerDelete(int32_t timer_id)
+{
+   x_err_t ret;
+   ret = KDeleteTimer(timer_id);
+   return ret;
+}
+
+x_err_t UserTimerStartRun(int32_t timer_id)
+{
+   x_err_t ret;
+   ret = KTimerStartRun(timer_id);
+   return ret;
+}
+
+x_err_t UserTimerQuitRun(int32_t timer_id)
+{
+   x_err_t ret;
+   ret = KTimerQuitRun(timer_id);
+   return ret;
+}
+
+x_err_t UserTimerModify(int32_t timer_id, uint32_t ticks)
+{
+   x_err_t ret;
+
+   ret = KTimerModify(timer_id, ticks);
+   return ret;
+}
+#endif
 
 long occupy_g_service_table  __attribute__ ((section (".g_service_table"))) = 0;
 

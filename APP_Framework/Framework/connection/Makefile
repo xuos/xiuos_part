@@ -1,12 +1,12 @@
 include $(KERNEL_ROOT)/.config
-ifeq ($(CONFIG_ADD_NUTTX_FETURES),y)
+ifeq ($(CONFIG_ADD_NUTTX_FEATURES),y)
     include $(APPDIR)/Make.defs
     CSRCS += adapter.c adapter_agent.c
     include $(APPDIR)/Application.mk
 
 endif
 
-ifeq ($(CONFIG_ADD_XIZI_FETURES),y)
+ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     SRC_FILES := adapter.c adapter_agent.c
 
     ifeq ($(CONFIG_CONNECTION_INDUSTRIAL_NETWORK),y)

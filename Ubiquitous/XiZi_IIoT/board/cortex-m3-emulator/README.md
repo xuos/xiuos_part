@@ -188,7 +188,7 @@ sudo apt install gdb-multiarch
 qemu-system-arm -machine  lm3s6965evb -nographic -kernel build/XiZi-cortex-m3-emulator.elf -s -S
 ```
 
-然后要重新开启另一个linux系统终端一个终端，执行`riscv-none-embed-gdb`命令
+然后要重新开启另一个linux系统终端一个终端，执行命令
 
 ```
 gdb-multiarch build/XiZi-cortex-m3-emulator.elf -ex "target remote localhost:1234" 

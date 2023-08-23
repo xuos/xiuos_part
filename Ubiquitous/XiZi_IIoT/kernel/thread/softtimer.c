@@ -147,7 +147,7 @@ static struct TimerDone Done =
 /**
  * This function will create a softtimer.
  *
- * @param name the length of the msg queue.
+ * @param name the name of the timer.
  * @param timeout the callback of the timer.
  * @param parameter the parameter of the callback function
  * @param time the timeout time

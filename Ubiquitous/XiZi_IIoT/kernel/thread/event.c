@@ -153,7 +153,7 @@ static int32 _EventProcess(struct Event *event, uint32 events, uint32 options, i
     task = GetKTaskDescriptor();
     task->exstatus = EOK;
 
-    timeout = CalculteTickFromTimeMs(msec);
+    timeout = CalculateTickFromTimeMs(msec);
 
     lock = CriticalAreaLock();
 
@@ -288,7 +288,7 @@ int32 KEventTrigger(int32 id, uint32 events)
  * @param events  events flag
  * @param options trigger way
  * @param msec timeout
- * @processed event processed flag
+ * @param processed event processed flag
  *
  * @return EOK on success.
  */

@@ -22,3 +22,13 @@
 [submodule "Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/xidatong-riscv64/kendryte-sdk/kendryte-sdk-source"]
 	path = Ubiquitous/RT-Thread_Fusion_XiUOS/aiit_board/xidatong-riscv64/kendryte-sdk/kendryte-sdk-source
 	url = https://www.gitlink.org.cn/chunyexixiaoyu/kendryte-sdk-source.git
+[submodule "APP_Framework/lib/lorawan/lora_radio_driver"]
+	path = APP_Framework/lib/lorawan/lora_radio_driver
+	url = https://gitlink.org.cn/IACU/lora_radio_driver.git
+[submodule "APP_Framework/lib/lorawan/lorawan_devicenode"]
+	path = APP_Framework/lib/lorawan/lorawan_devicenode
+	url = https://gitlink.org.cn/IACU/lorawan_devicenode.git
+	branch = master
+[submodule "APP_Framework/lib/lorawan/lorawan_gateway_single_channel"]
+	path = APP_Framework/lib/lorawan/lorawan_gateway_single_channel
+	url = https://gitlink.org.cn/IACU/lorawan_gateway_single_channel.git

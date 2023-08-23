@@ -6,7 +6,7 @@ MAKEFLAGS += --no-print-directory
 
 
 riscv_support := kd233 maix-go hifive1-rev-B gapuino gd32vf103-rvstar rv32m1-vega aiit-riscv64-board xidatong-riscv64 edu-riscv64
-arm_support += stm32f407-st-discovery stm32f407zgt6 stm32f103-nano nuvoton-m2354 ok1052-c imxrt1176-sbc aiit-arm32-board xidatong-arm32 xiwangtong-arm32 hc32f4a0
+arm_support += stm32f407-st-discovery stm32f407zgt6 stm32f103-nano nuvoton-m2354 ok1052-c imxrt1176-sbc aiit-arm32-board xidatong-arm32 xiwangtong-arm32 edu-arm32
 emulator_support += hifive1-emulator k210-emulator cortex-m0-emulator cortex-m3-emulator cortex-m4-emulator
 support := $(riscv_support) $(arm_support) $(emulator_support) 
 SRC_DIR :=
@@ -73,7 +73,14 @@ ifeq ($(CONFIG_RESOURCES_LWIP), y)
 PART += COMPILE_LWIP
 endif
 
+ifeq ($(CONFIG_MCUBOOT_BOOTLOADER), y)
+PART += COMPILE_BOOTLOADER
+else ifeq ($(CONFIG_MCUBOOT_APPLICATION), y)
+PART += COMPILE_APPLICATION
+else
 PART += COMPILE_ALL
+endif
+
 endif
 
 
@@ -86,6 +93,22 @@ COMPILE_ALL:
        done
 	@cp link.mk build/Makefile
 	@$(MAKE) -C build TARGET=XiZi-$(BOARD).elf LINK_FLAGS=LFLAGS
+	@rm build/Makefile build/make.obj
+
+COMPILE_BOOTLOADER:
+	@for dir in $(SRC_DIR);do    \
+               $(MAKE) -C $$dir;          \
+       done
+	@cp link.mk build/Makefile
+	@$(MAKE) -C build COMPILE_TYPE="-boot" TARGET=XiZi-$(BOARD)-boot.elf LINK_FLAGS=LFLAGS
+	@rm build/Makefile build/make.obj
+
+COMPILE_APPLICATION:
+	@for dir in $(SRC_DIR);do    \
+               $(MAKE) -C $$dir;          \
+       done
+	@cp link.mk build/Makefile
+	@$(MAKE) -C build COMPILE_TYPE="-app" TARGET=XiZi-$(BOARD)-app.elf LINK_FLAGS=LFLAGS
 	@rm build/Makefile build/make.obj
 
 COMPILE_MUSL:
@@ -117,10 +140,10 @@ COMPILE_KERNEL:
 COMPILE_APP:
 	@echo $(SRC_APP_DIR)
 	@for dir in $(SRC_APP_DIR);do    \
-               $(MAKE) -C $$dir USE_APP_INCLUDEPATH=y;          \
+               $(MAKE) -C $$dir;          \
        done
 	@cp link.mk build/Makefile
-	@$(MAKE) -C build COMPILE_TYPE="_app" TARGET=XiZi-$(BOARD)_app.elf LINK_FLAGS=APPLFLAGS
+	@$(MAKE) -C build COMPILE_TYPE="_app" TARGET=XiZi-$(BOARD)_app.elf LINK_FLAGS=APPLFLAGS  USE_APP_INCLUDEPATH=y
 	@rm build/Makefile build/make.obj
 
 show_info:

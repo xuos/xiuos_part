@@ -12,13 +12,13 @@ if BSP_USING_SPI1
         default "spi1_drv"    
     config BSP_SPI1_CLK_PIN
         int "spi1 clk pin number"
-        default 6
+        default 9
     config BSP_SPI1_D0_PIN
         int "spi1 d0 pin number"
-        default 8
+        default 11
     config BSP_SPI1_D1_PIN
         int "spi1 d1 pin number"
-        default 7
+        default 10
     menuconfig BSP_SPI1_USING_SS0
         bool "SPI1 Enable SS0"
         default y
@@ -28,7 +28,7 @@ if BSP_USING_SPI1
             default "spi1_dev0"        
         config BSP_SPI1_SS0_PIN
             int "spi1 ss0 pin number"
-            default 9
+            default 12
     menuconfig RESOURCES_SPI_LORA
     bool "Using spi lora function"
     default n
@@ -98,28 +98,5 @@ if BSP_USING_SPI1
             int "spi1 ss3 pin number"
             default 27
     endif
-endif
-
-config BSP_USING_TP
-bool "Using LCD touch  "
-default n
-
-if BSP_USING_TP
-    config BSP_TP_SCK_PIN
-        int "TP SCK pin number"
-        default 42
-    config BSP_TP_NCS_PIN
-        int "TP NCS pin number"
-        default 43
-    config BSP_TP_MISO_PIN
-        int "TP MISO pin number"
-        default 44
-    config BSP_TP_IRQ_PIN
-        int "TP IRQ pin number"
-        default 45
-    config BSP_TP_MOSI_PIN
-        int "TP MOSI pin number"
-        default 46
-
 endif
 
