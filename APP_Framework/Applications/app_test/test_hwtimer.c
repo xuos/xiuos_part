@@ -22,7 +22,7 @@
 #include <transform.h>
 #ifdef ADD_XIZI_FEATURES
 
-#define BSP_LED_PIN 134
+#define BSP_LED_PIN 29
 #define NULL_PARAMETER 0
 
 static uint16_t pin_fd=0;
@@ -37,7 +37,7 @@ void LedFlip(void *parameter)
 
 void TestHwTimer(void)
 {
-    x_ticks_t period = 100000;
+    x_ticks_t period = 1;
     
     pin_fd = PrivOpen(HWTIMER_PIN_DEV_DRIVER, O_RDWR);
     if(pin_fd<0) {

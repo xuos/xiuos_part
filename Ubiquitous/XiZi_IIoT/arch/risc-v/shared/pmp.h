@@ -14,6 +14,7 @@
 #define  PMP_H
 
 #include <xs_klist.h>
+#include <stddef.h>
 
 #define PMP_MAX_ENTRY_NUMBER     16
 #define PMP_ENTRY_RESERVE         6
@@ -40,11 +41,11 @@
 
 struct PmpEntry
 {
-    uint8_t pmpcfg;
+    uint8 pmpcfg;
 #if defined(ARCH_RISCV64)
-    uint64_t pmpaddr; 
+    uint64 pmpaddr; 
 #else
-    uint32_t pmpaddr;
+    uint32 pmpaddr;
 #endif
     
 };
@@ -53,8 +54,8 @@ struct PmpRegionNapot
 {
     x_ubase  start ;
     x_ubase  end;
-    uint16_t swap_count;
-    uint8_t  region_type;
+    uint16 swap_count;
+    uint8  region_type;
     struct PmpEntry  entry;
 
     DoubleLinklistType  link;
@@ -64,8 +65,8 @@ struct PmpRegionTor
 {
     x_ubase  start ;
     x_ubase  end;
-    uint16_t swap_count;
-    uint8_t  region_type;
+    uint16 swap_count;
+    uint8  region_type;
     struct PmpEntry  entry[2];
 
     DoubleLinklistType  link;
@@ -73,8 +74,8 @@ struct PmpRegionTor
 
 struct Pmp 
 {
-    uint8_t count;
-    uint8_t reserve;
+    uint8 count;
+    uint8 reserve;
     struct PmpEntry   pmp_entry_reserve[PMP_ENTRY_RESERVE];
     DoubleLinklistType   tor_list;
 
@@ -82,7 +83,7 @@ struct Pmp
 };
 
 
-x_err_t PmpAddTorRegion(void *task_pmp, x_ubase start , size_t size , uint8_t flag );
+x_err_t PmpAddTorRegion(void *task_pmp, x_ubase start , size_t size , uint8 flag );
 x_err_t PmpInitIsolation(void **task_pmp, x_ubase stack_start , size_t stack_size);
 void PmpFree(void *task_pmp);
 void PmpClear(void);
