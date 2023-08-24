@@ -111,7 +111,7 @@ uint32_t wdt_init(wdt_device_number_t id, uint64_t time_out_ms, plic_irq_callbac
     plic_irq_enable(id ? IRQN_WDT1_INTERRUPT : IRQN_WDT0_INTERRUPT);
     plic_irq_register(id ? IRQN_WDT1_INTERRUPT : IRQN_WDT0_INTERRUPT, on_irq, ctx);
 
-    wdt_response_mode(id, WDT_CR_RMOD_INTERRUPT);
+    wdt_response_mode(id, WDT_CR_RMOD_RESET);
     uint8_t m_top = wdt_get_top(id, time_out_ms);
     wdt_set_timeout(id, m_top);
     wdt_enable(id);
