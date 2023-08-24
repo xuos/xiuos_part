@@ -16,7 +16,9 @@
 
 time_t time(time_t *t)
 {
-    NULL_PARAM_CHECK(t);
+    if (NULL == t) {
+        return 0;
+    }
     time_t current = 0;
 
 #ifdef RESOURCES_RTC
