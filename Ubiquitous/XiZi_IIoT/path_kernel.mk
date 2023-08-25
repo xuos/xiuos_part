@@ -112,6 +112,21 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/third_party_driver/drivers \
 	-I$(BSP_ROOT)/third_party_driver/lcd \
 	-I$(KERNEL_ROOT)/include #
+
+ifeq ($(CONFIG_RESOURCES_LWIP),y)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/compat \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/netif \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/apps \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
+endif 
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/kd233)

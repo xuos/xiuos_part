@@ -14,6 +14,8 @@
 #include "socket.h"
 #include "w5500.h"
 
+#include "connect_ethernet.h"
+
 #define SPI_LORA_FREQUENCY 10000000
 
 // spi operations
@@ -256,6 +258,27 @@ int HwWiznetInit(void) {
 
   if (EOK != wiz_chip_cfg_init()) {
     return ERROR;
+  }
+
+  extern uint8_t wiz_mac[6];
+  setSHAR(wiz_mac);
+  ctlwizchip(CW_RESET_PHY, 0);
+
+  setSn_MR(0, Sn_MR_MFEN | Sn_MR_MACRAW | Sn_MR_MIP6B | Sn_MR_MMB);
+  // setSn_RXBUF_SIZE(0, 16);
+  // setSn_TXBUF_SIZE(0, 16);
+#define SOCK_ANY_PORT_NUM 0xC000
+  wiz_socket(0, Sn_MR_MACRAW, SOCK_ANY_PORT_NUM, 0x00);
+  // setSn_CR(0, Sn_CR_OPEN);
+  // setSn_CR(0, Sn_CR_CONNECT);
+
+  uint8_t sock_sr = 0;
+  while (1) {
+    SYS_KDEBUG_LOG(WIZNET_DEBUG, ("[%s] sock_sr: %x, MACRAW: %x\n", __func__, sock_sr = getSn_SR(0), SOCK_MACRAW));
+    if (sock_sr == SOCK_MACRAW) {
+        SYS_KDEBUG_LOG(WIZNET_DEBUG, ("Socket 0 MACRAW mdoe established\r\n"));
+        break;
+    }
   }
 
   network_init();

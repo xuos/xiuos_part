@@ -46,6 +46,7 @@ extern "C" {
 #define FILESYS_DEBUG 0
 #define NETDEV_DEBUG 0
 #define WEBNET_DEBUG 0
+#define WIZNET_DEBUG 1
 
 #define SYS_KDEBUG_LOG(section, information) \
     do {                                     \

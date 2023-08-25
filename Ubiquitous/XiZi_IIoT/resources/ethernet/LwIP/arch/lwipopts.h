@@ -35,6 +35,11 @@
 /* ---------- Debug options ---------- */
 #ifndef LWIP_DEBUG
 #define LWIP_DEBUG  1
+// #define LWIP_SOCKET_DEBUG
+// #define LWIP_TCPIP_DEBUG
+// #define LWIP_TCP_INPUT_DEBUG
+// #define LWIP_TCP_OUTPUT_DEBUG
+// #define LWIP_NETIF_DEBUG
 #endif
 
 #ifdef LWIP_DEBUG
@@ -219,6 +224,7 @@
 #define LWIP_SOCKET_SELECT      1
 #define LWIP_SOCKET_POLL        1
 
+#define LWIP_DHCP_DOES_ACD_CHECK 0
 /**
  * SYS_LIGHTWEIGHT_PROT==1: if you want inter-task protection for certain
  * critical regions during buffer allocation, deallocation and memory
@@ -242,7 +248,11 @@
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
    byte alignment -> define MEM_ALIGNMENT to 2. */
+#ifndef RISCV_LWIP
 #define MEM_ALIGNMENT           4
+#else
+#define MEM_ALIGNMENT 8
+#endif
 
 /* MEM_SIZE: the size of the heap memory. If the application will send
 a lot of data that needs to be copied, this should be set high. */
@@ -287,7 +297,7 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* Controls if TCP should queue segments that arrive out of
    order. Define to 0 if your device is low on memory. */
-#define TCP_QUEUE_OOSEQ         1
+#define TCP_QUEUE_OOSEQ 0
 
 /* TCP Maximum segment size. */
 #define TCP_MSS                 (1500 - 40)	  /* TCP_MSS = (Ethernet MTU - IP header size - TCP header size) */
@@ -442,7 +452,11 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 /**
  * LWIP_NETCONN==1: Enable Netconn API (require to use api_lib.c)
  */
+#ifndef RISCV_LWIP
 #define LWIP_NETCONN                    1
+#else
+#define LWIP_NETCONN 0
+#endif
 
 /*
    ------------------------------------
