@@ -866,5 +866,7 @@ menu "lib using LVGL"
 
         endmenu
     endif
+    
+    source "$APP_DIR/lib/lvgl/examples/Kconfig"
 
 endmenu
