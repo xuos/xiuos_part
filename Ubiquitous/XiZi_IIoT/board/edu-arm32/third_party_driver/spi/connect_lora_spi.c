@@ -191,8 +191,8 @@ static uint32 SpiLoraWrite(void *dev, struct BusBlockWriteParam *write_param)
         KPrintf("SpiLoraWrite ERROR:The message is too long!\n");
         return ERROR;
     } else {
-        SX1276SetTxPacket(write_param->buffer, write_param->size);    
-        while(SX1276Process() != RF_TX_DONE);
+        SX1276SetTx(write_param->buffer, write_param->size);    
+
         KPrintf("SpiLoraWrite success!\n");
     }
 
@@ -210,24 +210,12 @@ static uint32 SpiLoraRead(void *dev, struct BusBlockReadParam *read_param)
     NULL_PARAM_CHECK(dev);
     NULL_PARAM_CHECK(read_param);
 
-    int read_times = 100;
-    
-    SX1276StartRx();
     KPrintf("SpiLoraRead Ready!\n");
 
-    while (read_times) {
-        if (SX1276Process() != RF_RX_DONE) {
-            read_times --;
-            MdelayKTask(500);
-        } else {
-            break;
-        }
-    }
+    int ret = SX1276GetRx(read_param->buffer, (uint16 *)&read_param->read_length);
 
-    if (read_times > 0) {
-        SX1276GetRxPacket(read_param->buffer, (uint16 *)&read_param->read_length);
-    } else {
-        read_param->read_length = 0;
+    if (ret < 0) {
+        return 0;
     }
 
     return read_param->read_length;

@@ -80,7 +80,11 @@ void SX1276StartRx( void );                                   //开始接收
 
 void SX1276GetRxPacket( void *buffer, uint16_t *size );       //得到接收的数据
 
+int SX1276GetRx(void *buffer, uint16_t *size);                //应用接收数据，无数据时阻塞
+
 void SX1276SetTxPacket( const void *buffer, uint16_t size );  //发送数据
+
+void SX1276SetTx( const void *buffer, uint16_t size );        //应用发送数据
 
 uint8_t SX1276GetRFState( void );       				      //得到RFLRState状态
 

@@ -494,6 +494,7 @@ int HwSpiInit(void)
     return ret;
 }
 
+#ifdef TEST_SPI
 /*Just for lora test*/
 static struct Bus *bus;
 static struct HardwareDev *dev;
@@ -578,4 +579,4 @@ void TestLoraOpen(void)
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
                                                 TestLoraOpen, TestLoraOpen, open lora device and read parameters);
 
-
+#endif
