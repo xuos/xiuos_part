@@ -48,6 +48,9 @@ extern "C" {
 #endif
 #endif
 
+#define FILE_NAME "plc_data.csv"
+extern void FatfsPrintf(struct FileDescriptor *fdp, const void *src, size_t len);
+
 /*Control Framework Socket Init*/
 void SocketInit(char *ip, char *mask, char *gw);
 
@@ -59,6 +62,9 @@ void SerialWrite(uint8_t *write_data, int length);
 
 /*Control Framework Serial Read*/
 int SerialRead(uint8_t *read_data, int length);
+
+/*Control Framework Store data in SD Card*/
+int ControlFileDataStore(uint8 *data, int data_length);
 
 #ifdef __cplusplus
 }
