@@ -10,7 +10,7 @@ menu "lib using MQTT"
         menu "MQTT connection parameter configuration."
             config PLATFORM_PRODUCTKEY
                 string "Product Key, used to identify a product."
-                default "iywhcgnuezz"
+                default "iv74vebCdJC"
 
             config CLIENT_DEVICENAME
                 string "Device name, used to identify a client device."
@@ -18,7 +18,7 @@ menu "lib using MQTT"
 
             config CLIENT_DEVICESECRET
                 string "Device secret, used for device authentication and data encryption."
-                default "c9a4ce03e9382065fc089e9ff54b771d"
+                default "d2e613c4f714b6b0774bd7b68eeceae3"
         
             config PLATFORM_SERVERIP
                 string "mqtt platform server ip."
