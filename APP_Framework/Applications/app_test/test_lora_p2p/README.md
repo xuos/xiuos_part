@@ -1,116 +1,151 @@
 # 基于RISC-V终端，实现LoRa节点和LoRa网关通信私有协议
 
-## 1.简介
+## 一、简介
 在RISC-V终端上实现LoRa节点和LoRa网关私有协议通信功能,客户端可以通过SHELL终端连接\断开网关,并可以向网关发送数据.
 
-## 2.数据结构设计说明
+## 二、数据结构设计说明
+### 1、Lora工作模式枚举
+```c
+enum LoraMode
+{
+    LORA_SLEEP = 0, // 切换至休眠模式
+    LORA_WORK = 1 // 切换至工作模式
+};
+```
+在客户端需要传输数据时，Lora会工作在普通模式进行数据传输，在客户端数据传输完毕后，Lora会切换到休眠模式以屏蔽数据。
 
+### 2、客户端/网关状态信息
 ```c
 enum ClientState
 {
-    CLIENT_DISCONNECT = 0,
-    CLIENT_CONNECT,
+    CLIENT_DISCONNECT = 0, // 开启但断网
+    CLIENT_CONNECT, // 开启且联网
+    CLIENT_BROKEN, // 硬件损坏
+    CLIENT_CLOSED // 硬件关闭
 };
-struct LoraClientParam 
+enum GatewayState
+{
+    GATEWAY_ORIGINAL= 0, // 关闭且未开始工作
+    GATEWAY_WORKING, // 开启且已经开始工作
+    GATEWAY_BROKEN // 模块损坏
+};
+```
+### 3、客户端/网关参数信息
+```c
+struct ClientParam 
 {
     uint8_t client_id;
     uint8_t panid;
     uint8_t gateway_id;
     enum ClientState client_state;
-    int client_mtx;
+    pthread_mutex_t client_mutex; // 互斥量
 };
-```
-Lora客户端基础数据结构,`ClientState`为客户端状态,仅有断开和连接两种状态,`LoraClientParam`为客户端参数数据结构,`client_mtx`是Lora硬件互斥量.
-```c
-struct LoraGatewayParam 
+struct GatewayParam 
 {
     uint8_t gateway_id;
     uint8_t panid;
-    uint8_t client_id[GATEWAY_MAX_CLIENT_NUM];
-    int client_num;
-    int gateway_mtx;
+    uint8_t client_infos[GATEWAY_MAX_CLIENT_NUM];
+    uint8_t client_num;
+    enum GatewayState gateway_state;
+    pthread_mutex_t gateway_mutex; // 互斥量
 };
 ```
-Lora网关参数数据结构,`gateway_mtx`是Lora硬件互斥量.
+### 4、数据帧类型枚举
 ```c
-struct LoraHeaderFormat
+enum FrameType
 {
-    uint8_t client_id; //1
-    uint8_t panid;//1
-    uint8_t gateway_id; //1
-    uint8_t lora_data_type; //1
-    uint8_t data; //1
-    uint8_t crc_lo;
-    uint8_t crc_hi; //2
-};
-enum LoraDataType
-{
-    /*****C --->  G*/
-    CLIENT_JOIN_NET_REQUEST = 0,
-    CLIENT_QUIT_NET_REQUEST,
-    CLIENT_SEND_TEST_DATA_TO_GATEWAY_REQUEST,
-    /*****G --->  C*/
-    GATEWAY_REPLY_CLIENT_RESULT_EXPECTED,
-    GATEWAY_REPLY_CLIENT_RESULT_UN_EXPECTED,
+    /*C --->  G*/
+    CG_NET_JOIN = 0, // 入网请求
+    CG_NET_QUIT, // 退网请求
+    CG_DATA_SEND, // 数据传输请求
+    /*G --->  C*/
+    GC_REPLY_EXPECTED, // 上行请求执行成功
+    GC_REPLY_UNEXPECTED, // 上行请求执行失败
 };
 ```
-`LoraHeaderFormat`是主要的数据结构,包含基本参数,数据类型,附带数据,校验信息.`LoraDataType`标识数据报头的类型
-
+### 5、数据帧结构设计
 ```c
-static int (*gateway_handlers[])(struct Adapter*,struct LoraHeaderFormat*) = 
+struct DataFrameFormat
 {
-    [CLIENT_JOIN_NET_REQUEST] = ClientJoinNetHandler,
-    [CLIENT_QUIT_NET_REQUEST] = ClientQuitNetHandler,
-    [CLIENT_SEND_TEST_DATA_TO_GATEWAY_REQUEST] = ClientSendTestDataHandler,
+    uint8_t begin_mark_1; // 0XFF
+    uint8_t begin_mark_2; // 0XAA
+    uint8_t client_id;  // 0 - 127
+    uint8_t panid;  // 0 - 127
+    uint8_t gateway_id;   // 0 - 127
+    uint8_t frame_type;   // 0 - 127
+    uint8_t attach_data;   // 0 - 127 可以是数据长度，该值的意义视数据帧类型而定
+    uint8_t* user_data;  // 在有数据携带时才会发送该指针所指缓冲区数据
+    uint8_t crc_hi;   // 这个字节没有0XFF
+    uint8_t crc_lo; // 这个字节会出现 0XFF，但是他的下一个字节不可能是00，必然是0XFF
+    uint8_t end_mark_1; // 0XFF
+    uint8_t end_mark_2; // 0X00
 };
 ```
-`gateway_handlers`是网关人物处理相关事物的映射表,网关会根据不同的信息类型调用不同的处理函数.
+## 三、包含以下功能
+### 1、客户端联网/退网/数据传输操作
+> (1)、获取使用权后将其配置为传输模式。<br>
+> (2)、构建数据帧并设置好数据帧类型。<br>
+> (3)、监听信道直到信道空闲。<br>
+> (4)、发送数据帧（若是数据传输需要带上数据一起传输），若失败回到第三步。<br>
+> (5)、接收数据帧并对数据帧进行数据过滤，若失败回到第三步。<br>
+> (6)、解析数据帧并得到结果<br>
+### 2、网关后台任务操作
+> (1)、获取使用权后开启数据接收。<br>
+> (2)、根据数据帧结构，监听信道，过滤掉杂乱的信号，在接收到一个完整的数据帧并完整性校验通过后返回继续第三步，否则循环执行第二步。<br>
+> (3)、根据得到的数据帧类型将其交付给对应的处理器处理，处理完毕后返回第二步。<br>
 
-## 3.测试程序说明
+## 四、测试程序说明
+在进行测试时，最好先启动网关并开启网关程序，当然后启动网关也一样。
+### 1、客户端测试程序
+> (1)、`TestLoraConnectState`命令可以进行网络连接或者断开，`0-CLIENT_DISCONNECT 1-CLIENT_CONNECT`。
+> (2)、`TestLoraSendData`命令可以发送数据（联网状态下），请使用字符串（`void TestLoraSendData(char* data)`）。
+> (3)、`TestLoraClient`命令可以整体测试，先进行联网，再发送数据，再断开连接，最后再联网。
+### 2、网关测试程序
+> (1)、`TestLoraGateway`命令可以启动网关程序。
 
-1. 第一步: 启动网关任务
-    > 网关任务启动后会一直监听信道,在接收到数据后,首先对数据进行过滤,判断是否是发送给当前网关的数据,启动网关的命令: `StartGatewayTask`
-2. 第二步: 初始化客户端,
-   > `ClientInit`命令可以初始化相关参数并打开Lora设备.
-3. 第三步:客户端连接网关
-   > `ClientConnect`命令可以向客户端配置的网络发送入网请求,当该入网请求被该网络中的网关接受处理后即可完成入网.
-4. 第四步:客户端发送数据
-   > `ClientSend` 命令在客户端入网后可以向网关发送数据.
-5. 第五步:客户端断开连接
-   > `ClientDisConnect`命令可以向客户端配置的网络发送退网请求,当该退网请求被指定网关接受处理后即可完成退网.
+## 五、运行结果（##需结合运行测试截图按步骤说明##）
+### 1、修改必要的框架和驱动代码
+#### 修改文件： `xiuos/APP_Framework/Framework/framework_init.c`
+1. 在第`28`行添加代码: `extern int UsrAdapterLoraInit(void);`;
+2. 将第`170`行代码的`AdapterLoraInit`修改为`UsrAdapterLoraInit`，更换Lora的初始化函数;
+#### 修改文件：`xiuos/APP_Framework/Framework/connection/lora/e220/e220.c`
+1. 将第`429`行代码修改为`cfg.serial_timeout = 5000;`,更改客户端超时时间;
+2. 为第`478`行的`E220Ioctl`添加函数体：
+```c     
+static int E220Ioctl(struct Adapter *adapter, int cmd, void *args)
+{
+    switch (cmd)
+    {
+    case 0:                                      // LORA_SLEEP
+        E220LoraModeConfig(CONFIGURE_MODE_MODE); // 切换至休眠模式
+        break;
+    case 1:                                      // LORA_WORK
+        E220LoraModeConfig(DATA_TRANSFER_MODE); // 切换至传输模式
+        break;
+    default:
+        break;
+    }
 
-## 4. 运行结果（##需结合运行测试截图按步骤说明##）
-
-1. 修改Lora的初始化和注册函数,将原来的注册函数更换为自定义的初始化函数:<br>
-在文件 `APP_Framework/Framework/framework_init.c` 第 28 行添加 外部函数声明 <br>`extern int UsrAdapterLoraInit(void);`,<br>
-将第170行的`AdapterLoraInit`改为`UsrAdapterLoraInit`.
-2. 修改对应的Makefile文件将测试代码加入编译.
-3. 在工作区终端进入指定目录并输入命令`make BOARD=edu-riscv64 menuconfig`进入配置模式:<br>
-> (1) 依次进入: `APP_Framework -> Framework `开启 `support connection framework` 并进入;<br>
-![1](images/file_1_1.png)<br>
-> (2) 开启 `Using lora adapter device` 并进入<br>
-![2](images/file_1_2.png)<br>
-> (3) 选择 `Lora device adapter select net role type`,将角色配置为网关角色,其他配置如下图所示<br>
-![3](images/file_1_3.png)<br>
-> (4) 依次进入: `APP_Framework > Applications > test app` 开启 `Enable application test function` 并进入, 开启`Config test lora p2p`选项.<br>
-![4](images/file_1_4.png)<br>
-![5](images/file_1_5.png)<br>
-> (5) 保存配置.
-1. 使用命令`make BOARD=edu-riscv64`获得网关服务的运行文件,烧录进一个硬件作为网关
-2. 使用同样的方法配置编译一个客户端可执行文件并烧录(配置的第三步将其配置为客户端角色)
-3. 连接两个硬件并开始测试.
-4. 开启网关服务
-![6](images/file_2_1.png)<br>
-![7](images/file_2_2.png)<br>
-1. 初始化客户端
-![8](images/file_2_3.png)<br>
-![9](images/file_2_4.png)<br>
-1.  客户端连接网关
-![10](images/file_2_5_1.png)<br>
-![11](images/file_2_5_2.png)<br>
-1.   客户端发送数据到网关
-![12](images/file_2_6_1.png)<br>
-![13](images/file_2_6_2.png)<br>
-1.   客户端断开网关
-![14](images/file_2_7_1.png)<br>
-![15](images/file_2_7_2.png)<br>
+    return 0;
+}
+```
+### 2、修改Makefile
+#### 修改文件： `xiuos/APP_Framework/Applications/app_test/Makefile` 第 `137` 行为 `SRC_FILES += test_lora_p2p/test_lora_p2p.c`
+### 3、menuconfig配置
+1. `APP_Framework > Applications > test app` 开启 `Enable application test function` ,然后进入其中，开启 `Config test lora p2p (NEW)` ;
+![image](images/5-3-1.png)
+2. `APP_Framework > Framework` 开启 `support connection framework (NEW)` ,然后进入其中，开启 `Using lora adapter device (NEW)` ，然后进入其中， 客户端将其配置如下图所示，网关将其配置为下下图所示;
+![image](images/5-3-2-1.png)
+![image](images/5-3-2-2.png)
+3. 将客户端和网关分别编译、烧录到不同的板子并启动后用串口进行连接;
+![image](images/5-3-3.png)
+4. 启动网关程序；
+![image](images/5-3-4.png)
+5. 整体测试客户端；
+![image](images/5-3-5.png)
+6. 测试断网
+![image](images/5-3-6.png)
+7. 测试联网
+![image](images/5-3-7.png)
+8. 测试数据发送
+![image](images/5-3-8.png)
