@@ -105,9 +105,11 @@ struct DataFrameFormat
 
 ## 五、运行结果（##需结合运行测试截图按步骤说明##）
 ### 1、修改必要的框架和驱动代码
+
 #### 修改文件： `xiuos/APP_Framework/Framework/framework_init.c`
 1. 在第`28`行添加代码: `extern int UsrAdapterLoraInit(void);`;
 2. 将第`170`行代码的`AdapterLoraInit`修改为`UsrAdapterLoraInit`，更换Lora的初始化函数;
+
 #### 修改文件：`xiuos/APP_Framework/Framework/connection/lora/e220/e220.c`
 1. 将第`429`行代码修改为`cfg.serial_timeout = 5000;`,更改客户端超时时间;
 2. 为第`478`行的`E220Ioctl`添加函数体：
@@ -130,6 +132,7 @@ static int E220Ioctl(struct Adapter *adapter, int cmd, void *args)
 }
 ```
 ### 2、修改Makefile
+
 #### 修改文件： `xiuos/APP_Framework/Applications/app_test/Makefile` 第 `137` 行为 `SRC_FILES += test_lora_p2p/test_lora_p2p.c`
 ### 3、menuconfig配置
 1. `APP_Framework > Applications > test app` 开启 `Enable application test function` ,然后进入其中，开启 `Config test lora p2p (NEW)` ;
