@@ -121,6 +121,10 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
         SRC_FILES += test_socket.c
     endif    
 
+    ifeq ($(CONFIG_USER_TEST_MODBUS_TCP),y)
+        SRC_DIR += test_modbus_tcp
+    endif 
+
     ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
         SRC_FILES += 
     endif
