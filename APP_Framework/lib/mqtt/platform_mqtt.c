@@ -24,6 +24,7 @@
 #include <adapter.h>
 #include <transform.h>
 #include "platform_mqtt.h"
+#include "utils_hmacsha1.h"
 
 MQTT_TCB Platform_mqtt;  //创建一个用于连接云平台mqtt的结构体
 static struct Adapter *adapter;
@@ -110,14 +111,21 @@ int MQTT_Recv(uint8_t* buf, int buflen)
 int MQTT_Connect(void)
 {
     uint8_t TryConnect_time = 10;  //尝试登录次数
-	uint8_t passwdtemp[PASSWARD_SIZE];
-	
-	memset(&Platform_mqtt,0,sizeof(Platform_mqtt)); 
-	sprintf(Platform_mqtt.ClientID,"%s|securemode=3,signmethod=hmacsha1|",CLIENT_DEVICENAME);   //构建客户端ID并存入缓冲区
-	sprintf(Platform_mqtt.Username,"%s&%s",CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);              //构建用户名并存入缓冲区	
-	memset(passwdtemp,0,sizeof(passwdtemp)); 
-	sprintf(passwdtemp,"clientId%sdeviceName%sproductKey%s",CLIENT_DEVICENAME,CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);  //构建加密时的明文   
-	utils_hmac_sha1(passwdtemp,strlen(passwdtemp),Platform_mqtt.Passward,(char *)CLIENT_DEVICESECRET,strlen(CLIENT_DEVICESECRET)); //以DeviceSecret为秘钥对temp中的明文进行hmacsha1加密即为密码
+
+    memset(&Platform_mqtt,0,sizeof(Platform_mqtt));
+#ifdef XIUOS_PLATFORM
+    sprintf(Platform_mqtt.ClientID,"%s",CLIENTID);   //客户端ID存入缓冲区
+    sprintf(Platform_mqtt.Username,"%s",USERNAME);   //用户名存入缓冲区
+    sprintf(Platform_mqtt.Passward,"%s",PASSWORD);   //用户名存入缓冲区
+#endif
+#ifdef ALIBABA_PLATFORM
+    uint8_t passwdtemp[PASSWARD_SIZE];
+    memset(passwdtemp,0,sizeof(passwdtemp));
+    sprintf(Platform_mqtt.ClientID,"%s|securemode=3,signmethod=hmacsha1|",CLIENT_DEVICENAME);   //构建客户端ID并存入缓冲区
+    sprintf(Platform_mqtt.Username,"%s&%s",CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);              //构建用户名并存入缓冲区
+    sprintf(passwdtemp,"clientId%sdeviceName%sproductKey%s",CLIENT_DEVICENAME,CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);  //构建加密时的明文   
+    utils_hmac_sha1(passwdtemp,strlen(passwdtemp),Platform_mqtt.Passward,(char *)CLIENT_DEVICESECRET,strlen(CLIENT_DEVICESECRET)); //以DeviceSecret为秘钥对temp中的明文进行hmacsha1加密即为密码
+#endif
 
     Platform_mqtt.MessageID = 0;      //报文标识符清零,CONNECT报文虽然不需要添加报文标识符,但是CONNECT报文是第一个发送的报文,在此清零报文标识符为后续报文做准备
     Platform_mqtt.Fixed_len = 1;      //CONNECT报文固定报头长度暂定为1
@@ -126,7 +134,7 @@ int MQTT_Connect(void)
     Platform_mqtt.Remaining_len = Platform_mqtt.Variable_len + Platform_mqtt.Payload_len; //剩余长度=可变报头长度+负载长度
     memset(Platform_mqtt.Pack_buff,0,sizeof(Platform_mqtt.Pack_buff));
 
-    Platform_mqtt.Pack_buff[0] = 0x10;        //CONNECT报文 固定报头第1个字节0x10	
+    Platform_mqtt.Pack_buff[0] = 0x10;        //CONNECT报文,固定报头第1个字节0x10	
     do{
         if((Platform_mqtt.Remaining_len/128) == 0)
         {
@@ -281,7 +289,7 @@ int MQTT_UnSubscribeTopic(uint8_t *topic_name)
 
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+0] = Platform_mqtt.MessageID/256; //报文标识符高字节
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+1] = Platform_mqtt.MessageID%256; //报文标识符低字节
-    Platform_mqtt.MessageID++;                                                    //每用一次MessageID加1
+    Platform_mqtt.MessageID++;                                                        //每用一次MessageID加1
 
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+2] = strlen(topic_name)/256;               //主题长度高字节
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+3] = strlen(topic_name)%256;               //主题长度低字节
@@ -377,7 +385,7 @@ void MQTT_PublishDataQs1(uint8_t *topic_name,uint8_t *data, uint16_t data_len)
  
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+2+strlen(topic_name)] = Platform_mqtt.MessageID/256; //报文标识符高字节
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+3+strlen(topic_name)] = Platform_mqtt.MessageID%256; //报文标识符低字节
-    Platform_mqtt.MessageID++;                                                                       //每用一次MessageID加1
+    Platform_mqtt.MessageID++;                                                                           //每用一次MessageID加1
 
     memcpy(&Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+4+strlen(topic_name)],data,strlen(data));  //复制data数据
 
@@ -423,11 +431,14 @@ void MQTT_DealPublishData(uint8_t *data, uint16_t data_len)
 
     for(i = 1;i < 5;i++)
     {
+        //查找可变报头的长度字段,如果最高位为0表示该字节是长度字段的最后一个字节
         if((data[i] & 0x80) == 0)
             break;
     }
 
+    //1代表固定报头占一个字节,i代表可变报头长度字段所占用字节数,2代表主题长度字段占2字节,cmdpos代表报文里主题名称起始位置
     cmdpos = 1+i+2;
+    //data_len减去1+i+2就是报文中有效载荷的长度
     cmdlen = data_len-(1+i+2);
 
     if(data_len <= CMD_SIZE)

@@ -25,10 +25,6 @@
 
 #define JUMP_FAILED_FLAG  0XABABABAB
 #define JUMP_SUCCESS_FLAG 0XCDCDCDCD
-#define STARTFLAG             0x1A2B   //数据帧开始信号标记
-#define DATAFLAG              0x3C4D   //数据帧数据信号标记
-#define ENDTFLAG              0x5E6F   //数据帧结束信号标记
-#define LENGTH                  1024   //每帧数据的数据包长度
 
 typedef enum {
     OTA_STATUS_IDLE = 0,     // 空闲状态,没有进行OTA升级
@@ -62,6 +58,10 @@ typedef struct {
 
 
 #ifdef OTA_BY_TCPSERVER
+#define STARTFLAG             0x1A2B   //数据帧开始信号标记
+#define DATAFLAG              0x3C4D   //数据帧数据信号标记
+#define ENDTFLAG              0x5E6F   //数据帧结束信号标记
+#define LENGTH                  1024   //每帧数据的数据包长度
 /*bin包传输过程中的数据帧相关的结构体*/
 typedef struct
 {

@@ -23,7 +23,6 @@
 #define	_PLATFORM_MQTT_H_
 
 #include <stdint.h>
-#include "utils_hmacsha1.h"
 
 #define  KEEPALIVE_TIME 300    //保活时间(单位s),300s
 #define  HEART_TIME  120000    //空闲时发送心跳包的时间间隔(单位ms),120s

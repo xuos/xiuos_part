@@ -23,7 +23,7 @@ menu "OTA function"
 
                 config OTA_BY_PLATFORM
                     bool "Through IoT management platform."
-                    select TOOL_USING_MQTT
+                    select LIB_USING_MQTT
 
                 config OTA_BY_TCPSERVER
                     bool "Through the public network TCP server."

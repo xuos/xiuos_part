@@ -581,7 +581,7 @@ KERNELPATHS +=-I$(KERNEL_ROOT)/tool/bootloader/flash \
 	-I$(KERNEL_ROOT)/tool/bootloader/ota #
 endif
 
-ifeq ($(CONFIG_TOOL_USING_MQTT), y)
+ifeq ($(CONFIG_LIB_USING_MQTT), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/../../APP_Framework/lib/mqtt
 endif
 
