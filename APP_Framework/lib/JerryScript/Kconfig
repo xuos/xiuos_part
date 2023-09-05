@@ -1,5 +1,5 @@
 menu "lib using JerryScript"
-    menuconfig PKG_USING_JERRYSCRIPT
-        bool "JerryScript: Ultra-lightweight JavaScript engine for the Internet of Things."
+    menuconfig LIB_USING_JERRYSCRIPT
+        bool "Enable support JerryScript."
         default n
 endmenu
