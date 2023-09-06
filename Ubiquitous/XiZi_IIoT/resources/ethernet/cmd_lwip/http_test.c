@@ -9,7 +9,7 @@ void httpc_app_recv_end(void *arg, httpc_result_t httpc_result, u32_t rx_content
     httpc_state_t **req = (httpc_state_t**)arg;
 
     LWIP_DEBUGF(LWIP_DEBUG, ("[HTTPC] Transfer finished. rx_content_len is %lu\r\n", rx_content_len));
-    printf("[HTTPC] Transfer finished. rx_content_len is %lu\r\n", rx_content_len);
+    printf("[HTTPC] Transfer finished. rx_content_len is %u\r\n", rx_content_len);
     *req = NULL;
 }
 

@@ -175,12 +175,12 @@ SWITCH:
     HOOK(hook.assign.hook_Assign,(runningtask, new_task));
 
     SYS_KDEBUG_LOG(KDBG_SCHED,
-            ("[%d]switch to priority#%d "
-                "task:%.*s(sp:0x%08x), "
-                "from task:%.*s(sp: 0x%08x)\n",
-                isrManager.done->getCounter(), highest_prio,
-                NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
-                NAME_NUM_MAX, runningtask->task_base_info.name, runningtask->stack_point));
+        ("[%d]switch to priority#%ld "
+         "task:%.*s(sp:0x%8p), "
+         "from task:%.*s(sp: 0x%8p)\n",
+            isrManager.done->getCounter(), highest_prio,
+            NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
+            NAME_NUM_MAX, runningtask->task_base_info.name, runningtask->stack_point));
 
     Assign.smp_assign_done->SwitchToNew(runningtask,new_task);
 }
@@ -442,12 +442,12 @@ x_err_t YieldOsAssign(void)
     HOOK(hook.assign.hook_Assign,(runningtask, new_task));
 
     SYS_KDEBUG_LOG(KDBG_SCHED,
-            ("[%d]switch to priority#%d "
-                "task:%.*s(sp:0x%08x), "
-                "from task:%.*s(sp: 0x%08x)\n",
-                isrManager.done->getCounter(), highest_prio,
-                NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
-                NAME_NUM_MAX, runningtask->task_base_info.name, runningtask->stack_point));
+        ("[%d]switch to priority#%ld "
+         "task:%.*s(sp:0x%8p), "
+         "from task:%.*s(sp: 0x%8p)\n",
+            isrManager.done->getCounter(), highest_prio,
+            NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
+            NAME_NUM_MAX, runningtask->task_base_info.name, runningtask->stack_point));
 
     Assign.smp_assign_done->SwitchToNew(runningtask,new_task);
 
