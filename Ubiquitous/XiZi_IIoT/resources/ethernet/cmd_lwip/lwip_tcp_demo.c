@@ -125,7 +125,7 @@ void LwipTcpRecvTest(void)
 {
     uint8_t enet_port = 0; ///< test enet port 0
 
-    lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    lwip_config_tcp(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 
     uint8_t* recv_data = NULL;
     socklen_t sin_size;

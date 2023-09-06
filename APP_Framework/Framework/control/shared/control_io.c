@@ -190,3 +190,33 @@ int SerialRead(uint8_t *read_data, int length)
     return data_size;
 #endif
 }
+
+int ControlFileDataStore(uint8 *data, int data_length)
+{
+    int data_file_fd = -1;
+    struct stat data_file_status;
+    int i = 0;
+
+    //Step1 : open data file from SD card or other store device
+    data_file_fd = PrivOpen(FILE_NAME, O_RDONLY);
+    if (data_file_fd < 0) {
+        printf("Open data file %s failed\n", FILE_NAME);
+        PrivClose(data_file_fd);
+        return -1;
+    }
+
+    if (0 != fstat(data_file_fd, &data_file_status)) {
+        printf("Get data file information failed!\n");
+        PrivClose(data_file_fd);
+        return -1;
+    }
+
+	lseek(data_file_fd, data_file_status.st_size, SEEK_SET);
+
+    //Step2 : write data to file in SD card or other store device
+	FatfsPrintf(GetFileDescriptor(data_file_fd), data, data_length);
+
+    //Step3 : close data file from SD card or other store device
+    PrivClose(data_file_fd);  
+    return 0;
+}

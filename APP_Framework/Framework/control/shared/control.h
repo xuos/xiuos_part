@@ -67,7 +67,7 @@ typedef enum
 
 struct ControlDevice
 {
-    char *dev_name;
+    char dev_name[20];
     int status;
 
     //to do
