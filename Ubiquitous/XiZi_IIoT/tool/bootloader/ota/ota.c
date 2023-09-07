@@ -852,6 +852,10 @@ reconnect:
                 {
                         KPrintf("Failed to get ota information!\n");
                         ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "Failed to get ota information!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
                         break;
                 }
             }
@@ -864,6 +868,10 @@ reconnect:
                 {
                     KPrintf("current frame[%d] flash failed.\n",platform_ota.num-1);
                     ret = -1;
+                    ota_info.status = OTA_STATUS_ERROR;
+                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                    sprintf(ota_info.error_message,"current frame[%d] flash failed.",platform_ota.num-1);  
+                    UpdateOTAFlag(&ota_info);
                     break;
                 }
                 else
@@ -938,19 +946,16 @@ reconnect:
         strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
 
         UpdateOTAFlag(&ota_info);
-    } 
+        KPrintf("ota file transfer complete,start reboot!\n");
+    }
     else
     {
-        ota_info.status = OTA_STATUS_ERROR;
-        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
-        strncpy(ota_info.error_message, "Failed to download firmware to download partition!",sizeof(ota_info.error_message));
-        UpdateOTAFlag(&ota_info);
+        KPrintf("ota file transfer failed,start reboot!\n");
     }
     MQTT_UnSubscribeTopic(topicdatabuff[0]);
     MQTT_UnSubscribeTopic(topicdatabuff[1]);
     MQTT_Disconnect();
     mcuboot.flash_deinit();
-    KPrintf("ota file transfer complete,start reboot!\n");
     MdelayKTask(2000);
     mcuboot.op_reset();
 }
@@ -1074,6 +1079,10 @@ reconnect:
                 {
                         KPrintf("Failed to get ota information!\n");
                         ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "Failed to get ota information!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
                         break;
                 }
             }
@@ -1086,6 +1095,10 @@ reconnect:
                 {
                     KPrintf("current frame[%d] flash failed.\n",platform_ota.num-1);
                     ret = -1;
+                    ota_info.status = OTA_STATUS_ERROR;
+                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                    sprintf(ota_info.error_message,"current frame[%d] flash failed.",platform_ota.num-1);  
+                    UpdateOTAFlag(&ota_info);
                     break;
                 }
                 else
@@ -1160,18 +1173,15 @@ reconnect:
         strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
 
         UpdateOTAFlag(&ota_info);
-    } 
+        KPrintf("ota file transfer complete,start reboot!\n");
+    }
     else
     {
-        ota_info.status = OTA_STATUS_ERROR;
-        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
-        strncpy(ota_info.error_message, "Failed to download firmware to download partition!",sizeof(ota_info.error_message));
-        UpdateOTAFlag(&ota_info);
+        KPrintf("ota file transfer failed,start reboot!\n");
     }
     MQTT_UnSubscribeTopic(topicdatabuff);
     MQTT_Disconnect();
     mcuboot.flash_deinit();
-    KPrintf("ota file transfer complete,start reboot!\n");
     MdelayKTask(2000);
     mcuboot.op_reset();
 }
