@@ -168,6 +168,9 @@ static struct pbuf* wiz_read_receive_pbuf(struct pbuf* buf)
     int32_t data_len = wiz_sock_recvfrom(0, rx_frame, RX_FRAME_SIZE, addr, &port);
     if (data_len > 0 && data_len <= RX_FRAME_SIZE) {
         buf = pbuf_alloc(PBUF_RAW, data_len, PBUF_POOL);
+        if (buf == NULL) {
+            return NULL;
+        }
         memcpy(buf->payload, rx_frame, data_len);
     } else {
         return NULL;
