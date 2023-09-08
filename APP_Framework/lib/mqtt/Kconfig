@@ -9,7 +9,7 @@ menu "lib using MQTT"
     if LIB_USING_MQTT
         choice 
             prompt "Choose xiuos platform or Alibaba Cloud platform."
-            default ALIBABA_PLATFORM
+            default XIUOS_PLATFORM
 
             config XIUOS_PLATFORM
                 bool "xiuos platform."
@@ -34,11 +34,11 @@ menu "lib using MQTT"
                     default "xiuosiot"
             
                 config PLATFORM_SERVERIP
-                    string "mqtt platform server ip."
+                    string "xiuos platform server ip."
                     default "115.238.53.59"
 
                 config PLATFORM_SERVERPORT
-                    string "mqtt platform server port."
+                    string "xiuos platform server port."
                     default "1883"
             endmenu
         endif
@@ -58,11 +58,11 @@ menu "lib using MQTT"
                     default "d2e613c4f714b6b0774bd7b68eeceae3"
             
                 config PLATFORM_SERVERIP
-                    string "mqtt platform server ip."
+                    string "Alibaba Cloud platform server ip."
                     default "101.133.196.127"
 
                 config PLATFORM_SERVERPORT
-                    string "mqtt platform server port."
+                    string "Alibaba Cloud platform server port."
                     default "1883"
             endmenu
         endif

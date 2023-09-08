@@ -726,7 +726,7 @@ static void app_ota_by_4g(void)
         } 
     }
     mcuboot.flash_deinit();
-    KPrintf("ota file transfer complete,start reboot!\n");
+    KPrintf("firmware file transfer successful,start reboot!\n");
     MdelayKTask(2000);
     mcuboot.op_reset();
 }
@@ -758,6 +758,7 @@ static void PropertyVersion(void)
     
     memset(tempdatabuff,0,128);
     sprintf(tempdatabuff,"{\"clientId\":\"%s\",\"version\":\"%s\"}",CLIENTID,ota_info.os.version);
+    KPrintf("------current version is:%s------\r\n",ota_info.os.version);
 
     MQTT_PublishDataQs1("xiuosiot/ota/version",tempdatabuff,strlen(tempdatabuff));  //发送等级QS=1的PUBLISH报文
 }
@@ -794,7 +795,7 @@ static void app_ota_by_platform(void* parameter)
     uint32_t heart_time = 0;
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
     uint8_t topicdatabuff[2][64];
-    char *ptr;
+    char *ptr1, *ptr2;
 
     mcuboot.flash_init();
     memset(&ota_info, 0, sizeof(ota_info_t));
@@ -829,14 +830,15 @@ reconnect:
         {
             freecnt = 0;
             MQTT_DealPublishData(MqttRxbuf, datalen);
-            ptr = strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[0]); 
-            if(ptr != NULL)
+            ptr1 = strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[0]); 
+            ptr2 = strstr((char *)Platform_mqtt.cmdbuff,"{\"fileSize\":"); 
+            if((ptr1 != NULL) &&(ptr2 != NULL))
             {
-                if(sscanf(ptr+strlen(topicdatabuff[0])+1,"{\"fileSize\":%d,\"version\":\"%11s\",\"fileId\":%d,\"md5\":\"%*32s\"}",&platform_ota.size,platform_ota.version,&platform_ota.streamId)==3)
+                if(sscanf(ptr2,"{\"fileSize\":%d,\"version\":\"%11s\",\"fileId\":%d,\"md5\"",&platform_ota.size,platform_ota.version,&platform_ota.streamId)==3)
                 {
-                    KPrintf("ota file size:%d\r\n",platform_ota.size);
-                    KPrintf("ota file id:%d\r\n",platform_ota.streamId);
-                    KPrintf("ota file version:%s\r\n",platform_ota.version);
+                    KPrintf("------Start the firmware file transfer!------\r\n");
+                    KPrintf("file size:%d,file id:%d,file version:%s\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
+                    KPrintf("---------------------------------------------\r\n");
                     if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,platform_ota.size) != kStatus_Success)
                     {
                         KPrintf("Failed to erase target fash!\n");
@@ -877,7 +879,7 @@ reconnect:
                 else
                 {
                     KPrintf("current frame[%d] is written to flash 0x%x address successful.\n", platform_ota.num -1, flashdestination);
-                    KPrintf("Current progress is %d/%d\r\n",platform_ota.num,platform_ota.counter); 
+                    KPrintf("current progress is %d/%d.\r\n",platform_ota.num,platform_ota.counter); 
                     flashdestination += platform_ota.downlen;
                     platform_ota.num++; 
                 }
@@ -946,11 +948,11 @@ reconnect:
         strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
 
         UpdateOTAFlag(&ota_info);
-        KPrintf("ota file transfer complete,start reboot!\n");
+        KPrintf("firmware file transfer successful,start reboot!\n");
     }
     else
     {
-        KPrintf("ota file transfer failed,start reboot!\n");
+        KPrintf("firmware file transfer failed,start reboot!\n");
     }
     MQTT_UnSubscribeTopic(topicdatabuff[0]);
     MQTT_UnSubscribeTopic(topicdatabuff[1]);
@@ -982,6 +984,7 @@ static void PropertyVersion(void)
     
     memset(tempdatabuff,0,128);
     sprintf(tempdatabuff,"{\"id\": \"1\",\"params\": {\"version\": \"%s\"}}",ota_info.os.version);
+    KPrintf("------current version is:%s------\r\n",ota_info.os.version);
 
     MQTT_PublishDataQs1(topicdatabuff,tempdatabuff,strlen(tempdatabuff));  //发送等级QS=1的PUBLISH报文
 }
@@ -1061,9 +1064,9 @@ reconnect:
             {
                 if(sscanf(ptr,"{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&platform_ota.size,&platform_ota.streamId,platform_ota.version)==3)
                 {
-                    KPrintf("ota file size:%d\r\n",platform_ota.size);
-                    KPrintf("ota file id:%d\r\n",platform_ota.streamId);
-                    KPrintf("ota file version:%s\r\n",platform_ota.version);
+                    KPrintf("------Start the firmware file transfer!------\r\n");
+                    KPrintf("file size:%d,file id:%d,file version:%s\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
+                    KPrintf("---------------------------------------------\r\n");
                     if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,platform_ota.size) != kStatus_Success)
                     {
                         KPrintf("Failed to erase target fash!\n");
@@ -1104,7 +1107,7 @@ reconnect:
                 else
                 {
                     KPrintf("current frame[%d] is written to flash 0x%x address successful.\n", platform_ota.num -1, flashdestination);
-                    KPrintf("Current progress is %d/%d\r\n",platform_ota.num,platform_ota.counter); 
+                    KPrintf("current progress is %d/%d.\r\n",platform_ota.num,platform_ota.counter); 
                     flashdestination += platform_ota.downlen;
                     platform_ota.num++; 
                 }
@@ -1173,11 +1176,11 @@ reconnect:
         strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
 
         UpdateOTAFlag(&ota_info);
-        KPrintf("ota file transfer complete,start reboot!\n");
+        KPrintf("firmware file transfer successful,start reboot!\n");
     }
     else
     {
-        KPrintf("ota file transfer failed,start reboot!\n");
+        KPrintf("firmware file transfer failed,start reboot!\n");
     }
     MQTT_UnSubscribeTopic(topicdatabuff);
     MQTT_Disconnect();
