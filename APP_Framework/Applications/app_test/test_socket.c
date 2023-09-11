@@ -324,7 +324,7 @@ void TestSocket(int argc, char* argv[])
             return;
         } else {
             memset(iperf_param.host, 0, sizeof(iperf_param.host));
-            strncpy(iperf_param.host, ip_ptr, strlen(ip_ptr));
+            strncpy(iperf_param.host, ip_ptr, sizeof(iperf_param.host));
         }
         iperf_mode->mode = IPERF_MODE_CLIENT;
     }

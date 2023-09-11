@@ -94,7 +94,7 @@ static x_err_t _MsgQueueSend(struct MsgQueue* mq,
     NULL_PARAM_CHECK(mq);
     NULL_PARAM_CHECK(buffer);
 
-    SYS_KDEBUG_LOG(MSGQUEUE_DEBUG, ("[%s] mq_num_msgs: %d, block size: %d, needed size: %d\n", __func__, mq->num_msgs, mq->each_len, size));
+    SYS_KDEBUG_LOG(MSGQUEUE_DEBUG, ("[%s] mq_num_msgs: %d, block size: %d, needed size: %lu\n", __func__, mq->num_msgs, mq->each_len, size));
 
     if (size > mq->each_len)
         return -ERROR;

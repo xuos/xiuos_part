@@ -206,7 +206,7 @@ static int PrivLcdIoctl(int fd, int cmd, void *args)
 
 int PrivIoctl(int fd, int cmd, void *args)
 {
-    int ret;
+    int ret = -ERROR;
     struct PrivIoctlCfg *ioctl_cfg = (struct PrivIoctlCfg *)args;
     switch (ioctl_cfg->ioctl_driver_type)
     {

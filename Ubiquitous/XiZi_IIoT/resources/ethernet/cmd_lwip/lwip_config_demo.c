@@ -41,10 +41,10 @@ void LwipSetIPTest(int argc, char* argv[])
 {
     if (argc >= 4) {
         printf("lw: [%s] ip %s mask %s gw %s netport %s\n", __func__, argv[1], argv[2], argv[3], argv[4]);
-        sscanf(argv[1], "%d.%d.%d.%d", &lwip_ipaddr[0], &lwip_ipaddr[1], &lwip_ipaddr[2], &lwip_ipaddr[3]);
-        sscanf(argv[2], "%d.%d.%d.%d", &lwip_netmask[0], &lwip_netmask[1], &lwip_netmask[2], &lwip_netmask[3]);
-        sscanf(argv[3], "%d.%d.%d.%d", &lwip_gwaddr[0], &lwip_gwaddr[1], &lwip_gwaddr[2], &lwip_gwaddr[3]);
-        sscanf(argv[4], "%d", &enet_id);
+        sscanf(argv[1], "%hhd.%hhd.%hhd.%hhd", &lwip_ipaddr[0], &lwip_ipaddr[1], &lwip_ipaddr[2], &lwip_ipaddr[3]);
+        sscanf(argv[2], "%hhd.%hhd.%hhd.%hhd", &lwip_netmask[0], &lwip_netmask[1], &lwip_netmask[2], &lwip_netmask[3]);
+        sscanf(argv[3], "%hhd.%hhd.%hhd.%hhd", &lwip_gwaddr[0], &lwip_gwaddr[1], &lwip_gwaddr[2], &lwip_gwaddr[3]);
+        sscanf(argv[4], "%hhd", &enet_id);
 
         if (0 == enet_id) {
             printf("save eth0 info\n");
@@ -59,7 +59,7 @@ void LwipSetIPTest(int argc, char* argv[])
         }
     } else if (argc == 2) {
         printf("lw: [%s] set eth0 ipaddr %s \n", __func__, argv[1]);
-        sscanf(argv[1], "%d.%d.%d.%d", &lwip_ipaddr[0], &lwip_ipaddr[1], &lwip_ipaddr[2], &lwip_ipaddr[3]);
+        sscanf(argv[1], "%hhd.%hhd.%hhd.%hhd", &lwip_ipaddr[0], &lwip_ipaddr[1], &lwip_ipaddr[2], &lwip_ipaddr[3]);
         memcpy(lwip_eth0_ipaddr, lwip_ipaddr, strlen(lwip_ipaddr));
     }
     // sys_thread_new("SET ip address", LwipSetIPTask, &enet_id, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
