@@ -338,11 +338,11 @@ void lwip_config_input(struct netif* net)
 
     th_id = sys_thread_new("eth_input", ethernetif_input, net, LWIP_TASK_STACK_SIZE, 30);
 
-    if (th_id >= 0) {
-        lw_print("%s %d successfully!\n", __func__, th_id);
-    } else {
-        lw_print("%s failed!\n", __func__);
-    }
+    // if (th_id >= 0) {
+    //     lw_print("%s %d successfully!\n", __func__, th_id);
+    // } else {
+    //     lw_print("%s failed!\n", __func__);
+    // }
 }
 
 void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
@@ -387,7 +387,7 @@ void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
 #endif
     }
 
-    netif_set_default(&gnetif);
+    // netif_set_default(&gnetif);
     netif_set_up(&gnetif);
 
     lw_print("\r\n************************************************\r\n");

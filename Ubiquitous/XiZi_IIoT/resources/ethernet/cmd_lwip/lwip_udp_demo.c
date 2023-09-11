@@ -165,12 +165,12 @@ static int LwipUdpSend(int argc, char* argv[])
     }
 
     // translate string to array
-    sscanf(ip_ptr, "%d.%d.%d.%d", &get_udp_test_info()->ip[0], &get_udp_test_info()->ip[1], &get_udp_test_info()->ip[2], &get_udp_test_info()->ip[3]);
+    sscanf(ip_ptr, "%hhd.%hhd.%hhd.%hhd", &get_udp_test_info()->ip[0], &get_udp_test_info()->ip[1], &get_udp_test_info()->ip[2], &get_udp_test_info()->ip[3]);
     int msg_len = strlen(msg_ptr);
     strncpy(udp_demo_buffer, msg_ptr, msg_len < UDP_BUFFER_SIZE ? msg_len : UDP_BUFFER_SIZE);
 
     /* start task */
-    KPrintf("[%s] gw %d.%d.%d.%d:%d send time %d udp_interval %d\n", __func__,
+    KPrintf("[%s] gw %hhd.%hhd.%hhd.%hhd:%d send time %d udp_interval %d\n", __func__,
         get_udp_test_info()->ip[0], get_udp_test_info()->ip[1], get_udp_test_info()->ip[2], get_udp_test_info()->ip[3],
         get_udp_test_info()->port,
         get_udp_test_info()->num,
@@ -191,7 +191,7 @@ void LwipUdpRecvTest(void)
     //init lwip and net dirver
     lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 
-    uint8_t *recv_data;
+    uint8_t* recv_data = NULL;
     socklen_t sin_size;
     int sock = -1, connected, bytes_received, i;
     struct sockaddr_in server_addr, client_addr;

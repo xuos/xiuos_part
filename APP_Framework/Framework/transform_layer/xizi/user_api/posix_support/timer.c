@@ -66,7 +66,7 @@ int timer_create(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
     }
 
     memset(timer_name, 0, sizeof(timer_name));
-    snprintf(timer_name, sizeof(timer_name), "timer_%d", clockid);
+    snprintf(timer_name, sizeof(timer_name), "timer_%ld", clockid);
 
     sem_init(&timer_sem, 0, 0);
 

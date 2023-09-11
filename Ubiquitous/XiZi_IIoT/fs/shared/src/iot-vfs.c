@@ -231,9 +231,9 @@ int MountFilesystem(const char *bus_name,
         enum FilesystemType fs_type, const char *path)
 {
     struct MountPoint *mp = NULL, *itr;
-    struct Bus *bus;
+    struct Bus* bus = NULL;
     HardwareDevType dev;
-    DriverType drv;
+    DriverType drv = NULL;
     struct SysDoubleLinklistNode *node;
     int ret = -EINVAL;
 
