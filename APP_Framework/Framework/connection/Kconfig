@@ -6,7 +6,7 @@ menuconfig SUPPORT_CONNECTION_FRAMEWORK
 if SUPPORT_CONNECTION_FRAMEWORK
         config CONNECTION_FRAMEWORK_DEBUG
         bool "Using connection framework debug log function"
-        default y
+        default n
 
         menuconfig CONNECTION_INDUSTRIAL_NETWORK
                 bool "Using industrial network"

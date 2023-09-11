@@ -507,7 +507,7 @@ static status_t flexspi_config_mcr1(uint32_t instance, flexspi_mem_config_t *con
     // Configure MCR1
     FLEXSPI->MCR1 = FLEXSPI_MCR1_SEQWAIT(seqWaitTicks) | FLEXSPI_MCR1_AHBBUSWAIT(ahbBusWaitTicks);
 
-    return kStatus_Success;
+    return (status_t)kStatus_Success;
 }
 
 
@@ -647,14 +647,14 @@ uint8_t FLASH_WritePage(uint32_t addr, const uint32_t *buf, uint32_t len)
 
 
 /*******************************************************************************
-* 函 数 名: FLASH_Read
+* 函 数 名: FLASH_ReadBuf
 * 功能描述: 读Flash内容
 * 形    参: addr:读取区域起始地址
             buf:数据存储区
             len:要读取的字节数
 * 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
 *******************************************************************************/
-status_t FLASH_Read(uint32_t addr, uint32_t *buf, uint32_t len)
+status_t FLASH_ReadBuf(uint32_t addr, uint32_t *buf, uint32_t len)
 {
     status_t status;
     flexspi_xfer_t flashXfer;
@@ -679,205 +679,27 @@ status_t FLASH_Read(uint32_t addr, uint32_t *buf, uint32_t len)
 
 
 /*******************************************************************************
-* 函 数 名: flash_erase
-* 功能描述: 擦除Flash指定长度的空间
-* 形    参: addr:擦除区域起始地址
-            byte_cnt:要擦除的字节数,以4k字节为最小擦除单位
-* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码
-* 注    释: 不满4k字节的，也需要擦除掉4k字节
-*******************************************************************************/
-status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt)
-{
-    uint32_t addr;
-    status_t status;
-
-    addr = start_addr;
-    while(addr < (byte_cnt + start_addr))
-    {
-        status = FLASH_EraseSector(addr);
-        if(status != kStatus_Success)
-        {
-            return status;
-        }
-        addr += FLASH_GetSectorSize();
-    }
-    return status;
-}
-
-
-/*******************************************************************************
-* 函 数 名: flash_write
-* 功能描述: 在指定的flash起始地址写入指定长度的数据
-* 形    参: addr:写入区域起始地址
-            buf:数据存储区
-            byte_cnt:要写入的字节数
-* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
-*******************************************************************************/
-status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt)
-{
-    uint32_t size;
-    status_t status;
-    while(byte_cnt > 0)
-    {
-        size = byte_cnt > FLASH_PAGE_SIZE ? FLASH_PAGE_SIZE : byte_cnt;
-        status = FLASH_WritePage(start_addr, (void *)buf, size);
-        if(status != kStatus_Success) 
-        {
-            return status;
-        }
-        start_addr += size;
-        buf += size;
-        byte_cnt -= size;
-    }
-
-    return kStatus_Success;
-}
-
-
-/*******************************************************************************
-* 函 数 名: flash_read
-* 功能描述: 读Flash内容
-* 形    参: addr:读取区域起始地址
-            buf:数据存储区
-            len:要读取的字节数
-* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
-*******************************************************************************/
-status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len)
-{   
-    /* For FlexSPI Memory ReadBack, use IP Command instead of AXI command for security */
-    if((addr >= 0x60000000) && (addr < 0x61000000))
-    {
-        return FLASH_Read(addr, (void *)buf, len);
-    }
-        
-    else
-    {
-        void* result = memcpy(buf, (void*)addr, len);
-        if(result == NULL)
-        {
-            return (status_t)kStatus_Fail;  
-        } 
-        else 
-        {
-            return (status_t)kStatus_Success;  
-        }
-        
-    }
-}
-
-
-/*******************************************************************************
-* 函 数 名: flash_copy
-* 功能描述: 实现flash数据在分区之间的拷贝
-* 形    参: srcAddr:源flash的起始地址
-            dstAddr:目标flash的起始地址;
-            imageSize:要拷贝的flash空间大小,单位为字节
-* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
-*******************************************************************************/
-status_t flash_copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
-{   
-    uint32_t PageNum, Remain, i;
-    status_t status;
-
-    if((srcAddr == dstAddr) || imageSize > APP_FLASH_SIZE)
-    {
-        return (status_t)kStatus_Fail;
-    }
-
-    status = flash_erase(dstAddr,imageSize);
-    if(status != kStatus_Success)
-    {
-        KPrintf("Erase flash 0x%08x failure !\r\n",dstAddr);
-        return status;
-    }
-
-    PageNum = imageSize/FLASH_PAGE_SIZE;
-    Remain = imageSize%FLASH_PAGE_SIZE;
-
-    for(i=0;i<PageNum;i++)
-    {
-        memset(buffer, 0, sizeof(buffer));
-        status = flash_read(srcAddr + i*FLASH_PAGE_SIZE, buffer, sizeof(buffer));
-        if(status != kStatus_Success)
-        {
-            KPrintf("Read flash 0x%08x failure !\r\n", srcAddr + i*FLASH_PAGE_SIZE);
-            return status;
-        }
-        status = flash_write(dstAddr+ i*FLASH_PAGE_SIZE, buffer, FLASH_PAGE_SIZE);
-        if(status != kStatus_Success)
-        {
-            KPrintf("Write flash 0x%08x failure !\r\n", dstAddr + i*FLASH_PAGE_SIZE);
-            return status;
-        }
-    }
-
-    if(Remain)
-    {
-        memset(buffer, 0, sizeof(buffer));
-        status = flash_read(srcAddr + i*FLASH_PAGE_SIZE, buffer, Remain);
-        if(status != kStatus_Success)
-        {
-            KPrintf("Read flash 0x%08x failure !\r\n", srcAddr + i*FLASH_PAGE_SIZE);
-            return status;
-        }
-        status = flash_write(dstAddr+ i*FLASH_PAGE_SIZE, buffer, Remain);
-        if(status != kStatus_Success)
-        {
-            KPrintf("Write flash 0x%08x failure !\r\n", dstAddr + i*FLASH_PAGE_SIZE);
-            return status;
-        }
-    }
-
-    return (status_t)kStatus_Success; 
-}
-
-
-/*******************************************************************************
-* 函 数 名: NOR_FLASH_Erase
-* 功能描述: 以扇区为擦除单位擦除Flash指定长度的空间,最终擦除的字节可能大于imageSize
-* 形    参: addr:擦除区域起始地址
-            imageSize:要擦除的字节数
-* 返 回 值: None 
-*******************************************************************************/
-status_t NOR_FLASH_Erase(uint32_t app_base_addr,uint32_t imageSize)
-{
-    uint16_t i;
-    uint32_t sectorNum = (imageSize%SECTOR_SIZE != 0)? (imageSize/SECTOR_SIZE + 1):(imageSize/SECTOR_SIZE);
-    
-    for(i=0;i<sectorNum;i++)
-    {
-       status_t status = FLASH_EraseSector(app_base_addr+i*SECTOR_SIZE);
-    
-        if (status != kStatus_Success)
-        {
-            KPrintf("Erase_Sector 0x%x faild!\r\n",i*SECTOR_SIZE);
-            return status;
-        }
-    }
-    return kStatus_Success;
-}
-
-
-/*******************************************************************************
 * 函 数 名: NorFlash_Write_PageProgram
 * 功能描述: 写入Flash指定长度的数据
 * 形    参: pBuffer:数据存储区
             WriteAddr:写入区域起始地址
             NumByteToWrite:要写入的字节数(最大256)
-* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+* 返 回 值: 如果函数执行成功,状态值为 kStatus_Success,否则状态值为其他错误码 
 * 注    释: 在指定地址开始写入最大256字节的数据
 *******************************************************************************/
-void NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
+status_t NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 {
     uint8_t temp_data[256] = {0xff};
 
     memcpy(temp_data,pBuffer,NumByteToWrite);
     
    status_t status = FLASH_WritePage(WriteAddr,(void *)temp_data,FLASH_PAGE_SIZE);
-    if (status != kStatus_Success)
+    if(status != kStatus_Success)
     {
         KPrintf("Write_PageProgram 0x%x faild!\r\n",WriteAddr);
     }
+
+    return (status_t)kStatus_Success;
 }
 
 
@@ -887,13 +709,14 @@ void NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t Num
 * 形    参: pBuffer:数据存储区
             WriteAddr:开始写入的地址(24bit)
             NumByteToWrite:要写入的字节数(最大65535)
-* 返 回 值: 无
+* 返 回 值: 如果函数执行成功,状态值为 kStatus_Success,否则状态值为其他错误码 
 * 注    释: 必须确保所写的地址范围内的数据全部为0XFF,否则在非0XFF处写入的数据将失败!
             具有自动换页功能,在指定地址开始写入指定长度的数据,但是要确保地址不越界!
 *******************************************************************************/
-void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
+status_t NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 {
-    uint16_t pageRemain;	
+    uint16_t pageRemain;
+    status_t status;	
     
     pageRemain = 256 - WriteAddr%256;//单页剩余的字节数
     
@@ -904,7 +727,12 @@ void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByte
 
     while(1)
     {
-        NorFlash_Write_PageProgram(pBuffer,WriteAddr,pageRemain);
+        status = NorFlash_Write_PageProgram(pBuffer,WriteAddr,pageRemain);
+        if(status != kStatus_Success)
+        {
+            KPrintf("Write_PageProgram 0x%x faild!\r\n",WriteAddr);
+            return status;
+        }
         if(NumByteToWrite == pageRemain)
         {
             break;//写入结束了	
@@ -925,25 +753,54 @@ void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByte
             }
         }
     }
+
+    return (status_t)kStatus_Success;
 }
 
 
 /*******************************************************************************
-* 函 数 名: NorFlash_Write
+* 函 数 名: Flash_Erase
+* 功能描述: 以扇区为擦除单位擦除Flash指定长度的空间,最终擦除的字节可能大于imageSize
+* 形    参: start_addr:擦除区域起始地址
+            imageSize:要擦除的字节数
+* 返 回 值: 如果函数执行成功,状态值为 kStatus_Success,否则状态值为其他错误码 
+*******************************************************************************/
+status_t Flash_Erase(uint32_t start_addr, uint32_t imageSize)
+{
+    uint16_t i;
+    status_t status;
+    uint32_t sectorNum = (imageSize%SECTOR_SIZE != 0)? (imageSize/SECTOR_SIZE + 1):(imageSize/SECTOR_SIZE);
+    
+    for(i=0;i<sectorNum;i++)
+    {
+       status = FLASH_EraseSector(start_addr+i*SECTOR_SIZE);
+    
+        if (status != kStatus_Success)
+        {
+            KPrintf("Erase_Sector 0x%x faild!\r\n",i*SECTOR_SIZE);
+            return status;
+        }
+    }
+    return (status_t)kStatus_Success;
+}
+
+/*******************************************************************************
+* 函 数 名: Flash_Write
 * 功能描述: 写入W25QXX在指定地址开始写入指定长度的数据 
 * 形    参: pBuffer:数据存储区
-            WriteAddr:开始写入的地址(24bit)
+            WriteAddr:开始写入的地址
             NumByteToWrite:要写入的字节数(最大65535)  
-* 返 回 值: None 
+* 返 回 值: 如果函数执行成功,状态值为 kStatus_Success,否则状态值为其他错误码 
 * 注    释: 该函数带擦除操作
 *******************************************************************************/
-void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
+status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWrite)
 { 
     uint32_t secPos;
     uint16_t secOff;
     uint16_t secRemain;
     uint16_t i;    
     uint8_t *NorFlash_BUF = 0;
+    status_t status;
 
     NorFlash_BUF = NorFlash_BUFFER;//RAM缓冲区4K
 
@@ -959,7 +816,11 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
     }
     while(1) 
     {
-        FLASH_Read(CHIP_FLAH_BASE + secPos*SECTOR_SIZE, (void *)NorFlash_BUF, SECTOR_SIZE);//读出整个扇区的内容
+        status = FLASH_ReadBuf(CHIP_FLAH_BASE + secPos*SECTOR_SIZE, (void *)NorFlash_BUF, SECTOR_SIZE);//读出整个扇区的内容
+        if (status != kStatus_Success)
+        {
+            return status;
+        }
         for(i=0;i<secRemain;i++)//校验数据
         {
             if(NorFlash_BUF[secOff+i] != 0xFF)
@@ -969,16 +830,28 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
         }
         if(i < secRemain)//需要擦除
         {
-            FLASH_EraseSector(CHIP_FLAH_BASE + secPos*SECTOR_SIZE);
+            status = FLASH_EraseSector(CHIP_FLAH_BASE + secPos*SECTOR_SIZE);
+            if (status != kStatus_Success)
+            {
+                return status;
+            }
             for(i=0;i<secRemain;i++)//复制
             {
                 NorFlash_BUF[i+secOff] = pBuffer[i];                       
             }
-            NorFlash_Write_NoCheck(NorFlash_BUF,CHIP_FLAH_BASE + secPos*SECTOR_SIZE,SECTOR_SIZE);//写入整个扇区  
+            status = NorFlash_Write_NoCheck(NorFlash_BUF,CHIP_FLAH_BASE + secPos*SECTOR_SIZE,SECTOR_SIZE);//写入整个扇区
+            if (status != kStatus_Success)
+            {
+                return status;
+            }  
         }
         else
         {
-            NorFlash_Write_NoCheck(pBuffer,CHIP_FLAH_BASE + WriteAddr,secRemain);//写已经擦除了的,直接写入扇区剩余区间. 		
+            status = NorFlash_Write_NoCheck(pBuffer,CHIP_FLAH_BASE + WriteAddr,secRemain);//写已经擦除了的,直接写入扇区剩余区间. 	
+            if (status != kStatus_Success)
+            {
+                return status;
+            } 	
         }
                            
         if(NumByteToWrite == secRemain)
@@ -1003,8 +876,107 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
             }
         }
     }
+
+    return (status_t)kStatus_Success;
 }
 
+
+/*******************************************************************************
+* 函 数 名: Flash_Read
+* 功能描述: 读Flash内容
+* 形    参: addr:读取区域起始地址
+            buf:数据存储区
+            len:要读取的字节数
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
+status_t Flash_Read(uint32_t addr, uint8_t *buf, uint32_t len)
+{   
+    /* For FlexSPI Memory ReadBack, use IP Command instead of AXI command for security */
+    if((addr >= 0x60000000) && (addr < 0x61000000))
+    {
+        return FLASH_ReadBuf(addr, (void *)buf, len);
+    }
+        
+    else
+    {
+        void* result = memcpy(buf, (void*)addr, len);
+        if(result == NULL)
+        {
+            return (status_t)kStatus_Fail;  
+        } 
+        else 
+        {
+            return (status_t)kStatus_Success;  
+        }
+        
+    }
+}
+
+
+/*******************************************************************************
+* 函 数 名: Flash_Copy
+* 功能描述: 实现flash数据在分区之间的拷贝
+* 形    参: srcAddr:源flash的起始地址
+            dstAddr:目标flash的起始地址;
+            imageSize:要拷贝的flash空间大小,单位为字节
+* 返 回 值: 如果函数执行成功，状态值为 kStatus_Success，否则状态值为其他错误码 
+*******************************************************************************/
+status_t Flash_Copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
+{   
+    uint32_t PageNum, Remain, i;
+    status_t status;
+
+    if((srcAddr == dstAddr) || imageSize > APP_FLASH_SIZE)
+    {
+        return (status_t)kStatus_Fail;
+    }
+
+    status = Flash_Erase(dstAddr,imageSize);
+    if(status != kStatus_Success)
+    {
+        KPrintf("Erase flash 0x%08x failure !\r\n",dstAddr);
+        return status;
+    }
+
+    PageNum = imageSize/FLASH_PAGE_SIZE;
+    Remain = imageSize%FLASH_PAGE_SIZE;
+
+    for(i=0;i<PageNum;i++)
+    {
+        memset(buffer, 0, sizeof(buffer));
+        status = Flash_Read(srcAddr + i*FLASH_PAGE_SIZE, buffer, sizeof(buffer));
+        if(status != kStatus_Success)
+        {
+            KPrintf("Read flash 0x%08x failure !\r\n", srcAddr + i*FLASH_PAGE_SIZE);
+            return status;
+        }
+        status = Flash_Write(dstAddr+ i*FLASH_PAGE_SIZE, buffer, FLASH_PAGE_SIZE);
+        if(status != kStatus_Success)
+        {
+            KPrintf("Write flash 0x%08x failure !\r\n", dstAddr + i*FLASH_PAGE_SIZE);
+            return status;
+        }
+    }
+
+    if(Remain)
+    {
+        memset(buffer, 0, sizeof(buffer));
+        status = Flash_Read(srcAddr + i*FLASH_PAGE_SIZE, buffer, Remain);
+        if(status != kStatus_Success)
+        {
+            KPrintf("Read flash 0x%08x failure !\r\n", srcAddr + i*FLASH_PAGE_SIZE);
+            return status;
+        }
+        status = Flash_Write(dstAddr+ i*FLASH_PAGE_SIZE, buffer, Remain);
+        if(status != kStatus_Success)
+        {
+            KPrintf("Write flash 0x%08x failure !\r\n", dstAddr + i*FLASH_PAGE_SIZE);
+            return status;
+        }
+    }
+
+    return (status_t)kStatus_Success; 
+}
 
 /*******************************************************************************
 * 函 数 名: NOR_FLASH_Write
@@ -1012,24 +984,30 @@ void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 * 形    参: FlashAddress:用于存储当前写入Flash地址的指针，写入过程中会移动
             Data:要写入数据存储区
             DataLength:要写入的字节数
-* 返 回 值: 0 
+* 返 回 值: 如果函数执行成功,状态值为 kStatus_Success,否则状态值为其他错误码  
 *******************************************************************************/
 #ifndef  USE_HIGHT_SPEED_TRANS
-uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength)
+status_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength)
 {
+    status_t status;
     uint32_t WriteAddr;
     WriteAddr = *FlashAddress;
-    NorFlash_Write(Data,WriteAddr,DataLength);
+    status = Flash_Write(WriteAddr,Data,DataLength);
+    if (status != kStatus_Success)
+    {
+        return status;
+    } 	
     *FlashAddress += DataLength;
-    return 0;
+    return (status_t)kStatus_Success;
 }
 #else
 uint8_t packetNum = 0;
 uint32_t dataLen = 0;
 uint32_t WriteAddr;
 uint8_t dataBuff[5*1024];
-uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength,uint8_t doneFlag)
+status_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength,uint8_t doneFlag)
 {
+    status_t status;
     if(!doneFlag)
     {  
         memcpy(&dataBuff[dataLen],Data,DataLength);
@@ -1042,7 +1020,11 @@ uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLen
 
         if(dataLen>=SECTOR_SIZE)
         {
-            NorFlash_Write(dataBuff,WriteAddr,dataLen);
+            status = Flash_Write(WriteAddr,dataBuff,dataLen);
+            if (status != kStatus_Success)
+            {
+                return status;
+            } 
             packetNum = 0;
             dataLen = 0; 
         }
@@ -1050,10 +1032,14 @@ uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLen
     }
     else
     {
-        NorFlash_Write(dataBuff,WriteAddr,dataLen);
+        status = Flash_Write(WriteAddr,dataBuff,dataLen);
+        if (status != kStatus_Success)
+        {
+            return status;
+        } 
         packetNum = 0;
         dataLen = 0; 
     }
-   return (0);
+   return (status_t)kStatus_Success;;
 }
 #endif

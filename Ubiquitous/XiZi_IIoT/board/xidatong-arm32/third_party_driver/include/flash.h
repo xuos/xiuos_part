@@ -63,21 +63,19 @@ void FLASH_Init(void);
 void FLASH_DeInit(void);
 uint8_t FLASH_EraseSector(uint32_t addr);
 uint8_t FLASH_WritePage(uint32_t addr, const uint32_t *buf, uint32_t len);
-status_t FLASH_Read(uint32_t addr, uint32_t *buf, uint32_t len);
-status_t flash_erase(uint32_t start_addr, uint32_t byte_cnt);
-status_t flash_write(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt);
-status_t flash_read(uint32_t addr, uint8_t *buf, uint32_t len);
-status_t flash_copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize);
+status_t FLASH_ReadBuf(uint32_t addr, uint32_t *buf, uint32_t len);
+status_t NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite);
+status_t NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite);
 
-status_t NOR_FLASH_Erase(uint32_t app_base_addr,uint32_t imageSize);
-void NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite);
-void NorFlash_Write_NoCheck(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite);
-void NorFlash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite);
+status_t Flash_Erase(uint32_t start_addr, uint32_t imageSize);
+status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWrite);
+status_t Flash_Read(uint32_t addr, uint8_t *buf, uint32_t len);
+status_t Flash_Copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize);
 
 #ifndef  USE_HIGHT_SPEED_TRANS
-uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength);
+status_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength);
 #else
-uint32_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength,uint8_t doneFlag);
+status_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength,uint8_t doneFlag);
 #endif
 
 #endif
