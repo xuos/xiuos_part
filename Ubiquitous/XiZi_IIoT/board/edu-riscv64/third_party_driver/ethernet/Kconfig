@@ -2,6 +2,7 @@
 
 config BSP_USING_W5500
     bool "Using w5500"
+    select BSP_USING_LWIP
     default y
 
 config BSP_WIZ_RST_PIN
@@ -15,3 +16,8 @@ config BSP_WIZ_INT_PIN
 config BSP_WIZ_USE_IPERF
     bool "Using iperf"
     default y
+
+menuconfig BSP_USING_LWIP
+    bool "Using LwIP device"
+    default n
+    select RESOURCES_LWIP
