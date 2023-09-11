@@ -116,7 +116,7 @@ static int CopyRecursive(const char *from, const char *to, char *buf,
 
     DIR *dirp;
     struct dirent *dirent;
-    char *sub_from, *sub_to;
+    char *sub_from = NULL, *sub_to = NULL;
 
     ret = mkdir(to, 0777);
     if (ret < 0) {

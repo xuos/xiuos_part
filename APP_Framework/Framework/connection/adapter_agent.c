@@ -124,7 +124,9 @@ int ParseATReply(char *str, const char *format, ...)
 void ATSprintf(int fd, const char *format, va_list params)
 {
     last_cmd_len = vsnprintf(send_buf, sizeof(send_buf), format, params);
+#ifdef CONNECTION_FRAMEWORK_DEBUG
     printf("AT send %s len %u\n",send_buf, last_cmd_len);
+#endif
 	PrivWrite(fd, send_buf, last_cmd_len);
 }
 
@@ -264,29 +266,34 @@ int AtSetReplyCharNum(ATAgentType agent, unsigned int num)
 
 int EntmSend(ATAgentType agent, const char *data, int len)
 {
-    char send_buf[128];
-    if(len > 128){
-        printf("send length %d more then max 128 Bytes.\n",len);
+    if(len > 256){
+        printf("send length %d more then max 256 Bytes.\n",len);
         return -1;
     }
+    char *send_buff = (char *)PrivMalloc(256);
 
     PrivMutexObtain(&agent->lock);
-    memset(send_buf, 0, 128);
+    memset(send_buff, 0, 256);
 
     agent->receive_mode = ENTM_MODE;
 
-    memcpy(send_buf, data, len);
-    // memcpy(send_buf + len, "!@", 2);
+    memcpy(send_buff, data, len);
 
-	PrivWrite(agent->fd, send_buf, len);
+    PrivWrite(agent->fd, send_buff, len);
     PrivMutexAbandon(&agent->lock);
-    printf("entm send %s length %d\n",send_buf, len);
+#ifdef CONNECTION_FRAMEWORK_DEBUG
+    printf("entm send length %d\n", len);
+#endif
+
+    PrivFree(send_buff);
+
     return 0;
 }
 
 int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
 {
     struct timespec abstime;
+    uint32 real_recv_len = 0;
 
     abstime.tv_sec = timeout_s;
     if(buffer_len > ENTM_RECV_MAX){
@@ -299,21 +306,25 @@ int EntmRecv(ATAgentType agent, char *rev_buffer, int buffer_len, int timeout_s)
     PrivMutexAbandon(&agent->lock);
     //PrivTaskDelay(1000);
     if (PrivSemaphoreObtainWait(&agent->entm_rx_notice, &abstime)) {
+#ifdef CONNECTION_FRAMEWORK_DEBUG
         printf("wait sem[%d] timeout\n",agent->entm_rx_notice);
+#endif
+        agent->entm_recv_len = 0;
         return -1;
     }
     PrivMutexObtain(&agent->lock);
-
+#ifdef CONNECTION_FRAMEWORK_DEBUG
     printf("EntmRecv once len %d.\n", agent->entm_recv_len);
-
+#endif
     memcpy(rev_buffer, agent->entm_recv_buf, agent->entm_recv_len);
-
     memset(agent->entm_recv_buf, 0, ENTM_RECV_MAX);
+
+    real_recv_len = agent->entm_recv_len;
     agent->entm_recv_len = 0;
     agent->read_len = 0;
     PrivMutexAbandon(&agent->lock);
 
-    return buffer_len;
+    return real_recv_len;
 }
 
 static int GetCompleteATReply(ATAgentType agent)
@@ -321,21 +332,22 @@ static int GetCompleteATReply(ATAgentType agent)
     uint32_t read_len = 0;
     char ch = 0, last_ch = 0;
     bool is_full = false;
+    int res;
 
     PrivMutexObtain(&agent->lock);
 
     memset(agent->maintain_buffer, 0x00, agent->maintain_max);
     agent->maintain_len = 0;
 
-    memset(agent->entm_recv_buf, 0x00, 256);
+    memset(agent->entm_recv_buf, 0x00, ENTM_RECV_MAX);
     agent->entm_recv_len = 0;
 
     PrivMutexAbandon(&agent->lock);
 
     while (1) {
-        PrivRead(agent->fd, &ch, 1);
+        res = PrivRead(agent->fd, &ch, 1);
 #ifdef CONNECTION_FRAMEWORK_DEBUG
-        if(ch != 0) {
+        if((res == 1) && (ch != 0)) {
             printf(" %c (0x%x)\n", ch, ch);
         }
 #endif
@@ -343,14 +355,28 @@ static int GetCompleteATReply(ATAgentType agent)
         PrivMutexObtain(&agent->lock);
         if (agent->receive_mode == ENTM_MODE) {
             if (agent->entm_recv_len < ENTM_RECV_MAX) {
-                agent->entm_recv_buf[agent->entm_recv_len] = ch;
-                agent->entm_recv_len++;
-
-                if(agent->entm_recv_len < agent->read_len) {
+#ifdef TOOL_USING_MQTT
+                if((res == 1) && (agent->entm_recv_len < agent->read_len)) 
+                {
+                    agent->entm_recv_buf[agent->entm_recv_len] = ch;
+                    agent->entm_recv_len++;
                     PrivMutexAbandon(&agent->lock);
                     continue;
-                } else {
+                } 
+#else
+                agent->entm_recv_buf[agent->entm_recv_len] = ch;
+                agent->entm_recv_len++;
+                if(agent->entm_recv_len < agent->read_len) 
+                {
+                    PrivMutexAbandon(&agent->lock);
+                    continue;
+                }
+#endif       
+                else 
+                {
+#ifdef CONNECTION_FRAMEWORK_DEBUG
                     printf("ENTM_MODE recv %d Bytes done.\n",agent->entm_recv_len);
+#endif
                     agent->receive_mode = DEFAULT_MODE;
                     PrivSemaphoreAbandon(&agent->entm_rx_notice);
                 }

@@ -26,6 +26,7 @@ extern int AdapterEthercatInit(void);
 extern int AdapterZigbeeInit(void);
 extern int AdapterLoraInit(void);
 
+extern int Bmp180AltitudeInit(void);
 extern int D124VoiceInit(void);
 extern int Hs300xTemperatureInit(void);
 extern int Hs300xHumidityInit(void);
@@ -83,6 +84,10 @@ static struct InitDesc framework[] =
 
 static struct InitDesc sensor_desc[] = 
 {
+#ifdef SENSOR_DEVICE_BMP180
+	{ "bmp180_altitude", Bmp180AltitudeInit},
+#endif
+
 #ifdef SENSOR_DEVICE_D124
 	{ "d124_voice", D124VoiceInit },
 #endif

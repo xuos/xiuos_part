@@ -9,7 +9,7 @@ config KPU_DEV_DRIVER
 
 config CAMERA_DEV_DRIVER
     string "Set camera dev path for kpu"
-    default "/dev/ov2640"
+    default "/dev/camera_dev"
 
 config KPU_LCD_DEV_DRIVER
     string "Set lcd dev path for kpu"

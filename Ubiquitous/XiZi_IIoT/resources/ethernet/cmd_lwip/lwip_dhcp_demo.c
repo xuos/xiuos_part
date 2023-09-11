@@ -144,13 +144,13 @@ void LwipDHCPTest(void)
         /* Print DHCP progress */
         if(LwipPrintDHCP(&gnetif))
         {
-            sscanf(ipaddr_ntoa(&gnetif.ip_addr), "%d.%d.%d.%d", &lwip_ipaddr[0], &lwip_ipaddr[1],
+            sscanf(ipaddr_ntoa(&gnetif.ip_addr), "%hhd.%hhd.%hhd.%hhd", &lwip_ipaddr[0], &lwip_ipaddr[1],
                 &lwip_ipaddr[2], &lwip_ipaddr[3]);
 
-            sscanf(ipaddr_ntoa(&gnetif.netmask), "%d.%d.%d.%d", &lwip_netmask[0], &lwip_netmask[1],
+            sscanf(ipaddr_ntoa(&gnetif.netmask), "%hhd.%hhd.%hhd.%hhd", &lwip_netmask[0], &lwip_netmask[1],
                 &lwip_netmask[2], &lwip_netmask[3]);
 
-            sscanf(ipaddr_ntoa(&gnetif.gw), "%d.%d.%d.%d", &lwip_gwaddr[0], &lwip_gwaddr[1],
+            sscanf(ipaddr_ntoa(&gnetif.gw), "%hhd.%hhd.%hhd.%hhd", &lwip_gwaddr[0], &lwip_gwaddr[1],
                 &lwip_gwaddr[2], &lwip_gwaddr[3]);
 
             break;

@@ -28,7 +28,7 @@
 #include "tcpecho_raw.h"
 char tcp_demo_msg[LWIP_TEST_MSG_SIZE] = { 0 };
 char tcp_server_ip[] = {192, 168, 130, 2};
-u16_t tcp_server_port = 80;
+u32_t tcp_server_port = 80;
 int tcp_send_num = 0;
 int tcp_send_task_on = 0;
 uint32 tcp_interval = 50;
@@ -101,14 +101,13 @@ void LwipTcpSendTest(int argc, char *argv[])
     strcat(tcp_demo_msg, "\r\n");
 
     if(argc >= 3) {
-        if(sscanf(argv[2], "%d.%d.%d.%d:%d", &tcp_server_ip[0], &tcp_server_ip[1], &tcp_server_ip[2], &tcp_server_ip[3], &tcp_server_port) == EOK)
-        {
-            sscanf(argv[2], "%d.%d.%d.%d", &tcp_server_ip[0], &tcp_server_ip[1], &tcp_server_ip[2], &tcp_server_ip[3]);
+        if (sscanf(argv[2], "%hhd.%hhd.%hhd.%hhd:%d", &tcp_server_ip[0], &tcp_server_ip[1], &tcp_server_ip[2], &tcp_server_ip[3], &tcp_server_port) == EOK) {
+            sscanf(argv[2], "%hhd.%hhd.%hhd.%hhd", &tcp_server_ip[0], &tcp_server_ip[1], &tcp_server_ip[2], &tcp_server_ip[3]);
         }
         sscanf(argv[3], "%d", &tcp_send_num);
         sscanf(argv[4], "%d", &tcp_interval);
     }
-    KPrintf("connect ipaddr %d.%d.%d.%d:%d send msg %d times\n", tcp_server_ip[0], tcp_server_ip[1], tcp_server_ip[2], tcp_server_ip[3], tcp_server_port, tcp_send_num);
+    KPrintf("connect ipaddr %hhd.%hhd.%hhd.%hhd:%hhd send msg %d times\n", tcp_server_ip[0], tcp_server_ip[1], tcp_server_ip[2], tcp_server_ip[3], tcp_server_port, tcp_send_num);
     lwip_config_tcp(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 
     memcpy(param.ip, tcp_server_ip, 4);
@@ -126,9 +125,9 @@ void LwipTcpRecvTest(void)
 {
     uint8_t enet_port = 0; ///< test enet port 0
 
-    lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+    lwip_config_tcp(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
 
-    uint8_t *recv_data;
+    uint8_t* recv_data = NULL;
     socklen_t sin_size;
     int sock = -1, connected, bytes_received, i;
     struct sockaddr_in server_addr, client_addr;

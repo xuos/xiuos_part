@@ -128,6 +128,21 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/third_party_driver/drivers \
 	-I$(BSP_ROOT)/third_party_driver/lcd \
 	-I$(KERNEL_ROOT)/include #
+
+ifeq ($(CONFIG_RESOURCES_LWIP),y)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/compat \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/netif \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/apps \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
+endif 
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/kd233)
@@ -588,12 +603,17 @@ endif
 
 ifeq ($(CONFIG_TOOL_SHELL), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/tool/shell/letter-shell \
-	-I$(KERNEL_ROOT)/tool/shell/letter-shell/file_ext #
+	-I$(KERNEL_ROOT)/tool/shell/letter-shell/file_ext \
+	-I$(KERNEL_ROOT)/tool/shell/
 endif
 
 ifeq ($(CONFIG_TOOL_USING_OTA), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/tool/bootloader/flash \
 	-I$(KERNEL_ROOT)/tool/bootloader/ota #
+endif
+
+ifeq ($(CONFIG_TOOL_USING_MQTT), y)
+KERNELPATHS +=-I$(KERNEL_ROOT)/../../APP_Framework/lib/mqtt
 endif
 
 ifeq ($(CONFIG_FS_LWEXT4),y)

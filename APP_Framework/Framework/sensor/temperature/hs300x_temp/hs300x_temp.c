@@ -68,12 +68,28 @@ static int SensorDeviceRead(struct SensorDevice *sdev, size_t len)
     return 0;
 }
 
+/**
+ * @description: Write sensor device
+ * @param sdev - sensor device pointer
+ * @param buf - the buffer of write data
+ * @param len - the length of the write data
+ * @return success: 0 , failure: -1
+ */
+static int SensorDeviceWrite(struct SensorDevice *sdev, const void *buf, size_t len)
+{
+    //Read i2c device data from i2c device address
+    if (PrivWrite(sdev->fd, buf, len) < 0)
+        return -1;
+
+    return 0;
+}
+
 static struct SensorDone done =
 {
     SensorDeviceOpen,
     NULL,
     SensorDeviceRead,
-    NULL,
+    SensorDeviceWrite,
     NULL,
 };
 
@@ -108,7 +124,7 @@ static int32_t ReadTemperature(struct SensorQuantity *quant)
     float result;
     if (quant->sdev->done->read != NULL) {
         if (quant->sdev->status == SENSOR_DEVICE_PASSIVE) {
-            quant->sdev->done->read(quant->sdev, 4);
+            quant->sdev->done->write(quant->sdev, NONE, 0);
             PrivTaskDelay(50);
             quant->sdev->done->read(quant->sdev, 4);    /* It takes two reads to get the data right */
             result = ((quant->sdev->buffer[2]  << 8 | quant->sdev->buffer[3]) >> 2) * 165.0 /( (1 << 14) - 1) -  40.0;
