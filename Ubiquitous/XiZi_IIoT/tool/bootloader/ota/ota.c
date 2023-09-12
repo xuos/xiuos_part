@@ -824,7 +824,18 @@ reconnect:
         datalen = MQTT_Recv(MqttRxbuf, sizeof(MqttRxbuf));
         if(datalen <= 0)
         {
-           freecnt++; 
+            freecnt++; 
+            if((freecnt >= 20) && (CalculateTimeMsFromTick(CurrentTicksGain()) - heart_time >= HEART_TIME)) //连续20次未收到数据默认为为空闲状态,需每隔一段时间发送需要发送心跳包保活
+            {
+                heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
+                freecnt = 0;
+                if(MQTT_SendHeart() != 0) //发送心跳包失败可能连接断开,需要重连
+                {
+                    KPrintf("The connection has been disconnected, reconnecting!\n");
+                    goto reconnect;  
+                }
+                KPrintf("Send heartbeat packet successful!\n"); 
+            }
         }
         else if(MqttRxbuf[0] == 0x30)
         {
@@ -915,19 +926,6 @@ reconnect:
         {
             freecnt = 0;
             continue;
-        }
-
-        if((freecnt >= 10) && (CalculateTimeMsFromTick(CurrentTicksGain()) - heart_time >= HEART_TIME)) //连续10次未收到数据默认为为空闲状态,需每隔一段时间发送需要发送心跳包保活
-        {
-            heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
-            if(MQTT_SendHeart() != 0) //发送心跳包失败可能连接断开,需要重连
-            {
-                KPrintf("The connection has been disconnected, reconnecting!\n");
-                freecnt = 0;
-                heart_time = 0;
-                goto reconnect;  
-            }
-            KPrintf("Send heartbeat packet successful!\n"); 
         }
     }
 
@@ -1053,7 +1051,18 @@ reconnect:
         datalen = MQTT_Recv(MqttRxbuf, sizeof(MqttRxbuf));
         if(datalen <= 0)
         {
-           freecnt++; 
+            freecnt++;
+            if((freecnt >= 20) && (CalculateTimeMsFromTick(CurrentTicksGain()) - heart_time >= HEART_TIME)) //连续20次未收到数据默认为为空闲状态,需每隔一段时间发送需要发送心跳包保活
+            {
+                heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
+                freecnt = 0;
+                if(MQTT_SendHeart() != 0) //发送心跳包失败可能连接断开,需要重连
+                {
+                    KPrintf("The connection has been disconnected, reconnecting!\n");
+                    goto reconnect;  
+                }
+                KPrintf("Send heartbeat packet successful!\n"); 
+            }
         }
         else if(MqttRxbuf[0] == 0x30)
         {
@@ -1143,19 +1152,6 @@ reconnect:
         {
             freecnt = 0;
             continue;
-        }
-
-        if((freecnt >= 10) && (CalculateTimeMsFromTick(CurrentTicksGain()) - heart_time >= HEART_TIME)) //连续10次未收到数据默认为为空闲状态,需每隔一段时间发送需要发送心跳包保活
-        {
-            heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
-            if(MQTT_SendHeart() != 0) //发送心跳包失败可能连接断开,需要重连
-            {
-                KPrintf("The connection has been disconnected, reconnecting!\n");
-                freecnt = 0;
-                heart_time = 0;
-                goto reconnect;  
-            }
-            KPrintf("Send heartbeat packet successful!\n"); 
         }
     }
 
