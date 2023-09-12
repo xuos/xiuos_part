@@ -56,7 +56,7 @@ make BOARD=edu-arm32 menuconfig
 保存并退出menuconfig，然后执行编译:
 
 ```makefile
-make BOARD=BOARD=edu-arm32
+make BOARD=edu-arm32
 ```
 
 完成编译后，进行bin包的烧录，edu-arm32开发板的烧录方式参考xiuos/Ubiquitous/XiZi_IIoT/board/edu-arm32/目录下的README.md。
