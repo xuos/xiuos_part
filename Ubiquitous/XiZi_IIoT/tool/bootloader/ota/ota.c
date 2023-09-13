@@ -19,6 +19,7 @@
 *
 */
 #include <stdio.h>
+#include <stdbool.h>
 #include <transform.h>
 #include "shell.h"
 #include "xsconfig.h"
@@ -42,7 +43,7 @@ static int create_version(uint8_t* cur_version, uint8_t* new_version);
 static status_t UpdateOTAFlag(ota_info_t *ptr);
 static void InitialVersion(void);
 static void BackupVersion(void);
-static void UpdateNewApplication(void);
+static bool UpdateNewApplication(void);
 static void Update(void);
 static void BootLoaderJumpApp(void);
 
@@ -226,30 +227,39 @@ static void BackupVersion(void)
 
     ota_info.status = OTA_STATUS_BACKUP;
     UpdateOTAFlag(&ota_info);
-    status = mcuboot.op_flash_copy(BAKUP_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.bak.size);
-    if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.bak.size) == ota_info.bak.crc32))
+    // 1.先清空XiUOS System分区
+    status = mcuboot.op_flash_erase(XIUOS_FLAH_ADDRESS, ota_info.os.size);
+    if(status == kStatus_Success)
     {
-        mcuboot.print_string("\r\n------Backup app version success!------\r\n");
-        ota_info.os.size = ota_info.bak.size;
-        ota_info.os.crc32 = ota_info.bak.crc32;
-
-        memset(ota_info.os.version,0,sizeof(ota_info.os.version)); 
-        strncpy(ota_info.os.version, ota_info.bak.version, sizeof(ota_info.bak.version));
-
-        memset(ota_info.os.description,0,sizeof(ota_info.os.description)); 
-        strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
-
+        memset(&ota_info.os,0,sizeof(ota_info.os));
         UpdateOTAFlag(&ota_info);
+        mcuboot.print_string("\r\n------Clear app partition success!------\r\n");
     }
     else
     {
-        mcuboot.print_string("\r\n------Backup app version failed!------\r\n");
-        ota_info.status = OTA_STATUS_ERROR;
-
-        memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
-        strncpy(ota_info.error_message, "Backup app version failed!",sizeof(ota_info.error_message));
-
+        mcuboot.print_string("\r\n------Clear app partition failed!------\r\n");
+        return;
+    }
+    // 2.拷贝backup分区到XiUOS System分区
+    status = mcuboot.op_flash_copy(BAKUP_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.bak.size);
+    if(status == kStatus_Success)
+    {
+        ota_info.os.size = ota_info.bak.size;
+        ota_info.os.crc32 = ota_info.bak.crc32;
+        memset(ota_info.os.version,0,sizeof(ota_info.os.version)); 
+        strncpy(ota_info.os.version, ota_info.bak.version, sizeof(ota_info.bak.version));
+        memset(ota_info.os.description,0,sizeof(ota_info.os.description)); 
+        strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
         UpdateOTAFlag(&ota_info);
+        mcuboot.print_string("\r\n------Version rollback successful!------\r\n");
+    }
+    else
+    {
+        ota_info.status = OTA_STATUS_ERROR;
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
+        strncpy(ota_info.error_message, "Version rollback failed!",sizeof(ota_info.error_message));
+        UpdateOTAFlag(&ota_info);
+        mcuboot.print_string("\r\n------Version rollback failed!------\r\n");
     }
 }
 
@@ -258,10 +268,11 @@ static void BackupVersion(void)
 * 函 数 名: UpdateNewApplication
 * 功能描述: 在bootloader里进行调用,根据Flash中Flag分区中的信息决定是否进行版本更新
 * 形    参: 无
-* 返 回 值: 无
+* 返 回 值: true:需要升级,发生了flash搬移的操作,不代表升级的结果
+            false:不需要升级,未发生flash搬移
 * 注    释: 该函数调用后如果不需要升级APP分区保持不变,否则APP分区的版本为新版本
 *******************************************************************************/
-static void UpdateNewApplication(void)
+static bool UpdateNewApplication(void)
 {
     status_t status;
     ota_info_t ota_info;  // 定义OTA信息结构体
@@ -270,97 +281,126 @@ static void UpdateNewApplication(void)
     // 从Flash中读取OTA信息
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
 
-    // 如果OTA升级状态为准备状态，且APP分区与download分区版本不同,才可以进行升级
+    // 如果OTA升级状态为准备状态,且APP分区与download分区版本不同,才需要进行升级
     if((ota_info.status == OTA_STATUS_READY) && (ota_info.os.crc32 != ota_info.down.crc32)) 
     {
-        mcuboot.print_string("\r\n------Start to update the app!------\r\n");
+        mcuboot.print_string("\r\n------Start upgrading to new version!------\r\n");
         // 校验downlad分区固件CRC
         if(calculate_crc32(DOWN_FLAH_ADDRESS, ota_info.down.size) == ota_info.down.crc32) 
         {
             ota_info.status = OTA_STATUS_UPDATING;
             UpdateOTAFlag(&ota_info);
 
-            // 1.如果CRC校验通过,开始升级,逐字节拷贝Flash,先备份当前XiUOS System分区内容
+            // 1.如果CRC校验通过,开始升级,先清空Backup分区
+            status = mcuboot.op_flash_erase(BAKUP_FLAH_ADDRESS, ota_info.bak.size);
+            if(status == kStatus_Success)
+            {
+                memset(&ota_info.bak,0,sizeof(ota_info.bak));
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Clear backup partition success!------\r\n");
+            }
+            else
+            {
+                mcuboot.print_string("\r\n------Clear backup partition failed!------\r\n");
+                goto finish;
+            }
+
+            // 2.逐字节拷贝Flash,备份当前XiUOS System分区内容到Backup分区
             status = mcuboot.op_flash_copy(XIUOS_FLAH_ADDRESS, BAKUP_FLAH_ADDRESS, ota_info.os.size);
             if((status == kStatus_Success) &&(calculate_crc32(BAKUP_FLAH_ADDRESS, ota_info.os.size) == ota_info.os.crc32))
             {
-                mcuboot.print_string("\r\n------Backup app success!------\r\n");
                 ota_info.bak.size = ota_info.os.size;
                 ota_info.bak.crc32 = ota_info.os.crc32;
-
                 memset(ota_info.bak.version,0,sizeof(ota_info.bak.version)); 
                 strncpy(ota_info.bak.version, ota_info.os.version, sizeof(ota_info.os.version));
-
                 memset(ota_info.bak.description,0,sizeof(ota_info.bak.description)); 
                 strncpy(ota_info.bak.description, ota_info.os.description, sizeof(ota_info.os.description));
-
-                UpdateOTAFlag(&ota_info);;
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Backup app success!------\r\n");
             }
             else
             {
-                mcuboot.print_string("\r\n------Backup app failed!------\r\n");
                 ota_info.status = OTA_STATUS_ERROR;
-
                 memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
                 strncpy(ota_info.error_message, "Backup app failed!",sizeof(ota_info.error_message));
-
-                UpdateOTAFlag(&ota_info);;
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Backup app failed!------\r\n");
                 goto finish;
             }
 
-            // 2.拷贝download分区到XiUOS System分区
+            // 3.清空XiUOS System分区
+            status = mcuboot.op_flash_erase(XIUOS_FLAH_ADDRESS, ota_info.os.size);
+            if(status == kStatus_Success)
+            {
+                memset(&ota_info.os,0,sizeof(ota_info.os));
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Clear app partition success!------\r\n");
+            }
+            else
+            {
+                mcuboot.print_string("\r\n------Clear app partition failed!------\r\n");
+                goto finish;
+            }
+
+            // 4.拷贝download分区到XiUOS System分区
             status = mcuboot.op_flash_copy(DOWN_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.down.size);
             if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.down.size) == ota_info.down.crc32))
             {
-                mcuboot.print_string("\r\n------The download partition is copied successfully!------\r\n");
-
                 ota_info.os.size = ota_info.down.size;
                 ota_info.os.crc32 = ota_info.down.crc32;
-
                 memset(ota_info.os.version,0,sizeof(ota_info.os.version)); 
                 strncpy(ota_info.os.version, ota_info.down.version, sizeof(ota_info.down.version));
-
                 memset(ota_info.os.description,0,sizeof(ota_info.os.description)); 
                 strncpy(ota_info.os.description, ota_info.down.description, sizeof(ota_info.down.description));
-
-                ota_info.status == OTA_STATUS_IDLE; // 拷贝download分区到XiUOS System分区成功,将OTA升级状态设置为IDLE
-                UpdateOTAFlag(&ota_info);; 
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------The download partition is copied successfully!------\r\n");
             }
             else
             {
-                mcuboot.print_string("\r\n------The download partition copy failed!------\r\n");
                 ota_info.status = OTA_STATUS_ERROR;
-
                 memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
                 strncpy(ota_info.error_message, "The download partition copy failed!",sizeof(ota_info.error_message));
-
-                UpdateOTAFlag(&ota_info);;
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------The download partition copy failed!------\r\n");
                 goto finish;
             }
 
-            mcuboot.print_string("\r\n------Update completed!------\r\n");
+            // 5.清空download分区
+            status = mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS, ota_info.down.size);
+            if(status == kStatus_Success)
+            {
+                memset(&ota_info.down,0,sizeof(ota_info.down));
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Clear download partition success!------\r\n");
+            }
+            else
+            {
+                mcuboot.print_string("\r\n------Clear download partition failed!------\r\n");
+                goto finish;
+            }
+
+            ota_info.status == OTA_STATUS_IDLE; //将OTA升级状态设置为IDLE
+            UpdateOTAFlag(&ota_info);
+            mcuboot.print_string("\r\n------New version upgrade completed,reboot again!------\r\n");
             goto finish;
         }
         else
         {
-            // 如果download分区CRC校验失败，升级失败
-            mcuboot.print_string("\r\n------Download Firmware CRC check failed!------\r\n");
+            // 如果download分区CRC校验失败,升级失败
             ota_info.status = OTA_STATUS_ERROR;
-
             memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
             strncpy(ota_info.error_message, "Download Firmware CRC check failed!",sizeof(ota_info.error_message));
-
-            UpdateOTAFlag(&ota_info);;
+            UpdateOTAFlag(&ota_info);
+            mcuboot.print_string("\r\n------Download Firmware CRC check failed!------\r\n");
             goto finish;  
         }  
     }
     else
     {
-        mcuboot.print_string("\r\n------No need to update the app!------\r\n");
-        goto finish;
+        return false;
     }
 finish:
-    return;
+    return true;
 }
 
 
@@ -376,23 +416,33 @@ static void Update(void)
     mcuboot.flash_init();
     memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
-    /* 此时APP分区还没有有效的固件,需要在bootloader下通过iap烧写出厂固件 */
-    if((ota_info.os.size > APP_FLASH_SIZE) || (calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.os.size) != ota_info.os.crc32))
+    /* APP分区无有效固件时,需在bootloader下烧写初始固件, os.size大于分区大小视为无效固件*/
+    if(ota_info.os.size > APP_FLASH_SIZE)
     {
         mcuboot.print_string("\r\nNeed to flash initial firmware!\r\n");
         InitialVersion();
+        mcuboot.flash_deinit();
     }
-    else
+    /*进行新版本的升级*/
+    else 
     {
-        UpdateNewApplication();
+        if(UpdateNewApplication() == true) /*如果实际发生了flash搬移,操作完成后再重启一次*/
+        {
+            mcuboot.flash_deinit();
+            mcuboot.op_delay(2000);
+            mcuboot.op_reset();
+        }
+        else /*如果实际未发生flash搬移,说明未发生实际的升级,操作完成后不必再重启*/
+        {
+            mcuboot.flash_deinit();
+        }
     }
-    mcuboot.flash_deinit();
 }
 
 
 /*******************************************************************************
 * 函 数 名: BootLoaderJumpApp
-* 功能描述: 上次跳转若是失败的,先从BAKUP分区进行恢复，然后再进行跳转
+* 功能描述: 上次跳转若是失败的,先从BAKUP分区进行恢复,然后再进行跳转
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
@@ -406,7 +456,7 @@ static void BootLoaderJumpApp(void)
 
     if(ota_info.lastjumpflag == JUMP_FAILED_FLAG)
     {
-        mcuboot.print_string("\r\n------Bootloader false, begin backup!------\r\n");
+        mcuboot.print_string("\r\n------Jump to app partition failed,start version rollback!------\r\n");
         BackupVersion();   
     }
     else
@@ -466,6 +516,7 @@ static void app_ota_by_iap(void)
         UpdateOTAFlag(&ota_info);
     }
     mcuboot.flash_deinit();
+    MdelayKTask(2000);
     mcuboot.op_reset();
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),iap, app_ota_by_iap, ota by iap function);
@@ -863,13 +914,13 @@ reconnect:
                 }
                 else
                 {
-                        KPrintf("Failed to get ota information!\n");
-                        ret = -1;
-                        ota_info.status = OTA_STATUS_ERROR;
-                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
-                        strncpy(ota_info.error_message, "Failed to get ota information!",sizeof(ota_info.error_message));
-                        UpdateOTAFlag(&ota_info);
-                        break;
+                    KPrintf("Failed to get ota information!\n");
+                    ret = -1;
+                    ota_info.status = OTA_STATUS_ERROR;
+                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                    strncpy(ota_info.error_message, "Failed to get ota information!",sizeof(ota_info.error_message));
+                    UpdateOTAFlag(&ota_info);
+                    break;
                 }
             }
 
@@ -1089,13 +1140,13 @@ reconnect:
                 }
                 else
                 {
-                        KPrintf("Failed to get ota information!\n");
-                        ret = -1;
-                        ota_info.status = OTA_STATUS_ERROR;
-                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
-                        strncpy(ota_info.error_message, "Failed to get ota information!",sizeof(ota_info.error_message));
-                        UpdateOTAFlag(&ota_info);
-                        break;
+                    KPrintf("Failed to get ota information!\n");
+                    ret = -1;
+                    ota_info.status = OTA_STATUS_ERROR;
+                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                    strncpy(ota_info.error_message, "Failed to get ota information!",sizeof(ota_info.error_message));
+                    UpdateOTAFlag(&ota_info);
+                    break;
                 }
             }
 
@@ -1234,14 +1285,14 @@ void ota_entry(void)
 
     mcuboot.board_init();
 
-    mcuboot.print_string("Please press 'space' key into menu in 10s !!!\r\n");
+    mcuboot.print_string("Please press 'space' key into menu in 5s !!!\r\n");
     
     while(timeout)
     { 
         ret = (SerialKeyPressed((uint8_t*)&ch1));
         if(ret) break;
         timeout--;
-        mcuboot.op_delay(10);
+        mcuboot.op_delay(5);
     }
 
     while(1)
