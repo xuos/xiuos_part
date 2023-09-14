@@ -578,6 +578,11 @@ static void get_start_signal(struct Adapter* adapter)
         KPrintf("waiting for start msg...\n");
         if(AdapterDeviceRecv(adapter, &start_msg, sizeof(start_msg)) >= 0 && start_msg.header.frame_flag == STARTFLAG) 
         {
+            if(start_msg.header.total_len > APP_FLASH_SIZE)
+            {
+                KPrintf("File size is larger than partition size,the partition size is %dk.\n",APP_FLASH_SIZE/1024);
+                break;
+            }   
             if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,start_msg.header.total_len) != kStatus_Success)
             {
                 KPrintf("Failed to erase target fash!\n");
@@ -896,15 +901,30 @@ reconnect:
             ptr2 = strstr((char *)Platform_mqtt.cmdbuff,"{\"fileSize\":"); 
             if((ptr1 != NULL) &&(ptr2 != NULL))
             {
+                // 1.获取新版本固件大小及版本信息
                 if(sscanf(ptr2,"{\"fileSize\":%d,\"version\":\"%11s\",\"fileId\":%d,\"md5\"",&platform_ota.size,platform_ota.version,&platform_ota.streamId)==3)
                 {
                     KPrintf("------Start the firmware file transfer!------\r\n");
                     KPrintf("file size:%d,file id:%d,file version:%s\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
                     KPrintf("---------------------------------------------\r\n");
+                    if(platform_ota.size > APP_FLASH_SIZE)
+                    {
+                        KPrintf("File size is larger than partition size,the partition size is %dk.\n",APP_FLASH_SIZE/1024);
+                        ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "File size is larger than partition size!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
+                        break;
+                    }
                     if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,platform_ota.size) != kStatus_Success)
                     {
-                        KPrintf("Failed to erase target fash!\n");
+                        KPrintf("Failed to erase download partition!\n");
                         ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "Failed to erase download partition!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
                         break;
                     }
                     platform_ota.counter = (platform_ota.size%FRAME_LEN != 0)? (platform_ota.size/FRAME_LEN + 1):(platform_ota.size/FRAME_LEN);
@@ -924,6 +944,7 @@ reconnect:
                 }
             }
 
+            // 2.分片接收新版本固件
             if(strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[1]))
             {
                 memset(FrameBuf,0,sizeof(FrameBuf));
@@ -980,6 +1001,7 @@ reconnect:
         }
     }
 
+    // 3.新版本固件接收完毕,写入描述信息
     if(0 == ret)
     {
         ota_info.down.size = platform_ota.size;
@@ -1122,14 +1144,25 @@ reconnect:
             ptr = strstr((char *)Platform_mqtt.cmdbuff,"{\"code\":\"1000\""); 
             if(ptr != NULL)
             {
+                // 1.获取新版本固件大小及版本信息
                 if(sscanf(ptr,"{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&platform_ota.size,&platform_ota.streamId,platform_ota.version)==3)
                 {
                     KPrintf("------Start the firmware file transfer!------\r\n");
                     KPrintf("file size:%d,file id:%d,file version:%s\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
                     KPrintf("---------------------------------------------\r\n");
+                    if(platform_ota.size > APP_FLASH_SIZE)
+                    {
+                        KPrintf("File size is larger than partition size,the partition size is %dk.\n",APP_FLASH_SIZE/1024);
+                        ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "File size is larger than partition size!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
+                        break;
+                    }
                     if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,platform_ota.size) != kStatus_Success)
                     {
-                        KPrintf("Failed to erase target fash!\n");
+                        KPrintf("Failed to erase download partition!\n");
                         ret = -1;
                         break;
                     }
@@ -1150,6 +1183,7 @@ reconnect:
                 }
             }
 
+            // 2.分片接收新版本固件
             if(strstr((char *)Platform_mqtt.cmdbuff,"download_reply"))
             {
                 memset(FrameBuf,0,sizeof(FrameBuf));
@@ -1206,6 +1240,7 @@ reconnect:
         }
     }
 
+    // 3.新版本固件接收完毕,写入描述信息
     if(0 == ret)
     {
         ota_info.down.size = platform_ota.size;

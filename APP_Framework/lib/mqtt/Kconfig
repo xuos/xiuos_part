@@ -23,7 +23,7 @@ menu "lib using MQTT"
 
                 config CLIENTID
                     string "mqtt client id."
-                    default "xidatong0001"
+                    default "D001"
 
                 config USERNAME
                     string "mqtt client username."
