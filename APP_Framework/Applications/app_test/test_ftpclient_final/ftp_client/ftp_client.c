@@ -89,7 +89,53 @@ static int FtpEnterPasv(int threadID,char *ipaddr, int *port)
 	*port = pa * 256 + pb;
 	return 1;
 }
+
+int  FtpUpload(int threadID,char *name, void *buf, int len)
+{
+	int  ret;
+	char ipaddr[32];
+	int  port;
+	
+	//查询数据地址
+	ret=FtpEnterPasv(threadID,ipaddr, &port);
+	if(ret != 1)
+	{
+		return 0;
+	}
+	ret=SocketConnect(m_socket_data[threadID], ipaddr, port);
+	if(ret != 1)
+	{
+		return 0;
+	}
+	//准备上传
+	sprintf(m_send_buffer[threadID], "STOR %s\r\n", name);
+	ret = FtpSendCommand(threadID,m_send_buffer[threadID]);
+	if(ret != 1)
+	{
+		return 0;
+	}
+	ret = FtpRecvRespond(threadID,m_recv_buffer[threadID], 1024);
+	if(ret != 150)
+	{
+		SocketClose(m_socket_data[threadID]);
+		return 0;
+	}
+	
+	//开始上传
+	ret = SocketSend(m_socket_data[threadID], buf, len);
+	if(ret != len)
+	{	
+		printf("send data error!\r\n");
+		SocketClose(m_socket_data[threadID]);
+		return 0;
+	}
+	SocketClose(m_socket_data[threadID]);
  
+	//上传完成，等待回应
+	ret = FtpRecvRespond(threadID,m_recv_buffer[threadID], 1024);
+	return (ret==226);
+}
+
 int  FtpDownload(int threadID,char *name, void *buf, int len)
 {
 	int   i;

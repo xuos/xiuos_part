@@ -24,12 +24,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/*one client upLoad a file of 4K*/
+void* UpLoad(void* arg);
 /*one client downLoad 10 files of 4K*/
-void* downLoad(void* arg);
+void* DownLoad(void* arg);
 /* test for ftp client */
 void TestFtpClient(int argc, char* argv[]);
-
 #ifdef __cplusplus
 }
 #endif

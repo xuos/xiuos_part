@@ -28,11 +28,27 @@
 
 int threadIDs[THREAD_NUM];
 
-void delay(int n){
-    for(int i = 0;i < n;++i);
+/*one client upLoad a file of 4K*/
+void* UpLoad(void* arg){
+    int *pThreadID = (int*)arg;
+    printf("in thread:tid=%ld\n", pthread_self());
+    FtpInitCmd(*pThreadID);
+    int ret = FtpLogin(*pThreadID,"8.140.53.225", 9992, "anonymous", "anonymous");
+    int size = 4096;
+    char buf[size];
+    char fileName[20];
+    sprintf(fileName,"file%d",*pThreadID);
+    for(int i = 0;i < size;++i){
+        buf[i] = '0';
+    }
+    FtpInitData(*pThreadID);  // data socket 每次下载都要重新创建，下载完都要关闭
+    ret = FtpUpload(*pThreadID,fileName,buf,size);
+    FtpQuit(*pThreadID);
+    return NULL;
 }
+
 /*one client downLoad a file of 4K*/
-void* downLoad(void* arg){
+void* DownLoad(void* arg){
     int *pThreadID = (int*)arg;
     printf("in thread:tid=%ld\n", pthread_self());
     FtpInitCmd(*pThreadID);
@@ -43,7 +59,6 @@ void* downLoad(void* arg){
     size = FtpFileSize(*pThreadID,fileName);
     buf = malloc(size);
     FtpInitData(*pThreadID);  // data socket 每次下载都要重新创建，下载完都要关闭
-    delay(1000);
     ret = FtpDownload(*pThreadID,fileName, buf, size);
     free(buf);
     FtpQuit(*pThreadID);
@@ -53,10 +68,15 @@ void* downLoad(void* arg){
 /* test for 10 ftp client */
 void TestFtpClient(int argc, char* argv[])
 {
-    int n = atoi(argv[1]);
+    int options = atoi(argv[1]);
+    int n = atoi(argv[2]);
     for(int i = 0;i < n;++i){
         threadIDs[i] = i;
-        pthread_create(NULL,NULL,&downLoad,&threadIDs[i]);
+        if(options == 1){ // for DownLoad
+            pthread_create(NULL,NULL,&DownLoad,&threadIDs[i]);
+        }else if(options == 2){ // for upLoad
+            pthread_create(NULL,NULL,&UpLoad,&threadIDs[i]);
+        }
     }
     return;
 }

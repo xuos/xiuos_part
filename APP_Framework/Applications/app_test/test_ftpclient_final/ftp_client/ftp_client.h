@@ -41,4 +41,6 @@ int  FtpFileSize(int threadID,char *name);
 /* ftp download file*/
 int  FtpDownload(int threadID,char *name, void *buf, int len);
 
+/*ftp upload*/
+int  FtpUpload(int threadID,char *name, void *buf, int len);
 #endif

@@ -3,8 +3,8 @@
 ## 1. 简介
 本项目是基于赛事提供的云服务器，实现FTP协议的Server功能，其功能支持至少10个Client端并发向Server端传输4KB大小的文件，
 支持Server端并发地向至少10个Client端传输4KB大小的文件。
-test_ftpclient_final.h声明了多个客户端并发下载文件的测试函数
-test_ftpclient_final.c实现了多个客户端并发下载文件的测试函数
+test_ftpclient_final.h声明了多个客户端并发下载文件、并发上传文件的测试函数
+test_ftpclient_final.c实现了多个客户端并发下载文件、并发上传文件的测试函数
 ftp_client文件夹定义了ftp_client的相关类库其中my_socket.h,my_socket.c定义了socket抽象层，并基于
 Lwip实现了该抽象层，ftp_client.h,ftp_client.c实现了ftp登录，获取文件大小，下载文件等功能
 注意:在赛事提供的云服务器/root/yanglongFTP上有对应服务器代码 ./server运行服务器
@@ -36,15 +36,21 @@ struct Data{ // 用于线程间通信
 ```
 ## 3. 测试程序说明
 - test_ftpclient_final.c用于测试多个客户端并发下载文件
-通过多线程模拟多个客户端并发访问服务器
+通过多线程模拟多个客户端并发访问服务器，通过 TestFtpClient options threads进行测试
+其中options=1表示下载options=2表示上传，threads表示线程数/模拟的并发客户端数目
 ```c
 /* test for 10 ftp client */
 void TestFtpClient(int argc, char* argv[])
 {
-    int n = atoi(argv[1]);
+    int options = atoi(argv[1]);
+    int n = atoi(argv[2]);
     for(int i = 0;i < n;++i){
         threadIDs[i] = i;
-        pthread_create(NULL,NULL,&downLoad,&threadIDs[i]);
+        if(options == 1){ // for DownLoad
+            pthread_create(NULL,NULL,&DownLoad,&threadIDs[i]);
+        }else if(options == 2){ // for upLoad
+            pthread_create(NULL,NULL,&UpLoad,&threadIDs[i]);
+        }
     }
     return;
 }
@@ -64,7 +70,7 @@ PRIV_SHELL_CMD_FUNCTION(TestFtpClient, a ftpClient test sample, PRIV_SHELL_CMD_M
 ![](./img/image-5.png)
 5. 通过./server在云服务器运行FTP服务器
 ![](./img/image-6.png)
-6. 运行TestFtpClient 10，模拟10个客户端并发下载文件
+6. 运行TestFtpClient 1 10，模拟10个客户端并发下载文件
 - 客户端日志
 ![](./img/image-7.png)
 ![](./img/image-8.png)
@@ -82,3 +88,19 @@ PRIV_SHELL_CMD_FUNCTION(TestFtpClient, a ftpClient test sample, PRIV_SHELL_CMD_M
 ![](./img/image-19.png)
 ![](./img/image-20.png)
 ![](./img/image-21.png)
+7. 运行TestFtpClient 2 10，模拟10个客户端并发上传文件
+- 客户端日志
+![](./img/image-22.png)
+![](./img/image-23.png)
+![](./img/image-24.png)
+![](./img/image-25.png)
+![](./img/image-26.png)
+![](./img/image-27.png)
+![](./img/image-28.png)
+- 服务器日志
+![](./img/image-29.png)
+![](./img/image-30.png)
+![](./img/image-31.png)
+![](./img/image-32.png)
+- 上传结果
+![](./img/image-33.png)
