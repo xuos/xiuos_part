@@ -65,10 +65,10 @@ menu "OTA function"
             default 10000 if OTA_BY_TCPSERVER
             default 10000 if MCUBOOT_BOOTLOADER
         
-        config OTA_RX_BUFFERSIZE
-            int "OTA receive data buffer size."
+        config OTA_FRAME_SIZE
+            int "OTA receive data frame size."
             default 3072 if OTA_BY_PLATFORM
-            default 2048 if OTA_BY_TCPSERVER
+            default 1024 if OTA_BY_TCPSERVER
             default 256 if MCUBOOT_BOOTLOADER
     endif
 
