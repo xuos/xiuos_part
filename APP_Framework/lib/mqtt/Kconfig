@@ -41,6 +41,13 @@ menu "lib using MQTT"
                     string "xiuos platform server port."
                     default "1883"
             endmenu
+
+            menuconfig USING_DOWNLOAD_JSON
+                bool "Enable support download json file function"
+                default n
+                select BSP_USING_SDIO
+                select MOUNT_SDCARD_FS
+                select LIB_USING_CJSON
         endif
 
         if ALIBABA_PLATFORM

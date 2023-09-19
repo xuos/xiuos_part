@@ -19,10 +19,10 @@
 *
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <transform.h>
 #include "shell.h"
-#include "xsconfig.h"
 #include "mcuboot.h"
 #include "ymodem.h"
 #include "ota.h"
@@ -33,6 +33,10 @@
 
 #ifdef OTA_BY_PLATFORM
 #include "platform_mqtt.h"
+#endif
+
+#ifdef USING_DOWNLOAD_JSON
+#include "cJSON.h"
 #endif
 
 /****************************************************************************
@@ -790,10 +794,14 @@ static void app_ota_by_4g(void)
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, app_ota_by_4g, ota by 4g function);
 #endif
 
-
 #ifdef OTA_BY_PLATFORM
-#define FRAME_LEN   2048   //每帧数据的数据包长度
-static uint8_t MqttRxbuf[3072];
+
+#if (OTA_FRAME_SIZE <= MQTT_FRAME_SIZE)
+    #define FRAME_LEN  OTA_FRAME_SIZE
+#else
+    #error "The value of FRAME_LEN should not be greater than MQTT_FRAME_SIZE!!"
+#endif
+static uint8_t MqttRxbuf[FRAME_LEN + 512];
 static uint8_t FrameBuf[FRAME_LEN];
 static OTA_TCB platform_ota;
 
@@ -837,12 +845,12 @@ static void OTA_Download(int size, int offset)
 }
 
 /*******************************************************************************
-* 函 数 名: app_ota_by_platform
-* 功能描述: 通过云平台MQTT进行升级
+* 函 数 名: mqttCloudInteraction
+* 功能描述: 设备通过MQTT协议与云平台交互
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
-static void app_ota_by_platform(void* parameter)
+static void mqttCloudInteraction(void* parameter)
 {
     int datalen;
     int ret = 0;
@@ -850,8 +858,9 @@ static void app_ota_by_platform(void* parameter)
     ota_info_t ota_info;
     uint32_t heart_time = 0;
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
-    uint8_t topicdatabuff[2][64];
+    uint8_t topicdatabuff[2][32];
     char *ptr1, *ptr2;
+    uint16_t cmdlen;
 
     mcuboot.flash_init();
     memset(&ota_info, 0, sizeof(ota_info_t));
@@ -873,6 +882,17 @@ reconnect:
         KPrintf("Log in to the cloud platform failed, retry!\n");
         goto reconnect;  
     }
+
+#ifdef USING_DOWNLOAD_JSON
+    uint8_t jsontopicdatabuff[32];
+    uint8_t jsonfilename[32];
+    memset(jsontopicdatabuff,0,sizeof(jsontopicdatabuff));
+    sprintf(jsontopicdatabuff,"protocol/%s/files",CLIENTID);
+    if(!MQTT_SubscribeTopic(jsontopicdatabuff))
+    {
+        KPrintf("subscribe to the json download topic failed!\n"); 
+    }
+#endif
 
     while(1)
     {
@@ -896,7 +916,7 @@ reconnect:
         else if(MqttRxbuf[0] == 0x30)
         {
             freecnt = 0;
-            MQTT_DealPublishData(MqttRxbuf, datalen);
+            cmdlen = MQTT_DealPublishData(MqttRxbuf, datalen);
 
             // 1.获取新版本固件大小及版本信息
             ptr1 = strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[0]); 
@@ -993,7 +1013,40 @@ reconnect:
                     break;
                 }
             }
+#ifdef USING_DOWNLOAD_JSON
+            // 3.下载json文件,SD卡要确保已经插入并mount成功
+            extern bool GetSdMountStatus(void);
+            if(strstr((char *)Platform_mqtt.cmdbuff,jsontopicdatabuff) && GetSdMountStatus())
+            {
+                KPrintf("------Start download joson file !------\r\n");
+                memset(jsonfilename,0,sizeof(jsonfilename));
+                memset(FrameBuf,0,sizeof(FrameBuf));
+                memcpy(FrameBuf, &Platform_mqtt.cmdbuff[strlen(jsontopicdatabuff)],cmdlen-strlen(jsontopicdatabuff)); 
+                
+                cJSON *json_obj = cJSON_Parse(FrameBuf);
+                char* product_name = cJSON_GetObjectItem(json_obj, "productName")->valuestring;
+                sprintf(jsonfilename,"%s",product_name); 
+                strcat(jsonfilename,".json");
 
+                FILE *fp = fopen(jsonfilename, "w");
+                if(fp == NULL)
+                {
+                   KPrintf("%s file create failed,please check!\r\n",jsonfilename);
+                   cJSON_Delete(json_obj); 
+                   continue;
+                }
+                else
+                {
+                    KPrintf("%s file create success!\r\n",jsonfilename); 
+                    char *json_print_str = cJSON_Print(json_obj);
+                    fprintf(fp, "%s", json_print_str);
+                    fclose(fp);
+                    cJSON_free(json_print_str);
+                    cJSON_Delete(json_obj);
+                }
+                KPrintf("download %s file done!------\r\n",jsonfilename);
+            }
+#endif
         }
         else
         {
@@ -1026,8 +1079,6 @@ reconnect:
     {
         KPrintf("firmware file transfer failed,start reboot!\n");
     }
-    MQTT_UnSubscribeTopic(topicdatabuff[0]);
-    MQTT_UnSubscribeTopic(topicdatabuff[1]);
     MQTT_Disconnect();
     mcuboot.flash_deinit();
     MdelayKTask(2000);
@@ -1083,12 +1134,12 @@ static void OTA_Download(int size, int offset)
 }
 
 /*******************************************************************************
-* 函 数 名: app_ota_by_platform
-* 功能描述: 通过云平台MQTT进行升级
+* 函 数 名: mqttCloudInteraction
+* 功能描述: 设备通过MQTT协议与云平台交互
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
-static void app_ota_by_platform(void* parameter)
+static void mqttCloudInteraction(void* parameter)
 {
     int datalen;
     int ret = 0;
@@ -1266,7 +1317,6 @@ reconnect:
     {
         KPrintf("firmware file transfer failed,start reboot!\n");
     }
-    MQTT_UnSubscribeTopic(topicdatabuff);
     MQTT_Disconnect();
     mcuboot.flash_deinit();
     MdelayKTask(2000);
@@ -1277,9 +1327,9 @@ reconnect:
 int OtaTask(void)
 {
     int32 ota_task = 0;
-    ota_task = KTaskCreate("ota_platform", app_ota_by_platform, NULL,8192, 10);
+    ota_task = KTaskCreate("mqtt_platform", mqttCloudInteraction, NULL,10240, 10);
     if(ota_task < 0) {
-        KPrintf("ota_task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
+        KPrintf("matt platform task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
         return ERROR;
     }
 
