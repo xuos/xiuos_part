@@ -106,9 +106,9 @@ int MQTT_Recv(uint8_t* buf, int buflen)
 * 函 数 名: MQTT_Connect
 * 功能描述: 登录MQTT服务器
 * 形    参: 无
-* 返 回 值: 0表示成功,1表示失败
+* 返 回 值: true表示成功,false表示失败
 *******************************************************************************/
-int MQTT_Connect(void)
+bool MQTT_Connect(void)
 {
     uint8_t TryConnect_time = 10;  //尝试登录次数
 
@@ -180,11 +180,11 @@ int MQTT_Connect(void)
         MQTT_Recv(mqtt_rxbuf, 4);
         if(mqtt_rxbuf[0] == parket_connetAck[0] && mqtt_rxbuf[1] == parket_connetAck[1]) //连接成功
         {
-            return 0;
+            return true;
         }
         TryConnect_time--;
     }
-    return 1;
+    return false;
 }
 
 
@@ -204,9 +204,9 @@ void MQTT_Disconnect(void)
 * 函 数 名: MQTT_SubscribeTopic
 * 功能描述: MQTT订阅单个主题
 * 形    参: topic_name:要订阅的主题
-* 返 回 值: 0表示订阅成功,1表示订阅失败
+* 返 回 值: true表示订阅成功,false表示订阅失败
 *******************************************************************************/
-int MQTT_SubscribeTopic(uint8_t *topic_name)
+bool MQTT_SubscribeTopic(uint8_t *topic_name)
 {
     uint8_t TrySub_time = 10; //尝试订阅次数
 
@@ -249,11 +249,11 @@ int MQTT_SubscribeTopic(uint8_t *topic_name)
         MQTT_Recv(mqtt_rxbuf, 5);
         if(mqtt_rxbuf[0] == parket_subAck[0] && mqtt_rxbuf[1] == parket_subAck[1]) //订阅成功
         {
-            return 0;
+            return true;
         }
         TrySub_time--;
     }
-    return 1;
+    return false;
 }
 
 
@@ -261,9 +261,9 @@ int MQTT_SubscribeTopic(uint8_t *topic_name)
 * 函 数 名: MQTT_UnSubscribeTopic
 * 功能描述: MQTT取消订阅单个主题
 * 形    参: topic_name:要取消订阅的主题
-* 返 回 值: 0表示订阅成功,1表示订阅失败
+* 返 回 值: true表示取消订阅成功,false表示取消订阅失败
 *******************************************************************************/
-int MQTT_UnSubscribeTopic(uint8_t *topic_name)
+bool MQTT_UnSubscribeTopic(uint8_t *topic_name)
 {
     uint8_t TryUnSub_time = 10; //尝试取消订阅次数
 
@@ -303,11 +303,11 @@ int MQTT_UnSubscribeTopic(uint8_t *topic_name)
         MQTT_Recv(mqtt_rxbuf, 4);
         if(mqtt_rxbuf[0] == parket_unsubAck[0] && mqtt_rxbuf[1] == parket_unsubAck[1]) //取消订阅成功
         {
-            return 0;
+            return true;
         }
         TryUnSub_time--;
     }
-    return 1;
+    return false;
 }
 
 
@@ -397,9 +397,9 @@ void MQTT_PublishDataQs1(uint8_t *topic_name,uint8_t *data, uint16_t data_len)
 * 函 数 名: MQTT_SendHeart
 * 功能描述: 发送心跳保活包
 * 形    参: 无
-* 返 回 值: 0表示发送成功,其他值表示发送失败
+* 返 回 值: true表示发送成功,false表示发送失败
 *******************************************************************************/
-int MQTT_SendHeart(void)
+bool MQTT_SendHeart(void)
 {
     uint8_t TrySentHeart_time = 10; //尝试发送心跳保活次数
     while(TrySentHeart_time > 0)
@@ -410,11 +410,11 @@ int MQTT_SendHeart(void)
         MQTT_Recv(mqtt_rxbuf, 2);
         if(mqtt_rxbuf[0] == 0xD0 && mqtt_rxbuf[1] == 0x00)
         {
-            return 0;
+            return true;
         }
         TrySentHeart_time--;
     }
-    return 1;
+    return false;
 }
 
 

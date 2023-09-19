@@ -863,7 +863,7 @@ static void app_ota_by_platform(void* parameter)
     sprintf(topicdatabuff[1],"ota/%s/files",CLIENTID);   
 
 reconnect:
-    if((AdapterNetActive() == 0) && (MQTT_Connect() == 0) && MQTT_SubscribeTopic(topicdatabuff[0]) == 0 && MQTT_SubscribeTopic(topicdatabuff[1]) == 0)
+    if((AdapterNetActive() == 0) && MQTT_Connect() && MQTT_SubscribeTopic(topicdatabuff[0]) && MQTT_SubscribeTopic(topicdatabuff[1]))
     {
         KPrintf("Log in to the cloud platform and subscribe to the topic successfully.\n"); 
         PropertyVersion();
@@ -885,7 +885,7 @@ reconnect:
             {
                 heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
                 freecnt = 0;
-                if(MQTT_SendHeart() != 0) //发送心跳包失败可能连接断开,需要重连
+                if(!MQTT_SendHeart()) //发送心跳包失败可能连接断开,需要重连
                 {
                     KPrintf("The connection has been disconnected, reconnecting!\n");
                     goto reconnect;  
@@ -897,11 +897,12 @@ reconnect:
         {
             freecnt = 0;
             MQTT_DealPublishData(MqttRxbuf, datalen);
+
+            // 1.获取新版本固件大小及版本信息
             ptr1 = strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[0]); 
-            ptr2 = strstr((char *)Platform_mqtt.cmdbuff,"{\"fileSize\":"); 
+            ptr2 = strstr((char *)Platform_mqtt.cmdbuff,"{\"fileSize\":");
             if((ptr1 != NULL) &&(ptr2 != NULL))
             {
-                // 1.获取新版本固件大小及版本信息
                 if(sscanf(ptr2,"{\"fileSize\":%d,\"version\":\"%11s\",\"fileId\":%d,\"md5\"",&platform_ota.size,platform_ota.version,&platform_ota.streamId)==3)
                 {
                     KPrintf("------Start the firmware file transfer!------\r\n");
@@ -1001,7 +1002,7 @@ reconnect:
         }
     }
 
-    // 3.新版本固件接收完毕,写入描述信息
+    // 新版本固件接收完毕,写入描述信息
     if(0 == ret)
     {
         ota_info.down.size = platform_ota.size;
@@ -1107,7 +1108,7 @@ static void app_ota_by_platform(void* parameter)
     sprintf(topicdatabuff,"/sys/%s/%s/thing/file/download_reply",PLATFORM_PRODUCTKEY,CLIENT_DEVICENAME);  
 
 reconnect:
-    if((AdapterNetActive() == 0) && (MQTT_Connect() == 0) && MQTT_SubscribeTopic(topicdatabuff) == 0)
+    if((AdapterNetActive() == 0) && MQTT_Connect() && MQTT_SubscribeTopic(topicdatabuff))
     {
         KPrintf("Log in to the cloud platform and subscribe to the topic successfully.\n"); 
         PropertyVersion();
@@ -1129,7 +1130,7 @@ reconnect:
             {
                 heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
                 freecnt = 0;
-                if(MQTT_SendHeart() != 0) //发送心跳包失败可能连接断开,需要重连
+                if(!MQTT_SendHeart()) //发送心跳包失败可能连接断开,需要重连
                 {
                     KPrintf("The connection has been disconnected, reconnecting!\n");
                     goto reconnect;  
@@ -1141,10 +1142,11 @@ reconnect:
         {
             freecnt = 0;
             MQTT_DealPublishData(MqttRxbuf, datalen);
-            ptr = strstr((char *)Platform_mqtt.cmdbuff,"{\"code\":\"1000\""); 
+            
+            // 1.获取新版本固件大小及版本信息
+            ptr = strstr((char *)Platform_mqtt.cmdbuff,"{\"code\":\"1000\"");
             if(ptr != NULL)
             {
-                // 1.获取新版本固件大小及版本信息
                 if(sscanf(ptr,"{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&platform_ota.size,&platform_ota.streamId,platform_ota.version)==3)
                 {
                     KPrintf("------Start the firmware file transfer!------\r\n");
@@ -1240,7 +1242,7 @@ reconnect:
         }
     }
 
-    // 3.新版本固件接收完毕,写入描述信息
+    // 新版本固件接收完毕,写入描述信息
     if(0 == ret)
     {
         ota_info.down.size = platform_ota.size;

@@ -23,6 +23,7 @@
 #define	_PLATFORM_MQTT_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define  KEEPALIVE_TIME 300    //保活时间(单位s),300s
 #define  HEART_TIME  200000    //空闲时发送心跳包的时间间隔(单位ms),200s
@@ -50,12 +51,12 @@ extern MQTT_TCB Platform_mqtt; //外部变量声明
 int AdapterNetActive(void);
 int MQTT_Send(const uint8_t* buf, int buflen);
 int MQTT_Recv(uint8_t* buf, int buflen);
-int MQTT_Connect(void);
+bool MQTT_Connect(void);
 void MQTT_Disconnect(void);
-int MQTT_SubscribeTopic(uint8_t *topic_name);
-int MQTT_UnSubscribeTopic(uint8_t *topic_name);
+bool MQTT_SubscribeTopic(uint8_t *topic_name);
+bool MQTT_UnSubscribeTopic(uint8_t *topic_name);
 void MQTT_PublishDataQs0(uint8_t *topic_name,uint8_t *data, uint16_t data_len);
 void MQTT_PublishDataQs1(uint8_t *topic_name,uint8_t *data, uint16_t data_len);
-int MQTT_SendHeart(void);
+bool MQTT_SendHeart(void);
 void MQTT_DealPublishData(uint8_t *data, uint16_t data_len);
 #endif
