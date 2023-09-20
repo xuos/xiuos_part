@@ -350,10 +350,9 @@ static uint8 SdCardReadCd(void)
     return BusDevReadData(pin->owner_haldev, &read_param);
 }
 
+static int sd_card_status = 0;
 static void SdCardTask(void* parameter)
 {
-    static int sd_card_status = 0;
-
     while (1) {
         if (!SdCardReadCd()) {
             if (!sd_card_status) {
@@ -367,6 +366,11 @@ static void SdCardTask(void* parameter)
             }
         }
     }
+}
+
+int GetSdCardStatus(void)
+{
+    return sd_card_status;
 }
 
 #ifdef MOUNT_SDCARD

@@ -626,7 +626,6 @@ uint8_t FLASH_WritePage(uint32_t addr, const uint32_t *buf, uint32_t len)
     flexspi_xfer_t flashXfer;
     addr &= 0x0FFFFFFF;
 
-
     flashXfer.operation = kFLEXSPIOperation_Write;
     flashXfer.seqNum = 1;
     flashXfer.seqId = NOR_CMD_LUT_SEQ_IDX_PAGEPROGRAM;
@@ -692,8 +691,8 @@ status_t NorFlash_Write_PageProgram(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t
     uint8_t temp_data[256] = {0xff};
 
     memcpy(temp_data,pBuffer,NumByteToWrite);
-    
-   status_t status = FLASH_WritePage(WriteAddr,(void *)temp_data,FLASH_PAGE_SIZE);
+
+    status_t status = FLASH_WritePage(WriteAddr,(void *)temp_data,FLASH_PAGE_SIZE);
     if(status != kStatus_Success)
     {
         KPrintf("Write_PageProgram 0x%x faild!\r\n",WriteAddr);
@@ -773,9 +772,9 @@ status_t Flash_Erase(uint32_t start_addr, uint32_t imageSize)
     
     for(i=0;i<sectorNum;i++)
     {
-       status = FLASH_EraseSector(start_addr+i*SECTOR_SIZE);
-    
-        if (status != kStatus_Success)
+        status = FLASH_EraseSector(start_addr+i*SECTOR_SIZE);
+
+        if(status != kStatus_Success)
         {
             KPrintf("Erase_Sector 0x%x faild!\r\n",i*SECTOR_SIZE);
             return status;
@@ -817,7 +816,7 @@ status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWri
     while(1) 
     {
         status = FLASH_ReadBuf(CHIP_FLAH_BASE + secPos*SECTOR_SIZE, (void *)NorFlash_BUF, SECTOR_SIZE);//读出整个扇区的内容
-        if (status != kStatus_Success)
+        if(status != kStatus_Success)
         {
             return status;
         }
@@ -831,7 +830,7 @@ status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWri
         if(i < secRemain)//需要擦除
         {
             status = FLASH_EraseSector(CHIP_FLAH_BASE + secPos*SECTOR_SIZE);
-            if (status != kStatus_Success)
+            if(status != kStatus_Success)
             {
                 return status;
             }
@@ -840,7 +839,7 @@ status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWri
                 NorFlash_BUF[i+secOff] = pBuffer[i];                       
             }
             status = NorFlash_Write_NoCheck(NorFlash_BUF,CHIP_FLAH_BASE + secPos*SECTOR_SIZE,SECTOR_SIZE);//写入整个扇区
-            if (status != kStatus_Success)
+            if(status != kStatus_Success)
             {
                 return status;
             }  
@@ -848,7 +847,7 @@ status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWri
         else
         {
             status = NorFlash_Write_NoCheck(pBuffer,CHIP_FLAH_BASE + WriteAddr,secRemain);//写已经擦除了的,直接写入扇区剩余区间. 	
-            if (status != kStatus_Success)
+            if(status != kStatus_Success)
             {
                 return status;
             } 	
@@ -896,7 +895,6 @@ status_t Flash_Read(uint32_t addr, uint8_t *buf, uint32_t len)
     {
         return FLASH_ReadBuf(addr, (void *)buf, len);
     }
-        
     else
     {
         void* result = memcpy(buf, (void*)addr, len);
@@ -907,8 +905,7 @@ status_t Flash_Read(uint32_t addr, uint8_t *buf, uint32_t len)
         else 
         {
             return (status_t)kStatus_Success;  
-        }
-        
+        }  
     }
 }
 
@@ -993,10 +990,10 @@ status_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLen
     uint32_t WriteAddr;
     WriteAddr = *FlashAddress;
     status = Flash_Write(WriteAddr,Data,DataLength);
-    if (status != kStatus_Success)
+    if(status != kStatus_Success)
     {
         return status;
-    } 	
+    }
     *FlashAddress += DataLength;
     return (status_t)kStatus_Success;
 }
@@ -1015,13 +1012,13 @@ status_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLen
         packetNum ++;
         if(1 == packetNum)
         {
-            WriteAddr = *FlashAddress;    		 
+            WriteAddr = *FlashAddress;
         }
 
         if(dataLen>=SECTOR_SIZE)
         {
             status = Flash_Write(WriteAddr,dataBuff,dataLen);
-            if (status != kStatus_Success)
+            if(status != kStatus_Success)
             {
                 return status;
             } 
@@ -1033,10 +1030,10 @@ status_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLen
     else
     {
         status = Flash_Write(WriteAddr,dataBuff,dataLen);
-        if (status != kStatus_Success)
+        if(status != kStatus_Success)
         {
             return status;
-        } 
+        }
         packetNum = 0;
         dataLen = 0; 
     }

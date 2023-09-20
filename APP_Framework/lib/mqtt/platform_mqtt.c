@@ -24,6 +24,7 @@
 #include <adapter.h>
 #include <transform.h>
 #include "platform_mqtt.h"
+#include "utils_hmacsha1.h"
 
 MQTT_TCB Platform_mqtt;  //创建一个用于连接云平台mqtt的结构体
 static struct Adapter *adapter;
@@ -105,19 +106,26 @@ int MQTT_Recv(uint8_t* buf, int buflen)
 * 函 数 名: MQTT_Connect
 * 功能描述: 登录MQTT服务器
 * 形    参: 无
-* 返 回 值: 0表示成功,1表示失败
+* 返 回 值: true表示成功,false表示失败
 *******************************************************************************/
-int MQTT_Connect(void)
+bool MQTT_Connect(void)
 {
     uint8_t TryConnect_time = 10;  //尝试登录次数
-	uint8_t passwdtemp[PASSWARD_SIZE];
-	
-	memset(&Platform_mqtt,0,sizeof(Platform_mqtt)); 
-	sprintf(Platform_mqtt.ClientID,"%s|securemode=3,signmethod=hmacsha1|",CLIENT_DEVICENAME);   //构建客户端ID并存入缓冲区
-	sprintf(Platform_mqtt.Username,"%s&%s",CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);              //构建用户名并存入缓冲区	
-	memset(passwdtemp,0,sizeof(passwdtemp)); 
-	sprintf(passwdtemp,"clientId%sdeviceName%sproductKey%s",CLIENT_DEVICENAME,CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);  //构建加密时的明文   
-	utils_hmac_sha1(passwdtemp,strlen(passwdtemp),Platform_mqtt.Passward,(char *)CLIENT_DEVICESECRET,strlen(CLIENT_DEVICESECRET)); //以DeviceSecret为秘钥对temp中的明文进行hmacsha1加密即为密码
+
+    memset(&Platform_mqtt,0,sizeof(Platform_mqtt));
+#ifdef XIUOS_PLATFORM
+    sprintf(Platform_mqtt.ClientID,"%s",CLIENTID);   //客户端ID存入缓冲区
+    sprintf(Platform_mqtt.Username,"%s",USERNAME);   //用户名存入缓冲区
+    sprintf(Platform_mqtt.Passward,"%s",PASSWORD);   //用户名存入缓冲区
+#endif
+#ifdef ALIBABA_PLATFORM
+    uint8_t passwdtemp[PASSWARD_SIZE];
+    memset(passwdtemp,0,sizeof(passwdtemp));
+    sprintf(Platform_mqtt.ClientID,"%s|securemode=3,signmethod=hmacsha1|",CLIENT_DEVICENAME);   //构建客户端ID并存入缓冲区
+    sprintf(Platform_mqtt.Username,"%s&%s",CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);              //构建用户名并存入缓冲区
+    sprintf(passwdtemp,"clientId%sdeviceName%sproductKey%s",CLIENT_DEVICENAME,CLIENT_DEVICENAME,PLATFORM_PRODUCTKEY);  //构建加密时的明文   
+    utils_hmac_sha1(passwdtemp,strlen(passwdtemp),Platform_mqtt.Passward,(char *)CLIENT_DEVICESECRET,strlen(CLIENT_DEVICESECRET)); //以DeviceSecret为秘钥对temp中的明文进行hmacsha1加密即为密码
+#endif
 
     Platform_mqtt.MessageID = 0;      //报文标识符清零,CONNECT报文虽然不需要添加报文标识符,但是CONNECT报文是第一个发送的报文,在此清零报文标识符为后续报文做准备
     Platform_mqtt.Fixed_len = 1;      //CONNECT报文固定报头长度暂定为1
@@ -126,7 +134,7 @@ int MQTT_Connect(void)
     Platform_mqtt.Remaining_len = Platform_mqtt.Variable_len + Platform_mqtt.Payload_len; //剩余长度=可变报头长度+负载长度
     memset(Platform_mqtt.Pack_buff,0,sizeof(Platform_mqtt.Pack_buff));
 
-    Platform_mqtt.Pack_buff[0] = 0x10;        //CONNECT报文 固定报头第1个字节0x10	
+    Platform_mqtt.Pack_buff[0] = 0x10;        //CONNECT报文,固定报头第1个字节0x10	
     do{
         if((Platform_mqtt.Remaining_len/128) == 0)
         {
@@ -172,11 +180,11 @@ int MQTT_Connect(void)
         MQTT_Recv(mqtt_rxbuf, 4);
         if(mqtt_rxbuf[0] == parket_connetAck[0] && mqtt_rxbuf[1] == parket_connetAck[1]) //连接成功
         {
-            return 0;
+            return true;
         }
         TryConnect_time--;
     }
-    return 1;
+    return false;
 }
 
 
@@ -196,9 +204,9 @@ void MQTT_Disconnect(void)
 * 函 数 名: MQTT_SubscribeTopic
 * 功能描述: MQTT订阅单个主题
 * 形    参: topic_name:要订阅的主题
-* 返 回 值: 0表示订阅成功,1表示订阅失败
+* 返 回 值: true表示订阅成功,false表示订阅失败
 *******************************************************************************/
-int MQTT_SubscribeTopic(uint8_t *topic_name)
+bool MQTT_SubscribeTopic(uint8_t *topic_name)
 {
     uint8_t TrySub_time = 10; //尝试订阅次数
 
@@ -241,11 +249,11 @@ int MQTT_SubscribeTopic(uint8_t *topic_name)
         MQTT_Recv(mqtt_rxbuf, 5);
         if(mqtt_rxbuf[0] == parket_subAck[0] && mqtt_rxbuf[1] == parket_subAck[1]) //订阅成功
         {
-            return 0;
+            return true;
         }
         TrySub_time--;
     }
-    return 1;
+    return false;
 }
 
 
@@ -253,9 +261,9 @@ int MQTT_SubscribeTopic(uint8_t *topic_name)
 * 函 数 名: MQTT_UnSubscribeTopic
 * 功能描述: MQTT取消订阅单个主题
 * 形    参: topic_name:要取消订阅的主题
-* 返 回 值: 0表示订阅成功,1表示订阅失败
+* 返 回 值: true表示取消订阅成功,false表示取消订阅失败
 *******************************************************************************/
-int MQTT_UnSubscribeTopic(uint8_t *topic_name)
+bool MQTT_UnSubscribeTopic(uint8_t *topic_name)
 {
     uint8_t TryUnSub_time = 10; //尝试取消订阅次数
 
@@ -281,7 +289,7 @@ int MQTT_UnSubscribeTopic(uint8_t *topic_name)
 
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+0] = Platform_mqtt.MessageID/256; //报文标识符高字节
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+1] = Platform_mqtt.MessageID%256; //报文标识符低字节
-    Platform_mqtt.MessageID++;                                                    //每用一次MessageID加1
+    Platform_mqtt.MessageID++;                                                        //每用一次MessageID加1
 
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+2] = strlen(topic_name)/256;               //主题长度高字节
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+3] = strlen(topic_name)%256;               //主题长度低字节
@@ -295,11 +303,11 @@ int MQTT_UnSubscribeTopic(uint8_t *topic_name)
         MQTT_Recv(mqtt_rxbuf, 4);
         if(mqtt_rxbuf[0] == parket_unsubAck[0] && mqtt_rxbuf[1] == parket_unsubAck[1]) //取消订阅成功
         {
-            return 0;
+            return true;
         }
         TryUnSub_time--;
     }
-    return 1;
+    return false;
 }
 
 
@@ -377,7 +385,7 @@ void MQTT_PublishDataQs1(uint8_t *topic_name,uint8_t *data, uint16_t data_len)
  
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+2+strlen(topic_name)] = Platform_mqtt.MessageID/256; //报文标识符高字节
     Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+3+strlen(topic_name)] = Platform_mqtt.MessageID%256; //报文标识符低字节
-    Platform_mqtt.MessageID++;                                                                       //每用一次MessageID加1
+    Platform_mqtt.MessageID++;                                                                           //每用一次MessageID加1
 
     memcpy(&Platform_mqtt.Pack_buff[Platform_mqtt.Fixed_len+4+strlen(topic_name)],data,strlen(data));  //复制data数据
 
@@ -389,9 +397,9 @@ void MQTT_PublishDataQs1(uint8_t *topic_name,uint8_t *data, uint16_t data_len)
 * 函 数 名: MQTT_SendHeart
 * 功能描述: 发送心跳保活包
 * 形    参: 无
-* 返 回 值: 0表示发送成功,其他值表示发送失败
+* 返 回 值: true表示发送成功,false表示发送失败
 *******************************************************************************/
-int MQTT_SendHeart(void)
+bool MQTT_SendHeart(void)
 {
     uint8_t TrySentHeart_time = 10; //尝试发送心跳保活次数
     while(TrySentHeart_time > 0)
@@ -402,11 +410,11 @@ int MQTT_SendHeart(void)
         MQTT_Recv(mqtt_rxbuf, 2);
         if(mqtt_rxbuf[0] == 0xD0 && mqtt_rxbuf[1] == 0x00)
         {
-            return 0;
+            return true;
         }
         TrySentHeart_time--;
     }
-    return 1;
+    return false;
 }
 
 
@@ -414,20 +422,23 @@ int MQTT_SendHeart(void)
 * 函 数 名: MQTT_DealPublishData
 * 功能描述: 处理服务器发来的等级0的推送数据,附带topic信息
 * 形    参: redata:接收的数据,data_len:要处理的数据长度
-* 返 回 值: 无
+* 返 回 值: 报文中主题部分+实际负载的长度
 *******************************************************************************/
-void MQTT_DealPublishData(uint8_t *data, uint16_t data_len)
+uint16_t MQTT_DealPublishData(uint8_t *data, uint16_t data_len)
 {
     uint8_t i;
     uint16_t cmdpos,cmdlen;
 
     for(i = 1;i < 5;i++)
     {
+        //查找可变报头的长度字段,如果最高位为0表示该字节是长度字段的最后一个字节
         if((data[i] & 0x80) == 0)
             break;
     }
 
+    //1代表固定报头占一个字节,i代表可变报头长度字段所占用字节数,2代表主题长度字段占2字节,cmdpos代表报文里主题名称起始位置
     cmdpos = 1+i+2;
+    //data_len减去1+i+2就是报文中主题部分+实际负载的长度
     cmdlen = data_len-(1+i+2);
 
     if(data_len <= CMD_SIZE)
@@ -435,4 +446,6 @@ void MQTT_DealPublishData(uint8_t *data, uint16_t data_len)
         memset(Platform_mqtt.cmdbuff, 0, CMD_SIZE);
         memcpy(Platform_mqtt.cmdbuff, &data[cmdpos], cmdlen);
     }
+
+    return cmdlen;
 }
