@@ -874,7 +874,7 @@ static void mqttCloudInteraction(void* parameter)
 reconnect:
     if((AdapterNetActive() == 0) && MQTT_Connect() && MQTT_SubscribeTopic(topicdatabuff[0]) && MQTT_SubscribeTopic(topicdatabuff[1]))
     {
-        KPrintf("Log in to the cloud platform and subscribe to the ota topic successfully.\n"); 
+        KPrintf("Log in to the cloud platform and subscribe to the topic successfully.\n"); 
         PropertyVersion();
     }
     else
@@ -888,9 +888,9 @@ reconnect:
     uint8_t jsonfilename[32];
     memset(jsontopicdatabuff,0,sizeof(jsontopicdatabuff));
     sprintf(jsontopicdatabuff,"protocol/%s/files",CLIENTID);
-    if(MQTT_SubscribeTopic(jsontopicdatabuff))
+    if(!MQTT_SubscribeTopic(jsontopicdatabuff))
     {
-        KPrintf("subscribe to the json download topic successfully.\n"); 
+        KPrintf("subscribe to the json download topic failed!\n"); 
     }
 #endif
 
@@ -1015,8 +1015,8 @@ reconnect:
             }
 #ifdef USING_DOWNLOAD_JSON
             // 3.下载json文件,SD卡要确保已经插入
-            extern int GetSdCardStatus(void);
-            if(strstr((char *)Platform_mqtt.cmdbuff,jsontopicdatabuff) && GetSdCardStatus())
+            extern bool GetSdMountStatus(void);
+            if(strstr((char *)Platform_mqtt.cmdbuff,jsontopicdatabuff) && GetSdMountStatus())
             {
                 KPrintf("------Start download joson file !------\r\n");
                 memset(jsonfilename,0,sizeof(jsonfilename));
@@ -1079,8 +1079,6 @@ reconnect:
     {
         KPrintf("firmware file transfer failed,start reboot!\n");
     }
-    MQTT_UnSubscribeTopic(topicdatabuff[0]);
-    MQTT_UnSubscribeTopic(topicdatabuff[1]);
     MQTT_Disconnect();
     mcuboot.flash_deinit();
     MdelayKTask(2000);
@@ -1319,7 +1317,6 @@ reconnect:
     {
         KPrintf("firmware file transfer failed,start reboot!\n");
     }
-    MQTT_UnSubscribeTopic(topicdatabuff);
     MQTT_Disconnect();
     mcuboot.flash_deinit();
     MdelayKTask(2000);
