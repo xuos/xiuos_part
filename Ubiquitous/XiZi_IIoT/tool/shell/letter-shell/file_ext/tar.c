@@ -31,7 +31,7 @@ static void PrintOctal(char *str, int len, uint64_t value)
     char *cp;
     int written_len;
 
-    written_len = sprintf(buf, "%0*lo", len, value);
+    written_len = sprintf(buf, "%0*llo", len, value);
     cp = buf + written_len - len;
 
     if (*cp == '0')

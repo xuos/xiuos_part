@@ -101,7 +101,7 @@ void LwipTcpSendTest(int argc, char *argv[])
     strcat(tcp_demo_msg, "\r\n");
 
     if(argc >= 3) {
-        if (sscanf(argv[2], "%hhd.%hhd.%hhd.%hhd:%d", &tcp_server_ip[0], &tcp_server_ip[1], &tcp_server_ip[2], &tcp_server_ip[3], &tcp_server_port) == EOK) {
+        if (sscanf(argv[2], "%hhd.%hhd.%hhd.%hhd:%hhd", &tcp_server_ip[0], &tcp_server_ip[1], &tcp_server_ip[2], &tcp_server_ip[3], &tcp_server_port) == EOK) {
             sscanf(argv[2], "%hhd.%hhd.%hhd.%hhd", &tcp_server_ip[0], &tcp_server_ip[1], &tcp_server_ip[2], &tcp_server_ip[3]);
         }
         sscanf(argv[3], "%d", &tcp_send_num);

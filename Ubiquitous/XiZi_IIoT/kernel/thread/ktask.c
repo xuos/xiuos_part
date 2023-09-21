@@ -258,8 +258,8 @@ x_err_t _KTaskPrioSet(KTaskDescriptorType task, uint8 prio)
 #ifdef ARCH_SMP
             HwLockSpinlock(&AssignSpinLock);
 #endif
-            task->task_dync_sched_member.cur_prio = prio;
             Assign.ready_vector_done->remove(task);
+            task->task_dync_sched_member.cur_prio = prio;
             __BitmapSiteMask(task);
             Assign.ready_vector_done->insert(task);
 #ifdef ARCH_SMP

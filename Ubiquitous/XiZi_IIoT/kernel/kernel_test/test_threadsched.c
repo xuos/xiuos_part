@@ -47,12 +47,12 @@ static void Task1Entry(void *parameter)
 
 	#ifdef ARCH_SMP
 	if (0 == strncmp(parameter,"-b",strlen("-b"))) { ///< if tasks bind to cpu 0
-		head = &(Assign.smp_os_assign_ready_rector[0].priority_ready_vector[PRIORITY]);
+		head = &(Assign.smp_os_assign_ready_vector[0].priority_ready_vector[PRIORITY]);
 	} else {
-		head = &(Assign.os_assign_read_vector.priority_ready_vector[PRIORITY]);
+		head = &(Assign.os_assign_ready_vector.priority_ready_vector[PRIORITY]);
 	}
 	#else
-		head = &(Assign.os_assign_read_vector.priority_ready_vector[PRIORITY]);
+		head = &(Assign.os_assign_ready_vector.priority_ready_vector[PRIORITY]);
 	#endif
 	while(cnt--) {
 #ifdef TOOL_SHELL

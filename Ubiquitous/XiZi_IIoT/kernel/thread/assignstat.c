@@ -30,15 +30,17 @@
 void _KTaskOsAssignStackCheck(struct TaskDescriptor *task)
 {
 	NULL_PARAM_CHECK(task);
+        if ((x_ubase)task->stack_point <= (x_ubase)task->task_base_info.stack_start
+            || (x_ubase)task->stack_point > (x_ubase)task->task_base_info.stack_start + (x_ubase)task->task_base_info.stack_depth) {
 
-    if ((x_ubase)task->stack_point<= (x_ubase)task->task_base_info.stack_start ||
-        (x_ubase)task->stack_point >
-        (x_ubase)task->task_base_info.stack_start + (x_ubase)task->task_base_info.stack_depth) {
-       
-        KPrintf("task name:%s id:%d stack overflow,sp %p stacktop %p stack depth 0x%x\n", task->task_base_info.name,task->id.id,task->stack_point,(uint32*)task->task_base_info.stack_start + task->task_base_info.stack_depth,task->task_base_info.stack_depth);
+            KPrintf("task name:%s id:%d stack overflow,sp %p stacktop %p stack depth 0x%x\n",
+                task->task_base_info.name, task->id.id, task->stack_point,
+                (uint32*)task->task_base_info.stack_start + task->task_base_info.stack_depth,
+                task->task_base_info.stack_depth);
 
-        while (1);
-    }
+            while (1)
+                ;
+        }
 }
 #endif
 
