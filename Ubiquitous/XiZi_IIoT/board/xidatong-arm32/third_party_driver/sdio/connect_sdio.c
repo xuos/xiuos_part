@@ -285,7 +285,7 @@ static bool is_mount_ok = false;
  */
 static int MountSDCardFs(enum FilesystemType fs_type)
 {
-    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, fs_type, "/") == 0){
+    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, fs_type, "/") == 0) {
         KPrintf("Sd card mount to '/'");
         is_mount_ok = true;
     } else {
@@ -395,7 +395,7 @@ int MountSDCard()
 bool GetSdMountStatus(void)
 {
     if(!is_mount_ok) 
-        KPrintf("The SD card was not mounted successfully or not inserted, please check!\r\n");
+        KPrintf("SD card is not inserted or failed to mount, please check!\r\n");
     return is_mount_ok;
 }
 

@@ -1014,7 +1014,7 @@ reconnect:
                 }
             }
 #ifdef USING_DOWNLOAD_JSON
-            // 3.下载json文件,SD卡要确保已经插入
+            // 3.下载json文件,SD卡要确保已经插入并mount成功
             extern bool GetSdMountStatus(void);
             if(strstr((char *)Platform_mqtt.cmdbuff,jsontopicdatabuff) && GetSdMountStatus())
             {
