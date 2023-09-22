@@ -28,8 +28,8 @@
 #define  KEEPALIVE_TIME               300   //保活时间(单位s),300s
 #define  HEART_TIME                200000   //空闲时发送心跳包的时间间隔(单位ms),200s
 #define  PACK_SIZE                    512   //存放报文数据缓冲区大小
-#define  MQTT_FRAME_SIZE             3072   //保存推送的PUBLISH报文中的数据负载大小,最大3k
-#define  CMD_SIZE (MQTT_FRAME_SIZE + 512)   //保存推送的PUBLISH报文中的数据缓冲区大小
+#define  MQTT_FRAME_SIZE             2048   //保存推送的PUBLISH报文中的数据负载大小,最大2k
+#define  CMD_SIZE (MQTT_FRAME_SIZE + 1024)  //保存推送的PUBLISH报文中的数据缓冲区大小
 #define  CLIENTID_SIZE                 64   //存放客户端ID的缓冲区大小
 #define  USERNAME_SIZE                 64   //存放用户名的缓冲区大小
 #define  PASSWARD_SIZE                 64   //存放密码的缓冲区大小

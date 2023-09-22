@@ -421,13 +421,13 @@ bool MQTT_SendHeart(void)
 /*******************************************************************************
 * 函 数 名: MQTT_DealPublishData
 * 功能描述: 处理服务器发来的等级0的推送数据,附带topic信息
-* 形    参: redata:接收的数据,data_len:要处理的数据长度
+* 形    参: data:接收的数据,data_len:要处理的数据长度
 * 返 回 值: 报文中主题部分+实际负载的长度
 *******************************************************************************/
 uint16_t MQTT_DealPublishData(uint8_t *data, uint16_t data_len)
 {
     uint8_t i;
-    uint16_t cmdpos,cmdlen;
+    uint16_t startPos,payloadLen;
 
     for(i = 1;i < 5;i++)
     {
@@ -436,16 +436,16 @@ uint16_t MQTT_DealPublishData(uint8_t *data, uint16_t data_len)
             break;
     }
 
-    //1代表固定报头占一个字节,i代表可变报头长度字段所占用字节数,2代表主题长度字段占2字节,cmdpos代表报文里主题名称起始位置
-    cmdpos = 1+i+2;
+    //1代表固定报头占一个字节,i代表可变报头长度字段所占用字节数,2代表主题长度字段占2字节,startPos代表报文里主题名称起始位置
+    startPos = 1+i+2;
     //data_len减去1+i+2就是报文中主题部分+实际负载的长度
-    cmdlen = data_len-(1+i+2);
+    payloadLen = data_len-(1+i+2);
 
     if(data_len <= CMD_SIZE)
     {
         memset(Platform_mqtt.cmdbuff, 0, CMD_SIZE);
-        memcpy(Platform_mqtt.cmdbuff, &data[cmdpos], cmdlen);
+        memcpy(Platform_mqtt.cmdbuff, &data[startPos], payloadLen);
     }
 
-    return cmdlen;
+    return payloadLen;
 }

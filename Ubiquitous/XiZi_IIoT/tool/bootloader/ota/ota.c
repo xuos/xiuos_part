@@ -401,6 +401,13 @@ static bool UpdateNewApplication(void)
     }
     else
     {
+        // 如果OTA升级状态为准备状态但APP分区与download分区版本相同,不需要进行升级,重置status,打印提示信息
+        if((ota_info.status == OTA_STATUS_READY) && (ota_info.os.crc32 == ota_info.down.crc32)) 
+        {
+            ota_info.status == OTA_STATUS_IDLE;
+            UpdateOTAFlag(&ota_info);
+            mcuboot.print_string("\r\n------The app partition is the same as the download partition, no need to upgrade!------\r\n");
+        }
         return false;
     }
 finish:
@@ -801,7 +808,7 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHE
 #else
     #error "The value of FRAME_LEN should not be greater than MQTT_FRAME_SIZE!!"
 #endif
-static uint8_t MqttRxbuf[FRAME_LEN + 512];
+static uint8_t MqttRxbuf[FRAME_LEN + 1024];
 static uint8_t FrameBuf[FRAME_LEN];
 static OTA_TCB platform_ota;
 
@@ -828,12 +835,12 @@ static void PropertyVersion(void)
 }
 
 
-/*-------------------------------------------------*/
-/*函数名：OTA下载数据                              */
-/*参  数：size:本次下载量                         */
-/*参  数：offset:本次下载偏移量                   */
-/*返回值：无                                       */
-/*-------------------------------------------------*/
+/*******************************************************************************
+* 函 数 名: OTA_Download
+* 功能描述: OTA下载数据
+* 形    参: size:本次下载量,offset:本次下载偏移量
+* 返 回 值: 无
+*******************************************************************************/
 static void OTA_Download(int size, int offset)
 {
     uint8_t tempdatabuff[128];
@@ -860,7 +867,7 @@ static void mqttCloudInteraction(void* parameter)
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
     uint8_t topicdatabuff[2][32];
     char *ptr1, *ptr2;
-    uint16_t cmdlen;
+    uint16_t payloadLen;
 
     mcuboot.flash_init();
     memset(&ota_info, 0, sizeof(ota_info_t));
@@ -916,7 +923,7 @@ reconnect:
         else if(MqttRxbuf[0] == 0x30)
         {
             freecnt = 0;
-            cmdlen = MQTT_DealPublishData(MqttRxbuf, datalen);
+            payloadLen = MQTT_DealPublishData(MqttRxbuf, datalen);
 
             // 1.获取新版本固件大小及版本信息
             ptr1 = strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[0]); 
@@ -1021,7 +1028,7 @@ reconnect:
                 KPrintf("------Start download joson file !------\r\n");
                 memset(jsonfilename,0,sizeof(jsonfilename));
                 memset(FrameBuf,0,sizeof(FrameBuf));
-                memcpy(FrameBuf, &Platform_mqtt.cmdbuff[strlen(jsontopicdatabuff)],cmdlen-strlen(jsontopicdatabuff)); 
+                memcpy(FrameBuf, &Platform_mqtt.cmdbuff[strlen(jsontopicdatabuff)],payloadLen-strlen(jsontopicdatabuff)); 
                 
                 cJSON *json_obj = cJSON_Parse(FrameBuf);
                 char* product_name = cJSON_GetObjectItem(json_obj, "productName")->valuestring;
@@ -1113,12 +1120,12 @@ static void PropertyVersion(void)
 }
 
 
-/*-------------------------------------------------*/
-/*函数名：OTA下载数据                              */
-/*参  数：size:本次下载量                         */
-/*参  数：offset:本次下载偏移量                   */
-/*返回值：无                                       */
-/*-------------------------------------------------*/
+/*******************************************************************************
+* 函 数 名: OTA_Download
+* 功能描述: OTA下载数据
+* 形    参: size:本次下载量,offset:本次下载偏移量
+* 返 回 值: 无
+*******************************************************************************/
 static void OTA_Download(int size, int offset)
 {
     uint8_t topicdatabuff[64];
