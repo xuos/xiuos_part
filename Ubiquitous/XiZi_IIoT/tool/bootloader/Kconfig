@@ -67,9 +67,9 @@ menu "OTA function"
         
         config OTA_FRAME_SIZE
             int "OTA receive data frame size."
-            default 3072 if OTA_BY_PLATFORM
+            default 2048 if OTA_BY_PLATFORM
             default 1024 if OTA_BY_TCPSERVER
-            default 256 if MCUBOOT_BOOTLOADER
+            default 0 if MCUBOOT_BOOTLOADER
     endif
 
 endmenu
