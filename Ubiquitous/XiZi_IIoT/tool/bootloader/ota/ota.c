@@ -812,6 +812,27 @@ static uint8_t MqttRxbuf[FRAME_LEN + 1024];
 static uint8_t FrameBuf[FRAME_LEN];
 static OTA_TCB platform_ota;
 
+
+/*******************************************************************************
+* 函 数 名: displayProgress
+* 功能描述: 显示当前ota下载进度的百分比
+* 形    参: progress:当前下载的进度,0-100之间
+* 返 回 值: 无
+*******************************************************************************/
+void displayProgress(uint8_t progress) 
+{
+    uint8_t buf[101];
+    if((progress >= 0) && (progress <= 100))
+    {
+        memset(buf, '=', progress);
+        buf[progress] = '\0';
+        KPrintf("[%-100s][%d%%]\r",buf,progress);
+        if(progress == 100)
+            KPrintf("\r\n---------------------------------------------\r\n");
+    }
+}
+
+
 #ifdef XIUOS_PLATFORM
 /*******************************************************************************
 * 函 数 名: PropertyVersion
@@ -932,8 +953,8 @@ reconnect:
             {
                 if(sscanf(ptr2,"{\"fileSize\":%d,\"version\":\"%11s\",\"fileId\":%d,\"md5\"",&platform_ota.size,platform_ota.version,&platform_ota.streamId)==3)
                 {
+                    KPrintf("OTA firmware information:file size is %d,file id is %d,file version is %s!\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
                     KPrintf("------Start the firmware file transfer!------\r\n");
-                    KPrintf("file size:%d,file id:%d,file version:%s\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
                     KPrintf("---------------------------------------------\r\n");
                     if(platform_ota.size > APP_FLASH_SIZE)
                     {
@@ -989,8 +1010,7 @@ reconnect:
                 }
                 else
                 {
-                    KPrintf("current frame[%d] is written to flash 0x%x address successful.\n", platform_ota.num -1, flashdestination);
-                    KPrintf("current progress is %d/%d.\r\n",platform_ota.num,platform_ota.counter); 
+                    displayProgress((platform_ota.num*100)/platform_ota.counter);
                     flashdestination += platform_ota.downlen;
                     platform_ota.num++; 
                 }
@@ -1207,8 +1227,8 @@ reconnect:
             {
                 if(sscanf(ptr,"{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&platform_ota.size,&platform_ota.streamId,platform_ota.version)==3)
                 {
-                    KPrintf("------Start the firmware file transfer!------\r\n");
-                    KPrintf("file size:%d,file id:%d,file version:%s\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
+                    KPrintf("OTA firmware information:file size is %d,file id is %d,file version is %s!\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
+                    KPrintf("------Start the firmware file transfer!------\r\n");                    
                     KPrintf("---------------------------------------------\r\n");
                     if(platform_ota.size > APP_FLASH_SIZE)
                     {
@@ -1260,8 +1280,7 @@ reconnect:
                 }
                 else
                 {
-                    KPrintf("current frame[%d] is written to flash 0x%x address successful.\n", platform_ota.num -1, flashdestination);
-                    KPrintf("current progress is %d/%d.\r\n",platform_ota.num,platform_ota.counter); 
+                    displayProgress((platform_ota.num*100)/platform_ota.counter);
                     flashdestination += platform_ota.downlen;
                     platform_ota.num++; 
                 }
