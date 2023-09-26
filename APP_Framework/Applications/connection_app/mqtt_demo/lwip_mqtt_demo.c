@@ -612,5 +612,117 @@ int32_t MQTTMsgPublish(int32_t sock, char *topic, int8_t qos, uint8_t* msg)
 }
 
 
+static void *MqttSocketSendTask(void *arg)
+{
 
+  int fd = -1, clientfd;
+    int recv_len;
+    int ret;
+    char *recv_buf;
+    struct sockaddr_in mqtt_addr;
+    socklen_t addr_len;
+
+     fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) {
+        lw_print("Socket error\n");
+        return NULL;
+    }
+
+    struct sockaddr_in mqtt_sock;
+    mqtt_sock.sin_family = AF_INET;
+    mqtt_sock.sin_port = htons(mqtt_socket_port);
+    mqtt_sock.sin_addr.s_addr = inet_addr(mqtt_ip_str);
+
+    memset(&(mqtt_sock.sin_zero), 0, sizeof(mqtt_sock.sin_zero));
+
+    ret = connect(fd, (struct sockaddr *)&mqtt_sock, sizeof(struct sockaddr));
+
+    if (ret < 0) {
+        lw_print("Unable to connect %s:%d = %d\n", mqtt_ip_str, mqtt_socket_port, ret);
+        close(fd);
+        return NULL;
+    }
+
+    lw_print("MQTT connect %s:%d success, begin to verify hostname and password.\n", mqtt_ip_str, mqtt_socket_port);
+    
+    if(MQTT_Connect() != Connect_OK)
+    {
+        lw_print("MQTT verify failed.\n");
+        shutdown(fd, SHUT_WR);
+        recv(fd, NULL, (size_t)0, 0);
+        close(fd);
+        return NULL;
+    }
+
+    lw_print("MQTT subscribe begin.\n");
+    if(MQTTSubscribe(fd,(char *)TOPIC,QOS1) < 0)
+    {
+        lw_print("MQTT subscribe failed.\n");
+        shutdown(fd, SHUT_WR);
+        recv(fd, NULL, (size_t)0, 0);
+        close(fd);
+        return NULL;
+    }
+
+    lw_print("subscribe success.\n");
+
+
+
+    uint8_t no_mqtt_msg_exchange = 1;
+    uint32_t curtick=0;
+    uint8_t res;
+
+    cJSON* cJSON_Data = NULL;
+    cJSON_Data = cJSON_Data_Init();
+    DHT11_Data_TypeDef* recv_data;
+
+    double a,b;
+    while(1)
+    {
+      curtick+=1;
+      char* p ="Hello,here is hc";
+      ret = MQTTMsgPublish(fd,(char*)TOPIC,QOS0,(uint8_t*)p);
+      if(ret >= 0)
+      {
+          no_mqtt_msg_exchange = 0;
+          PrivTaskDelay(1000);
+      }
+    }
+}
+
+
+void MqttSocketSendTest(int argc, char *argv[])
+{
+    if(argc >= 2) {
+        lw_print("lw: [%s] target ip %s\n", __func__, argv[1]);
+        MqttSocketConfigParam(argv[1]);
+    }
+
+
+    // ip4_addr_t dns_ip;
+    // netconn_gethostbyname(HOST_NAME, &dns_ip);
+    // char* host_ip = ip_ntoa(&dns_ip);
+    // lw_print("host name : %s , host_ip : %s\n",HOST_NAME,host_ip);
+    // MqttSocketConfigParam(host_ip);
+
+
+#ifdef ADD_XIZI_FEATURES
+    lwip_config_tcp(0, mqtt_demo_ipaddr, mqtt_demo_netmask, mqtt_demo_gwaddr);
+
+    pthread_attr_t attr;
+    attr.schedparam.sched_priority = LWIP_MQTT_DEMO_TASK_PRIO;
+    attr.stacksize = LWIP_MQTT_DEMO_TASK_STACK_SIZE;
+#endif
+
+#ifdef ADD_NUTTX_FEATURES
+    pthread_attr_t attr = PTHREAD_ATTR_INITIALIZER;
+    attr.priority = LWIP_mqtt_DEMO_TASK_PRIO;
+    attr.stacksize = LWIP_mqtt_DEMO_TASK_STACK_SIZE;
+#endif
+
+    PrivTaskCreate(&mqtt_client_task, &attr, &MqttSocketSendTask, NULL);
+    PrivTaskStartup(&mqtt_client_task);
+}
+
+PRIV_SHELL_CMD_FUNCTION(MqttSocketSendTest, a tcp send sample, PRIV_SHELL_CMD_MAIN_ATTR);
 
