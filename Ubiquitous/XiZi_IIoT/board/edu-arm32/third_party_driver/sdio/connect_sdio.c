@@ -281,6 +281,7 @@ static void SdCardTask(void* parameter)
                 sd_card_status = 0;
             }
         }
+        MdelayKTask(500);
     }
 }
 
