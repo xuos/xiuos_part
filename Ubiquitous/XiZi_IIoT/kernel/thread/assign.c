@@ -39,28 +39,27 @@ static struct PriorityReadyVectorDone SingleReadyVectorDone =
  */
 void KTaskOsAssign(void)
 {
-    
     x_ubase highest_prio = 0;
     int need_insert_from_task = 0;
     struct TaskDescriptor *new_task = NONE;
     struct TaskDescriptor *from_task = NONE;
 
     if(GetOsAssignLockLevel() >= 1) {
-        return;
+        goto exit;
     }
 
     if( isrManager.done->isInIsr() ){
         isrManager.done->setSwitchTrigerFlag();
-        return;
+        goto exit;
     }
 
     /* if the bitmap is empty then do not switch */
-    if(RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_read_vector)) {
-        return;
+    if (RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_ready_vector)) {
+        goto exit;
     }
 
-    highest_prio = Assign.os_assign_read_vector.highest_prio;
-    new_task = ChooseTaskWithHighestPrio(&Assign.os_assign_read_vector);
+    highest_prio = Assign.os_assign_ready_vector.highest_prio;
+    new_task = ChooseTaskWithHighestPrio(&Assign.os_assign_ready_vector);
 
     if(RET_TRUE != JudgeKTaskStatIsRunning(Assign.os_running_task)) {
         CHECK(NONE != new_task);
@@ -69,7 +68,7 @@ void KTaskOsAssign(void)
 
     /* if the running task’ priority is the highest and this task is not be yield then do not switch */
     if(highest_prio < Assign.os_running_task->task_dync_sched_member.cur_prio) {
-        return;
+        goto exit;
     } else {
         need_insert_from_task = 1;
     }
@@ -90,12 +89,12 @@ SWITCH:
         Assign.os_running_task = new_task;
 
         SYS_KDEBUG_LOG(KDBG_SCHED,
-                ("[%d]switch to priority#%d "
-                    "task:%.*s(sp:0x%08x), "
-                    "from task:%.*s(sp: 0x%08x)\n",
-                    isrManager.done->getCounter(), highest_prio,
-                    NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
-                    NAME_NUM_MAX, from_task->task_base_info.name, from_task->stack_point));
+            ("[%d]switch to priority#%d "
+             "task:%.*s(sp:0x%08x), "
+             "from task:%.*s(sp: 0x%08x)\n",
+                isrManager.done->getCounter(), highest_prio,
+                NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
+                NAME_NUM_MAX, from_task->task_base_info.name, from_task->stack_point));
 
 #ifdef KERNEL_STACK_OVERFLOW_CHECK
         _KTaskOsAssignStackCheck(new_task);
@@ -108,6 +107,8 @@ SWITCH:
         Assign.ready_vector_done->remove(Assign.os_running_task);
         KTaskStatSetAsRunning(Assign.os_running_task);
     }
+
+exit:
     return;
 }
 
@@ -129,12 +130,12 @@ void KTaskOsAssignDoIrqSwitch(void *context)
     
     isrManager.done->clearSwitchTrigerFlag();
     /* if the bitmap is empty then do not switch */
-    if(RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_read_vector)) {
+    if (RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_ready_vector)) {
         return;
     }
 
-    highest_prio = Assign.os_assign_read_vector.highest_prio;
-    new_task = ChooseTaskWithHighestPrio(&Assign.os_assign_read_vector);
+    highest_prio = Assign.os_assign_ready_vector.highest_prio;
+    new_task = ChooseTaskWithHighestPrio(&Assign.os_assign_ready_vector);
 
     if(RET_TRUE != JudgeKTaskStatIsRunning(Assign.os_running_task)) {
         CHECK(NONE != new_task);
@@ -165,17 +166,17 @@ SWITCH:
         Assign.os_running_task = new_task;
 
         SYS_KDEBUG_LOG(KDBG_SCHED,
-                ("[%d]switch to priority#%d "
-                    "task:%.*s(sp:0x%08x), "
-                    "from task:%.*s(sp: 0x%08x)\n",
-                    isrManager.done->getCounter(), highest_prio,
-                    NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
-                    NAME_NUM_MAX, from_task->task_base_info.name, from_task->stack_point));
+            ("[%s][%d]switch to priority#%d "
+             "task:%.*s(sp:0x%08x), "
+             "from task:%.*s(sp: 0x%08x)\n",
+                __func__,
+                isrManager.done->getCounter(), highest_prio,
+                NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
+                NAME_NUM_MAX, from_task->task_base_info.name, from_task->stack_point));
 
 #ifdef KERNEL_STACK_OVERFLOW_CHECK
         _KTaskOsAssignStackCheck(new_task);
 #endif
-
 
         SYS_KDEBUG_LOG(KDBG_SCHED, ("switch in interrupt\n"));
         HwInterruptcontextSwitch((x_ubase)&from_task->stack_point,
@@ -189,8 +190,8 @@ SWITCH:
 
 void KTaskOsAssignAfterIrq(void *context)
 {
-    x_base lock = 0;                                 
-    lock = DISABLE_INTERRUPT();                  
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
     KTaskOsAssignDoIrqSwitch(context);
     ENABLE_INTERRUPT(lock);
 }
@@ -204,20 +205,20 @@ void KTaskInsertToReadyVector(struct TaskDescriptor *task)
 {
     x_base lock = 0;
 
-	NULL_PARAM_CHECK(task);
+    NULL_PARAM_CHECK(task);
 
     lock = DISABLE_INTERRUPT();
 
     KTaskStatSetAsReady(task);
-	AssignPolicyInsert(task, &Assign.os_assign_read_vector);
+    AssignPolicyInsert(task, &Assign.os_assign_ready_vector);
 
     SYS_KDEBUG_LOG(KDBG_SCHED, ("insert task[%.*s], the priority: %d\n",
                                       NAME_NUM_MAX, task->task_base_info.name, task->task_dync_sched_member.cur_prio));
 
 #if KTASK_PRIORITY_MAX > 32
-    MERGE_FLAG(&Assign.os_assign_read_vector.ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
+    MERGE_FLAG(&Assign.os_assign_ready_vector.ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
 #endif
-    MERGE_FLAG(&Assign.os_assign_read_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
+    MERGE_FLAG(&Assign.os_assign_ready_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
 
     ENABLE_INTERRUPT(lock);
 }
@@ -234,29 +235,28 @@ void KTaskOsAssignRemoveKTask(struct TaskDescriptor *task)
     x_ubase number = 0;
     x_ubase highest_priority = 0;
 
-	NULL_PARAM_CHECK(task);
+    NULL_PARAM_CHECK(task);
+    ;
 
     lock = DISABLE_INTERRUPT();
 
-    SYS_KDEBUG_LOG(KDBG_SCHED, ("remove task[%.*s], the priority: %d\n",
-                                      NAME_NUM_MAX, task->task_base_info.name,
-                                      task->task_dync_sched_member.cur_prio));
+    SYS_KDEBUG_LOG(KDBG_SCHED, ("remove task[%.*s], the priority: %d\n", NAME_NUM_MAX, task->task_base_info.name, task->task_dync_sched_member.cur_prio));
 
     DoubleLinkListRmNode(&(task->task_dync_sched_member.sched_link));
-    
-    if (IsDoubleLinkListEmpty(&(Assign.os_assign_read_vector.priority_ready_vector[task->task_dync_sched_member.cur_prio]))) {
+
+    if (IsDoubleLinkListEmpty(&(Assign.os_assign_ready_vector.priority_ready_vector[task->task_dync_sched_member.cur_prio]))) {
 #if KTASK_PRIORITY_MAX > 32
-        CLEAR_FLAG(&Assign.os_assign_read_vector.ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
-        if (Assign.os_assign_read_vector.ready_vector[task->task_dync_sched_member.bitmap_offset] == 0) {
-            CLEAR_FLAG(&Assign.os_assign_read_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
+        CLEAR_FLAG(&Assign.os_assign_ready_vector.ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
+        if (Assign.os_assign_ready_vector.ready_vector[task->task_dync_sched_member.bitmap_offset] == 0) {
+            CLEAR_FLAG(&Assign.os_assign_ready_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
         }
-        number = PrioCaculate(Assign.os_assign_read_vector.priority_ready_group);
-        highest_priority = (number * 8) + PrioCaculate(Assign.os_assign_read_vector.ready_vector[number]);
+        number = PrioCaculate(Assign.os_assign_ready_vector.priority_ready_group);
+        highest_priority = (number * 8) + PrioCaculate(Assign.os_assign_ready_vector.ready_vector[number]);
 #else
-        CLEAR_FLAG(&Assign.os_assign_read_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
-        highest_priority = PrioCaculate(Assign.os_assign_read_vector.priority_ready_group);
+        CLEAR_FLAG(&Assign.os_assign_ready_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
+        highest_priority = PrioCaculate(Assign.os_assign_ready_vector.priority_ready_group);
 #endif
-        Assign.os_assign_read_vector.highest_prio = highest_priority;
+        Assign.os_assign_ready_vector.highest_prio = highest_priority;
     }
 
     ENABLE_INTERRUPT(lock);
@@ -305,13 +305,13 @@ x_err_t YieldOsAssign(void)
     }
 
     /* if the bitmap is empty then do not switch */
-    if(RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_read_vector)) {
+    if (RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_ready_vector)) {
         ENABLE_INTERRUPT(lock);
         return -ERROR;
     }
 
-    highest_prio = Assign.os_assign_read_vector.highest_prio;
-    new_task = ChooseTaskWithHighestPrio(&Assign.os_assign_read_vector);
+    highest_prio = Assign.os_assign_ready_vector.highest_prio;
+    new_task = ChooseTaskWithHighestPrio(&Assign.os_assign_ready_vector);
 
     from_task = Assign.os_running_task;
     
@@ -331,12 +331,13 @@ x_err_t YieldOsAssign(void)
         Assign.os_running_task = new_task;
 
         SYS_KDEBUG_LOG(KDBG_SCHED,
-                ("[%d]switch to priority#%d "
-                    "task:%.*s(sp:0x%08x), "
-                    "from task:%.*s(sp: 0x%08x)\n",
-                    isrManager.done->getCounter(), highest_prio,
-                    NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
-                    NAME_NUM_MAX, from_task->task_base_info.name, from_task->stack_point));
+            ("[%s][%d]switch to priority#%d "
+             "task:%.*s(sp:0x%08x), "
+             "from task:%.*s(sp: 0x%08x)\n",
+                __func__,
+                isrManager.done->getCounter(), highest_prio,
+                NAME_NUM_MAX, new_task->task_base_info.name, new_task->stack_point,
+                NAME_NUM_MAX, from_task->task_base_info.name, from_task->stack_point));
 
 #ifdef KERNEL_STACK_OVERFLOW_CHECK
         _KTaskOsAssignStackCheck(new_task);
@@ -368,7 +369,7 @@ void StartupOsAssign(void)
 {
     struct TaskDescriptor *FirstRunningTask = NONE;
 
-    FirstRunningTask = ChooseTaskWithHighestPrio(&Assign.os_assign_read_vector);
+    FirstRunningTask = ChooseTaskWithHighestPrio(&Assign.os_assign_ready_vector);
 
     SetSystemRunningTask(FirstRunningTask);
     SwitchToFirstRunningTask(FirstRunningTask);
@@ -384,7 +385,7 @@ void SysInitOsAssign(void)
                                       KTASK_PRIORITY_MAX));
 
     Assign.ready_vector_done = &SingleReadyVectorDone;
-    Assign.ready_vector_done->init(&Assign.os_assign_read_vector);
+    Assign.ready_vector_done->init(&Assign.os_assign_ready_vector);
 
     ResetCriticalAreaLock();
 }
