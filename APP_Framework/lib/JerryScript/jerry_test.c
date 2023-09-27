@@ -46,7 +46,7 @@ bool js_parse_test1(void* parameter)
 
         /* Returned value must be freed */
         jerry_release_value (ret_value);
-        printf("jerry_run ret=%d\n", ret_value);
+        printf("jerry_run ret=%ld\n", ret_value);
     }
 
     /* Parsed source code must be freed */
