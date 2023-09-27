@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) 2022 AIIT XUOS Lab
+ * XiUOS is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *        http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
+
+/**
+ * @file transport.c
+ * @brief mqtt transport function
+ * @version 3.0
+ * @author AIIT XUOS Lab
+ * @date 2023.8.10
+ */
+
 #include "transport.h"
 #include "lwip/opt.h"
 #include "lwip/arch.h"
@@ -8,13 +28,7 @@
 
 static int mysock;
 
-/************************************************************************
-** ��������: transport_sendPacketBuffer									
-** ��������: ��TCP��ʽ��������
-** ��ڲ���: unsigned char* buf�����ݻ�����
-**           int buflen�����ݳ���
-** ���ڲ���: <0��������ʧ��							
-************************************************************************/
+
 int32_t transport_sendPacketBuffer( uint8_t* buf, int32_t buflen)
 {
 	int32_t rc;
@@ -22,13 +36,7 @@ int32_t transport_sendPacketBuffer( uint8_t* buf, int32_t buflen)
 	return rc;
 }
 
-/************************************************************************
-** ��������: transport_getdata									
-** ��������: �������ķ�ʽ����TCP����
-** ��ڲ���: unsigned char* buf�����ݻ�����
-**           int count�����ݳ���
-** ���ڲ���: <=0��������ʧ��									
-************************************************************************/
+
 int transport_getdata(unsigned char* buf, int count)
 {
 	int32_t rc;
@@ -39,57 +47,6 @@ int transport_getdata(unsigned char* buf, int count)
 }
 
 
-
-/************************************************************************
-** ��������: transport_open									
-** ��������: ��һ���ӿڣ����Һͷ����� ��������
-** ��ڲ���: char* servip:����������
-**           int   port:�˿ں�
-** ���ڲ���: <0������ʧ��										
-************************************************************************/
-// int32_t transport_open(int8_t* servip, int32_t port)
-// {
-// 	int32_t *sock = &mysock;
-// 	int32_t ret;
-// //	int32_t opt;
-// 	struct sockaddr_in addr;
-	
-// 	//��ʼ����������Ϣ
-// 	memset(&addr,0,sizeof(addr));
-// 	addr.sin_len = sizeof(addr);
-// 	addr.sin_family = AF_INET;
-// 	//��д�������˿ں�
-// 	addr.sin_port = PP_HTONS(port);
-// 	//��д������IP��ַ
-// 	addr.sin_addr.s_addr = inet_addr((const char*)servip);
-	
-// 	//����SOCK
-// 	*sock = socket(AF_INET,SOCK_STREAM,0);
-// 	//���ӷ����� 
-// 	ret = connect(*sock,(struct sockaddr*)&addr,sizeof(addr));
-// 	if(ret != 0)
-// 	{
-// 		 //�ر�����
-// 		 close(*sock);
-// 		 //����ʧ��
-// 		 return -1;
-// 	}
-// 	//���ӳɹ�,���ó�ʱʱ��1000ms
-// //	opt = 1000;
-// //	setsockopt(*sock,SOL_SOCKET,SO_RCVTIMEO,&opt,sizeof(int));
-	
-// 	//�����׽���
-// 	return *sock;
-// }
-
-
-/************************************************************************
-** ��������: transport_close									
-** ��������: �ر��׽���
-** ��ڲ���: unsigned char* buf�����ݻ�����
-**           int buflen�����ݳ���
-** ���ڲ���: <0��������ʧ��							
-************************************************************************/
 int32_t transport_close(void)
 {
   
