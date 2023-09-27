@@ -7,7 +7,7 @@
 
 /**
 * @file board.h
-* @brief define imxrt1052-board init configure and start-up function
+* @brief definecortex-m7-emulator init configure and start-up function
 * @version 1.0
 * @author AIIT XUOS Lab
 * @date 2021-05-28
@@ -15,10 +15,10 @@
 
 /*************************************************
 File name: board.h
-Description: define imxrt1052-board board init function and struct
+Description: define cortex-m7-emulator init function and struct
 Others:
 History:
-1. Date: 2021-05-28
+1. Date: 2023-09-27
 Author: AIIT XUOS Lab
 Modification:
 1. define imxrt-board InitBoardHardware

@@ -1,29 +1,46 @@
-/*
- * Copyright 2018 NXP
- * All rights reserved.
+/* -----------------------------------------------------------------------------
+ * Copyright (c) 2016 - 2017 ARM Ltd.
+ *
+ * This software is provided 'as-is', without any express or implied warranty.
+ * In no event will the authors be held liable for any damages arising from
+ * the use of this software. Permission is granted to anyone to use this
+ * software for any purpose, including commercial applications, and to alter
+ * it and redistribute it freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software in
+ *    a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ *
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ *
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  *
- * SPDX-License-Identifier: BSD-3-Clause
- */
+ * $Date:        26. October 2017
+ * $Revision:    V1.0.3
+ *
+ * -------------------------------------------------------------------------- */
 
 /**
 * @file connect_uart.c
-* @brief support imxrt1052-board uart function and register to bus framework
-* @version 1.0 
+* @brief support cortex-m7-emulator uart function and register to bus framework
+* @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-05-28
+* @date 2023-09-27
 */
 
 /*************************************************
 File name: connect_uart.c
-Description: support imxrt1052-board uart configure and uart bus register function
-Others: take SDK_2.6.1_MIMXRT1052xxxxB/components/uart/lpuart_adapter.c for references
-History: 
-1. Date: 2021-05-28
+Description: support cortex-m7-emulator uart function and register to bus framework
+Others: take Arm\Packs\Keil\V2M-MPS2_CMx_BSP\1.8.0\CMSIS\Driver\USART_V2M-MPS2.c for references
+History:
+1. Date: 2023-09-27
 Author: AIIT XUOS Lab
-Modification: 
-1. support imxrt1052-board uart configure, write and read
-2. support imxrt1052-board uart bus device and driver register
+Modification:
+1. support cortex-m7-emulator uart configure, write and read
+2. support  cortex-m7-emulator uart bus device and driver register
 *************************************************/
 
 #include <board.h>
@@ -45,7 +62,7 @@ static const ARM_DRIVER_VERSION usart_driver_version = { ARM_USART_API_VERSION, 
 
 
 // USART0
-#if (defined (RTE_USART0) && (RTE_USART0 != 0))
+#ifdef BSP_USING_LPUART1
 
 // USART0 Run-Time Information
 static USART_INFO          USART0_Info         = { 0U, { 0U, 0U, 0U }, 0U };
@@ -93,146 +110,7 @@ static const USART_RESOURCES USART0_Resources = {
 
 #endif
 
-// USART1
-#if (defined (RTE_USART1) && (RTE_USART1 != 0))
 
-// USART1 Run-Time Information
-static USART_INFO          USART1_Info         = { 0U, { 0U, 0U, 0U }, 0U };
-static USART_TRANSFER_INFO USART1_TransferInfo = { 0U, 0U, 0U, 0U, 0U, 0U };
-static PIN                 USART1_pin_rx       = { CMSDK_GPIO1, 7U };
-static PIN                 USART1_pin_tx       = { CMSDK_GPIO1, 8U };
-
-// USART1 Resources
-static const USART_RESOURCES USART1_Resources = {
-  {     // Capabilities
-    1,  // supports UART (Asynchronous) mode
-    0,  // supports Synchronous Master mode
-    0,  // supports Synchronous Slave mode
-    0,  // supports UART Single-wire mode
-    0,  // supports UART IrDA mode
-    0,  // supports UART Smart Card mode
-    0,  // Smart Card Clock generator
-    0,  // RTS Flow Control available
-    0,  // CTS Flow Control available
-    1,  // Transmit completed event: \ref ARM_USART_EVENT_TX_COMPLETE
-    1,  // Signal receive character timeout event: \ref ARM_USART_EVENT_RX_TIMEOUT
-    0,  // RTS Line: 0=not available, 1=available
-    0,  // CTS Line: 0=not available, 1=available
-    0,  // DTR Line: 0=not available, 1=available
-    0,  // DSR Line: 0=not available, 1=available
-    0,  // DCD Line: 0=not available, 1=available
-    0,  // RI Line: 0=not available, 1=available
-    0,  // Signal CTS change event: \ref ARM_USART_EVENT_CTS
-    0,  // Signal DSR change event: \ref ARM_USART_EVENT_DSR
-    0,  // Signal DCD change event: \ref ARM_USART_EVENT_DCD
-    0,  // Signal RI change event: \ref ARM_USART_EVENT_RI
-    0   // Reserved (must be zero)
-  },
-  {
-    &USART1_pin_rx,
-    &USART1_pin_tx
-  },
-  CMSDK_UART1,
-  UART1RX_IRQn,
-  UART1TX_IRQn,
-  &USART1_Info,
-  &USART1_TransferInfo
-};
-#endif
-
-// USART2
-#if (defined (RTE_USART2) && (RTE_USART2 != 0))
-
-// USART2 Run-Time Information
-static USART_INFO          USART2_Info         = { 0U, { 0U, 0U, 0U }, 0U };
-static USART_TRANSFER_INFO USART2_TransferInfo = { 0U, 0U, 0U, 0U, 0U, 0U };
-static PIN                 USART2_pin_rx       = { CMSDK_GPIO1, 0U };
-static PIN                 USART2_pin_tx       = { CMSDK_GPIO1, 1U };
-
-// USART2 Resources
-static const USART_RESOURCES USART2_Resources = {
-  {     // Capabilities
-    1,  // supports UART (Asynchronous) mode
-    0,  // supports Synchronous Master mode
-    0,  // supports Synchronous Slave mode
-    0,  // supports UART Single-wire mode
-    0,  // supports UART IrDA mode
-    0,  // supports UART Smart Card mode
-    0,  // Smart Card Clock generator
-    0,  // RTS Flow Control available
-    0,  // CTS Flow Control available
-    1,  // Transmit completed event: \ref ARM_USART_EVENT_TX_COMPLETE
-    1,  // Signal receive character timeout event: \ref ARM_USART_EVENT_RX_TIMEOUT
-    0,  // RTS Line: 0=not available, 1=available
-    0,  // CTS Line: 0=not available, 1=available
-    0,  // DTR Line: 0=not available, 1=available
-    0,  // DSR Line: 0=not available, 1=available
-    0,  // DCD Line: 0=not available, 1=available
-    0,  // RI Line: 0=not available, 1=available
-    0,  // Signal CTS change event: \ref ARM_USART_EVENT_CTS
-    0,  // Signal DSR change event: \ref ARM_USART_EVENT_DSR
-    0,  // Signal DCD change event: \ref ARM_USART_EVENT_DCD
-    0,  // Signal RI change event: \ref ARM_USART_EVENT_RI
-    0   // Reserved (must be zero)
-  },
-  {
-    &USART2_pin_rx,
-    &USART2_pin_tx
-  },
-  CMSDK_UART2,
-  UART2RX_IRQn,
-  UART2TX_IRQn,
-  &USART2_Info,
-  &USART2_TransferInfo
-};
-#endif
-
-// USART3
-#if (defined (RTE_USART3) && (RTE_USART3 != 0))
-
-// USART3 Run-Time Information
-static USART_INFO          USART3_Info         = { 0U, { 0U, 0U, 0U }, 0U };
-static USART_TRANSFER_INFO USART3_TransferInfo = { 0U, 0U, 0U, 0U, 0U, 0U };
-static PIN                 USART3_pin_rx       = { CMSDK_GPIO0, 0U };
-static PIN                 USART3_pin_tx       = { CMSDK_GPIO0, 4U };
-
-// USART3 Resources
-static const USART_RESOURCES USART3_Resources = {
-  {     // Capabilities
-    1,  // supports UART (Asynchronous) mode
-    0,  // supports Synchronous Master mode
-    0,  // supports Synchronous Slave mode
-    0,  // supports UART Single-wire mode
-    0,  // supports UART IrDA mode
-    0,  // supports UART Smart Card mode
-    0,  // Smart Card Clock generator
-    0,  // RTS Flow Control available
-    0,  // CTS Flow Control available
-    1,  // Transmit completed event: \ref ARM_USART_EVENT_TX_COMPLETE
-    1,  // Signal receive character timeout event: \ref ARM_USART_EVENT_RX_TIMEOUT
-    0,  // RTS Line: 0=not available, 1=available
-    0,  // CTS Line: 0=not available, 1=available
-    0,  // DTR Line: 0=not available, 1=available
-    0,  // DSR Line: 0=not available, 1=available
-    0,  // DCD Line: 0=not available, 1=available
-    0,  // RI Line: 0=not available, 1=available
-    0,  // Signal CTS change event: \ref ARM_USART_EVENT_CTS
-    0,  // Signal DSR change event: \ref ARM_USART_EVENT_DSR
-    0,  // Signal DCD change event: \ref ARM_USART_EVENT_DCD
-    0,  // Signal RI change event: \ref ARM_USART_EVENT_RI
-    0   // Reserved (must be zero)
-  },
-  {
-    &USART3_pin_rx,
-    &USART3_pin_tx
-  },
-  CMSDK_UART3,
-  UART3RX_IRQn,
-  UART3TX_IRQn,
-  &USART3_Info,
-  &USART3_TransferInfo
-};
-#endif
 
 
 // USART Driver functions
@@ -430,32 +308,6 @@ static int32_t USART_Receive (      void            *data,
         usart->reg->STATE=0;
     }
     
-//   if ((usart->info->flags & USART_FLAG_CONFIGURED) == 0U) {
-//     // USART is not configured (mode not selected)
-//     return ARM_DRIVER_ERROR;
-//   }
-
-// //   Check if receiver is busy
-//   if ((usart->info->status.rx_busy != 0U) ||
-//      ((usart->reg->STATE & CMSDK_UART_STATE_RXBF_Msk) != 0U)) {
-//     return ARM_DRIVER_ERROR_BUSY;
-//   }
-
-//   // Save number of data to be received
-//   usart->xfer->rx_num = num;
-
-//   // Clear RX status
-//   usart->info->status.rx_overflow = 0U;
-
-//   // Save receive buffer info
-//   usart->xfer->rx_buf = (uint8_t *)data;
-//   usart->xfer->rx_cnt =  0U;
-
-//   // Set RX busy flag
-//   usart->info->status.rx_busy = 1U;
-
-//   // RX interrupt enable
-//   usart->reg->CTRL |= CMSDK_UART_CTRL_RXIRQEN_Msk;
 
   return ch;
 }
@@ -667,23 +519,11 @@ static ARM_USART_MODEM_STATUS USART_GetModemStatus (const USART_RESOURCES *usart
 
 
 static void UartIsr(struct SerialBus *serial, struct SerialDriver *serial_drv, struct SerialHardwareDevice *serial_dev);
+
 #ifdef BSP_USING_LPUART1
 struct SerialBus serial_bus_1;
 struct SerialDriver serial_driver_1;
 struct SerialHardwareDevice serial_device_1;
-
-// void LPUART1_IRQHandler(int irqn, void *arg)
-// {
-
-//     DisableIRQ(UART1_IRQn);
-
-//     UartIsr(&serial_bus_1, &serial_driver_1, &serial_device_1);
-//     // UART0TX_Handler();
-//     EnableIRQ(UART1_IRQn);
-
-// }
-// DECLARE_HW_IRQ(UART0TX_IRQn, UART0TX_Handler, NONE);
-// DECLARE_HW_IRQ(UART0RX_IRQn, UART0RX_Handler, NONE);
 #endif
 
 
@@ -695,10 +535,9 @@ struct SerialHardwareDevice serial_device_1;
 */
 static void USARTRX_IRQHandler (USART_RESOURCES *usart) {
   uint32_t status;
-// //   KPrintf("RX Handler\n");
+
   status = usart->reg->INTSTATUS;
-//   if (usart->xfer->rx_buf != NULL)
-//     usart->xfer->rx_buf[usart->xfer->rx_cnt++] = (uint8_t)usart->reg->DATA;
+
  usart->xfer->rx_num = 0U;
   usart->info->status.rx_busy = 0U;
   usart->reg->CTRL &= ~CMSDK_UART_CTRL_RXIRQEN_Msk;
@@ -793,132 +632,7 @@ extern ARM_DRIVER_USART Driver_USART0;
 };
 #endif
 
-#ifdef BSP_USING_LPUART2
-// USART1 Driver Wrapper functions
-       void                    UART1RX_Handler        (void);
-       void                    UART1TX_Handler        (void);
-static ARM_USART_CAPABILITIES  USART1_GetCapabilities (void)                                                { return USART_GetCapabilities (&USART1_Resources); }
-static int32_t                 USART1_Initialize      (ARM_USART_SignalEvent_t cb_event)                    { return USART_Initialize (cb_event, &USART1_Resources); }
-static int32_t                 USART1_Uninitialize    (void)                                                { return USART_Uninitialize (&USART1_Resources); }
-static int32_t                 USART1_PowerControl    (ARM_POWER_STATE state)                               { return USART_PowerControl (state, &USART1_Resources); }
-static int32_t                 USART1_Send            (const void *data, uint32_t num)                      { return USART_Send (data, num, &USART1_Resources); }
-static int32_t                 USART1_Receive         (void *data, uint32_t num)                            { return USART_Receive (data, num, &USART1_Resources); }
-static int32_t                 USART1_Transfer        (const void *data_out, void *data_in, uint32_t num)   { return USART_Transfer (data_out, data_in, num, &USART1_Resources); }
-static uint32_t                USART1_GetTxCount      (void)                                                { return USART_GetTxCount (&USART1_Resources); }
-static uint32_t                USART1_GetRxCount      (void)                                                { return USART_GetRxCount (&USART1_Resources); }
-static int32_t                 USART1_Control         (uint32_t control, uint32_t arg)                      { return USART_Control (control, arg, &USART1_Resources); }
-static ARM_USART_STATUS        USART1_GetStatus       (void)                                                { return USART_GetStatus (&USART1_Resources); }
-static int32_t                 USART1_SetModemControl (ARM_USART_MODEM_CONTROL control)                     { return USART_SetModemControl (control, &USART1_Resources); }
-static ARM_USART_MODEM_STATUS  USART1_GetModemStatus  (void)                                                { return USART_GetModemStatus (&USART1_Resources); }
-       void                    UART1RX_Handler        (void)                                                {        USARTRX_IRQHandler (&USART1_Resources); }
-       void                    UART1TX_Handler        (void)                                                {        USARTTX_IRQHandler (&USART1_Resources); }
 
-// USART1 Driver Control Block
-extern ARM_DRIVER_USART Driver_USART1;
-       ARM_DRIVER_USART Driver_USART1 = {
-    USARTx_GetVersion,
-    USART1_GetCapabilities,
-    USART1_Initialize,
-    USART1_Uninitialize,
-    USART1_PowerControl,
-    USART1_Send,
-    USART1_Receive,
-    USART1_Transfer,
-    USART1_GetTxCount,
-    USART1_GetRxCount,
-    USART1_Control,
-    USART1_GetStatus,
-    USART1_SetModemControl,
-    USART1_GetModemStatus
-};
-#endif
-
-#ifdef BSP_USING_LPUART3
-// USART2 Driver Wrapper functions
-       void                    UART2RX_Handler        (void);
-       void                    UART2TX_Handler        (void);
-static ARM_USART_CAPABILITIES  USART2_GetCapabilities (void)                                                { return USART_GetCapabilities (&USART2_Resources); }
-static int32_t                 USART2_Initialize      (ARM_USART_SignalEvent_t cb_event)                    { return USART_Initialize (cb_event, &USART2_Resources); }
-static int32_t                 USART2_Uninitialize    (void)                                                { return USART_Uninitialize (&USART2_Resources); }
-static int32_t                 USART2_PowerControl    (ARM_POWER_STATE state)                               { return USART_PowerControl (state, &USART2_Resources); }
-static int32_t                 USART2_Send            (const void *data, uint32_t num)                      { return USART_Send (data, num, &USART2_Resources); }
-static int32_t                 USART2_Receive         (void *data, uint32_t num)                            { return USART_Receive (data, num, &USART2_Resources); }
-static int32_t                 USART2_Transfer        (const void *data_out, void *data_in, uint32_t num)   { return USART_Transfer (data_out, data_in, num, &USART2_Resources); }
-static uint32_t                USART2_GetTxCount      (void)                                                { return USART_GetTxCount (&USART2_Resources); }
-static uint32_t                USART2_GetRxCount      (void)                                                { return USART_GetRxCount (&USART2_Resources); }
-static int32_t                 USART2_Control         (uint32_t control, uint32_t arg)                      { return USART_Control (control, arg, &USART2_Resources); }
-static ARM_USART_STATUS        USART2_GetStatus       (void)                                                { return USART_GetStatus (&USART2_Resources); }
-static int32_t                 USART2_SetModemControl (ARM_USART_MODEM_CONTROL control)                     { return USART_SetModemControl (control, &USART2_Resources); }
-static ARM_USART_MODEM_STATUS  USART2_GetModemStatus  (void)                                                { return USART_GetModemStatus (&USART2_Resources); }
-       void                    UART2RX_Handler        (void)                                                {        USARTRX_IRQHandler (&USART2_Resources); }
-       void                    UART2TX_Handler        (void)                                                {        USARTTX_IRQHandler (&USART2_Resources); }
-
-// USART2 Driver Control Block
-extern ARM_DRIVER_USART Driver_USART2;
-       ARM_DRIVER_USART Driver_USART2 = {
-    USARTx_GetVersion,
-    USART2_GetCapabilities,
-    USART2_Initialize,
-    USART2_Uninitialize,
-    USART2_PowerControl,
-    USART2_Send,
-    USART2_Receive,
-    USART2_Transfer,
-    USART2_GetTxCount,
-    USART2_GetRxCount,
-    USART2_Control,
-    USART2_GetStatus,
-    USART2_SetModemControl,
-    USART2_GetModemStatus
-};
-#endif
-
-#ifdef BSP_USING_LPUART4
-// USART3 Driver Wrapper functions
-       void                    UART3RX_Handler        (void);
-       void                    UART3TX_Handler        (void);
-static ARM_USART_CAPABILITIES  USART3_GetCapabilities (void)                                                { return USART_GetCapabilities (&USART3_Resources); }
-static int32_t                 USART3_Initialize      (ARM_USART_SignalEvent_t cb_event)                    { return USART_Initialize (cb_event, &USART3_Resources); }
-static int32_t                 USART3_Uninitialize    (void)                                                { return USART_Uninitialize (&USART3_Resources); }
-static int32_t                 USART3_PowerControl    (ARM_POWER_STATE state)                               { return USART_PowerControl (state, &USART3_Resources); }
-static int32_t                 USART3_Send            (const void *data, uint32_t num)                      { return USART_Send (data, num, &USART3_Resources); }
-static int32_t                 USART3_Receive         (void *data, uint32_t num)                            { return USART_Receive (data, num, &USART3_Resources); }
-static int32_t                 USART3_Transfer        (const void *data_out, void *data_in, uint32_t num)   { return USART_Transfer (data_out, data_in, num, &USART3_Resources); }
-static uint32_t                USART3_GetTxCount      (void)                                                { return USART_GetTxCount (&USART3_Resources); }
-static uint32_t                USART3_GetRxCount      (void)                                                { return USART_GetRxCount (&USART3_Resources); }
-static int32_t                 USART3_Control         (uint32_t control, uint32_t arg)                      { return USART_Control (control, arg, &USART3_Resources); }
-static ARM_USART_STATUS        USART3_GetStatus       (void)                                                { return USART_GetStatus (&USART3_Resources); }
-static int32_t                 USART3_SetModemControl (ARM_USART_MODEM_CONTROL control)                     { return USART_SetModemControl (control, &USART3_Resources); }
-static ARM_USART_MODEM_STATUS  USART3_GetModemStatus  (void)                                                { return USART_GetModemStatus (&USART3_Resources); }
-       void                    UART3RX_Handler        (void)                                                {        USARTRX_IRQHandler (&USART3_Resources); }
-       void                    UART3TX_Handler        (void)                                                {        USARTTX_IRQHandler (&USART3_Resources); }
-
-// USART3 Driver Control Block
-extern ARM_DRIVER_USART Driver_USART3;
-       ARM_DRIVER_USART Driver_USART3 = {
-    USARTx_GetVersion,
-    USART3_GetCapabilities,
-    USART3_Initialize,
-    USART3_Uninitialize,
-    USART3_PowerControl,
-    USART3_Send,
-    USART3_Receive,
-    USART3_Transfer,
-    USART3_GetTxCount,
-    USART3_GetRxCount,
-    USART3_Control,
-    USART3_GetStatus,
-    USART3_SetModemControl,
-    USART3_GetModemStatus
-};
-#endif
-
-
-// extern int stdout_init (void);
-// extern int stdout_putchar (int ch);
-// extern int stdout_receivechar();
-// extern void UART0TX_Handler();
-// extern void UART0RX_Handler();
 
 
 #define _USART_Driver_(n)  Driver_USART##n

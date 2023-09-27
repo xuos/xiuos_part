@@ -15,7 +15,7 @@
 * @brief support cortex-m7-emulator-board init configure and start-up
 * @version 1.0 
 * @author fudan
-* @date 2021-08-26
+* @date 2023-09-27
 */
 
 /*************************************************
@@ -23,7 +23,7 @@ File name: board.c
 Description: support cortex-m7-emulator-board init configure and driver/task/... init
 Others: 
 History: 
-1. Date: 2021-04-25
+1. Date: 2023-09-27
 Author: AIIT XUOS Lab
 Modification: 
 1. support cortex-m7-emulator-board InitBoardHardware

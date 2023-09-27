@@ -32,16 +32,9 @@
 #include <string.h>
 #include "Driver_USART.h"
 #include "Device.h"
-#include "RTE_Device.h"
-#include "RTE_Components.h"
 
-#if (defined(RTE_Drivers_USART) \
-     && (RTE_USART0 == 0)       \
-     && (RTE_USART1 == 0)       \
-     && (RTE_USART2 == 0)       \
-     && (RTE_USART3 == 0))
-  #error "USART not configured in RTE_Device.h!"
-#endif
+
+
 
 // USART Flags
 #define USART_FLAG_INITIALIZED      ((uint8_t)(1U))
