@@ -11,8 +11,8 @@
  */
 
 /**
- * @file l2cc_pl310.c
- * @brief PLC inovance am401 app
+ * @file device.h
+ * @brief struct of imx6q devices
  * @version 3.0
  * @author AIIT XUOS Lab
  * @date 2023.8.10
