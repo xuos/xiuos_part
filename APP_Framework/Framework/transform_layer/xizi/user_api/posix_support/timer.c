@@ -78,7 +78,11 @@ int timer_create(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
     attr.schedparam.sched_priority = 22;
     attr.stacksize = 2048;
 
-    pthread_create(&timer_task, &attr, &timer_callback, (void *)evp);
+    pthread_args_t args;
+    args.pthread_name = timer_name;
+    args.arg = (void *)evp;
+
+    pthread_create(&timer_task, &attr, &timer_callback, (void *)&args);
     
     timer_id = UserTimerCreate(timer_name, NULL, (void *)&timer_sem, 1000, g_timer_func.timer_flags);
     *timerid = timer_id;
