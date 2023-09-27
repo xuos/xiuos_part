@@ -12,7 +12,7 @@
 
 /**
  * @file l2cc_pl310.c
- * @brief PLC inovance am401 app
+ * @brief the general management of L2 cache
  * @version 3.0
  * @author AIIT XUOS Lab
  * @date 2023.8.10
