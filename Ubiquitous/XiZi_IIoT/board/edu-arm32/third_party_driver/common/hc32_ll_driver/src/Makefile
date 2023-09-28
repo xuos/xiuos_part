@@ -9,7 +9,7 @@ ifeq ($(CONFIG_BSP_USING_ADC),y)
 endif
 
 ifeq ($(CONFIG_BSP_USING_DAC),y)
-  SRC_FILES += hc32_ll_dac.c
+  SRC_FILES += hc32_ll_dac.c hc32_ll_mau.c
 endif
 
 ifeq ($(CONFIG_BSP_USING_SDIO),y)

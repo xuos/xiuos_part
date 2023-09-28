@@ -180,7 +180,7 @@ int SerialRead(uint8_t *read_data, int length)
     int data_recv_size = 0;
 
     while (data_size < length) {
-        data_recv_size = PrivRead(uart_fd, read_data + data_recv_size, length);
+        data_recv_size = PrivRead(uart_fd, read_data + data_size, length - data_size);
         data_size += data_recv_size;
     }
 

@@ -1,23 +1,27 @@
 /**
-* @file:    test_radix_tree.c
-* @brief:   Implement a simple radix tree
-* @version: 1.0
-* @date:    2023/5/24
-*/
+ * @file:    test_radix_tree.c
+ * @brief:   Implement a simple radix tree
+ * @version: 1.0
+ * @date:    2023/5/24
+ */
 
-#include <transform.h>
 #include "test_radix_tree.h"
 
 /**
  * @description: Create a radix tree node
  * @return node pointer
  */
-node* CreateNode()
+radix_node *CreateNode()
 {
-    node* n = (node*)malloc(sizeof(node));
-    n->value = NULL;
-    for (int i = 0; i < NODE_SIZE; i++) {
-        n->next[i] = NULL;
+    radix_node *n = (radix_node *)malloc(sizeof(radix_node));
+    if (n != NULL)
+    {
+        n->parent = NULL;
+        n->value = NULL;
+        for (int i = 0; i < NODE_SIZE; ++i)
+        {
+            n->child[i] = NULL;
+        }
     }
     return n;
 }
@@ -29,21 +33,32 @@ node* CreateNode()
  * @param value - new node value
  * @return void
  */
-void InsertNode(node* root, const char* key, void* value)
+int InsertNode(radix_node *root, unsigned int key, void *value)
 {
-    if (root == NULL) {
-        return;
+    if (root == NULL)
+    {
+        return -1; // The root node is empty
     }
-    node* cur = root;
-    size_t len = strlen(key);
-    for (size_t i = 0; i < len; i++) {
-        uint8_t b = (uint8_t)key[i];
-        if (cur->next[b] == NULL) {
-            cur->next[b] = CreateNode();
+    radix_node *cur = root;
+    int temp;
+    for (int i = radix_tree_height - 1; i >= 0; --i)
+    {
+        temp = CHECK_BITS(key, i);
+        if (!cur->child[temp])
+        {
+            cur->child[temp] = CreateNode();
+            if (!cur->child[temp])
+                return -2; // Failed to apply for a node
+            cur->child[temp]->parent = cur;
         }
-        cur = cur->next[b];
+        cur = cur->child[temp];
     }
+    if (cur->value == value)
+        return -3; // Repeat insertion
+    if (cur->value != NULL)
+        return -4; // Already occupied
     cur->value = value;
+    return 0;
 }
 
 /**
@@ -52,38 +67,27 @@ void InsertNode(node* root, const char* key, void* value)
  * @param key - key which is needed to delete
  * @return void
  */
-void DeleteNode(node* root, const char* key)
+void DeleteNode(radix_node *root, unsigned int key)
 {
-    if (root == NULL) {
+    if (root == NULL)
+    {
         return;
     }
-    node** cur = &root;
-    size_t len = strlen(key);
-    for (size_t i = 0; i < len; i++) {
-        uint8_t b = (uint8_t)key[i];
-        if ((*cur)->next[b] == NULL) {
-            return;
-        }
-        cur = &((*cur)->next[b]);
-    }
-
-    if ((*cur)->value == NULL) {
-        return;
-    }
-
-    (*cur)->value = NULL;
-
-    int has_children = 0;
-    for (int i = 0; i < NODE_SIZE; i++) {
-        if ((*cur)->next[i] != NULL) {
-            has_children = 1;
+    radix_node *cur = root;
+    int temp;
+    for (int i = radix_tree_height - 1; i >= 0; --i)
+    {
+        temp = CHECK_BITS(key, i);
+        cur = cur->child[temp];
+        if (!cur)
             break;
-        }
     }
-    if (!has_children) {
-        free(*cur);
-        (*cur) = NULL;
-    }
+
+    if (!cur)
+        return;
+
+    cur->parent->child[temp] = NULL;
+    free(cur);
 }
 
 /**
@@ -92,20 +96,23 @@ void DeleteNode(node* root, const char* key)
  * @param key - key which is needed to find
  * @return value pointer corresponding to key
  */
-void* FindNode(node* root, const char* key)
+void *FindNode(radix_node *root, unsigned int key)
 {
-    if (root == NULL) {
+    if (root == NULL)
+    {
         return NULL;
     }
-    node* cur = root;
-    size_t len = strlen(key);
-    for (size_t i = 0; i < len; i++) {
-        uint8_t b = (uint8_t)key[i];
-        if (cur->next[b] == NULL) {
-            return NULL;
-        }
-        cur = cur->next[b];
+    radix_node *cur = root;
+    int temp;
+    for (int i = radix_tree_height - 1; i >= 0; --i)
+    {
+        temp = CHECK_BITS(key, i);
+        cur = cur->child[temp];
+        if (!cur)
+            break;
     }
+    if (!cur)
+        return NULL;
     return cur->value;
 }
 
@@ -114,73 +121,88 @@ void* FindNode(node* root, const char* key)
  * @param root - radix tree root
  * @return void
  */
-void DestroyTree(node* root)
+void DestroyTree(radix_node *root)
 {
-    if (root == NULL) {
+    if (root == NULL)
+    {
         return;
     }
-    for (int i = 0; i < NODE_SIZE; i++) {
-        DestroyTree(root->next[i]);
+    for (int i = 0; i < NODE_SIZE; i++)
+    {
+        DestroyTree(root->child[i]);
     }
     free(root);
 }
 
 void TestRadix()
 {
-    char keys[][MAX_WORD_LEN] = {
+    char values[][16] = {
         "what",
         "where",
         "why",
         "how",
         "hello!",
         "apple",
-        "12345"
-    };
-    int values[] = {1, 2, 3, 4, 5, 6, 7};
+        "12345"};
+    unsigned int keys[] = {1, 2, 3, 4, 5, 6, 7};
 
     printf("\nCreate tree and add key & value:\n");
-    node* root = CreateNode();
-    if (!root) printf("Create node failed.\n");
+    radix_node *root = CreateNode();
+    if (!root)
+        printf("Create node failed.\n");
 
     int num = sizeof(keys) / sizeof(keys[0]);
-    for (int i = 0; i < num - 1; ++i) {
+    for (int i = 0; i < num - 1; ++i)
+    {
         InsertNode(root, keys[i], &values[i]);
     }
 
-    for (int i = 0; i < num; ++i) {
-        int* v = (int*)FindNode(root, keys[i]);
-        if (v) printf("keys[%d] \"%s\"'v = %d, values[%d] = %d\n", i, keys[i], *v, i, values[i]);
-        else printf("keys[%d] \"%s\" not found\n", i, keys[i]);
+    for (int i = 0; i < num; ++i)
+    {
+        char *v = (char *)FindNode(root, keys[i]);
+        if (v)
+            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, v);
+        else
+            printf("keys[%d] %x not found\n", i, keys[i]);
     }
 
     printf("\nDelete \"where\" and \"how\":\n");
     DeleteNode(root, keys[1]);
     DeleteNode(root, keys[3]);
-    
-    for (int i = 0; i < num; ++i) {
-        int* v = (int*)FindNode(root, keys[i]);
-        if (v) printf("keys[%d] \"%s\"'v = %d, values[%d] = %d\n", i, keys[i], *v, i, values[i]);
-        else printf("keys[%d] \"%s\" not found\n", i, keys[i]);
+
+    for (int i = 0; i < num; ++i)
+    {
+        char *v = (char *)FindNode(root, keys[i]);
+        if (v)
+            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, v);
+        else
+            printf("keys[%d] %x not found\n", i, keys[i]);
     }
 
     printf("\nInsert \"where\" and \"12345\":\n");
     InsertNode(root, keys[1], &values[1]);
     InsertNode(root, keys[6], &values[6]);
 
-    for (int i = 0; i < num; ++i) {
-        int* v = (int*)FindNode(root, keys[i]);
-        if (v) printf("keys[%d] \"%s\"'v = %d, values[%d] = %d\n", i, keys[i], *v, i, values[i]);
-        else printf("keys[%d] \"%s\" not found\n", i, keys[i]);
+    for (int i = 0; i < num; ++i)
+    {
+        char *v = (char *)FindNode(root, keys[i]);
+        if (v)
+            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, v);
+        else
+            printf("keys[%d] %x not found\n", i, keys[i]);
     }
 
     printf("\nDestroy tree:\n");
     DestroyTree(root);
     root = NULL;
 
-    for (int i = 0; i < num; ++i) {
-        int* v = (int*)FindNode(root, keys[i]);
-        if (v) printf("keys[%d] \"%s\"'v = %d, values[%d] = %d\n", i, keys[i], *v, i, values[i]);
-        else printf("keys[%d] \"%s\" not found\n", i, keys[i]);
+    for (int i = 0; i < num; ++i)
+    {
+        char *v = (char *)FindNode(root, keys[i]);
+        if (v)
+            printf("keys[%d] %x, values[%d] = %s\n", i, keys[i], i, v);
+        else
+            printf("keys[%d] %x not found\n", i, keys[i]);
     }
 }
 

@@ -427,7 +427,7 @@ uint32_t PrivGetTickTime();
 
 /*********************driver*************************/
 
-int PrivOpen(const char *path, int flags);
+int PrivOpen(const char *path, int flags, ...);
 int PrivRead(int fd, void *buf, size_t len);
 int PrivWrite(int fd, const void *buf, size_t len);
 int PrivClose(int fd);

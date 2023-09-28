@@ -49,6 +49,10 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
         SRC_FILES += test_i2c.c
     endif
 
+    ifeq ($(CONFIG_USER_TEST_UART),y)
+        SRC_FILES += test_uart.c
+    endif
+
     ifeq ($(CONFIG_USER_TEST_GPIO),y)
         SRC_FILES += test_gpio.c
     endif
@@ -111,7 +115,15 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
 
     ifeq ($(CONFIG_USER_TEST_RBTREE),y)
         SRC_FILES += test_rbtree/test_rbtree.c
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_SOCKET),y)
+        SRC_FILES += test_socket.c
     endif    
+
+    ifeq ($(CONFIG_USER_TEST_MODBUS_TCP),y)
+        SRC_DIR += test_modbus_tcp
+    endif 
 
     ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
         SRC_FILES += test_webserver/test_webserver.c

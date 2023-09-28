@@ -20,56 +20,301 @@
 
 #include <connect_dac.h>
 
-#define _DAC_CONS(string1, string2) string1##string2
-#define DAC_CONS(string1, string2) _DAC_CONS(string1, string2)
+/*******************************************************************************
+ * Local pre-processor symbols/macros ('#define')
+ ******************************************************************************/
+#define DAC_UNIT1_PORT                               (GPIO_PORT_A)
+#define DAC_UNIT1_CHN1_PIN                           (GPIO_PIN_04)
 
-#ifdef BSP_USING_DAC
-#define DAC_GPIO      DAC_CONS(GPIO_Pin_, DAC_GPIO_NUM)
+#define VREFH                                        (3.3F)
+#define DAC_CHN1                                     (0U)
+#define DAC_CHN2                                     (1U)
+#define DAC_DATA_ALIGN_12b_R                         (0U)
+#define DAC_DATA_ALIGN_12b_L                         (1U)
+
+#define SUPPORT_AMP
+#define SUPPORT_ADP
+#define SINGLE_WAVE_DAC_CHN                          (DAC_CHN1)
+#define DAC_DATA_ALIGN                               (DAC_DATA_ALIGN_12b_L)
+
+#define SINE_DOT_NUMBER                              (4096U)
+#define SINE_NEGATIVE_TO_POSITVE                     (1.0F)
+
+/*******************************************************************************
+ * Local type definitions ('typedef')
+ ******************************************************************************/
+typedef enum {
+    DAC_Unit1,
+    DAC_Unit2,
+    DAC_Unit_Max,
+}en_dac_unit_t;
+
+typedef enum {
+    E_Dac_Single,
+    E_Dac_Dual,
+}en_dac_cvt_t;
+
+typedef struct {
+    CM_DAC_TypeDef *pUnit;
+    en_dac_cvt_t enCvtType;
+    uint16_t u16Ch;
+} stc_dac_handle_t;
+
+/*******************************************************************************
+ * Local variable definitions ('static')
+ ******************************************************************************/
+static stc_dac_handle_t m_stcDACHandle[DAC_Unit_Max] = {0};
+static uint32_t gu32SinTable[SINE_DOT_NUMBER];
+static stc_dac_handle_t *pSingleDac;
+
+/*******************************************************************************
+ * Function implementation - global ('extern') and local ('static')
+ ******************************************************************************/
+/**
+ * @brief   MAU Initialization
+ * @param   None
+ * @retval  None
+ */
+static void MauInit(void)
+{
+    /* Enable MAU peripheral clock. */
+    FCG_Fcg0PeriphClockCmd(PWC_FCG0_MAU, ENABLE);
+}
+
+/**
+ * @brief   MAU De-Initialization
+ * @param   None
+ * @retval  None
+ */
+static void MauDeinit(void)
+{
+    /* Enable MAU peripheral clock. */
+    FCG_Fcg0PeriphClockCmd(PWC_FCG0_MAU, DISABLE);
+}
+
+/**
+ * @brief    Sin table Initialization
+ * @param    [in] pSinTable  sin table
+ * @param    [in] u32count   number of pSinTable items
+ * @retval   None
+ */
+static void SinTableInit(uint32_t pSinTable[], uint32_t u32count)
+{
+    uint32_t i;
+    uint32_t u32AngAvg = (uint32_t)(float32_t)((float32_t)((float32_t)MAU_SIN_ANGIDX_TOTAL / (float32_t)u32count) + 0.5);
+    float32_t fSin;
+    for (i = 0U; i < u32count; i++) {
+        fSin = (((float32_t)MAU_Sin(CM_MAU, (uint16_t)(u32AngAvg * i))
+                 / (float32_t)MAU_SIN_Q15_SCALAR + SINE_NEGATIVE_TO_POSITVE) / VREFH) *
+               (float32_t)DAC_DATAREG_VALUE_MAX + 0.5F;
+
+#if (DAC_DATA_ALIGN == DAC_DATA_ALIGN_12b_L)
+        {
+            pSinTable[i] = (uint32_t)fSin << 4;
+        }
+#else
+        {
+            pSinTable[i] = (uint32_t)fSin;
+        }
 #endif
-			  
+    }
+}
+
+/**
+ * @brief    Enable DAC peripheral clock
+ * @param    [in] enUnit  The selected DAC unit
+ * @retval   None
+ */
+static void DacPClkEnable(en_dac_unit_t enUnit)
+{
+    uint32_t u32PClk;
+    switch (enUnit) {
+        case DAC_Unit1:
+            u32PClk = PWC_FCG3_DAC1;
+            break;
+        case DAC_Unit2:
+            u32PClk = PWC_FCG3_DAC2;
+            break;
+        default:
+            u32PClk = PWC_FCG3_DAC1 | PWC_FCG3_DAC2;
+            break;
+    }
+    /* Enable DAC peripheral clock. */
+    FCG_Fcg3PeriphClockCmd(u32PClk, ENABLE);
+}
+
+/**
+ * @brief    Init DAC single channel
+ * @param    [in] enUnit  The selected DAC unit
+ * @retval   A pointer of DAC handler
+ */
+static stc_dac_handle_t *DacSingleConversionInit(en_dac_unit_t enUnit)
+{
+    uint8_t u8Port;
+    uint16_t u16Pin;
+    stc_dac_handle_t *pDac;
+
+    if (enUnit == DAC_Unit1) {
+        pDac = &m_stcDACHandle[DAC_Unit1];
+        pDac->pUnit = CM_DAC1;
+    } else {
+        pDac = &m_stcDACHandle[DAC_Unit2];
+        pDac->pUnit = CM_DAC2;
+    }
+    DacPClkEnable(enUnit);
+
+    pDac->enCvtType = E_Dac_Single;
+#if (SINGLE_WAVE_DAC_CHN == DAC_CHN1)
+    pDac->u16Ch = DAC_CH1;
+#else
+    pDac->u16Ch = DAC_CH2;
+#endif
+
+    /* Init DAC by default value: source from data register and output enabled*/
+    DAC_DeInit(pDac->pUnit);
+    stc_dac_init_t stInit;
+    (void)DAC_StructInit(&stInit);
+    (void)DAC_Init(pDac->pUnit, pDac->u16Ch, &stInit);
+#if (DAC_DATA_ALIGN == DAC_DATA_ALIGN_12b_L)
+    DAC_DataRegAlignConfig(pDac->pUnit, DAC_DATA_ALIGN_L);
+#else
+    DAC_DataRegAlignConfig(pDac->pUnit, DAC_DATA_ALIGN_R);
+#endif
+
+    /* Set DAC pin attribute to analog */
+    if (enUnit == DAC_Unit1) {
+        u8Port = DAC_UNIT1_PORT;
+#if (SINGLE_WAVE_DAC_CHN == DAC_CHN1)
+        u16Pin = DAC_UNIT1_CHN1_PIN;
+#endif
+    }
+    stc_gpio_init_t stcGpioInit;
+    (void)GPIO_StructInit(&stcGpioInit);
+    stcGpioInit.u16PinAttr = PIN_ATTR_ANALOG;
+    (void)GPIO_Init(u8Port, u16Pin, &stcGpioInit);
+
+#ifdef SUPPORT_ADP
+    /* Set ADC first */
+    /* Enable ADC peripheral clock. */
+    FCG_Fcg3PeriphClockCmd(PWC_FCG3_ADC1 | PWC_FCG3_ADC2 | PWC_FCG3_ADC3, ENABLE);
+    if (CM_ADC1->STR == 0U) {
+        if (CM_ADC2->STR == 0U) {
+            if (CM_ADC3->STR == 0U) {
+                DAC_ADCPrioConfig(pDac->pUnit, DAC_ADP_SELECT_ALL, ENABLE);
+                DAC_ADCPrioCmd(pDac->pUnit, ENABLE);
+            }
+        }
+    }
+#endif
+    return pDac;
+}
+
+/**
+ * @brief    Start single DAC conversions
+ * @param    [in] pDac       A pointer of DAC handler
+ * @retval   None
+ */
+static void DacStartSingleConversion(const stc_dac_handle_t *pDac)
+{
+    /* Enalbe AMP */
+#ifdef SUPPORT_AMP
+    (void)DAC_AMPCmd(pDac->pUnit, pDac->u16Ch, ENABLE);
+#endif
+
+    (void)DAC_Start(pDac->pUnit, pDac->u16Ch);
+
+#ifdef SUPPORT_AMP
+    /* delay 3us before setting data*/
+    DDL_DelayMS(1U);
+#endif
+}
+
+/**
+ * @brief    Convert data by single DAC channel
+ * @param    [in] pDac       A pointer of DAC handler
+ * @param    [in] pDataTable The data table to be converted
+ * @param    [in] u32count   Number of data table items
+ * @retval   None
+ */
+__STATIC_INLINE void DacSetSingleConversionData(const stc_dac_handle_t *pDac, uint32_t const pDataTable[], uint32_t u32count)
+{
+    uint32_t i = 0U;
+
+    for (i = 0U; i < u32count; i++) {
+#ifdef SUPPORT_ADP
+        uint32_t u32TryCount = 100U;
+        while (u32TryCount != 0U) {
+            u32TryCount--;
+            if (SET != DAC_GetChConvertState(pDac->pUnit, pDac->u16Ch)) {
+                break;
+            }
+        }
+#endif
+        DAC_SetChData(pDac->pUnit, pDac->u16Ch, (uint16_t)pDataTable[i]);
+    }
+}
+
+/**
+ * @brief    stop DAC conversion
+ * @param    [in] pDac A pointer of DAC handler
+ * @retval   None
+ */
+static void DAC_StopConversion(const stc_dac_handle_t *pDac)
+{
+    if (NULL == pDac) {
+        DAC_DeInit(CM_DAC1);
+        DAC_DeInit(CM_DAC2);
+    } else if (pDac->enCvtType != E_Dac_Dual) {
+        (void)DAC_Stop(pDac->pUnit, pDac->u16Ch);
+    } else {
+        DAC_StopDualCh(pDac->pUnit);
+    }
+}
 
 static uint32 DacOpen(void *dev)
 {
     struct DacHardwareDevice *dac_dev = (struct DacHardwareDevice *)dev;
 
-    CM_DAC_TypeDef *DACx  = (CM_DAC_TypeDef *)dac_dev->private_data;
+    /* Init MAU for generating sine data*/
+    MauInit();
+    /* Init sine data table */
+    SinTableInit(gu32SinTable, SINE_DOT_NUMBER);
 
-    stc_dac_init_t pstcDacInit;
-
-    DAC_StructInit(&pstcDacInit);
-
-    DAC_Init(DACx,DAC_CH1,&pstcDacInit);
+    /* Init single DAC */
+    pSingleDac = DacSingleConversionInit(DAC_Unit1);
 
     return EOK;
 }
 
 static uint32 DacClose(void *dev)
 {
-
     struct DacHardwareDevice *dac_dev = (struct DacHardwareDevice *)dev;
-
     CM_DAC_TypeDef *DACx  = (CM_DAC_TypeDef *)dac_dev->private_data;
-
+    
+    DAC_StopConversion(pSingleDac);
+    
     DAC_DeInit(DACx);
 
+    MauDeinit();
+
+    memset(gu32SinTable, 0 , sizeof(gu32SinTable));
+    
     return EOK;
 }
 
-
-static uint32 DacRead(void *dev, struct BusBlockReadParam *read_param)
+static uint32 DacWrite(void *dev, struct BusBlockWriteParam *write_param)
 {
     struct DacHardwareDevice *dac_dev = (struct DacHardwareDevice *)dev;
+    struct HwDac *dac_cfg = (struct HwDac *)dac_dev->haldev.private_data;
 
-    CM_DAC_TypeDef *DACx  = (CM_DAC_TypeDef *)dac_dev->private_data;
+    for (int i = 0; i < dac_cfg->digital_data; i ++) {
+        DacStartSingleConversion(pSingleDac);
+        DacSetSingleConversionData(pSingleDac, &gu32SinTable[i], 1U);
+        if (i > SINE_DOT_NUMBER) {
+            i = 0;
+        }
+    }
 
-    uint16 dac_set_value = 0;
-
-    dac_set_value = DAC_GetChConvertState(DACx,DAC_CH1);
-
-   *(uint16 *)read_param->buffer = dac_set_value;
-   read_param->read_length = 2;
-
-   return read_param->read_length;
     return EOK;
 }
 
@@ -88,8 +333,6 @@ static uint32 DacDrvConfigure(void *drv, struct BusConfigureInfo *configure_info
     {
         case OPE_CFG:
             dac_cfg->digital_data = *(uint16 *)configure_info->private_data;
-            // DAC_SetChannel1Data(DAC_Align_12b_R, dac_cfg->digital_data);//12 bits、R-Align data format, digital data
-            DAC_SetChData(dac_cfg->DACx,DAC_CH1,dac_cfg->digital_data);
             break;
         default:
             break;
@@ -102,8 +345,8 @@ static const struct DacDevDone dev_done =
 {
     DacOpen,
     DacClose,
+    DacWrite,
     NONE,
-    DacRead,
 };
 
 int HwDacInit(void)

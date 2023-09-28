@@ -772,7 +772,8 @@ int stat(const char *path, struct stat *buf)
 
     ret = mp->fs->stat(mp, relpath, &vfs_statbuf);
     if (ret < 0) {
-        SYS_ERR("%s: stat file failed\n", __func__);
+        // stat() is absolutely fine to check if a file exists
+        // SYS_ERR("%s: stat file failed\n", __func__);
         goto err;
     }
 
@@ -790,7 +791,6 @@ err:
     free(abspath);
 
     if (ret < 0) {
-        KUpdateExstatus(ret);
         return -1;
     }
     return 0;
