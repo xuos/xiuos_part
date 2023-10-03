@@ -10,6 +10,7 @@
 - 支持信道冲突检测，检测上行通道是否占用。
 ## 2. 数据结构说明
 ### E220模块相关数据结构
+
 ```c
 enum LoraMode                        // E220工作模式，支持四种，配置模式与休眠模式一致
 {
@@ -54,7 +55,9 @@ enum LoraConfig                      // 支持IOCTL函数进行配置的配置�
     CONFIG_SHOW = 0X7                // 打印配置信息
 };
 ```
+
 ### 数据帧相关数据结构
+
 ```c
 enum FrameType      // 数据帧类型枚举
 {
@@ -79,7 +82,9 @@ struct LoraFrame                // 数据帧消息类型
     uint16 end_mark;            // 结束标志 0X5A5A
 };
 ```
+
 ### Lora节点相关数据结构
+
 ```c
 enum EndNodeState                     //节点状态
 {
@@ -103,7 +108,9 @@ struct EndNodeParam                   // 节点参数结构
     uint8 recv_time;                  // 接受下行消息的时间窗口长度，单位为秒
 };
 ```
+
 ### Lora网关相关数据结构
+
 ```c
 struct EndNodeInfo                    // 网关存储的客户端信息
 {
@@ -133,6 +140,7 @@ struct GatewayParam                                             // 网关参数
     uint16 node_count;                                          // 已链接客户端数量
 };
 ```
+
 ## 3. 测试程序说明
 - 编译烧录两个不同地址、信道的客户端和一个网关。
 - 分别打开客户端和网关并联网。
