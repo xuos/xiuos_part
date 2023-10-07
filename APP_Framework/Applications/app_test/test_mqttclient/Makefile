@@ -1,14 +1,5 @@
-SRC_FILES += test_mqttclient.c\
-			 MQTTPacket.c\
-			 MQTTConnectClient.c \
-		     MQTTConnectServer.c \
-			 MQTTDeserializePublish.c \
-			 MQTTFormat.c \
-			 MQTTSerializePublish.c \
-			 MQTTSubscribeClient.c \
-			 MQTTSubscribeServer.c \
-			 MQTTUnsubscribeClient.c \
-			 MQTTUnsubscribeServer.c \
-			 transport.c
+SRC_FILES += test_mqttclient.c
+			
 
+SRC_DIR += mqtt
 include $(KERNEL_ROOT)/compiler.mk

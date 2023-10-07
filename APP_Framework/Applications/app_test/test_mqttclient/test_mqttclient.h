@@ -39,13 +39,17 @@
 #define   USER_NAME     "test&iw3rn3pa11K"     //用户名
 #define   PASSWORD      "7b948d22fe46f0f63d1a403376d26e7cb298abc227d29e44311d7040307a71f8"  //秘钥
 
-// #define   CLIENT_ID     "hc123456789"         //随机的id
-// #define   USER_NAME     "xiuos"     //用户名
-// #define   PASSWORD      "xiuos"  //秘钥
+
 
 #define   TOPIC         "/iw3rn3pa11K/test/user/Test"      //订阅的主题
 
 #define   TEST_MESSAGE  "test_message"  //发送测试消息
+
+
+// #define   CLIENT_ID     "hc123456789"         //随机的id
+// #define   USER_NAME     "xiuos"     //用户名
+// #define   PASSWORD      "xiuos"  //秘钥
+
 
 enum QoS 
 { QOS0 = 0, 

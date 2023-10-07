@@ -27,9 +27,9 @@
 #include "lwip/sys.h"
 #include "lwip/api.h"
 
-#include "MQTTPacket.h"
-#include "MQTTSubscribe.h"
-#include "transport.h"
+#include "mqtt/MQTTPacket.h"
+#include "mqtt/MQTTSubscribe.h"
+#include "mqtt/transport.h"
 #include <cJSON_Process.h>
 
 #endif
