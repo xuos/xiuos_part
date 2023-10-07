@@ -886,7 +886,7 @@ static void mqttCloudInteraction(void* parameter)
     ota_info_t ota_info;
     uint32_t heart_time = 0;
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
-    uint8_t topicdatabuff[2][32];
+    uint8_t topicdatabuff[2][64];
     char *ptr1, *ptr2;
     uint16_t payloadLen;
 
@@ -912,7 +912,7 @@ reconnect:
     }
 
 #ifdef USING_DOWNLOAD_JSON
-    uint8_t jsontopicdatabuff[32];
+    uint8_t jsontopicdatabuff[64];
     uint8_t jsonfilename[32];
     memset(jsontopicdatabuff,0,sizeof(jsontopicdatabuff));
     sprintf(jsontopicdatabuff,"protocol/%s/files",CLIENTID);
