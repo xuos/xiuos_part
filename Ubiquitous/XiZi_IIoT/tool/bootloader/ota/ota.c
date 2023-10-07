@@ -886,7 +886,7 @@ static void mqttCloudInteraction(void* parameter)
     ota_info_t ota_info;
     uint32_t heart_time = 0;
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
-    uint8_t topicdatabuff[2][32];
+    uint8_t topicdatabuff[2][64];
     char *ptr1, *ptr2;
     uint16_t payloadLen;
 
@@ -912,7 +912,7 @@ reconnect:
     }
 
 #ifdef USING_DOWNLOAD_JSON
-    uint8_t jsontopicdatabuff[32];
+    uint8_t jsontopicdatabuff[64];
     uint8_t jsonfilename[32];
     memset(jsontopicdatabuff,0,sizeof(jsontopicdatabuff));
     sprintf(jsontopicdatabuff,"protocol/%s/files",CLIENTID);
@@ -1071,7 +1071,7 @@ reconnect:
                     cJSON_free(json_print_str);
                     cJSON_Delete(json_obj);
                 }
-                KPrintf("download %s file done!------\r\n",jsonfilename);
+                KPrintf("------download %s file done!------\r\n",jsonfilename);
             }
 #endif
         }
@@ -1174,19 +1174,20 @@ static void mqttCloudInteraction(void* parameter)
     ota_info_t ota_info;
     uint32_t heart_time = 0;
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
-    uint8_t topicdatabuff[64];
-    char *ptr;
+    uint8_t topicdatabuff[2][64];
+    char *ptr1, *ptr2;
 
     mcuboot.flash_init();
     memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
     ota_info.status = OTA_STATUS_DOWNLOADING;
     UpdateOTAFlag(&ota_info);
-    memset(topicdatabuff,0,64); 
-    sprintf(topicdatabuff,"/sys/%s/%s/thing/file/download_reply",PLATFORM_PRODUCTKEY,CLIENT_DEVICENAME);  
+    memset(topicdatabuff,0,sizeof(topicdatabuff));
+    sprintf(topicdatabuff[0],"/ota/device/upgrade/%s/%s",PLATFORM_PRODUCTKEY,CLIENT_DEVICENAME);  
+    sprintf(topicdatabuff[1],"/sys/%s/%s/thing/file/download_reply",PLATFORM_PRODUCTKEY,CLIENT_DEVICENAME);  
 
 reconnect:
-    if((AdapterNetActive() == 0) && MQTT_Connect() && MQTT_SubscribeTopic(topicdatabuff))
+    if((AdapterNetActive() == 0) && MQTT_Connect() && MQTT_SubscribeTopic(topicdatabuff[0]) && MQTT_SubscribeTopic(topicdatabuff[1]))
     {
         KPrintf("Log in to the cloud platform and subscribe to the topic successfully.\n"); 
         PropertyVersion();
@@ -1222,10 +1223,11 @@ reconnect:
             MQTT_DealPublishData(MqttRxbuf, datalen);
             
             // 1.获取新版本固件大小及版本信息
-            ptr = strstr((char *)Platform_mqtt.cmdbuff,"{\"code\":\"1000\"");
-            if(ptr != NULL)
+            ptr1 = strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[0]); 
+            ptr2 = strstr((char *)Platform_mqtt.cmdbuff,"{\"code\":\"1000\"");
+            if((ptr1 != NULL) &&(ptr2 != NULL))
             {
-                if(sscanf(ptr,"{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&platform_ota.size,&platform_ota.streamId,platform_ota.version)==3)
+                if(sscanf(ptr2,"{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&platform_ota.size,&platform_ota.streamId,platform_ota.version)==3)
                 {
                     KPrintf("OTA firmware information:file size is %d,file id is %d,file version is %s!\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
                     KPrintf("------Start the firmware file transfer!------\r\n");                    
@@ -1244,6 +1246,10 @@ reconnect:
                     {
                         KPrintf("Failed to erase download partition!\n");
                         ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "Failed to erase download partition!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
                         break;
                     }
                     platform_ota.counter = (platform_ota.size%FRAME_LEN != 0)? (platform_ota.size/FRAME_LEN + 1):(platform_ota.size/FRAME_LEN);
@@ -1264,7 +1270,7 @@ reconnect:
             }
 
             // 2.分片接收新版本固件
-            if(strstr((char *)Platform_mqtt.cmdbuff,"download_reply"))
+            if(strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[1]))
             {
                 memset(FrameBuf,0,sizeof(FrameBuf));
                 memcpy(FrameBuf, &MqttRxbuf[datalen-platform_ota.downlen-2], platform_ota.downlen);
