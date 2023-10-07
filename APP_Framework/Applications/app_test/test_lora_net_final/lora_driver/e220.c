@@ -1,3 +1,24 @@
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
+
+/**
+* @file:    e220.c
+* @brief:   E220 module underlying related configuration driver functions implement
+* @version: 0.1
+* @author:  YUNFEI CHU
+* @date:    2023/10/01 
+*
+*/
+
 #include "e220.h"
 
 struct RegisterCfg                  // 寄存器结构
@@ -32,7 +53,7 @@ static struct RegisterCfg register_cfg =
 */
 static struct SerialDataCfg serial_cfg =
 {
-    .serial_baud_rate = E220_DEFAULT_CONFIG_BAUD_RATE,    // 串口波特率
+    .serial_baud_rate = E220_DEFAULT_CONFIG_BAUD_RATE,// 串口波特率
     .serial_data_bits = DATA_BITS_8,
     .serial_stop_bits = STOP_BITS_1,
     .serial_parity_mode = PARITY_NONE,

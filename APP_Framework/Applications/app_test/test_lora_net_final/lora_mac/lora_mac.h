@@ -1,3 +1,24 @@
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
+
+/**
+* @file:    lora_mac.h
+* @brief:   Definition of data structures related to the Lora private protocol
+* @version: 0.1
+* @author:  YUNFEI CHU
+* @date:    2023/10/01 
+*
+*/
+
 #include <transform.h>
 #include <adapter.h>
 #include "../lora_driver/e220.h"
@@ -19,12 +40,12 @@
 #define FRAME_FOOT_LENGTH 4                                                  // 额外数据以下至帧尾的数据长度
 #define FRAME_MARK_LENGTH 2                                                  // 帧头帧尾的数据长度
 
-enum FrameType      // 数据帧类型枚举
+enum FrameType                  // 数据帧类型枚举
 {
-    E_G_JOIN = 0,   // 客户端入网请求，需回复
-    E_G_QUIT,       // 客户端退网请求，不需回复
-    E_G_DATA,       // 客户端上传数据，需回复
-    G_E_ANS,        // 网关响应客户端请求
+    E_G_JOIN = 0,               // 客户端入网请求，需回复
+    E_G_QUIT,                   // 客户端退网请求，不需回复
+    E_G_DATA,                   // 客户端上传数据，需回复
+    G_E_ANS,                    // 网关响应客户端请求
 };
 
 struct LoraFrame                // 数据帧消息类型
@@ -75,29 +96,29 @@ uint8 CheckCrcLoraFrame(struct LoraFrame* frame);
 /*数据帧**************************************************************************/
 
 /*基础操作************************************************************************/
-#define LORA_ADAPTER_NAME "e220"
-#define LORA_OK 0XFF
-#define LORA_NO 0X00
-#define LORA_TIME_ON_AIR 2
-#define LORA_AIR_RATE 0
-#define LORA_FRAME_RETRY 5
-#define LORA_GATEWAY_MAX_CMD 20
-#define LORA_GATEWAY_MAX_NODE 20
-#define LORA_GATEWAY_ADDRESS 0XFFFF
+#define LORA_ADAPTER_NAME "e220"                // Lora适配器名称
+#define LORA_OK 0XFF                            // 标识成功、确认等
+#define LORA_NO 0X00                            // 标识失败、丢失等
+#define LORA_TIME_ON_AIR 2                      // 估计的空中时间
+#define LORA_AIR_RATE 0                         // 模块的空中速率
+#define LORA_FRAME_RETRY 5                      // 数据帧重传次数，超过这个次数判定断网
+#define LORA_GATEWAY_MAX_NODE 20                // 每个网关支持的最大客户端个数，防止上行通道过于拥挤
+#define LORA_GATEWAY_ADDRESS 0XFFFF             // 网关地址，单信道网关的监听地址
 
 #ifdef AS_LORA_GATEWAY
 
-#define LORA_RECV_TIME 10
-#define LORA_GATEWAY_CHANNEL 0XA
+#define LORA_RECV_TIME 10                       // 串口超时时间
+#define LORA_GATEWAY_CHANNEL 0XA                // 网关默认信道
 
 #else
 
-#define LORA_ADDRESS 0X9
-#define LORA_RECV_TIME 5
-#define LORA_DOWN_CHANNEL 0X9
-#define LORA_UP_CHANNEL 0XA
-#define LORA_ADR_ENABLE LORA_NO
-#define LORA_RECONNECT_ENABLE LORA_OK
+#define LORA_ADDRESS 0X9                        // 节点默认地址
+#define LORA_RECV_TIME 5                        // 节点默认串口超时时间
+#define LORA_DOWN_CHANNEL 0X9                   // 节点默认下行信道
+#define LORA_UP_CHANNEL 0XA                     // 节点默认上行通道
+#define LORA_ADR_ENABLE LORA_NO                 // 节点是否开启网关自动搜索
+#define LORA_RECONNECT_ENABLE LORA_OK           // 节点是否开启断网自动重联
+
 #endif
 
 /**
@@ -234,20 +255,20 @@ enum GatewayState                   // 网关的状态枚举
     GATEWAY_BROKEN                  // 模块损坏
 };
 
-struct GatewayParam                                             // 网关参数
+struct GatewayParam                                                   // 网关参数
 {
-    uint16 dev_addr;                                            // 设备ID
-    uint8 channel;                                              // 网络编号
+    uint16 dev_addr;                                                  // 设备ID
+    uint8 channel;                                                    // 网络编号
 
-    int recv_time;                                              // 串口超时时间
-    enum LoraAirRate air_rate;                                  // 网关空中速率
-    uint8 frame_retry;                                          // 重传次数
-    enum GatewayState gateway_state;                            // 网关状态
-    struct EndNodeInfo *node_infos[LORA_GATEWAY_MAX_NODE];      // 客户端信息
-    uint16 node_count;                                          // 已链接客户端数量
+    int recv_time;                                                    // 串口超时时间
+    enum LoraAirRate air_rate;                                        // 网关空中速率
+    uint8 frame_retry;                                                // 重传次数
+    enum GatewayState gateway_state;                                  // 网关状态
+    struct EndNodeInfo *node_infos[LORA_GATEWAY_MAX_NODE];            // 客户端信息
+    uint16 node_count;                                                // 已链接客户端数量
 };
 
-extern struct GatewayParam gateway_param;                                   // 网关参数
+extern struct GatewayParam gateway_param;                             // 网关参数
 extern int (*gateway_handlers[])(struct Adapter*,struct LoraFrame*);  // 处理程序
 
 /**

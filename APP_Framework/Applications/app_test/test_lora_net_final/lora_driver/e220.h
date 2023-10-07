@@ -1,10 +1,31 @@
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
+
+/**
+* @file:    e220.h
+* @brief:   E220 module underlying related configuration driver functions declarations
+* @version: 0.1
+* @author:  YUNFEI CHU
+* @date:    2023/10/01 
+*
+*/
+
 #include <transform.h>
 #include <adapter.h>
 
 #ifndef __E220_H__
 #define __E220_H__
 
-// #define __DRIVER_DEBUG__                                // 驱动调试信息输出开关
+// #define __DRIVER_DEBUG__                             // 驱动调试信息输出开关
 #ifdef __DRIVER_DEBUG__  
 #define DDBG(format,...) printf(format, ##__VA_ARGS__)  
 #else  
