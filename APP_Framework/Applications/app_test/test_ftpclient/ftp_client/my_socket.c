@@ -16,6 +16,7 @@
 * @version: 1.0
 * @author:  bdislab_final
 * @date:    2023/7/25
+* @reference https://kerndev.blog.csdn.net/article/details/89383888
 */
 
 #include "my_socket.h"
