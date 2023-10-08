@@ -7,7 +7,7 @@ test_ftpclient_final.h声明了多个客户端并发下载文件、并发上传�
 test_ftpclient_final.c实现了多个客户端并发下载文件、并发上传文件的测试函数
 ftp_client文件夹定义了ftp_client的相关类库其中my_socket.h,my_socket.c定义了socket抽象层，并基于
 Lwip实现了该抽象层，ftp_client.h,ftp_client.c实现了ftp登录，获取文件大小，下载文件等功能
-注意:在赛事提供的云服务器/root/yanglongFTP上有对应服务器代码 ./server运行服务器
+注意:在赛事提供的云服务器/root/yanglongFTP上有对应服务器代码 ./server运行服务器，为了方便查看代码我们讲服务器代码备份存放在ftp_server目录下
 ## 2. 数据结构设计说明
 - ftp_client.c 的设计
 分别定义了发送命令和接收数据的socket和相应的缓冲区并且实现了登录、发送命令、接收响应数据、查找文件大小、进入被动模式、下载文件、关闭ftp客户端等操作
