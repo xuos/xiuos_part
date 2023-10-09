@@ -173,7 +173,7 @@ int Download(char *name)
         return 0;
     }
     for(it = 0;it < len;it += ret){
-        ret = wiz_sock_recv(SOCKET_DATA,((char *)buf + it),len-it);
+        ret = wiz_sock_recv(SOCKET_DATA,((char *)buf + it),len);
         if(ret<0){
             printf("download was interupted\r\n");
             break;
@@ -196,7 +196,6 @@ int Download(char *name)
             printf("write failed\r\n");
         }
         else printf("success!\r\n");
-        close(fd);
     }
     else {
         printf("create file %s failed\r\n",name);

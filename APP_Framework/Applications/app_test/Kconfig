@@ -1,10 +1,10 @@
 menu "test app"
-    menuconfig USER_TEST
+    config USER_TEST
         bool "Enable application test function "
         default n
 
         if USER_TEST
-            menuconfig USER_TEST_ADC
+            config USER_TEST_ADC
                 bool "Config test adc"
                 default n
                 if USER_TEST_ADC
@@ -15,7 +15,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_DAC
+            config USER_TEST_DAC
                 bool "Config test dac"
                 default n
                 if USER_TEST_DAC
@@ -26,7 +26,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_FS
+            config USER_TEST_FS
                 bool "Config test fs with sd or usb"
                 default n
                 if USER_TEST_FS
@@ -38,7 +38,7 @@ menu "test app"
                 endif
 
 
-            menuconfig USER_TEST_GPIO
+            config USER_TEST_GPIO
                 select BSP_USING_GPIO
                 select RESOURCES_PIN
                 select BSP_USING_LED
@@ -53,7 +53,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_LORA
+            config USER_TEST_LORA
                 select BSP_USING_UART
                 select BSP_USING_GPIO
                 select RESOURCES_PIN
@@ -72,12 +72,12 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_SOCKET
+            config USER_TEST_SOCKET
                 select BSP_USING_LWIP
                 bool "Config test socket(lwip)"
                 default n
 
-            menuconfig USER_TEST_UART
+            config USER_TEST_UART
                 select BSP_USING_UART
                 select BSP_USING_UART6
                 bool "Config test uart"
@@ -90,7 +90,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_RS485
+            config USER_TEST_RS485
                 select BSP_USING_UART
                 select BSP_USING_GPIO
                 select RESOURCES_PIN
@@ -108,7 +108,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_RTC
+            config USER_TEST_RTC
                 select BSP_USING_RTC
                 bool "Config test rtc"
                 default n
@@ -120,7 +120,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_HWTIMER
+            config USER_TEST_HWTIMER
                 select BSP_USING_HWTIMER
                 select BSP_USING_GPIO
                 select RESOURCES_PIN
@@ -138,7 +138,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_WDT
+            config USER_TEST_WDT
                 select BSP_USING_WDT0
                 bool "Config test watchdog"
                 default n
@@ -150,7 +150,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_LCD_EDU
+            config USER_TEST_LCD_EDU
                 select BSP_USING_LCD
                 bool "Config test lcd in PrivOpen"
                 default n
@@ -162,7 +162,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_TOUCH
+            config USER_TEST_TOUCH
                 select BSP_USING_TOUCH
                 bool "Config test touch"
                 default n
@@ -177,7 +177,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_I2C
+            config USER_TEST_I2C
                 select BSP_USING_I2C
                 bool "Config test i2c"
                 default n
@@ -189,7 +189,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_CAN
+            config USER_TEST_CAN
                 select BSP_USING_CAN
                 bool "Config test can"
                 default n
@@ -201,7 +201,7 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_CAMERA
+            config USER_TEST_CAMERA
                 select BSP_USING_CAMERA
                 select BSP_USING_LCD
                 bool "Config test camera with lcd"
@@ -225,7 +225,7 @@ menu "test app"
                 bool "Config test lcd device"
                 default n
 
-            menuconfig USER_TEST_ETHERNET
+            config USER_TEST_ETHERNET
                 bool "Config test ethernet only for edu-riscv64"
                 default n
                 if USER_TEST_ETHERNET
@@ -243,7 +243,7 @@ menu "test app"
                     endif
                 endif
             
-            menuconfig USER_TEST_FLASH
+            config USER_TEST_FLASH
                 bool "Config test w25q128 device"
                 default n
                 if USER_TEST_FLASH
@@ -254,51 +254,51 @@ menu "test app"
                     endif
                 endif
 
-            menuconfig USER_TEST_TIMER
+            config USER_TEST_TIMER
                 bool "Config test soft timer"
                 default n
 
-            menuconfig USER_TEST_HASH
+            config USER_TEST_HASH
                 bool "Config test hash"
                 default n
 
-            menuconfig USER_TEST_RADIX
+            config USER_TEST_RADIX
                 bool "Config test radix tree"
                 default n
             
-            menuconfig USER_TEST_RBTREE
+            config USER_TEST_RBTREE
                 bool "Config test red black tree"
                 default n
 
-            menuconfig USER_TEST_MODBUS_TCP
+            config USER_TEST_MODBUS_TCP
                 bool "Config test modbus_tcp"
                 default n
 
-            menuconfig USER_TEST_WEBSERVER
+            config USER_TEST_WEBSERVER
                 bool "Config test webserver"
                 default n
 
-            menuconfig USER_TEST_MQTTCLIENT
+            config USER_TEST_MQTTCLIENT
                 bool "Config test mqtt client"
                 default n
 
-            menuconfig USER_TEST_FTPCLIENT
+            config USER_TEST_FTPCLIENT
                 bool "Config test ftp client"
                 default n
             
-            menuconfig USER_TEST_LORA_P2P
+            config USER_TEST_LORA_P2P
                 bool "Config test lora p2p"
                 default n
 
-            menuconfig USER_TEST_LORAWAN_SINGLEGW
+            config USER_TEST_LORAWAN_SINGLEGW
                 bool "Config test lorawan single channel gateway"
                 default n
 
-            menuconfig USER_TEST_CANOPEN
+            config USER_TEST_CANOPEN
                 bool "Config test CanOpen"
                 default n
 
-            menuconfig USER_TEST_USB_CAMERA
+            config USER_TEST_USB_CAMERA
                 bool "Config test usb camera"
                 default n
 

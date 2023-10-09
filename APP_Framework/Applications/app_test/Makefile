@@ -125,6 +125,10 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
         SRC_DIR += test_modbus_tcp
     endif 
 
+    ifeq ($(CONFIG_USER_TEST_FTPCLIENT),y)
+        SRC_FILES += test_ftp/test_ftp.c
+    endif
+	
     ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
         SRC_FILES += 
     endif
