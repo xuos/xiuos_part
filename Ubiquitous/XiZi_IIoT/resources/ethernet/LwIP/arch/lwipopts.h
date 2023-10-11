@@ -46,7 +46,6 @@
 // #define LWIP_API_MSG_DEBUG
 #endif
 
-
 #ifdef LWIP_DEBUG
 #ifdef LWIP_SYS_DEBUG
 #define SYS_DEBUG LWIP_DBG_ON

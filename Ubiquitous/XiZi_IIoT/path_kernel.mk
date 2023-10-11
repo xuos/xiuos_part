@@ -41,8 +41,6 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/include \
 	-I$(KERNEL_ROOT)/resources/include 
 
-
-
 ifeq ($(CONFIG_RESOURCES_LWIP),y)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include \

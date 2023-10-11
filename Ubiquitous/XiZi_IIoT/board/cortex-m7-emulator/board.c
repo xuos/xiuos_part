@@ -14,7 +14,7 @@
 * @file board.c
 * @brief support cortex-m7-emulator-board init configure and start-up
 * @version 1.0 
-* @author fudan
+* @author AIIT XUOS Lab
 * @date 2023-09-27
 */
 
@@ -198,8 +198,5 @@ void InitBoardHardware()
     KPrintf("board init done.\n");
     KPrintf("start kernel...\n");
 
-#ifdef TOOL_USING_OTA
-    //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
-    app_clear_jumpflag();
-#endif
+
 }

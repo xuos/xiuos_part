@@ -28,18 +28,18 @@
 
 /**
 * @file link.lds
-* @brief xidatong-arm32 Linker script
+* @brief cortex-m7 emulator Linker script
 * @version 1.0
 * @author AIIT XUOS Lab
-* @date 2021-05-28
+* @date 2021-09-27
 */
 
 /*************************************************
 File name: link.lds
-Description: xidatong-arm32 Linker script
+Description:cortex-m7 emulator Linker script
 Others: take MIMXRT1052xxxxx_flexspi_nor.ld for references
 History:
-1. Date: 2021-05-28
+1. Date: 2021-09-27
 Author: AIIT XUOS Lab
 Modification:
 1. add shell cmd table and g_service_table

@@ -12,10 +12,10 @@
  
 /**
 * @file connect_uart.h
-* @brief define imxrt1052-board usart function and struct
+* @brief define m7 emulator usart function and struct
 * @version 2.0
 * @author AIIT XUOS Lab
-* @date 2022-03-15
+* @date 2023-09-27
 */
 
 #ifndef CONNECT_UART_H
