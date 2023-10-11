@@ -19,20 +19,22 @@ static char m_recv_buffer[THREAD_NUM][1024]; // 接收缓冲区
 ```
 - server.c 的设计(具体代码在赛事提供的云服务器的/root/yanglongFTP下)
 ```c
-#define THREAD_NUM 10 // 可接受的客户端数目
-static int isBinary = 0; // 是否是二进制传输文件
-static int port = 9992; // 命令服务器端口
-static int dataPort = 9993; // 文件传输服务器端口
-static char order[4]; // 存储命令
-static char param[20]; // 存储命令参数
-static char *respMessage; // 响应消息指针
-static int serverFd;  // 命令服务器的socket fd
-static int dataServerFd; // 文件传输服务器的 socket fd
-struct Data{ // 用于线程间通信
-    sem_t isReady; // 命令服务器是否收到并写好文件名
-    sem_t isDone; // 文件传输服务器是否传输完文件
-    char fileName[20]; // 存储文件名
-};
+#define THREAD_NUM 10000 // thread num
+static int isBinary = 0; // transmit binary data
+static int port = 9992; // service port
+static int dataPort = 9993; // the port for file download
+static char order[4]; // receive order
+static char param[20]; // receive order param
+static char *respMessage; // respose message
+static int serverFd;  // the server fd for deal with order requests
+static int dataServerFd; // the server fd for file download
+sem_t mutex; // mutex lock
+struct Data{ // 线程间通信传输的数据
+    char fileName[20]; // file name
+    int type; // 0:download 1:upload
+    sem_t isDone;  // complete file downlaod
+    sem_t isReady;  // 文件准备好了
+} data;
 ```
 ## 3. 测试程序说明
 - test_ftpclient_final.c用于测试多个客户端并发下载文件
@@ -44,12 +46,22 @@ void TestFtpClient(int argc, char* argv[])
 {
     int options = atoi(argv[1]);
     int n = atoi(argv[2]);
+    pthread_t threads[THREAD_NUM];
     for(int i = 0;i < n;++i){
         threadIDs[i] = i;
-        if(options == 1){ // for DownLoad
-            pthread_create(NULL,NULL,&DownLoad,&threadIDs[i]);
-        }else if(options == 2){ // for upLoad
-            pthread_create(NULL,NULL,&UpLoad,&threadIDs[i]);
+        if(options == 1){ // 全部都是下载
+            pthread_create(&threads[i],NULL,&DownLoad,&threadIDs[i]);
+        }else if(options == 2){ // 全部都是上传
+            pthread_create(&threads[i],NULL,&UpLoad,&threadIDs[i]);
+        }else if(options == 3){  // 随机下载/上传
+            int r = rand()%2;
+            if(r == 0){
+                printf("===============download===============\n");
+                pthread_create(&threads[i],NULL,&DownLoad,&threadIDs[i]);
+            }else{
+                printf("===============upload===============\n");
+                pthread_create(&threads[i],NULL,&UpLoad,&threadIDs[i]);
+            }
         }
     }
     return;
@@ -104,3 +116,20 @@ PRIV_SHELL_CMD_FUNCTION(TestFtpClient, a ftpClient test sample, PRIV_SHELL_CMD_M
 ![](./img/image-32.png)
 - 上传结果
 ![](./img/image-33.png)
+8. 运行TestFtpClient 3 10，模拟10个客户端混合并发下载和上传文件
+- 客户端日志
+![](./img/image-34.png)
+![](./img/image-35.png)
+![](./img/image-36.png)
+![](./img/image-37.png)
+![](./img/image-38.png)
+![](./img/image-39.png)
+
+- 服务器日志
+![](./img/image-40.png)
+![](./img/image-41.png)
+![](./img/image-42.png)
+
+- 下载和上传结果
+![](./img/image-43.png)
+![](./img/image-44.png)

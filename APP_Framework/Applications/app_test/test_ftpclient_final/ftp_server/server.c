@@ -1,3 +1,23 @@
+/*
+* Copyright (c) 2020 AIIT XUOS Lab
+* XiUOS is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*        http://license.coscl.org.cn/MulanPSL2
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+* See the Mulan PSL v2 for more details.
+*/
+
+/**
+* @file:    server.c
+* @brief:   a ftpserver
+* @version: 1.0
+* @author:  bdislab_final
+* @date:    2023/10/11
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -7,7 +27,7 @@
 #include <semaphore.h>
 #include <errno.h>
 
-#define THREAD_NUM 10
+#define THREAD_NUM 10000 // thread num
 static int isBinary = 0; // transmit binary data
 static int port = 9992; // service port
 static int dataPort = 9993; // the port for file download
@@ -16,11 +36,13 @@ static char param[20]; // receive order param
 static char *respMessage; // respose message
 static int serverFd;  // the server fd for deal with order requests
 static int dataServerFd; // the server fd for file download
-struct Data{
-    sem_t isReady;
-    sem_t isDone;
-    char fileName[20];
-};
+sem_t mutex; // mutex lock
+struct Data{ // 线程间通信传输的数据
+    char fileName[20]; // file name
+    int type; // 0:download 1:upload
+    sem_t isDone;  // complete file downlaod
+    sem_t isReady;  // 文件准备好了
+} data;
 
 void RecvData(int clientFd,char param[20]){
     recv(clientFd,param,20,0);
@@ -41,7 +63,7 @@ void SendMessage(int clientFd, char * respMessage){
     send(clientFd,respMessage,len+1,0);
 }
 
-int CreateServer(int port) {
+int CreateServer(int port,int type) {
     int serverFd = 0;
 	struct sockaddr_in serverAddr = {0};
 	socklen_t socklen = 0;
@@ -50,8 +72,13 @@ int CreateServer(int port) {
 	{
 		printf("创建socket失败\n");
 		return 0;
-	}	
-	printf("in server:serverFd=%d\n",serverFd);
+	}
+
+    if(type == 0){
+        printf("in ftp server:serverFd=%d\n",serverFd);
+    }else{
+        printf("in ftp data server:serverFd=%d\n",serverFd);
+    }	
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(port);
 	serverAddr.sin_addr.s_addr=htonl(INADDR_ANY);
@@ -68,49 +95,60 @@ int CreateServer(int port) {
     return serverFd;
 }
 
-// accept a client and receive file's data
+// receive file's data
 void* UpLoadServer(void * args){ 
-    struct Data* pData = (struct Data *) args;
-    struct sockaddr_in clientAdrr = {0};
-    int socketLen = sizeof(clientAdrr);
-    int clientFd = accept(dataServerFd,(struct sockaddr *)&clientAdrr,&socketLen);
-    printf("accept a client for file upload: clientFd=%d,tid=%ld\n",clientFd,pthread_self());
-    char data[4096];
-    int ret = recv(clientFd,data,4096,0);
+    int clientFd = *(int *) args;
+    char buf[4096];
+    int ret = recv(clientFd,buf,4096,0);
     printf("ret=%d,errno=%d\n",ret,errno);
-    FILE * file = fopen(pData->fileName,"wb");  // fileName需要线程间通信
-    fwrite(data,4096,1,file);
+    FILE * file = fopen(data.fileName,"wb");
+    fwrite(buf,4096,1,file);
     fclose(file);
     printf("upload complete for client: clientFd=%d,tid=%ld\n",clientFd,pthread_self());
-    sem_post(&pData->isDone);
+    // notify for file download complete
+    sem_post(&data.isDone);
     close(clientFd);
 }
 
-// accept a client and send file's data
+//  send file's data
 void* DownLoadServer(void * args){ 
-    struct Data* pData = (struct Data *) args;
-    struct sockaddr_in clientAdrr = {0};
-    int socketLen = sizeof(clientAdrr);
-    int clientFd = accept(dataServerFd,(struct sockaddr *)&clientAdrr,&socketLen);
-    printf("accept a client for file download: clientFd=%d,tid=%ld\n",clientFd,pthread_self());
-
-    // wait for fileName ready
-    printf("wait for fileName ready,tid=%ld\n",pthread_self());
-    sem_wait(&pData->isReady);
-    char data[4096];
-    FILE * file = fopen(pData->fileName,"rb");  // fileName需要线程间通信
-    fread(data,4096,1,file);
-    send(clientFd,data,sizeof(data),0);
+    int clientFd = *(int *) args;
+    char buf[4096];
+    FILE * file = fopen(data.fileName,"rb");
+    fread(buf,4096,1,file);
+    send(clientFd,buf,sizeof(buf),0);
     fclose(file);
     printf("download complete for client: clientFd=%d,tid=%ld\n",clientFd,pthread_self());
-    sem_post(&pData->isDone);
+    // notify for file download complete
+    sem_post(&data.isDone);
     close(clientFd);
+}
+
+// accept a client and new a thread for downlaod/upload
+void* DataServer(void * args){
+    dataServerFd = CreateServer(dataPort,1);
+    while(1){
+        // wait for a filename
+        sem_wait(&data.isReady);
+        struct sockaddr_in clientAdrr = {0};
+        int socketLen = sizeof(clientAdrr);
+        int clientFd = accept(dataServerFd,(struct sockaddr *)&clientAdrr,&socketLen);
+        pthread_t thread;
+        if(data.type == 0){ // download
+            printf("accept a client for file download: clientFd=%d,tid=%ld\n",clientFd,pthread_self());
+            pthread_create(&thread,NULL,&DownLoadServer,&clientFd);
+        }else if(data.type == 1){ // upload
+            printf("accept a client for file upload: clientFd=%d,tid=%ld\n",clientFd,pthread_self());
+            pthread_create(&thread,NULL,&UpLoadServer,&clientFd);
+        }
+        // release lock
+        sem_post(&mutex);
+    }
 }
 
 // deal with order requests
 void* OrderServer(void * args){
     int clientFd = *(int *)args;
-    struct Data data;
     printf("in OrderServer thread: tid=%ld\n",pthread_self());
     // order format: USER anonymous\r\n
     // response code format: 213 4096\r\n
@@ -142,7 +180,7 @@ void* OrderServer(void * args){
             respMessage = "213 4096\r\n";
             SendMessage(clientFd,respMessage);
         }else if(strcmp(order,"PASV") == 0){
-            sem_init(&data.isReady,0,0);
+            sem_wait(&mutex); // 锁竞争
             sem_init(&data.isDone,0,0);
             RecvData(clientFd,param);
             char buf[50];
@@ -152,8 +190,7 @@ void* OrderServer(void * args){
         }else if(strcmp(order,"RETR") == 0){
             RecvData(clientFd,param);
             sprintf(data.fileName,"./data/%s",param+2);
-            pthread_t thread;
-            pthread_create(&thread,NULL,&DownLoadServer,&data);
+            data.type = 0;
             // notify the thread of waiting fileName
             sem_post(&data.isReady);
             char buf[70];
@@ -168,8 +205,9 @@ void* OrderServer(void * args){
         }else if(strcmp(order,"STOR") == 0){
             RecvData(clientFd,param);
             sprintf(data.fileName,"./out/%s",param+1);
-            pthread_t thread;
-            pthread_create(&thread,NULL,&UpLoadServer,&data);
+            data.type = 1;
+            // notify the thread of waiting fileName
+            sem_post(&data.isReady);
             char buf[70];
             sprintf(buf,"150 Opening Binary mode data connection for %s (4096 bytes).\r\n",param+1);
             respMessage = buf;
@@ -190,8 +228,11 @@ void* OrderServer(void * args){
 }
 
 int main(){
-    serverFd = CreateServer(port);
-    dataServerFd = CreateServer(dataPort);
+    serverFd = CreateServer(port,0);
+    sem_init(&data.isReady,0,0);
+    sem_init(&mutex,0,1);
+    pthread_t thread;
+    pthread_create(&thread,NULL,&DataServer,NULL);
     int clientFds[THREAD_NUM];
     int i = 0;
     while(1){
@@ -201,7 +242,7 @@ int main(){
         printf("accept a client:fd=%d\n",clientFds[i]);
         respMessage = "220 (myFtpServer 1.0)\r\n";
         SendMessage(clientFds[i],respMessage);
-        printf("send successful.\n");
+        printf("send welcome message successfully.\n");
         pthread_t thread;
         pthread_create(&thread,NULL,&OrderServer,&clientFds[i]);
         i++;

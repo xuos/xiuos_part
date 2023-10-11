@@ -70,12 +70,22 @@ void TestFtpClient(int argc, char* argv[])
 {
     int options = atoi(argv[1]);
     int n = atoi(argv[2]);
+    pthread_t threads[THREAD_NUM];
     for(int i = 0;i < n;++i){
         threadIDs[i] = i;
-        if(options == 1){ // for DownLoad
-            pthread_create(NULL,NULL,&DownLoad,&threadIDs[i]);
-        }else if(options == 2){ // for upLoad
-            pthread_create(NULL,NULL,&UpLoad,&threadIDs[i]);
+        if(options == 1){ // 全部都是下载
+            pthread_create(&threads[i],NULL,&DownLoad,&threadIDs[i]);
+        }else if(options == 2){ // 全部都是上传
+            pthread_create(&threads[i],NULL,&UpLoad,&threadIDs[i]);
+        }else if(options == 3){  // 随机下载/上传
+            int r = rand()%2;
+            if(r == 0){
+                printf("===============download===============\n");
+                pthread_create(&threads[i],NULL,&DownLoad,&threadIDs[i]);
+            }else{
+                printf("===============upload===============\n");
+                pthread_create(&threads[i],NULL,&UpLoad,&threadIDs[i]);
+            }
         }
     }
     return;
