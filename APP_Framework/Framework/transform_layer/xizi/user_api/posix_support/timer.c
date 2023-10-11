@@ -57,7 +57,6 @@ int timer_create(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
 {
     int timer_id;
     char timer_name[16];
-    sem_t sem;
 
     if ((NULL == evp) || (NULL == timerid)) {
         errno = EINVAL;
@@ -73,8 +72,7 @@ int timer_create(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
     memset(timer_name, 0, sizeof(timer_name));
     snprintf(timer_name, sizeof(timer_name), "timer_%ld", clockid);
 
-    sem = timer_sem[clockid];
-    sem_init(&sem, 0, 0);
+    sem_init(&(timer_sem[clockid]), 0, 0);
 
     g_timer_func[clockid].value = evp->sigev_value;
     g_timer_func[clockid].user_timer_function = evp->sigev_notify_function;
@@ -89,8 +87,8 @@ int timer_create(clockid_t clockid, struct sigevent * evp, timer_t * timerid)
     args.arg = &clockid;
 
     pthread_create(&(timer_task[clockid]), &attr, &timer_callback, (void *)&args);
-    
-    timer_id = UserTimerCreate(timer_name, NULL, (void *)&(timer_sem[clockid]), 1000, g_timer_func[clockid].timer_flags);
+
+    timer_id = UserTimerCreate(timer_name, NULL, (void *)&(timer_sem[clockid]), clockid, g_timer_func[clockid].timer_flags);
     *timerid = timer_id;
     return timer_id;
 }

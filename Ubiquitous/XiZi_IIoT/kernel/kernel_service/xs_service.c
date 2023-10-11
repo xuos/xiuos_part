@@ -775,19 +775,24 @@ uint8_t UserGetTaskPriority(int32_t id)
 }
 
 #ifdef KERNEL_SOFTTIMER
-static int32 timer_sem;
+#define TIMER_NUM 20
+static int32 timer_sem[TIMER_NUM];
+static uint32_t timer_id[TIMER_NUM];
 static void UserTimerCallback(void *parameter)
 {
-   KSemaphoreAbandon(timer_sem);
+   uint32_t timer_id = *((uint32_t *)parameter);
+   KSemaphoreAbandon(timer_sem[timer_id]);
 }
 
 int32 UserTimerCreate(const char *name, void (*timeout)(void *parameter), void *parameter, uint32_t time, uint8_t trigger_mode)
 {
    int32 ret;
 
-   timer_sem = *((int *)parameter);
+   timer_id[time] = time;
+   timer_sem[time] = *((int *)parameter);
 
-   ret = KCreateTimer(name, UserTimerCallback, NONE, time, trigger_mode);
+   ret = KCreateTimer(name, UserTimerCallback, (void *)&(timer_id[time]), 1000, trigger_mode);
+
    return ret;
 }
 
