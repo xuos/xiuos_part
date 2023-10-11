@@ -549,13 +549,19 @@ static int ATAgentInit(ATAgentType agent)
     attr.priority = 18;
     attr.stacksize = 8192;
 
+    PrivTaskCreate(&agent->at_handler, &attr, ATAgentReceiveProcess, agent);
 #else
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 25;
     attr.stacksize = 4096;
-#endif
 
-    PrivTaskCreate(&agent->at_handler, &attr, ATAgentReceiveProcess, agent);
+    char task_name[] = "at_agent";
+    pthread_args_t args;
+    args.pthread_name = task_name;
+    args.arg = (void *)agent;
+
+    PrivTaskCreate(&agent->at_handler, &attr, ATAgentReceiveProcess, (void *)&args);
+#endif
 
     return result;
 

@@ -301,7 +301,9 @@ void CheckTimerList(void)
                 ((WorkQueueDoneType *)sys_workq->done)->WorkSubmit((WorkqueueType *)sys_workq->property, t->t_work, 0);
                 lock = CriticalAreaLock();
             } else {
-                KPrintf("sortlist run unactive timer(%s), quit this timer\n", t->name);
+                // KPrintf("sortlist run unactive timer(%s), current %d deadline %d quit this timer\n", 
+                //     t->name, current_tick, t->deadline_timeslice);
+                break;
             }
         }
         else

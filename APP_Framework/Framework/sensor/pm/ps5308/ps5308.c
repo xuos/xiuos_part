@@ -80,7 +80,12 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
 
     result = PrivIoctl(sdev->fd, OPE_INT, &cfg);
 
-    PrivTaskCreate(&active_task_id, NULL, &ReadTask, sdev);
+    char task_name[] = "ps5308_recv_data";
+    pthread_args_t args;
+    args.pthread_name = task_name;
+    args.arg = (void *)sdev;
+
+    PrivTaskCreate(&active_task_id, NULL, &ReadTask, (void *)&args);
     PrivTaskStartup(&active_task_id);
 
     return result;
