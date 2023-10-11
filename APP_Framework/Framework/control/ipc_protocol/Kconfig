@@ -13,3 +13,12 @@ config CONTROL_PROTOCOL_MODBUS_UART
 if CONTROL_PROTOCOL_MODBUS_UART
         source "$APP_DIR/Framework/control/ipc_protocol/modbus_uart/Kconfig"
 endif
+
+config CONTROL_PROTOCOL_FREEMODBUS_TCP_SERVER
+        bool "Using modbus_tcp_server control protocol"
+        default n
+        select CONTROL_USING_SOCKET
+        select LIB_USING_FREEMODBUS
+if CONTROL_PROTOCOL_FREEMODBUS_TCP_SERVER
+        source "$APP_DIR/Framework/control/ipc_protocol/freemodbustcpserver/Kconfig"
+endif

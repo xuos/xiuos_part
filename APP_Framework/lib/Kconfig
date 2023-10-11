@@ -15,4 +15,5 @@ menu "app lib"
     source "$APP_DIR/lib/embedded_database/Kconfig"
     source "$APP_DIR/lib/lorawan/Kconfig"
     source "$APP_DIR/lib/mqtt/Kconfig"
+    source "$APP_DIR/lib/freemodbus/Kconfig"
 endmenu

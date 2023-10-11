@@ -398,7 +398,7 @@ int ModbusUartProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatIn
         p_read_item_data);
 
     ControlPrintfList("CMD", modbusuart_read_item->data_info.base_data_info.p_command, modbusuart_read_item->data_info.base_data_info.command_length);
-    protocol_format_info->last_item_size = GetValueTypeMemorySize(modbusuart_read_item->value_type);
+    protocol_format_info->last_item_size = GetValueTypeMemorySize(modbusuart_read_item->value_type,1);
 
     last_item_size += protocol_format_info->last_item_size;
 

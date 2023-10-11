@@ -1,4 +1,5 @@
 SRC_DIR := plc_demo
+SRC_DIR += modbus_tcp_server_demo
 
 ifeq ($(CONFIG_RESOURCES_LWIP),y)
 
