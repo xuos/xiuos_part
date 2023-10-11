@@ -535,10 +535,15 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protoc
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/melsec #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/opcua #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/s7 #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/freemodbustcpserver #
 endif
 
 ifeq ($(CONFIG_LIB_USING_CJSON), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON
+endif
+
+ifeq ($(CONFIG_LIB_USING_FREEMODBUS), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/freemodbus
 endif
 
 ifeq ($(CONFIG_LIB_USING_LORAWAN), y)
