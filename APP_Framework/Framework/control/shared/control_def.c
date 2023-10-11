@@ -322,7 +322,12 @@ int ControlProtocolOpenDef(struct ControlProtocol *control_protocol)
     attr.schedparam.sched_priority = 19;
     attr.stacksize = 2048;
 
-    PrivTaskCreate(&recv_plc_data_task, &attr, &ReceivePlcDataTask, control_protocol);
+    char task_name[] = "control_recv_data";
+    pthread_args_t args;
+    args.pthread_name = task_name;
+    args.arg = (void *)control_protocol;
+
+    PrivTaskCreate(&recv_plc_data_task, &attr, &ReceivePlcDataTask, (void *)&args);
     PrivTaskStartup(&recv_plc_data_task);
 }
 

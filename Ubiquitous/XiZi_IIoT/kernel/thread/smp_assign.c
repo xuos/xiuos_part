@@ -40,7 +40,7 @@ static inline x_ubase SmpGetReadyVectorHighestPrio(void)
 {
     uint8 coreid = GetCpuId();
 
-    return ((Assign.os_assign_read_vector.highest_prio > Assign.smp_os_assign_ready_rector[coreid].highest_prio) ? Assign.os_assign_read_vector.highest_prio : Assign.smp_os_assign_ready_rector[coreid].highest_prio);
+    return ((Assign.os_assign_ready_vector.highest_prio > Assign.smp_os_assign_ready_vector[coreid].highest_prio) ? Assign.os_assign_ready_vector.highest_prio : Assign.smp_os_assign_ready_vector[coreid].highest_prio);
 }
 
 /*
@@ -51,13 +51,13 @@ static inline struct TaskDescriptor* SmpAssignTargetTaskSelect(void)
 
     uint8 coreid = GetCpuId();
 
-    if (Assign.os_assign_read_vector.highest_prio > Assign.smp_os_assign_ready_rector[coreid].highest_prio)
+    if (Assign.os_assign_ready_vector.highest_prio > Assign.smp_os_assign_ready_vector[coreid].highest_prio)
     {
-        return ChooseTaskWithHighestPrio(&Assign.os_assign_read_vector);
+        return ChooseTaskWithHighestPrio(&Assign.os_assign_ready_vector);
     }
     else
     {
-        return ChooseTaskWithHighestPrio(&Assign.smp_os_assign_ready_rector[coreid]);
+        return ChooseTaskWithHighestPrio(&Assign.smp_os_assign_ready_vector[coreid]);
     }
 }
 
@@ -98,7 +98,7 @@ static void SmpOsAssignInit(void)
 {
     int coreid = 0;
     while(coreid < CPU_NUMBERS) {
-        Assign.ready_vector_done->init(&Assign.smp_os_assign_ready_rector[coreid]);
+        Assign.ready_vector_done->init(&Assign.smp_os_assign_ready_vector[coreid]);
         Assign.smp_os_running_task[coreid] = NONE;
         
 #ifdef ARCH_SMP
@@ -148,8 +148,8 @@ void KTaskOsAssign(void)
     runningtask = Assign.smp_os_running_task[coreid];
 
     /* if the bitmap is empty then do not switch */
-    if((RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_read_vector)) &&
-        (RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.smp_os_assign_ready_rector[coreid]))) {
+    if((RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_ready_vector)) &&
+        (RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.smp_os_assign_ready_vector[coreid]))) {
         return;
     }
 
@@ -210,8 +210,8 @@ void KTaskOsAssignDoIrqSwitch(void *context)
 
     runningtask = Assign.smp_os_running_task[coreid];
 
-    if((RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_read_vector)) &&
-        (RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.smp_os_assign_ready_rector[coreid]))) {
+    if((RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_ready_vector)) &&
+        (RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.smp_os_assign_ready_vector[coreid]))) {
         return;
     }
 
@@ -260,10 +260,10 @@ static void UncombineInsert(struct TaskDescriptor *task)
     NULL_PARAM_CHECK(task);
 
 #if KTASK_PRIORITY_MAX > 32
-    MERGE_FLAG(&Assign.os_assign_read_vector.ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
+    MERGE_FLAG(&Assign.os_assign_ready_vector.ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
 #endif
-    MERGE_FLAG(&Assign.os_assign_read_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
-    AssignPolicyInsert(task, &Assign.os_assign_read_vector);
+    MERGE_FLAG(&Assign.os_assign_ready_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
+    AssignPolicyInsert(task, &Assign.os_assign_ready_vector);
     cpu_mask = CPU_MASK ^ (1 << GetCpuId());
     HwSendIpi(ASSIGN_IPI, cpu_mask);
 }
@@ -273,10 +273,10 @@ static void ComnbineInsert(struct TaskDescriptor *task, int coreid)
     NULL_PARAM_CHECK(task);
 
 #if KTASK_PRIORITY_MAX > 32
-    MERGE_FLAG(&Assign.smp_os_assign_ready_rector[coreid].ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
+    MERGE_FLAG(&Assign.smp_os_assign_ready_vector[coreid].ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
 #endif
-    MERGE_FLAG(&Assign.smp_os_assign_ready_rector[coreid].priority_ready_group, task->task_dync_sched_member.bitmap_column);
-    AssignPolicyInsert(task, &Assign.smp_os_assign_ready_rector[coreid]);
+    MERGE_FLAG(&Assign.smp_os_assign_ready_vector[coreid].priority_ready_group, task->task_dync_sched_member.bitmap_column);
+    AssignPolicyInsert(task, &Assign.smp_os_assign_ready_vector[coreid]);
     if (coreid != task->task_smp_info.combined_coreid)
     {
         uint32 cpu_mask;
@@ -324,22 +324,22 @@ static void UncombineRemove(struct TaskDescriptor *task)
 
     NULL_PARAM_CHECK(task);
 
-    if (IsDoubleLinkListEmpty(&(Assign.os_assign_read_vector.priority_ready_vector[task->task_dync_sched_member.cur_prio]))) {
+    if (IsDoubleLinkListEmpty(&(Assign.os_assign_ready_vector.priority_ready_vector[task->task_dync_sched_member.cur_prio]))) {
 #if KTASK_PRIORITY_MAX > 32
         
-        CLEAR_FLAG(&Assign.os_assign_read_vector.ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
-        if (Assign.os_assign_read_vector.ready_vector[task->task_dync_sched_member.bitmap_offset] == 0) {
-            CLEAR_FLAG(&Assign.os_assign_read_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
+        CLEAR_FLAG(&Assign.os_assign_ready_vector.ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
+        if (Assign.os_assign_ready_vector.ready_vector[task->task_dync_sched_member.bitmap_offset] == 0) {
+            CLEAR_FLAG(&Assign.os_assign_ready_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);
         }
-        number = PrioCaculate(Assign.os_assign_read_vector.priority_ready_group);
-        highest_priority = (number * 8) + PrioCaculate(Assign.os_assign_read_vector.ready_vector[number]);
+        number = PrioCaculate(Assign.os_assign_ready_vector.priority_ready_group);
+        highest_priority = (number * 8) + PrioCaculate(Assign.os_assign_ready_vector.ready_vector[number]);
 #else
         
         
-        CLEAR_FLAG(&Assign.os_assign_read_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);   
-        highest_priority = PrioCaculate(Assign.os_assign_read_vector.priority_ready_group);
+        CLEAR_FLAG(&Assign.os_assign_ready_vector.priority_ready_group, task->task_dync_sched_member.bitmap_column);   
+        highest_priority = PrioCaculate(Assign.os_assign_ready_vector.priority_ready_group);
 #endif
-        Assign.os_assign_read_vector.highest_prio = highest_priority;  
+        Assign.os_assign_ready_vector.highest_prio = highest_priority;  
     }
 }
 
@@ -351,19 +351,19 @@ static void CombineRemove(struct TaskDescriptor *task)
 
     NULL_PARAM_CHECK(task);
 
-    if (IsDoubleLinkListEmpty(&(Assign.smp_os_assign_ready_rector[combined_coreid].priority_ready_vector[task->task_dync_sched_member.cur_prio]))) {
+    if (IsDoubleLinkListEmpty(&(Assign.smp_os_assign_ready_vector[combined_coreid].priority_ready_vector[task->task_dync_sched_member.cur_prio]))) {
 #if KTASK_PRIORITY_MAX > 32
-        CLEAR_FLAG(&Assign.smp_os_assign_ready_rector[combined_coreid].ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
-        if (Assign.os_assign_read_vector.ready_vector[task->task_dync_sched_member.bitmap_offset] == 0) {
-            CLEAR_FLAG(&Assign.smp_os_assign_ready_rector[combined_coreid].priority_ready_group, task->task_dync_sched_member.bitmap_column);
+        CLEAR_FLAG(&Assign.smp_os_assign_ready_vector[combined_coreid].ready_vector[task->task_dync_sched_member.bitmap_offset], task->task_dync_sched_member.bitmap_row);
+        if (Assign.os_assign_ready_vector.ready_vector[task->task_dync_sched_member.bitmap_offset] == 0) {
+            CLEAR_FLAG(&Assign.smp_os_assign_ready_vector[combined_coreid].priority_ready_group, task->task_dync_sched_member.bitmap_column);
         }
-        number = PrioCaculate(Assign.smp_os_assign_ready_rector[combined_coreid].priority_ready_group);
-        highest_prio_on_core = (number * 8) + PrioCaculate(Assign.smp_os_assign_ready_rector[combined_coreid].ready_vector[number]);
+        number = PrioCaculate(Assign.smp_os_assign_ready_vector[combined_coreid].priority_ready_group);
+        highest_prio_on_core = (number * 8) + PrioCaculate(Assign.smp_os_assign_ready_vector[combined_coreid].ready_vector[number]);
 #else
-        CLEAR_FLAG(&Assign.smp_os_assign_ready_rector[combined_coreid].priority_ready_group, task->task_dync_sched_member.bitmap_column);
-        highest_prio_on_core = PrioCaculate(Assign.smp_os_assign_ready_rector[combined_coreid].priority_ready_group);
+        CLEAR_FLAG(&Assign.smp_os_assign_ready_vector[combined_coreid].priority_ready_group, task->task_dync_sched_member.bitmap_column);
+        highest_prio_on_core = PrioCaculate(Assign.smp_os_assign_ready_vector[combined_coreid].priority_ready_group);
 #endif
-        Assign.smp_os_assign_ready_rector[combined_coreid].highest_prio = highest_prio_on_core;
+        Assign.smp_os_assign_ready_vector[combined_coreid].highest_prio = highest_prio_on_core;
     }
 }
 
@@ -420,8 +420,8 @@ x_err_t YieldOsAssign(void)
         return -ERROR;
     }
     /* if the bitmap is empty then do not switch */
-    if((RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_read_vector)) &&
-        (RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.smp_os_assign_ready_rector[coreid]))) {
+    if((RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.os_assign_ready_vector)) &&
+        (RET_TRUE == JudgeAssignReadyBitmapIsEmpty(&Assign.smp_os_assign_ready_vector[coreid]))) {
         HwUnlockSpinlock(&AssignSpinLock);
         ENABLE_INTERRUPT(lock);
         return -ERROR;
@@ -481,7 +481,7 @@ void SysInitOsAssign(void)
 
     Assign.ready_vector_done = &ready_vector_done;
     Assign.smp_assign_done = &smp_assign_done;
-    Assign.ready_vector_done->init(&Assign.os_assign_read_vector);
+    Assign.ready_vector_done->init(&Assign.os_assign_ready_vector);
     Assign.smp_assign_done->SmpInit();
 
 }
