@@ -90,7 +90,7 @@ static int FtpEnterPasv(char *ipaddr, int *port)
 	return 1;
 }
  
-int  FtpDownload(char *name, void *buf, int len)
+int  FtpDownload(char *name, char *buf, int len)
 {
 	int   i;
 	int   ret;
@@ -138,6 +138,10 @@ int  FtpDownload(char *name, void *buf, int len)
 	}
 	//下载完成
 	printf("download %d/%d bytes complete.\r\n", i, len);
+	printf("====file content====\n");
+	buf[100] = '\0';
+	printf("%s\n",buf);
+	printf("====================\n");
     // FILE *fp = NULL;
 
     // fp = fopen(name+1, "wb");

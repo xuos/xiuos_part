@@ -37,6 +37,6 @@ int  FtpLogin(char *addr, int port, char *username, char *password);
 int  FtpFileSize(char *name);
 
 /* ftp download file*/
-int  FtpDownload(char *name, void *buf, int len);
+int  FtpDownload(char *name, char *buf, int len);
 
 #endif

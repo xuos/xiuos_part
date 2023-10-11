@@ -30,13 +30,13 @@
 void TestFtpClient(int argc, char* argv[])
 {
     FtpInitCmd();
-    int ret = FtpLogin("192.168.0.248", 21, "anonymous", "anonymous");
+    int ret = FtpLogin("192.168.1.248", 21, "anonymous", "anonymous");
     int size;
     char *buf;
     for(int i = 1;i <= 10;i++){
         char fileName[20] = "/file"; 
         char temp[5] = "";
-        sprintf(temp,"%d",i);
+        sprintf(temp,"%d",i-1);
         strcat(fileName,temp);
         size = FtpFileSize(fileName);
         buf = malloc(size);
