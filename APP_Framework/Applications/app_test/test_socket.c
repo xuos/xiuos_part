@@ -335,10 +335,22 @@ void TestSocket(int argc, char* argv[])
     if (mode == IPERF_MODE_SERVER) {
         printf("[%s] Running iperf server at port %d.\n", __func__, iperf_param.port);
 
-        PrivTaskCreate(&thd, NULL, TestIperfServer, (void*)&iperf_param);
+#ifdef ADD_XIZI_FEATURES
+        char task_name[] = "test_iperf_server";
+        pthread_args_t args;
+        args.pthread_name = task_name;
+        args.arg = (void *)&iperf_param;
+        PrivTaskCreate(&thd, NULL, TestIperfServer, (void*)&args);
+#endif
     } else if (mode == IPERF_MODE_CLIENT) {
         printf("[%s] Running iperf client to server at %s:%d.\n", __func__, iperf_param.host, iperf_param.port);
-        PrivTaskCreate(&thd, NULL, TestIperfClient, (void*)&iperf_param);
+#ifdef ADD_XIZI_FEATURES
+        char task_name[] = "test_iperf_client";
+        pthread_args_t args;
+        args.pthread_name = task_name;
+        args.arg = (void *)&iperf_param;
+        PrivTaskCreate(&thd, NULL, TestIperfClient, (void*)&args);
+#endif
     }
 
     PrivTaskStartup(&thd);

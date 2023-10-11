@@ -1,6 +1,10 @@
 export CROSS_COMPILE ?=/usr/bin/arm-none-eabi-
 
+<<<<<<< HEAD
 export CFLAGS := -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -ffunction-sections -fdata-sections -Dgcc -O0 -fgnu89-inline -Wa,-mimplicit-it=thumb -Werror
+=======
+export CFLAGS := -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -ffunction-sections -fdata-sections -Dgcc -O0 -fgnu89-inline -Wa,-mimplicit-it=thumb -Werror -Wuninitialized
+>>>>>>> upstream/prepare_for_master
 # export CFLAGS := -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -ffunction-sections -fdata-sections -Dgcc -O0 -gdwarf-2 -g -fgnu89-inline -Wa,-mimplicit-it=thumb -Werror
 export AFLAGS := -c -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -ffunction-sections -fdata-sections -x assembler-with-cpp -Wa,-mimplicit-it=thumb  -gdwarf-2
 export LFLAGS := -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -ffunction-sections -fdata-sections -Wl,--gc-sections,-Map=XiZi-edu-arm32.map,-cref,-u,Reset_Handler -T $(BSP_ROOT)/link.lds

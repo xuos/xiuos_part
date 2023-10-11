@@ -116,7 +116,12 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     attr.schedparam.sched_priority = 20;
     attr.stacksize = 2048;
 
-    PrivTaskCreate(&active_task_id, &attr, &ReadTask, sdev);
+    char task_name[] = "d124_recv_data";
+    pthread_args_t args;
+    args.pthread_name = task_name;
+    args.arg = (void *)sdev;
+
+    PrivTaskCreate(&active_task_id, &attr, &ReadTask, (void *)&args);
     PrivTaskStartup(&active_task_id);
 
     return result;
