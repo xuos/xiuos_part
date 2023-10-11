@@ -53,6 +53,10 @@ extern int S7ProtocolInit(struct ControlRecipe *p_recipe);
 extern int FreeModbusTcpServerInit(struct ControlRecipe *p_recipe);
 #endif
 
+#ifdef CONTROL_PROTOCOL_CIP
+extern int CipProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
 /*
 CONTROL FRAMEWORK READ DATA FORMAT:
 |  HEAD |device_id|read data length|read item count|         data         |
@@ -96,6 +100,9 @@ static struct ControlProtocolInitParam protocol_init[] =
     { PROTOCOL_FREEMODBUS_TCP_SERVER, FreeModbusTcpServerInit },
 #endif
 
+#ifdef CONTROL_PROTOCOL_CIP
+    { PROTOCOL_CIP, CipProtocolInit },
+#endif
 	{ PROTOCOL_END, NULL },
 };
 
@@ -329,7 +336,7 @@ int ControlProtocolOpenDef(struct ControlProtocol *control_protocol)
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 19;
-    attr.stacksize = 2048;
+    attr.stacksize = 4096;
 
     char task_name[] = "control_recv_data";
     pthread_args_t args;

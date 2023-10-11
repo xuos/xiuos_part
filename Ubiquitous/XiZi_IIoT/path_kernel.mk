@@ -536,6 +536,7 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protoc
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/opcua #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/s7 #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/freemodbustcpserver #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/cip #
 endif
 
 ifeq ($(CONFIG_LIB_USING_CJSON), y)

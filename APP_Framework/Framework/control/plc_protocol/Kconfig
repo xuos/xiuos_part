@@ -27,3 +27,11 @@ config CONTROL_PROTOCOL_S7
 if CONTROL_PROTOCOL_S7
         source "$APP_DIR/Framework/control/plc_protocol/s7/Kconfig"
 endif
+
+config CONTROL_PROTOCOL_CIP
+        bool "Using cip control protocol"
+        default n
+        select CONTROL_USING_SOCKET
+if CONTROL_PROTOCOL_CIP
+        source "$APP_DIR/Framework/control/plc_protocol/cip/Kconfig"
+endif
