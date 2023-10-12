@@ -39,7 +39,7 @@ void Controlabl30Test(void)
             read_data_length = ControlProtocolRead(CIP_protocol, read_data, sizeof(read_data));
             printf("%s read [%d] CIP data %d using receipe file\n", __func__, i, read_data_length);
             i++;
-            PrivTaskDelay(10000);
+            PrivTaskDelay(1000);
         }
 
         //ControlProtocolClose(CIP_protocol);

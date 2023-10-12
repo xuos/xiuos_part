@@ -172,9 +172,10 @@ int8_t ReadPlcDataByRecipe(struct ControlRecipe *p_recipe)
                     // ret = ab_cip_write_short(fd, address, w_s_val);
                     // printf("Write\t %s \tshort:\t %d, \tret: %d\n", address, w_s_val, ret);
                     // GET_RESULT(ret);
-            
+
+                    s_val = 0;
                     ret = ab_cip_read_short(fd, address, &s_val);
-                    // printf("Read\t %s \tshort:\t %d\n", address, s_val);
+                    printf("Read\t %s \tshort:\t %d\n", address, s_val);
                     GET_RESULT(ret); 
                     memcpy(val,&s_val,sizeof(s_val));
                     PushDataIntoStack(CIP_data,val,2);
@@ -188,7 +189,7 @@ int8_t ReadPlcDataByRecipe(struct ControlRecipe *p_recipe)
                     // printf("Write\t %s \tint32:\t %d, \tret: %d\n", address, w_i_val, ret);
                     // GET_RESULT(ret);
 
-                    
+                    i_val = 0;
                     ret = ab_cip_read_int32(fd, address, &i_val);
                     // printf("Read\t %s \tint32:\t %d\n", address, i_val);
                     GET_RESULT(ret);
@@ -204,6 +205,7 @@ int8_t ReadPlcDataByRecipe(struct ControlRecipe *p_recipe)
                     // printf("Write\t %s \tushort:\t %d, \tret: %d\n", address, w_us_val, ret);
                     // GET_RESULT(ret);
 
+                    us_val = 0;
                     ret = ab_cip_read_ushort(fd, address, &us_val);
                     // printf("Read\t %s \tushort:\t %d\n", address, us_val);
                     GET_RESULT(ret);
@@ -219,6 +221,7 @@ int8_t ReadPlcDataByRecipe(struct ControlRecipe *p_recipe)
                     // printf("Write\t %s \tuint32:\t %d, \tret: %d\n", address, w_ui_val, ret);
                     // GET_RESULT(ret);
     
+                    ui_val = 0;
                     ret = ab_cip_read_uint32(fd, address, &ui_val);
                     // printf("Read\t %s \tuint32:\t %d\n", address, ui_val);
                     GET_RESULT(ret);
@@ -234,6 +237,7 @@ int8_t ReadPlcDataByRecipe(struct ControlRecipe *p_recipe)
                     // printf("Write\t %s \tdouble:\t %lf, \tret: %d\n", address, w_d_val, ret);
                     // GET_RESULT(ret);
 
+                    d_val = 0.0;
                     ret = ab_cip_read_double(fd, address, &d_val);
                     // printf("Read\t %s \tdouble:\t %lf\n", address, d_val);
                     GET_RESULT(ret);
@@ -249,24 +253,26 @@ int8_t ReadPlcDataByRecipe(struct ControlRecipe *p_recipe)
                     // printf("Write\t %s \tfloat:\t %f, \tret: %d\n", address, w_f_val, ret);
                     // GET_RESULT(ret);
 
+                    f_val = 0.0;
                     ret = ab_cip_read_float(fd, address, &f_val);
-                    // printf("Read\t %s \tfloat:\t %f\n", address, f_val);
+                    printf("Read\t %s \tfloat:\t %f\n", address, f_val);
                     GET_RESULT(ret);
                     memcpy(val,&f_val,sizeof(us_val));
-                    PushDataIntoStack(CIP_data,val,1);               
+                    PushDataIntoStack(CIP_data,val,4);               
                     break;
 
                 default:
                     printf("value type no found!\n");
                     break;
                 }
-                ControlPrintfList("CIP RECV", CIP_data, data_length);
+                // ControlPrintfList("CIP RECV", CIP_data, data_length);
             }      
             printf("All Failed count: %d\n", faild_count);
             if(faild_count != 0)
             {         
                 ab_cip_disconnect(fd);
-                system("pause");
+                printf("get value failed!\n");
+                break;
             }
             /*read all variable item data, put them into circular_area*/
             printf("%s get %d item %d length\n", __func__, i, data_length);

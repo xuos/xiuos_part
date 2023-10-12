@@ -221,6 +221,7 @@ cip_error_code_e read_value(int fd, const char *address, int length, byte_array_
 			if (cip_read_response(fd, &response))
 				ret = cip_analysis_read_byte(response, out_bytes);
 				// printf("%s %hu\n",__func__,response.data);
+			free(response.data);
 		}
 		free(core_cmd.data);
 	}
@@ -266,6 +267,7 @@ bool initialization_on_connect(int fd)
 
 	// 返回成功的信号 -> Return a successful signal
 	return is_ok;
+	free(temp.data);
 }
 
 bool cip_read_response(int fd, byte_array_info *response)
