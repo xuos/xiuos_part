@@ -76,7 +76,7 @@ void Uart485Init(uint32_t baud_rate, uint8_t data_bits, uint8_t stop_bits, uint8
     ioctl_cfg.args = &pin_param;
     PrivIoctl(pin_fd, OPE_CFG, &ioctl_cfg);
 
-    uart_fd = open(CONTROL_FRAMEWORK_UART_DEV, O_RDWR);
+    uart_fd = PrivOpen(CONTROL_FRAMEWORK_UART_DEV, O_RDWR);
     if (uart_fd < 0) {
         printf("open fd error %d\n", uart_fd);
         return;
