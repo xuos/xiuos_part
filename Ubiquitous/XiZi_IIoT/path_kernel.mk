@@ -57,6 +57,20 @@ KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/cortex-m7-emulator)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/CMSIS \
+	-I$(BSP_ROOT)/third_party_driver/CMSIS/Include\
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/include/V2M \
+	-I$(KERNEL_ROOT)/include \
+	-I$(KERNEL_ROOT)/resources/include 
+
+
+endif 
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xiwangtong-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
