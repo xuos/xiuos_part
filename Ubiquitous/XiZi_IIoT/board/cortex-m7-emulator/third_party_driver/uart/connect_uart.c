@@ -695,18 +695,22 @@ static void UartIsr(struct SerialBus *serial, struct SerialDriver *serial_drv, s
 
 static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInfo *configure_info)
 {
-    NULL_PARAM_CHECK(serial_drv);
+  NULL_PARAM_CHECK(serial_drv);
 
-    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
-    // LPUART_Type *uart_base = (LPUART_Type *)serial_cfg->hw_cfg.private_data;
-
-    if (configure_info->private_data) {
-        struct SerialCfgParam *serial_cfg_new = (struct SerialCfgParam *)configure_info->private_data;
-        SerialCfgParamCheck(serial_cfg, serial_cfg_new);
-    }
+  struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
+  // LPUART_Type *uart_base = (LPUART_Type *)serial_cfg->hw_cfg.private_data;
 
 	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)serial_drv->driver.owner_bus->owner_haldev;
 	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
+
+  if (configure_info->private_data) {
+      struct SerialCfgParam *serial_cfg_new = (struct SerialCfgParam *)configure_info->private_data;
+      SerialCfgParamCheck(serial_cfg, serial_cfg_new);
+
+      if (serial_cfg_new->data_cfg.dev_recv_callback) {
+          BusDevRecvCallback(&(serial_dev->haldev), serial_cfg_new->data_cfg.dev_recv_callback);
+      }
+  }
 
 	// config serial receive sem timeout
 	dev_param->serial_timeout = serial_cfg->data_cfg.serial_timeout;
