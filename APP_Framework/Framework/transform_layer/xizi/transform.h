@@ -43,6 +43,9 @@ extern "C" {
 
 #define NAME_NUM_MAX            32
 
+#define LINKLIST_FLAG_FIFO      0x00           
+#define LINKLIST_FLAG_PRIO      0x01
+
 #ifndef EVENT_AND
 #define EVENT_AND          (1 << 0)
 #endif
@@ -168,6 +171,8 @@ struct SerialDataCfg
     uint8_t serial_invert_mode;
     uint16_t serial_buffer_size;
     int32 serial_timeout;
+
+    int (*dev_recv_callback) (void *dev, size_t length);
 
     uint8_t is_ext_uart;
     uint8_t ext_uart_no;
