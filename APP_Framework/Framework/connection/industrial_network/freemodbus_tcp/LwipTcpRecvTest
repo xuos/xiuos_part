@@ -1,0 +1,92 @@
+
+
+void LwipTcpRecvTest(void)
+{
+    uint8_t enet_port = 0; ///< test enet port 0
+
+    lwip_config_net(enet_port, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
+
+    uint8_t *recv_data;
+    socklen_t sin_size;
+    int sock = -1, connected, bytes_received, i;
+    struct sockaddr_in server_addr, client_addr;
+    fd_set readset;
+    struct timeval timeout;
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        KPrintf("[%s:%d] Socket error!\n", __FILE__, __LINE__);
+        goto __exit;
+    }
+
+    recv_data = (uint8_t *)malloc(128);
+    if (recv_data == NULL) {
+        KPrintf("No memory!\n");
+        goto __exit;
+    }
+
+    //configure tcp server param
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(tcp_server_port);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    memset(&(server_addr.sin_zero), 0x0, sizeof(server_addr.sin_zero));
+
+    if (bind(sock, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1) {
+        KPrintf("Unable to bind!\n");
+        goto __exit;
+    }
+
+    if (listen(sock, 5) == -1) {
+        KPrintf("Listen error!\n");
+        goto __exit;
+    }
+
+    timeout.tv_sec = 30;
+    timeout.tv_usec = 0;
+
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) ==-1) {
+        KPrintf("setsockopt failed!");
+        goto __exit;
+    }
+
+    while (1) {
+        FD_ZERO(&readset);
+        FD_SET(sock, &readset);
+
+        if (select(sock + 1, &readset, NULL, NULL, &timeout) == 0) {
+            continue;
+        }
+
+        sin_size = sizeof(struct sockaddr_in);
+        connected = accept(sock, (struct sockaddr *)&client_addr, &sin_size);
+        while (1) {
+            bytes_received = recv(connected, recv_data, 128, 0);
+            if (bytes_received == 0) {
+                KPrintf("client disconnected (%s, %d)\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+                break;
+            } else if (bytes_received < 0) {
+                KPrintf("recv error, client: (%s, %d)\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+                break;
+            } else {
+                KPrintf("new client connected from (%s, %d)\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+                KPrintf("recv data length %d Bytes\n", bytes_received);
+                for (i = 0; i < bytes_received; i ++) {
+                    KPrintf("data 0x%x\n", recv_data[i]);
+                }
+                if (i = bytes_received) {
+                    KPrintf("\r\n");
+                    memset(recv_data, 0, sizeof(recv_data));
+                }
+            }
+        }
+        if (connected >= 0) {
+            closesocket(connected);
+            connected = -1;
+            break;
+        }
+
+    __exit:
+        if (sock >= 0) closesocket(sock);
+        if (recv_data) free(recv_data);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) |
+SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),TCPRecv, LwipTcpRecvTest, TCP Recv message);

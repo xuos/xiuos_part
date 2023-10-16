@@ -38,7 +38,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-#include <sockets.h> 
+#include <sockets.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>

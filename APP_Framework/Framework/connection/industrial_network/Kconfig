@@ -13,3 +13,12 @@ config CONNECTION_ADAPTER_POWERLINK
     if CONNECTION_ADAPTER_POWERLINK
         source "$APP_DIR/Framework/connection/industrial_network/powerlink/Kconfig"
     endif
+
+config CONNECTION_ADAPTER_FREEMODBUSTCP
+    bool "Using FREEMODBUSTCP on industrial network adapter device"
+    default n
+
+    if CONNECTION_ADAPTER_FREEMODBUSTCP
+        source "$APP_DIR/Framework/connection/industrial_network/freemodbus_tcp/Kconfig"
+    endif
+    

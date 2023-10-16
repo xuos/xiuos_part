@@ -1,5 +1,0 @@
-menu "lib using freemodbus"
-    menuconfig LIB_USING_FREEMODBUS
-        bool "USING freemodbus"
-        default n
-endmenu

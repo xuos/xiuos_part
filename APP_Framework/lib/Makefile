@@ -22,8 +22,8 @@ ifeq ($(CONFIG_TOOL_USING_MQTT),y)
   SRC_DIR += mqtt
 endif
 
-ifeq ($(CONFIG_LIB_USING_FREEMODBUS),y)
-	SRC_DIR += freemodbus
-endif
+# ifeq ($(CONFIG_LIB_USING_FREEMODBUS),y)
+# 	SRC_DIR += freemodbus
+# endif
 
 include $(KERNEL_ROOT)/compiler.mk

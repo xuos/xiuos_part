@@ -33,11 +33,13 @@
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
+#include <transform.h>
+#include "lwip/sys.h"
+#include "lwip/sockets.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
 #include "mbport.h"
-#include "freemodbustcpserver.h"
 
 /* ----------------------- Defines ------------------------------------------*/
 #define PROG            "freemodbus"
@@ -65,6 +67,7 @@ static BOOL     bCreatePollingThread( void );
 static enum ThreadState eGetPollingThreadState( void );
 static void     eSetPollingThreadState( enum ThreadState eNewState );
 static void* pvPollingThread( void *pvParameter );
+int LWIPConnectSocket(uint16_t port);
 
 /* ----------------------- Start implementation -----------------------------*/
 int MBServer()
@@ -74,6 +77,17 @@ int MBServer()
     BOOL            bDoExit;
     usRegHoldingBuf[5] = 123;
     usRegHoldingBuf[7] = 234;
+
+    printf("%s ip %d.%d.%d.%d mask %d.%d.%d.%d gw %d.%d.%d.%d\n", __func__, 
+    192, 168, 250, 233,
+    255, 255, 255, 255,
+    192, 168, 250, 1);
+    uint8_t local_ip[4] = {192,168,250,233};
+    uint8_t gateway[4] = {192,168,250,1};
+    uint8_t netmask[4] = {255,255,255,0};
+    lwip_config_tcp(0, local_ip, netmask, gateway);
+    printf("%s LWIPInit done\n", __func__);
+
     if( eMBTCPInit( MB_TCP_PORT_USE_DEFAULT ) != MB_ENOERR )
     {
         fprintf( stderr, "%s: can't initialize modbus stack!\r\n", PROG );
@@ -88,18 +102,22 @@ int MBServer()
             printf(  "Can't start protocol stack! Already running?\r\n"  );
         }
     }
-    printf("%d %d\n",sizeof(usRegHoldingBuf),__LINE__);
+    printf("%d %d %s\n",sizeof(usRegHoldingBuf),__LINE__,__func__);
+    
     while(1)
     {
         for(int i =0; i<sizeof(usRegHoldingBuf)/2;i++)
         {
             printf("poll recv is %3d\n", usRegHoldingBuf[i]);
             MdelayKTask(100);
-        } 
+        }
     }
   
     return iExitCode;
 }
+
+PRIV_SHELL_CMD_FUNCTION(MBServer, a Mtcp server Demo, PRIV_SHELL_CMD_MAIN_ATTR);  
+
 
 BOOL bCreatePollingThread( void )
 {
@@ -249,33 +267,33 @@ eMBErrorCode eMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT us
  * @param control_protocol - control protocol pointer
  * @return success : 0 error
  */
-int FreeModbusTcpOpen(struct ControlProtocol *control_protocol)
-{
-    ControlProtocolOpenDef(control_protocol);
-    return 0;
-}
+// int FreeModbusTcpOpen(struct ControlProtocol *control_protocol)
+// {
+//     ControlProtocolOpenDef(control_protocol);
+//     return 0;
+// }
 
-static struct ControlDone FreeModbusTcp_protocol_done = 
-{
-    ._open = FreeModbusTcpOpen,
-    ._close = NULL,
-    ._read = NULL,
-    ._write = NULL,
-    ._ioctl = NULL,
-};
+// static struct ControlDone FreeModbusTcp_protocol_done = 
+// {
+//     ._open = FreeModbusTcpOpen,
+//     ._close = NULL,
+//     ._read = NULL,
+//     ._write = NULL,
+//     ._ioctl = NULL,
+// };
 
-void *ReceivePlcDataTask(void *parameter)
-{
-    MBServer();
-}
+// void *ReceivePlcDataTask(void *parameter)
+// {
+//     MBServer();
+// }
 
 /**
  * @description: Modbus Tcp Server Init
  * @param p_recipe - recipe pointer
  * @return success : 0 error : -1
  */
-int FreeModbusTcpServerInit(struct ControlRecipe *p_recipe)
-{   
-    p_recipe->done = &FreeModbusTcp_protocol_done;
-    return 0;
-}
+// int FreeModbusTcpServerInit(struct ControlRecipe *p_recipe)
+// {   
+//     p_recipe->done = &FreeModbusTcp_protocol_done;
+//     return 0;
+// }
