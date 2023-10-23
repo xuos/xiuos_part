@@ -25,7 +25,7 @@ char recvBuffer[]:输入缓冲区
 打开menuconfig之后，将test_ftp开启(y)，将Using TFcard device 和 Using W5500 as network device 开启(y)保存后退出
 
 ![image](img/03.png)
-编译XiZi-cortex-edu-riscv64.elf成功
+编译XiZi-edu-riscv64.elf成功
 
 ![image](img/04.png)
 启动kflash烧录bin文件，按reset键重置成功进入系统并显示SD卡已挂载
