@@ -126,7 +126,7 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     endif 
 
     ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
-        SRC_FILES += 
+        SRC_FILES += test_webserver/test_webserver.c
     endif
 
     ifeq ($(CONFIG_USER_TEST_MQTTCLIENT),y)
