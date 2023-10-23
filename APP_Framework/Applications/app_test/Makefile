@@ -142,7 +142,7 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     endif
 
 	ifeq ($(CONFIG_USER_TEST_FTPCLIENT_RISCV),y)
-        SRC_FILES += tes_ftpclient_riscv/test_ftpclient_riscv.c
+        SRC_FILES += test_ftpclient_riscv/test_ftpclient_riscv.c
     endif
 
     ifeq ($(CONFIG_USER_TEST_LORA_P2P),y)
