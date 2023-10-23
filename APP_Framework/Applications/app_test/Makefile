@@ -24,7 +24,7 @@ endif
 
 ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     SRC_FILES := test_shell.c
-
+    
     ifeq ($(CONFIG_USER_TEST_ADC),y)
         SRC_FILES += test_adc.c
     endif
@@ -130,6 +130,7 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     endif
 
     ifeq ($(CONFIG_USER_TEST_MQTTCLIENT),y)
+        SRC_DIR:= test_mqttclient
         SRC_FILES += 
     endif
 
