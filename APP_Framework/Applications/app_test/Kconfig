@@ -286,6 +286,10 @@ menu "test app"
                 bool "Config test ftp client"
                 default n
             
+            menuconfig USER_TEST_FTPCLIENT_RISCV
+                bool "Config test ftp client on riscv"
+                default n
+
             menuconfig USER_TEST_LORA_P2P
                 bool "Config test lora p2p"
                 default n

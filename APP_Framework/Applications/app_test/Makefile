@@ -124,7 +124,7 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     ifeq ($(CONFIG_USER_TEST_MODBUS_TCP),y)
         SRC_DIR += test_modbus_tcp
     endif 
-
+	
     ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
         SRC_FILES += test_webserver/test_webserver.c
     endif
@@ -137,6 +137,10 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     ifeq ($(CONFIG_USER_TEST_FTPCLIENT),y)
         SRC_FILES += test_ftpclient/test_ftpclient.c test_ftpclient/ftp_client/ftp_client.c\
                      test_ftpclient/ftp_client/my_socket.c
+    endif
+
+	ifeq ($(CONFIG_USER_TEST_FTPCLIENT_RISCV),y)
+        SRC_FILES += test_ftpclient_riscv/test_ftpclient_riscv.c
     endif
 
     ifeq ($(CONFIG_USER_TEST_LORA_P2P),y)
