@@ -16,7 +16,7 @@ http://license.coscl.org.cn/MulanPSL2
 #include <socket.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "test_ftp.h"
+#include "test_ftpclient_riscv.h"
 #define SOCKET_DATA 2
 #define SOCKET_CMD 3
 char sendBuffer[1024];
