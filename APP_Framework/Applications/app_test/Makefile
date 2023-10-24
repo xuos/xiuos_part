@@ -157,7 +157,11 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
 
     ifeq ($(CONFIG_USER_TEST_USB_CAMERA),y)
         SRC_FILES += 
-    endif     
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_FTPCLIENT_FINAL),y)
+        SRC_FILES += test_ftpclient_final/test_ftpclient_final.c test_ftpclient_final/ftp_client/ftp_client.c test_ftpclient_final/ftp_client/my_socket.c
+    endif   
 
     include $(KERNEL_ROOT)/compiler.mk
 endif
