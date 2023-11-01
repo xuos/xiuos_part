@@ -18,4 +18,12 @@ ifeq ($(CONFIG_LIB_USING_LORAWAN),y)
 	SRC_DIR += lorawan
 endif
 
+ifeq ($(CONFIG_TOOL_USING_MQTT),y)
+  SRC_DIR += mqtt
+endif
+
+ifeq ($(CONFIG_LIB_USING_SQLITE),y)
+  SRC_DIR += SQLite
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

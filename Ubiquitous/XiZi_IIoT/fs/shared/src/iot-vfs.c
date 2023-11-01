@@ -231,9 +231,9 @@ int MountFilesystem(const char *bus_name,
         enum FilesystemType fs_type, const char *path)
 {
     struct MountPoint *mp = NULL, *itr;
-    struct Bus *bus;
+    struct Bus* bus = NULL;
     HardwareDevType dev;
-    DriverType drv;
+    DriverType drv = NULL;
     struct SysDoubleLinklistNode *node;
     int ret = -EINVAL;
 
@@ -449,7 +449,7 @@ int open(const char *path, int flags, ...)
     abspath = GetAbsolutePath(path);
     mp = GetMountPoint(abspath);
     if (mp == NULL) {
-        SYS_ERR("%s: mount point not found\n", __func__);
+        SYS_ERR("%s: mount point not found path %s abspath %s\n", __func__, path, abspath);
         ret = -EINVAL;
         goto err;
     }

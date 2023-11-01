@@ -46,7 +46,12 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     endif
 
     ifeq ($(CONFIG_USER_TEST_I2C),y)
-        SRC_FILES += test_i2c.c
+        ifeq ($(CONFIG_BOARD_EDU_RISCV64_EVB),y)
+            SRC_FILES += test_i2c_riscv.c
+        endif
+        ifeq ($(CONFIG_BOARD_EDU_ARM32_EVB),y)
+            SRC_FILES += test_i2c_arm.c
+        endif
     endif
 
     ifeq ($(CONFIG_USER_TEST_UART),y)
@@ -66,7 +71,12 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     endif
 
     ifeq ($(CONFIG_USER_TEST_RS485),y)
-        SRC_FILES += test_rs485.c
+        ifeq ($(CONFIG_BOARD_EDU_RISCV64_EVB),y)
+            SRC_FILES += test_rs485_riscv.c
+        endif
+        ifeq ($(CONFIG_BOARD_EDU_ARM32_EVB),y)
+            SRC_FILES += test_rs485_arm.c
+        endif
     endif    
 
     ifeq ($(CONFIG_USER_TEST_HWTIMER),y)

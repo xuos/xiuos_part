@@ -42,15 +42,9 @@ uint32 HwtimerOpen(void *dev)
 {
     struct HwtimerHardwareDevice *hwtimer_dev = dev;
 
-    ptim2_cb_info = &hwtimer_dev->hwtimer_param.cb_info;
-
     plic_init();
     sysctl_enable_irq();
     timer_init(TIMER_DEVICE_1);
-
-    size_t real_time =  timer_set_interval(TIMER_DEVICE_1, TIMER_CHANNEL_1, hwtimer_dev->hwtimer_param.period_millisecond *1000);
-    KPrintf("timer_set_interval --  real_time : %ld\n", real_time);
-    timer_irq_register(TIMER_DEVICE_1, TIMER_CHANNEL_1, !hwtimer_dev->hwtimer_param.repeat, 1, timer_callback, NULL);
 
     timer_set_enable(TIMER_DEVICE_1, TIMER_CHANNEL_1, 1);
 
@@ -73,6 +67,34 @@ static const struct HwtimerDevDone dev_done =
     .read = NONE,
 };
 
+static uint32 HwTimerDrvConfigure(void *drv, struct BusConfigureInfo *configure_info)
+{
+    NULL_PARAM_CHECK(drv);
+    NULL_PARAM_CHECK(configure_info);
+
+    x_err_t ret = EOK;
+    void* param;
+
+    switch (configure_info->configure_cmd)
+    {
+        case OPE_CFG: {
+            size_t real_time =  timer_set_interval(TIMER_DEVICE_1, TIMER_CHANNEL_1, *(x_ticks_t *)configure_info->private_data *1000000);
+            KPrintf("timer_set_interval --  real_time : %ld\n", real_time);
+            break;
+        }
+        case OPE_INT: {
+            ptim2_cb_info = (struct HwtimerCallBackInfo *)malloc(sizeof(struct HwtimerCallBackInfo));
+            ptim2_cb_info->timeout_callback = configure_info->private_data;
+            timer_irq_register(TIMER_DEVICE_1, TIMER_CHANNEL_1, 0, 1, timer_callback, NULL);
+            break;
+        }
+        default:
+            break;
+    }
+
+    return ret;
+}
+
 /*Init hwtimer bus*/
 static int BoardHwtimerBusInit(struct HwtimerBus *hwtimer_bus, struct HwtimerDriver *hwtimer_driver)
 {
@@ -86,7 +108,7 @@ static int BoardHwtimerBusInit(struct HwtimerBus *hwtimer_bus, struct HwtimerDri
     }
 
     /*Init the hwtimer driver*/
-    hwtimer_driver->configure = NONE;
+    hwtimer_driver->configure = &HwTimerDrvConfigure;
     ret = HwtimerDriverInit(hwtimer_driver, HWTIMER_DRIVER_NAME_1);
     if (EOK != ret) {
         KPrintf("board_hwtimer_init HwtimerDriverInit error %d\n", ret);

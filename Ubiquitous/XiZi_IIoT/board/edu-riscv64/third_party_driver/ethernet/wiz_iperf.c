@@ -304,7 +304,7 @@ __exit:
     if (recv_data) free(recv_data);
 }
 
-void iperf_usage(void)
+static void iperf_usage(void)
 {
     KPrintf("Usage: iperf [-s|-c host] [options] [multi-threaded]\n");
     KPrintf("       iperf [-h|--stop]\n");
@@ -326,7 +326,7 @@ void iperf_usage(void)
     return;
 }
 
-int iperf(int argc, char **argv)
+int wiz_iperf(int argc, char** argv)
 {
     int mode = 0; /* server mode */
     char *host = NULL;
@@ -460,6 +460,6 @@ __usage:
     return 0;
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
-                 iperf, iperf,
-                 iperf throughput test);
+    wiz_iperf, wiz_iperf,
+    iperf throughput test);
 #endif

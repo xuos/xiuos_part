@@ -50,6 +50,9 @@ uint8_t SX1276Regs[0x70];
 static bool LoRaOn = true;       
 static bool LoRaOnState = false; 
 
+static int sx1276_tx_sem, sx1276_rx_sem;
+static int sx1276_radio_task;
+
 void SX1276Reset(void)
 {
 	uint32_t startTick;  
@@ -200,6 +203,20 @@ void SX1276GetRxPacket(void *buffer, uint16_t *size)
     }
 }
 
+int SX1276GetRx(void *buffer, uint16_t *size)
+{
+    int ret = -1;
+    SX1276StartRx();
+
+    //receive timeout 10s
+    ret = KSemaphoreObtain(sx1276_rx_sem, 10000);
+    if (0 == ret) {
+        SX1276LoRaSetRFState(RFLR_STATE_IDLE);
+        SX1276GetRxPacket(buffer, size);
+    }
+    return ret;
+}
+
 void SX1276SetTxPacket(const void *buffer, uint16_t size)
 {
     if(LoRaOn == false) {
@@ -207,6 +224,14 @@ void SX1276SetTxPacket(const void *buffer, uint16_t size)
     } else {
         SX1276LoRaSetTxPacket(buffer, size);
     }
+}
+
+void SX1276SetTx(const void *buffer, uint16_t size)
+{
+    SX1276SetTxPacket(buffer, size);
+
+    KSemaphoreObtain(sx1276_tx_sem, WAITING_FOREVER);
+    SX1276StartRx();
 }
 
 uint8_t SX1276GetRFState(void)
@@ -233,6 +258,20 @@ uint32_t SX1276Process(void)
         return SX1276FskProcess();
     } else {
         return SX1276LoRaProcess();
+    }
+}
+
+static void Sx1276RadioEntry(void *parameter)  
+{
+    uint32_t result;
+    while(1) {
+        result = SX1276Process();
+        if (RF_RX_DONE == result) {
+            KSemaphoreAbandon(sx1276_rx_sem);
+        }
+        if (RF_TX_DONE == result) {
+            KSemaphoreAbandon(sx1276_tx_sem);
+        }
     }
 }
 
@@ -277,6 +316,12 @@ void SX1276Init(void)
 		SX1276_SetLoRaOn(LoRaOn);
 		SX1276LoRaInit();       
 	#endif
+
+    sx1276_rx_sem = KSemaphoreCreate(0);
+    sx1276_tx_sem = KSemaphoreCreate(0);
+
+    sx1276_radio_task = KTaskCreate("radio", Sx1276RadioEntry , NONE, 2048, 20);
+    StartupKTask(sx1276_radio_task);
 }
 
 #endif

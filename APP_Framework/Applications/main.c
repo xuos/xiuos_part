@@ -17,12 +17,21 @@
 
 extern int FrameworkInit();
 extern void ApplicationOtaTaskInit(void);
+
+#ifdef OTA_BY_PLATFORM
+extern int OtaTask(void);
+#endif
+
 int main(void)
 {
-	printf("Hello, world! \n");
-	FrameworkInit();
+    printf("Hello, world! \n");
+    FrameworkInit();
 #ifdef APPLICATION_OTA
-	ApplicationOtaTaskInit();
+    ApplicationOtaTaskInit();
+#endif
+
+#ifdef OTA_BY_PLATFORM
+    OtaTask();
 #endif
     return 0;
 }

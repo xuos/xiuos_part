@@ -20,10 +20,14 @@ xiuos/APP_Framework/lib/lorawan
 
 ```
 # 下载代码
-# 进入APP_Framework/lib/lorawan目录下载更新子模块
+# 进入APP_Framework/lib/lorawan目录下载更新子模块，首先执行以下命令：
 git submodule init
+# 若需要使用lora_radio_driver子模块，执行以下命令：
 git submodule update APP_Framework/lib/lorawan/lora_radio_driver
+# 若需要使用lorawan_devicenode子模块，执行以下命令：
 git submodule update APP_Framework/lib/lorawan/lorawan_devicenode
+# 若需要使用lorawan_gateway_single_channel子模块，执行以下命令：
+git submodule update APP_Framework/lib/lorawan/lorawan_gateway_single_channel
 
 # 进入 APP_Framework/lib/lorawan/Kconfig 配置，增加子模块source路径，从而编译时可找到相应lib的配置
 menuconfig LIB_USING_LORAWAN_GATEWAY_SC

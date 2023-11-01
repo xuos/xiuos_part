@@ -25,10 +25,11 @@
 #ifndef _BSP_ATOMIC_H
 #define _BSP_ATOMIC_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 #define SPINLOCK_INIT \
     {                 \
@@ -63,7 +64,7 @@ extern "C" {
 
 typedef struct _spinlock
 {
-    int lock;
+    int32_t lock;
 } spinlock_t;
 
 typedef struct _semaphore

@@ -280,7 +280,7 @@ int32_t Ymodem_Receive(uint8_t *buf, const uint32_t addr)
                     }
                     /* erase user application area */
 
-                    NOR_FLASH_Erase(addr,size);
+                    Flash_Erase(addr,size);
                     Send_Byte(ACK);
                     Send_Byte(CRC16);
                   }
@@ -300,9 +300,9 @@ int32_t Ymodem_Receive(uint8_t *buf, const uint32_t addr)
 
                   /* Write received data in Flash */
 #ifndef  USE_HIGHT_SPEED_TRANS
-                 if(NOR_FLASH_Write(&flashdestination, buf, (uint16_t)packet_length)  == 0)
+                  if(NOR_FLASH_Write(&flashdestination, buf, (uint16_t)packet_length) == kStatus_Success)
 #else
-                  if(NOR_FLASH_Write(&flashdestination, buf, (uint16_t)packet_length, 0) == 0)
+                  if(NOR_FLASH_Write(&flashdestination, buf, (uint16_t)packet_length, 0) == kStatus_Success)
 #endif
                   {
                     Send_Byte(ACK);
@@ -349,7 +349,10 @@ int32_t Ymodem_Receive(uint8_t *buf, const uint32_t addr)
     }
   }
 #ifdef  USE_HIGHT_SPEED_TRANS
-    NOR_FLASH_Write(&flashdestination, buf, (uint16_t) packet_length,1);
+  if(NOR_FLASH_Write(&flashdestination, buf, (uint16_t) packet_length,1) != kStatus_Success)
+  {
+      return -4;
+  }
 #endif
   return (int32_t)size;
 }
@@ -370,13 +373,12 @@ int32_t SerialDownload(const uint32_t addr)
     Size = Ymodem_Receive(&tab_1024[0], addr);
     if(Size > 0)
     {
-        Serial_PutString("\n\n\r Programming Completed Successfully!\n\r--------------------------------\r\n Name: ");
+        Serial_PutString("\n\n\rProgramming Completed Successfully!\n\r\r\nName: ");
         Serial_PutString(FileName);
         Int2Str(Number, Size);
-        Serial_PutString("\n\r Size: ");
+        Serial_PutString("\n\rSize: ");
         Serial_PutString(Number);
         Serial_PutString(" Bytes\r\n");
-        Serial_PutString("-------------------\n");
     }
     else if(Size == -1)
     {
