@@ -56,7 +56,7 @@ Modification:
 #endif
 
 #ifdef ADD_XIZI_FEATURES
-#define DEFAULT_DB_NAME "/xiuos.db"
+#define DEFAULT_DB_NAME "xiuos.db"
 #endif
 
 #ifdef ADD_RTTHREAD_FEATURES
@@ -98,7 +98,7 @@ int db_helper_init(void)
     ret = PrivMutexCreate(&db_mutex_lock, 0);
     if (ret < 0)
     {
-        printf("rt_mutex_create dbmtx failed!\n");
+        printf("mutex_create dbmtx failed!\n");
         return -1;
     }
     return 0;

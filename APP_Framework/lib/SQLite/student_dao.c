@@ -570,12 +570,11 @@ static void list_by_score(int ls, int hs, enum order_type order)
     return;
 }
 
-static void stu(uint8_t argc, char **argv)
+static int stu(int argc, char *argv[])
 {
     if (argc < 2)
     {
         list_all();
-        return;
     }
     else
     {
@@ -706,15 +705,22 @@ static void stu(uint8_t argc, char **argv)
             PrivFree(s);
         }
     }
+    return 0;
 }
-PRIV_SHELL_CMD_FUNCTION(stu, student add del update query, PRIV_SHELL_CMD_FUNC_ATTR);
+PRIV_SHELL_CMD_FUNCTION(stu, student add del update query, PRIV_SHELL_CMD_MAIN_ATTR);
 
 static int create_student_tbl(void)
 {
-    int fd = 0;
+    int fd = -1;
+
+    //init sqlite3
+    db_helper_init();
+
     db_set_name("/stu_info.db");
-    fd = PrivOpen(db_get_name(), O_RDONLY);
+
+    fd = PrivOpen("/stu_info.db", O_RDONLY);
     printf(db_get_name());
+    printf(" fd %d\n", fd);
     if (fd < 0)
     {
         /* there is not the .db file.create db and table */

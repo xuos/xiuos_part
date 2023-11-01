@@ -408,7 +408,7 @@ static int _xizi_io_sector_size(sqlite3_file *file_id)
 
 static int _xizi_io_device_characteristics(sqlite3_file *file_id)
 {
-    return 0;
+    return SQLITE_IOCAP_SAFE_APPEND;
 }
 
 /*

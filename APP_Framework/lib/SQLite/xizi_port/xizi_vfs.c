@@ -101,7 +101,7 @@ int _gettimeofday(struct timeval *tp, void *ignore)
 
 static int _Access(const char *pathname, int mode)
 {
-    int fd;
+    int fd = -1;
 
     fd = PrivOpen(pathname, O_RDONLY);
 

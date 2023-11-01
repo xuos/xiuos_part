@@ -14,12 +14,15 @@ SQLite 是一个小型，快速，独立的高可靠性全功能 SQL 数据库�
 | rtthread_io_methods.c    | rt-thread为sqlite提供的底层文件IO接口                            |
 | rtthread_mutex.c         | rt-thread为sqlite提供的互斥量操作接口                            |
 | rtthread_vfs.c           | rt-thread为sqlite提供的VFS(虚拟文件系统)接口                     |
+| xizi_io_methods.c        | xizi为sqlite提供的底层文件IO接口                                 |
+| xizi_mutex.c             | xizi为sqlite提供的互斥量操作接口                                 |
+| xizi_vfs.c               | xizi为sqlite提供的VFS(虚拟文件系统)接口                          |
 | dbhelper.c               | sqlite3操作接口封装，简化应用                                    |
 | dbhelper.h               | dbhelper头文件，向外部声明封装后的接口，供用户调用               |
 | student_dao.c            | 简单的DAO层例程，简单展示了对dbhelper的使用方法                  |
 | student_dao.h            | 数据访问对象对外接口声明，线程可通过调用这些接口完成对该表的操作 |
 
-## 获取
+## RT-Thread获取
 
 在ENV中配置如下
 
@@ -41,14 +44,39 @@ RT-Thread online packages  --->
 ## 依赖
 - RT-Thread 3.X+
 - DFS组件
+
+## XiZi获取
+
+在menuconfig中配置如下
+
+```c
+LIB_USING_SQLITE  ---> 
+        [*]   Enable SQLite example
+        (1024) Set SQL statements max length
+        (64) Set SQL database filename fullpath max length
+```
+
+配置项说明：
+
+| 名称                         | 说明                                                |
+| -----------------------------| --------------------------------------------------- |
+| Enable example               | 选择是否使能DAO层例程，例程是模拟了学生成绩录入查询 |
+| SQL statements max length    | SQL语句最大长度，请根据实际业务需求设置。           |
+| filename fullpath max length | SQL数据库文件名最大长度，请根据实际业务需求设置。           |
+
+## 依赖
+- XiZi_IIoT
+- shell线程栈不少于32KB
+- TF卡驱动支持，并挂载FATFS文件系统
+
 ## dbhelp接口说明
 
 dbhelp是对sqlite3操作接口的封装，目的是使用户更加简单地操作sqlite。
 
 ### 数据库文件完整路径
-数据库文件的默认存放完整路径是"/rt.db"，用户可根据实际需求在dbhelper.h中修改。
+数据库文件的默认存放完整路径是"/rt.db"或"xiuos.db"，用户可根据实际需求在dbhelper.h中修改。
 ```c
-#define DB_NAME "/rt.db"
+#define DB_NAME "/rt.db" 、"xiuos.db"
 ```
 ### 初始化
 dbhelp初始化，其中包含了sqlite的初始化及互斥量创建。用户无需再对数据库及锁初始化。

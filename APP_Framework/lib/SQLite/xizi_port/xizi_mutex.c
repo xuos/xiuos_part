@@ -122,7 +122,7 @@ static sqlite3_mutex * _xizi_mtx_alloc(int id)
     {
         case SQLITE_MUTEX_FAST:
         case SQLITE_MUTEX_RECURSIVE:
-            p = PrivMalloc(sizeof(sqlite3_mutex));
+            p = sqlite3_malloc(sizeof(sqlite3_mutex));
 
             if (p != NULL) {
                 PrivMutexCreate(&p->mutex, 0);
