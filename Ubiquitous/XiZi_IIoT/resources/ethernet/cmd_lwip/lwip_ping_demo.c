@@ -47,8 +47,7 @@ void LwipPingTest(int argc, char *argv[])
         printf("lw: [%s] ping %s\n", __func__, argv[1]);
         if(isdigit(argv[1][0]))
         {
-            if(sscanf(argv[1], "%d.%d.%d.%d", &arg_ip[0], &arg_ip[1], &arg_ip[2], &arg_ip[3]) == EOF)
-            {
+            if (sscanf(argv[1], "%hhd.%hhd.%hhd.%hhd", &arg_ip[0], &arg_ip[1], &arg_ip[2], &arg_ip[3]) == EOF) {
                 lw_notice("input wrong ip\n");
                 return;
             }

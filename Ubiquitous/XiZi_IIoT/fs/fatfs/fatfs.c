@@ -493,3 +493,15 @@ DWORD GetFatTime(void)
 
     return fat_time;
 }
+
+void FatfsPrintf(struct FileDescriptor *fdp, const void *src, size_t len)
+{
+    int i = 0;
+    for (i = 0; i < len; i ++) {
+        f_printf(fdp->data, "%d,", ((uint8 *)src)[i]);
+    }
+    if (i == len) {
+        f_printf(fdp->data, "\r\n");
+    }
+}
+

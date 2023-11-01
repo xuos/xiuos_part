@@ -266,6 +266,8 @@ void iperf_server_worker(void* arg) {
     struct sock_conn_cb *sccb = (struct sock_conn_cb *)arg;
     x_ticks_t tick1, tick2;
 
+    int cur_tid = GetKTaskDescriptor()->id.id;
+
     uint8_t *recv_data = (uint8_t *)malloc(IPERF_BUFSZ);
     if(recv_data == NULL) {
         KPrintf("[%s] No Memory.\n", __func__);
@@ -281,8 +283,6 @@ void iperf_server_worker(void* arg) {
                 TCP_NODELAY,     /* name of option */
                 (void *) &flag,  /* the cast is historical cruft */
                 sizeof(int));    /* length of option value */
-
-    int cur_tid = GetKTaskDescriptor()->id.id;
 
     tick1 = CurrentTicksGain();
     while (param.mode != IPERF_MODE_STOP) {
@@ -393,7 +393,7 @@ __exit:
 
 void iperf_server(void *thread_param)
 {
-    uint8_t *recv_data;
+    uint8_t* recv_data = NULL;
     socklen_t sin_size;
     x_ticks_t tick1, tick2;
     int sock = -1, connected, bytes_received;

@@ -286,6 +286,7 @@ static inline int SerialDevDMARead(struct SerialHardwareDevice *serial_dev, stru
     x_size_t read_dma_length;
     x_size_t read_dma_size = SerialGetRxFifoLength(serial_dev);
     
+    lock = CriticalAreaLock();
     if (serial_cfg->data_cfg.serial_buffer_size) {
         if(read_length < (int)read_dma_size)
             read_dma_length = read_length;

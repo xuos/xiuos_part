@@ -119,7 +119,7 @@ tcpecho_raw_ack_size(struct tcp_pcb *tpcb, int ack_len)
 
     // ack message
     ack_buf = pbuf_alloc(PBUF_TRANSPORT, TCP_ACK_MSG_SIZE, PBUF_RAM);
-    snprintf(ack_buf->payload, TCP_ACK_MSG_SIZE, "%d\n\0", ack_len);
+    snprintf(ack_buf->payload, TCP_ACK_MSG_SIZE, "%d\n", ack_len);
     ack_buf->len = strlen(ack_buf->payload);
     ack_buf->tot_len = strlen(ack_buf->payload);
     ack_buf->next = NULL;

@@ -183,6 +183,7 @@ x_err_t KTaskDelete(int32 id);
 x_err_t YieldOsAssign(void);
 x_err_t DelayKTask(x_ticks_t tick);
 x_err_t MdelayKTask(uint32 ms);
+// KTaskPrioSet is bugged, dont use this
 x_err_t KTaskPrioSet(int32 id, uint8 prio);
 x_err_t KTaskCoreCombine(int32 id, uint8 coreid);
 x_err_t KTaskCoreUnCombine(int32 id);

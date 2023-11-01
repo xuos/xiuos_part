@@ -30,8 +30,8 @@ typedef struct
     void (*flash_deinit)(void);
 
     /* flash operation */
-    status_t (*op_flash_erase)(uint32_t start_addr, uint32_t byte_cnt);
-    status_t (*op_flash_write)(uint32_t start_addr, uint8_t *buf, uint32_t byte_cnt);
+    status_t (*op_flash_erase)(uint32_t start_addr, uint32_t imageSize);
+    status_t (*op_flash_write)(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWrite);
     status_t (*op_flash_read)(uint32_t addr, uint8_t *buf, uint32_t len);
     status_t (*op_flash_copy)(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize);
 

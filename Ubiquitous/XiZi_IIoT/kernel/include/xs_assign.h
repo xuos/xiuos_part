@@ -55,8 +55,8 @@ struct smp_assign_done
 };
 struct Assign
 {
-    struct OsAssignReadyVector os_assign_read_vector;
-    struct OsAssignReadyVector smp_os_assign_ready_rector[CPU_NUMBERS];
+    struct OsAssignReadyVector os_assign_ready_vector;
+    struct OsAssignReadyVector smp_os_assign_ready_vector[CPU_NUMBERS];
     struct TaskDescriptor *smp_os_running_task[CPU_NUMBERS];
 
     struct PriorityReadyVectorDone *ready_vector_done;
@@ -73,7 +73,7 @@ void HwInterruptcontextSwitch( x_ubase from, x_ubase to,struct TaskDescriptor *t
 #else
 struct Assign
 {
-    struct OsAssignReadyVector os_assign_read_vector;
+    struct OsAssignReadyVector os_assign_ready_vector;
     struct TaskDescriptor *os_running_task;
 
     struct PriorityReadyVectorDone *ready_vector_done;

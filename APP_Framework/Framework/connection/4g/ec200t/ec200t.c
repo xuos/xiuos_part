@@ -163,8 +163,12 @@ static int Ec200tIoctl(struct Adapter *adapter, int cmd, void *args)
     serial_cfg.serial_parity_mode = PARITY_NONE;
     serial_cfg.serial_bit_order = STOP_BITS_1;
     serial_cfg.serial_invert_mode = NRZ_NORMAL;
+#ifdef TOOL_USING_OTA
+    serial_cfg.serial_timeout = OTA_RX_TIMEOUT;
+#else
     //serial receive timeout 10s
-    serial_cfg.serial_timeout = 10000;
+    serial_cfg.serial_timeout = 100000;
+#endif
     serial_cfg.is_ext_uart = 0;
 #ifdef ADAPTER_EC200T_DRIVER_EXT_PORT
     serial_cfg.is_ext_uart = 1;

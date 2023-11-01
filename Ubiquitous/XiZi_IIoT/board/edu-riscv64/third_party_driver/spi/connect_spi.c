@@ -191,8 +191,8 @@ static uint32 SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStan
                 for (i = 0; i < spi_datacfg->length; i++) {
                     tx_buff[i] = ((uint8_t *)spi_datacfg->tx_buff)[i];
                 }
-                dmac_set_single_mode(dev_param->spi_dma_param->spi_dmac_txchannel, tx_buff, (void *)(&spi_instance[device_master_id]->dr[0]), DMAC_ADDR_INCREMENT, DMAC_ADDR_NOCHANGE,
-                            DMAC_MSIZE_4, DMAC_TRANS_WIDTH_32, spi_datacfg->length);
+                dmac_set_single_mode(dev_param->spi_dma_param->spi_dmac_txchannel, tx_buff, (void*)(&spi_instance[device_master_id]->dr[0]), DMAC_ADDR_INCREMENT, DMAC_ADDR_NOCHANGE,
+                    DMAC_MSIZE_4, DMAC_TRANS_WIDTH_32, spi_datacfg->length);
             }
             
             spi_instance[device_master_id]->ser = 1U << dev_param->spi_slave_param->spi_cs_select_id;
@@ -202,9 +202,9 @@ static uint32 SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStan
             spi_instance[device_master_id]->ssienr = 0x00;
 
     transfer_done:
-            if (tx_buff) {
-                x_free(tx_buff);
-            }
+        if (tx_buff != NULL) {
+            x_free(tx_buff);
+        }
         }
 
         if (spi_datacfg->spi_cs_release) {

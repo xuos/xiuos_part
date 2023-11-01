@@ -200,7 +200,9 @@ typedef uintptr_t mem_ptr_t;
 #include <unistd.h>
 #endif
 #else /* SSIZE_MAX */
+#ifndef RISCV_LWIP
 typedef int ssize_t;
+#endif
 #define SSIZE_MAX INT_MAX
 #endif /* SSIZE_MAX */
 

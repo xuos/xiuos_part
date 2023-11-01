@@ -129,6 +129,9 @@ uint8_t lora_recv_data[ADAPTER_LORA_TRANSFER_DATA_LENGTH];
 struct LoraDataFormat client_recv_data_format[ADAPTER_LORA_CLIENT_NUM];
 
 static sem_t gateway_recv_data_sem;
+static sem_t gateway_send_cmd_sem;
+static sem_t client_recv_cmd_sem;
+static sem_t client_send_data_sem;
 struct LoraDataFormat gateway_recv_data_format;
 
 static int recv_error_cnt = 0;
@@ -315,6 +318,8 @@ static int LoraGatewaySendCmd(struct Adapter *adapter, uint8_t client_id, uint16
         return -1;
     }
 
+    PrivSemaphoreAbandon(&gateway_send_cmd_sem);
+
     return 0;
 }
 
@@ -410,6 +415,7 @@ static int LoraClientSendData(struct Adapter *adapter, void *send_buf, int lengt
         return -1;
     }
 
+    PrivSemaphoreAbandon(&client_send_data_sem);
     return 0;
 }
 
@@ -462,7 +468,7 @@ static int LoraClientDataAnalyze(struct Adapter *adapter, void *send_buf, int le
     struct timespec abstime;
     abstime.tv_sec = DEFAULT_SEM_TIMEOUT;
 
-    ret = PrivSemaphoreObtainWait(&adapter->sem, &abstime);
+    ret = PrivSemaphoreObtainWait(&client_recv_cmd_sem, NULL);
     if (0 == ret) {
         //only handle this client_id information from gateway
         if ((client_recv_data_format[client_id - 1].client_id == adapter->net_role_id) && 
@@ -653,9 +659,15 @@ static int LoraReceiveDataCheck(struct Adapter *adapter, uint8_t *recv_data, uin
 static void *LoraReceiveTask(void *parameter)
 {
     int ret = 0;
+    struct timespec abstime;
+    abstime.tv_sec = DEFAULT_SEM_TIMEOUT;
+
     struct Adapter *lora_adapter = (struct Adapter *)parameter;
 
     while (1) {
+#ifdef AS_LORA_GATEWAY_ROLE
+        PrivSemaphoreObtainWait(&gateway_send_cmd_sem, NULL);  
+#endif
         memset(lora_recv_data, 0, ADAPTER_LORA_TRANSFER_DATA_LENGTH);
         
         ret = AdapterDeviceRecv(lora_adapter, lora_recv_data, ADAPTER_LORA_TRANSFER_DATA_LENGTH);
@@ -675,8 +687,10 @@ static void *LoraReceiveTask(void *parameter)
         if (ret < 0) {
             continue;
         }
-
-        PrivSemaphoreAbandon(&lora_adapter->sem);
+#ifdef AS_LORA_CLIENT_ROLE
+        PrivSemaphoreAbandon(&client_recv_cmd_sem);
+        PrivSemaphoreObtainWait(&client_send_data_sem, &abstime);  
+#endif
     }
 
     return 0;
@@ -702,7 +716,7 @@ void LoraGatewayProcess(struct Adapter *lora_adapter, struct LoraGatewayParam *g
                 printf("LoraGatewaySendCmd client ID %d error\n", gateway->client_id[i]);
                 continue;
             }
-
+        
             ret = PrivSemaphoreObtainWait(&gateway_recv_data_sem, &abstime);
             if (0 == ret) {
                 printf("LoraGatewayProcess receive client %d data done\n", gateway->client_id[i]);
@@ -834,8 +848,10 @@ static int AdapterLoraRegister(struct Adapter *adapter)
     ret = AdapterDeviceRegister(adapter);
     if (ret < 0) {
         printf("Adapter4G register error\n");
+#ifdef AS_LORA_GATEWAY_ROLE
         if (lora_gateway)
             PrivFree(lora_gateway);
+#endif
         if (lora_client)
             PrivFree(lora_client);
 
@@ -904,9 +920,13 @@ int AdapterLoraInit(void)
     adapter->done = product_info->model_done;
 #endif
 
-    PrivSemaphoreCreate(&adapter->sem, 0, 0);
-
+#ifdef AS_LORA_GATEWAY_ROLE
     PrivSemaphoreCreate(&gateway_recv_data_sem, 0, 0);
+    PrivSemaphoreCreate(&gateway_send_cmd_sem, 0, 0);
+#else//AS_LORA_CLIENT_ROLE
+    PrivSemaphoreCreate(&client_recv_cmd_sem, 0, 0);
+    PrivSemaphoreCreate(&client_send_data_sem, 0, 0);
+#endif
 
     PrivMutexCreate(&adapter->lock, 0);
 
@@ -934,22 +954,32 @@ int AdapterLoraTest(void)
     pthread_attr_t lora_gateway_attr = PTHREAD_ATTR_INITIALIZER;
     lora_gateway_attr.priority = 20;
     lora_gateway_attr.stacksize = 2048;
+    PrivTaskCreate(&lora_recv_data_task, &lora_gateway_attr, &LoraReceiveTask, (void *)adapter);
 #else
     pthread_attr_t lora_gateway_attr;
     lora_gateway_attr.schedparam.sched_priority = 20;
     lora_gateway_attr.stacksize = 2048;
+
+    char task_name_1[] = "adapter_lora_recv";
+    pthread_args_t args;
+    args.pthread_name = task_name_1;
+    args.arg = (void *)adapter;
+    PrivTaskCreate(&lora_recv_data_task, &lora_gateway_attr, &LoraReceiveTask, (void *)&args);
 #endif
 
-    PrivTaskCreate(&lora_recv_data_task, &lora_gateway_attr, &LoraReceiveTask, (void *)adapter);
     PrivTaskStartup(&lora_recv_data_task);
 
 #ifdef ADD_NUTTX_FEATURES
-    lora_gateway_attr.priority = 19;
+    lora_gateway_attr.priority = 20;
+    PrivTaskCreate(&lora_gateway_task, &lora_gateway_attr, &LoraGatewayTask, (void *)adapter);
 #else   
-    lora_gateway_attr.schedparam.sched_priority = 19;
+    lora_gateway_attr.schedparam.sched_priority = 20;
+    char task_name_2[] = "adapter_lora_gateway";
+    args.pthread_name = task_name_2;
+    args.arg = (void *)adapter;
+    PrivTaskCreate(&lora_recv_data_task, &lora_gateway_attr, &LoraReceiveTask, (void *)&args);
 #endif
 
-    PrivTaskCreate(&lora_gateway_task, &lora_gateway_attr, &LoraGatewayTask, (void *)adapter);
     PrivTaskStartup(&lora_gateway_task);
 
 #else //AS_LORA_CLIENT_ROLE
@@ -957,22 +987,34 @@ int AdapterLoraTest(void)
     pthread_attr_t lora_client_attr = PTHREAD_ATTR_INITIALIZER;
     lora_client_attr.priority = 20;
     lora_client_attr.stacksize = 2048;
+
+    PrivTaskCreate(&lora_recv_data_task, &lora_client_attr, &LoraReceiveTask, (void *)adapter);
 #else
     pthread_attr_t lora_client_attr;
     lora_client_attr.schedparam.sched_priority = 20;
     lora_client_attr.stacksize = 2048;
+
+    char task_name_1[] = "adapter_lora_recv";
+    pthread_args_t args;
+    args.pthread_name = task_name_1;
+    args.arg = (void *)adapter;
+    PrivTaskCreate(&lora_recv_data_task, &lora_client_attr, &LoraReceiveTask, (void *)&args);
 #endif
-    PrivTaskCreate(&lora_recv_data_task, &lora_client_attr, &LoraReceiveTask, (void *)adapter);
+
     PrivTaskStartup(&lora_recv_data_task);
 
 #ifdef ADD_NUTTX_FEATURES
-    lora_client_attr.priority = 19;
+    lora_client_attr.priority = 20;
+    PrivTaskCreate(&lora_client_data_task, &lora_client_attr, &LoraClientDataTask, (void *)adapter);
 #else   
-    lora_client_attr.schedparam.sched_priority = 19;
+    lora_client_attr.schedparam.sched_priority = 20;
+    char task_name_2[] = "adapter_lora_client";
+    args.pthread_name = task_name_2;
+    args.arg = (void *)adapter;
+    PrivTaskCreate(&lora_client_data_task, &lora_client_attr, &LoraClientDataTask, (void *)&args);
 #endif
 
     //create lora client task
-    PrivTaskCreate(&lora_client_data_task, &lora_client_attr, &LoraClientDataTask, (void *)adapter);
     PrivTaskStartup(&lora_client_data_task);
 
 #endif

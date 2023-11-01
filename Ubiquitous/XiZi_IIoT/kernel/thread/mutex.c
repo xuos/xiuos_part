@@ -109,10 +109,16 @@ static int32 _MutexObtain(struct Mutex *mutex, int32 msec)
                 SYS_KDEBUG_LOG(KDBG_IPC, ("mutex_take: suspend task: %s\n",
                                             task->task_base_info.name));
 
-                if (task->task_dync_sched_member.cur_prio > mutex->holder->task_dync_sched_member.cur_prio)
-                {
-                    KTaskPrioSet(mutex->holder->id.id, task->task_dync_sched_member.cur_prio);
-                }
+                /* pending task is removed from ready list,
+                   so it wont affect the mutex holder;
+                   if holder is stucked by others with higher priorities,
+                   try fix this by design, instead of mutex.
+                   Warning: dont use KTaskPrioSet, for it's bugged.
+                 */
+                // if (task->task_dync_sched_member.cur_prio > mutex->holder->task_dync_sched_member.cur_prio)
+                // {
+                //     KTaskPrioSet(mutex->holder->id.id, task->task_dync_sched_member.cur_prio);
+                // }
 
                 LinklistSuspend(&(mutex->pend_list), task, LINKLIST_FLAG_PRIO);
 
@@ -164,10 +170,10 @@ static int32 _MutexAbandon(struct Mutex *mutex)
 
     mutex->recursive_cnt --;
     if (mutex->recursive_cnt == 0) {
-        if (mutex->origin_prio != mutex->holder->task_dync_sched_member.cur_prio)
-        {
-            KTaskPrioSet(mutex->holder->id.id, mutex->origin_prio);
-        }
+        // if (mutex->origin_prio != mutex->holder->task_dync_sched_member.cur_prio)
+        // {
+        //     KTaskPrioSet(mutex->holder->id.id, mutex->origin_prio);
+        // }
 
         if (!IsDoubleLinkListEmpty(&mutex->pend_list)) {
             task = SYS_DOUBLE_LINKLIST_ENTRY(mutex->pend_list.node_next, struct TaskDescriptor, task_dync_sched_member.sched_link);
