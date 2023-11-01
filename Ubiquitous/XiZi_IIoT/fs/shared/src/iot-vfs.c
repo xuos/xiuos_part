@@ -449,7 +449,7 @@ int open(const char *path, int flags, ...)
     abspath = GetAbsolutePath(path);
     mp = GetMountPoint(abspath);
     if (mp == NULL) {
-        SYS_ERR("%s: mount point not found\n", __func__);
+        SYS_ERR("%s: mount point not found path %s abspath %s\n", __func__, path, abspath);
         ret = -EINVAL;
         goto err;
     }

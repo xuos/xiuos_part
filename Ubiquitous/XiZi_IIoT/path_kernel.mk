@@ -555,6 +555,11 @@ ifeq ($(CONFIG_LIB_USING_CJSON), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON
 endif
 
+ifeq ($(CONFIG_LIB_USING_SQLITE), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/SQLite #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/SQLite/xizi_port #
+endif
+
 ifeq ($(CONFIG_LIB_USING_LORAWAN), y)
 ifeq ($(CONFIG_LIB_USING_LORA_RADIO), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/lorawan/lora_radio_driver/lora-radio/common #
