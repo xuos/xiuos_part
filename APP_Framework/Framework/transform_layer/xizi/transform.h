@@ -430,6 +430,13 @@ int PrivTaskDelay(int32_t ms);
 int PrivUserTaskSearch(void);
 uint32_t PrivGetTickTime();
 
+/*********************Files**************************/
+int PrivLseek(int fd, off_t offset, int whence);
+int PrivFsync(int fd);
+int PrivFstat(int fd, struct stat *buf);
+int PrivStat(const char *path, struct stat *buf);
+int PrivUnlink(const char *path);
+char *PrivGetcwd(char *buf, size_t size);
 /*********************driver*************************/
 
 int PrivOpen(const char *path, int flags, ...);
