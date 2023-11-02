@@ -26,4 +26,8 @@ ifeq ($(CONFIG_LIB_USING_JERRYSCRIPT),y)
     SRC_DIR += JerryScript
 endif
 
+ifeq ($(CONFIG_LIB_USING_SQLITE),y)
+  SRC_DIR += SQLite
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
