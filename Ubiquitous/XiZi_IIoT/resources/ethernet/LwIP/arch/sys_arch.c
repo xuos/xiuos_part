@@ -387,7 +387,7 @@ void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
 #endif
     }
 
-    // netif_set_default(&gnetif);
+    netif_set_default(&gnetif);
     netif_set_up(&gnetif);
 
     lw_print("\r\n************************************************\r\n");
