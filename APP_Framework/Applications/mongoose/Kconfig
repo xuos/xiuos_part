@@ -1,0 +1,3 @@
+menuconfig USE_MONGOOSE
+    bool "Use mongoose as webserver"
+    default n

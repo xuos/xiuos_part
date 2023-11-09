@@ -39,6 +39,10 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     ifeq ($(CONFIG_APP_USING_WEBNET),y)
         SRC_DIR += webnet
     endif
+    
+    ifeq ($(CONFIG_USE_MONGOOSE),y)
+        SRC_DIR += mongoose
+    endif
 
     include $(KERNEL_ROOT)/compiler.mk
 endif
