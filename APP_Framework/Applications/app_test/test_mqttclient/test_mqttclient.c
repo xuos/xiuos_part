@@ -569,7 +569,7 @@ int32_t MQTTMsgPublish(int32_t sock, char *topic, int8_t qos, uint8_t* msg)
 		uint8_t buf[MSG_MAX_LEN];
 		int32_t buflen = sizeof(buf),len;
 		MQTTString topicString = MQTTString_initializer;
-	  uint16_t packid = 0,packetidbk;
+	  uint16_t packid = 0,packetidbk = 0;
 	
 		//填充主题
 	  topicString.cstring = (char *)topic;
