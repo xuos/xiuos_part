@@ -176,13 +176,19 @@ void            vMBMasterCBRequestScuuess( void );
  *   a new byte was received. The port implementation should wake up the
  *   tasks which are currently blocked on the eventqueue.
  */
-extern          BOOL( *pxMBFrameCBByteReceived ) ( void );
-
 extern          BOOL( *pxMBFrameCBTransmitterEmpty ) ( void );
 
 extern          BOOL( *pxMBPortCBTimerExpired ) ( void );
 
+#ifdef ADD_RTTHREAD_FEATURES
+extern          BOOL( *pxMBFrameCBByteReceived ) ( void );
 extern          BOOL( *pxMBMasterFrameCBByteReceived ) ( void );
+#endif
+
+#ifdef ADD_XIZI_FEATURES
+extern          BOOL( *pxMBFrameCBByteReceived ) ( CHAR pucByte );
+extern          BOOL( *pxMBMasterFrameCBByteReceived ) ( CHAR pucByte );
+#endif
 
 extern          BOOL( *pxMBMasterFrameCBTransmitterEmpty ) ( void );
 

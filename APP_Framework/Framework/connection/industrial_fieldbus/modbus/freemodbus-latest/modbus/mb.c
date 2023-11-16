@@ -85,7 +85,12 @@ static pvMBFrameClose pvMBFrameCloseCur;
  * or transmission of a character.
  * Using for Modbus Slave
  */
+#ifdef ADD_RTTHREAD_FEATURES
 BOOL( *pxMBFrameCBByteReceived ) ( void );
+#endif
+#ifdef ADD_XIZI_FEATURES
+BOOL( *pxMBFrameCBByteReceived ) ( CHAR pucByte );
+#endif
 BOOL( *pxMBFrameCBTransmitterEmpty ) ( void );
 BOOL( *pxMBPortCBTimerExpired ) ( void );
 

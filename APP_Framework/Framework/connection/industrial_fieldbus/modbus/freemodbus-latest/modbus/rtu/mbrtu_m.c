@@ -235,8 +235,14 @@ eMBMasterRTUSend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength 
     return eStatus;
 }
 
+#ifdef ADD_RTTHREAD_FEATURES
 BOOL
 xMBMasterRTUReceiveFSM( void )
+#endif
+#ifdef ADD_XIZI_FEATURES
+BOOL
+xMBMasterRTUReceiveFSM( CHAR pucByte )
+#endif
 {
     BOOL            xTaskNeedSwitch = FALSE;
     UCHAR           ucByte;
@@ -249,8 +255,9 @@ xMBMasterRTUReceiveFSM( void )
     MB_CHECK(( eSndState == STATE_M_TX_IDLE ) || ( eSndState == STATE_M_TX_XFWR ));
 #endif
 
-    /* Always read the character. */
-    ( void )xMBMasterPortSerialGetByte( ( CHAR * ) & ucByte );
+    // /* Always read the character. */
+    // ( void )xMBMasterPortSerialGetByte( ( CHAR * ) & ucByte );
+    ucByte = pucByte;
 
     switch ( eRcvState )
     {
@@ -302,7 +309,7 @@ xMBMasterRTUReceiveFSM( void )
         {
             eRcvState = STATE_M_RX_ERROR;
         }
-        vMBMasterPortTimersT35Enable();
+        //vMBMasterPortTimersT35Enable();
         break;
     }
     return xTaskNeedSwitch;

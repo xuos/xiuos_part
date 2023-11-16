@@ -259,6 +259,7 @@ static rt_err_t serial_rx_ind(rt_device_t dev, rt_size_t size) {
 /* ----------------------- Static variables ---------------------------------*/
 /* software simulation serial transmit IRQ handler thread */
 static pthread_t thread_serial_soft_trans_irq;
+static pthread_t thread_serial_recv_irq;
 /* serial event */
 static int event_serial;
 /* modbus master serial device */
@@ -268,35 +269,36 @@ static int uart_fd = 0;
 /* ----------------------- Defines ------------------------------------------*/
 /* serial transmit event */
 #define EVENT_SERIAL_TRANS_START    (1<<0)
+#define RTU_RECV_DATA_LENGTH 8
 
 /* ----------------------- static functions ---------------------------------*/
 static void prvvUARTTxReadyISR(void);
-static void prvvUARTRxISR(void);
-static int serial_rx_ind(void *dev, size_t size);
+static void prvvUARTRxISR(CHAR pucByte);
+
 static void *serial_soft_trans_irq(void* parameter);
+static void *serial_recv_irq(void* parameter);
 
 /* ----------------------- Start implementation -----------------------------*/
 BOOL xMBMasterPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
         eMBParity eParity)
 {
     int ret = 0;
-    uint8_t baud_rate, data_bits, parity;
+    uint32_t baud_rate; 
+    uint8_t data_bits, parity;
     
     baud_rate = ulBaudRate; 
+    data_bits = ucDataBits;
     /* set serial configure parameter */
     switch(eParity){
         case MB_PAR_NONE: {
-            data_bits = DATA_BITS_8;
             parity = PARITY_NONE;
             break;
         }
         case MB_PAR_ODD: {
-            data_bits = DATA_BITS_9;
             parity = PARITY_ODD;
             break;
         }
         case MB_PAR_EVEN: {
-            data_bits = DATA_BITS_9;
             parity = PARITY_EVEN;
             break;
         }
@@ -332,14 +334,14 @@ BOOL xMBMasterPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
     cfg.serial_stop_bits = STOP_BITS_1;
     cfg.serial_buffer_size = 128;
     cfg.serial_parity_mode = parity;
-    cfg.serial_bit_order = 0;
-    cfg.serial_invert_mode = 0;
+    cfg.serial_bit_order = 1;
+    cfg.serial_invert_mode = 1;
 #ifdef CONNECTION_MODBUS_RTU_EXTUART
     cfg.ext_uart_no = 0;
     cfg.port_configure = PORT_CFG_INIT;
 #endif
     cfg.serial_timeout = -1;
-    cfg.dev_recv_callback = serial_rx_ind;
+    cfg.dev_recv_callback = NULL;
 
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
     ioctl_cfg.args = &cfg;
@@ -356,14 +358,23 @@ BOOL xMBMasterPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 21;
-    attr.stacksize = 1024;
+    attr.stacksize = 2048;
 
-    char task_name[] = "master_trans";
+    char task1_name[] = "master_trans";
     pthread_args_t args;
-    args.pthread_name = task_name;
+    args.pthread_name = task1_name;
 
     PrivTaskCreate(&thread_serial_soft_trans_irq, &attr, &serial_soft_trans_irq, (void *)&args);
     PrivTaskStartup(&thread_serial_soft_trans_irq);
+
+    attr.schedparam.sched_priority = 22;
+    attr.stacksize = 2048;
+
+    char task2_name[] = "master_recv";
+    args.pthread_name = task2_name;
+
+    PrivTaskCreate(&thread_serial_recv_irq, &attr, &serial_recv_irq, (void *)&args);
+    PrivTaskStartup(&thread_serial_recv_irq);
 
     return TRUE;
 }
@@ -453,9 +464,9 @@ void prvvUARTTxReadyISR(void)
  * protocol stack will then call xMBPortSerialGetByte( ) to retrieve the
  * character.
  */
-void prvvUARTRxISR(void)
+void prvvUARTRxISR(CHAR pucByte)
 {
-    pxMBMasterFrameCBByteReceived();
+    pxMBMasterFrameCBByteReceived(pucByte);
 }
 
 /**
@@ -467,24 +478,38 @@ static void *serial_soft_trans_irq(void* parameter) {
     unsigned int recved_event;
     while (1) {
         /* waiting for serial transmit start */
-        PrivEventProcess(event_serial, EVENT_SERIAL_TRANS_START, EVENT_OR, 0, &recved_event);
-        /* execute modbus callback */
-        prvvUARTTxReadyISR();
+        if (0 == PrivEventProcess(event_serial, EVENT_SERIAL_TRANS_START, EVENT_OR, 0, &recved_event)) {
+            /* execute modbus callback */
+            prvvUARTTxReadyISR();
+        }
     }
 }
 
 /**
- * This function is serial receive callback function
+ * Software simulation serial receive data IRQ handler.
  *
- * @param dev the device of serial
- * @param size the data size that receive
- *
- * @return return 0
+ * @param parameter parameter
  */
-static int serial_rx_ind(void *dev, size_t size) {
-    prvvUARTRxISR();
-    return 0;
+static void *serial_recv_irq(void* parameter) {
+    int i;
+    int data_size = 0;
+    int data_recv_size = 0;
+    char recv_data[RTU_RECV_DATA_LENGTH] = {0};
+    
+    while (1) {
+        while (data_size < RTU_RECV_DATA_LENGTH) {
+            data_recv_size = PrivRead(uart_fd, recv_data + data_size, RTU_RECV_DATA_LENGTH - data_size);
+            data_size += data_recv_size;
+        }
+        /* execute modbus recv callback */
+        for (i = 0; i < RTU_RECV_DATA_LENGTH; i ++) {
+            prvvUARTRxISR(recv_data[i]);
+        }
+        data_size = 0;
+        data_recv_size = 0;
+    }
 }
+
 #endif
 
 #endif

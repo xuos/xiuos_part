@@ -142,7 +142,7 @@ MSH_CMD_EXPORT(mb_master_sample, run a modbus master sample);
 #define SLAVE_ADDR      0x01
 #define PORT_NUM        4
 #define PORT_BAUDRATE   115200
-#define PORT_PARITY     MB_PAR_EVEN
+#define PORT_PARITY     MB_PAR_NONE
 
 #define MB_POLL_THREAD_PRIORITY  22
 #define MB_SEND_THREAD_PRIORITY  22
@@ -189,7 +189,7 @@ static void *mb_master_poll(void *parameter)
     }
 }
 
-static int mb_master_sample(int argc, char **argv)
+static int mb_master_sample(void)
 {
     static uint8_t is_init = 0;
 

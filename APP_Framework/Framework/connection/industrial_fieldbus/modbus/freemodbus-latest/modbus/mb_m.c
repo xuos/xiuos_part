@@ -90,7 +90,12 @@ static pvMBFrameClose pvMBMasterFrameCloseCur;
  * or transmission of a character.
  * Using for Modbus Master,Add by Armink 20130813
  */
+#ifdef ADD_RTTHREAD_FEATURES
 BOOL( *pxMBMasterFrameCBByteReceived ) ( void );
+#endif
+#ifdef ADD_XIZI_FEATURES
+BOOL( *pxMBMasterFrameCBByteReceived ) ( CHAR pucByte );
+#endif
 BOOL( *pxMBMasterFrameCBTransmitterEmpty ) ( void );
 BOOL( *pxMBMasterPortCBTimerExpired ) ( void );
 

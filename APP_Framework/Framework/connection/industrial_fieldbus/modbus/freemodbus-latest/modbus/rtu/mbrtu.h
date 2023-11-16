@@ -42,7 +42,12 @@ void            eMBRTUStart( void );
 void            eMBRTUStop( void );
 eMBErrorCode    eMBRTUReceive( UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength );
 eMBErrorCode    eMBRTUSend( UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength );
+#ifdef ADD_RTTHREAD_FEATURES
 BOOL            xMBRTUReceiveFSM( void );
+#endif
+#ifdef ADD_XIZI_FEATURES
+BOOL            xMBRTUReceiveFSM( CHAR pucByte );
+#endif
 BOOL            xMBRTUTransmitFSM( void );
 BOOL            xMBRTUTimerT15Expired( void );
 BOOL            xMBRTUTimerT35Expired( void );
@@ -53,8 +58,13 @@ void            eMBMasterRTUStart( void );
 void            eMBMasterRTUStop( void );
 eMBErrorCode    eMBMasterRTUReceive( UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength );
 eMBErrorCode    eMBMasterRTUSend( UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength );
-BOOL            xMBMasterRTUReceiveFSM( void );
 BOOL            xMBMasterRTUTransmitFSM( void );
+#ifdef ADD_RTTHREAD_FEATURES
+BOOL            xMBMasterRTUReceiveFSM( void );
+#endif
+#ifdef ADD_XIZI_FEATURES
+BOOL            xMBMasterRTUReceiveFSM( CHAR pucByte );
+#endif
 BOOL            xMBMasterRTUTimerExpired( void );
 #endif
 

@@ -168,7 +168,7 @@ MSH_CMD_EXPORT(mb_slave_sample, run a modbus slave sample);
 #define PORT_NUM        4
 #define PORT_BAUDRATE   115200
 
-#define PORT_PARITY     MB_PAR_EVEN
+#define PORT_PARITY     MB_PAR_NONE
 
 #define MB_POLL_THREAD_PRIORITY  22
 #define MB_SEND_THREAD_PRIORITY  22
@@ -199,14 +199,7 @@ static void *send_thread_entry(void *parameter)
 
 static void *mb_slave_poll(void *parameter)
 {
-    if (strstr(parameter, "RTU")) {
-        eMBInit(MB_RTU, SLAVE_ADDR, PORT_NUM, PORT_BAUDRATE, PORT_PARITY);
-    } else if (rt_strstr(parameter, "TCP")) {
-        eMBTCPInit(0);
-    } else {
-        rt_kprintf("Error: unknown parameter");
-    }
-
+    eMBInit(MB_RTU, SLAVE_ADDR, PORT_NUM, PORT_BAUDRATE, PORT_PARITY);
     eMBEnable();
 
     while (1) {
@@ -215,17 +208,12 @@ static void *mb_slave_poll(void *parameter)
     }
 }
 
-static int mb_slave_sample(int argc, char **argv)
+static int mb_slave_sample(void)
 {
     static uint8_t is_init = 0;
 
     if (is_init > 0) {
         printf("sample is running\n");
-        return -1;
-    }
-
-    if (argc < 2) {
-        printf("Usage: mb_slave_sample RTU/TCP\n");
         return -1;
     }
 
@@ -235,7 +223,7 @@ static int mb_slave_sample(int argc, char **argv)
 
     char task1_name[] = "md_s_poll";
     pthread_args_t args;
-    args.arg = argv[1];
+    args.arg = NULL;
     args.pthread_name = task1_name;
 
     PrivTaskCreate(&tid1, &attr, &mb_slave_poll, (void *)&args);

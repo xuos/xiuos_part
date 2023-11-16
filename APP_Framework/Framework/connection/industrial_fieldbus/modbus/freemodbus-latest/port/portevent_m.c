@@ -286,13 +286,13 @@ xMBMasterPortEventPost( eMBMasterEventType eEvent )
 BOOL
 xMBMasterPortEventGet( eMBMasterEventType * eEvent )
 {
-    unsigned int recvedEvent;
+    unsigned int recvedEvent = EV_MASTER_ERROR_PROCESS;
 
     /* waiting forever OS event */
-    while (0 != PrivEventProcess(xMasterOsEvent, 
-            EV_MASTER_READY | EV_MASTER_FRAME_RECEIVED | EV_MASTER_EXECUTE |
-            EV_MASTER_FRAME_SENT | EV_MASTER_ERROR_PROCESS,
-            EVENT_OR | EVENT_AUTOCLEAN, 0, &recvedEvent));
+    PrivEventProcess(xMasterOsEvent, 
+        EV_MASTER_READY | EV_MASTER_FRAME_RECEIVED | EV_MASTER_EXECUTE |
+        EV_MASTER_FRAME_SENT | EV_MASTER_ERROR_PROCESS,
+        EVENT_OR | EVENT_AUTOCLEAN, 0, &recvedEvent);
 
     /* the enum type couldn't convert to int type */
     switch (recvedEvent)
@@ -450,11 +450,11 @@ eMBMasterReqErrCode eMBMasterWaitRequestFinish( void ) {
     unsigned int recvedEvent;
 
     /* waiting forever OS event */
-    while (0 != PrivEventProcess(xMasterOsEvent, 
-            EV_MASTER_PROCESS_SUCESS | EV_MASTER_ERROR_RESPOND_TIMEOUT
-                    | EV_MASTER_ERROR_RECEIVE_DATA
-                    | EV_MASTER_ERROR_EXECUTE_FUNCTION,
-            EVENT_OR | EVENT_AUTOCLEAN, 0, &recvedEvent));
+    PrivEventProcess(xMasterOsEvent, 
+        EV_MASTER_PROCESS_SUCESS | EV_MASTER_ERROR_RESPOND_TIMEOUT
+            | EV_MASTER_ERROR_RECEIVE_DATA
+            | EV_MASTER_ERROR_EXECUTE_FUNCTION,
+            EVENT_OR | EVENT_AUTOCLEAN, 0, &recvedEvent);
 
     switch (recvedEvent)
     {

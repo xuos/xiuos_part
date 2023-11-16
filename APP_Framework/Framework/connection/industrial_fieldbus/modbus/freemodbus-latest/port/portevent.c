@@ -112,9 +112,9 @@ xMBPortEventGet( eMBEventType * eEvent )
     unsigned int recvedEvent;
 
     /* waiting forever OS event */
-    while (0 != PrivEventProcess(xSlaveOsEvent, 
-            EV_READY | EV_FRAME_RECEIVED | EV_EXECUTE | EV_FRAME_SENT,
-            EVENT_OR | EVENT_AUTOCLEAN, 0, &recvedEvent));
+    PrivEventProcess(xSlaveOsEvent, 
+        EV_READY | EV_FRAME_RECEIVED | EV_EXECUTE | EV_FRAME_SENT,
+        EVENT_OR | EVENT_AUTOCLEAN, 0, &recvedEvent);
 
     switch (recvedEvent)
     {
