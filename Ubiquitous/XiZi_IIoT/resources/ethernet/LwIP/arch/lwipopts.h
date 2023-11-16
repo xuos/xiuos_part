@@ -36,6 +36,7 @@
 #ifndef LWIP_DEBUG
 #define LWIP_DEBUG 1
 // #define LWIP_SOCKET_DEBUG
+// #define LWIP_SOCKETS_DEBUG
 // #define LWIP_TCPIP_DEBUG
 // #define LWIP_MEMP_DEBUG
 // #define LWIP_PBUF_DEBUG

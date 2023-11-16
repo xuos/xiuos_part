@@ -38,7 +38,16 @@ Modification:
 
 struct netdev** get_netdev_listhead()
 {
-    static struct netdev* netdev_listhead = NULL;
+    static bool init = false;
+    static struct netdev* netdev_listhead;
+    if (!init) {
+        static struct netdev netdev_guard;
+        strncpy(netdev_guard.name, "guard\0", 6);
+        InitSingleLinkList(&(netdev_guard.list));
+        netdev_listhead = &netdev_guard;
+    }
+    init = true;
+
     return &netdev_listhead;
 }
 struct netdev** get_default_netdev()
@@ -87,7 +96,8 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
     // validate name
     uint32_t name_len = strlen(name);
     if (name_len < NAME_NUM_MAX) {
-        strncpy(netdev->name, name, name_len);
+        SYS_KDEBUG_LOG(NETDEV_DEBUG, ("Register Netdev %s, name len: %d.\n", name, name_len));
+        strncpy(netdev->name, name, (name_len > 31 ? 31 : name_len));
         netdev->name[name_len] = '\0';
     } else {
         SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] name too long.\n", __func__));
@@ -103,6 +113,7 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
     x_base lock = DISABLE_INTERRUPT();
     if (NETDEV_LISTHEAD == NULL) {
         NETDEV_LISTHEAD = netdev;
+
     } else {
         SingleLinkListNodeInsert(&(NETDEV_LISTHEAD->list), &(netdev->list));
     }
@@ -110,7 +121,7 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
 
     if (NETDEV_DEFAULT == NULL) {
         // set first met netdev to default netdev
-        netdev_set_default(NETDEV_LISTHEAD);
+        netdev_set_default(netdev);
     }
 
     if (g_netdev_register_callback) {
