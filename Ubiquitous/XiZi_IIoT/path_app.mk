@@ -39,6 +39,9 @@ ifeq ($(CONFIG_CRYPTO), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/security/crypto/include #
 endif
 
+ifeq ($(CONFIG_USE_MONGOOSE),y)
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose #
+endif
 
 # COMPILE_APP:
 # 	@$(eval CPPPATHS=$(APPPATHS))
