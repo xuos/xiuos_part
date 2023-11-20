@@ -461,6 +461,39 @@ KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xishutong-arm32)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m4/hc32f4a0 \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/common/hc32_ll_driver/inc \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/CMSIS/include \
+	-I$(BSP_ROOT)/third_party_driver/spi/third_party_spi_lora/sx12xx/inc \
+	-I$(BSP_ROOT)/third_party_driver/spi/third_party_spi_lora/sx12xx/src/radio \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver/usb_host_lib \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver/usb_host_lib/host_class/msc \
+	-I$(BSP_ROOT)/third_party_driver/usb/hc32_usb_driver/usb_host_lib/host_core \
+	-I$(KERNEL_ROOT)/include #
+
+ifeq ($(CONFIG_RESOURCES_LWIP),y)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/compat \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/netif \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/apps \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/priv \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/include/lwip/prot \
+	-I$(KERNEL_ROOT)/resources/ethernet/LwIP/arch 
+
+KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
+endif 
+endif
+
 KERNELPATHS += -I$(KERNEL_ROOT)/arch \
             -I$(KERNEL_ROOT)/arch/risc-v/shared/kernel_service #
 
