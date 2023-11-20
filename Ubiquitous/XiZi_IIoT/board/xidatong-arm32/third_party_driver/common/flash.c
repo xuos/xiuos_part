@@ -6,7 +6,7 @@
  */
 
 /**
-* @file fsl_flash.c
+* @file flash.c
 * @brief support flexspi norflash function
 * @version 2.0 
 * @author AIIT XUOS Lab
