@@ -1,6 +1,6 @@
 /**
-* @file flash.h
-* @brief support flexspi norflash function
+* @file flash_for_ota.h
+* @brief support flash function
 * @version 2.0 
 * @author AIIT XUOS Lab
 * @date 2023-11-20
