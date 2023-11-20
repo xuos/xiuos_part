@@ -1,16 +1,9 @@
-/*
- * Copyright 2018-2020 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
- 
 /**
-* @file mcuboot.h
+* @file boot_for_ota.h
 * @brief support bootloader function
 * @version 2.0 
 * @author AIIT XUOS Lab
-* @date 2023-04-03
+* @date 2023-11-20
 */
 
 #ifndef __MCUBOOT_H__

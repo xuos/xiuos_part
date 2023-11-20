@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <transform.h>
 #include "shell.h"
-#include "mcuboot.h"
+#include "boot_for_ota.h"
 #include "ymodem.h"
 #include "ota.h"
 
