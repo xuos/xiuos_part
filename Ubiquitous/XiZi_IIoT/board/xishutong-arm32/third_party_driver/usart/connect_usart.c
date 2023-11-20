@@ -51,19 +51,19 @@ Modification:
 #endif
 
 #if defined(BSP_USING_UART4)
-#define USART4_RX_PORT                  (GPIO_PORT_E)
-#define USART4_RX_PIN                   (GPIO_PIN_07)
+#define USART4_RX_PORT                  (GPIO_PORT_H)
+#define USART4_RX_PIN                   (GPIO_PIN_10)
 
-#define USART4_TX_PORT                  (GPIO_PORT_G)
-#define USART4_TX_PIN                   (GPIO_PIN_00)
+#define USART4_TX_PORT                  (GPIO_PORT_H)
+#define USART4_TX_PIN                   (GPIO_PIN_09)
 #endif
 
 #if defined(BSP_USING_UART6)
 #define USART6_RX_PORT                  (GPIO_PORT_H)
-#define USART6_RX_PIN                   (GPIO_PIN_06)
+#define USART6_RX_PIN                   (GPIO_PIN_08)
 
-#define USART6_TX_PORT                  (GPIO_PORT_E)
-#define USART6_TX_PIN                   (GPIO_PIN_06)
+#define USART6_TX_PORT                  (GPIO_PORT_H)
+#define USART6_TX_PIN                   (GPIO_PIN_07)
 #endif
 
 static void UartIsr(struct SerialBus *serial, struct SerialDriver *serial_drv, struct SerialHardwareDevice *serial_dev);
