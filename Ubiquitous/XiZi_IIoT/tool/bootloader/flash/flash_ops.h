@@ -6,14 +6,14 @@
  */
  
 /**
-* @file bootloader_ops.h
+* @file flash_ops.h
 * @brief support flash function
 * @version 2.0 
 * @author AIIT XUOS Lab
 * @date 2023-04-03
 */
-#ifndef __BOOTLOADER_OPS_H__
-#define __BOOTLOADER_OPS_H__
+#ifndef __FLASH_OPS_H__
+#define __FLASH_OPS_H__
 
 
 #include <flash.h>
