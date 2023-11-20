@@ -15,6 +15,6 @@ ifeq ($(CONFIG_BOARD_EDU_ARM32_EVB),y)
 SRC_FILES += mcu/hc32f4a0/setjmp.S
 endif
 
-SRC_FILES += jerry_port.c jerry_main.c jerry_test.c
+SRC_FILES += jerry_port.c jerry_main.c
 
 include $(KERNEL_ROOT)/compiler.mk

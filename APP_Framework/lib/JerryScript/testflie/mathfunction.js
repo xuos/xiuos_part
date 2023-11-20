@@ -1,9 +1,3 @@
-/**
- * File: mathUtils.js
- * Function: Math utilities
- * Description: Contains various math utility functions.
- */
-
 // Calculates the square of a number
 function square(number) {
   var square = number * number;
