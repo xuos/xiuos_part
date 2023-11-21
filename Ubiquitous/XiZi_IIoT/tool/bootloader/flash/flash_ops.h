@@ -20,9 +20,7 @@
 #ifndef __FLASH_OPS_H__
 #define __FLASH_OPS_H__
 
-
-#include <flash.h>
-
+#include "flash_for_ota.h"
 typedef struct
 {
     /* board init function*/

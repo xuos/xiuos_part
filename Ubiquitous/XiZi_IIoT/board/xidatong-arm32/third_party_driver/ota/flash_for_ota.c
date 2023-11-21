@@ -19,7 +19,6 @@
 */
  
 #include <stdio.h>
-#include "flash.h"
 #include "flash_for_ota.h"
 #include "MIMXRT1052.h"
 

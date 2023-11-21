@@ -22,7 +22,7 @@
 #include <xs_base.h>
 #include "common.h"
 #include "boot_for_ota.h"
-#include "flash.h"
+#include "flash_for_ota.h"
 
 #ifdef TOOL_USING_OTA
 
