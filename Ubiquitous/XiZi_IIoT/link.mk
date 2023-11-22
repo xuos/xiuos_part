@@ -6,5 +6,6 @@ $(TARGET): $(OBJS)
 	@$(CROSS_COMPILE)g++ -o $@ $($(LINK_FLAGS)) $(OBJS) $(LINK_LWIP) $(LINK_MUSLLIB) $(LIBCC)
 	@echo ------------------------------------------------
 	@$(CROSS_COMPILE)objcopy -O binary $@ XiZi-$(BOARD)$(COMPILE_TYPE).bin
+	@$(CROSS_COMPILE)objdump -S $@ > XiZi-$(BOARD)$(COMPILE_TYPE).asm
 	@$(CROSS_COMPILE)objcopy -O ihex $@  XiZi-$(BOARD)$(COMPILE_TYPE).hex
 	@$(CROSS_COMPILE)size $@

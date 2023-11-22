@@ -272,7 +272,7 @@ CircularAreaAppType CircularAreaAppInit(uint32_t circular_area_length)
     circular_area->p_tail = circular_area->data_buffer + circular_area_length;
     circular_area->area_length = circular_area_length;
 
-    printf("CircularAreaAppInit done p_head %8p p_tail %8p length %lu\n",
+    printf("CircularAreaAppInit done p_head %8p p_tail %8p length %u\n",
         circular_area->p_head, circular_area->p_tail, circular_area->area_length);
 
     circular_area->CircularAreaAppOperations = &CircularAreaAppOperations;
