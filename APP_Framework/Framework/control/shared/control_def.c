@@ -57,6 +57,10 @@ extern int FreeModbusTcpServerInit(struct ControlRecipe *p_recipe);
 extern int CipProtocolInit(struct ControlRecipe *p_recipe);
 #endif
 
+#ifdef CONTROL_PROTOCOL_ETHERCAT
+extern int EthercatProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
 /*
 CONTROL FRAMEWORK READ DATA FORMAT:
 |  HEAD |device_id|read data length|read item count|         data         |
@@ -103,6 +107,11 @@ static struct ControlProtocolInitParam protocol_init[] =
 #ifdef CONTROL_PROTOCOL_CIP
     { PROTOCOL_CIP, CipProtocolInit },
 #endif
+
+#ifdef CONTROL_PROTOCOL_ETHERCAT
+    { PROTOCOL_ETHERCAT, EthercatProtocolInit },
+#endif
+
 	{ PROTOCOL_END, NULL },
 };
 

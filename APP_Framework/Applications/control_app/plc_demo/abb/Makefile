@@ -1,3 +1,3 @@
-SRC_FILES :=  freemodbustcpserver.c
+SRC_FILES := abb_pm5630.c
 
 include $(KERNEL_ROOT)/compiler.mk

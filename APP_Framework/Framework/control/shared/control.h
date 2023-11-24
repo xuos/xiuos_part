@@ -57,6 +57,7 @@ typedef enum
     PROTOCOL_MELSEC_3C,
     PROTOCOL_FREEMODBUS_TCP_SERVER,
     PROTOCOL_CIP,
+    PROTOCOL_ETHERCAT,
     PROTOCOL_END
 }ProtocolType;
 
@@ -115,6 +116,7 @@ int ControlProtocolIoctl(struct ControlProtocol *control_protocol, int cmd, void
 
 /*Control Framework new certain Protocol*/
 ControlProtocolType control_protocol;
+
 
 #ifdef __cplusplus
 }

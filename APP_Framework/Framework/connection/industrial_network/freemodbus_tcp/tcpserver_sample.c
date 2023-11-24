@@ -112,7 +112,6 @@ int MBServer()
             MdelayKTask(100);
         }
     }
-  
     return iExitCode;
 }
 

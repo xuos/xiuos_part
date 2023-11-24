@@ -15,12 +15,12 @@
  * @brief PLC ABB L30 app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2022.9.27
+ * @date 2023.8.27
  */
 
 #include <control.h>
 
-void Controlabl30Test(void)
+void ControlABL30Test(void)
 {
     int i = 0;
     uint16_t read_data_length = 0;
@@ -45,4 +45,4 @@ void Controlabl30Test(void)
         //ControlProtocolClose(CIP_protocol);
     }
 }
-PRIV_SHELL_CMD_FUNCTION(Controlabl30Test, Ab Plc CIP Demo, PRIV_SHELL_CMD_MAIN_ATTR);
+PRIV_SHELL_CMD_FUNCTION(ControlABL30Test, Ab Plc CIP Demo, PRIV_SHELL_CMD_MAIN_ATTR);

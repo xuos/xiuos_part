@@ -21,4 +21,3 @@ config CONNECTION_ADAPTER_FREEMODBUSTCP
     if CONNECTION_ADAPTER_FREEMODBUSTCP
         source "$APP_DIR/Framework/connection/industrial_network/freemodbus_tcp/Kconfig"
     endif
-    
