@@ -281,6 +281,7 @@ menu "test app"
             menuconfig USER_TEST_MQTTCLIENT
                 bool "Config test mqtt client"
                 default n
+                select LIB_USING_CJSON
 
             menuconfig USER_TEST_FTPCLIENT
                 bool "Config test ftp client"

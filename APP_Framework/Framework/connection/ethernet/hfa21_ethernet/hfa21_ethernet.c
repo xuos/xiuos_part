@@ -407,6 +407,7 @@ static int Hfa21EthernetIoctl(struct Adapter *adapter, int cmd, void *args)
     serial_cfg.ext_uart_no = ADAPTER_HFA21_DRIVER_EXT_PORT;
     serial_cfg.port_configure = PORT_CFG_INIT;
 #endif
+    serial_cfg.dev_recv_callback = NULL;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;

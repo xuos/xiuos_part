@@ -68,6 +68,7 @@ void TestUart(int argc, char* argv[])
     uart_cfg.serial_buffer_size = SERIAL_RB_BUFSZ;
     uart_cfg.serial_timeout = -1;
     uart_cfg.is_ext_uart = 0;
+    uart_cfg.dev_recv_callback = NULL;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;

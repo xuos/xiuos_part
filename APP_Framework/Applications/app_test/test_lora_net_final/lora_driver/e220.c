@@ -62,6 +62,7 @@ static struct SerialDataCfg serial_cfg =
     .serial_buffer_size = SERIAL_RB_BUFSZ,
     .serial_timeout = E220_DAFAULT_SERIAL_TIMEOUT,     // 串口超时配置
     .is_ext_uart = 0,
+    .dev_recv_callback = NULL,
 };
 
 enum LoraMode current_mode = -1;                       // 当前模块处于什么模式
