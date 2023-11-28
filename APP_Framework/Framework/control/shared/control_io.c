@@ -97,7 +97,7 @@ void Uart485Init(uint32_t baud_rate, uint8_t data_bits, uint8_t stop_bits, uint8
     cfg.port_configure = PORT_CFG_INIT;
 #endif
     cfg.serial_timeout = 10000;
-
+    cfg.dev_recv_callback=NULL;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
     ioctl_cfg.args = &cfg;
     ret = PrivIoctl(uart_fd, OPE_INT, &ioctl_cfg);
