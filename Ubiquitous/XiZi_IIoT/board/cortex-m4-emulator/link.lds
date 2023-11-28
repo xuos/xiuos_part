@@ -63,6 +63,7 @@ SECTIONS
         PROVIDE(g_service_table_end = ABSOLUTE(.));
 
         PROVIDE(_etext =  ABSOLUTE(.));
+        _exit = .;
     } > flash
 
     /* .ARM.exidx is sorted, so has to go in its own output section.  */

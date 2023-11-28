@@ -19,10 +19,11 @@
 *
 */
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <transform.h>
 #include "shell.h"
-#include "xsconfig.h"
-#include "mcuboot.h"
+#include "boot_for_ota.h"
 #include "ymodem.h"
 #include "ota.h"
 
@@ -34,6 +35,10 @@
 #include "platform_mqtt.h"
 #endif
 
+#ifdef USING_DOWNLOAD_JSON
+#include "cJSON.h"
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -42,7 +47,7 @@ static int create_version(uint8_t* cur_version, uint8_t* new_version);
 static status_t UpdateOTAFlag(ota_info_t *ptr);
 static void InitialVersion(void);
 static void BackupVersion(void);
-static void UpdateNewApplication(void);
+static bool UpdateNewApplication(void);
 static void Update(void);
 static void BootLoaderJumpApp(void);
 
@@ -128,7 +133,7 @@ static uint32_t calculate_crc32(uint32_t addr, uint32_t len)
 * 形    参: cur_version:当前版本号,new_version:生成的新版本号
 * 返 回 值: 0:生成成功,-1:生成失败
 * 说    明: 为保持一致,平台通过OTA传输而来的版本号也要保持这样三段式的形式
-            版本形式为major.minor.patch,如01.02.03
+            版本形式为major.minor.patch,如001.002.003
 *******************************************************************************/
 static int create_version(uint8_t* cur_version, uint8_t* new_version) 
 {
@@ -226,30 +231,39 @@ static void BackupVersion(void)
 
     ota_info.status = OTA_STATUS_BACKUP;
     UpdateOTAFlag(&ota_info);
-    status = mcuboot.op_flash_copy(BAKUP_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.bak.size);
-    if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.bak.size) == ota_info.bak.crc32))
+    // 1.先清空XiUOS System分区
+    status = mcuboot.op_flash_erase(XIUOS_FLAH_ADDRESS, ota_info.os.size);
+    if(status == kStatus_Success)
     {
-        mcuboot.print_string("\r\n------Backup app version success!------\r\n");
-        ota_info.os.size = ota_info.bak.size;
-        ota_info.os.crc32 = ota_info.bak.crc32;
-
-        memset(ota_info.os.version,0,sizeof(ota_info.os.version)); 
-        strncpy(ota_info.os.version, ota_info.bak.version, sizeof(ota_info.bak.version));
-
-        memset(ota_info.os.description,0,sizeof(ota_info.os.description)); 
-        strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
-
+        memset(&ota_info.os,0,sizeof(ota_info.os));
         UpdateOTAFlag(&ota_info);
+        mcuboot.print_string("\r\n------Clear app partition success!------\r\n");
     }
     else
     {
-        mcuboot.print_string("\r\n------Backup app version failed!------\r\n");
-        ota_info.status = OTA_STATUS_ERROR;
-
-        memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
-        strncpy(ota_info.error_message, "Backup app version failed!",sizeof(ota_info.error_message));
-
+        mcuboot.print_string("\r\n------Clear app partition failed!------\r\n");
+        return;
+    }
+    // 2.拷贝backup分区到XiUOS System分区
+    status = mcuboot.op_flash_copy(BAKUP_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.bak.size);
+    if(status == kStatus_Success)
+    {
+        ota_info.os.size = ota_info.bak.size;
+        ota_info.os.crc32 = ota_info.bak.crc32;
+        memset(ota_info.os.version,0,sizeof(ota_info.os.version)); 
+        strncpy(ota_info.os.version, ota_info.bak.version, sizeof(ota_info.bak.version));
+        memset(ota_info.os.description,0,sizeof(ota_info.os.description)); 
+        strncpy(ota_info.os.description, ota_info.bak.description, sizeof(ota_info.bak.description));
         UpdateOTAFlag(&ota_info);
+        mcuboot.print_string("\r\n------Version rollback successful!------\r\n");
+    }
+    else
+    {
+        ota_info.status = OTA_STATUS_ERROR;
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
+        strncpy(ota_info.error_message, "Version rollback failed!",sizeof(ota_info.error_message));
+        UpdateOTAFlag(&ota_info);
+        mcuboot.print_string("\r\n------Version rollback failed!------\r\n");
     }
 }
 
@@ -258,10 +272,11 @@ static void BackupVersion(void)
 * 函 数 名: UpdateNewApplication
 * 功能描述: 在bootloader里进行调用,根据Flash中Flag分区中的信息决定是否进行版本更新
 * 形    参: 无
-* 返 回 值: 无
+* 返 回 值: true:需要升级,发生了flash搬移的操作,不代表升级的结果
+            false:不需要升级,未发生flash搬移
 * 注    释: 该函数调用后如果不需要升级APP分区保持不变,否则APP分区的版本为新版本
 *******************************************************************************/
-static void UpdateNewApplication(void)
+static bool UpdateNewApplication(void)
 {
     status_t status;
     ota_info_t ota_info;  // 定义OTA信息结构体
@@ -270,97 +285,133 @@ static void UpdateNewApplication(void)
     // 从Flash中读取OTA信息
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
 
-    // 如果OTA升级状态为准备状态，且APP分区与download分区版本不同,才可以进行升级
+    // 如果OTA升级状态为准备状态,且APP分区与download分区版本不同,才需要进行升级
     if((ota_info.status == OTA_STATUS_READY) && (ota_info.os.crc32 != ota_info.down.crc32)) 
     {
-        mcuboot.print_string("\r\n------Start to update the app!------\r\n");
+        mcuboot.print_string("\r\n------Start upgrading to new version!------\r\n");
         // 校验downlad分区固件CRC
         if(calculate_crc32(DOWN_FLAH_ADDRESS, ota_info.down.size) == ota_info.down.crc32) 
         {
             ota_info.status = OTA_STATUS_UPDATING;
             UpdateOTAFlag(&ota_info);
 
-            // 1.如果CRC校验通过,开始升级,逐字节拷贝Flash,先备份当前XiUOS System分区内容
+            // 1.如果CRC校验通过,开始升级,先清空Backup分区
+            status = mcuboot.op_flash_erase(BAKUP_FLAH_ADDRESS, ota_info.bak.size);
+            if(status == kStatus_Success)
+            {
+                memset(&ota_info.bak,0,sizeof(ota_info.bak));
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Clear backup partition success!------\r\n");
+            }
+            else
+            {
+                mcuboot.print_string("\r\n------Clear backup partition failed!------\r\n");
+                goto finish;
+            }
+
+            // 2.逐字节拷贝Flash,备份当前XiUOS System分区内容到Backup分区
             status = mcuboot.op_flash_copy(XIUOS_FLAH_ADDRESS, BAKUP_FLAH_ADDRESS, ota_info.os.size);
             if((status == kStatus_Success) &&(calculate_crc32(BAKUP_FLAH_ADDRESS, ota_info.os.size) == ota_info.os.crc32))
             {
-                mcuboot.print_string("\r\n------Backup app success!------\r\n");
                 ota_info.bak.size = ota_info.os.size;
                 ota_info.bak.crc32 = ota_info.os.crc32;
-
                 memset(ota_info.bak.version,0,sizeof(ota_info.bak.version)); 
                 strncpy(ota_info.bak.version, ota_info.os.version, sizeof(ota_info.os.version));
-
                 memset(ota_info.bak.description,0,sizeof(ota_info.bak.description)); 
                 strncpy(ota_info.bak.description, ota_info.os.description, sizeof(ota_info.os.description));
-
-                UpdateOTAFlag(&ota_info);;
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Backup app success!------\r\n");
             }
             else
             {
-                mcuboot.print_string("\r\n------Backup app failed!------\r\n");
                 ota_info.status = OTA_STATUS_ERROR;
-
                 memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
                 strncpy(ota_info.error_message, "Backup app failed!",sizeof(ota_info.error_message));
-
-                UpdateOTAFlag(&ota_info);;
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Backup app failed!------\r\n");
                 goto finish;
             }
 
-            // 2.拷贝download分区到XiUOS System分区
+            // 3.清空XiUOS System分区
+            status = mcuboot.op_flash_erase(XIUOS_FLAH_ADDRESS, ota_info.os.size);
+            if(status == kStatus_Success)
+            {
+                memset(&ota_info.os,0,sizeof(ota_info.os));
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Clear app partition success!------\r\n");
+            }
+            else
+            {
+                mcuboot.print_string("\r\n------Clear app partition failed!------\r\n");
+                goto finish;
+            }
+
+            // 4.拷贝download分区到XiUOS System分区
             status = mcuboot.op_flash_copy(DOWN_FLAH_ADDRESS, XIUOS_FLAH_ADDRESS, ota_info.down.size);
             if((status == kStatus_Success) &&(calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.down.size) == ota_info.down.crc32))
             {
-                mcuboot.print_string("\r\n------The download partition is copied successfully!------\r\n");
-
                 ota_info.os.size = ota_info.down.size;
                 ota_info.os.crc32 = ota_info.down.crc32;
-
                 memset(ota_info.os.version,0,sizeof(ota_info.os.version)); 
                 strncpy(ota_info.os.version, ota_info.down.version, sizeof(ota_info.down.version));
-
                 memset(ota_info.os.description,0,sizeof(ota_info.os.description)); 
                 strncpy(ota_info.os.description, ota_info.down.description, sizeof(ota_info.down.description));
-
-                ota_info.status == OTA_STATUS_IDLE; // 拷贝download分区到XiUOS System分区成功,将OTA升级状态设置为IDLE
-                UpdateOTAFlag(&ota_info);; 
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------The download partition is copied successfully!------\r\n");
             }
             else
             {
-                mcuboot.print_string("\r\n------The download partition copy failed!------\r\n");
                 ota_info.status = OTA_STATUS_ERROR;
-
                 memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
                 strncpy(ota_info.error_message, "The download partition copy failed!",sizeof(ota_info.error_message));
-
-                UpdateOTAFlag(&ota_info);;
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------The download partition copy failed!------\r\n");
                 goto finish;
             }
 
-            mcuboot.print_string("\r\n------Update completed!------\r\n");
+            // 5.清空download分区
+            status = mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS, ota_info.down.size);
+            if(status == kStatus_Success)
+            {
+                memset(&ota_info.down,0,sizeof(ota_info.down));
+                UpdateOTAFlag(&ota_info);
+                mcuboot.print_string("\r\n------Clear download partition success!------\r\n");
+            }
+            else
+            {
+                mcuboot.print_string("\r\n------Clear download partition failed!------\r\n");
+                goto finish;
+            }
+
+            ota_info.status == OTA_STATUS_IDLE; //将OTA升级状态设置为IDLE
+            UpdateOTAFlag(&ota_info);
+            mcuboot.print_string("\r\n------New version upgrade completed,reboot again!------\r\n");
             goto finish;
         }
         else
         {
-            // 如果download分区CRC校验失败，升级失败
-            mcuboot.print_string("\r\n------Download Firmware CRC check failed!------\r\n");
+            // 如果download分区CRC校验失败,升级失败
             ota_info.status = OTA_STATUS_ERROR;
-
             memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
             strncpy(ota_info.error_message, "Download Firmware CRC check failed!",sizeof(ota_info.error_message));
-
-            UpdateOTAFlag(&ota_info);;
+            UpdateOTAFlag(&ota_info);
+            mcuboot.print_string("\r\n------Download Firmware CRC check failed!------\r\n");
             goto finish;  
         }  
     }
     else
     {
-        mcuboot.print_string("\r\n------No need to update the app!------\r\n");
-        goto finish;
+        // 如果OTA升级状态为准备状态但APP分区与download分区版本相同,不需要进行升级,重置status,打印提示信息
+        if((ota_info.status == OTA_STATUS_READY) && (ota_info.os.crc32 == ota_info.down.crc32)) 
+        {
+            ota_info.status == OTA_STATUS_IDLE;
+            UpdateOTAFlag(&ota_info);
+            mcuboot.print_string("\r\n------The app partition is the same as the download partition, no need to upgrade!------\r\n");
+        }
+        return false;
     }
 finish:
-    return;
+    return true;
 }
 
 
@@ -376,23 +427,33 @@ static void Update(void)
     mcuboot.flash_init();
     memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
-    /* 此时APP分区还没有有效的固件,需要在bootloader下通过iap烧写出厂固件 */
-    if((ota_info.os.size > APP_FLASH_SIZE) || (calculate_crc32(XIUOS_FLAH_ADDRESS, ota_info.os.size) != ota_info.os.crc32))
+    /* APP分区无有效固件时,需在bootloader下烧写初始固件, os.size大于分区大小视为无效固件*/
+    if(ota_info.os.size > APP_FLASH_SIZE)
     {
         mcuboot.print_string("\r\nNeed to flash initial firmware!\r\n");
         InitialVersion();
+        mcuboot.flash_deinit();
     }
-    else
+    /*进行新版本的升级*/
+    else 
     {
-        UpdateNewApplication();
+        if(UpdateNewApplication() == true) /*如果实际发生了flash搬移,操作完成后再重启一次*/
+        {
+            mcuboot.flash_deinit();
+            mcuboot.op_delay(2000);
+            mcuboot.op_reset();
+        }
+        else /*如果实际未发生flash搬移,说明未发生实际的升级,操作完成后不必再重启*/
+        {
+            mcuboot.flash_deinit();
+        }
     }
-    mcuboot.flash_deinit();
 }
 
 
 /*******************************************************************************
 * 函 数 名: BootLoaderJumpApp
-* 功能描述: 上次跳转若是失败的,先从BAKUP分区进行恢复，然后再进行跳转
+* 功能描述: 上次跳转若是失败的,先从BAKUP分区进行恢复,然后再进行跳转
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
@@ -406,7 +467,7 @@ static void BootLoaderJumpApp(void)
 
     if(ota_info.lastjumpflag == JUMP_FAILED_FLAG)
     {
-        mcuboot.print_string("\r\n------Bootloader false, begin backup!------\r\n");
+        mcuboot.print_string("\r\n------Jump to app partition failed,start version rollback!------\r\n");
         BackupVersion();   
     }
     else
@@ -466,6 +527,7 @@ static void app_ota_by_iap(void)
         UpdateOTAFlag(&ota_info);
     }
     mcuboot.flash_deinit();
+    MdelayKTask(2000);
     mcuboot.op_reset();
 }
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),iap, app_ota_by_iap, ota by iap function);
@@ -527,6 +589,11 @@ static void get_start_signal(struct Adapter* adapter)
         KPrintf("waiting for start msg...\n");
         if(AdapterDeviceRecv(adapter, &start_msg, sizeof(start_msg)) >= 0 && start_msg.header.frame_flag == STARTFLAG) 
         {
+            if(start_msg.header.total_len > APP_FLASH_SIZE)
+            {
+                KPrintf("File size is larger than partition size,the partition size is %dk.\n",APP_FLASH_SIZE/1024);
+                break;
+            }   
             if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,start_msg.header.total_len) != kStatus_Success)
             {
                 KPrintf("Failed to erase target fash!\n");
@@ -726,7 +793,7 @@ static void app_ota_by_4g(void)
         } 
     }
     mcuboot.flash_deinit();
-    KPrintf("ota file transfer complete,start reboot!\n");
+    KPrintf("firmware file transfer successful,start reboot!\n");
     MdelayKTask(2000);
     mcuboot.op_reset();
 }
@@ -734,13 +801,319 @@ static void app_ota_by_4g(void)
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0),ota, app_ota_by_4g, ota by 4g function);
 #endif
 
-
 #ifdef OTA_BY_PLATFORM
-#define FRAME_LEN   2048   //每帧数据的数据包长度
-static uint8_t MqttRxbuf[3072];
-static uint8_t FrameBuf[FRAME_LEN];
-static OTA_TCB AliOTA;
 
+#if (OTA_FRAME_SIZE <= MQTT_FRAME_SIZE)
+    #define FRAME_LEN  OTA_FRAME_SIZE
+#else
+    #error "The value of FRAME_LEN should not be greater than MQTT_FRAME_SIZE!!"
+#endif
+static uint8_t MqttRxbuf[FRAME_LEN + 1024];
+static uint8_t FrameBuf[FRAME_LEN];
+static OTA_TCB platform_ota;
+
+
+/*******************************************************************************
+* 函 数 名: displayProgress
+* 功能描述: 显示当前ota下载进度的百分比
+* 形    参: progress:当前下载的进度,0-100之间
+* 返 回 值: 无
+*******************************************************************************/
+void displayProgress(uint8_t progress) 
+{
+    uint8_t buf[101];
+    if((progress >= 0) && (progress <= 100))
+    {
+        memset(buf, '=', progress);
+        buf[progress] = '\0';
+        KPrintf("[%-100s][%d%%]\r",buf,progress);
+        if(progress == 100)
+            KPrintf("\r\n---------------------------------------------\r\n");
+    }
+}
+
+
+#ifdef XIUOS_PLATFORM
+/*******************************************************************************
+* 函 数 名: PropertyVersion
+* 功能描述: 向服务器上传当前设备版本信息
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+static void PropertyVersion(void)
+{
+    uint8_t tempdatabuff[128];
+    ota_info_t ota_info;
+
+    memset(&ota_info, 0, sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t)); 
+    
+    memset(tempdatabuff,0,128);
+    sprintf(tempdatabuff,"{\"clientId\":\"%s\",\"version\":\"%s\"}",CLIENTID,ota_info.os.version);
+    KPrintf("------current version is:%s------\r\n",ota_info.os.version);
+
+    MQTT_PublishDataQs1("xiuosiot/ota/version",tempdatabuff,strlen(tempdatabuff));  //发送等级QS=1的PUBLISH报文
+}
+
+
+/*******************************************************************************
+* 函 数 名: OTA_Download
+* 功能描述: OTA下载数据
+* 形    参: size:本次下载量,offset:本次下载偏移量
+* 返 回 值: 无
+*******************************************************************************/
+static void OTA_Download(int size, int offset)
+{
+    uint8_t tempdatabuff[128];
+
+    memset(tempdatabuff,0,128);
+    sprintf(tempdatabuff,"{\"clientId\":\"%s\",\"fileId\":%d,\"fileOffset\":%d,\"size\":%d}",Platform_mqtt.ClientID,platform_ota.streamId,offset,size);
+
+    MQTT_PublishDataQs0("xiuosiot/ota/files", tempdatabuff, strlen(tempdatabuff));
+}
+
+/*******************************************************************************
+* 函 数 名: mqttCloudInteraction
+* 功能描述: 设备通过MQTT协议与云平台交互
+* 形    参: 无
+* 返 回 值: 无
+*******************************************************************************/
+static void mqttCloudInteraction(void* parameter)
+{
+    int datalen;
+    int ret = 0;
+    int freecnt = 0;
+    ota_info_t ota_info;
+    uint32_t heart_time = 0;
+    uint32_t flashdestination = DOWN_FLAH_ADDRESS;
+    uint8_t topicdatabuff[2][64];
+    char *ptr1, *ptr2;
+    uint16_t payloadLen;
+
+    mcuboot.flash_init();
+    memset(&ota_info, 0, sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
+    ota_info.status = OTA_STATUS_DOWNLOADING;
+    UpdateOTAFlag(&ota_info);
+    memset(topicdatabuff,0,sizeof(topicdatabuff)); 
+    sprintf(topicdatabuff[0],"ota/%s/update",CLIENTID); 
+    sprintf(topicdatabuff[1],"ota/%s/files",CLIENTID);   
+
+reconnect:
+    if((AdapterNetActive() == 0) && MQTT_Connect() && MQTT_SubscribeTopic(topicdatabuff[0]) && MQTT_SubscribeTopic(topicdatabuff[1]))
+    {
+        KPrintf("Log in to the cloud platform and subscribe to the topic successfully.\n"); 
+        PropertyVersion();
+    }
+    else
+    {
+        KPrintf("Log in to the cloud platform failed, retry!\n");
+        goto reconnect;  
+    }
+
+#ifdef USING_DOWNLOAD_JSON
+    uint8_t jsontopicdatabuff[64];
+    uint8_t jsonfilename[32];
+    memset(jsontopicdatabuff,0,sizeof(jsontopicdatabuff));
+    sprintf(jsontopicdatabuff,"protocol/%s/files",CLIENTID);
+    if(!MQTT_SubscribeTopic(jsontopicdatabuff))
+    {
+        KPrintf("subscribe to the json download topic failed!\n"); 
+    }
+#endif
+
+    while(1)
+    {
+        memset(MqttRxbuf,0,sizeof(MqttRxbuf));
+        datalen = MQTT_Recv(MqttRxbuf, sizeof(MqttRxbuf));
+        if(datalen <= 0)
+        {
+            freecnt++; 
+            if((freecnt >= 20) && (CalculateTimeMsFromTick(CurrentTicksGain()) - heart_time >= HEART_TIME)) //连续20次未收到数据默认为为空闲状态,需每隔一段时间发送需要发送心跳包保活
+            {
+                heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
+                freecnt = 0;
+                if(!MQTT_SendHeart()) //发送心跳包失败可能连接断开,需要重连
+                {
+                    KPrintf("The connection has been disconnected, reconnecting!\n");
+                    goto reconnect;  
+                }
+                KPrintf("Send heartbeat packet successful!\n"); 
+            }
+        }
+        else if(MqttRxbuf[0] == 0x30)
+        {
+            freecnt = 0;
+            payloadLen = MQTT_DealPublishData(MqttRxbuf, datalen);
+
+            // 1.获取新版本固件大小及版本信息
+            ptr1 = strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[0]); 
+            ptr2 = strstr((char *)Platform_mqtt.cmdbuff,"{\"fileSize\":");
+            if((ptr1 != NULL) &&(ptr2 != NULL))
+            {
+                if(sscanf(ptr2,"{\"fileSize\":%d,\"version\":\"%11s\",\"fileId\":%d,\"md5\"",&platform_ota.size,platform_ota.version,&platform_ota.streamId)==3)
+                {
+                    KPrintf("OTA firmware information:file size is %d,file id is %d,file version is %s!\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
+                    KPrintf("------Start the firmware file transfer!------\r\n");
+                    KPrintf("---------------------------------------------\r\n");
+                    if(platform_ota.size > APP_FLASH_SIZE)
+                    {
+                        KPrintf("File size is larger than partition size,the partition size is %dk.\n",APP_FLASH_SIZE/1024);
+                        ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "File size is larger than partition size!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
+                        break;
+                    }
+                    if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,platform_ota.size) != kStatus_Success)
+                    {
+                        KPrintf("Failed to erase download partition!\n");
+                        ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "Failed to erase download partition!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
+                        break;
+                    }
+                    platform_ota.counter = (platform_ota.size%FRAME_LEN != 0)? (platform_ota.size/FRAME_LEN + 1):(platform_ota.size/FRAME_LEN);
+                    platform_ota.num = 1;                                          //下载次数,初始值为1
+                    platform_ota.downlen = FRAME_LEN;                              //记录本次下载量
+                    OTA_Download(platform_ota.downlen,(platform_ota.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
+                }
+                else
+                {
+                    KPrintf("Failed to get ota information!\n");
+                    ret = -1;
+                    ota_info.status = OTA_STATUS_ERROR;
+                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                    strncpy(ota_info.error_message, "Failed to get ota information!",sizeof(ota_info.error_message));
+                    UpdateOTAFlag(&ota_info);
+                    break;
+                }
+            }
+
+            // 2.分片接收新版本固件
+            if(strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[1]))
+            {
+                memset(FrameBuf,0,sizeof(FrameBuf));
+                memcpy(FrameBuf, &MqttRxbuf[datalen-platform_ota.downlen], platform_ota.downlen);
+                if(mcuboot.op_flash_write(flashdestination,FrameBuf,platform_ota.downlen) != kStatus_Success)
+                {
+                    KPrintf("current frame[%d] flash failed.\n",platform_ota.num-1);
+                    ret = -1;
+                    ota_info.status = OTA_STATUS_ERROR;
+                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                    sprintf(ota_info.error_message,"current frame[%d] flash failed.",platform_ota.num-1);  
+                    UpdateOTAFlag(&ota_info);
+                    break;
+                }
+                else
+                {
+                    displayProgress((platform_ota.num*100)/platform_ota.counter);
+                    flashdestination += platform_ota.downlen;
+                    platform_ota.num++; 
+                }
+
+                if(platform_ota.num < platform_ota.counter) //如果小于总下载次数
+                {
+                    platform_ota.downlen = FRAME_LEN;                                      //记录本次下载量
+                    OTA_Download(platform_ota.downlen,(platform_ota.num - 1)*FRAME_LEN);   //发送要下载的数据信息给服务器
+                }
+                else if(platform_ota.num == platform_ota.counter) //如果等于总下载次数,说明是最后一次下载
+                {
+                    if(platform_ota.size%FRAME_LEN == 0)    //判断固件大小是否是FRAME_LEN的整数倍
+                    {
+                        platform_ota.downlen = FRAME_LEN;                                    //记录本次下载量
+                        OTA_Download(platform_ota.downlen,(platform_ota.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
+                    }
+                    else
+                    {
+                        platform_ota.downlen = platform_ota.size%FRAME_LEN;                   //记录本次下载量
+                        OTA_Download(platform_ota.downlen,(platform_ota.num - 1)*FRAME_LEN);  //发送要下载的数据信息给服务器
+                    }
+                }
+
+                else //下载完毕
+                {
+                    ret = 0;
+                    break;
+                }
+            }
+#ifdef USING_DOWNLOAD_JSON
+            // 3.下载json文件,SD卡要确保已经插入并mount成功
+            extern bool GetSdMountStatus(void);
+            if(strstr((char *)Platform_mqtt.cmdbuff,jsontopicdatabuff) && GetSdMountStatus())
+            {
+                KPrintf("------Start download joson file !------\r\n");
+                memset(jsonfilename,0,sizeof(jsonfilename));
+                memset(FrameBuf,0,sizeof(FrameBuf));
+                memcpy(FrameBuf, &Platform_mqtt.cmdbuff[strlen(jsontopicdatabuff)],payloadLen-strlen(jsontopicdatabuff)); 
+                
+                cJSON *json_obj = cJSON_Parse(FrameBuf);
+                char* product_name = cJSON_GetObjectItem(json_obj, "productName")->valuestring;
+                sprintf(jsonfilename,"%s",product_name); 
+                strcat(jsonfilename,".json");
+
+                FILE *fp = fopen(jsonfilename, "w");
+                if(fp == NULL)
+                {
+                   KPrintf("%s file create failed,please check!\r\n",jsonfilename);
+                   cJSON_Delete(json_obj); 
+                   continue;
+                }
+                else
+                {
+                    KPrintf("%s file create success!\r\n",jsonfilename); 
+                    char *json_print_str = cJSON_Print(json_obj);
+                    fprintf(fp, "%s", json_print_str);
+                    fclose(fp);
+                    cJSON_free(json_print_str);
+                    cJSON_Delete(json_obj);
+                }
+                KPrintf("------download %s file done!------\r\n",jsonfilename);
+            }
+#endif
+        }
+        else
+        {
+            freecnt = 0;
+            continue;
+        }
+    }
+
+    // 新版本固件接收完毕,写入描述信息
+    if(0 == ret)
+    {
+        ota_info.down.size = platform_ota.size;
+        ota_info.down.crc32 = calculate_crc32(DOWN_FLAH_ADDRESS, platform_ota.size);
+
+        memset(ota_info.down.version,0,sizeof(ota_info.down.version)); 
+        strncpy(ota_info.down.version, platform_ota.version, sizeof(ota_info.down.version));
+
+        memset(ota_info.down.description,0,sizeof(ota_info.down.description)); 
+        strncpy(ota_info.down.description, "MQTT OTA bin.",sizeof(ota_info.down.description));
+
+        ota_info.status = OTA_STATUS_READY;
+    
+        memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
+        strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
+
+        UpdateOTAFlag(&ota_info);
+        KPrintf("firmware file transfer successful,start reboot!\n");
+    }
+    else
+    {
+        KPrintf("firmware file transfer failed,start reboot!\n");
+    }
+    MQTT_Disconnect();
+    mcuboot.flash_deinit();
+    MdelayKTask(2000);
+    mcuboot.op_reset();
+}
+#endif
+
+#ifdef ALIBABA_PLATFORM
 /*******************************************************************************
 * 函 数 名: PropertyVersion
 * 功能描述: 向服务器上传当前设备版本信息
@@ -761,18 +1134,19 @@ static void PropertyVersion(void)
     
     memset(tempdatabuff,0,128);
     sprintf(tempdatabuff,"{\"id\": \"1\",\"params\": {\"version\": \"%s\"}}",ota_info.os.version);
+    KPrintf("------current version is:%s------\r\n",ota_info.os.version);
 
     MQTT_PublishDataQs1(topicdatabuff,tempdatabuff,strlen(tempdatabuff));  //发送等级QS=1的PUBLISH报文
 }
 
 
-/*-------------------------------------------------*/
-/*函数名：OTA下载数据                              */
-/*参  数：size：本次下载量                         */
-/*参  数：offset：本次下载偏移量                   */
-/*返回值：无                                       */
-/*-------------------------------------------------*/
-void OTA_Download(int size, int offset)
+/*******************************************************************************
+* 函 数 名: OTA_Download
+* 功能描述: OTA下载数据
+* 形    参: size:本次下载量,offset:本次下载偏移量
+* 返 回 值: 无
+*******************************************************************************/
+static void OTA_Download(int size, int offset)
 {
     uint8_t topicdatabuff[64];
     uint8_t tempdatabuff[128];
@@ -781,18 +1155,18 @@ void OTA_Download(int size, int offset)
     sprintf(topicdatabuff,"/sys/%s/%s/thing/file/download",PLATFORM_PRODUCTKEY,CLIENT_DEVICENAME);
 
     memset(tempdatabuff,0,128);
-    sprintf(tempdatabuff,"{\"id\": \"1\",\"params\": {\"fileInfo\":{\"streamId\":%d,\"fileId\":1},\"fileBlock\":{\"size\":%d,\"offset\":%d}}}",AliOTA.streamId,size,offset);
+    sprintf(tempdatabuff,"{\"id\": \"1\",\"params\": {\"fileInfo\":{\"streamId\":%d,\"fileId\":1},\"fileBlock\":{\"size\":%d,\"offset\":%d}}}",platform_ota.streamId,size,offset);
 
     MQTT_PublishDataQs0(topicdatabuff, tempdatabuff, strlen(tempdatabuff));
 }
 
 /*******************************************************************************
-* 函 数 名: app_ota_by_platform
-* 功能描述: 通过云平台MQTT进行升级
+* 函 数 名: mqttCloudInteraction
+* 功能描述: 设备通过MQTT协议与云平台交互
 * 形    参: 无
 * 返 回 值: 无
 *******************************************************************************/
-static void app_ota_by_platform(void* parameter)
+static void mqttCloudInteraction(void* parameter)
 {
     int datalen;
     int ret = 0;
@@ -800,19 +1174,20 @@ static void app_ota_by_platform(void* parameter)
     ota_info_t ota_info;
     uint32_t heart_time = 0;
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
-    uint8_t topicdatabuff[64];
-    char *ptr;
+    uint8_t topicdatabuff[2][64];
+    char *ptr1, *ptr2;
 
     mcuboot.flash_init();
     memset(&ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
     ota_info.status = OTA_STATUS_DOWNLOADING;
     UpdateOTAFlag(&ota_info);
-    memset(topicdatabuff,0,64); 
-    sprintf(topicdatabuff,"/sys/%s/%s/thing/file/download_reply",PLATFORM_PRODUCTKEY,CLIENT_DEVICENAME);  
+    memset(topicdatabuff,0,sizeof(topicdatabuff));
+    sprintf(topicdatabuff[0],"/ota/device/upgrade/%s/%s",PLATFORM_PRODUCTKEY,CLIENT_DEVICENAME);  
+    sprintf(topicdatabuff[1],"/sys/%s/%s/thing/file/download_reply",PLATFORM_PRODUCTKEY,CLIENT_DEVICENAME);  
 
 reconnect:
-    if((AdapterNetActive() == 0) && (MQTT_Connect() == 0) && MQTT_SubscribeTopic(topicdatabuff) == 0)
+    if((AdapterNetActive() == 0) && MQTT_Connect() && MQTT_SubscribeTopic(topicdatabuff[0]) && MQTT_SubscribeTopic(topicdatabuff[1]))
     {
         KPrintf("Log in to the cloud platform and subscribe to the topic successfully.\n"); 
         PropertyVersion();
@@ -829,73 +1204,109 @@ reconnect:
         datalen = MQTT_Recv(MqttRxbuf, sizeof(MqttRxbuf));
         if(datalen <= 0)
         {
-           freecnt++; 
+            freecnt++;
+            if((freecnt >= 20) && (CalculateTimeMsFromTick(CurrentTicksGain()) - heart_time >= HEART_TIME)) //连续20次未收到数据默认为为空闲状态,需每隔一段时间发送需要发送心跳包保活
+            {
+                heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
+                freecnt = 0;
+                if(!MQTT_SendHeart()) //发送心跳包失败可能连接断开,需要重连
+                {
+                    KPrintf("The connection has been disconnected, reconnecting!\n");
+                    goto reconnect;  
+                }
+                KPrintf("Send heartbeat packet successful!\n"); 
+            }
         }
         else if(MqttRxbuf[0] == 0x30)
         {
             freecnt = 0;
             MQTT_DealPublishData(MqttRxbuf, datalen);
-            ptr = strstr((char *)Platform_mqtt.cmdbuff,"{\"code\":\"1000\""); 
-            if(ptr != NULL)
+            
+            // 1.获取新版本固件大小及版本信息
+            ptr1 = strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[0]); 
+            ptr2 = strstr((char *)Platform_mqtt.cmdbuff,"{\"code\":\"1000\"");
+            if((ptr1 != NULL) &&(ptr2 != NULL))
             {
-                if(sscanf(ptr,"{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&AliOTA.size,&AliOTA.streamId,AliOTA.version)==3)
+                if(sscanf(ptr2,"{\"code\":\"1000\",\"data\":{\"size\":%d,\"streamId\":%d,\"sign\":\"%*32s\",\"dProtocol\":\"mqtt\",\"version\":\"%11s\"",&platform_ota.size,&platform_ota.streamId,platform_ota.version)==3)
                 {
-                    KPrintf("ota file size:%d\r\n",AliOTA.size);
-                    KPrintf("ota file id:%d\r\n",AliOTA.streamId);
-                    KPrintf("ota file version:%s\r\n",AliOTA.version);
-                    if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,AliOTA.size != kStatus_Success))
+                    KPrintf("OTA firmware information:file size is %d,file id is %d,file version is %s!\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
+                    KPrintf("------Start the firmware file transfer!------\r\n");                    
+                    KPrintf("---------------------------------------------\r\n");
+                    if(platform_ota.size > APP_FLASH_SIZE)
                     {
-                        KPrintf("Failed to erase target fash!\n");
+                        KPrintf("File size is larger than partition size,the partition size is %dk.\n",APP_FLASH_SIZE/1024);
                         ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "File size is larger than partition size!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
                         break;
                     }
-                    AliOTA.counter = (AliOTA.size%FRAME_LEN != 0)? (AliOTA.size/FRAME_LEN + 1):(AliOTA.size/FRAME_LEN);
-                    AliOTA.num = 1;                                          //下载次数,初始值为1
-                    AliOTA.downlen = FRAME_LEN;                              //记录本次下载量
-                    OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
+                    if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,platform_ota.size) != kStatus_Success)
+                    {
+                        KPrintf("Failed to erase download partition!\n");
+                        ret = -1;
+                        ota_info.status = OTA_STATUS_ERROR;
+                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                        strncpy(ota_info.error_message, "Failed to erase download partition!",sizeof(ota_info.error_message));
+                        UpdateOTAFlag(&ota_info);
+                        break;
+                    }
+                    platform_ota.counter = (platform_ota.size%FRAME_LEN != 0)? (platform_ota.size/FRAME_LEN + 1):(platform_ota.size/FRAME_LEN);
+                    platform_ota.num = 1;                                          //下载次数,初始值为1
+                    platform_ota.downlen = FRAME_LEN;                              //记录本次下载量
+                    OTA_Download(platform_ota.downlen,(platform_ota.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
                 }
                 else
                 {
-                        KPrintf("Failed to get ota information!\n");
-                        ret = -1;
-                        break;
+                    KPrintf("Failed to get ota information!\n");
+                    ret = -1;
+                    ota_info.status = OTA_STATUS_ERROR;
+                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                    strncpy(ota_info.error_message, "Failed to get ota information!",sizeof(ota_info.error_message));
+                    UpdateOTAFlag(&ota_info);
+                    break;
                 }
             }
 
-            if(strstr((char *)Platform_mqtt.cmdbuff,"download_reply"))
+            // 2.分片接收新版本固件
+            if(strstr((char *)Platform_mqtt.cmdbuff,topicdatabuff[1]))
             {
                 memset(FrameBuf,0,sizeof(FrameBuf));
-                memcpy(FrameBuf, &MqttRxbuf[datalen-AliOTA.downlen-2], AliOTA.downlen);
-                if(mcuboot.op_flash_write(flashdestination,FrameBuf,AliOTA.downlen) != kStatus_Success)
+                memcpy(FrameBuf, &MqttRxbuf[datalen-platform_ota.downlen-2], platform_ota.downlen);
+                if(mcuboot.op_flash_write(flashdestination,FrameBuf,platform_ota.downlen) != kStatus_Success)
                 {
-                    KPrintf("current frame[%d] flash failed.\n",AliOTA.num-1);
+                    KPrintf("current frame[%d] flash failed.\n",platform_ota.num-1);
                     ret = -1;
+                    ota_info.status = OTA_STATUS_ERROR;
+                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
+                    sprintf(ota_info.error_message,"current frame[%d] flash failed.",platform_ota.num-1);  
+                    UpdateOTAFlag(&ota_info);
                     break;
                 }
                 else
                 {
-                    KPrintf("current frame[%d] is written to flash 0x%x address successful.\n", AliOTA.num -1, flashdestination);
-                    KPrintf("Current progress is %d/%d\r\n",AliOTA.num,AliOTA.counter); 
-                    flashdestination += AliOTA.downlen;
-                    AliOTA.num++; 
+                    displayProgress((platform_ota.num*100)/platform_ota.counter);
+                    flashdestination += platform_ota.downlen;
+                    platform_ota.num++; 
                 }
 
-                if(AliOTA.num < AliOTA.counter) //如果小于总下载次数
+                if(platform_ota.num < platform_ota.counter) //如果小于总下载次数
                 {
-                    AliOTA.downlen = FRAME_LEN;                                //记录本次下载量
-                    OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN);   //发送要下载的数据信息给服务器
+                    platform_ota.downlen = FRAME_LEN;                                      //记录本次下载量
+                    OTA_Download(platform_ota.downlen,(platform_ota.num - 1)*FRAME_LEN);   //发送要下载的数据信息给服务器
                 }
-                else if(AliOTA.num == AliOTA.counter) //如果等于总下载次数,说明是最后一次下载
+                else if(platform_ota.num == platform_ota.counter) //如果等于总下载次数,说明是最后一次下载
                 {
-                    if(AliOTA.size%FRAME_LEN == 0)    //判断固件大小是否是FRAME_LEN的整数倍
+                    if(platform_ota.size%FRAME_LEN == 0)    //判断固件大小是否是FRAME_LEN的整数倍
                     {
-                        AliOTA.downlen = FRAME_LEN;                              //记录本次下载量
-                        OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
+                        platform_ota.downlen = FRAME_LEN;                                    //记录本次下载量
+                        OTA_Download(platform_ota.downlen,(platform_ota.num - 1)*FRAME_LEN); //发送要下载的数据信息给服务器
                     }
                     else
                     {
-                        AliOTA.downlen = AliOTA.size%FRAME_LEN;                   //记录本次下载量
-                        OTA_Download(AliOTA.downlen,(AliOTA.num - 1)*FRAME_LEN);  //发送要下载的数据信息给服务器	
+                        platform_ota.downlen = platform_ota.size%FRAME_LEN;                   //记录本次下载量
+                        OTA_Download(platform_ota.downlen,(platform_ota.num - 1)*FRAME_LEN);  //发送要下载的数据信息给服务器
                     }
                 }
 
@@ -912,28 +1323,16 @@ reconnect:
             freecnt = 0;
             continue;
         }
-
-        if((freecnt >= 10) && (CalculateTimeMsFromTick(CurrentTicksGain()) - heart_time >= HEART_TIME)) //连续10次未收到数据默认为为空闲状态,需每隔一段时间发送需要发送心跳包保活
-        {
-            heart_time = CalculateTimeMsFromTick(CurrentTicksGain());
-            if(MQTT_SendHeart() != 0) //发送心跳包失败可能连接断开,需要重连
-            {
-                KPrintf("The connection has been disconnected, reconnecting!\n");
-                freecnt = 0;
-                heart_time = 0;
-                goto reconnect;  
-            }
-            KPrintf("Send heartbeat packet successful!\n"); 
-        }
     }
 
+    // 新版本固件接收完毕,写入描述信息
     if(0 == ret)
     {
-        ota_info.down.size = AliOTA.size;
-        ota_info.down.crc32= calculate_crc32(DOWN_FLAH_ADDRESS, AliOTA.size);
+        ota_info.down.size = platform_ota.size;
+        ota_info.down.crc32 = calculate_crc32(DOWN_FLAH_ADDRESS, platform_ota.size);
 
         memset(ota_info.down.version,0,sizeof(ota_info.down.version)); 
-        strncpy(ota_info.down.version, AliOTA.version, sizeof(ota_info.down.version));
+        strncpy(ota_info.down.version, platform_ota.version, sizeof(ota_info.down.version));
 
         memset(ota_info.down.description,0,sizeof(ota_info.down.description)); 
         strncpy(ota_info.down.description, "MQTT OTA bin.",sizeof(ota_info.down.description));
@@ -944,28 +1343,25 @@ reconnect:
         strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
 
         UpdateOTAFlag(&ota_info);
-    } 
+        KPrintf("firmware file transfer successful,start reboot!\n");
+    }
     else
     {
-        ota_info.status = OTA_STATUS_ERROR;
-        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
-        strncpy(ota_info.error_message, "Failed to download firmware to download partition!",sizeof(ota_info.error_message));
-        UpdateOTAFlag(&ota_info);
+        KPrintf("firmware file transfer failed,start reboot!\n");
     }
-    MQTT_UnSubscribeTopic(topicdatabuff);
     MQTT_Disconnect();
     mcuboot.flash_deinit();
-    KPrintf("ota file transfer complete,start reboot!\n");
     MdelayKTask(2000);
     mcuboot.op_reset();
 }
+#endif
 
 int OtaTask(void)
 {
     int32 ota_task = 0;
-    ota_task = KTaskCreate("ota_platform", app_ota_by_platform, NULL,8192, 10);
+    ota_task = KTaskCreate("mqtt_platform", mqttCloudInteraction, NULL,10240, 10);
     if(ota_task < 0) {
-        KPrintf("ota_task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
+        KPrintf("matt platform task create failed ...%s %d.\n", __FUNCTION__,__LINE__);
         return ERROR;
     }
 
@@ -1008,14 +1404,14 @@ void ota_entry(void)
 
     mcuboot.board_init();
 
-    mcuboot.print_string("Please press 'space' key into menu in 10s !!!\r\n");
+    mcuboot.print_string("Please press 'space' key into menu in 5s !!!\r\n");
     
     while(timeout)
     { 
         ret = (SerialKeyPressed((uint8_t*)&ch1));
         if(ret) break;
         timeout--;
-        mcuboot.op_delay(10);
+        mcuboot.op_delay(5);
     }
 
     while(1)

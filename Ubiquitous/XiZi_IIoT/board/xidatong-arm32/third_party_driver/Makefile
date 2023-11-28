@@ -39,4 +39,8 @@ ifeq ($(CONFIG_BSP_USING_WDT),y)
   SRC_DIR += wdt
 endif
 
+ifeq ($(CONFIG_TOOL_USING_OTA),y)
+  SRC_DIR += ota
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
