@@ -18,4 +18,8 @@ ifeq ($(CONFIG_BOARD_EDU_ARM32_EVB),y)
 SRC_DIR += hc32f4a0
 endif
 
+ifeq ($(CONFIG_BOARD_XISHUTONG_ARM32),y)
+SRC_DIR += hc32f4a0
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
