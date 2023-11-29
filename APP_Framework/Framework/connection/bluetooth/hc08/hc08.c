@@ -268,6 +268,7 @@ static int Hc08Open(struct Adapter *adapter)
     serial_cfg.ext_uart_no = ADAPTER_HC08_DRIVER_EXT_PORT;
     serial_cfg.port_configure = PORT_CFG_INIT;
 #endif
+    serial_cfg.dev_recv_callback = NULL;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
@@ -326,6 +327,7 @@ static int Hc08Ioctl(struct Adapter *adapter, int cmd, void *args)
     serial_cfg.ext_uart_no = ADAPTER_HC08_DRIVER_EXT_PORT;
     serial_cfg.port_configure = PORT_CFG_INIT;
 #endif
+    serial_cfg.dev_recv_callback = NULL;
 
     serial_cfg.serial_timeout = -1;
 

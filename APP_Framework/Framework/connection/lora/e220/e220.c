@@ -374,6 +374,7 @@ static int E220Open(struct Adapter *adapter)
     //serial receive wait forever
     cfg.serial_timeout = -1;
 #endif
+    cfg.dev_recv_callback = NULL;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
@@ -428,6 +429,7 @@ static int E220Open(struct Adapter *adapter)
     //serial receive wait forever
     cfg.serial_timeout = -1;
 #endif
+    cfg.dev_recv_callback = NULL;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;

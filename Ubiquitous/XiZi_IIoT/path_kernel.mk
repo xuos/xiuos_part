@@ -535,6 +535,19 @@ endif
 ifeq ($(CONFIG_SUPPORT_CONNECTION_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/zigbee #
+
+ifeq ($(CONFIG_CONNECTION_MODBUS), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_fieldbus/modbus/freemodbus-latest/modbus/include #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_fieldbus/modbus/freemodbus-latest/port #
+
+ifeq ($(CONFIG_CONNECTION_MODBUS_USING_RTU), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_fieldbus/modbus/freemodbus-latest/modbus/rtu #
+endif
+
+ifeq ($(CONFIG_CONNECTION_MODBUS_USING_TCP), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_fieldbus/modbus/freemodbus-latest/modbus/tcp #
+endif
+endif
 endif
 
 ifeq ($(CONFIG_ADAPTER_HFA21_ETHERCAT), y)
