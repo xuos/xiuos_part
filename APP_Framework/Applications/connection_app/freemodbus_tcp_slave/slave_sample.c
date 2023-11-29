@@ -70,7 +70,7 @@ static void* pvPollingThread( void *pvParameter );
 int LWIPConnectSocket(uint16_t port);
 
 /* ----------------------- Start implementation -----------------------------*/
-int MBServer()
+int MBSlave()
 {
     int             iExitCode;
     CHAR            cCh;
@@ -115,7 +115,7 @@ int MBServer()
     return iExitCode;
 }
 
-PRIV_SHELL_CMD_FUNCTION(MBServer, a Mtcp server Demo, PRIV_SHELL_CMD_MAIN_ATTR);  
+PRIV_SHELL_CMD_FUNCTION(MBSlave, a Mtcp server Demo, PRIV_SHELL_CMD_MAIN_ATTR);  
 
 
 BOOL bCreatePollingThread( void )
@@ -257,42 +257,3 @@ eMBErrorCode eMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT us
 {
     return MB_ENOREG;
 }
-
-
-
-
-/**
- * @description: Modbus Tcp Server Open
- * @param control_protocol - control protocol pointer
- * @return success : 0 error
- */
-// int FreeModbusTcpOpen(struct ControlProtocol *control_protocol)
-// {
-//     ControlProtocolOpenDef(control_protocol);
-//     return 0;
-// }
-
-// static struct ControlDone FreeModbusTcp_protocol_done = 
-// {
-//     ._open = FreeModbusTcpOpen,
-//     ._close = NULL,
-//     ._read = NULL,
-//     ._write = NULL,
-//     ._ioctl = NULL,
-// };
-
-// void *ReceivePlcDataTask(void *parameter)
-// {
-//     MBServer();
-// }
-
-/**
- * @description: Modbus Tcp Server Init
- * @param p_recipe - recipe pointer
- * @return success : 0 error : -1
- */
-// int FreeModbusTcpServerInit(struct ControlRecipe *p_recipe)
-// {   
-//     p_recipe->done = &FreeModbusTcp_protocol_done;
-//     return 0;
-// }
