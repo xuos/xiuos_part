@@ -26,13 +26,16 @@
 #include <hc32_ll_eth.h>
 #include <sys_arch.h>
 
+#ifdef BSP_USING_W5500
 #include "connect_ethernet_wiz.h"
 #include "connect_w5500.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifdef BSP_USING_ETHERNET
 struct hc32_irq_config {
     IRQn_Type irq_num;
     uint32_t irq_prio;
@@ -64,10 +67,11 @@ int32_t low_level_init(struct netif* netif);
 err_t low_level_output(struct netif* netif, struct pbuf* p);
 struct pbuf* low_level_input(struct netif* netif);
 
+int HwEthInit(void);
+#endif
+
 int lwip_netdev_add(struct netif* lwip_netif);
 void lwip_netdev_del(struct netif* lwip_netif);
-
-int HwEthInit(void);
 
 #ifdef __cplusplus
 }

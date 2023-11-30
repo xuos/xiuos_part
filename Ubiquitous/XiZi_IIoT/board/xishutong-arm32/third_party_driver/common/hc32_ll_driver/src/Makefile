@@ -28,7 +28,7 @@ ifeq ($(CONFIG_BSP_USING_I2C),y)
   SRC_FILES += hc32_ll_i2c.c
 endif
 
-ifeq ($(CONFIG_BSP_USING_LWIP),y)
+ifeq ($(CONFIG_BSP_USING_ETHERNET),y)
   SRC_FILES += hc32_ll_eth.c
 endif
 

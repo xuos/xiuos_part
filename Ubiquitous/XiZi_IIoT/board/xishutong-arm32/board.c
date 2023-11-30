@@ -210,7 +210,7 @@ struct InitSequenceDesc _board_init[] = {
 #ifdef BSP_USING_CAN
     { "can", HwCanInit },
 #endif
-#ifdef BSP_USING_LWIP
+#ifdef BSP_USING_W5500
     { "wiz", HwWiznetInit },
 #endif
     { " NONE ", NONE },
