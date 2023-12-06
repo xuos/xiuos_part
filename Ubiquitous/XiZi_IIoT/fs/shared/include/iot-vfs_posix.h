@@ -15,7 +15,8 @@
 
 #include <iot-vfs.h>
 
-typedef void DIR;
+#include <ff.h>
+// typedef void void;
 
 #if defined(LIB_NEWLIB) && defined(_EXFUN)
 _READ_WRITE_RETURN_TYPE _EXFUN(read, (int __fd, void *__buf, size_t __nbyte));
@@ -39,15 +40,15 @@ int fsync(int fd);
 int ftruncate(int fd, off_t length);
 
 int mkdir(const char *path, mode_t mode);
-DIR *opendir(const char *path);
-int closedir(DIR *dirp);
-struct dirent *readdir(DIR *dirp);
+void* opendir(const char* path);
+int closedir(void* dirp);
+struct dirent* readdir(void* dirp);
 int rmdir(const char *path);
 int chdir(const char *path);
 char *getcwd(char *buf, size_t size);
-long telldir(DIR *dirp);
-void seekdir(DIR *dirp, off_t offset);
-void rewinddir(DIR *dirp);
+long telldir(void* dirp);
+void seekdir(void* dirp, off_t offset);
+void rewinddir(void* dirp);
 
 int statfs(const char *path, struct statfs *buf);
 

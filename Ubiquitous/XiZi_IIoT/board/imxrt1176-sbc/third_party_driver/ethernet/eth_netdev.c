@@ -76,6 +76,7 @@ static int lwip_netdev_set_addr_info(struct netdev* netdev, ip_addr_t* ip_addr, 
             netif_set_gw((struct netif*)netdev->user_data, ip_2_ip4(gw));
         }
     }
+    return 0;
 }
 
 #ifdef LWIP_DNS
@@ -92,7 +93,7 @@ static int lwip_netdev_set_dns_server(struct netdev* netdev, uint8_t dns_num, ip
 }
 #endif
 
-#ifdef LWIP_DHCP
+#if LWIP_DHCP
 static int lwip_netdev_set_dhcp(struct netdev* netdev, bool is_enabled)
 {
     netdev_low_level_set_dhcp_status(netdev, is_enabled);
@@ -120,7 +121,7 @@ static const struct netdev_ops lwip_netdev_ops = {
 #ifdef LWIP_DNS
     .set_dns_server = lwip_netdev_set_dns_server,
 #endif
-#ifdef LWIP_DHCP
+#if LWIP_DHCP
     .set_dhcp = lwip_netdev_set_dhcp,
 #endif
     .set_default = lwip_netdev_set_default,
@@ -180,9 +181,9 @@ int lwip_netdev_add(struct netif* lwip_netif)
     netdev->ops = &lwip_netdev_ops;
     netdev->hwaddr_len = lwip_netif->hwaddr_len;
     memcpy(netdev->hwaddr, lwip_netif->hwaddr, lwip_netif->hwaddr_len);
-    netdev->ip_addr = lwip_netif->ip_addr;
-    netdev->gw = lwip_netif->gw;
-    netdev->netmask = lwip_netif->netmask;
+    netdev->ip_addr = &lwip_netif->ip_addr;
+    netdev->gw = &lwip_netif->gw;
+    netdev->netmask = &lwip_netif->netmask;
 
     return result;
 }

@@ -93,9 +93,9 @@ struct netdev {
     SysSingleLinklistType list;
 
     char name[NAME_NUM_MAX]; /* network interface device name */
-    ip_addr_t ip_addr; /* IP address */
-    ip_addr_t netmask; /* subnet mask */
-    ip_addr_t gw; /* gateway */
+    ip_addr_t* ip_addr; /* IP address */
+    ip_addr_t* netmask; /* subnet mask */
+    ip_addr_t* gw; /* gateway */
 #if NETDEV_IPV6
     ip_addr_t ip6_addr[NETDEV_IPV6_NUM_ADDRESSES]; /* array of IPv6 addresses */
 #endif /* NETDEV_IPV6 */

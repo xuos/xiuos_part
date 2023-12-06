@@ -906,7 +906,7 @@ err:
     return 0;
 }
 
-DIR *opendir(const char *path)
+void* opendir(const char* path)
 {
     struct FileDescriptor *fdp;
     struct MountPoint *mp;
@@ -968,7 +968,7 @@ err:
     return fdp;
 }
 
-int closedir(DIR *dirp)
+int closedir(void* dirp)
 {
     struct FileDescriptor *fdp = dirp;
     int ret;
@@ -999,7 +999,7 @@ int closedir(DIR *dirp)
 }
 
 static struct dirent dirent;
-struct dirent *readdir(DIR *dirp)
+struct dirent* readdir(void* dirp)
 {
     struct FileDescriptor *fdp = dirp;
     int ret;
@@ -1036,7 +1036,7 @@ int rmdir(const char *path)
 int chdir(const char *path)
 {
     char *abspath;
-    DIR *dirp;
+    void* dirp;
 
     if (path == NULL) {
         SYS_ERR("%s: invalid path\n", __func__);
@@ -1074,7 +1074,7 @@ char *getcwd(char *buf, size_t size)
     return buf;
 }
 
-void seekdir(DIR *dirp, off_t offset)
+void seekdir(void* dirp, off_t offset)
 {
     struct FileDescriptor *fdp = dirp;
 
@@ -1093,7 +1093,7 @@ void seekdir(DIR *dirp, off_t offset)
     fdp->mntp->fs->seekdir(fdp, offset);
 }
 
-void rewinddir(DIR *dirp)
+void rewinddir(void* dirp)
 {
     struct FileDescriptor *fdp = dirp;
 
