@@ -76,10 +76,12 @@ struct IperfParam {
 static void* TestIperfServer(void* param)
 {
     struct IperfParam* iperf_param = (struct IperfParam*)param;
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    int sock = socket(AF_INET, SOCK_STREAM, 6);
     if (sock < 0) {
         printf("[%s] Err: Can't create socker.\n", __func__);
         return NULL;
+    } else {
+        printf("[%s] Info Create server socket %d\n", __func__, sock);
     }
 
     uint8_t* recv_data = (uint8_t*)malloc(IPERF_BUFSZ);
@@ -121,8 +123,9 @@ static void* TestIperfServer(void* param)
         socklen_t sin_size = sizeof(struct sockaddr_in);
         struct sockaddr_in client_addr;
         int connection = accept(sock, (struct sockaddr*)&client_addr, &sin_size);
-        printf("[%s] Info: New client connected from (%s, %d)\n", __func__,
-            inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+        printf("[%s] Info: New client connected from (%s, %d), connect: %d\n", __func__,
+            inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port),
+            connection);
 
         int flag = 1;
         setsockopt(connection,
@@ -141,8 +144,8 @@ static void* TestIperfServer(void* param)
                     inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
                 break;
             } else if (bytes_received < 0) {
-                KPrintf("recv error, client: (%s, %d)\n",
-                    inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+                KPrintf("recv error: %d, client: (%s, %d)\n",
+                    bytes_received, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
                 break;
             }
 
@@ -258,8 +261,6 @@ enum IperfParamEnum {
 
 void TestSocket(int argc, char* argv[])
 {
-    lwip_config_tcp(0, lwip_ipaddr, lwip_netmask, lwip_gwaddr);
-
     static char usage_info[] = "Run either a iperf server or iperf client.";
     static char program_info[] = "Lwip socket test task, a simple iperf.";
     static const char* const usages[] = {

@@ -50,6 +50,7 @@ export SRC_DIR:= $(SRC_APP_DIR) $(SRC_KERNEL_DIR)
 export LIBCC 
 export MUSL_DIR := $(KERNEL_ROOT)/lib/musllib
 export LWIP_DIR := $(KERNEL_ROOT)/resources/ethernet
+export MONGOOSE_DIR := $(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose/lib
 
 PART:=
 
@@ -72,6 +73,10 @@ endif
 
 ifeq ($(CONFIG_RESOURCES_LWIP), y)
 PART += COMPILE_LWIP
+endif
+
+ifeq ($(CONFIG_USE_MONGOOSE), y)
+# PART += COMPILE_MONGOOSE
 endif
 
 ifeq ($(CONFIG_MCUBOOT_BOOTLOADER), y)
@@ -128,6 +133,15 @@ COMPILE_LWIP:
 	@cp link_lwip.mk build/Makefile
 	@$(MAKE) -C build TARGET=liblwip.a LINK_FLAGS=LFLAGS
 	@cp build/liblwip.a $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
+	@rm build/Makefile build/make.obj
+
+COMPILE_MONGOOSE: 
+	@for dir in $(MONGOOSE_DIR);do    \
+               $(MAKE) -C $$dir COMPILE_TYPE=$@;          \
+       done
+	@cp link_mongoose.mk build/Makefile
+	@$(MAKE) -C build TARGET=mongoose.a LINK_FLAGS=LFLAGS
+	@cp build/mongoose.a $(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose/mongoose.a
 	@rm build/Makefile build/make.obj
 
 COMPILE_KERNEL:

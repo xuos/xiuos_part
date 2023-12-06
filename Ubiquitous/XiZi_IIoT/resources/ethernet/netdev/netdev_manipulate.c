@@ -28,8 +28,12 @@ Modification:
 1. support net dev set-ip, set-netmask, set-gw, set-addr-callback, set-status-callback, set-up and set-down
 *************************************************/
 
+#include <inet.h>
+
 #include <netdev.h>
 #include <string.h>
+
+#include <shell.h>
 #include <xs_isr.h>
 #include <xs_kdbg.h>
 
@@ -273,7 +277,7 @@ struct netdev* netdev_get_by_ipaddr(ip_addr_t* ip_addr)
     struct netdev* current_dev = NETDEV_LISTHEAD;
     SINGLE_LINKLIST_FOR_EACH_ENTRY(current_dev, &(NETDEV_LISTHEAD->list), list)
     {
-        if (NULL != current_dev && ip_addr_cmp(&(current_dev->ip_addr), ip_addr)) {
+        if (NULL != current_dev && ip_addr_cmp((current_dev->ip_addr), ip_addr)) {
             ENABLE_INTERRUPT(lock);
             return current_dev;
         }
@@ -298,6 +302,8 @@ struct netdev* netdev_get_by_name(const char* name)
         return NULL;
     }
 
+    uint32_t search_name_len = strlen(name);
+    SYS_KDEBUG_LOG(NETDEV_DEBUG, ("Netdev search name: %s, len: %d\n", name, search_name_len));
     // get netdev from list
     x_base lock = DISABLE_INTERRUPT();
     struct netdev* current_dev = NETDEV_LISTHEAD;
@@ -306,8 +312,10 @@ struct netdev* netdev_get_by_name(const char* name)
         if (NULL == current_dev) {
             continue;
         }
+
         uint32_t name_len = strlen(current_dev->name);
-        if (NULL != current_dev && (strncmp(current_dev->name, name, strlen(current_dev->name) < NAME_NUM_MAX ? strlen(current_dev->name) : NAME_NUM_MAX) == 0)) {
+        SYS_KDEBUG_LOG(NETDEV_DEBUG, ("Netdev current dev name: %s, len: %d\n", current_dev->name, name_len));
+        if (NULL != current_dev && name_len == search_name_len && 0 == strncmp(current_dev->name, name, name_len)) {
             ENABLE_INTERRUPT(lock);
             return current_dev;
         }
@@ -316,3 +324,35 @@ struct netdev* netdev_get_by_name(const char* name)
 
     return NULL;
 }
+
+void netdev_list_dev()
+{
+    if (NETDEV_LISTHEAD == NULL) {
+        return;
+    }
+
+    char ip[IP4ADDR_STRLEN_MAX], netmask[IP4ADDR_STRLEN_MAX], gw[IP4ADDR_STRLEN_MAX], dns[IP4ADDR_STRLEN_MAX];
+
+    // get netdev from list
+    x_base lock = DISABLE_INTERRUPT();
+    struct netdev* current_dev = NETDEV_LISTHEAD;
+    SINGLE_LINKLIST_FOR_EACH_ENTRY(current_dev, &(NETDEV_LISTHEAD->list), list)
+    {
+        if (NULL == current_dev) {
+            continue;
+        }
+
+        strncpy(ip, inet_ntoa(*current_dev->ip_addr), IP4ADDR_STRLEN_MAX);
+        strncpy(netmask, inet_ntoa(*current_dev->netmask), IP4ADDR_STRLEN_MAX);
+        strncpy(gw, inet_ntoa(*current_dev->gw), IP4ADDR_STRLEN_MAX);
+        strncpy(dns, inet_ntoa(current_dev->dns_servers[0]), IP4ADDR_STRLEN_MAX);
+        KPrintf("Netdev %s: ip: %s, mask: %s, gw: %s, dns: %s\n",
+            current_dev->name,
+            ip, netmask, gw, dns);
+    }
+    ENABLE_INTERRUPT(lock);
+
+    return;
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(5),
+    netdev_list, netdev_list_dev, list sys netdev);

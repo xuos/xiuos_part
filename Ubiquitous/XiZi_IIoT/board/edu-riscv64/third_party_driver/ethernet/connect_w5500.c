@@ -328,7 +328,11 @@ int HwWiznetInit(void)
     setSHAR(wiz_mac);
     ctlwizchip(CW_RESET_PHY, 0);
 
+    network_init();
+
     wiz_interrupt_init(0, wiz_irq_handler);
+
+    network_init();
 
     setSn_RXBUF_SIZE(0, 16);
     setSn_TXBUF_SIZE(0, 16);
@@ -348,8 +352,6 @@ int HwWiznetInit(void)
             break;
         }
     }
-
-    network_init();
 
     return EOK;
 }

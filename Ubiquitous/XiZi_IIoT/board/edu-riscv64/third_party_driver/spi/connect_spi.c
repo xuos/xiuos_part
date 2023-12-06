@@ -152,6 +152,9 @@ static uint32 SpiDrvConfigure(void *drv, struct BusConfigureInfo *configure_info
 
 static uint32 SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStandard *spi_datacfg)
 {
+#define WRITE_BUF_SIZE 1600
+    static uint32_t write_buf[4 * WRITE_BUF_SIZE] = { 0 };
+
     SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_dev->haldev.private_data);
 
     uint8 device_id = dev_param->spi_slave_param->spi_slave_id;
@@ -184,10 +187,15 @@ static uint32 SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStan
                 dmac_set_single_mode(dev_param->spi_dma_param->spi_dmac_txchannel, &dummy, (void *)(&spi_instance[device_master_id]->dr[0]), DMAC_ADDR_NOCHANGE, DMAC_ADDR_NOCHANGE,
                             DMAC_MSIZE_4, DMAC_TRANS_WIDTH_32, spi_datacfg->length);
             } else {
-                tx_buff = x_malloc(spi_datacfg->length * 4);
-                if (!tx_buff) {
-                    goto transfer_done;
+                if (spi_datacfg->length > WRITE_BUF_SIZE) {
+                    tx_buff = x_malloc(spi_datacfg->length * 4);
+                    if (!tx_buff) {
+                        goto transfer_done;
+                    }
+                } else {
+                    tx_buff = write_buf;
                 }
+
                 for (i = 0; i < spi_datacfg->length; i++) {
                     tx_buff[i] = ((uint8_t *)spi_datacfg->tx_buff)[i];
                 }
@@ -201,10 +209,10 @@ static uint32 SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStan
             spi_instance[device_master_id]->ser = 0x00;
             spi_instance[device_master_id]->ssienr = 0x00;
 
-    transfer_done:
-        if (tx_buff != NULL) {
-            x_free(tx_buff);
-        }
+        transfer_done:
+            if (tx_buff != NULL && spi_datacfg->length > WRITE_BUF_SIZE) {
+                x_free(tx_buff);
+            }
         }
 
         if (spi_datacfg->spi_cs_release) {
@@ -219,6 +227,9 @@ static uint32 SpiWriteData(struct SpiHardwareDevice *spi_dev, struct SpiDataStan
 
 static uint32 SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStandard *spi_datacfg)
 {
+#define READ_BUF_SIZE 1600
+    static uint32_t read_buf[4 * READ_BUF_SIZE] = { 0 };
+
     SpiDeviceParam *dev_param = (SpiDeviceParam *)(spi_dev->haldev.private_data);
 
     uint32 spi_read_length = 0;;
@@ -251,12 +262,15 @@ static uint32 SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStand
                 dmac_set_single_mode(dev_param->spi_dma_param->spi_dmac_rxchannel, (void *)(&spi_instance[device_master_id]->dr[0]), &dummy, DMAC_ADDR_NOCHANGE, DMAC_ADDR_NOCHANGE,
                             DMAC_MSIZE_1, DMAC_TRANS_WIDTH_32, spi_datacfg->length);
             } else {
-                rx_buff = x_calloc(spi_datacfg->length * 4, 1);
-                if(!rx_buff)
-                {
-                    goto transfer_done;
+                if (spi_datacfg->length > READ_BUF_SIZE) {
+                    rx_buff = x_calloc(spi_datacfg->length * 4, 1);
+                    if (!rx_buff) {
+                        goto transfer_done;
+                    }
+                } else {
+                    rx_buff = read_buf;
                 }
-                
+
                 dmac_set_single_mode(dev_param->spi_dma_param->spi_dmac_rxchannel, (void *)(&spi_instance[device_master_id]->dr[0]), rx_buff, DMAC_ADDR_NOCHANGE, DMAC_ADDR_INCREMENT,
                             DMAC_MSIZE_1, DMAC_TRANS_WIDTH_32, spi_datacfg->length);
             }
@@ -273,8 +287,8 @@ static uint32 SpiReadData(struct SpiHardwareDevice *spi_dev, struct SpiDataStand
                 }
             }
 
-    transfer_done:
-            if (rx_buff) {
+        transfer_done:
+            if (rx_buff && spi_datacfg->length > READ_BUF_SIZE) {
                 x_free(rx_buff);
             }
         }
