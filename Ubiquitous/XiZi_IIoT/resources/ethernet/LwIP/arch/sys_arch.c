@@ -76,7 +76,7 @@ char lwip_eth0_ipaddr[20] = { 192, 168, 130, 77 };
 char lwip_eth0_netmask[20] = { 255, 255, 254, 0 };
 char lwip_eth0_gwaddr[20] = { 192, 168, 130, 1 };
 
-char lwip_eth1_ipaddr[20] = { 192, 168, 130, 88 };
+char lwip_eth1_ipaddr[20] = { 192, 168, 131, 88 };
 char lwip_eth1_netmask[20] = { 255, 255, 254, 0 };
 char lwip_eth1_gwaddr[20] = { 192, 168, 130, 1 };
 
@@ -346,7 +346,9 @@ void lwip_config_input(int eport, struct netif* net)
     if (eport == 0) {
         th_id = sys_thread_new("eth_input", ethernetif_input, net, LWIP_TASK_STACK_SIZE, 30);
     } else if (eport == 1) {
+#ifdef NETIF_ENET1_INIT_FUNC
         th_id = sys_thread_new("eth_input2", ethernetif_input2, net, LWIP_TASK_STACK_SIZE, 30);
+#endif
     }
 }
 
@@ -360,7 +362,6 @@ void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
 
         if (chk_lwip_bit(LWIP_INIT_FLAG)) {
             lw_print("lw: [%s] already ...\n", __func__);
-            return;
         }
 
         set_lwip_bit(LWIP_INIT_FLAG);
@@ -384,12 +385,13 @@ void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
         lw_print("Not Netif driver for Eport 0\n");
         return;
 #endif
+#ifdef NETIF_ENET0_INIT_FUNC
         lw_print("Add netif eport 0\n");
         netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET0_INIT_FUNC,
             tcpip_input);
 
-        // netif_set_default(&gnetif);
-        // netif_set_up(&gnetif);
+        netif_set_default(&gnetif);
+        netif_set_up(&gnetif);
 
         lw_print("\r\n************************************************\r\n");
         lw_print(" Network Configuration\r\n");
@@ -404,6 +406,7 @@ void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
 
         lwip_config_input(enet_port, &gnetif);
         is_init_0 = 1;
+#endif
 
     } else if (1 == enet_port) {
         if (is_init_1 == 1) {
@@ -413,11 +416,12 @@ void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
         lw_print("Not Netif driver for Eport 1\n");
         return;
 #endif
+#ifdef NETIF_ENET1_INIT_FUNC
         lw_print("Add netif eport 1\n");
         netif_add(&gnetif2, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET1_INIT_FUNC,
             tcpip_input);
 
-        netif_set_default(&gnetif2);
+        // netif_set_default(&gnetif2);
         netif_set_up(&gnetif2);
 
         lw_print("\r\n************************************************\r\n");
@@ -433,5 +437,6 @@ void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
 
         lwip_config_input(enet_port, &gnetif2);
         is_init_1 = 1;
+#endif
     }
 }

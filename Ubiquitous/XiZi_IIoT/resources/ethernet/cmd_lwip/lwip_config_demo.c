@@ -25,102 +25,145 @@
 #include <sys_arch.h>
 #include <xs_kdbg.h>
 
-#include <netdev.h>
+#include "argparse.h"
+
+#include "inet.h"
+#include "netdev.h"
 
 /******************************************************************************/
-uint8_t enet_id = 0;
-static void LwipSetIPTask(void* param)
-{
-    lwip_config_tcp(0, lwip_eth0_ipaddr, lwip_eth0_netmask, lwip_eth0_gwaddr);
-    lwip_config_tcp(1, lwip_eth1_ipaddr, lwip_eth1_netmask, lwip_eth1_gwaddr);
-}
+enum NETWORK_ACTIVE_E {
+    LWIP_ACTIVE = 'e',
+    LWIP_ACTIVE_ALL = 'a',
+};
 
-void LwipSetIPTest(int argc, char* argv[])
+void LwipNetworkActive(int argc, char* argv[])
 {
-    if (argc >= 4) {
-        printf("lw: [%s] ip %s mask %s gw %s netport %s\n", __func__, argv[1], argv[2], argv[3], argv[4]);
-        sscanf(argv[1], "%hhd.%hhd.%hhd.%hhd", &lwip_ipaddr[0], &lwip_ipaddr[1], &lwip_ipaddr[2], &lwip_ipaddr[3]);
-        sscanf(argv[2], "%hhd.%hhd.%hhd.%hhd", &lwip_netmask[0], &lwip_netmask[1], &lwip_netmask[2], &lwip_netmask[3]);
-        sscanf(argv[3], "%hhd.%hhd.%hhd.%hhd", &lwip_gwaddr[0], &lwip_gwaddr[1], &lwip_gwaddr[2], &lwip_gwaddr[3]);
-        sscanf(argv[4], "%hhd", &enet_id);
+    static char usage_info[] = "select a eport to start.";
+    static char program_info[] = "Active lwip network function.";
+    static const char* const net_active_usages[] = {
+        "LwipNetworkActive -e 0",
+        "LwipNetworkActive -e 1",
+        "LwipNetworkActive -a",
+    };
 
-        if (0 == enet_id) {
-            printf("save eth0 info\n");
-            memcpy(lwip_eth0_ipaddr, lwip_ipaddr, 20);
-            memcpy(lwip_eth0_netmask, lwip_netmask, 20);
-            memcpy(lwip_eth0_gwaddr, lwip_gwaddr, 20);
-        } else if (1 == enet_id) {
-            printf("save eth1 info\n");
-            memcpy(lwip_eth1_ipaddr, lwip_ipaddr, 20);
-            memcpy(lwip_eth1_netmask, lwip_netmask, 20);
-            memcpy(lwip_eth1_gwaddr, lwip_gwaddr, 20);
-        }
-    } else if (argc == 2) {
-        printf("lw: [%s] set eth0 ipaddr %s \n", __func__, argv[1]);
-        sscanf(argv[1], "%hhd.%hhd.%hhd.%hhd", &lwip_ipaddr[0], &lwip_ipaddr[1], &lwip_ipaddr[2], &lwip_ipaddr[3]);
-        memcpy(lwip_eth0_ipaddr, lwip_ipaddr, strlen(lwip_ipaddr));
+    int eport = -1;
+    bool all = false;
+    bool is_help = false;
+    struct argparse_option options[] = {
+        OPT_HELP(&is_help),
+        OPT_INTEGER(LWIP_ACTIVE, "eport", &eport, "eport to start network.", NULL, 0, 0),
+        OPT_BIT(LWIP_ACTIVE_ALL, "all", &all, "start network at both eport 0 and 1.", NULL, true, 0),
+        OPT_END(),
+    };
+
+    struct argparse argparse;
+    argparse_init(&argparse, options, net_active_usages, 0);
+    argparse_describe(&argparse, usage_info, program_info);
+    argc = argparse_parse(&argparse, argc, (const char**)argv);
+    if (is_help) {
+        return;
     }
-    // sys_thread_new("SET ip address", LwipSetIPTask, &enet_id, LWIP_TASK_STACK_SIZE, LWIP_DEMO_TASK_PRIO);
-    LwipSetIPTask(&enet_id);
-}
 
+    if (all) {
+        lwip_config_tcp(0, lwip_eth0_ipaddr, lwip_eth0_netmask, lwip_eth0_gwaddr);
+        lwip_config_tcp(1, lwip_eth1_ipaddr, lwip_eth1_netmask, lwip_eth1_gwaddr);
+        return;
+    }
+
+    if (eport != 0 && eport != 1) {
+        printf("[%s] Err: Support only eport 0 and eport 1.\n", __func__);
+    }
+
+    if (eport == 0) {
+        lwip_config_tcp(0, lwip_eth0_ipaddr, lwip_eth0_netmask, lwip_eth0_gwaddr);
+    } else if (eport == 1) {
+        lwip_config_tcp(1, lwip_eth1_ipaddr, lwip_eth1_netmask, lwip_eth1_gwaddr);
+    }
+}
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(5),
-    setip, LwipSetIPTest, setip[IP][Netmask][Gateway][port]);
+    LwipNetworkActive, LwipNetworkActive, start lwip);
 
-void LwipShowIPTask(int argc, char* argv[])
+enum NETWORK_CONFIG_E {
+    NETWORK_DEV = 'd',
+    NETWORK_IP = 'i',
+    NETWORK_NM = 'n',
+    NETWORK_GW = 'g',
+};
+
+void LwipSetNetwork(int argc, char* argv[])
 {
-#ifdef configMAC_ADDR
-    char mac_addr0[] = configMAC_ADDR;
-#endif
+    static char usage_info[] = "config network information.";
+    static char program_info[] = "set network ip, netmask, gateway";
+    static const char* const net_set_usages[] = {
+        "LwipSetNetwork -d [dev] -i [ip]",
+        "LwipSetNetwork -d [dev] -n [netmask]",
+        "LwipSetNetwork -d [dev] -g [gw]",
+        "LwipSetNetwork -d [dev] -i [ip] -n [netmask] -g [gw]",
+    };
 
-    // find default netdev
-    struct netdev* netdev = netdev_get_by_name("en\0");
+    char* dev_ptr = NULL;
+    char* ip_ptr = NULL;
+    char* nm_ptr = NULL;
+    char* gw_ptr = NULL;
+    bool is_help = false;
+    struct argparse_option options[] = {
+        OPT_HELP(&is_help),
+        OPT_GROUP("Param Options"),
+        OPT_STRING(NETWORK_DEV, "dev", &dev_ptr, "netdev", NULL, 0, 0),
+        OPT_STRING(NETWORK_IP, "ip", &ip_ptr, "change ip", NULL, 0, 0),
+        OPT_STRING(NETWORK_NM, "nm", &nm_ptr, "change netmask", NULL, 0, 0),
+        OPT_STRING(NETWORK_GW, "gw", &gw_ptr, "change gateway", NULL, 0, 0),
+        OPT_END(),
+    };
+
+    struct argparse argparse;
+    argparse_init(&argparse, options, net_set_usages, 0);
+    argparse_describe(&argparse, usage_info, program_info);
+    argc = argparse_parse(&argparse, argc, (const char**)argv);
+    /* help task */
+    if (is_help) {
+        return;
+    }
+
+    if (dev_ptr == NULL) {
+        printf("[%s] Err: must given a netdev name.\n", __func__);
+        return;
+    }
+    struct netdev* netdev = netdev_get_by_name(dev_ptr);
     if (netdev == NULL) {
-        lw_notice("[%s] Netdev not found by name en\n");
-        struct netdev* default_netdev = NETDEV_DEFAULT;
+        printf("[%s] Err: Netdev not found by name: %s\n", __func__, dev_ptr);
+        return;
     }
 
-    lw_notice("\r\n************************************************\r\n");
-    lw_notice(" Network Configuration\r\n");
-    lw_notice("************************************************\r\n");
-    //     lw_notice(" ETH0 IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&lwip_eth0_ipaddr)[0], ((u8_t*)&lwip_eth0_ipaddr)[1],
-    //         ((u8_t*)&lwip_eth0_ipaddr)[2], ((u8_t*)&lwip_eth0_ipaddr)[3]);
-    //     lw_notice(" ETH0 IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&lwip_eth0_netmask)[0], ((u8_t*)&lwip_eth0_netmask)[1],
-    //         ((u8_t*)&lwip_eth0_netmask)[2], ((u8_t*)&lwip_eth0_netmask)[3]);
-    //     lw_notice(" ETH0 IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&lwip_gwaddr)[0], ((u8_t*)&lwip_eth0_gwaddr)[1],
-    //         ((u8_t*)&lwip_eth0_gwaddr)[2], ((u8_t*)&lwip_eth0_gwaddr)[3]);
-    // #ifdef configMAC_ADDR
-    //     lw_notice(" ETH0 MAC Address    : %x:%x:%x:%x:%x:%x\r\n", mac_addr0[0], mac_addr0[1], mac_addr0[2],
-    //         mac_addr0[3], mac_addr0[4], mac_addr0[5]);
-    // #endif
-
-    lw_notice(" ETH0 IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&lwip_eth0_ipaddr)[0], ((u8_t*)&lwip_eth0_ipaddr)[1],
-        ((u8_t*)&lwip_eth0_ipaddr)[2], ((u8_t*)&lwip_eth0_ipaddr)[3]);
-    lw_notice(" ETH0 IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&lwip_eth0_netmask)[0], ((u8_t*)&lwip_eth0_netmask)[1],
-        ((u8_t*)&lwip_eth0_netmask)[2], ((u8_t*)&lwip_eth0_netmask)[3]);
-    lw_notice(" ETH0 IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&lwip_gwaddr)[0], ((u8_t*)&lwip_eth0_gwaddr)[1],
-        ((u8_t*)&lwip_eth0_gwaddr)[2], ((u8_t*)&lwip_eth0_gwaddr)[3]);
-#ifdef configMAC_ADDR
-    lw_notice(" ETH0 MAC Address    : %x:%x:%x:%x:%x:%x\r\n", mac_addr0[0], mac_addr0[1], mac_addr0[2],
-        mac_addr0[3], mac_addr0[4], mac_addr0[5]);
-#endif
-
-#ifdef BOARD_NET_COUNT
-    if (BOARD_NET_COUNT > 1) {
-        char mac_addr1[] = configMAC_ADDR_ETH1;
-        lw_notice("\r\n");
-        lw_notice(" ETH1 IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&lwip_eth1_ipaddr)[0], ((u8_t*)&lwip_eth1_ipaddr)[1],
-            ((u8_t*)&lwip_eth1_ipaddr)[2], ((u8_t*)&lwip_eth1_ipaddr)[3]);
-        lw_notice(" ETH1 IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&lwip_eth1_netmask)[0], ((u8_t*)&lwip_eth1_netmask)[1],
-            ((u8_t*)&lwip_eth1_netmask)[2], ((u8_t*)&lwip_eth1_netmask)[3]);
-        lw_notice(" ETH1 IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&lwip_eth1_gwaddr)[0], ((u8_t*)&lwip_eth1_gwaddr)[1],
-            ((u8_t*)&lwip_eth1_gwaddr)[2], ((u8_t*)&lwip_eth1_gwaddr)[3]);
-        lw_notice(" ETH1 MAC Address    : %x:%x:%x:%x:%x:%x\r\n", mac_addr1[0], mac_addr1[1], mac_addr1[2],
-            mac_addr1[3], mac_addr1[4], mac_addr1[5]);
+    ip_addr_t ipaddr, maskaddr, gwaddr;
+    if (ip_ptr != NULL) {
+        inet_aton(ip_ptr, &ipaddr);
+        if (0 != netdev_set_ipaddr(netdev, &ipaddr)) {
+            printf("[%s] Err: set ip: %s failed.\n", __func__, ip_ptr);
+        }
     }
-#endif
-    lw_notice("************************************************\r\n");
+    if (nm_ptr != NULL) {
+        inet_aton(nm_ptr, &maskaddr);
+        if (0 != netdev_set_netmask(netdev, &maskaddr)) {
+            printf("[%s] Err: set netmask: %s failed.\n", __func__, nm_ptr);
+        }
+    }
+    if (gw_ptr != NULL) {
+        inet_aton(gw_ptr, &gwaddr);
+        if (0 != netdev_set_gw(netdev, &gwaddr)) {
+            printf("[%s] Err: set gateway: %s failed.\n", __func__, gw_ptr);
+        }
+    }
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(11),
+    LwipSetNetwork, LwipSetNetwork, config lwip);
+
+void LwipShowNetwork(int argc, char* argv[])
+{
+    extern void netdev_list_dev();
+    netdev_list_dev();
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(0),
-    showip, LwipShowIPTask, GetIp[IP][Netmask][Gateway]);
+    LwipShowNetwork, LwipShowNetwork, show lwip network configuration);

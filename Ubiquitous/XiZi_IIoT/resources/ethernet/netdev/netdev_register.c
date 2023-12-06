@@ -65,17 +65,13 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
 
     // set flag mask, assert network is down
     uint16_t flag_mask = 0;
-    flag_mask = NETDEV_FLAG_UP | NETDEV_FLAG_LINK_UP | NETDEV_FLAG_INTERNET_UP | NETDEV_FLAG_DHCP;
+    flag_mask = NETDEV_FLAG_UP | NETDEV_FLAG_LINK_UP | NETDEV_FLAG_INTERNET_UP;
     netdev->flags &= ~flag_mask;
 
     // clear dev setting
-    ip_addr_set_zero(&(netdev->ip_addr));
-    ip_addr_set_zero(&(netdev->netmask));
-    ip_addr_set_zero(&(netdev->gw));
-
-    IP_SET_TYPE_VAL(netdev->ip_addr, IPADDR_TYPE_V4);
-    IP_SET_TYPE_VAL(netdev->netmask, IPADDR_TYPE_V4);
-    IP_SET_TYPE_VAL(netdev->gw, IPADDR_TYPE_V4);
+    netdev->ip_addr = NULL;
+    netdev->netmask = NULL;
+    netdev->gw = NULL;
 
 #if NETDEV_IPV6
     for (index = 0; index < NETDEV_IPV6_NUM_ADDRESSES; index++) {
@@ -87,7 +83,6 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
     // clear DNS servers
     for (uint16_t idx = 0; idx < NETDEV_DNS_SERVERS_NUM; idx++) {
         ip_addr_set_zero(&(netdev->dns_servers[idx]));
-        IP_SET_TYPE_VAL(netdev->ip_addr, IPADDR_TYPE_V4);
     }
     // clear callback fn
     netdev->addr_callback = NULL;

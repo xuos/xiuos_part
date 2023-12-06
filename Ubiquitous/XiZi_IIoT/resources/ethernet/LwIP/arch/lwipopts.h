@@ -272,13 +272,16 @@ a lot of data that needs to be copied, this should be set high. */
 #define MEMP_NUM_PBUF 32
 /* MEMP_NUM_UDP_PCB: the number of UDP protocol control blocks. One
    per active UDP "connection". */
-#define MEMP_NUM_UDP_PCB 4
+#define MEMP_NUM_UDP_PCB 32
 /* MEMP_NUM_TCP_PCB: the number of simulatenously active TCP
    connections. */
-#define MEMP_NUM_TCP_PCB 64
+#define MEMP_NUM_TCP_PCB 32
+#define MEMP_NUM_RAW_PCB 32
+#define MEMP_NUM_REASSDATA 32
+#define MEMP_NUM_NETCONN 32
 /* MEMP_NUM_TCP_PCB_LISTEN: the number of listening TCP
    connections. */
-#define MEMP_NUM_TCP_PCB_LISTEN 2
+#define MEMP_NUM_TCP_PCB_LISTEN 32
 /* MEMP_NUM_TCP_SEG: the number of simultaneously queued TCP
    segments. */
 #define MEMP_NUM_TCP_SEG 256
@@ -383,12 +386,6 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* ---------- ICMP options ---------- */
 #define LWIP_ICMP 1
-
-/* ---------- DHCP options ---------- */
-/* Define LWIP_DHCP to 1 if you want DHCP configuration of
-   interfaces. DHCP is not implemented in lwIP 0.5.1, however, so
-   turning this on does currently not work. */
-#define LWIP_DHCP 1
 
 /* ---------- UDP options ---------- */
 #define LWIP_UDP 1
@@ -521,7 +518,7 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 /* ---------- DHCP options ---------- */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. */
-#define LWIP_DHCP 1
+#define LWIP_DHCP 0
 
 /* 1 if you want to do an ARP check on the offered address
    (recommended). */

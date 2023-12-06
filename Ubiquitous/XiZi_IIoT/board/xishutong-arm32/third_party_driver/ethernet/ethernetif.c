@@ -204,7 +204,6 @@ void ethernetif_input(void* netif_arg)
     /* Move received packet into a new pbuf */
     while (1) {
         sys_arch_sem_wait(get_eth_recv_sem(), WAITING_FOREVER);
-        KPrintf("%s -->\n", netif->name);
         while (1) {
             p = low_level_input(netif);
 #ifndef ETHERNET_LOOPBACK_TEST

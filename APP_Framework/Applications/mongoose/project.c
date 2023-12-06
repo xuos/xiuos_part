@@ -14,7 +14,7 @@
 
 char index_path[] = "login.html";
 
-static const char* s_http_addr = "http://0.0.0.0:8000"; // HTTP port
+static const char* s_http_addr = "http://192.168.131.88:8000"; // HTTP port
 static const char* s_root_dir = "webserver";
 static const char* s_enable_hexdump = "no";
 static const char* s_ssi_pattern = "#.html";
@@ -104,18 +104,22 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
     (void)fn_data;
 }
 
-extern void LwipSetIPTest(int argc, char* argv[]);
 static void* do_webserver_demo(void* none)
 {
-    p_netdev = NETDEV_DEFAULT;
-    s_config.ip = strdup(inet_ntoa(p_netdev->ip_addr));
-    s_config.mask = strdup(inet_ntoa(p_netdev->netmask));
-    s_config.gw = strdup(inet_ntoa(p_netdev->gw));
+    p_netdev = netdev_get_by_name("wz");
+    if (p_netdev == NULL) {
+        MG_INFO(("Did nto find wz netdev, use default.\n"));
+        p_netdev = NETDEV_DEFAULT;
+    }
+    MG_INFO(("Use Netdev %s", p_netdev->name));
+    s_config.ip = strdup(inet_ntoa(*p_netdev->ip_addr));
+    s_config.mask = strdup(inet_ntoa(*p_netdev->netmask));
+    s_config.gw = strdup(inet_ntoa(*p_netdev->gw));
     s_config.dns = strdup(inet_ntoa(p_netdev->dns_servers[0]));
 
     struct mg_mgr mgr; // Event manager
-    mg_log_set(MG_LL_INFO); // Set to 3 to enable debug
-    // mg_log_set(MG_LL_DEBUG); // Set to 3 to enable debug
+    // mg_log_set(MG_LL_INFO); // Set to 3 to enable debug
+    mg_log_set(MG_LL_DEBUG); // Set to 3 to enable debug
     mg_mgr_init(&mgr); // Initialise event manager
     mg_http_listen(&mgr, s_http_addr, fn, NULL); // Create HTTP listener
     for (;;)
@@ -126,12 +130,10 @@ static void* do_webserver_demo(void* none)
 
 int webserver_demo(int argc, char* argv[])
 {
-    LwipSetIPTest(1, NULL);
-
     pthread_t tid = -1;
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 30;
-    attr.stacksize = 0x4000;
+    attr.stacksize = 0x2000;
 
     PrivTaskCreate(&tid, &attr, do_webserver_demo, NULL);
 
