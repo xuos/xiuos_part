@@ -189,7 +189,7 @@ static uint32 CanReadData(void *dev , struct BusBlockReadParam *databuf)
 
     ret = CAN_GetRxFrame(CAN_X, &frame_received);
     if(EOK != ret){
-        // KPrintf("CAN recv frame failed(CODE:%d)!\n",ret);
+       // KPrintf("CAN recv frame failed(CODE:%d)!\n",ret);
         p_can_config->data_lenth = 0;
         return ERROR;            
     }
