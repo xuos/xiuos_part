@@ -24,27 +24,29 @@ Others: connect_can.c for references
 
 #define CAN_X (CM_CAN2)
 
-#define CAN_TX_PORT (GPIO_PORT_D)
-#define CAN_TX_PIN  (GPIO_PIN_07)
-#define CAN_RX_PORT (GPIO_PORT_D)
-#define CAN_RX_PIN  (GPIO_PIN_06)
-#define CAN_TX_PIN_FUNC (GPIO_FUNC_62)
-#define CAN_RX_PIN_FUNC (GPIO_FUNC_63)
+#define CAN_TX_PORT             (GPIO_PORT_D)
+#define CAN_TX_PIN              (GPIO_PIN_07)
+#define CAN_RX_PORT             (GPIO_PORT_D)
+#define CAN_RX_PIN              (GPIO_PIN_06)
+#define CAN_TX_PIN_FUNC         (GPIO_FUNC_62)
+#define CAN_RX_PIN_FUNC         (GPIO_FUNC_63)
 
 #define INTSEL_REG              ((uint32_t)(&CM_INTC->SEL0))
 #define CANX_IRQ_SRC            INT_SRC_CAN2_HOST
 #define CANX_IRQ_NUM               17
 #define IRQ_NUM_OFFSET             16
 
-#define CAN_AF1_ID (0x123UL)
-#define CAN_AF1_ID_MSK (0xFFFUL)
-#define CAN_AF1_MSK_TYPE CAN_ID_STD
-#define CAN_AF2_ID (0x005UL)
-#define CAN_AF2_ID_MSK (0x00FUL)
-#define CAN_AF2_MSK_TYPE CAN_ID_STD
-#define CAN_AF3_ID (0x23UL)
-#define CAN_AF3_ID_MSK (0xFFUL)
-#define CAN_AF3_MSK_TYPE CAN_ID_STD
+#define CAN_AF1_ID              (0x123UL)
+#define CAN_AF1_ID_MSK          (0xFFFUL)
+#define CAN_AF1_MSK_TYPE        CAN_ID_STD
+
+#define CAN_AF2_ID              (0x005UL)
+#define CAN_AF2_ID_MSK          (0x00FUL)
+#define CAN_AF2_MSK_TYPE        CAN_ID_STD
+
+#define CAN_AF3_ID              (0x23UL)
+#define CAN_AF3_ID_MSK          (0xFFUL)
+#define CAN_AF3_MSK_TYPE        CAN_ID_STD
 
 #ifdef CAN_USING_INTERRUPT
 void CanIrqHandler(int vector, void *param)
@@ -95,18 +97,9 @@ static void CanInit(struct CanDriverConfigure *can_drv_config)
     stcInit.stcBitCfg.u32TimeSeg2 = can_drv_config->tbs2;
     stcInit.u8WorkMode = can_drv_config->mode;
 
-#ifdef CAN_USING_FD
-    stcInit.stcFDCfg.u8TDCSSP = 16U;
-    stcInit.stcFDCfg.u8CANFDMode = CAN_FD_MODE_ISO_11898;
-    stcInit.stcFDCfg.stcFBT.u32SEG1 = 16U;
-    stcInit.stcFDCfg.stcFBT.u32SEG2 = 4U;
-    stcInit.stcFDCfg.stcFBT.u32SJW  = 4U;
-    stcInit.stcFDCfg.stcFBT.u32Prescaler = 1U;
-    (void)CAN_FD_Init(APP_CAN_UNIT, &stcInit);
-#else
     FCG_Fcg1PeriphClockCmd(PWC_FCG1_CAN2, ENABLE);
     (void)CAN_Init(CAN_X, &stcInit);
-#endif
+
     CAN_ClearStatus(CAN_X, 0xFFFFFFFFU);
 
 #ifdef CAN_USING_INTERRUPT
