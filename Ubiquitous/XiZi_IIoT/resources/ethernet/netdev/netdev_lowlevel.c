@@ -43,8 +43,8 @@ void netdev_low_level_set_ipaddr(struct netdev* netdev, const ip_addr_t* ip_addr
 {
     CHECK(ip_addr);
 
-    if (netdev && ip_addr_cmp(&(netdev->ip_addr), ip_addr) == 0) {
-        ip_addr_copy(netdev->ip_addr, *ip_addr);
+    if (netdev && ip_addr_cmp((netdev->ip_addr), ip_addr) == 0) {
+        ip_addr_copy(*netdev->ip_addr, *ip_addr);
 
         /* execute IP address change callback function */
         if (netdev->addr_callback) {
@@ -64,8 +64,8 @@ void netdev_low_level_set_netmask(struct netdev* netdev, const ip_addr_t* netmas
 {
     CHECK(netmask);
 
-    if (netdev && ip_addr_cmp(&(netdev->netmask), netmask) == 0) {
-        ip_addr_copy(netdev->netmask, *netmask);
+    if (netdev && ip_addr_cmp((netdev->netmask), netmask) == 0) {
+        ip_addr_copy(*netdev->netmask, *netmask);
 
         /* execute netmask address change callback function */
         if (netdev->addr_callback) {
@@ -85,8 +85,8 @@ void netdev_low_level_set_gw(struct netdev* netdev, const ip_addr_t* gw)
 {
     CHECK(gw);
 
-    if (netdev && ip_addr_cmp(&(netdev->gw), gw) == 0) {
-        ip_addr_copy(netdev->gw, *gw);
+    if (netdev && ip_addr_cmp((netdev->gw), gw) == 0) {
+        ip_addr_copy(*netdev->gw, *gw);
 
         /* execute gateway address change callback function */
         if (netdev->addr_callback) {

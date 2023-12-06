@@ -38,7 +38,16 @@ Modification:
 
 struct netdev** get_netdev_listhead()
 {
-    static struct netdev* netdev_listhead = NULL;
+    static bool init = false;
+    static struct netdev* netdev_listhead;
+    if (!init) {
+        static struct netdev netdev_guard;
+        strncpy(netdev_guard.name, "guard\0", 6);
+        InitSingleLinkList(&(netdev_guard.list));
+        netdev_listhead = &netdev_guard;
+    }
+    init = true;
+
     return &netdev_listhead;
 }
 struct netdev** get_default_netdev()
@@ -56,17 +65,13 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
 
     // set flag mask, assert network is down
     uint16_t flag_mask = 0;
-    flag_mask = NETDEV_FLAG_UP | NETDEV_FLAG_LINK_UP | NETDEV_FLAG_INTERNET_UP | NETDEV_FLAG_DHCP;
+    flag_mask = NETDEV_FLAG_UP | NETDEV_FLAG_LINK_UP | NETDEV_FLAG_INTERNET_UP;
     netdev->flags &= ~flag_mask;
 
     // clear dev setting
-    ip_addr_set_zero(&(netdev->ip_addr));
-    ip_addr_set_zero(&(netdev->netmask));
-    ip_addr_set_zero(&(netdev->gw));
-
-    IP_SET_TYPE_VAL(netdev->ip_addr, IPADDR_TYPE_V4);
-    IP_SET_TYPE_VAL(netdev->netmask, IPADDR_TYPE_V4);
-    IP_SET_TYPE_VAL(netdev->gw, IPADDR_TYPE_V4);
+    netdev->ip_addr = NULL;
+    netdev->netmask = NULL;
+    netdev->gw = NULL;
 
 #if NETDEV_IPV6
     for (index = 0; index < NETDEV_IPV6_NUM_ADDRESSES; index++) {
@@ -78,7 +83,6 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
     // clear DNS servers
     for (uint16_t idx = 0; idx < NETDEV_DNS_SERVERS_NUM; idx++) {
         ip_addr_set_zero(&(netdev->dns_servers[idx]));
-        IP_SET_TYPE_VAL(netdev->ip_addr, IPADDR_TYPE_V4);
     }
     // clear callback fn
     netdev->addr_callback = NULL;
@@ -87,7 +91,8 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
     // validate name
     uint32_t name_len = strlen(name);
     if (name_len < NAME_NUM_MAX) {
-        strncpy(netdev->name, name, name_len);
+        SYS_KDEBUG_LOG(NETDEV_DEBUG, ("Register Netdev %s, name len: %d.\n", name, name_len));
+        strncpy(netdev->name, name, (name_len > 31 ? 31 : name_len));
         netdev->name[name_len] = '\0';
     } else {
         SYS_KDEBUG_LOG(NETDEV_DEBUG, ("[%s] name too long.\n", __func__));
@@ -103,6 +108,7 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
     x_base lock = DISABLE_INTERRUPT();
     if (NETDEV_LISTHEAD == NULL) {
         NETDEV_LISTHEAD = netdev;
+
     } else {
         SingleLinkListNodeInsert(&(NETDEV_LISTHEAD->list), &(netdev->list));
     }
@@ -110,7 +116,7 @@ int netdev_register(struct netdev* netdev, const char* name, void* user_data)
 
     if (NETDEV_DEFAULT == NULL) {
         // set first met netdev to default netdev
-        netdev_set_default(NETDEV_LISTHEAD);
+        netdev_set_default(netdev);
     }
 
     if (g_netdev_register_callback) {

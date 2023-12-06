@@ -101,6 +101,8 @@ extern char lwip_eth1_gwaddr[];
 
 extern struct netif gnetif;
 extern sys_sem_t* get_eth_recv_sem();
+extern struct netif gnetif2;
+extern sys_sem_t* get_eth_recv_sem2();
 
 void lwip_tcp_init(void);
 void lwip_config_net(uint8_t enet_port, char *ip, char *mask, char *gw);
