@@ -52,3 +52,10 @@ menuconfig BSP_USING_SPI
     if BSP_USING_SPI
         source "$BSP_DIR/third_party_driver/spi/Kconfig"
     endif
+
+menuconfig BSP_USING_SDRAM
+    bool "Using SDRAM IS42S16400J"
+    default y
+    if BSP_USING_SDRAM
+        source "$BSP_DIR/third_party_driver/sdram/Kconfig"
+    endif
