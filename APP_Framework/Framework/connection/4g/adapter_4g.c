@@ -24,6 +24,10 @@
 extern AdapterProductInfoType Ec200tAttach(struct Adapter *adapter);
 #endif
 
+#ifdef ADAPTER_EC200A
+extern AdapterProductInfoType Ec200aAttach(struct Adapter *adapter);
+#endif
+
 static int Adapter4GRegister(struct Adapter *adapter)
 {
     int ret = 0;
@@ -76,6 +80,20 @@ int Adapter4GInit(void)
 
 #endif
 
+#ifdef ADAPTER_EC200A
+    AdapterProductInfoType product_info = Ec200aAttach(adapter);
+    if (!product_info) {
+        printf("Adapter4GInit ec200a attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
+
+#endif
+
     return ret;
 }
 
@@ -86,7 +104,7 @@ int Adapter4GTest(void)
     char recv_msg[256] = {0};
     int baud_rate = BAUD_RATE_115200;
 
-    struct Adapter* adapter =  AdapterDeviceFindByName(ADAPTER_4G_NAME);
+    struct Adapter* adapter = AdapterDeviceFindByName(ADAPTER_4G_NAME);
 
 #ifdef ADAPTER_EC200T
     /* Using Public TCP server to  test 4G Socket connection */
@@ -108,6 +126,26 @@ int Adapter4GTest(void)
     }
 #endif
 
+#ifdef ADAPTER_EC200A
+    /* Using Public TCP server to  test 4G Socket connection */
+    uint8 server_addr[64] = "120.76.100.197";
+    uint8 server_port[64] = "10002";
+
+    adapter->socket.socket_id = 0;
+
+    AdapterDeviceOpen(adapter);
+    AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+
+    AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
+
+    while (1) {
+        AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
+        AdapterDeviceRecv(adapter, recv_msg, 256);
+        printf("4G recv msg %s\n", recv_msg);
+        memset(recv_msg, 0, 256);
+    }
+#endif
+
     return 0;    
 }
-PRIV_SHELL_CMD_FUNCTION(Adapter4GTest, a EC200T adpter sample, PRIV_SHELL_CMD_FUNC_ATTR);
+PRIV_SHELL_CMD_FUNCTION(Adapter4GTest, a EC200T or EC200A adpter sample, PRIV_SHELL_CMD_FUNC_ATTR);
