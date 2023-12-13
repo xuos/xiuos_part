@@ -25,6 +25,7 @@ menuconfig BSP_USING_ETHERNET
 menuconfig BSP_USING_W5500
     bool "Using W5500 ethernet device"
     default n
+    select BSP_USING_ETHERNET
     select BSP_USING_LWIP
     select BSP_USING_SPI
     select BSP_USING_SPI1
@@ -55,7 +56,7 @@ menuconfig BSP_USING_SPI
 
 menuconfig BSP_USING_SDRAM
     bool "Using SDRAM IS42S16400J"
-    default y
+    default n
     if BSP_USING_SDRAM
         source "$BSP_DIR/third_party_driver/sdram/Kconfig"
     endif

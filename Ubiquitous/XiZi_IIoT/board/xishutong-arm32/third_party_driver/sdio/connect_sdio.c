@@ -214,9 +214,9 @@ static struct SdioDevDone dev_done = {
 static int MountSDCardFs(enum FilesystemType fs_type)
 {
     if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, fs_type, "/") == 0)
-        KPrintf("Sd card mount to '/'");
+        KPrintf("Sd card mount to '/'\n");
     else
-        KPrintf("Sd card mount to '/' failed!");
+        KPrintf("Sd card mount to '/' failed!\n");
 
     return 0;
 }
@@ -291,7 +291,7 @@ int MountSDCard()
 {
     int sd_card_task = 0;
     sd_card_task = KTaskCreate("sd_card", SdCardTask, NONE,
-        SD_CARD_STACK_SIZE, 8);
+        SD_CARD_STACK_SIZE, 17);
     if (sd_card_task < 0) {
         KPrintf("sd_card_task create failed ...%s %d.\n", __FUNCTION__, __LINE__);
         return ERROR;

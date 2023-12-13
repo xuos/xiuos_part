@@ -8,6 +8,26 @@
 //    any other URI serves static files from s_root_dir
 // Data and results are JSON strings
 
+/**
+* @file webserver_project.c
+* @brief support webserver_project for XiUOS
+* @version 3.0 
+* @author AIIT XUOS Lab
+* @date 2023-11-07
+*/
+
+/*************************************************
+File name: webserver_project.c
+Description: support webserver_project for XiUOS
+Others: 
+History: 
+1. Date: 2023-11-07
+Author: AIIT XUOS Lab
+Modification: 
+1、support xishutong-arm32 board, using W5500 to support webserver.
+*************************************************/
+
+
 #include "ip_addr.h"
 #include "mongoose.h"
 #include "netdev.h"
@@ -19,11 +39,12 @@ static const char* s_root_dir = "webserver";
 static const char* s_enable_hexdump = "no";
 static const char* s_ssi_pattern = "#.html";
 
-static const char* device_type = "Edu-ARM32";
-static const char* web_version = "XUOS Webserver 1.0";
+static const char* device_type = "xishutong-arm32";
+static const char* web_version = "XiUOS WebServer 1.0";
 static int enable_4g = 0;
 
 static struct netdev* p_netdev;
+static pthread_t tid;
 
 static struct config {
     char *ip, *mask, *gw, *dns;
@@ -104,11 +125,11 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
     (void)fn_data;
 }
 
-static void* do_webserver_demo(void* none)
+static void* do_webserver(void* args)
 {
     p_netdev = netdev_get_by_name("wz");
     if (p_netdev == NULL) {
-        MG_INFO(("Did nto find wz netdev, use default.\n"));
+        MG_INFO(("Did not find wz netdev, use default.\n"));
         p_netdev = NETDEV_DEFAULT;
     }
     MG_INFO(("Use Netdev %s", p_netdev->name));
@@ -119,7 +140,7 @@ static void* do_webserver_demo(void* none)
 
     struct mg_mgr mgr; // Event manager
     // mg_log_set(MG_LL_INFO); // Set to 3 to enable debug
-    mg_log_set(MG_LL_DEBUG); // Set to 3 to enable debug
+    mg_log_set(MG_LL_ERROR); // Set to 3 to enable debug
     mg_mgr_init(&mgr); // Initialise event manager
     mg_http_listen(&mgr, s_http_addr, fn, NULL); // Create HTTP listener
     for (;;)
@@ -128,15 +149,24 @@ static void* do_webserver_demo(void* none)
     return NULL;
 }
 
-int webserver_demo(int argc, char* argv[])
+int webserver(void)
 {
-    pthread_t tid = -1;
+    char* params[3] = {"LwipNetworkActive", "-e", "1"};
+    extern void LwipNetworkActive(int argc, char* argv[]);
+    LwipNetworkActive(3, params);
+
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 30;
     attr.stacksize = 0x2000;
 
-    PrivTaskCreate(&tid, &attr, do_webserver_demo, NULL);
+    char task_name[] = "do_webserver";
+    pthread_args_t args;
+    args.pthread_name = task_name;
+
+    PrivTaskCreate(&tid, &attr, &do_webserver, (void *)&args);
+    PrivTaskStartup(&tid);
 
     return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(5), Webserver, webserver_demo, webserver for project);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_PARAM_NUM(5), 
+    Webserver, webserver, webserver for project);

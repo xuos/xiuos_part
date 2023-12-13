@@ -78,7 +78,7 @@ char lwip_eth0_gwaddr[20] = { 192, 168, 130, 1 };
 
 char lwip_eth1_ipaddr[20] = { 192, 168, 131, 88 };
 char lwip_eth1_netmask[20] = { 255, 255, 254, 0 };
-char lwip_eth1_gwaddr[20] = { 192, 168, 130, 1 };
+char lwip_eth1_gwaddr[20] = { 192, 168, 131, 1 };
 
 char lwip_flag = 0;
 
@@ -256,11 +256,11 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
     }
 #endif /* SYS_STATS */
     if (*mbox < 0) {
-        lw_print("lw: [%s] alloc %d mbox %p failed\n", __func__, size, mbox);
+        lw_error("lw: [%s] alloc %d mbox %p failed\n", __func__, size, mbox);
         return ERR_MEM;
     }
 
-    lw_print("lw: [%s] alloc %d mbox %p ok!\n", __func__, size, mbox);
+    // lw_print("lw: [%s] alloc %d mbox %p ok!\n", __func__, size, mbox);
     return ERR_OK;
 }
 

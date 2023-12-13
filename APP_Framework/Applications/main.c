@@ -22,9 +22,13 @@ extern void ApplicationOtaTaskInit(void);
 extern int OtaTask(void);
 #endif
 
+#ifdef USE_MONGOOSE
+extern int webserver(void);
+#endif
+
 int main(void)
 {
-    printf("Hello, world! \n");
+    printf("\nHello, world!\n");
     FrameworkInit();
 #ifdef APPLICATION_OTA
     ApplicationOtaTaskInit();
@@ -33,6 +37,11 @@ int main(void)
 #ifdef OTA_BY_PLATFORM
     OtaTask();
 #endif
+
+#ifdef USE_MONGOOSE
+    webserver();
+#endif
+
     return 0;
 }
 // int cppmain(void);
