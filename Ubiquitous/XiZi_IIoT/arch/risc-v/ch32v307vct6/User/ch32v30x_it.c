@@ -1,16 +1,16 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : ch32v10x_it.c
-* Author             : WCH
-* Version            : V1.0.0
-* Date               : 2020/04/30
-* Description        : Main Interrupt Service Routines.
-* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
-*******************************************************************************/
+ * File Name          : ch32v10x_it.c
+ * Author             : WCH
+ * Version            : V1.0.0
+ * Date               : 2020/04/30
+ * Description        : Main Interrupt Service Routines.
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ *******************************************************************************/
 /*************************************************
 File name: ch32v30x_it.c
-Description: include peripheral supports for ch32v30x 
-History: 
+Description: include peripheral supports for ch32v30x
+History:
 1. Date: 2022-08-09
 Author: AIIT XUOS Lab
 Modification:
@@ -20,10 +20,8 @@ Modification:
 #include "board.h"
 #include <xs_isr.h>
 
-
-
-void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void NMI_Handler(void) __attribute__((interrupt()));
+void HardFault_Handler(void) __attribute__((interrupt()));
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -56,6 +54,3 @@ void HardFault_Handler(void)
     isrManager.done->decCounter();
     FREE_INT_SP();
 }
-
-
-
