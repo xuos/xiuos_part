@@ -104,28 +104,6 @@ void WCHNET_CreateTcpSocket(uint8_t* DESIP, uint16_t srcport, uint16_t desport, 
 }
 
 /*********************************************************************
- * @fn      WCHNET_CreateTcpSocketListen
- *
- * @brief   Create TCP Socket for Listening
- *
- * @return  none
- */
-void WCHNET_CreateTcpSocketListen(uint16_t srcport, uint8_t* SocketId)
-{
-    uint8_t i;
-    SOCK_INF TmpSocketInf;
-
-    memset((void*)&TmpSocketInf, 0, sizeof(SOCK_INF));
-    TmpSocketInf.SourPort = srcport;
-    TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
-    i = WCHNET_SocketCreat(SocketId, &TmpSocketInf);
-    KPrintf("SocketIdForListen %d\r\n", *SocketId);
-    mStopIfError(i);
-    i = WCHNET_SocketListen(*SocketId); // listen for connections
-    mStopIfError(i);
-}
-
-/*********************************************************************
  * @fn      WCHNET_DataLoopback
  *
  * @brief   Data loopback function.
@@ -164,9 +142,9 @@ void WCHNET_DataLoopback(uint8_t id)
  * @param   socketid - socket id.
  *          intstat - interrupt status
  *
- * @return  none
+ * @return  0 or TIME_OUT
  */
-void WCHNET_HandleSockInt(uint8_t socketid, uint8_t intstat)
+int WCHNET_HandleSockInt(uint8_t socketid, uint8_t intstat)
 {
     uint8_t i;
 
@@ -208,7 +186,9 @@ void WCHNET_HandleSockInt(uint8_t socketid, uint8_t intstat)
             }
         }
         KPrintf("TCP Timeout\r\n");
+        return TIME_OUT;
     }
+    return 0;
 }
 
 /*********************************************************************
@@ -216,9 +196,9 @@ void WCHNET_HandleSockInt(uint8_t socketid, uint8_t intstat)
  *
  * @brief   Global Interrupt Handle
  *
- * @return  none
+ * @return  0 or SockInt
  */
-void WCHNET_HandleGlobalInt(void)
+int WCHNET_HandleGlobalInt(void)
 {
     uint8_t intstat;
     uint16_t i;
@@ -242,10 +222,12 @@ void WCHNET_HandleGlobalInt(void)
     if (intstat & GINT_STAT_SOCKET) { // socket related interrupt
         for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++) {
             socketint = WCHNET_GetSocketInt(i);
-            if (socketint)
-                WCHNET_HandleSockInt(i, socketint);
+            if (socketint) {
+                return WCHNET_HandleSockInt(i, socketint);
+            }
         }
     }
+    return 0;
 }
 
 uint8_t InitHwEth()

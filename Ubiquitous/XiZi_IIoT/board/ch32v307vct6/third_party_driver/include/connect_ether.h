@@ -31,7 +31,9 @@ uint8_t InitHwEth();
 void WCHNET_CreateTcpSocket(uint8_t* DESIP, uint16_t srcport, uint16_t desport, uint8_t* SocketId);
 void WCHNET_CreateTcpSocketListen(uint16_t srcport, uint8_t* SocketId);
 
-void WCHNET_HandleGlobalInt(void);
+int WCHNET_HandleGlobalInt(void);
+
+#define TIME_OUT -1
 
 #ifdef __cplusplus
 }

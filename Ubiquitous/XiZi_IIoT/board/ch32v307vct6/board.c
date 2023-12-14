@@ -67,7 +67,9 @@ void InitBoardHardware()
     InitHwUart();
     InstallConsole("uart1", "uart1_drv", "uart1_dev1");
 
+#ifdef BSP_USING_ETH
     InitHwEth();
+#endif
 
     KPrintf("consle init completed.\n");
     KPrintf("board initialization......\n");
