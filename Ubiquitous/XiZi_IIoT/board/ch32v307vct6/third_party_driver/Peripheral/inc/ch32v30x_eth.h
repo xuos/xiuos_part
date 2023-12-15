@@ -319,6 +319,9 @@ typedef struct
 /* PHY basic register */
 #define PHY_BCR                          0x0           /*PHY transceiver Basic Control Register */
 #define PHY_BSR                          0x01          /*PHY transceiver Basic Status Register */
+#define PHY_ANAR                         0x04          /* Auto-Negotiation Advertisement Register */
+#define PHY_ANLPAR                       0x05          /* Auto-Negotiation Link Partner Base  Page Ability Register*/
+#define PHY_ANER                         0x06          /* Auto-Negotiation Expansion Register */
 #define PHY_BMCR                         PHY_BCR
 #define PHY_BMSR                         PHY_BSR
 #define PHY_STATUS                       0x10
