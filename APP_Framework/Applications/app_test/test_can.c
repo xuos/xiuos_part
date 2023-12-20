@@ -18,6 +18,7 @@
 * @date:    2023/2/17
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <transform.h>
 #ifdef ADD_XIZI_FEATURES
@@ -54,7 +55,7 @@ void TestCAN(void)
     }
     printf("CAN configure successful!\n");
 
-    uint8_t data_buff[64u] = {1,2,3,4,4,3,2,1};
+    uint8_t data_buff[64u] = "12344321";
     struct CanSendConfigure frame_send;
     frame_send.ide=0;
     frame_send.stdid = 0x55;
@@ -63,19 +64,19 @@ void TestCAN(void)
     frame_send.data = data_buff;
 
     struct CanSendConfigure frame_recv;
-    uint8_t recv_buff[65U] = {0};
+    uint8_t recv_buff[64u] = {};
     frame_recv.data = recv_buff;
 
     // CAN write
     while (1)
     {
         PrivTaskDelay(500);
-        PrivWrite(can_fd, &frame_send, NONE);
+        PrivWrite(can_fd, &frame_send, 100);
         PrivTaskDelay(500);
-        PrivRead(can_fd, &frame_recv, NONE);
+        PrivRead(can_fd, &frame_recv, 100);
         // if any data has received,Then printf message
         if(frame_recv.data_lenth > 0){
-            printf("ID %08x:%s\n",frame_recv.exdid,frame_recv.data);
+            printf("ID %08x:%d:%s\n",frame_recv.exdid,frame_recv.data_lenth,frame_recv.data);
         }
     }
 

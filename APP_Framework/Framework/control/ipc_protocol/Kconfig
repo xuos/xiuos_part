@@ -14,11 +14,4 @@ if CONTROL_PROTOCOL_MODBUS_UART
         source "$APP_DIR/Framework/control/ipc_protocol/modbus_uart/Kconfig"
 endif
 
-config CONTROL_PROTOCOL_ETHERCAT
-        bool "Using ethercat control protocol"
-        default n
-        select CONTROL_USING_SOCKET
-if CONTROL_PROTOCOL_ETHERCAT
-        source "$APP_DIR/Framework/control/ipc_protocol/ethercat/Kconfig"
-endif
 
