@@ -31,25 +31,319 @@ Modification:
 #include "ip_addr.h"
 #include "mongoose.h"
 #include "netdev.h"
+#include <sys_arch.h>
+#include <lwip/sockets.h>
+#include "lwip/sys.h"
 
+/*******************************************************************************
+ * Local variable definitions ('static')
+ ******************************************************************************/
 char index_path[] = "login.html";
 
 static const char* s_http_addr = "http://192.168.131.88:8000"; // HTTP port
 static const char* s_root_dir = "webserver";
 static const char* s_enable_hexdump = "no";
 static const char* s_ssi_pattern = "#.html";
-
-static const char* device_type = "xishutong-arm32";
 static const char* web_version = "XiUOS WebServer 1.0";
-static int enable_4g = 0;
 
-static struct netdev* p_netdev;
+static struct netdev* p_netdev_webserver;
+static struct netdev* p_netdev_ethernet;
 static pthread_t tid;
 
-static struct config {
-    char *ip, *mask, *gw, *dns;
-} s_config;
+/*define device info*/
+static const char* device_name = "矽数通4G"; 
+static const char* device_type = "xishutong-arm32";
+static const char* device_serial_num = "123456789";
 
+/*define webserver info*/
+static struct webserver_config {
+    char *ip, *mask, *gw, *dns;
+} webserver_config;
+
+/*define interface info*/
+static struct rs485_config {
+    int baud_rate;
+    int data_bit;
+    int stop_bit;
+    int parity;
+} rs485_config;
+int rs485_uart_fd = -1;
+
+#define RS485_DEVICE_PATH "/dev/usart4_dev4"
+
+/*define net 4G info*/
+static struct net_4g_info {
+    char map_ip[20];
+    char connect_ip[20];
+    char operator[20];
+    int signal_strength;
+    char connect_port[20];
+} net_4g_info;
+int close_4g_function = 0;
+
+static struct net_4g_mqtt_info {
+    char topic[20];
+    char username[20];
+    char password[20];
+    int client_id;
+    int connect_status;
+} net_4g_mqtt_info;
+int close_mqtt_function = 0;
+
+/*define net LoRa info*/
+
+
+/*define net Ethernet info*/
+static struct net_ethernet_info {
+    char ethernetIp[20];
+    char ethernetNetmask[20];
+    char ethernetGateway[20];
+    char ethernetDNS[20];
+    char targetIp[20];
+    char targetPort[20];
+    char targetGateway[20];
+    char targetDNS[20];
+    int connect_status;
+} net_ethernet_info;
+
+#define LWIP_TCP_CLIENT_TASK_STACK_SIZE        4096
+#define LWIP_TCP_CLIENT_TASK_PRIO              20
+
+#define ETHERNET_CONNECT           0x01
+#define ETHERNET_DISCONNECT        0x02
+#define ETHERNET_ALL               (ETHERNET_CONNECT | ETHERNET_DISCONNECT)
+
+static int ethernet_event;
+static unsigned int status = 0;
+
+static pthread_t tcp_client_task;
+static int socket_fd = -1;
+
+static char tcp_ethernet_ipaddr[] = {192, 168, 130, 77};
+static char tcp_ethernet_netmask[] = {255, 255, 254, 0};
+static char tcp_ethernet_gwaddr[] = {192, 168, 130, 1};
+
+static uint16_t tcp_socket_port = 8888;
+
+/*define PLC info*/
+static char *plc_json;
+#define JSON_FILE_NAME "test_recipe.json"
+
+/*******************************************************************************
+ * Function implementation - define interface info
+ ******************************************************************************/
+static void Rs485InitConfigure(void)
+{
+    rs485_uart_fd = PrivOpen(RS485_DEVICE_PATH, O_RDWR);
+    if (rs485_uart_fd < 0) {
+        printf("open rs485 %s fd error:%d\n", RS485_DEVICE_PATH, rs485_uart_fd);
+        return;
+    }
+    printf("uart %s open success\n", RS485_DEVICE_PATH);
+
+    struct SerialDataCfg uart_cfg;
+    memset(&uart_cfg, 0, sizeof(struct SerialDataCfg));
+
+    rs485_config.baud_rate = BAUD_RATE_115200;
+    rs485_config.data_bit = DATA_BITS_8;
+    rs485_config.stop_bit = STOP_BITS_1;
+    rs485_config.parity = PARITY_NONE;
+
+    uart_cfg.serial_baud_rate = rs485_config.baud_rate;
+    uart_cfg.serial_data_bits = rs485_config.data_bit;
+    uart_cfg.serial_stop_bits = rs485_config.stop_bit;
+    uart_cfg.serial_parity_mode = rs485_config.parity;
+    uart_cfg.serial_bit_order = BIT_ORDER_LSB;
+    uart_cfg.serial_invert_mode = NRZ_NORMAL;
+    uart_cfg.serial_buffer_size = SERIAL_RB_BUFSZ;
+    uart_cfg.serial_timeout = -1;
+    uart_cfg.is_ext_uart = 0;
+    uart_cfg.dev_recv_callback = NULL;
+
+    struct PrivIoctlCfg ioctl_cfg;
+    ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
+    ioctl_cfg.args = (void *)&uart_cfg;
+
+    if (0 != PrivIoctl(rs485_uart_fd, OPE_INT, &ioctl_cfg)) {
+        printf("ioctl uart fd error %d\n", rs485_uart_fd);
+        PrivClose(rs485_uart_fd);
+        return;
+    }
+}
+
+static void Rs485Configure(int baud_rate, int data_bit, int stop_bit, int parity)
+{
+    if (rs485_uart_fd < 0) {
+        rs485_uart_fd = PrivOpen(RS485_DEVICE_PATH, O_RDWR);
+        if (rs485_uart_fd < 0) {
+            printf("open rs485 %s fd error:%d\n", RS485_DEVICE_PATH, rs485_uart_fd);
+            return;
+        }
+        printf("uart %s open success\n", RS485_DEVICE_PATH);
+    }
+
+    struct SerialDataCfg uart_cfg;
+    memset(&uart_cfg, 0, sizeof(struct SerialDataCfg));
+
+    uart_cfg.serial_baud_rate = baud_rate;
+    uart_cfg.serial_data_bits = data_bit;
+    uart_cfg.serial_stop_bits = stop_bit;
+    uart_cfg.serial_parity_mode = parity;
+    uart_cfg.serial_bit_order = BIT_ORDER_LSB;
+    uart_cfg.serial_invert_mode = NRZ_NORMAL;
+    uart_cfg.serial_buffer_size = SERIAL_RB_BUFSZ;
+    uart_cfg.serial_timeout = -1;
+    uart_cfg.is_ext_uart = 0;
+    uart_cfg.dev_recv_callback = NULL;
+
+    struct PrivIoctlCfg ioctl_cfg;
+    ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
+    ioctl_cfg.args = (void *)&uart_cfg;
+
+    if (0 != PrivIoctl(rs485_uart_fd, OPE_INT, &ioctl_cfg)) {
+        printf("ioctl uart fd error %d\n", rs485_uart_fd);
+        PrivClose(rs485_uart_fd);
+        return;
+    }
+
+    printf("Board RS485 changed to [br: %d, data: %d, stop: %d, party: %d]\n",
+        baud_rate, data_bit, stop_bit, parity);
+}
+
+/*******************************************************************************
+ * Function implementation - define net Ethernet info
+ ******************************************************************************/
+static void TcpClientConnect(void)
+{
+    int cnt = 20;
+    int ret;
+    char send_msg[128];
+
+    sscanf(net_ethernet_info.targetPort, "%d", &tcp_socket_port);
+
+    memset(send_msg, 0, sizeof(send_msg));
+    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_fd < 0) {
+        printf("Socket error\n");
+        return;
+    }
+
+    struct sockaddr_in tcp_sock;
+    tcp_sock.sin_family = AF_INET;
+    tcp_sock.sin_port = htons(tcp_socket_port);
+    tcp_sock.sin_addr.s_addr = inet_addr(net_ethernet_info.targetIp);
+
+    memset(&(tcp_sock.sin_zero), 0, sizeof(tcp_sock.sin_zero));
+
+    int keepalive = 1;
+    int keepidle = 30;
+    int keepinterval = 5;
+    int keepcount = 5;
+    setsockopt(socket_fd,
+        IPPROTO_TCP,           /* set option at TCP level */
+        TCP_KEEPALIVE,         /* name of option */
+        (void*)&keepalive,     /* the cast is historical cruft */
+        sizeof(keepalive));    /* length of option value */
+
+    setsockopt(socket_fd,
+        IPPROTO_TCP,           /* set option at TCP level */
+        TCP_KEEPIDLE,          /* name of option */
+        (void*)&keepidle,      /* the cast is historical cruft */
+        sizeof(keepidle));     /* length of option value */
+
+    setsockopt(socket_fd,
+        IPPROTO_TCP,           /* set option at TCP level */
+        TCP_KEEPINTVL,         /* name of option */
+        (void*)&keepinterval,  /* the cast is historical cruft */
+        sizeof(keepinterval)); /* length of option value */
+
+    setsockopt(socket_fd,
+        IPPROTO_TCP,           /* set option at TCP level */
+        TCP_KEEPCNT,           /* name of option */
+        (void*)&keepcount,     /* the cast is historical cruft */
+        sizeof(keepcount));    /* length of option value */
+
+    ret = connect(socket_fd, (struct sockaddr *)&tcp_sock, sizeof(struct sockaddr));
+    if (ret < 0) {
+        printf("Unable to connect %s:%d = %d\n", net_ethernet_info.targetIp, tcp_socket_port, ret);
+        closesocket(socket_fd);
+        return;
+    }
+
+    printf("TCP connect %s:%d success, start to send.\n", net_ethernet_info.targetIp, tcp_socket_port);
+
+    while (cnt --) {
+        printf("Lwip client is running.\n");
+        snprintf(send_msg, sizeof(send_msg), "TCP test package times %d\r\n", cnt);
+        send(socket_fd, send_msg, strlen(send_msg), 0);
+        printf("Send tcp msg: %s ", send_msg);
+        PrivTaskDelay(1000);
+    }
+
+    return;
+}
+
+static void TcpClientDisconnect(void)
+{
+    printf("TCP disconnect\n");
+    closesocket(socket_fd);
+}
+
+static void *TcpSocketClientTask(void *arg)
+{
+    ethernet_event = PrivEventCreate(LINKLIST_FLAG_FIFO);
+    while(1) {
+        if (0 == PrivEventProcess(ethernet_event, ETHERNET_ALL, EVENT_OR | EVENT_AUTOCLEAN, 0, &status)) {
+            switch( status ) {
+                case ETHERNET_CONNECT:
+                    TcpClientConnect();
+                    break;
+                case ETHERNET_DISCONNECT:
+                    TcpClientDisconnect();
+                    break;   
+            }
+        }
+    }
+}
+
+static void TcpClientSocket(void)
+{
+    char task_name[] = "tcp_client_task";
+    pthread_args_t args;
+    args.pthread_name = task_name;
+    
+    pthread_attr_t attr;
+    attr.schedparam.sched_priority = LWIP_TCP_CLIENT_TASK_PRIO;
+    attr.stacksize = LWIP_TCP_CLIENT_TASK_STACK_SIZE;
+
+    PrivTaskCreate(&tcp_client_task, &attr, &TcpSocketClientTask, (void *)&args);
+    PrivTaskStartup(&tcp_client_task);
+}
+
+/*******************************************************************************
+ * Function implementation - define plc info
+ ******************************************************************************/
+static void PlcInfoWriteToSd(const char *json)
+{
+    extern int GetSdMountStatus(void);
+    if(GetSdMountStatus()) {
+        KPrintf("------Start download json file !------\r\n");
+
+        FILE *fp = fopen(JSON_FILE_NAME, "w");
+        if(fp == NULL) {
+            printf("%s file create failed,please check!\r\n", JSON_FILE_NAME);
+        } else {
+            printf("%s file create success!\r\n", JSON_FILE_NAME); 
+            fprintf(fp, "%s", json);
+            fclose(fp);
+        }
+        printf("------download %s file done!------\r\n", JSON_FILE_NAME);
+    }
+}
+
+/*******************************************************************************
+ * Function implementation - webserver
+ ******************************************************************************/
 // Try to update a single configuration value
 static void update_config(struct mg_str json, const char* path, char** value)
 {
@@ -60,55 +354,158 @@ static void update_config(struct mg_str json, const char* path, char** value)
     }
 }
 
+static void update_config_array(struct mg_str json, const char* path, char* value)
+{
+    char* jval;
+    if ((jval = mg_json_get_str(json, path)) != NULL) {
+        sprintf(value, "%s", jval); 
+    }
+}
+
 static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
 {
     if (ev == MG_EV_HTTP_MSG) {
         struct mg_http_message *hm = (struct mg_http_message*)ev_data, tmp = { 0 };
+        /*define device info*/
         if (mg_http_match_uri(hm, "/getSystemInfo")) {
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
-                "{%m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%d}\n",
-                MG_ESC("ip"), MG_ESC(s_config.ip),
+                "{%m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%m}\n",
+                MG_ESC("deviceName"), MG_ESC(device_name),
                 MG_ESC("deviceType"), MG_ESC(device_type),
-                MG_ESC("deviceNo"), MG_ESC("0"),
-                MG_ESC("systemTime"), MG_ESC("YYYY:MM:DD hh:mm:ss"),
-                MG_ESC("webVersion"), MG_ESC(web_version),
-                MG_ESC("statusOf4g"), enable_4g);
-        } else if (mg_http_match_uri(hm, "/net/get4gInfo")) {
-            mg_http_reply(c, 200, "Content-Type: application/json\r\n",
-                "{%m:%m}\n",
-                MG_ESC("enable4g"), MG_ESC(enable_4g));
-        } else if (mg_http_match_uri(hm, "/net/set4gInfo")) {
-            struct mg_str json = hm->body;
-            enable_4g = mg_json_get_long(json, "$.enable4g", 0);
-            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
-            printf("Get enable 4g setting: %d\n", enable_4g);
-        } else if (mg_http_match_uri(hm, "/net/getEthernetInfo")) {
-            mg_http_reply(c, 200, "Content-Type: application/json\r\n",
-                "{%m:%m, %m:%m, %m:%m, %m:%m}\n",
-                MG_ESC("ip"), MG_ESC(s_config.ip),
-                MG_ESC("netmask"), MG_ESC(s_config.mask),
-                MG_ESC("gateway"), MG_ESC(s_config.gw),
-                MG_ESC("dns"), MG_ESC(s_config.dns));
-        } else if (mg_http_match_uri(hm, "/net/setEthernetInfo")) {
+                MG_ESC("deviceNo"), MG_ESC(device_serial_num),
+                MG_ESC("ip"), MG_ESC(webserver_config.ip),
+                MG_ESC("netmask"), MG_ESC(webserver_config.mask),
+                MG_ESC("gateway"), MG_ESC(webserver_config.gw));
+        } 
+        /*define webserver info*/
+        else if (mg_http_match_uri(hm, "/setNetInfo")) {
             struct mg_str json = hm->body;
             printf("json: %s\n", json.ptr);
-            update_config(json, "$.ip", &s_config.ip);
-            update_config(json, "$.netmask", &s_config.mask);
-            update_config(json, "$.gateway", &s_config.gw);
-            update_config(json, "$.dns", &s_config.dns);
+            update_config(json, "$.ip", &webserver_config.ip);
+            update_config(json, "$.netmask", &webserver_config.mask);
+            update_config(json, "$.gateway", &webserver_config.gw);
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
 
             ip_addr_t ipaddr, maskaddr, gwaddr;
-            inet_aton(s_config.ip, &ipaddr);
-            inet_aton(s_config.mask, &maskaddr);
-            inet_aton(s_config.gw, &gwaddr);
-            p_netdev->ops->set_addr_info(p_netdev, &ipaddr, &maskaddr, &gwaddr);
+            inet_aton(webserver_config.ip, &ipaddr);
+            inet_aton(webserver_config.mask, &maskaddr);
+            inet_aton(webserver_config.gw, &gwaddr);
+            p_netdev_webserver->ops->set_addr_info(p_netdev_webserver, &ipaddr, &maskaddr, &gwaddr);
 
-            printf("Board Net Configuration changed to [IP: %s, Mask: %s, GW: %s, DNS: %s]\n",
-                s_config.ip,
-                s_config.mask,
-                s_config.gw,
-                s_config.dns);
+            printf("Board Webserver Net changed to [IP: %s, Mask: %s, GW: %s]\n",
+                webserver_config.ip,
+                webserver_config.mask,
+                webserver_config.gw);
+        }
+        /*define interface info*/
+        else if (mg_http_match_uri(hm, "/interface/get485Info")) {
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n",
+                "{%m:%d, %m:%d, %m:%d, %m:%d}\n",
+                MG_ESC("baudRate"), rs485_config.baud_rate,
+                MG_ESC("wordLength"), rs485_config.data_bit,
+                MG_ESC("stopBits"), rs485_config.stop_bit,
+                MG_ESC("parity"), rs485_config.parity);
+        } else if (mg_http_match_uri(hm, "/interface/set485Info")) {
+            struct mg_str json = hm->body;
+            printf("json: %s\n", json.ptr);
+            rs485_config.baud_rate = mg_json_get_long(json, "$.baudRate", 0);
+            rs485_config.data_bit = mg_json_get_long(json, "$.wordLength", 0);
+            rs485_config.stop_bit = mg_json_get_long(json, "$.stopBits", 0);
+            rs485_config.parity = mg_json_get_long(json, "$.parity", 0);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
+
+            Rs485Configure(rs485_config.baud_rate, rs485_config.data_bit, rs485_config.stop_bit, rs485_config.parity);
+        }
+        /*define net 4G info*/
+        else if (mg_http_match_uri(hm, "/net/get4gInfo")) {
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n",
+                "{%m:%m, %m:%m, %m:%d}\n",
+                MG_ESC("mapIp"), MG_ESC(net_4g_info.map_ip),
+                MG_ESC("operator"), MG_ESC(net_4g_info.operator),
+                MG_ESC("signalIntensity"), net_4g_info.signal_strength);
+        } else if (mg_http_match_uri(hm, "/net/set4gInfo")) {
+            struct mg_str json = hm->body;
+            update_config_array(json, "$.publicIp", net_4g_info.connect_ip);
+            update_config_array(json, "$.publicPort", net_4g_info.connect_port);
+            close_4g_function = mg_json_get_long(json, "$.close4G", 0);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
+        } else if (mg_http_match_uri(hm, "/net/connect4G")) {
+            close_4g_function = 0;//enable 4G connect function
+        } else if (mg_http_match_uri(hm, "/net/disconnect4G")) {
+            close_4g_function = 1;//disable 4G connect function
+        } else if (mg_http_match_uri(hm, "/net/getMQTTInfo")) {
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n",
+                "{%m:%m, %m:%m, %m:%m, %m:%d, %m:%d}\n",
+                MG_ESC("topic"), MG_ESC(net_4g_mqtt_info.topic),
+                MG_ESC("username"), MG_ESC(net_4g_mqtt_info.username),
+                MG_ESC("password"), MG_ESC(net_4g_mqtt_info.password),
+                MG_ESC("client_id"), net_4g_mqtt_info.client_id,
+                MG_ESC("status"), net_4g_mqtt_info.connect_status);
+        } else if (mg_http_match_uri(hm, "/net/setMQTTInfo")) {
+            struct mg_str json = hm->body;
+            update_config_array(json, "$.topic", net_4g_mqtt_info.topic);
+            update_config_array(json, "$.username", net_4g_mqtt_info.username);
+            update_config_array(json, "$.password", net_4g_mqtt_info.password);
+            net_4g_mqtt_info.client_id = mg_json_get_long(json, "$.client_id", 0);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
+        } else if (mg_http_match_uri(hm, "/net/connectMQTT")) {
+            close_mqtt_function = 0;//enable 4G MQTT connect function
+        } else if (mg_http_match_uri(hm, "/net/disconnectMQTT")) {
+            close_mqtt_function = 1;//disable 4G MQTT connect function
+        }
+        /*define net LoRa info*/
+        
+        /*define net Ethernet info*/
+        else if (mg_http_match_uri(hm, "/net/getEthernetInfo")) {
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n",
+                "{%m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%d}\n",
+                MG_ESC("ethernetIp"), MG_ESC(net_ethernet_info.ethernetIp),
+                MG_ESC("ethernetNetmask"), MG_ESC(net_ethernet_info.ethernetNetmask),
+                MG_ESC("ethernetGateway"), MG_ESC(net_ethernet_info.ethernetGateway),
+                MG_ESC("ethernetDNS"), MG_ESC(net_ethernet_info.ethernetDNS),
+                MG_ESC("targetIp"), MG_ESC(net_ethernet_info.targetIp),
+                MG_ESC("targetPort"), MG_ESC(net_ethernet_info.targetPort),
+                MG_ESC("targetGateway"), MG_ESC(net_ethernet_info.targetGateway),
+                MG_ESC("targetDNS"), MG_ESC(net_ethernet_info.targetDNS),
+                MG_ESC("ethernetStatus"), net_4g_mqtt_info.connect_status);
+        } else if (mg_http_match_uri(hm, "/net/setEthernetInfo")) {
+            struct mg_str json = hm->body;
+            printf("json: %s\n", json.ptr);
+            update_config_array(json, "$.ethernetIp", net_ethernet_info.ethernetIp);
+            update_config_array(json, "$.ethernetNetmask", net_ethernet_info.ethernetNetmask);
+            update_config_array(json, "$.ethernetGateway", net_ethernet_info.ethernetGateway);
+            update_config_array(json, "$.ethernetDNS", net_ethernet_info.ethernetDNS);
+            update_config_array(json, "$.targetIp", net_ethernet_info.targetIp);
+            update_config_array(json, "$.targetPort", net_ethernet_info.targetPort);
+            update_config_array(json, "$.targetGateway", net_ethernet_info.targetGateway);
+            update_config_array(json, "$.targetDNS", net_ethernet_info.targetDNS);
+
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
+
+            p_netdev_ethernet = netdev_get_by_name("hd");
+            if (p_netdev_ethernet) {
+                ip_addr_t ipaddr, maskaddr, gwaddr;
+                inet_aton(net_ethernet_info.ethernetIp, &ipaddr);
+                inet_aton(net_ethernet_info.ethernetNetmask, &maskaddr);
+                inet_aton(net_ethernet_info.ethernetGateway, &gwaddr);
+                p_netdev_ethernet->ops->set_addr_info(p_netdev_ethernet, &ipaddr, &maskaddr, &gwaddr);
+
+                printf("Ethernet Configuration changed to [IP: %s, Mask: %s, GW: %s]\n",
+                    net_ethernet_info.ethernetIp, net_ethernet_info.ethernetNetmask,
+                    net_ethernet_info.ethernetGateway);
+            }
+        } else if (mg_http_match_uri(hm, "/net/connectEthernet")) {
+            //enable Ethernet connect function
+            PrivEvenTrigger(ethernet_event, ETHERNET_CONNECT);
+        } else if (mg_http_match_uri(hm, "/net/disconnectEthernet")) {
+            //disable Ethernet connect function
+            PrivEvenTrigger(ethernet_event, ETHERNET_DISCONNECT);
+        }
+        /*define plc info*/
+        else if (mg_http_match_uri(hm, "/control/setPLCInfo")) {
+            struct mg_str json = hm->body;
+            printf("json: %s\n", json.ptr);
+            PlcInfoWriteToSd(json.ptr);
         } else {
             struct mg_str unknown = mg_str_n("?", 1), *cl;
             struct mg_http_serve_opts opts = { .root_dir = s_root_dir, .ssi_pattern = s_ssi_pattern };
@@ -127,16 +524,22 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
 
 static void* do_webserver(void* args)
 {
-    p_netdev = netdev_get_by_name("wz");
-    if (p_netdev == NULL) {
+    p_netdev_webserver = netdev_get_by_name("wz");
+    if (p_netdev_webserver == NULL) {
         MG_INFO(("Did not find wz netdev, use default.\n"));
-        p_netdev = NETDEV_DEFAULT;
+        p_netdev_webserver = NETDEV_DEFAULT;
     }
-    MG_INFO(("Use Netdev %s", p_netdev->name));
-    s_config.ip = strdup(inet_ntoa(*p_netdev->ip_addr));
-    s_config.mask = strdup(inet_ntoa(*p_netdev->netmask));
-    s_config.gw = strdup(inet_ntoa(*p_netdev->gw));
-    s_config.dns = strdup(inet_ntoa(p_netdev->dns_servers[0]));
+    MG_INFO(("Webserver Use Netdev %s", p_netdev_webserver->name));
+    webserver_config.ip = strdup(inet_ntoa(*p_netdev_webserver->ip_addr));
+    webserver_config.mask = strdup(inet_ntoa(*p_netdev_webserver->netmask));
+    webserver_config.gw = strdup(inet_ntoa(*p_netdev_webserver->gw));
+    webserver_config.dns = strdup(inet_ntoa(p_netdev_webserver->dns_servers[0]));
+
+#ifdef BSP_USING_RS485
+    Rs485InitConfigure();
+#endif
+
+    TcpClientSocket();
 
     struct mg_mgr mgr; // Event manager
     // mg_log_set(MG_LL_INFO); // Set to 3 to enable debug
@@ -151,13 +554,13 @@ static void* do_webserver(void* args)
 
 int webserver(void)
 {
-    char* params[3] = {"LwipNetworkActive", "-e", "1"};
+    char* params[2] = {"LwipNetworkActive", "-a"};
     extern void LwipNetworkActive(int argc, char* argv[]);
-    LwipNetworkActive(3, params);
+    LwipNetworkActive(2, params);
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 30;
-    attr.stacksize = 0x2000;
+    attr.stacksize = 0x4000;
 
     char task_name[] = "do_webserver";
     pthread_args_t args;
