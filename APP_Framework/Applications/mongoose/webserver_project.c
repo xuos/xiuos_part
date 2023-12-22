@@ -34,6 +34,7 @@ Modification:
 #include <sys_arch.h>
 #include <lwip/sockets.h>
 #include "lwip/sys.h"
+#include <adapter.h>
 
 /*******************************************************************************
  * Local variable definitions ('static')
@@ -49,6 +50,26 @@ static const char* web_version = "XiUOS WebServer 1.0";
 static struct netdev* p_netdev_webserver;
 static struct netdev* p_netdev_ethernet;
 static pthread_t tid;
+
+#define WB_EVENT_TASK_STACK_SIZE      4096
+#define WB_EVENT_TASK_PRIO            20
+
+#define WB_4G_CONNECT                 0x0001
+#define WB_4G_DISCONNECT              0x0002
+#define WB_MQTT_CONNECT               0x0004
+#define WB_MQTT_DISCONNECT            0x0008
+#define WB_LORA_CONNECT               0x0010
+#define WB_LORA_DISCONNECT            0x0020
+#define WB_ETHERNET_CONNECT           0x0040
+#define WB_ETHERNET_DISCONNECT        0x0080
+#define WB_EVENT_ALL                 (WB_4G_CONNECT | WB_4G_DISCONNECT |            \
+                                      WB_MQTT_CONNECT | WB_MQTT_DISCONNECT |        \
+                                      WB_LORA_CONNECT | WB_LORA_DISCONNECT |        \
+                                      WB_ETHERNET_CONNECT | WB_ETHERNET_DISCONNECT) 
+
+static int wb_event;
+static unsigned int status = 0;
+static pthread_t wb_event_task;
 
 /*define device info*/
 static const char* device_name = "矽数通4G"; 
@@ -76,10 +97,11 @@ static struct net_4g_info {
     char map_ip[20];
     char connect_ip[20];
     char operator[20];
-    int signal_strength;
+    char signal_strength[20];
     char connect_port[20];
 } net_4g_info;
-int close_4g_function = 0;
+
+struct Adapter* adapter;
 
 static struct net_4g_mqtt_info {
     char topic[20];
@@ -88,10 +110,17 @@ static struct net_4g_mqtt_info {
     int client_id;
     int connect_status;
 } net_4g_mqtt_info;
-int close_mqtt_function = 0;
 
 /*define net LoRa info*/
+struct net_lora_info 
+{
+    uint32_t frequency;         // frequency
+    uint8_t sf;                 // spreadfactor
+    uint8_t bw;                 // bandwidth
 
+    uint32_t connect_status;    //connect status
+    uint8_t lora_init_flag;     //if 1 means already init
+} net_lora_info;
 
 /*define net Ethernet info*/
 static struct net_ethernet_info {
@@ -106,17 +135,6 @@ static struct net_ethernet_info {
     int connect_status;
 } net_ethernet_info;
 
-#define LWIP_TCP_CLIENT_TASK_STACK_SIZE        4096
-#define LWIP_TCP_CLIENT_TASK_PRIO              20
-
-#define ETHERNET_CONNECT           0x01
-#define ETHERNET_DISCONNECT        0x02
-#define ETHERNET_ALL               (ETHERNET_CONNECT | ETHERNET_DISCONNECT)
-
-static int ethernet_event;
-static unsigned int status = 0;
-
-static pthread_t tcp_client_task;
 static int socket_fd = -1;
 
 static char tcp_ethernet_ipaddr[] = {192, 168, 130, 77};
@@ -211,6 +229,70 @@ static void Rs485Configure(int baud_rate, int data_bit, int stop_bit, int parity
 }
 
 /*******************************************************************************
+ * Function implementation - define net 4G info
+ ******************************************************************************/
+static void Net4gGetInfo(char *ip, char *operator, char *signal_strength)
+{
+    //to do
+}
+
+static void Net4gConnect(void)
+{
+    int ec200a_baud_rate = 115200;
+    const char *send_msg = "Adapter_4G Test";
+    adapter->socket.socket_id = 0;
+
+    AdapterDeviceOpen(adapter);
+    AdapterDeviceControl(adapter, OPE_INT, &ec200a_baud_rate);
+    AdapterDeviceConnect(adapter, CLIENT, net_4g_info.connect_ip, net_4g_info.connect_port, IPV4);
+}
+
+static void Net4gDisconnect(void)
+{
+    uint8_t priv_net_group = IP_PROTOCOL;
+    AdapterDeviceDisconnect(adapter, &priv_net_group);
+}
+
+/*******************************************************************************
+ * Function implementation - define net 4G MQTT info
+ ******************************************************************************/
+static void NetMqttConnect(void)
+{
+    //to do
+}
+
+static void NetMqttDisconnect(void)
+{
+    //to do
+}
+
+/*******************************************************************************
+ * Function implementation - define net LoRa info
+ ******************************************************************************/
+static void NetLoraConnect(void)
+{
+    char* init_params[2] = {"TestLoraRadio", "probe"};
+    char* tx_params[4] = {"TestLoraRadio", "tx", "1", "2000"};
+    extern int TestLoraRadio(int argc, char *argv[]);
+
+    if (0 == net_lora_info.lora_init_flag) {
+        TestLoraRadio(2, init_params);
+        net_lora_info.lora_init_flag = 1;
+    }
+    
+    TestLoraRadio(4, tx_params);
+    net_lora_info.connect_status = 1;
+}
+
+static void NetLoraDisconnect(void)
+{
+    char* disconnect_params[2] = {"TestLoraRadio", "txdone"};
+    extern int TestLoraRadio(int argc, char *argv[]);
+    TestLoraRadio(2, disconnect_params);
+    net_lora_info.connect_status = 0;
+}
+
+/*******************************************************************************
  * Function implementation - define net Ethernet info
  ******************************************************************************/
 static void TcpClientConnect(void)
@@ -271,6 +353,7 @@ static void TcpClientConnect(void)
     }
 
     printf("TCP connect %s:%d success, start to send.\n", net_ethernet_info.targetIp, tcp_socket_port);
+    net_ethernet_info.connect_status = 1;
 
     while (cnt --) {
         printf("Lwip client is running.\n");
@@ -287,37 +370,7 @@ static void TcpClientDisconnect(void)
 {
     printf("TCP disconnect\n");
     closesocket(socket_fd);
-}
-
-static void *TcpSocketClientTask(void *arg)
-{
-    ethernet_event = PrivEventCreate(LINKLIST_FLAG_FIFO);
-    while(1) {
-        if (0 == PrivEventProcess(ethernet_event, ETHERNET_ALL, EVENT_OR | EVENT_AUTOCLEAN, 0, &status)) {
-            switch( status ) {
-                case ETHERNET_CONNECT:
-                    TcpClientConnect();
-                    break;
-                case ETHERNET_DISCONNECT:
-                    TcpClientDisconnect();
-                    break;   
-            }
-        }
-    }
-}
-
-static void TcpClientSocket(void)
-{
-    char task_name[] = "tcp_client_task";
-    pthread_args_t args;
-    args.pthread_name = task_name;
-    
-    pthread_attr_t attr;
-    attr.schedparam.sched_priority = LWIP_TCP_CLIENT_TASK_PRIO;
-    attr.stacksize = LWIP_TCP_CLIENT_TASK_STACK_SIZE;
-
-    PrivTaskCreate(&tcp_client_task, &attr, &TcpSocketClientTask, (void *)&args);
-    PrivTaskStartup(&tcp_client_task);
+    net_ethernet_info.connect_status = 0;
 }
 
 /*******************************************************************************
@@ -339,6 +392,58 @@ static void PlcInfoWriteToSd(const char *json)
         }
         printf("------download %s file done!------\r\n", JSON_FILE_NAME);
     }
+}
+
+/*******************************************************************************
+ * Function implementation - WebserverEventTask
+ ******************************************************************************/
+static void *WebserverEventTask(void *arg)
+{
+    wb_event = PrivEventCreate(LINKLIST_FLAG_FIFO);
+    while(1) {
+        if (0 == PrivEventProcess(wb_event, WB_EVENT_ALL, EVENT_OR | EVENT_AUTOCLEAN, 0, &status)) {
+            switch( status ) {
+                case WB_4G_CONNECT:
+                    Net4gConnect();
+                    break;
+                case WB_4G_DISCONNECT:
+                    Net4gDisconnect();
+                    break; 
+                case WB_MQTT_CONNECT:
+                    NetMqttConnect();
+                    break;
+                case WB_MQTT_DISCONNECT:
+                    NetMqttDisconnect();
+                    break; 
+                case WB_LORA_CONNECT:
+                    NetLoraConnect();
+                    break;
+                case WB_LORA_DISCONNECT:
+                    NetLoraDisconnect();
+                    break; 
+                case WB_ETHERNET_CONNECT:
+                    TcpClientConnect();
+                    break;
+                case WB_ETHERNET_DISCONNECT:
+                    TcpClientDisconnect();
+                    break;   
+            }
+        }
+    }
+}
+
+static void WbEventInit(void)
+{
+    char task_name[] = "wb_event_task";
+    pthread_args_t args;
+    args.pthread_name = task_name;
+    
+    pthread_attr_t attr;
+    attr.schedparam.sched_priority = WB_EVENT_TASK_PRIO;
+    attr.stacksize = WB_EVENT_TASK_STACK_SIZE;
+
+    PrivTaskCreate(&wb_event_task, &attr, &WebserverEventTask, (void *)&args);
+    PrivTaskStartup(&wb_event_task);
 }
 
 /*******************************************************************************
@@ -418,21 +523,26 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
         }
         /*define net 4G info*/
         else if (mg_http_match_uri(hm, "/net/get4gInfo")) {
+
+            Net4gGetInfo(net_4g_info.map_ip, net_4g_info.operator, net_4g_info.signal_strength);
+
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
                 "{%m:%m, %m:%m, %m:%d}\n",
                 MG_ESC("mapIp"), MG_ESC(net_4g_info.map_ip),
                 MG_ESC("operator"), MG_ESC(net_4g_info.operator),
-                MG_ESC("signalIntensity"), net_4g_info.signal_strength);
+                MG_ESC("signalIntensity"), MG_ESC(net_4g_info.signal_strength));
         } else if (mg_http_match_uri(hm, "/net/set4gInfo")) {
             struct mg_str json = hm->body;
             update_config_array(json, "$.publicIp", net_4g_info.connect_ip);
             update_config_array(json, "$.publicPort", net_4g_info.connect_port);
-            close_4g_function = mg_json_get_long(json, "$.close4G", 0);
+
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else if (mg_http_match_uri(hm, "/net/connect4G")) {
-            close_4g_function = 0;//enable 4G connect function
+            //enable 4G connect function
+            PrivEvenTrigger(wb_event, WB_4G_CONNECT);
         } else if (mg_http_match_uri(hm, "/net/disconnect4G")) {
-            close_4g_function = 1;//disable 4G connect function
+            //disable 4G connect function
+            PrivEvenTrigger(wb_event, WB_4G_CONNECT);
         } else if (mg_http_match_uri(hm, "/net/getMQTTInfo")) {
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
                 "{%m:%m, %m:%m, %m:%m, %m:%d, %m:%d}\n",
@@ -449,12 +559,39 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
             net_4g_mqtt_info.client_id = mg_json_get_long(json, "$.client_id", 0);
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else if (mg_http_match_uri(hm, "/net/connectMQTT")) {
-            close_mqtt_function = 0;//enable 4G MQTT connect function
+            //enable 4G MQTT connect function
+            PrivEvenTrigger(wb_event, WB_MQTT_CONNECT);
         } else if (mg_http_match_uri(hm, "/net/disconnectMQTT")) {
-            close_mqtt_function = 1;//disable 4G MQTT connect function
+            //disable 4G MQTT connect function
+            PrivEvenTrigger(wb_event, WB_MQTT_DISCONNECT);
         }
         /*define net LoRa info*/
-        
+        else if (mg_http_match_uri(hm, "/net/getLoraInfo")) {
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n",
+                "{%m:%d, %m:%d, %m:%d, %m:%d}\n",
+                MG_ESC("range"), net_lora_info.frequency,
+                MG_ESC("bandwidth"), net_lora_info.bw,
+                MG_ESC("factor"), net_lora_info.sf,
+                MG_ESC("status"), net_lora_info.connect_status);
+        }
+        else if (mg_http_match_uri(hm, "/net/setLoraInfo")) {
+            struct mg_str json = hm->body;
+            printf("json: %s\n", json.ptr);
+            net_lora_info.frequency = mg_json_get_long(json, "$.range", 0);
+            net_lora_info.sf = mg_json_get_long(json, "$.factor", 0);
+            net_lora_info.bw = mg_json_get_long(json, "$.bandwidth", 0);
+
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
+
+            extern void LoraRadioParamsUpdate(uint32_t frequency, uint8_t sf, uint8_t bw);
+            LoraRadioParamsUpdate(net_lora_info.frequency, net_lora_info.sf, net_lora_info.bw);
+        } else if (mg_http_match_uri(hm, "/net/ConnectLora")) {
+            //enable LoRa connect function
+            PrivEvenTrigger(wb_event, WB_LORA_CONNECT);
+        } else if (mg_http_match_uri(hm, "/net/DisonnectLora")) {
+            //disable LoRa connect function
+            PrivEvenTrigger(wb_event, WB_LORA_DISCONNECT);
+        }
         /*define net Ethernet info*/
         else if (mg_http_match_uri(hm, "/net/getEthernetInfo")) {
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
@@ -467,7 +604,7 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
                 MG_ESC("targetPort"), MG_ESC(net_ethernet_info.targetPort),
                 MG_ESC("targetGateway"), MG_ESC(net_ethernet_info.targetGateway),
                 MG_ESC("targetDNS"), MG_ESC(net_ethernet_info.targetDNS),
-                MG_ESC("ethernetStatus"), net_4g_mqtt_info.connect_status);
+                MG_ESC("ethernetStatus"), net_ethernet_info.connect_status);
         } else if (mg_http_match_uri(hm, "/net/setEthernetInfo")) {
             struct mg_str json = hm->body;
             printf("json: %s\n", json.ptr);
@@ -496,10 +633,10 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
             }
         } else if (mg_http_match_uri(hm, "/net/connectEthernet")) {
             //enable Ethernet connect function
-            PrivEvenTrigger(ethernet_event, ETHERNET_CONNECT);
+            PrivEvenTrigger(wb_event, WB_ETHERNET_CONNECT);
         } else if (mg_http_match_uri(hm, "/net/disconnectEthernet")) {
             //disable Ethernet connect function
-            PrivEvenTrigger(ethernet_event, ETHERNET_DISCONNECT);
+            PrivEvenTrigger(wb_event, WB_ETHERNET_DISCONNECT);
         }
         /*define plc info*/
         else if (mg_http_match_uri(hm, "/control/setPLCInfo")) {
@@ -539,7 +676,9 @@ static void* do_webserver(void* args)
     Rs485InitConfigure();
 #endif
 
-    TcpClientSocket();
+    adapter =  AdapterDeviceFindByName(ADAPTER_4G_NAME);
+    net_lora_info.lora_init_flag = 0;
+    WbEventInit();
 
     struct mg_mgr mgr; // Event manager
     // mg_log_set(MG_LL_INFO); // Set to 3 to enable debug

@@ -34,8 +34,8 @@ config BSP_USING_RS485
     default n
 
 menuconfig BSP_USING_UART6
-    bool "Enable USART6"
-    default n
+    bool "Enable USART6 for 4G EC200A"
+    default y
     if BSP_USING_UART6
         config SERIAL_BUS_NAME_6
             string "serial bus 6 name"
