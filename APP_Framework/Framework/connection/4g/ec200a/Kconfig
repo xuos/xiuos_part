@@ -1,0 +1,10 @@
+config ADAPTER_4G_EC200A
+        string "EC200A adapter name"
+        default "ec200a"
+
+if ADD_XIZI_FEATURES
+        config ADAPTER_EC200A_DRIVER
+                string "EC200A device uart driver path"
+                default "/dev/usart6_dev6"
+endif
+

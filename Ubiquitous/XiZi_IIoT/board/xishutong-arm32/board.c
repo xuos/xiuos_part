@@ -82,6 +82,10 @@ Modification:
 #include <connect_ethernet.h>
 #endif
 
+#ifdef BSP_USING_EXTSDRAM
+#include <connect_sdram.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
 
@@ -179,6 +183,9 @@ void SysTick_Handler(void)
 struct InitSequenceDesc _board_init[] = {
 #ifdef BSP_USING_GPIO
     { "hw_pin", HwGpioInit },
+#endif
+#ifdef BSP_USING_EXTSDRAM
+    { "ext_sdram", ExtSdramInit},
 #endif
 #ifdef BSP_USING_SDIO
     { "sdio", HwSdioInit },

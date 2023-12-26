@@ -16,6 +16,7 @@ menuconfig BSP_USING_UART3
 menuconfig BSP_USING_UART4
     bool "Enable USART4 for RS485"
     default y
+    select BSP_USING_RS485
     if BSP_USING_UART4
         config SERIAL_BUS_NAME_4
             string "serial bus 4 name"
@@ -25,12 +26,16 @@ menuconfig BSP_USING_UART4
             default "usart4_drv"
         config SERIAL_4_DEVICE_NAME_0
             string "serial bus 4 device 0 name"
-            default "usart4_dev4"   
+            default "usart4_dev4" 
     endif
 
-menuconfig BSP_USING_UART6
-    bool "Enable USART6"
+config BSP_USING_RS485
+    bool
     default n
+
+menuconfig BSP_USING_UART6
+    bool "Enable USART6 for 4G EC200A"
+    default y
     if BSP_USING_UART6
         config SERIAL_BUS_NAME_6
             string "serial bus 6 name"

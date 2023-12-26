@@ -24,4 +24,8 @@ ifeq ($(CONFIG_BSP_USING_SPI),y)
   SRC_DIR += spi
 endif
 
+ifeq ($(CONFIG_BSP_USING_EXTSDRAM),y)
+  SRC_DIR += sdram
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
