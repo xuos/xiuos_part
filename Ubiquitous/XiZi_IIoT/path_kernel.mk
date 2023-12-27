@@ -607,14 +607,13 @@ ifeq ($(CONFIG_LIB_USING_CJSON), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON
 endif
 
-<<<<<<< HEAD
 ifeq ($(CONFIG_LIB_USING_FREEMODBUS), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/freemodbus
-=======
+endif
+
 ifeq ($(CONFIG_LIB_USING_SQLITE), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/SQLite #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/SQLite/xizi_port #
->>>>>>> 051f67ddba2c147f4dd182d204ca8dbf28110479
 endif
 
 ifeq ($(CONFIG_LIB_USING_LORAWAN), y)
