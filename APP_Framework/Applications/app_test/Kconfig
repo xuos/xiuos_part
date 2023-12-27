@@ -270,6 +270,10 @@ menu "test app"
                 bool "Config test red black tree"
                 default n
 
+            menuconfig USER_TEST_MODBUS_TCP
+                bool "Config test modbus_tcp"
+                default n
+
             menuconfig USER_TEST_WEBSERVER
                 bool "Config test webserver"
                 default n
@@ -277,11 +281,16 @@ menu "test app"
             menuconfig USER_TEST_MQTTCLIENT
                 bool "Config test mqtt client"
                 default n
+                select LIB_USING_CJSON
 
             menuconfig USER_TEST_FTPCLIENT
                 bool "Config test ftp client"
                 default n
             
+            menuconfig USER_TEST_FTPCLIENT_RISCV
+                bool "Config test ftp client on riscv"
+                default n
+
             menuconfig USER_TEST_LORA_P2P
                 bool "Config test lora p2p"
                 default n

@@ -36,7 +36,7 @@ menuconfig LIB_USING_LORAWAN
             select BSP_USING_SPI
 
         if LIB_USING_LORA_RADIO
-
+            source "$APP_DIR/lib/lorawan/lora_radio_driver/Kconfig"
         endif
     endif
 

@@ -22,6 +22,7 @@
 #include <transform.h>
 #ifdef ADD_XIZI_FEATURES
 
+#ifdef BSP_USING_W5500
 #include <socket.h>
 
 #define BUFF_SIZE 128
@@ -189,6 +190,6 @@ PRIV_SHELL_CMD_FUNCTION(TestSocketAsClient, a w5500 client-ip-port-msg test samp
 
 
 #endif
-
+#endif
 
 #endif

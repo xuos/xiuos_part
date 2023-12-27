@@ -60,6 +60,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     cfg.ext_uart_no = SENSOR_DEVICE_QS_FX_DEV_EXT_PORT;
     cfg.port_configure = PORT_CFG_INIT;
 #endif
+    cfg.dev_recv_callback = NULL;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;

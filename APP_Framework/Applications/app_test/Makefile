@@ -24,7 +24,7 @@ endif
 
 ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     SRC_FILES := test_shell.c
-
+    
     ifeq ($(CONFIG_USER_TEST_ADC),y)
         SRC_FILES += test_adc.c
     endif
@@ -125,22 +125,34 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
 
     ifeq ($(CONFIG_USER_TEST_RBTREE),y)
         SRC_FILES += test_rbtree/test_rbtree.c
-    endif    
+    endif
 
     ifeq ($(CONFIG_USER_TEST_SOCKET),y)
         SRC_FILES += test_socket.c
     endif    
 
+    ifeq ($(CONFIG_USER_TEST_MODBUS_TCP),y)
+        SRC_DIR += test_modbus_tcp
+    endif 
+	
     ifeq ($(CONFIG_USER_TEST_WEBSERVER),y)
-        SRC_FILES += 
+        SRC_FILES += test_webserver/test_webserver.c
     endif
 
     ifeq ($(CONFIG_USER_TEST_MQTTCLIENT),y)
+        SRC_DIR:= test_mqttclient
         SRC_FILES += 
     endif
 
     ifeq ($(CONFIG_USER_TEST_FTPCLIENT),y)
-        SRC_FILES += 
+        SRC_FILES += test_ftpclient/test_ftpclient.c test_ftpclient/ftp_client/ftp_client.c\
+                     test_ftpclient/ftp_client/my_socket.c
+    endif
+
+	ifeq ($(CONFIG_USER_TEST_FTPCLIENT_RISCV),y)
+        ifeq ($(CONFIG_BSP_USING_W5500),y)
+            SRC_FILES += test_ftpclient_riscv/test_ftpclient_riscv.c
+        endif 
     endif
 
     ifeq ($(CONFIG_USER_TEST_LORA_P2P),y)
@@ -157,7 +169,11 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
 
     ifeq ($(CONFIG_USER_TEST_USB_CAMERA),y)
         SRC_FILES += 
-    endif     
+    endif
+
+    ifeq ($(CONFIG_USER_TEST_FTPCLIENT_FINAL),y)
+        SRC_FILES += test_ftpclient_final/test_ftpclient_final.c test_ftpclient_final/ftp_client/ftp_client.c test_ftpclient_final/ftp_client/my_socket.c
+    endif   
 
     include $(KERNEL_ROOT)/compiler.mk
 endif

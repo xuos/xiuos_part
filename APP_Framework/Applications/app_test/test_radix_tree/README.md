@@ -9,13 +9,15 @@
 基数树节点设计为：
 
 ```c
-typedef struct _node {
-​    void* value;
-​    struct _node* next[NODE_SIZE];
-} node;
+typedef struct radix_node
+{
+    void *value;
+    struct radix_node *child[NODE_SIZE];
+    struct radix_node *parent;
+} radix_node;
 ```
 
-其中，节点在树中的路径即为键，`value` 存储值，`NODE_SIZE` 定义为 128，足以容纳所有 ASCII 值。
+其中，节点在树中的路径即为键，为`unsigned int`类型，`value` 存储值，`NODE_SIZE` 定义为 4，即每个树节点包含2个bit位，可以根据实际需求调整。
 
 一共实现了 5 个函数，分别为：
 
@@ -32,20 +34,19 @@ typedef struct _node {
 测试程序定义了以下键值对：
 
 ```c
-char keys[][MAX_WORD_LEN] = {
+char values[][16] = {
     "what",
     "where",
     "why",
     "how",
     "hello!",
     "apple",
-    "12345"
-};
-int values[] = {1, 2, 3, 4, 5, 6, 7};
+    "12345"};
+unsigned int keys[] = {1, 2, 3, 4, 5, 6, 7};
 ```
 
 1. 程序的第一部分创建了基数树，并且将定义的 7 个键值对的前 6 个插入了基数树，然后分别查找 7 个键，前 6 个均可以找到对应的值，最后一个未插入，因此无法找到
-2. 程序的第二部分从基数树中删除了 `where` 和 `how` 两个键，再次分别查找 7 个键，删除的键值对和未插入的键值对均无法找到
+2. 程序的第二部分从基数树中删除了 `where` 和 `how` 两个值的键，再次分别查找 7 个键，删除的键值对和未插入的键值对均无法找到
 3. 程序的第三部分重新插入了已删除的 `where` 和未插入过的 `12345` ，再次分别查找 7 个键，新插入的值可以检索到
 4. 程序的第四部分将基数树销毁，再次分别查找 7 个键，所有的键值对均无法找到
 

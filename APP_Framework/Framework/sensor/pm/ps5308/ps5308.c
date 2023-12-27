@@ -77,6 +77,7 @@ static int SensorDeviceOpen(struct SensorDevice *sdev)
     cfg.ext_uart_no = SENSOR_DEVICE_PS5308_DEV_EXT_PORT;
     cfg.port_configure = PORT_CFG_INIT;
 #endif
+    cfg.dev_recv_callback = NULL;
 
     result = PrivIoctl(sdev->fd, OPE_INT, &cfg);
 

@@ -229,11 +229,13 @@ static void SdCardAttach(void)
     
     KPrintf("\r\nCard inserted.\r\n");
 
+    int err_code = LL_OK;
+
     /* Reset and init SDIOC */
-    if (LL_OK != SDIOC_SWReset(sd_handle->SDIOCx, SDIOC_SW_RST_ALL)) {
-        KPrintf("Reset SDIOC failed!\r\n");
-    } else if (LL_OK != SD_Init(sd_handle)) {
-        KPrintf("SD card initialize failed!\r\n");
+    if (LL_OK != (err_code = SDIOC_SWReset(sd_handle->SDIOCx, SDIOC_SW_RST_ALL))) {
+        KPrintf("Reset SDIOC failed! error code: %d\r\n", err_code);
+    } else if (LL_OK != (err_code = SD_Init(sd_handle))) {
+        KPrintf("SD card initialize failed!, error code: %d\r\n", err_code);
     } else {
         KPrintf("SD card init done!\r\n");
     }

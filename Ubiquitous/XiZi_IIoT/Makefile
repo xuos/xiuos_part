@@ -6,8 +6,9 @@ MAKEFLAGS += --no-print-directory
 
 
 riscv_support := kd233 maix-go hifive1-rev-B gapuino gd32vf103-rvstar rv32m1-vega aiit-riscv64-board xidatong-riscv64 edu-riscv64 ch32v307vct6
-arm_support += stm32f407-st-discovery stm32f407zgt6 stm32f103-nano nuvoton-m2354 ok1052-c imxrt1176-sbc aiit-arm32-board xidatong-arm32 xiwangtong-arm32 edu-arm32
-emulator_support += hifive1-emulator k210-emulator cortex-m0-emulator cortex-m3-emulator cortex-m4-emulator
+arm_support += stm32f407-st-discovery stm32f407zgt6 stm32f103-nano nuvoton-m2354 ok1052-c imxrt1176-sbc aiit-arm32-board xidatong-arm32 xiwangtong-arm32 edu-arm32 xishutong-arm32
+emulator_support += hifive1-emulator k210-emulator cortex-m0-emulator cortex-m3-emulator cortex-m4-emulator cortex-m7-emulator
+
 support := $(riscv_support) $(arm_support) $(emulator_support) 
 SRC_DIR :=
 
@@ -49,6 +50,7 @@ export SRC_DIR:= $(SRC_APP_DIR) $(SRC_KERNEL_DIR)
 export LIBCC 
 export MUSL_DIR := $(KERNEL_ROOT)/lib/musllib
 export LWIP_DIR := $(KERNEL_ROOT)/resources/ethernet
+export MONGOOSE_DIR := $(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose/lib
 
 PART:=
 
@@ -71,6 +73,10 @@ endif
 
 ifeq ($(CONFIG_RESOURCES_LWIP), y)
 PART += COMPILE_LWIP
+endif
+
+ifeq ($(CONFIG_USE_MONGOOSE), y)
+# PART += COMPILE_MONGOOSE
 endif
 
 ifeq ($(CONFIG_MCUBOOT_BOOTLOADER), y)
@@ -127,6 +133,15 @@ COMPILE_LWIP:
 	@cp link_lwip.mk build/Makefile
 	@$(MAKE) -C build TARGET=liblwip.a LINK_FLAGS=LFLAGS
 	@cp build/liblwip.a $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
+	@rm build/Makefile build/make.obj
+
+COMPILE_MONGOOSE: 
+	@for dir in $(MONGOOSE_DIR);do    \
+               $(MAKE) -C $$dir COMPILE_TYPE=$@;          \
+       done
+	@cp link_mongoose.mk build/Makefile
+	@$(MAKE) -C build TARGET=mongoose.a LINK_FLAGS=LFLAGS
+	@cp build/mongoose.a $(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose/mongoose.a
 	@rm build/Makefile build/make.obj
 
 COMPILE_KERNEL:

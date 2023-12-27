@@ -61,7 +61,6 @@ void TestCAN(void)
     frame_send.stdid = 0x55;
     frame_send.rtr=0;
     frame_send.data_lenth=8;
-    frame_send.data = data_buff;
 
     struct CanSendConfigure frame_recv;
     uint8_t recv_buff[64u] = {};
@@ -70,13 +69,20 @@ void TestCAN(void)
     // CAN write
     while (1)
     {
-        PrivTaskDelay(500);
-        PrivWrite(can_fd, &frame_send, 100);
-        PrivTaskDelay(500);
-        PrivRead(can_fd, &frame_recv, 100);
+        // PrivTaskDelay(500);
+        // PrivWrite(can_fd, &frame_send, NONE);
+        // PrivTaskDelay(500);
+        PrivRead(can_fd, &frame_recv, NONE);
         // if any data has received,Then printf message
         if(frame_recv.data_lenth > 0){
-            printf("ID %08x:%d:%s\n",frame_recv.exdid,frame_recv.data_lenth,frame_recv.data);
+            printf("ID %08x : \n",frame_recv.exdid);
+            for(int i = 0; i < frame_recv.data_lenth; i ++) {
+                printf("0x%x ", frame_recv.data[i]);
+            }
+            printf("\n");
+
+            frame_send.data = recv_buff;
+            PrivWrite(can_fd, &frame_send, NONE);
         }
     }
 

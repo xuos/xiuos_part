@@ -18,8 +18,16 @@ ifeq ($(CONFIG_LIB_USING_LORAWAN),y)
 	SRC_DIR += lorawan
 endif
 
-ifeq ($(CONFIG_TOOL_USING_MQTT),y)
-  SRC_DIR += mqtt
+ifeq ($(CONFIG_LIB_USING_MQTT),y)
+    SRC_DIR += mqtt
+endif
+
+ifeq ($(CONFIG_LIB_USING_JERRYSCRIPT),y)
+    SRC_DIR += JerryScript
+endif
+
+ifeq ($(CONFIG_LIB_USING_SQLITE),y)
+  SRC_DIR += SQLite
 endif
 
 # ifeq ($(CONFIG_LIB_USING_FREEMODBUS),y)

@@ -2,6 +2,8 @@ ifeq ($(COMPILE_TYPE), COMPILE_MUSL)
 SRC_DIR_TEMP := $(MUSL_DIR)
 else ifeq ($(COMPILE_TYPE), COMPILE_LWIP) 
 SRC_DIR_TEMP := $(LWIP_DIR)
+else ifeq ($(COMPILE_TYPE), COMPILE_MONGOOSE)
+SRC_DIR_TEMP := $(MONGOOSE_DIR)
 else
 SRC_DIR_TEMP := $(SRC_DIR) 
 endif
@@ -9,6 +11,7 @@ endif
 SRC_DIR :=
 MUSL_DIR :=
 LWIP_DIR :=
+MONGOOSE_DIR :=
 
 ifeq ($(USE_APP_INCLUDEPATH), y)
 	include $(KERNEL_ROOT)/path_app.mk

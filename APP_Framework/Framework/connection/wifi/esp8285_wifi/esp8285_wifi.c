@@ -81,6 +81,7 @@ static int Esp8285UartOpen(struct Adapter *adapter)
     cfg.ext_uart_no = ADAPTER_ESP8285_DRIVER_EXT_PORT;
     cfg.port_configure = PORT_CFG_INIT;
 #endif
+    cfg.dev_recv_callback = NULL;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;
@@ -507,6 +508,7 @@ static int Esp8285WifiIoctl(struct Adapter *adapter, int cmd, void *args)
             cfg.serial_invert_mode = NRZ_NORMAL;
             cfg.serial_buffer_size = SERIAL_RB_BUFSZ;
             cfg.is_ext_uart = 0;
+            cfg.dev_recv_callback = NULL;
 #ifdef ADAPTER_ESP8285_DRIVER_EXT_PORT
             cfg.is_ext_uart = 1;
             cfg.ext_uart_no         = ADAPTER_ESP8285_DRIVER_EXT_PORT;

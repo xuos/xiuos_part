@@ -29,7 +29,7 @@
 #define REPLY_TIME_OUT 10
 
 #ifdef TOOL_USING_OTA
-#define ENTM_RECV_MAX OTA_RX_BUFFERSIZE
+#define ENTM_RECV_MAX (OTA_FRAME_SIZE + 1024)
 #else
 #define ENTM_RECV_MAX 256
 #endif

@@ -63,6 +63,7 @@ static int BC28UartOpen(struct Adapter *adapter)
     cfg.ext_uart_no = ADAPTER_BC28_DRIVER_EXT_PORT;
     cfg.port_configure = PORT_CFG_INIT;
 #endif
+    cfg.dev_recv_callback = NULL;
 
     struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = SERIAL_TYPE;

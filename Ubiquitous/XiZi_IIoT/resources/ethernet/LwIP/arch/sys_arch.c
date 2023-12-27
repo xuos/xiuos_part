@@ -76,9 +76,9 @@ char lwip_eth0_ipaddr[20] = { 192, 168, 130, 77 };
 char lwip_eth0_netmask[20] = { 255, 255, 254, 0 };
 char lwip_eth0_gwaddr[20] = { 192, 168, 130, 1 };
 
-char lwip_eth1_ipaddr[20] = { 192, 168, 130, 99 };
+char lwip_eth1_ipaddr[20] = { 192, 168, 131, 88 };
 char lwip_eth1_netmask[20] = { 255, 255, 254, 0 };
-char lwip_eth1_gwaddr[20] = { 192, 168, 130, 23 };
+char lwip_eth1_gwaddr[20] = { 192, 168, 131, 1 };
 
 char lwip_flag = 0;
 
@@ -88,6 +88,13 @@ x_ticks_t lwip_sys_now;
 
 struct netif gnetif;
 sys_sem_t* get_eth_recv_sem()
+{
+    static sys_sem_t g_recv_sem = 0;
+    return &g_recv_sem;
+}
+
+struct netif gnetif2;
+sys_sem_t* get_eth_recv_sem2()
 {
     static sys_sem_t g_recv_sem = 0;
     return &g_recv_sem;
@@ -249,11 +256,11 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
     }
 #endif /* SYS_STATS */
     if (*mbox < 0) {
-        lw_print("lw: [%s] alloc %d mbox %p failed\n", __func__, size, mbox);
+        lw_error("lw: [%s] alloc %d mbox %p failed\n", __func__, size, mbox);
         return ERR_MEM;
     }
 
-    lw_print("lw: [%s] alloc %d mbox %p ok!\n", __func__, size, mbox);
+    // lw_print("lw: [%s] alloc %d mbox %p ok!\n", __func__, size, mbox);
     return ERR_OK;
 }
 
@@ -332,136 +339,104 @@ ip4_addr_t ipaddr;
 ip4_addr_t netmask;
 ip4_addr_t gw;
 
-void lwip_config_input(struct netif* net)
+void lwip_config_input(int eport, struct netif* net)
 {
     sys_thread_t th_id = 0;
 
-    th_id = sys_thread_new("eth_input", ethernetif_input, net, LWIP_TASK_STACK_SIZE, 30);
-
-    // if (th_id >= 0) {
-    //     lw_print("%s %d successfully!\n", __func__, th_id);
-    // } else {
-    //     lw_print("%s failed!\n", __func__);
-    // }
+    if (eport == 0) {
+        th_id = sys_thread_new("eth_input", ethernetif_input, net, LWIP_TASK_STACK_SIZE, 30);
+    } else if (eport == 1) {
+#ifdef NETIF_ENET1_INIT_FUNC
+        th_id = sys_thread_new("eth_input2", ethernetif_input2, net, LWIP_TASK_STACK_SIZE, 30);
+#endif
+    }
 }
 
 void lwip_config_tcp(uint8_t enet_port, char* ip, char* mask, char* gw)
 {
-    static char is_init = 0;
-    if (is_init != 0) {
-        return;
+    static char is_init_0 = 0;
+    static char is_init_1 = 0;
+    if (is_init_0 == 0 && is_init_1 == 0) {
+        sys_sem_new(get_eth_recv_sem(), 0);
+        sys_sem_new(get_eth_recv_sem2(), 0);
+
+        if (chk_lwip_bit(LWIP_INIT_FLAG)) {
+            lw_print("lw: [%s] already ...\n", __func__);
+        }
+
+        set_lwip_bit(LWIP_INIT_FLAG);
+
+        tcpip_init(NULL, NULL);
     }
-    is_init = 1;
-
-    sys_sem_new(get_eth_recv_sem(), 0);
-
-    ip4_addr_t net_ipaddr, net_netmask, net_gw;
-    char* eth_cfg;
-
-    eth_cfg = ethernetif_config_enet_set(enet_port);
-
-    if (chk_lwip_bit(LWIP_INIT_FLAG)) {
-        lw_print("lw: [%s] already ...\n", __func__);
-        return;
-    }
-
-    set_lwip_bit(LWIP_INIT_FLAG);
-
-    tcpip_init(NULL, NULL);
 
     lw_print("lw: [%s] start ...\n", __func__);
 
+    char* eth_cfg = ethernetif_config_enet_set(enet_port);
+    ip4_addr_t net_ipaddr, net_netmask, net_gw;
     IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
     IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
     IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
 
     if (0 == enet_port) {
+        if (is_init_0 == 1) {
+            return;
+        }
+#ifndef NETIF_ENET0_INIT_FUNC
+        lw_print("Not Netif driver for Eport 0\n");
+        return;
+#endif
 #ifdef NETIF_ENET0_INIT_FUNC
+        lw_print("Add netif eport 0\n");
         netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET0_INIT_FUNC,
             tcpip_input);
-#endif
-    } else if (1 == enet_port) {
-#ifdef NETIF_ENET1_INIT_FUNC
-        netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET1_INIT_FUNC,
-            tcpip_input);
-#endif
-    }
 
-    // netif_set_default(&gnetif);
-    netif_set_up(&gnetif);
-
-    lw_print("\r\n************************************************\r\n");
-    lw_print(" Network Configuration\r\n");
-    lw_print("************************************************\r\n");
-    lw_print(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&net_ipaddr)[0], ((u8_t*)&net_ipaddr)[1],
-        ((u8_t*)&net_ipaddr)[2], ((u8_t*)&net_ipaddr)[3]);
-    lw_print(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&net_netmask)[0], ((u8_t*)&net_netmask)[1],
-        ((u8_t*)&net_netmask)[2], ((u8_t*)&net_netmask)[3]);
-    lw_print(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&net_gw)[0], ((u8_t*)&net_gw)[1],
-        ((u8_t*)&net_gw)[2], ((u8_t*)&net_gw)[3]);
-    lw_print("************************************************\r\n");
-
-    lwip_config_input(&gnetif);
-}
-
-void lwip_config_net(uint8_t enet_port, char* ip, char* mask, char* gw)
-{
-    ip4_addr_t net_ipaddr, net_netmask, net_gw;
-    char* eth_cfg;
-
-    eth_cfg = ethernetif_config_enet_set(enet_port);
-
-    if (chk_lwip_bit(LWIP_INIT_FLAG)) {
-        lw_print("lw: [%s] already ...\n", __func__);
-
-        IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
-        IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
-        IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
-
-        // update ip addr
-        netif_set_down(&gnetif);
-        netif_set_gw(&gnetif, &net_gw);
-        netif_set_netmask(&gnetif, &net_netmask);
-        netif_set_ipaddr(&gnetif, &net_ipaddr);
+        netif_set_default(&gnetif);
         netif_set_up(&gnetif);
-        return;
-    }
-    set_lwip_bit(LWIP_INIT_FLAG);
 
-    lw_print("lw: [%s] start ...\n", __func__);
-
-    IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
-    IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
-    IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
-
-    lwip_init();
-
-    if (0 == enet_port) {
-#ifdef NETIF_ENET0_INIT_FUNC
-        netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET0_INIT_FUNC,
-            ethernet_input);
-#endif
-    } else if (1 == enet_port) {
-#ifdef NETIF_ENET1_INIT_FUNC
-        netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET1_INIT_FUNC,
-            ethernet_input);
-#endif
-    }
-
-    netif_set_default(&gnetif);
-    netif_set_up(&gnetif);
-
-    if (chk_lwip_bit(LWIP_PRINT_FLAG)) {
-        lw_notice("\r\n************************************************\r\n");
-        lw_notice(" Network Configuration\r\n");
-        lw_notice("************************************************\r\n");
-        lw_notice(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&net_ipaddr)[0], ((u8_t*)&net_ipaddr)[1],
+        lw_print("\r\n************************************************\r\n");
+        lw_print(" Network Configuration\r\n");
+        lw_print("************************************************\r\n");
+        lw_print(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&net_ipaddr)[0], ((u8_t*)&net_ipaddr)[1],
             ((u8_t*)&net_ipaddr)[2], ((u8_t*)&net_ipaddr)[3]);
-        lw_notice(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&net_netmask)[0], ((u8_t*)&net_netmask)[1],
+        lw_print(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&net_netmask)[0], ((u8_t*)&net_netmask)[1],
             ((u8_t*)&net_netmask)[2], ((u8_t*)&net_netmask)[3]);
-        lw_notice(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&net_gw)[0], ((u8_t*)&net_gw)[1],
+        lw_print(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&net_gw)[0], ((u8_t*)&net_gw)[1],
             ((u8_t*)&net_gw)[2], ((u8_t*)&net_gw)[3]);
-        lw_notice("************************************************\r\n");
+        lw_print("************************************************\r\n");
+
+        lwip_config_input(enet_port, &gnetif);
+        is_init_0 = 1;
+#endif
+
+    } else if (1 == enet_port) {
+        if (is_init_1 == 1) {
+            return;
+        }
+#ifndef NETIF_ENET1_INIT_FUNC
+        lw_print("Not Netif driver for Eport 1\n");
+        return;
+#endif
+#ifdef NETIF_ENET1_INIT_FUNC
+        lw_print("Add netif eport 1\n");
+        netif_add(&gnetif2, &net_ipaddr, &net_netmask, &net_gw, eth_cfg, NETIF_ENET1_INIT_FUNC,
+            tcpip_input);
+
+        // netif_set_default(&gnetif2);
+        netif_set_up(&gnetif2);
+
+        lw_print("\r\n************************************************\r\n");
+        lw_print(" Network Configuration\r\n");
+        lw_print("************************************************\r\n");
+        lw_print(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&net_ipaddr)[0], ((u8_t*)&net_ipaddr)[1],
+            ((u8_t*)&net_ipaddr)[2], ((u8_t*)&net_ipaddr)[3]);
+        lw_print(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&net_netmask)[0], ((u8_t*)&net_netmask)[1],
+            ((u8_t*)&net_netmask)[2], ((u8_t*)&net_netmask)[3]);
+        lw_print(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&net_gw)[0], ((u8_t*)&net_gw)[1],
+            ((u8_t*)&net_gw)[2], ((u8_t*)&net_gw)[3]);
+        lw_print("************************************************\r\n");
+
+        lwip_config_input(enet_port, &gnetif2);
+        is_init_1 = 1;
+#endif
     }
-    lwip_config_input(&gnetif);
 }
