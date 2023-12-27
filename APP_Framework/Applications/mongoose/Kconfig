@@ -1,6 +1,6 @@
 menuconfig USE_MONGOOSE
     bool "Use mongoose as webserver"
-    default y
+    default n
     select BSP_USING_SDIO
     select BSP_USING_W5500
     select BSP_USING_ETHERNET
