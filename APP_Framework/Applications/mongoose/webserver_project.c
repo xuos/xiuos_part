@@ -540,9 +540,11 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
         } else if (mg_http_match_uri(hm, "/net/connect4G")) {
             //enable 4G connect function
             PrivEvenTrigger(wb_event, WB_4G_CONNECT);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else if (mg_http_match_uri(hm, "/net/disconnect4G")) {
             //disable 4G connect function
             PrivEvenTrigger(wb_event, WB_4G_CONNECT);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else if (mg_http_match_uri(hm, "/net/getMQTTInfo")) {
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
                 "{%m:%m, %m:%m, %m:%m, %m:%d, %m:%d}\n",
@@ -561,9 +563,11 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
         } else if (mg_http_match_uri(hm, "/net/connectMQTT")) {
             //enable 4G MQTT connect function
             PrivEvenTrigger(wb_event, WB_MQTT_CONNECT);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else if (mg_http_match_uri(hm, "/net/disconnectMQTT")) {
             //disable 4G MQTT connect function
             PrivEvenTrigger(wb_event, WB_MQTT_DISCONNECT);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         }
         /*define net LoRa info*/
         else if (mg_http_match_uri(hm, "/net/getLoraInfo")) {
@@ -588,9 +592,11 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
         } else if (mg_http_match_uri(hm, "/net/ConnectLora")) {
             //enable LoRa connect function
             PrivEvenTrigger(wb_event, WB_LORA_CONNECT);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else if (mg_http_match_uri(hm, "/net/DisonnectLora")) {
             //disable LoRa connect function
             PrivEvenTrigger(wb_event, WB_LORA_DISCONNECT);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         }
         /*define net Ethernet info*/
         else if (mg_http_match_uri(hm, "/net/getEthernetInfo")) {
@@ -634,15 +640,18 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
         } else if (mg_http_match_uri(hm, "/net/connectEthernet")) {
             //enable Ethernet connect function
             PrivEvenTrigger(wb_event, WB_ETHERNET_CONNECT);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else if (mg_http_match_uri(hm, "/net/disconnectEthernet")) {
             //disable Ethernet connect function
             PrivEvenTrigger(wb_event, WB_ETHERNET_DISCONNECT);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         }
         /*define plc info*/
         else if (mg_http_match_uri(hm, "/control/setPLCInfo")) {
             struct mg_str json = hm->body;
             printf("json: %s\n", json.ptr);
             PlcInfoWriteToSd(json.ptr);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else {
             struct mg_str unknown = mg_str_n("?", 1), *cl;
             struct mg_http_serve_opts opts = { .root_dir = s_root_dir, .ssi_pattern = s_ssi_pattern };
