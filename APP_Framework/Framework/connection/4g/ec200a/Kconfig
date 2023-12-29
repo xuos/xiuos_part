@@ -45,7 +45,7 @@ if ADD_NUTTX_FEATURES
         if ADAPTER_EC200A_USING_PWRKEY
                 config ADAPTER_EC200A_PWRKEY
                         int "EC200A PWRKEY pin number"
-                        default "97"
+                        default "144"
 
                 config ADAPTER_EC200A_PIN_DRIVER
                         string "EC200A device pin driver path"
@@ -75,7 +75,8 @@ endif
 if ADD_RTTHREAD_FEATURES
         config ADAPTER_EC200A_PWRKEY
                 int "EC200A PWRKEY pin number"
-                default "97"
+                default "144"
+        
         config ADAPTER_EC200A_PIN_DRIVER
                 string "EC200A device pin driver path"
                 default "/dev/pin_dev"

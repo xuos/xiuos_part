@@ -63,7 +63,7 @@ static void Ec200aPowerSet(void)
     pin_stat.val = GPIO_HIGH;
     PrivWrite(pin_fd, &pin_stat, 1);
 
-    PrivTaskDelay(600);//at least 500ms
+    PrivTaskDelay(600); //at least 500ms
 
     pin_stat.val = GPIO_LOW;
     PrivWrite(pin_fd, &pin_stat, 1);
@@ -112,7 +112,7 @@ static int Ec200aClose(struct Adapter *adapter)
         return -1;
     }
 
-    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);  //'O', 'K'
 
     /*step1: serial write "+++", quit transparent mode*/
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
@@ -200,7 +200,7 @@ static int Ec200aConnect(struct Adapter *adapter, enum NetRoleType net_role, con
 
     /*step2: serial write "AT+CCID", get SIM ID*/
     for(try = 0; try < TRY_TIMES; try++){
-        ret = AtCmdConfigAndCheck(adapter->agent, EC200A_GET_CCID_CMD, EC200A_OK_REPLY);
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200A_GET_QCCID_CMD, EC200A_OK_REPLY);
         if (ret == 0) {
             break;
         }
@@ -222,7 +222,7 @@ static int Ec200aConnect(struct Adapter *adapter, enum NetRoleType net_role, con
 
     /*step4: serial write "AT+CREG?", check whether registered to GSM net*/
     for(try = 0; try < TRY_TIMES; try++){
-        ret = AtCmdConfigAndCheck(adapter->agent, EC200A_GET_CREG_CMD, EC200A_CREG_REPLY);
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200A_GET_CEREG_CMD, EC200A_CREG_REPLY);
         if (ret == 0) {
             break;
         }
