@@ -1,3 +1,19 @@
+menuconfig BSP_USING_ADC
+    bool "Using ADC device"
+    default n
+    select RESOURCES_ADC
+    if BSP_USING_ADC
+        source "$BSP_DIR/third_party_driver/adc/Kconfig"
+    endif
+
+menuconfig BSP_USING_DAC
+    bool "Using DAC device"
+    default n
+    select RESOURCES_DAC
+    if BSP_USING_DAC
+        source "$BSP_DIR/third_party_driver/dac/Kconfig"
+    endif
+
 menuconfig BSP_USING_UART
     bool "Using UART device"
     default y
