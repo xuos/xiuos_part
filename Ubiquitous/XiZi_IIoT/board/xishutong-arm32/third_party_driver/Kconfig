@@ -14,6 +14,14 @@ menuconfig BSP_USING_DAC
         source "$BSP_DIR/third_party_driver/dac/Kconfig"
     endif
 
+menuconfig BSP_USING_CAN
+    bool "Using CAN device"
+    default n
+    select RESOURCES_CAN
+    if BSP_USING_CAN
+        source "$BSP_DIR/third_party_driver/can/Kconfig"
+    endif
+
 menuconfig BSP_USING_UART
     bool "Using UART device"
     default y
@@ -60,6 +68,14 @@ menuconfig BSP_USING_SDIO
     select RESOURCES_SDIO
     if BSP_USING_SDIO
         source "$BSP_DIR/third_party_driver/sdio/Kconfig"
+    endif
+
+menuconfig BSP_USING_USB
+    bool "Using USB device"
+    default n
+    select RESOURCES_USB
+    if BSP_USING_USB
+        source "$BSP_DIR/third_party_driver/usb/Kconfig"
     endif
 
 menuconfig BSP_USING_SPI
