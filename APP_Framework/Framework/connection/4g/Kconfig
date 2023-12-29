@@ -8,9 +8,8 @@ endif
 
 config ADAPTER_EC200A
         bool "Using 4G adapter device EC200A"
-        default y
+        default n
 
 if ADAPTER_EC200A
     source "$APP_DIR/Framework/connection/4g/ec200a/Kconfig"
 endif
-                

@@ -13,9 +13,9 @@
 /**
  * @file ec200a.c
  * @brief Implement the connection 4G adapter function, using EC200A device
- * @version 1.0
+ * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2023.11.23
+ * @date 2023.12.22
  */
 
 #include <adapter.h>

@@ -22,7 +22,7 @@
 #include <transform.h>
 #ifdef ADD_XIZI_FEATURES
 
-#define BSP_LED_PIN 29
+#define BSP_LED_PIN 134
 #define NULL_PARAMETER 0
 
 static uint16_t pin_fd=0;
@@ -30,6 +30,7 @@ static struct PinStat pin_led;
 
 void LedFlip(void *parameter)
 {
+    printf("%s val %d time %d\n", __func__, pin_led.val, PrivGetTickTime());
     pin_led.pin = BSP_LED_PIN;
     pin_led.val = !pin_led.val;
     PrivWrite(pin_fd, &pin_led, NULL_PARAMETER);
@@ -37,7 +38,7 @@ void LedFlip(void *parameter)
 
 void TestHwTimer(void)
 {
-    x_ticks_t period = 1;
+    uint32_t period_ms = 500;
     
     pin_fd = PrivOpen(HWTIMER_PIN_DEV_DRIVER, O_RDWR);
     if(pin_fd<0) {
@@ -75,7 +76,7 @@ void TestHwTimer(void)
         return;
     }    
 
-    ioctl_cfg.args = (void *)&period;
+    ioctl_cfg.args = (void *)&period_ms;
     if (0 != PrivIoctl(timer_fd, OPE_CFG, &ioctl_cfg)) {
         printf("timer pin fd error %d\n", pin_fd);
         PrivClose(pin_fd);

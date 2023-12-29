@@ -28,7 +28,7 @@ Author: AIIT XUOS Lab
 Modification:
 1. support xishutong-arm32-board spi configure, write and read
 2. support xishutong-arm32-board spi bus device and driver register
-3. SPI1 for W5500, SPI6 using J12-pin-header to connect
+3. SPI1 for W5500, SPI2 using J12-pin-header to connect
 *************************************************/
 
 #include <connect_spi.h>
@@ -36,48 +36,48 @@ Modification:
 #define SPI1_MASTER_SLAVE_MODE (SPI_MASTER)
 
 /* SPI1 definition */
-#define SPI1_UNIT (CM_SPI1)
-#define SPI1_CLK (FCG1_PERIPH_SPI1)
+#define SPI1_UNIT                   (CM_SPI1)
+#define SPI1_CLK                    (FCG1_PERIPH_SPI1)
 
 /* CS = PG3 */
-#define SPI1_SS_PORT (GPIO_PORT_G)
-#define SPI1_SS_PIN (GPIO_PIN_03)
+#define SPI1_SS_PORT                (GPIO_PORT_G)
+#define SPI1_SS_PIN                 (GPIO_PIN_03)
 /* SCLK = PG5 */
-#define SPI1_SCK_PORT (GPIO_PORT_G)
-#define SPI1_SCK_PIN (GPIO_PIN_05)
-#define SPI1_SCK_FUNC (GPIO_FUNC_40)
+#define SPI1_SCK_PORT               (GPIO_PORT_G)
+#define SPI1_SCK_PIN                (GPIO_PIN_05)
+#define SPI1_SCK_FUNC               (GPIO_FUNC_40)
 /* MOSI = PG4 */
-#define SPI1_MOSI_PORT (GPIO_PORT_G)
-#define SPI1_MOSI_PIN (GPIO_PIN_04)
-#define SPI1_MOSI_FUNC (GPIO_FUNC_41)
+#define SPI1_MOSI_PORT              (GPIO_PORT_G)
+#define SPI1_MOSI_PIN               (GPIO_PIN_04)
+#define SPI1_MOSI_FUNC              (GPIO_FUNC_41)
 /* MISO = PG6 */
-#define SPI1_MISO_PORT (GPIO_PORT_G)
-#define SPI1_MISO_PIN (GPIO_PIN_06)
-#define SPI1_MISO_FUNC (GPIO_FUNC_42)
+#define SPI1_MISO_PORT              (GPIO_PORT_G)
+#define SPI1_MISO_PIN               (GPIO_PIN_06)
+#define SPI1_MISO_FUNC              (GPIO_FUNC_42)
 
-#define SPI1_DEVICE_SLAVE_ID_0 0
+#define SPI1_DEVICE_SLAVE_ID_0      0
 
-/* SPI6 definition */
-#define SPI6_UNIT (CM_SPI6)
-#define SPI6_CLK (FCG1_PERIPH_SPI6)
+/* SPI2 definition */
+#define SPI2_UNIT                   (CM_SPI2)
+#define SPI2_CLK                    (FCG1_PERIPH_SPI2)
 
-/* SS = PE02 */
-#define SPI6_SS_PORT (GPIO_PORT_E)
-#define SPI6_SS_PIN (GPIO_PIN_02)
-/* SCK = PE03 */
-#define SPI6_SCK_PORT (GPIO_PORT_E)
-#define SPI6_SCK_PIN (GPIO_PIN_03)
-#define SPI6_SCK_FUNC (GPIO_FUNC_46)
-/* MOSI = PE04 */
-#define SPI6_MOSI_PORT (GPIO_PORT_E)
-#define SPI6_MOSI_PIN (GPIO_PIN_04)
-#define SPI6_MOSI_FUNC (GPIO_FUNC_47)
-/* MISO = PE05 */
-#define SPI6_MISO_PORT (GPIO_PORT_E)
-#define SPI6_MISO_PIN (GPIO_PIN_05)
-#define SPI6_MISO_FUNC (GPIO_FUNC_48)
+/* SS = PI01 */
+#define SPI2_SS_PORT                (GPIO_PORT_I)
+#define SPI2_SS_PIN                 (GPIO_PIN_01)
+/* SCK = PH14 */
+#define SPI2_SCK_PORT               (GPIO_PORT_H)
+#define SPI2_SCK_PIN                (GPIO_PIN_14)
+#define SPI2_SCK_FUNC               (GPIO_FUNC_43)
+/* MOSI = PH15 */
+#define SPI2_MOSI_PORT              (GPIO_PORT_H)
+#define SPI2_MOSI_PIN               (GPIO_PIN_15)
+#define SPI2_MOSI_FUNC              (GPIO_FUNC_44)
+/* MISO = PI0 */
+#define SPI2_MISO_PORT              (GPIO_PORT_I)
+#define SPI2_MISO_PIN               (GPIO_PIN_00)
+#define SPI2_MISO_FUNC              (GPIO_FUNC_45)
 
-#define SPI6_DEVICE_SLAVE_ID_0 0
+#define SPI2_DEVICE_SLAVE_ID_0      0
 
 static void HwSpiEnable(CM_SPI_TypeDef* SPIx)
 {
@@ -148,20 +148,20 @@ static uint32 SpiSdkInit(struct SpiDriver* spi_drv)
     SPI_Cmd(SPI1_UNIT, ENABLE);
 #endif
 
-#ifdef BSP_USING_SPI6
+#ifdef BSP_USING_SPI2
     /* Configure Port */
     (void)GPIO_StructInit(&stcGpioInit);
     stcGpioInit.u16PinState = PIN_STAT_RST;
     stcGpioInit.u16PinDir = PIN_DIR_OUT;
-    (void)GPIO_Init(SPI6_SS_PORT, SPI6_SS_PIN, &stcGpioInit);
-    GPIO_SetPins(SPI6_SS_PORT, SPI6_SS_PIN);
+    (void)GPIO_Init(SPI2_SS_PORT, SPI2_SS_PIN, &stcGpioInit);
+    GPIO_SetPins(SPI2_SS_PORT, SPI2_SS_PIN);
 
-    GPIO_SetFunc(SPI6_SCK_PORT, SPI6_SCK_PIN, SPI6_SCK_FUNC);
-    GPIO_SetFunc(SPI6_MOSI_PORT, SPI6_MOSI_PIN, SPI6_MOSI_FUNC);
-    GPIO_SetFunc(SPI6_MISO_PORT, SPI6_MISO_PIN, SPI6_MISO_FUNC);
+    GPIO_SetFunc(SPI2_SCK_PORT, SPI2_SCK_PIN, SPI2_SCK_FUNC);
+    GPIO_SetFunc(SPI2_MOSI_PORT, SPI2_MOSI_PIN, SPI2_MOSI_FUNC);
+    GPIO_SetFunc(SPI2_MISO_PORT, SPI2_MISO_PIN, SPI2_MISO_FUNC);
 
     /* Configuration SPI */
-    FCG_Fcg1PeriphClockCmd(SPI6_CLK, ENABLE);
+    FCG_Fcg1PeriphClockCmd(SPI2_CLK, ENABLE);
     SPI_StructInit(&stcSpiInit);
 
     stcSpiInit.u32WireMode = SPI_4_WIRE;
@@ -195,8 +195,8 @@ static uint32 SpiSdkInit(struct SpiDriver* spi_drv)
 
     stcSpiInit.u32FrameLevel = SPI_1_FRAME;
 
-    (void)SPI_Init(SPI6_UNIT, &stcSpiInit);
-    SPI_Cmd(SPI6_UNIT, ENABLE);
+    (void)SPI_Init(SPI2_UNIT, &stcSpiInit);
+    SPI_Cmd(SPI2_UNIT, ENABLE);
 #endif
 
     return EOK;
@@ -414,30 +414,30 @@ static int BoardSpiDevBend(void)
     }
 #endif
 
-#ifdef SPI_6_DEVICE_NAME_0
-    static struct SpiHardwareDevice spi6_device0;
-    memset(&spi6_device0, 0, sizeof(struct SpiHardwareDevice));
+#ifdef SPI_2_DEVICE_NAME_0
+    static struct SpiHardwareDevice spi2_device0;
+    memset(&spi2_device0, 0, sizeof(struct SpiHardwareDevice));
 
-    static struct SpiSlaveParam spi6_slaveparam0;
-    memset(&spi6_slaveparam0, 0, sizeof(struct SpiSlaveParam));
+    static struct SpiSlaveParam spi2_slaveparam0;
+    memset(&spi2_slaveparam0, 0, sizeof(struct SpiSlaveParam));
 
-    spi6_slaveparam0.spi_slave_id = SPI1_DEVICE_SLAVE_ID_0;
-    spi6_slaveparam0.spi_cs_gpio_pin = SPI6_SS_PIN;
-    spi6_slaveparam0.spi_cs_gpio_port = SPI6_SS_PORT;
+    spi2_slaveparam0.spi_slave_id = SPI1_DEVICE_SLAVE_ID_0;
+    spi2_slaveparam0.spi_cs_gpio_pin = SPI2_SS_PIN;
+    spi2_slaveparam0.spi_cs_gpio_port = SPI2_SS_PORT;
 
-    spi6_device0.spi_param.spi_slave_param = &spi6_slaveparam0;
+    spi2_device0.spi_param.spi_slave_param = &spi2_slaveparam0;
 
-    spi6_device0.spi_dev_done = &(spi_dev_done);
+    spi2_device0.spi_dev_done = &(spi_dev_done);
 
-    ret = SpiDeviceRegister(&spi6_device0, (void*)(&spi6_device0.spi_param), SPI_6_DEVICE_NAME_0);
+    ret = SpiDeviceRegister(&spi2_device0, (void*)(&spi2_device0.spi_param), SPI_2_DEVICE_NAME_0);
     if (EOK != ret) {
-        KPrintf("BoardSpiDevBend SpiDeviceRegister device %s error %d\n", SPI_6_DEVICE_NAME_0, ret);
+        KPrintf("BoardSpiDevBend SpiDeviceRegister device %s error %d\n", SPI_2_DEVICE_NAME_0, ret);
         return ERROR;
     }
 
-    ret = SpiDeviceAttachToBus(SPI_6_DEVICE_NAME_0, SPI_BUS_NAME_6);
+    ret = SpiDeviceAttachToBus(SPI_2_DEVICE_NAME_0, SPI_BUS_NAME_2);
     if (EOK != ret) {
-        KPrintf("BoardSpiDevBend SpiDeviceAttachToBus device %s error %d\n", SPI_6_DEVICE_NAME_0, ret);
+        KPrintf("BoardSpiDevBend SpiDeviceAttachToBus device %s error %d\n", SPI_2_DEVICE_NAME_0, ret);
         return ERROR;
     }
 #endif
@@ -467,17 +467,17 @@ int HwSpiInit(void)
 
 #endif
 
-#ifdef BSP_USING_SPI6
-    static struct SpiBus spi6_bus;
-    memset(&spi6_bus, 0, sizeof(struct SpiBus));
+#ifdef BSP_USING_SPI2
+    static struct SpiBus spi2_bus;
+    memset(&spi2_bus, 0, sizeof(struct SpiBus));
 
-    static struct SpiDriver spi6_driver;
-    memset(&spi6_driver, 0, sizeof(struct SpiDriver));
+    static struct SpiDriver spi2_driver;
+    memset(&spi2_driver, 0, sizeof(struct SpiDriver));
 
-    spi6_bus.private_data = SPI6_UNIT;
-    spi6_driver.configure = SpiDrvConfigure;
+    spi2_bus.private_data = SPI2_UNIT;
+    spi2_driver.configure = SpiDrvConfigure;
 
-    ret = BoardSpiBusInit(&spi6_bus, &spi6_driver, SPI_BUS_NAME_6, SPI_6_DRV_NAME);
+    ret = BoardSpiBusInit(&spi2_bus, &spi2_driver, SPI_BUS_NAME_2, SPI_2_DRV_NAME);
     if (EOK != ret) {
         KPrintf("BoardSpiBusInit error ret %u\n", ret);
         return ERROR;
