@@ -12,3 +12,18 @@ menuconfig BSP_USING_UART1
                 string "serial bus  device name"
                 default "uart1_dev1"   
     endif
+
+menuconfig BSP_USING_UART2
+    bool "Enable UART2"
+    default y
+    if BSP_USING_UART2
+        config SERIAL_BUS_NAME_2
+            string "serial bus  name"
+            default "uart2"
+        config SERIAL_DRV_NAME_2
+            string "serial bus  driver name"
+            default "uart2_drv"
+        config SERIAL_2_DEVICE_NAME_0
+                string "serial bus  device name"
+                default "uart2_dev2"   
+    endif

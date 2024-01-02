@@ -57,15 +57,23 @@ static uint32_t _SysTick_Config(uint32_t ticks)
 /**
  * This function will initial your board.
  */
+
+extern RxBuffer2;
+extern uint16_t UART_ReceiveData(USART_TypeDef* USARTx);
 void InitBoardHardware()
 {
-    USART_Printf_Init(115200);
+    // USART_Printf_Init(115200);
     /* System Tick Configuration */
     _SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
     /* initialize memory system */
     InitBoardMemory(MEMORY_START_ADDRESS, (void*)MEMORY_END_ADDRESS);
     InitHwUart();
+#ifdef BSP_USING_UART1
     InstallConsole("uart1", "uart1_drv", "uart1_dev1");
+#endif
+    // #ifdef BSP_USING_UART2
+    //     InstallConsole("uart2", "uart2_drv", "uart2_dev2");
+    // #endif
 
 #ifdef BSP_USING_ETH
     InitHwEth();
@@ -78,4 +86,10 @@ void InitBoardHardware()
 
     KPrintf("board init done.\n");
     KPrintf("start okernel...\n");
+    while (1) {
+        uint16_t ans = UART_ReceiveData(USART3);
+        KPrintf("%d\n", ans);
+        for (int i = 0; i < 1000; i++)
+            ;
+    }
 }
