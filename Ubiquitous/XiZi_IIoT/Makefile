@@ -50,7 +50,7 @@ export SRC_DIR:= $(SRC_APP_DIR) $(SRC_KERNEL_DIR)
 export LIBCC 
 export MUSL_DIR := $(KERNEL_ROOT)/lib/musllib
 export LWIP_DIR := $(KERNEL_ROOT)/resources/ethernet
-export MONGOOSE_DIR := $(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose/lib
+export MONGOOSE_DIR := $(KERNEL_ROOT)/../../APP_Framework/Applications/webserver/lib
 
 PART:=
 
@@ -73,10 +73,6 @@ endif
 
 ifeq ($(CONFIG_RESOURCES_LWIP), y)
 PART += COMPILE_LWIP
-endif
-
-ifeq ($(CONFIG_USE_MONGOOSE), y)
-# PART += COMPILE_MONGOOSE
 endif
 
 ifeq ($(CONFIG_MCUBOOT_BOOTLOADER), y)
@@ -141,7 +137,7 @@ COMPILE_MONGOOSE:
        done
 	@cp link_mongoose.mk build/Makefile
 	@$(MAKE) -C build TARGET=mongoose.a LINK_FLAGS=LFLAGS
-	@cp build/mongoose.a $(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose/mongoose.a
+	@cp build/mongoose.a $(KERNEL_ROOT)/../../APP_Framework/Applications/webserver/mongoose.a
 	@rm build/Makefile build/make.obj
 
 COMPILE_KERNEL:

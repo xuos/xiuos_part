@@ -15,8 +15,8 @@ ifeq ($(CONFIG_RESOURCES_LWIP), y)
 export LINK_LWIP := $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
 endif
 
-ifeq ($(CONFIG_USE_MONGOOSE), y)
-export LINK_MONGOOSE := $(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose/mongoose.a
+ifeq ($(CONFIG_APPLICATION_WEBSERVER), y)
+export LINK_MONGOOSE := $(KERNEL_ROOT)/../../APP_Framework/Applications/webserver/mongoose.a
 endif
 
 export ARCH = arm

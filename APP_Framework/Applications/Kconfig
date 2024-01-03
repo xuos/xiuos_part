@@ -20,5 +20,5 @@ menu "Applications"
     source "$APP_DIR/Applications/sensor_app/Kconfig"
     source "$APP_DIR/Applications/embedded_database_app/Kconfig"
     source "$APP_DIR/Applications/webnet/Kconfig"
-    source "$APP_DIR/Applications/mongoose/Kconfig"
+    source "$APP_DIR/Applications/webserver/Kconfig"
 endmenu
