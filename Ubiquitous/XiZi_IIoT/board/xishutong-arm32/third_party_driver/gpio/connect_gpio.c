@@ -303,7 +303,7 @@ static int GpioPinIndex(uint16_t pin)
     int ret = 0;
     for (; ret <= MAX_PIN_INDEX; ret++) { // ret must be 16-bit
         if ((0x0001U << ret) & pin) {
-            KPrintf("the int pin is %d\n", ret);
+            // KPrintf("the int pin is %d\n", ret);
             return ret;
         }
     };

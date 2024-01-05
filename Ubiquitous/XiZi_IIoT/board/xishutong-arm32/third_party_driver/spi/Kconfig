@@ -15,19 +15,27 @@ if BSP_USING_SPI
             default "spi1_drv"
     endif   
 
-    config BSP_USING_SPI6
-    bool "Using spi6"
-    default n
+    config BSP_USING_SPI2
+    bool "Using spi2 for E22 LoRa"
+    default y
 
-    if BSP_USING_SPI6
-        config SPI_BUS_NAME_6
-            string "spi bus 6 name"
-            default "spi6"
-        config SPI_6_DEVICE_NAME_0
-            string "spi bus 6 device 0 name"
-            default "spi6_dev0" 
-        config SPI_6_DRV_NAME
-            string "spi bus 6 driver name"
-            default "spi6_drv"
+    if BSP_USING_SPI2
+        config SPI_BUS_NAME_2
+            string "spi bus 2 name"
+            default "spi2"
+        config SPI_2_DEVICE_NAME_0
+            string "spi bus 2 device 0 name"
+            default "spi2_dev0" 
+        config SPI_2_DRV_NAME
+            string "spi bus 2 driver name"
+            default "spi2_drv"
+        menuconfig RESOURCES_SPI_LORA
+            bool "Using spi lora function"
+            default n
+            if RESOURCES_SPI_LORA
+                config SX12XX_DEVICE_NAME
+                string "SX1276 lora device name"
+                default "spi2_lora"
+            endif
     endif  
 endif

@@ -75,6 +75,7 @@ Modification:
 
 static stc_sd_handle_t gSdHandle;
 static int sd_lock = -1;
+static int is_mount_ok = 0;
 
 static void SdCardConfig(void)
 {
@@ -213,11 +214,13 @@ static struct SdioDevDone dev_done = {
  */
 static int MountSDCardFs(enum FilesystemType fs_type)
 {
-    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, fs_type, "/") == 0)
-        KPrintf("Sd card mount to '/'");
-    else
-        KPrintf("Sd card mount to '/' failed!");
-
+    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, fs_type, "/") == 0) {
+        KPrintf("Sd card mount to '/'\n");
+        is_mount_ok = 1;
+    } else {
+        KPrintf("Sd card mount to '/' failed!\n");
+        is_mount_ok = 0;
+    }
     return 0;
 }
 #endif
@@ -252,7 +255,15 @@ static void SdCardDetach(void)
 
 #ifdef MOUNT_SDCARD_FS
     UnmountFileSystem("/");
+    is_mount_ok = 0;
 #endif
+}
+
+int GetSdMountStatus(void)
+{
+    if(!is_mount_ok) 
+        KPrintf("SD card is not inserted or failed to mount, please check!\r\n");
+    return is_mount_ok;
 }
 
 static uint8 SdCardReadCd(void)
@@ -291,7 +302,7 @@ int MountSDCard()
 {
     int sd_card_task = 0;
     sd_card_task = KTaskCreate("sd_card", SdCardTask, NONE,
-        SD_CARD_STACK_SIZE, 8);
+        SD_CARD_STACK_SIZE, 17);
     if (sd_card_task < 0) {
         KPrintf("sd_card_task create failed ...%s %d.\n", __FUNCTION__, __LINE__);
         return ERROR;

@@ -20,12 +20,11 @@
 
 #include <connect_hwtimer.h>
 
-#define TMR0_CMP_VAL 1000
+#define TMR0_CMP_VAL                   (100000000U / 1024U / 2 - 1U)  
 #define TMR0x                          ((CM_TMR0_TypeDef *)CM_TMR0_1_BASE)
 #define TMR0_CH_x                      (TMR0_CH_A)
 #define INTSEL_REG                     ((uint32_t)(&CM_INTC->SEL0))
 #define TIMER0_IRQn                    (18)
-
 
 void (*callback_function)(void *) ;
 
@@ -47,10 +46,10 @@ static uint32 HwtimerOpen(void *dev)
 
     /* TIMER0 basetimer function initialize */
     (void)TMR0_StructInit(&stcTmr0Init);
-    stcTmr0Init.u32ClockDiv = TMR0_CLK_DIV128;        /* Config clock division */
-    stcTmr0Init.u32ClockSrc = TMR0_CLK_SRC_INTERN_CLK;          /* Chose clock source */
-    stcTmr0Init.u32Func = TMR0_FUNC_CMP;            /* Timer0 compare mode */
-    stcTmr0Init.u16CompareValue = TMR0_CMP_VAL;             /* Set compare register data */
+    stcTmr0Init.u32ClockDiv = TMR0_CLK_DIV1024;         /* Config clock division */
+    stcTmr0Init.u32ClockSrc = TMR0_CLK_SRC_INTERN_CLK; /* Chose clock source */
+    stcTmr0Init.u32Func = TMR0_FUNC_CMP;               /* Timer0 compare mode */
+    stcTmr0Init.u16CompareValue = TMR0_CMP_VAL;        /* Set compare register data */
     (void)TMR0_Init(TMR0x, TMR0_CH_x, &stcTmr0Init);
 
     // DelayKTask(1);
@@ -98,7 +97,8 @@ static uint32 HwtimerDrvConfigure(void *drv, struct BusConfigureInfo *configure_
             break;
         case OPE_CFG:
             TMR0_ClearStatus(TMR0x, TMR0_FLAG_CMP_A);
-            TMR0_SetCompareValue(TMR0x, TMR0_CH_x, *((int *)configure_info->private_data) );
+            uint32_t cmp_value = *((uint32_t *)configure_info->private_data) * 100;//1ms 100, max 655ms 65535 
+            TMR0_SetCompareValue(TMR0x, TMR0_CH_x, (uint16_t)cmp_value);
             /* Timer0 interrupt function Enable */
             TMR0_SetCountValue(TMR0x, TMR0_CH_x, 0x0000); 
             TMR0_Start(TMR0x, TMR0_CH_x);
