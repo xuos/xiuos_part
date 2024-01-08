@@ -74,7 +74,22 @@ void InitIdleKTask(void)
     char ktaskidle[NAME_NUM_MAX] = {0};
 
     for (coreid = 0; coreid < CORE_NUM; coreid++) {
+
+    #ifdef BOARD_RZV2L_M33
+        char * name_str = "ktaskidle-";
+
+        char ch_coreid_id = 0x30 + coreid;
+        int str_len = strlen(name_str);
+
+        for (int i = 0; i < str_len; i++)
+        {
+            ktaskidle[i] = name_str[i];
+        }
+
+        ktaskidle[str_len] = ch_coreid_id;
+    #else
         sprintf(ktaskidle, "ktaskidle%d", coreid);
+    #endif
 
         idle[coreid] = KTaskCreate(ktaskidle,IdleKTaskEntry,NONE,IDLE_KTASK_STACKSIZE,KTASK_LOWEST_PRIORITY);
 
