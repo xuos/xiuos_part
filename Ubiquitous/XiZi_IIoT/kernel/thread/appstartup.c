@@ -35,7 +35,18 @@ extern int main(void);
 void MainKTaskFunction(void *parameter)
 {  
 #if defined(__ICCARM__) || defined(__GNUC__)
+
+#ifdef BOARD_RZV2L_M33
+    while (1)
+    {
+        for (int i = 0; i < 100000; i++) {}
+        KPrintf("Hello World - RZV2L-M33!\n");
+    } 
+#else
     main();
+
+#endif
+
 #endif
 }
 #endif
