@@ -3,7 +3,6 @@ config ADAPTER_4G_EC200A
         default "ec200a"
 
 if ADD_XIZI_FEATURES
-<<<<<<< HEAD
         config ADAPTER_EC200A_USING_PWRKEY
                 bool "EC200A using PWRKEY pin number"
                 default n
@@ -103,10 +102,3 @@ if ADD_RTTHREAD_FEATURES
 
 
 endif
-=======
-        config ADAPTER_EC200A_DRIVER
-                string "EC200A device uart driver path"
-                default "/dev/usart6_dev6"
-endif
-
->>>>>>> upstream/prepare_for_master
