@@ -24,12 +24,13 @@
 #define EC200A_AT_MODE_CMD          "+++"
 #define EC200A_GET_QCCID_CMD         "AT+QCCID\r\n"
 #define EC200A_GET_CPIN_CMD         "AT+CPIN?\r\n"
-#define EC200A_GET_CEREG_CMD         "AT+CEREG?\r\n"
-#define EC200A_OPEN_SOCKET_CMD      "AT+QIOPEN=1,%u"
-#define EC200A_CLOSE_SOCKET_CMD     "AT+QICLOSE=%u\r\n"
+#define EC200A_GET_CREG_CMD         "AT+CREG?\r\n"
+#define EC200A_CFG_TCP_CMD          "AT+QICSGP"
 #define EC200A_ACTIVE_PDP_CMD       "AT+QIACT=1\r\n"
 #define EC200A_DEACTIVE_PDP_CMD     "AT+QIDEACT=1\r\n"
-#define EC200A_CFG_TCP_CMD          "AT+QICSGP"
+#define EC200A_OPEN_SOCKET_CMD      "AT+QIOPEN=1,%u"
+#define EC200A_CLOSE_SOCKET_CMD     "AT+QICLOSE=%u\r\n"
+#define EC200A_CLOSE                "AT+QPOWD"
 
 #define EC200A_OK_REPLY             "OK"
 #define EC200A_READY_REPLY          "READY"
@@ -60,12 +61,12 @@ static void Ec200aPowerSet(void)
 
     struct PinStat pin_stat;
     pin_stat.pin = ADAPTER_EC200A_PWRKEY;
-    pin_stat.val = GPIO_HIGH;
+    pin_stat.val = GPIO_LOW; //put power key at low-level state
     PrivWrite(pin_fd, &pin_stat, 1);
 
-    PrivTaskDelay(600); //at least 500ms
+    PrivTaskDelay(2500); //wait at least 2s
 
-    pin_stat.val = GPIO_LOW;
+    pin_stat.val = GPIO_HIGH; //put power key at high-level state
     PrivWrite(pin_fd, &pin_stat, 1);
 
     PrivClose(pin_fd);
@@ -133,11 +134,12 @@ static int Ec200aClose(struct Adapter *adapter)
     }
 
 out:
-    /*step4: close ec200a serial port*/
-    PrivClose(adapter->fd);
+    /*step4: power down ec200a*/
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200A_CLOSE, EC200A_OK_REPLY);
+    PrivTaskDelay(12500); //wait at least 12s
 
-    /*step5: power down ec200a*/
-    Ec200aPowerSet();
+     /*step5: close ec200a serial port*/
+    PrivClose(adapter->fd);
     
     return ret;
 }
@@ -196,7 +198,9 @@ static int Ec200aConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
 
     /*step1: serial write "+++", quit transparent mode*/
+    PrivTaskDelay(1500); //before +++ command, wait at least 1s
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
+    PrivTaskDelay(1500); //after +++ command, wait at least 1s
 
     /*step2: serial write "AT+CCID", get SIM ID*/
     for(try = 0; try < TRY_TIMES; try++){
@@ -221,8 +225,10 @@ static int Ec200aConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     }
 
     /*step4: serial write "AT+CREG?", check whether registered to GSM net*/
+    PrivTaskDelay(1000); //before CREG command, wait 1s
+
     for(try = 0; try < TRY_TIMES; try++){
-        ret = AtCmdConfigAndCheck(adapter->agent, EC200A_GET_CEREG_CMD, EC200A_CREG_REPLY);
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200A_GET_CREG_CMD, EC200A_CREG_REPLY);
         if (ret == 0) {
             break;
         }
@@ -312,7 +318,7 @@ static int Ec200aConnect(struct Adapter *adapter, enum NetRoleType net_role, con
 
 out:
     ADAPTER_DEBUG("Ec200a connect TCP failed. Power down\n");
-    Ec200aPowerSet();
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200A_CLOSE, EC200A_OK_REPLY);
     return -1;
 }
 
@@ -345,7 +351,9 @@ static int Ec200aDisconnect(struct Adapter *adapter)
     AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
     
     /*step1: serial write "+++", quit transparent mode*/
+    PrivTaskDelay(1500); //before +++ command, wait at least 1s
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
+    PrivTaskDelay(1500); //after +++ command, wait at least 1s
 
     /*step2: serial write "AT+QICLOSE", close socket connect before open socket*/
     memset(ec200a_cmd, 0, sizeof(ec200a_cmd));
@@ -361,7 +369,7 @@ static int Ec200aDisconnect(struct Adapter *adapter)
 
 out:
     ADAPTER_DEBUG("Ec200a disconnect TCP failed. Power down\n");
-    Ec200aPowerSet();
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200A_CLOSE, EC200A_OK_REPLY);
     return -1;
 }
 

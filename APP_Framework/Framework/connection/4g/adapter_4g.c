@@ -128,8 +128,8 @@ int Adapter4GTest(void)
 
 #ifdef ADAPTER_EC200A
     /* Using Public TCP server to  test 4G Socket connection */
-    uint8 server_addr[64] = "120.76.100.197";
-    uint8 server_port[64] = "10002";
+    uint8 server_addr[64] = "xyheqmx.e3.luyouxia.net";
+    uint8 server_port[64] = "13333";
 
     adapter->socket.socket_id = 0;
 
