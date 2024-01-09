@@ -20,18 +20,18 @@
 
 /**
 * @file usb_host_user.c
-* @brief support edu-arm32-board usb function
-* @version 2.0 
+* @brief support xishutong-arm32-board usb function
+* @version 3.0 
 * @author AIIT XUOS Lab
-* @date 2022-11-07
+* @date 2023-12-29
 */
 
 /*************************************************
 File name: usb_host_user.c
-Description: support edu-arm32-board usb function
+Description: support xishutong-arm32-board usb function
 Others: 
 History: 
-1. Date: 2022-11-07
+1. Date: 2023-12-29
 Author: AIIT XUOS Lab
 Modification: 
 1. delete useless usb host configure and define

@@ -25,6 +25,11 @@ History:
 Author: AIIT XUOS Lab
 Modification: 
 1、support xishutong-arm32 board, using W5500 to support webserver.
+
+2. Date: 2024-1-3
+Author: AIIT XUOS Lab
+Modification: 
+1、support xishutong board(single ethernet port), using MAC to support webserver
 *************************************************/
 
 
@@ -34,7 +39,9 @@ Modification:
 #include <sys_arch.h>
 #include <lwip/sockets.h>
 #include "lwip/sys.h"
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
 #include <adapter.h>
+#endif
 
 /*******************************************************************************
  * Local variable definitions ('static')
@@ -72,9 +79,17 @@ static unsigned int status = 0;
 static pthread_t wb_event_task;
 
 /*define device info*/
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
 static const char* device_name = "矽数通4G"; 
 static const char* device_type = "xishutong-arm32";
 static const char* device_serial_num = "123456789";
+#endif
+
+#ifdef APPLICATION_WEBSERVER_XISHUTONG
+static const char* device_name = "矽数通"; 
+static const char* device_type = "xishutong-arm32";
+static const char* device_serial_num = "123456789";
+#endif
 
 /*define webserver info*/
 static struct webserver_config {
@@ -231,6 +246,7 @@ static void Rs485Configure(int baud_rate, int data_bit, int stop_bit, int parity
 /*******************************************************************************
  * Function implementation - define net 4G info
  ******************************************************************************/
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
 static void Net4gGetInfo(char *ip, char *operator, char *signal_strength)
 {
     //to do
@@ -265,6 +281,7 @@ static void NetMqttDisconnect(void)
 {
     //to do
 }
+#endif
 
 /*******************************************************************************
  * Function implementation - define net LoRa info
@@ -295,6 +312,7 @@ static void NetLoraDisconnect(void)
 /*******************************************************************************
  * Function implementation - define net Ethernet info
  ******************************************************************************/
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
 static void TcpClientConnect(void)
 {
     int cnt = 20;
@@ -372,6 +390,7 @@ static void TcpClientDisconnect(void)
     closesocket(socket_fd);
     net_ethernet_info.connect_status = 0;
 }
+#endif
 
 /*******************************************************************************
  * Function implementation - define plc info
@@ -403,6 +422,7 @@ static void *WebserverEventTask(void *arg)
     while(1) {
         if (0 == PrivEventProcess(wb_event, WB_EVENT_ALL, EVENT_OR | EVENT_AUTOCLEAN, 0, &status)) {
             switch( status ) {
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
                 case WB_4G_CONNECT:
                     Net4gConnect();
                     break;
@@ -415,18 +435,21 @@ static void *WebserverEventTask(void *arg)
                 case WB_MQTT_DISCONNECT:
                     NetMqttDisconnect();
                     break; 
+#endif
                 case WB_LORA_CONNECT:
                     NetLoraConnect();
                     break;
                 case WB_LORA_DISCONNECT:
                     NetLoraDisconnect();
                     break; 
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
                 case WB_ETHERNET_CONNECT:
                     TcpClientConnect();
                     break;
                 case WB_ETHERNET_DISCONNECT:
                     TcpClientDisconnect();
                     break;   
+#endif
             }
         }
     }
@@ -522,6 +545,7 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
             Rs485Configure(rs485_config.baud_rate, rs485_config.data_bit, rs485_config.stop_bit, rs485_config.parity);
         }
         /*define net 4G info*/
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
         else if (mg_http_match_uri(hm, "/net/get4gInfo")) {
 
             Net4gGetInfo(net_4g_info.map_ip, net_4g_info.operator, net_4g_info.signal_strength);
@@ -569,6 +593,7 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
             PrivEvenTrigger(wb_event, WB_MQTT_DISCONNECT);
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         }
+#endif
         /*define net LoRa info*/
         else if (mg_http_match_uri(hm, "/net/getLoraInfo")) {
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
@@ -599,6 +624,7 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         }
         /*define net Ethernet info*/
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
         else if (mg_http_match_uri(hm, "/net/getEthernetInfo")) {
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
                 "{%m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%d}\n",
@@ -646,6 +672,7 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
             PrivEvenTrigger(wb_event, WB_ETHERNET_DISCONNECT);
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         }
+#endif
         /*define plc info*/
         else if (mg_http_match_uri(hm, "/control/setPLCInfo")) {
             struct mg_str json = hm->body;
@@ -670,23 +697,41 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
 
 static void* do_webserver(void* args)
 {
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
     p_netdev_webserver = netdev_get_by_name("wz");
     if (p_netdev_webserver == NULL) {
         MG_INFO(("Did not find wz netdev, use default.\n"));
         p_netdev_webserver = NETDEV_DEFAULT;
     }
+#endif
+
+#ifdef APPLICATION_WEBSERVER_XISHUTONG
+    p_netdev_webserver = netdev_get_by_name("hd");
+    if (p_netdev_webserver == NULL) {
+        MG_INFO(("Did not find hd netdev, use default.\n"));
+        p_netdev_webserver = NETDEV_DEFAULT;
+    }
+#endif
     MG_INFO(("Webserver Use Netdev %s", p_netdev_webserver->name));
     webserver_config.ip = strdup(inet_ntoa(*p_netdev_webserver->ip_addr));
     webserver_config.mask = strdup(inet_ntoa(*p_netdev_webserver->netmask));
     webserver_config.gw = strdup(inet_ntoa(*p_netdev_webserver->gw));
     webserver_config.dns = strdup(inet_ntoa(p_netdev_webserver->dns_servers[0]));
 
+
 #ifdef BSP_USING_RS485
     Rs485InitConfigure();
 #endif
 
-    adapter =  AdapterDeviceFindByName(ADAPTER_4G_NAME);
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
+    adapter = AdapterDeviceFindByName(ADAPTER_4G_NAME);
+#endif
+
+    //lora init param
+    net_lora_info.bw = 2;//bw 0:125 kHz 1:250 kHz 2:500 kHz,
+    net_lora_info.sf = 12;//sf12
     net_lora_info.lora_init_flag = 0;
+
     WbEventInit();
 
     struct mg_mgr mgr; // Event manager
@@ -702,9 +747,22 @@ static void* do_webserver(void* args)
 
 int webserver(void)
 {
-    char* params[2] = {"LwipNetworkActive", "-a"};
     extern void LwipNetworkActive(int argc, char* argv[]);
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
+    char* params[2] = {"LwipNetworkActive", "-a"};
     LwipNetworkActive(2, params);
+#endif
+
+#ifdef APPLICATION_WEBSERVER_XISHUTONG
+    char* params[3] = {"LwipNetworkActive", "-e", "0"};
+    LwipNetworkActive(3, params);
+
+    extern void LwipSetNetwork(int argc, char* argv[]);
+    char* ip_params[5] = {"LwipSetNetwork", "-d", "hd", "-i", "192.168.131.88"};
+    LwipSetNetwork(5, ip_params);
+    char* gw_params[5] = {"LwipSetNetwork", "-d", "hd", "-g", "192.168.131.1"};
+    LwipSetNetwork(5, gw_params);
+#endif
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 30;

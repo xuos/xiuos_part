@@ -20,22 +20,22 @@
 
 /**
 * @file usb_bsp.c
-* @brief support edu-arm32-board usb bsp function
-* @version 2.0 
+* @brief support xishutong-arm32-board usb bsp function
+* @version 3.0 
 * @author AIIT XUOS Lab
-* @date 2022-11-08
+* @date 2023-12-29
 */
 
 /*************************************************
 File name: usb_bsp.c
-Description: support edu-arm32-board usb bsp function
+Description: support xishutong-arm32-board usb bsp function
 Others: 
 History: 
-1. Date: 2022-11-08
+1. Date: 2023-12-29
 Author: AIIT XUOS Lab
 Modification: 
-1. support edu-arm32-board usb IO configure
-2. support edu-arm32-board usb irq define
+1. support xishutong-arm32-board usb IO configure
+2. support xishutong-arm32-board usb irq define
 *************************************************/
 #include <device.h>
 #include "usb_bsp.h"
@@ -56,8 +56,8 @@ extern usb_core_instance usb_app_instance;
 #define USB_VBUSDET_PORT                (GPIO_PORT_A)
 #define USB_VBUSDET_PIN                 (GPIO_PIN_09)
 
-#define USB_OC_PORT                     (GPIO_PORT_D)
-#define USB_OC_PIN                      (GPIO_PIN_15)
+#define USB_OC_PORT                     (GPIO_PORT_H)
+#define USB_OC_PIN                      (GPIO_PIN_13)
 
 //USB HOST ISR
 static void USB_IRQ_Handler(void)
