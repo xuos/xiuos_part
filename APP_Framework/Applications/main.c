@@ -22,7 +22,7 @@ extern void ApplicationOtaTaskInit(void);
 extern int OtaTask(void);
 #endif
 
-#ifdef USE_MONGOOSE
+#ifdef APPLICATION_WEBSERVER
 extern int webserver(void);
 #endif
 
@@ -38,7 +38,7 @@ int main(void)
     OtaTask();
 #endif
 
-#ifdef USE_MONGOOSE
+#ifdef APPLICATION_WEBSERVER
     webserver();
 #endif
 

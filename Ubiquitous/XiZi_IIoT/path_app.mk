@@ -39,7 +39,7 @@ ifeq ($(CONFIG_CRYPTO), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/security/crypto/include #
 endif
 
-ifeq ($(CONFIG_USE_MONGOOSE),y)
+ifeq ($(CONFIG_APPLICATION_WEBSERVER),y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose #
 endif
 

@@ -12,22 +12,22 @@
 
 /**
 * @file connect_usb.c
-* @brief support edu-arm32-board usb function and register to bus framework
-* @version 2.0 
+* @brief support xishutong-arm32-board usb function and register to bus framework
+* @version 3.0 
 * @author AIIT XUOS Lab
-* @date 2022-11-07
+* @date 2023-12-29
 */
 
 /*************************************************
 File name: connect_usb.c
-Description: support edu-arm32-board usb function and register to bus framework
+Description: support xishutong-arm32-board usb function and register to bus framework
 Others: 
 History: 
-1. Date: 2022-11-07
+1. Date: 2023-12-29
 Author: AIIT XUOS Lab
 Modification: 
-1. support edu-arm32-board usb configure, write and read
-2. support edu-arm32-board usb bus device and driver register
+1. support xishutong-arm32-board usb configure, write and read
+2. support xishutong-arm32-board usb bus device and driver register
 *************************************************/
 
 #include <connect_usb.h>
