@@ -30,7 +30,10 @@
 #define EC200A_DEACTIVE_PDP_CMD     "AT+QIDEACT=1\r\n"
 #define EC200A_OPEN_SOCKET_CMD      "AT+QIOPEN=1,%u"
 #define EC200A_CLOSE_SOCKET_CMD     "AT+QICLOSE=%u\r\n"
-#define EC200A_CLOSE                "AT+QPOWD"
+#define EC200A_CLOSE                "AT+QPOWD\r\n"
+#define EC200A_GET_COPS_CMD         "AT+COPS?\r\n"
+#define EC200A_GET_CSQ_CMD          "AT+CSQ\r\n"
+#define EC200A_GET_POP_IP           "AT+CGPADDR=1\r\n"
 
 #define EC200A_OK_REPLY             "OK"
 #define EC200A_READY_REPLY          "READY"
@@ -373,6 +376,10 @@ out:
     return -1;
 }
 
+static int Ec200aNetstat() {
+
+}
+
 static const struct IpProtocolDone ec200a_done = 
 {
     .open = Ec200aOpen,
@@ -384,7 +391,7 @@ static const struct IpProtocolDone ec200a_done =
     .setdns = NULL,
     .setdhcp = NULL,
     .ping = NULL,
-    .netstat = NULL,
+    .netstat = Ec200aNetstat,
     .connect = Ec200aConnect,
     .send = Ec200aSend,
     .recv = Ec200aRecv,
