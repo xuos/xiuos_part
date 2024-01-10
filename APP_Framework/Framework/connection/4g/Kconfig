@@ -13,4 +13,3 @@ config ADAPTER_EC200A
 if ADAPTER_EC200A
     source "$APP_DIR/Framework/connection/4g/ec200a/Kconfig"
 endif
-                
