@@ -400,7 +400,7 @@ void LoraOpen(void)
 {
     x_err_t ret = EOK;
 
-    bus = BusFind(SPI_BUS_NAME_1);
+    bus = BusFind(SPI_BUS_NAME_2);
     dev = BusFindDevice(bus, SX12XX_DEVICE_NAME);
 
     ret = SpiLoraOpen(dev);

@@ -28,6 +28,10 @@ if LORA_RADIO_DRIVER_USING_XISHUTONG_ARM32
                 string "lora device pin driver path"
                 default "/dev/spi2_dev0"
 
+        config LORA_RADIO_BUSY_PIN
+                int "xishutong-arm32 board lora chip busy pin[PC12]"
+                default "141"
+
         config LORA_RADIO_RESET_PIN
                 int "xishutong-arm32 board lora chip reset pin[PD02]"
                 default "144"

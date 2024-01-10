@@ -78,17 +78,27 @@ static int wb_event;
 static unsigned int status = 0;
 static pthread_t wb_event_task;
 
+enum ModulesType            
+{
+    MODULES_NULL = 0,          // null
+    MODULES_4G,                // support 4G modules
+    MODULES_LORA,              // support LoRa modules
+    MODULES_ALL,               //all
+};
+
 /*define device info*/
 #ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
 static const char* device_name = "矽数通4G"; 
 static const char* device_type = "xishutong-arm32";
 static const char* device_serial_num = "123456789";
+static int support_module = MODULES_NULL;
 #endif
 
 #ifdef APPLICATION_WEBSERVER_XISHUTONG
 static const char* device_name = "矽数通"; 
 static const char* device_type = "xishutong-arm32";
 static const char* device_serial_num = "123456789";
+static int support_module = MODULES_LORA;
 #endif
 
 /*define webserver info*/
@@ -107,6 +117,7 @@ int rs485_uart_fd = -1;
 
 #define RS485_DEVICE_PATH "/dev/usart4_dev4"
 
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
 /*define net 4G info*/
 static struct net_4g_info {
     char map_ip[20];
@@ -125,6 +136,7 @@ static struct net_4g_mqtt_info {
     int client_id;
     int connect_status;
 } net_4g_mqtt_info;
+#endif
 
 /*define net LoRa info*/
 struct net_lora_info 
@@ -161,6 +173,31 @@ static uint16_t tcp_socket_port = 8888;
 /*define PLC info*/
 static char *plc_json;
 #define JSON_FILE_NAME "test_recipe.json"
+
+/*******************************************************************************
+ * Function implementation - judge using 4G modules or LoRa modules
+ ******************************************************************************/
+static int JudgeModulesType(void)
+{
+    int ret;
+    int retry = 5;
+    
+#ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
+    extern int TestLoraRadio(int argc, char *argv[]);
+    char* check_params[2] = {"TestLoraRadio", "check"};
+    do {
+        ret = TestLoraRadio(2, check_params);
+        if (ret > 0) {
+            retry = 0;
+            support_module = MODULES_LORA;
+        } else {
+            retry--;
+        }
+    } while (retry > 0);
+#endif
+
+    return support_module;
+}
 
 /*******************************************************************************
  * Function implementation - define interface info
@@ -288,24 +325,19 @@ static void NetMqttDisconnect(void)
  ******************************************************************************/
 static void NetLoraConnect(void)
 {
-    char* init_params[2] = {"TestLoraRadio", "probe"};
-    char* tx_params[4] = {"TestLoraRadio", "tx", "1", "2000"};
+    char* tx_params[5] = {"TestLoraRadio", "tx", "1", "2000", "2"};
     extern int TestLoraRadio(int argc, char *argv[]);
 
     if (0 == net_lora_info.lora_init_flag) {
-        TestLoraRadio(2, init_params);
         net_lora_info.lora_init_flag = 1;
     }
     
-    TestLoraRadio(4, tx_params);
+    TestLoraRadio(5, tx_params);
     net_lora_info.connect_status = 1;
 }
 
 static void NetLoraDisconnect(void)
 {
-    char* disconnect_params[2] = {"TestLoraRadio", "txdone"};
-    extern int TestLoraRadio(int argc, char *argv[]);
-    TestLoraRadio(2, disconnect_params);
     net_lora_info.connect_status = 0;
 }
 
@@ -494,8 +526,14 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
 {
     if (ev == MG_EV_HTTP_MSG) {
         struct mg_http_message *hm = (struct mg_http_message*)ev_data, tmp = { 0 };
+        /*define modules info*/
+        if (mg_http_match_uri(hm, "/net/getModulesInfo")) {
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n",
+                "{%m:%d}\n",
+                MG_ESC("modulesStatus"), JudgeModulesType());
+        } 
         /*define device info*/
-        if (mg_http_match_uri(hm, "/getSystemInfo")) {
+        else if (mg_http_match_uri(hm, "/getSystemInfo")) {
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
                 "{%m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%m}\n",
                 MG_ESC("deviceName"), MG_ESC(device_name),

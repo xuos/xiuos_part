@@ -88,7 +88,7 @@ void SX126xProcessIrqs( void );
 
 void SX126xInit( DioIrqHandler dioIrq )
 {   
-    SX126xReset( );
+    // SX126xReset( );
 
     SX126xIoIrqInit( dioIrq );
 

@@ -191,18 +191,20 @@ void SX126xIoInit( void )
             return;
         }
     }
-#ifdef LORA_RADIO_DRIVER_USING_EDU_ARM32
+
     struct PinParam pin_param;
+    struct PinStat pin_stat;
+    struct PrivIoctlCfg ioctl_cfg;
+
+#ifdef LORA_RADIO_DRIVER_USING_EDU_ARM32
     pin_param.cmd = GPIO_CONFIG_MODE;
     pin_param.mode = GPIO_CFG_OUTPUT;
     pin_param.pin = LORA_RADIO_RFSW1_PIN;
 
-    struct PrivIoctlCfg ioctl_cfg;
     ioctl_cfg.ioctl_driver_type = PIN_TYPE;
     ioctl_cfg.args = &pin_param;
     PrivIoctl(pin_fd, OPE_CFG, &ioctl_cfg);
 
-    struct PinStat pin_stat;
     pin_stat.pin = LORA_RADIO_RFSW1_PIN;
     pin_stat.val = GPIO_LOW;
     PrivWrite(pin_fd, &pin_stat, 1);
@@ -218,6 +220,7 @@ void SX126xIoInit( void )
     pin_stat.pin = LORA_RADIO_RFSW2_PIN;
     pin_stat.val = GPIO_LOW;
     PrivWrite(pin_fd, &pin_stat, 1);
+#endif
 
     pin_param.cmd = GPIO_CONFIG_MODE;
     pin_param.mode = GPIO_CFG_INPUT;
@@ -230,7 +233,6 @@ void SX126xIoInit( void )
     pin_stat.pin = LORA_RADIO_BUSY_PIN;
     pin_stat.val = GPIO_LOW;
     PrivWrite(pin_fd, &pin_stat, 1);
-#endif
 }
 
 void SX126xIoIrqInit( DioIrqHandler dioIrq )
