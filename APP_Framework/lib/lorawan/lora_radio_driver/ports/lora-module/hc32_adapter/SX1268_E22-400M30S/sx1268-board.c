@@ -220,7 +220,6 @@ void SX126xIoInit( void )
     pin_stat.pin = LORA_RADIO_RFSW2_PIN;
     pin_stat.val = GPIO_LOW;
     PrivWrite(pin_fd, &pin_stat, 1);
-#endif
 
     pin_param.cmd = GPIO_CONFIG_MODE;
     pin_param.mode = GPIO_CFG_INPUT;
@@ -233,6 +232,7 @@ void SX126xIoInit( void )
     pin_stat.pin = LORA_RADIO_BUSY_PIN;
     pin_stat.val = GPIO_LOW;
     PrivWrite(pin_fd, &pin_stat, 1);
+#endif
 }
 
 void SX126xIoIrqInit( DioIrqHandler dioIrq )
