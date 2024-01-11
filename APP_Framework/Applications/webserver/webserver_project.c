@@ -91,7 +91,7 @@ enum ModulesType
 static const char* device_name = "矽数通4G"; 
 static const char* device_type = "xishutong-arm32";
 static const char* device_serial_num = "123456789";
-static int support_module = MODULES_NULL;
+static int support_module = MODULES_ALL;
 #endif
 
 #ifdef APPLICATION_WEBSERVER_XISHUTONG
@@ -325,20 +325,24 @@ static void NetMqttDisconnect(void)
  ******************************************************************************/
 static void NetLoraConnect(void)
 {
-    char* tx_params[5] = {"TestLoraRadio", "tx", "1", "2000", "2"};
-    extern int TestLoraRadio(int argc, char *argv[]);
+    if (MODULES_LORA == support_module) {
+        char* tx_params[5] = {"TestLoraRadio", "tx", "1", "2000", "2"};
+        extern int TestLoraRadio(int argc, char *argv[]);
 
-    if (0 == net_lora_info.lora_init_flag) {
-        net_lora_info.lora_init_flag = 1;
+        if (0 == net_lora_info.lora_init_flag) {
+            net_lora_info.lora_init_flag = 1;
+        }
+        
+        TestLoraRadio(5, tx_params);
+        net_lora_info.connect_status = 1;
     }
-    
-    TestLoraRadio(5, tx_params);
-    net_lora_info.connect_status = 1;
 }
 
 static void NetLoraDisconnect(void)
 {
-    net_lora_info.connect_status = 0;
+    if (MODULES_LORA == support_module) {
+        net_lora_info.connect_status = 0;
+    }
 }
 
 /*******************************************************************************
