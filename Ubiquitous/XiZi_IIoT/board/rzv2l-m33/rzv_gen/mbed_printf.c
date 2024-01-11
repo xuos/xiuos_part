@@ -84,6 +84,11 @@
 #define PRECISION_DEFAULT (INT_MAX)
 
 /**
+ * max data number of fifi data reg
+*/
+static const uint32_t SCIF_UART_TX_FIFO_STAGES     = 16;
+
+/**
  * Enum for storing width modifier.
  */
 typedef enum
@@ -785,7 +790,6 @@ int mbed_minimal_formatted_string(char *buffer, size_t length, const char *forma
 }
 
 static uint32_t xSerialPortInitialized = 0;
-static uint32_t tx_data_empty = 1;
 static uint32_t rx_data_full = 0;
 
 static void uart_callback(uart_callback_args_t *const p_arg)
@@ -820,17 +824,26 @@ static void uart_callback(uart_callback_args_t *const p_arg)
     }
     if (p_arg->event & UART_EVENT_TX_DATA_EMPTY)
     {
-        tx_data_empty = 1;
+        __NOP();
     }
 }
 
 static void outbyte1(console_t console, char c)
 {
     scif_uart_instance_ctrl_t * p_ctrl = (scif_uart_instance_ctrl_t *)g_uart2.p_ctrl;
+    uint32_t no_send_data_count = 0;
 
-    p_ctrl->p_reg->FTDR = c;
-
-    for (int i = 0; i < 200; i++){}
+    while (1)
+    {
+        // 获取还未发送的数据数量
+        no_send_data_count = (uint32_t) p_ctrl->p_reg->FDR_b.T;
+        // 还存在可以发送数据的空间
+        if (no_send_data_count < SCIF_UART_TX_FIFO_STAGES)
+        {
+            p_ctrl->p_reg->FTDR = c;
+            break;
+        }
+    } 
 }
 
 void outbyte(console_t console, char c)

@@ -9,19 +9,6 @@
 void R_BSP_WarmStart(bsp_warm_start_event_t event);
 // FSP_CPP_FOOTER
 
-void* TaskSample(void * args)
-{
-    while (1)
-    {
-        for (int i = 0; i < 100000; i++)
-        {
-            ;
-        }
-        
-        KPrintf("TaskSample: %s\n",(char*)args);
-    }
-}
-
 void XiZi_SysTick_Handler(void)
 {
     x_base lock = DISABLE_INTERRUPT();
@@ -41,7 +28,8 @@ void hal_entry(void)
 	SysInitIsrManager();
     
     InitBoardMemory((void *)HEAP_START, (void *)HEAP_END);
-    KPrintf("hal_entry: InitBoardMemory -- HEAP_START = %p, HEAP_END = %p, Size = %dKB !\n",HEAP_START,HEAP_END,(HEAP_END - HEAP_START) / 1024);
+    KPrintf("hal_entry: InitBoardMemory -- HEAP_START = %p, HEAP_END = %p, Size = %dKB !\n"
+        ,(void *)HEAP_START,(void *)HEAP_END,(((void *)HEAP_END) - ((void *)HEAP_START)) / 1024);
     
     #ifdef KERNEL_QUEUEMANAGE
         QueuemanagerDoneRegister();
@@ -54,26 +42,16 @@ void hal_entry(void)
     CreateKServiceKTask();
 
     CreateEnvInitTask();
-
-    // RPMsg 任务入口
-    CreateRPMsgTask();
-
-    // StartupKTask(KTaskCreate("test-task-a",TaskSample,"test-task-a",512,20));
-    // StartupKTask(KTaskCreate("test-task-b",TaskSample,"test-task-b",512,20));
-    // StartupKTask(KTaskCreate("test-task-c",TaskSample,"test-task-c",512,20));
-
     KPrintf("hal_entry: init kernel envirement final!\n");
     
-    x_base lock = DISABLE_INTERRUPT();
+    DISABLE_INTERRUPT();
     KPrintf("hal_entry: disable interrupt now!\n");
     
     g_timer2.p_api->open(g_timer2.p_ctrl, g_timer2.p_cfg);
     g_timer2.p_api->callbackSet(g_timer2.p_ctrl, XiZi_SysTick_Handler, NULL, NULL);
     g_timer2.p_api->start(g_timer2.p_ctrl);
 
-    ENABLE_INTERRUPT(lock);
     KPrintf("hal_entry: enable interrupt!\n");
-    
     StartupOsAssign();
 }
 

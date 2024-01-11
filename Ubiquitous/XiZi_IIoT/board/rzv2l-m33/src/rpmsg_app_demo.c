@@ -48,7 +48,6 @@ extern void cleanup_system(void);
  *-----------------------------------------------------------------------------*/
 
 /* Local variables */
-
 static struct rpmsg_endpoint rp_ept[CFG_RPMSG_SVCNO] = {0};
 
 volatile static int evt_svc_unbind[CFG_RPMSG_SVCNO] = {0};
@@ -67,19 +66,18 @@ static int rpmsg_endpoint_cb0 (struct rpmsg_endpoint * cb_rp_ept, void * data, s
     /* service 0 */
     (void) priv;
     (void) src;
+
     /* On reception of a shutdown we signal the application to terminate */
     if ((*(unsigned int *) data) == SHUTDOWN_MSG)
     {
         evt_svc_unbind[0] = 1;
-
         return RPMSG_SUCCESS;
     }
-    KPrintf("rpmsg_endpoint_cb0: recv data = %p, *data = %d,len = %d\n",data,*((int*)(data)),len);
+    KPrintf("rpmsg_endpoint_cb0: recv &data = %p, *data = %d,len = %d\n",data,*((int*)(data)),len);
     /* Send data back to master */
     if (rpmsg_send(cb_rp_ept, data, (int) len) < 0)
     {
-        LPERROR("rpmsg_send failed\n");
-
+        KPrintf("rpmsg_endpoint_cb0: rpmsg_send back failed\n");
         return -1;
     }
     return RPMSG_SUCCESS;
@@ -145,40 +143,26 @@ int app (struct rpmsg_device * rdev, void * platform, unsigned long svcno)
 
     if (svcno == 0UL)
     {
-        ret = rpmsg_create_ept(&rp_ept[0],
-                               rdev,
-                               CFG_RPMSG_SVC_NAME0,
-                               APP_EPT_ADDR,
-                               RPMSG_ADDR_ANY,
-                               rpmsg_endpoint_cb0,
-                               rpmsg_service_unbind0);
+        ret = rpmsg_create_ept(&rp_ept[0],rdev,CFG_RPMSG_SVC_NAME0,APP_EPT_ADDR,RPMSG_ADDR_ANY,rpmsg_endpoint_cb0,rpmsg_service_unbind0);
         if (ret)
         {
-            LPERROR("Failed to create endpoint.\n");
-
+            KPrintf("app: fail to create endpoint[0]\n");
             return -1;
         }
-
-        KPrintf("app: Success to create endpoint rp_ept[0]\n");
+        KPrintf("app: Success to create endpoint[0]\n");
     }
     else
     {
-        ret = rpmsg_create_ept(&rp_ept[1],
-                               rdev,
-                               CFG_RPMSG_SVC_NAME1,
-                               APP_EPT_ADDR,
-                               RPMSG_ADDR_ANY,
-                               rpmsg_endpoint_cb1,
-                               rpmsg_service_unbind1);
+        ret = rpmsg_create_ept(&rp_ept[1],rdev,CFG_RPMSG_SVC_NAME1,APP_EPT_ADDR,RPMSG_ADDR_ANY,rpmsg_endpoint_cb1,rpmsg_service_unbind1);
         if (ret)
         {
-            LPERROR("Failed to create endpoint.\n");
-
+            KPrintf("app: fail to create endpoint[1]\n");
             return -1;
         }
+        KPrintf("app: success to create endpoint[1]\n");
     }
 
-    LPRINTF("Waiting for events...\n");
+    LPRINTF("Waiting for master data ...\n");
 
     while (1)
     {
@@ -187,6 +171,8 @@ int app (struct rpmsg_device * rdev, void * platform, unsigned long svcno)
         /* we got a shutdown request, exit */
         if (evt_svc_unbind[svcno])
         {
+            // 销毁该节点
+            rpmsg_destroy_ept(&rp_ept[svcno]);
             break;
         }
     }

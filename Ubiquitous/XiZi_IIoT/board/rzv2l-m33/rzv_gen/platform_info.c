@@ -297,11 +297,11 @@ void platform_release_rpmsg_vdev (void * platform, struct rpmsg_device * rpdev)
     struct rpmsg_virtio_device * rpmsg_vdev;
     struct remoteproc_priv     * prproc = rproc->priv;
 
-    KTaskDelete(ipi_tsk_id[prproc->notify_id]);
-    ipi_tsk_id[prproc->notify_id] = -1;
-
     KMutexDelete(ipi.ipi_mutx_id[prproc->notify_id]);
     ipi.ipi_mutx_id[prproc->notify_id] = -1;
+
+    KTaskDelete(ipi_tsk_id[prproc->notify_id]);
+    ipi_tsk_id[prproc->notify_id] = -1;
 
     rpmsg_vdev = metal_container_of(rpdev, struct rpmsg_virtio_device, rdev);
     rpmsg_deinit_vdev(rpmsg_vdev);
@@ -378,7 +378,7 @@ static void* IpiTask (void * exinf)
         // KPrintf("IpiTask: after remoteproc_get_notification\n");
         if (ret)
         {
-            LPRINTF("remoteproc_get_notification() failed with %d", ret);
+            KPrintf("remoteproc_get_notification() failed with %d", ret);
             break;
         }
 
@@ -400,7 +400,7 @@ static void start_ipi_task (void * platform)
     }
     ipi.ipi_mutx_id[prproc->notify_id] = mutx_id;
 
-    KPrintf("start_ipi_task: prproc->notify_id = %d, ipi.ipi_mutx_id[prproc->notify_id] = %d \n",prproc->notify_id,ipi.ipi_mutx_id[prproc->notify_id]);
+    // KPrintf("start_ipi_task: prproc->notify_id = %d, ipi.ipi_mutx_id[prproc->notify_id] = %d \n",prproc->notify_id,ipi.ipi_mutx_id[prproc->notify_id]);
 
     int32 ipi_task_id = -1;
     ipi_task_id = KTaskCreate("ipi_task",IpiTask,platform,4096,SHELL_TASK_PRIORITY + 1);
