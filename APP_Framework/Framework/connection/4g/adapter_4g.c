@@ -136,6 +136,8 @@ int Adapter4GTest(void)
     AdapterDeviceOpen(adapter);
     AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
 
+    AdapterDeviceNetstat(adapter);
+
     AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
 
     while (1) {

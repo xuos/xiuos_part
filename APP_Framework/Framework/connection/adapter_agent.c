@@ -225,6 +225,43 @@ __exit:
     return ret;
 }
 
+int AtGetNetworkInfoReply(ATAgentType agent, char *cmd, char *result)
+{
+    int ret = 0;
+    if (NULL == agent || NULL == cmd) {
+        return -1;
+    }
+
+    ATReplyType reply = CreateATReply(256);
+    if (NULL == reply) {
+        printf("%s %d at_create_resp failed!\n",__func__,__LINE__);
+        ret = -1;
+        goto __exit;
+    }
+
+    ret = ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd);
+    if(ret < 0){
+        printf("%s %d ATOrderSend failed.\n",__func__,__LINE__);
+        ret = -1;
+        goto __exit;
+    }
+
+    const char *replyText = GetReplyText(reply);
+    if (replyText == NULL || replyText[0] == '\0') {
+        printf("%s %n get reply failed.\n",__func__,__LINE__);
+        ret = -1;
+        goto __exit;
+    }
+
+    strncpy(result, replyText, 63);
+    result[63] = '\0';
+    printf("[reply result: %s]\n", result);
+
+__exit:
+    DeleteATReply(reply);
+    return ret;
+}
+
 char *GetReplyText(ATReplyType reply)
 {
     return reply->reply_buffer;

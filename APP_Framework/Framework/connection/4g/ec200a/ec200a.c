@@ -376,8 +376,138 @@ out:
     return -1;
 }
 
-static int Ec200aNetstat() {
+static void extractCarrierInfo(const char *response, struct NetworkInfo *networkInfo)
+{
+    const char *delimiter = "\"";
+    const char *token;
 
+    token = strtok(response, delimiter);
+    token = strtok(NULL, delimiter);
+
+    if (strcmp(token, "CHINA MOBILE") == 0) {
+        networkInfo->carrier_type = CARRIER_CHINA_MOBILE;
+    } else if (strcmp(token, "CHN-UNICOM") == 0) {
+        networkInfo->carrier_type = CARRIER_CHINA_UNICOM;
+    } else if (strcmp(token, "CHN-CT") == 0) {
+        networkInfo->carrier_type = CARRIER_CHINA_TELECOM;
+    } else {
+        networkInfo->carrier_type = CARRIER_UNKNOWN;
+    }
+}
+
+static int Ec200aNetstat(struct Adapter *adapter) {
+    char result[64] = {0};
+
+    struct NetworkInfo info = {
+        .carrier_type = CARRIER_UNKNOWN,
+        .signal_strength = 0,
+        .ip_address = "192.168.1.1"
+    };
+    
+    int ret = 0;
+    int try = 0;
+
+    AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
+
+    /*step1: serial write "+++", quit transparent mode*/
+    PrivTaskDelay(1500); //before +++ command, wait at least 1s
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
+    PrivTaskDelay(1500); //after +++ command, wait at least 1s
+
+    /*step2: serial write "AT+CCID", get SIM ID*/
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200A_GET_QCCID_CMD, EC200A_OK_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
+    if (ret < 0) {
+        goto out;
+    }
+
+    /*step3: serial write "AT+CPIN?", check SIM status*/
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200A_GET_CPIN_CMD, EC200A_READY_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
+    if (ret < 0) {
+        goto out;
+    }
+
+    /*step4: serial write "AT+CREG?", check whether registered to GSM net*/
+    PrivTaskDelay(1000); //before CREG command, wait 1s
+
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, EC200A_GET_CREG_CMD, EC200A_CREG_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
+    if (ret < 0) {
+        goto out;
+    }
+
+    /*step5: serial write "AT+COPS?", get carrier type*/
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtGetNetworkInfoReply(adapter->agent, EC200A_GET_COPS_CMD, result);
+        if (ret == 0) {
+            break;
+        }
+    }
+    if (ret < 0) {
+        goto out;
+    }
+    extractCarrierInfo(result, &info);
+    adapter->network_info.carrier_type = info.carrier_type;
+
+    /*step6: serial write "AT+CSQ", get carrier type*/
+    memset(result, 0, sizeof(result));
+    
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtGetNetworkInfoReply(adapter->agent, EC200A_GET_CSQ_CMD, result);
+        if (ret == 0) {
+            break;
+        }
+    }
+    if (ret < 0) {
+        goto out;
+    }
+    if (sscanf(result, "AT+CSQ\n+CSQ: %d", &info.signal_strength) == 1) {
+        printf("Signal Strength: %d\n", info.signal_strength);
+        adapter->network_info.signal_strength = info.signal_strength;
+    } else {
+        printf("Failed to parse signal strength\n");
+        goto out;
+    }
+
+    /*step7: serial write "AT+CSQ", get carrier type*/
+    memset(result, 0, sizeof(result));
+    
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtGetNetworkInfoReply(adapter->agent, EC200A_GET_POP_IP, result);
+        if (ret == 0) {
+            break;
+        }
+    }
+    if (ret < 0) {
+        goto out;
+    }
+    if (sscanf(result, "AT+CGPADDR=1\n+CGPADDR: 1,\"%15[^\"]\"", info.ip_address) == 1) {
+        printf("IP Address: %s\n", info.ip_address);
+        strcpy(adapter->network_info.ip_address, info.ip_address);
+    } else {
+        printf("Failed to parse IP address\n");
+        goto out;
+    }
+
+    return 0;
+
+out:
+    ADAPTER_DEBUG("Ec200a get netstat failed. Power down\n");
+    ret = AtCmdConfigAndCheck(adapter->agent, EC200A_CLOSE, EC200A_OK_REPLY);
+    return -1;
 }
 
 static const struct IpProtocolDone ec200a_done = 

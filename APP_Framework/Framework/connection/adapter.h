@@ -118,6 +118,19 @@ enum IpType
     IPV6,
 };
 
+enum CarrierType {
+    CARRIER_CHINA_MOBILE = 1,
+    CARRIER_CHINA_UNICOM,
+    CARRIER_CHINA_TELECOM,
+    CARRIER_UNKNOWN,
+};
+
+struct NetworkInfo {
+    enum CarrierType carrier_type;
+    int signal_strength;
+    char ip_address[16];
+};
+
 struct AdapterData
 {
     uint32 len;
@@ -185,6 +198,8 @@ struct Adapter
     enum NetProtocolType net_protocol;
     enum NetRoleType net_role;
     enum AdapterStatus adapter_status;
+
+    struct NetworkInfo network_info;
 
     char buffer[ADAPTER_BUFFSIZE];
     
