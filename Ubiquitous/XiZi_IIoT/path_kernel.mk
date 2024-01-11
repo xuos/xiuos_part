@@ -34,7 +34,9 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/rzv/fsp/src/bsp/mcu/rzv2l  \
 	-I$(BSP_ROOT)/rzv_cfg/fsp_cfg  \
 	-I$(BSP_ROOT)/rzv_cfg/fsp_cfg/bsp  \
-	-I$(BSP_ROOT)/rzv_gen  #
+	-I$(BSP_ROOT)/rzv_gen \
+	-I$(BSP_ROOT)/rzv/linaro/libmetal/include \
+	-I$(BSP_ROOT)/rzv/linaro/open-amp/lib/include #
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong-arm32)

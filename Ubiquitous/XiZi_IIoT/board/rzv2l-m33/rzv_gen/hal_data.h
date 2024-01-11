@@ -7,6 +7,7 @@
 #include "r_uart_api.h"
 #include "r_scif_uart.h"
 #include "r_timer_api.h"
+#include "r_mhu_ns.h"
 #include "r_gtm.h"
 
 FSP_HEADER
@@ -18,6 +19,13 @@ extern const uart_instance_t g_uart2;
 extern scif_uart_instance_ctrl_t g_uart2_ctrl;
 extern const uart_cfg_t g_uart2_cfg;
 extern const scif_uart_extended_cfg_t g_uart2_cfg_extend;
+
+/** MHU Instance */
+extern const mhu_instance_t g_mhu_ns0;
+
+/** Access the MHU instance using these structures when calling API functions directly (::p_api is not used). */
+extern mhu_ns_instance_ctrl_t g_mhu_ns0_ctrl;
+extern const mhu_cfg_t g_mhu_ns0_cfg;
 
 /** GTM Timer Instance */
 extern const timer_instance_t g_timer2;

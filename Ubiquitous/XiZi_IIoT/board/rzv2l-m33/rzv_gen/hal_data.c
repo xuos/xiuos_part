@@ -59,6 +59,25 @@ const uart_instance_t g_uart2 =
     .p_api = &g_uart_on_scif
 };
 
+mhu_ns_instance_ctrl_t g_mhu_ns0_ctrl;
+
+const mhu_cfg_t g_mhu_ns0_cfg =
+{ 
+    .channel = 1, 
+    .rx_ipl = 12, 
+    .rx_irq = MHU_MSG1_NS_IRQn, 
+    .p_callback = NULL, 
+    .p_shared_memory = 0, 
+    .p_context = NULL, 
+};
+/* Instance structure to use this module. */
+const mhu_instance_t g_mhu_ns0 =
+{ 
+    .p_ctrl = &g_mhu_ns0_ctrl, 
+    .p_cfg = &g_mhu_ns0_cfg, 
+    .p_api = &g_mhu_ns_on_mhu_ns 
+};
+
 gtm_instance_ctrl_t g_timer2_ctrl;
 
 const gtm_extended_cfg_t g_timer2_extend =
@@ -71,7 +90,7 @@ const timer_cfg_t g_timer2_cfg =
 {
     .mode = TIMER_MODE_PERIODIC,
     // .period_counts = 99999 /* Actual period: 0.001 seconds. */,
-    .period_counts = 100000000 /* Actual period: 0.001 seconds. */,
+    .period_counts = 1000000 /* Actual period: 0.001 seconds. */,
     .channel = 2,
     .p_callback = NULL,
     .p_context = NULL,

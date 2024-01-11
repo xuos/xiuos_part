@@ -3,10 +3,24 @@
 #include <console.h>
 #include <xizi.h>
 #include <arch_interrupt.h>
+#include <rpmsg_task.h>
 
 // FSP_CPP_HEADER
 void R_BSP_WarmStart(bsp_warm_start_event_t event);
 // FSP_CPP_FOOTER
+
+void* TaskSample(void * args)
+{
+    while (1)
+    {
+        for (int i = 0; i < 100000; i++)
+        {
+            ;
+        }
+        
+        KPrintf("TaskSample: %s\n",(char*)args);
+    }
+}
 
 void XiZi_SysTick_Handler(void)
 {
@@ -40,6 +54,13 @@ void hal_entry(void)
     CreateKServiceKTask();
 
     CreateEnvInitTask();
+
+    // RPMsg 任务入口
+    CreateRPMsgTask();
+
+    // StartupKTask(KTaskCreate("test-task-a",TaskSample,"test-task-a",512,20));
+    // StartupKTask(KTaskCreate("test-task-b",TaskSample,"test-task-b",512,20));
+    // StartupKTask(KTaskCreate("test-task-c",TaskSample,"test-task-c",512,20));
 
     KPrintf("hal_entry: init kernel envirement final!\n");
     

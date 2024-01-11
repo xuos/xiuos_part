@@ -76,7 +76,7 @@ BSP_DONT_REMOVE fsp_vector_t g_vector_table[BSP_ICU_VECTOR_MAX_ENTRIES] BSP_PLAC
   Default_Handler, /* IRQ:66 */
   Default_Handler, /* IRQ:67 */
   Default_Handler, /* IRQ:68 */
-  Default_Handler, /* IRQ:69 */
+  metal_irq_isr_wrapper, /* IRQ:69 MHU1 MSG_INT_NS (Non-Secure Message Interrupt ch1) */
   Default_Handler, /* IRQ:70 */
   Default_Handler, /* IRQ:71 */
   Default_Handler, /* IRQ:72 */

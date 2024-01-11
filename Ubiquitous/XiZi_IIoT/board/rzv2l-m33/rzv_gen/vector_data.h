@@ -3,7 +3,7 @@
 #define VECTOR_DATA_H
 /* Number of interrupts allocated */
 #ifndef VECTOR_DATA_IRQ_COUNT
-#define VECTOR_DATA_IRQ_COUNT    (6)
+#define VECTOR_DATA_IRQ_COUNT    (7)
 #endif
 
 /** Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
@@ -16,6 +16,7 @@ void scif_uart_bri_isr(void);
 void scif_uart_rxi_isr(void);
 void scif_uart_txi_isr(void);
 void scif_uart_tei_isr(void);
+void metal_irq_isr_wrapper(void);
 
 /** Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
 FSP_FOOTER
