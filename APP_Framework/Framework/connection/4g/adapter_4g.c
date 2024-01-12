@@ -130,6 +130,11 @@ int Adapter4GTest(void)
     /* Using Public TCP server to  test 4G Socket connection */
     uint8 server_addr[64] = "xyheqmx.e3.luyouxia.net";
     uint8 server_port[64] = "13333";
+    uint8 client_id[64] = "quectel";
+    uint8 username[64] = "test";
+    uint8 password[64] = "test123456";
+    uint8 topic_pub[64] = "/reply";
+    uint8 topic_sub[64] = "/get";
 
     adapter->socket.socket_id = 0;
 
@@ -146,8 +151,19 @@ int Adapter4GTest(void)
         printf("4G recv msg %s\n", recv_msg);
         memset(recv_msg, 0, 256);
     }
+
+    /*
+    AdapterDeviceMqttConnect(adapter, server_addr, server_port, client_id, username, password);
+
+    while (1) {
+        AdapterDeviceMqttSend(adapter, topic_pub, send_msg, strlen(send_msg));
+        AdapterDeviceMqttRecv(adapter, topic_sub, recv_msg, 256);
+        printf("4G mqtt recv msg %s\n", recv_msg);
+        memset(recv_msg, 0, 256);
+    }
+    */
 #endif
 
     return 0;    
 }
-PRIV_SHELL_CMD_FUNCTION(Adapter4GTest, a EC200T or EC200A adpter sample, PRIV_SHELL_CMD_FUNC_ATTR);
+PRIV_SHELL_CMD_FUNCTION(Adapter4GTest, a EC200T or EC200A adapter sample, PRIV_SHELL_CMD_FUNC_ATTR);

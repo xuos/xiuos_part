@@ -163,6 +163,10 @@ struct IpProtocolDone
     int (*send)(struct Adapter *adapter, const void *buf, size_t len);
     int (*recv)(struct Adapter *adapter, void *buf, size_t len);
     int (*disconnect)(struct Adapter *adapter);
+    int (*mqttconnect)(struct Adapter *adapter, const char *ip, const char *port, const char *client_id, const char *username, const char *password);
+    int (*mqttdisconnect)(struct Adapter *adapter);
+    int (*mqttsend)(struct Adapter *adapter, const char *topic, const void *buf, size_t len);
+    int (*mqttrecv)(struct Adapter *adapter, const char *topic, const void *buf, size_t len);
 };
 
 struct PrivProtocolDone
@@ -268,6 +272,18 @@ int AdapterDevicePing(struct Adapter *adapter, const char *destination);
 
 /*Show the net status*/
 int AdapterDeviceNetstat(struct Adapter *adapter);
+
+/*Connect to a certain mqtt server*/
+int AdapterDeviceMqttConnect(struct Adapter *adapter, const char *ip, const char *port, const char *client_id, const char *username, const char *password);
+
+/*Adapter disconnect from mqtt server*/
+int AdapterDeviceMqttDisconnect(struct Adapter *adapter);
+
+/*Send data to mqtt server*/
+ssize_t AdapterDeviceMqttSend(struct Adapter *adapter, const char *topic, const void *buf, size_t len);
+
+/*Receice data from mqtt server*/
+ssize_t AdapterDeviceMqttRecv(struct Adapter *adapter, const char *topic, void *buf, size_t len);
 
 #ifdef __cplusplus
 }

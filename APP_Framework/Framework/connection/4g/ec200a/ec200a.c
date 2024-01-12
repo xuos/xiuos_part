@@ -22,7 +22,7 @@
 #include <at_agent.h>
 
 #define EC200A_AT_MODE_CMD          "+++"
-#define EC200A_GET_QCCID_CMD         "AT+QCCID\r\n"
+#define EC200A_GET_QCCID_CMD        "AT+QCCID\r\n"
 #define EC200A_GET_CPIN_CMD         "AT+CPIN?\r\n"
 #define EC200A_GET_CREG_CMD         "AT+CREG?\r\n"
 #define EC200A_CFG_TCP_CMD          "AT+QICSGP"
@@ -41,6 +41,11 @@
 #define EC200A_CONNECT_REPLY        "CONNECT"
 
 #define TRY_TIMES 10
+
+extern int Ec200aMqttConnect(struct Adapter *adapter, const char *ip, const char *port, const char *client_id, const char *username, const char *password);
+extern int Ec200aMqttDisconnect(struct Adapter *adapter);
+extern int Ec200aMqttSend(struct Adapter *adapter, const char *topic, const void *buf, size_t len);
+extern int Ec200aMqttRecv(struct Adapter *adapter, const char *topic, void *buf, size_t len);
 
 static void Ec200aPowerSet(void)
 {
@@ -261,6 +266,7 @@ static int Ec200aConnect(struct Adapter *adapter, enum NetRoleType net_role, con
 
     /*step6: serial write "AT+QICLOSE", close socket connect before open socket*/
     memset(ec200a_cmd, 0, sizeof(ec200a_cmd));
+    
     sprintf(ec200a_cmd, EC200A_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
     for(try = 0; try < TRY_TIMES; try++){
         ret = AtCmdConfigAndCheck(adapter->agent, ec200a_cmd, EC200A_OK_REPLY);
@@ -526,6 +532,10 @@ static const struct IpProtocolDone ec200a_done =
     .send = Ec200aSend,
     .recv = Ec200aRecv,
     .disconnect = Ec200aDisconnect,
+    .mqttconnect = Ec200aMqttConnect,
+    .mqttdisconnect = Ec200aMqttDisconnect,
+    .mqttsend = Ec200aMqttSend,
+    .mqttrecv = Ec200aMqttRecv,
 };
 
 AdapterProductInfoType Ec200aAttach(struct Adapter *adapter)
