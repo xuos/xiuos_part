@@ -67,7 +67,7 @@ struct ipi_info
     int          registered;
     unsigned int mbx_chn[CFG_RPMSG_SVCNO];
     unsigned int chn_mask;             /**< IPI channel mask */
-    int32 ipi_mutx_id[CFG_RPMSG_SVCNO];
+    volatile int32 ipi_mutx_id[CFG_RPMSG_SVCNO];
 };
 
 struct shm_info

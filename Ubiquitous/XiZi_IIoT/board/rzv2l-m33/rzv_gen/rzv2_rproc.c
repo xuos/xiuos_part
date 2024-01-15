@@ -109,9 +109,13 @@ static int rzv2_mhu_callback (mhu_callback_args_t * p_args)
         return METAL_IRQ_NOT_HANDLED;  /* Invalid message arrived */
     }
 
-    if (ipi.ipi_mutx_id[val] >= 0)
+    // if (ipi.ipi_mutx_id[val] >= 0)
+    // {
+    //     KMutexAbandon(ipi.ipi_mutx_id[val]);
+    // }
+    if (ipi.ipi_mutx_id[val] != -1)
     {
-        KMutexAbandon(ipi.ipi_mutx_id[val]);
+        ipi.ipi_mutx_id[val] = 1;
     }
     else
     {

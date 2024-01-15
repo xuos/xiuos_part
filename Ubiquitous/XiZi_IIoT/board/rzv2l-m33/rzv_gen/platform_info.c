@@ -297,7 +297,7 @@ void platform_release_rpmsg_vdev (void * platform, struct rpmsg_device * rpdev)
     struct rpmsg_virtio_device * rpmsg_vdev;
     struct remoteproc_priv     * prproc = rproc->priv;
 
-    KMutexDelete(ipi.ipi_mutx_id[prproc->notify_id]);
+    // KMutexDelete(ipi.ipi_mutx_id[prproc->notify_id]);
     ipi.ipi_mutx_id[prproc->notify_id] = -1;
 
     KTaskDelete(ipi_tsk_id[prproc->notify_id]);
@@ -363,11 +363,12 @@ static void* IpiTask (void * exinf)
 
     while (1)
     {
-        // extern long ShowTask(void);
-        // ShowTask();
-
-        KMutexObtain(ipi.ipi_mutx_id[prproc->notify_id], WAITING_FOREVER);
-        // KPrintf("IpiTask: after KSemaphoreObtain\n");
+        if (ipi.ipi_mutx_id[prproc->notify_id] != 1)
+        {
+            __WFI();
+            continue;
+        }
+        // KMutexObtain(ipi.ipi_mutx_id[prproc->notify_id], WAITING_FOREVER);
 
         /* Ignore a incoming interrupt if the virtio layer of a target remoteproc is not yet initialized */
         if (metal_list_is_empty(&rproc->vdevs))
@@ -381,8 +382,8 @@ static void* IpiTask (void * exinf)
             KPrintf("remoteproc_get_notification() failed with %d", ret);
             break;
         }
-
-        DelayKTask(10);
+        ipi.ipi_mutx_id[prproc->notify_id] = 0;
+        // DelayKTask(10);
     }
 }
 
@@ -391,14 +392,14 @@ static void start_ipi_task (void * platform)
     struct remoteproc      * rproc  = platform;
     struct remoteproc_priv * prproc = rproc->priv;
 
-    int32 mutx_id = KMutexCreate();
-
-    if (mutx_id < 0)
-    {
-        KPrintf("start_ipi_task: create sem fail!\n");
-        return ;
-    }
-    ipi.ipi_mutx_id[prproc->notify_id] = mutx_id;
+    // int32 mutx_id = KMutexCreate();
+    // if (mutx_id < 0)
+    // {
+    //     KPrintf("start_ipi_task: create sem fail!\n");
+    //     return ;
+    // }
+    // ipi.ipi_mutx_id[prproc->notify_id] = mutx_id;
+    ipi.ipi_mutx_id[prproc->notify_id] = 0;
 
     // KPrintf("start_ipi_task: prproc->notify_id = %d, ipi.ipi_mutx_id[prproc->notify_id] = %d \n",prproc->notify_id,ipi.ipi_mutx_id[prproc->notify_id]);
 

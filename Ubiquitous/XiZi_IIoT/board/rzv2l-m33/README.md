@@ -201,3 +201,24 @@ saveenv
 
 
 
+
+## 四、核间通信测试
+> XiUOS 将收到的数据打印后返回到Linux
+
+### 1、烧录A55端的Linux和M33端的XiUOS
+<div align= "center"><img src = img/rpmsg_begin.png></div>
+
+### 2、在M33端创建监听任务
+```c
+CreateRPMsgTask // 该命令会创建一个通信节点，在探测到Linux的第一条信息时该通信节点被激活
+```
+<div align= "center"><img src = img/rpmsg_create.png></div>
+
+### 3、在Linux端启动核间通信测试例程
+```c
+rpmsg_sample_client 0
+```
+<div align= "center"><img src = img/rpmsg_test_begin.png></div>
+
+### 3、测试结果
+<div align= "center"><img src = img/rpmsg_test_result.png></div>
