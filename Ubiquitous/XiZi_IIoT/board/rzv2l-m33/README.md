@@ -43,7 +43,8 @@ $ sudo apt install gcc make libncurses5-dev openssl libssl-dev bison flex libelf
 
 ### 4、VSCode 插件安装
 **推荐安装下图所示插件：**
-<div align= "center"><img src = img/vscode-plugins.png></div>
+
+![VSCode插件推荐](img/vscode-plugins.png "VSCode插件推荐")
 
 ### 5、XiUOS操作系统源码下载
 XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
@@ -74,9 +75,7 @@ git clone https://gitlink.org.cn/xuos/xiuos.git
 
 使用VScode打开代码，具体操作步骤为：在源码文件夹下打开系统终端，输入`code .`即可打开VScode开发环境，如下图所示：
 
-<div align= "center"> 
-<img src = img/vscode.jpg  width =1000>
-</div>
+![VSCode介绍](img/vscode.jpg "VSCode介绍")
 
 ### 6、裁减配置工具的下载
 
@@ -108,7 +107,8 @@ sudo chmod 755 LibgenUpdateInstall_v1.2020.02.run
 sudo ./LibgenUpdateInstall_v1.2020.02.run
 ```
 **运行后输入ARM工具链根目录、回车，再输入 y 以确认**
-<div align= "center"><img src = img/libgen-update.png></div>
+
+![更新编译工具链](img/libgen-update.png "更新编译工具链")
 
 **至此，编译环境已经安装完毕**
 
@@ -135,7 +135,8 @@ make BOARD=rzv2l-m33 distclean
 make BOARD=rzv2l-m33 menuconfig
 ```
 ### (1)、关闭文件系统支持
-<div align= "center"><img src = img/menuconfig-filesystem.png></div>
+
+![关闭文件系统支持](img/menuconfig-filesystem.png "关闭文件系统支持")
 
 **退出并保存配置**
 
@@ -145,7 +146,8 @@ make BOARD=rzv2l-m33 menuconfig
 make BOARD=rzv2l-m33
 ```
 等待编译完成：生成`XiZi-rzv2l-m33.elf`等文件
-<div align= "center"><img src = img/compile-result.png></div>
+
+![编译结果](img/compile-result.png "编译结果")
 
 ### 4、编译输出处理
 `RZ/V2L`的`M33`端没有`FLASH`，需要借助 `boot-loader` 加载到内存中直接运行。
@@ -155,7 +157,8 @@ make BOARD=rzv2l-m33
 ./postbuild.sh
 ```
 生成的文件：安全/非安全的中断向量表和代码数据段共四个文件
-<div align= "center"><img src = img/postbuild-output.png></div>
+
+![运行文件提取](img/postbuild-output.png "运行文件提取")
 
 ## 三、运行执行
 
@@ -163,7 +166,8 @@ make BOARD=rzv2l-m33
 > 参考文档：SMARC EVK of RZ/V2L Linux Start-up Guide 进行 A55 端 Linux 编译和 BootLoader 烧录
 
 ### 2、将生成的文件拷贝到上一步生成的SD卡里
-<div align= "center"><img src = img/copy-bin-to-sd.png></div>
+
+![复制到内存卡](img/copy-bin-to-sd.png "复制到内存卡")
 
 > 在上一步中，SD被划分为两个逻辑分区，一个作为根文件系统（RZ_ext），一个用于存放系统镜像（RZ_FAT包含Linux镜像、设备数已经刚放进去的M33端程序）
 
@@ -173,7 +177,7 @@ make BOARD=rzv2l-m33
 
 `Pmod1`的 2、3、5 脚分别是 `TXD、RXD、GND`将其利用`USB转串口模块`与电脑相连；
 
-<div align= "center"><img src = img/connection-state.jpg></div>
+![硬件连接](img/connection-state.jpg "硬件连接")
 
 ### 4、修改 boot 参数以自动加载
 ```c
@@ -192,33 +196,38 @@ setenv bootcmd "run bootcmd_m3_boot"  // 注意：若是需要启动Linux，需�
 // 7. 保存环境变量
 saveenv
 ```
+
 **环境变量如下：**
-<div align= "center"><img src = img/loader-env.jpeg></div>
+
+![环境变量](img/loader-env.jpeg "环境变量")
 
 ### 5、运行M33
 **将SD插入卡槽，按下开发板 reset 按键**
-<div align= "center"><img src = img/run-result.jpeg></div>
 
-
-
+![启动M33](img/run-result.jpeg "启动M33")
 
 ## 四、核间通信测试
 > XiUOS 将收到的数据打印后返回到Linux
 
 ### 1、烧录A55端的Linux和M33端的XiUOS
-<div align= "center"><img src = img/rpmsg_begin.png></div>
+
+![两端启动](img/rpmsg_begin.png "两端启动")
 
 ### 2、在M33端创建监听任务
+
 ```c
 CreateRPMsgTask // 该命令会创建一个通信节点，在探测到Linux的第一条信息时该通信节点被激活
 ```
-<div align= "center"><img src = img/rpmsg_create.png></div>
+![通信节点创造](img/rpmsg_create.png "通信节点创造")
 
 ### 3、在Linux端启动核间通信测试例程
+
 ```c
 rpmsg_sample_client 0
 ```
-<div align= "center"><img src = img/rpmsg_test_begin.png></div>
+
+![测试启动](img/rpmsg_test_begin.png "测试启动")
 
 ### 3、测试结果
-<div align= "center"><img src = img/rpmsg_test_result.png></div>
+
+![测试结果](img/rpmsg_test_result.png "测试结果")
