@@ -104,5 +104,6 @@ int ParseATReply(char* str, const char *format, ...);
 void DeleteATReply(ATReplyType reply);
 int ATOrderSend(ATAgentType agent, uint32_t timeout_s, ATReplyType reply, const char *cmd_expr, ...);
 int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check);
+int AtGetNetworkInfoReply(ATAgentType agent, char *cmd, char *result);
 
 #endif

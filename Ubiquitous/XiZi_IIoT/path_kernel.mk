@@ -19,6 +19,26 @@ ifeq ($(CONFIG_LIB_NEWLIB),y)
 KERNELPATHS += -I$(KERNEL_ROOT)/lib/newlib/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rzv2l-m33)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m33 \
+	-I$(BSP_ROOT)/rzv/arm/CMSIS_5/CMSIS/Core/Include \
+	-I$(BSP_ROOT)/rzv/board/rzv2l_smarc \
+	-I$(BSP_ROOT)/rzv/fsp/inc \
+	-I$(BSP_ROOT)/rzv/fsp/inc/api \
+	-I$(BSP_ROOT)/rzv/fsp/inc/instances \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/cmsis/Device/RENESAS/Include \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/cmsis/Device/RENESAS/Include/iobitmasks  \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/cmsis/Device/RENESAS/Include/iodefines  \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/mcu/all  \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/mcu/rzv2l  \
+	-I$(BSP_ROOT)/rzv_cfg/fsp_cfg  \
+	-I$(BSP_ROOT)/rzv_cfg/fsp_cfg/bsp  \
+	-I$(BSP_ROOT)/rzv_gen \
+	-I$(BSP_ROOT)/rzv/linaro/libmetal/include \
+	-I$(BSP_ROOT)/rzv/linaro/open-amp/lib/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \

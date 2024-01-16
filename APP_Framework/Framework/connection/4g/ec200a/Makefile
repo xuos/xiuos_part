@@ -7,7 +7,7 @@ ifeq ($(CONFIG_ADD_NUTTX_FEATURES),y)
 endif
 
 ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
-    SRC_FILES := ec200a.c
+    SRC_FILES := ec200a.c ec200a_mqtt.c
 
     include $(KERNEL_ROOT)/compiler.mk
 
