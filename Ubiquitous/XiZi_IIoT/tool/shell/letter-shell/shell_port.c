@@ -21,6 +21,10 @@
 #include "xsconfig.h"
 #include <device.h>
 
+#ifdef BOARD_RZV2L_M33
+#include <console.h>
+#endif
+
 Shell shell;
 char *shellBuffer;
 ShellFs shellFs;
@@ -46,6 +50,10 @@ void userShellWrite(char data)
  */
 signed char userShellRead(char *data)
 {
+#ifdef BOARD_RZV2L_M33
+
+    return scanf_raw(data);
+#else
     char read_length = 0;
     struct BusBlockReadParam read_param;
 
@@ -60,6 +68,7 @@ signed char userShellRead(char *data)
     read_length = (char)read_param.read_length;
 
     return read_length;
+#endif
 }
 
 #ifdef SHELL_ENABLE_FILESYSTEM
@@ -110,13 +119,16 @@ int userShellInit(void)
     shell.write = userShellWrite;
     shell.read = userShellRead;
 
-    console = ObtainConsole();
+#ifdef BOARD_RZV2L_M33
 
+#else
+    console = ObtainConsole();
     /*Open the serial device in interrupt receiving and polling sending mode */
     struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)console->private_data;
     serial_dev_param->serial_set_mode = 0;
     serial_dev_param->serial_stream_mode = SIGN_OPER_STREAM;
     BusDevOpen(console);
+#endif
     
     shellInit(&shell, shellBuffer, 512);
     int32 tid;
