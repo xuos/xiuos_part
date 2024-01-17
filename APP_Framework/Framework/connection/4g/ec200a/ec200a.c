@@ -382,7 +382,7 @@ out:
     return -1;
 }
 
-static void extractCarrierInfo(const char *response, struct NetworkInfo *networkInfo)
+static void extractCarrierInfo(char *response, struct NetworkInfo *networkInfo)
 {
     const char *delimiter = "\"";
     const char *token;

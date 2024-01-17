@@ -54,6 +54,10 @@ static const char* s_enable_hexdump = "no";
 static const char* s_ssi_pattern = "#.html";
 static const char* web_version = "XiUOS WebServer 1.0";
 
+static const char* net_carrier_china_mobile = "中国移动";
+static const char* net_carrier_china_unicom = "中国联通";
+static const char* net_carrier_china_telecom = "中国电信";
+
 static struct netdev* p_netdev_webserver;
 static struct netdev* p_netdev_ethernet;
 static pthread_t tid;
@@ -125,6 +129,9 @@ static struct net_4g_info {
     char operator[20];
     char signal_strength[20];
     char connect_port[20];
+
+    int net_4g_init_flag;
+    int connect_status;
 } net_4g_info;
 
 struct Adapter* adapter;
@@ -286,24 +293,63 @@ static void Rs485Configure(int baud_rate, int data_bit, int stop_bit, int parity
 #ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
 static void Net4gGetInfo(char *ip, char *operator, char *signal_strength)
 {
-    //to do
+    if (net_4g_info.net_4g_init_flag) {
+        AdapterDeviceNetstat(adapter);
+
+        strcpy(ip, adapter->network_info.ip_address);
+        sprintf(signal_strength, "%d", adapter->network_info.signal_strength);
+
+        switch (adapter->network_info.carrier_type)
+        {
+        case CARRIER_CHINA_MOBILE:
+            strcpy(operator, net_carrier_china_mobile);
+            break;
+        case CARRIER_CHINA_UNICOM:
+            strcpy(operator, net_carrier_china_unicom);
+            break;
+        case CARRIER_CHINA_TELECOM:
+            strcpy(operator, net_carrier_china_telecom);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 static void Net4gConnect(void)
 {
-    int ec200a_baud_rate = 115200;
+    int ret = -1;
+    int ec200a_baud_rate;
     const char *send_msg = "Adapter_4G Test";
-    adapter->socket.socket_id = 0;
 
-    AdapterDeviceOpen(adapter);
-    AdapterDeviceControl(adapter, OPE_INT, &ec200a_baud_rate);
-    AdapterDeviceConnect(adapter, CLIENT, net_4g_info.connect_ip, net_4g_info.connect_port, IPV4);
+    if (0 == net_4g_info.net_4g_init_flag) {
+        adapter->socket.socket_id = 0;
+        ec200a_baud_rate = 115200;
+        AdapterDeviceOpen(adapter);
+        AdapterDeviceControl(adapter, OPE_INT, &ec200a_baud_rate);
+        net_4g_info.net_4g_init_flag = 1;
+    }
+
+    if (0 == net_4g_info.connect_status) {
+        ret = AdapterDeviceConnect(adapter, CLIENT, net_4g_info.connect_ip, net_4g_info.connect_port, IPV4);
+        if (ret < 0) {
+            net_4g_info.connect_status = 0;
+            printf("webserver %s fail\n", __func__);
+        } else {
+            net_4g_info.connect_status = 1;
+            AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
+            printf("webserver %s success\n", __func__);
+        }
+    }
 }
 
 static void Net4gDisconnect(void)
 {
-    uint8_t priv_net_group = IP_PROTOCOL;
-    AdapterDeviceDisconnect(adapter, &priv_net_group);
+    if (1 == net_4g_info.connect_status) {
+        uint8_t priv_net_group = IP_PROTOCOL;
+        AdapterDeviceDisconnect(adapter, &priv_net_group);
+        net_4g_info.connect_status = 0;
+    }
 }
 
 /*******************************************************************************
@@ -311,12 +357,44 @@ static void Net4gDisconnect(void)
  ******************************************************************************/
 static void NetMqttConnect(void)
 {
-    //to do
+    int ret = -1;
+    int ec200a_baud_rate;
+    uint8_t client_id[64];
+    const char *send_msg = "Adapter_4G MQTT Test";
+
+    if (0 == net_4g_info.net_4g_init_flag) {
+        adapter->socket.socket_id = 0;
+        ec200a_baud_rate = 115200;
+        AdapterDeviceOpen(adapter);
+        AdapterDeviceControl(adapter, OPE_INT, &ec200a_baud_rate);
+        net_4g_info.net_4g_init_flag = 1;
+    }
+
+    if (1 == net_4g_info.connect_status) {
+        uint8_t priv_net_group = IP_PROTOCOL;
+        AdapterDeviceDisconnect(adapter, &priv_net_group);
+    }
+
+    sprintf(client_id, "%d", net_4g_mqtt_info.client_id);
+
+    ret = AdapterDeviceMqttConnect(adapter, net_4g_info.connect_ip, net_4g_info.connect_port, 
+        client_id, net_4g_mqtt_info.username, net_4g_mqtt_info.password);
+    if (ret < 0) {
+        net_4g_mqtt_info.connect_status = 0;
+        printf("webserver %s fail\n", __func__);
+    } else {
+        net_4g_mqtt_info.connect_status = 1;
+        AdapterDeviceMqttSend(adapter, net_4g_mqtt_info.topic, send_msg, strlen(send_msg));
+        printf("webserver %s success\n", __func__);
+    }
 }
 
 static void NetMqttDisconnect(void)
 {
-    //to do
+    if (1 == net_4g_mqtt_info.connect_status) {
+        AdapterDeviceMqttDisconnect(adapter);
+        net_4g_mqtt_info.connect_status = 0;
+    }
 }
 #endif
 
@@ -593,7 +671,7 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
             Net4gGetInfo(net_4g_info.map_ip, net_4g_info.operator, net_4g_info.signal_strength);
 
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
-                "{%m:%m, %m:%m, %m:%d}\n",
+                "{%m:%m, %m:%m, %m:%m}\n",
                 MG_ESC("mapIp"), MG_ESC(net_4g_info.map_ip),
                 MG_ESC("operator"), MG_ESC(net_4g_info.operator),
                 MG_ESC("signalIntensity"), MG_ESC(net_4g_info.signal_strength));
@@ -768,6 +846,9 @@ static void* do_webserver(void* args)
 #ifdef APPLICATION_WEBSERVER_XISHUTONG_4G
     adapter = AdapterDeviceFindByName(ADAPTER_4G_NAME);
 #endif
+
+    //4g init param
+    net_4g_info.net_4g_init_flag = 0;
 
     //lora init param
     net_lora_info.bw = 2;//bw 0:125 kHz 1:250 kHz 2:500 kHz,

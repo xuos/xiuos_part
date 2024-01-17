@@ -166,7 +166,7 @@ struct IpProtocolDone
     int (*mqttconnect)(struct Adapter *adapter, const char *ip, const char *port, const char *client_id, const char *username, const char *password);
     int (*mqttdisconnect)(struct Adapter *adapter);
     int (*mqttsend)(struct Adapter *adapter, const char *topic, const void *buf, size_t len);
-    int (*mqttrecv)(struct Adapter *adapter, const char *topic, const void *buf, size_t len);
+    int (*mqttrecv)(struct Adapter *adapter, const char *topic, void *buf, size_t len);
 };
 
 struct PrivProtocolDone
