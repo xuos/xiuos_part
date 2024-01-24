@@ -143,16 +143,17 @@ int Adapter4GTest(void)
 
     AdapterDeviceNetstat(adapter);
 
-    AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
+    /*4G TCP Connect Test*/
+    // AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
 
-    while (1) {
-        AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
-        AdapterDeviceRecv(adapter, recv_msg, 256);
-        printf("4G recv msg %s\n", recv_msg);
-        memset(recv_msg, 0, 256);
-    }
+    // while (1) {
+    //     AdapterDeviceSend(adapter, send_msg, strlen(send_msg));
+    //     AdapterDeviceRecv(adapter, recv_msg, 256);
+    //     printf("4G recv msg %s\n", recv_msg);
+    //     memset(recv_msg, 0, 256);
+    // }
 
-    /*
+    /*4G MQTT Connect Test*/
     AdapterDeviceMqttConnect(adapter, server_addr, server_port, client_id, username, password);
 
     while (1) {
@@ -161,7 +162,6 @@ int Adapter4GTest(void)
         printf("4G mqtt recv msg %s\n", recv_msg);
         memset(recv_msg, 0, 256);
     }
-    */
 #endif
 
     return 0;    

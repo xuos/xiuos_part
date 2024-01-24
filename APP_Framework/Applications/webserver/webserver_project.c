@@ -125,7 +125,7 @@ int rs485_uart_fd = -1;
 /*define net 4G info*/
 static struct net_4g_info {
     char map_ip[20];
-    char connect_ip[20];
+    char connect_ip[40];
     char operator[20];
     char signal_strength[20];
     char connect_port[20];
@@ -137,10 +137,10 @@ static struct net_4g_info {
 struct Adapter* adapter;
 
 static struct net_4g_mqtt_info {
-    char topic[20];
-    char username[20];
-    char password[20];
-    int client_id;
+    char topic[40];
+    char username[40];
+    char password[40];
+    char client_id[40];
     int connect_status;
 } net_4g_mqtt_info;
 #endif
@@ -294,8 +294,6 @@ static void Rs485Configure(int baud_rate, int data_bit, int stop_bit, int parity
 static void Net4gGetInfo(char *ip, char *operator, char *signal_strength)
 {
     if (net_4g_info.net_4g_init_flag) {
-        AdapterDeviceNetstat(adapter);
-
         strcpy(ip, adapter->network_info.ip_address);
         sprintf(signal_strength, "%d", adapter->network_info.signal_strength);
 
@@ -327,7 +325,13 @@ static void Net4gConnect(void)
         ec200a_baud_rate = 115200;
         AdapterDeviceOpen(adapter);
         AdapterDeviceControl(adapter, OPE_INT, &ec200a_baud_rate);
+        AdapterDeviceNetstat(adapter);
         net_4g_info.net_4g_init_flag = 1;
+    }
+
+    if (1 == net_4g_mqtt_info.connect_status) {
+        AdapterDeviceMqttDisconnect(adapter);
+        net_4g_mqtt_info.connect_status = 0;
     }
 
     if (0 == net_4g_info.connect_status) {
@@ -358,34 +362,47 @@ static void Net4gDisconnect(void)
 static void NetMqttConnect(void)
 {
     int ret = -1;
-    int ec200a_baud_rate;
-    uint8_t client_id[64];
+    int ec200a_baud_rate = 0;
+
+    //for test
     const char *send_msg = "Adapter_4G MQTT Test";
+    char recv_msg[256] = {0};
+    int send_cnt = 1;
 
     if (0 == net_4g_info.net_4g_init_flag) {
         adapter->socket.socket_id = 0;
         ec200a_baud_rate = 115200;
         AdapterDeviceOpen(adapter);
         AdapterDeviceControl(adapter, OPE_INT, &ec200a_baud_rate);
+        AdapterDeviceNetstat(adapter);
         net_4g_info.net_4g_init_flag = 1;
     }
 
     if (1 == net_4g_info.connect_status) {
         uint8_t priv_net_group = IP_PROTOCOL;
         AdapterDeviceDisconnect(adapter, &priv_net_group);
+        net_4g_info.connect_status = 0;
     }
 
-    sprintf(client_id, "%d", net_4g_mqtt_info.client_id);
+    if (0 == net_4g_mqtt_info.connect_status) {
+        ret = AdapterDeviceMqttConnect(adapter, net_4g_info.connect_ip, net_4g_info.connect_port, 
+            net_4g_mqtt_info.client_id, net_4g_mqtt_info.username, net_4g_mqtt_info.password);
+        if (ret < 0) {
+            net_4g_mqtt_info.connect_status = 0;
+            printf("webserver %s fail\n", __func__);
+        } else {
+            net_4g_mqtt_info.connect_status = 1;
 
-    ret = AdapterDeviceMqttConnect(adapter, net_4g_info.connect_ip, net_4g_info.connect_port, 
-        client_id, net_4g_mqtt_info.username, net_4g_mqtt_info.password);
-    if (ret < 0) {
-        net_4g_mqtt_info.connect_status = 0;
-        printf("webserver %s fail\n", __func__);
-    } else {
-        net_4g_mqtt_info.connect_status = 1;
-        AdapterDeviceMqttSend(adapter, net_4g_mqtt_info.topic, send_msg, strlen(send_msg));
-        printf("webserver %s success\n", __func__);
+            //for test
+            while (send_cnt < 11) {
+                AdapterDeviceMqttSend(adapter, net_4g_mqtt_info.topic, send_msg, strlen(send_msg));
+                AdapterDeviceMqttRecv(adapter, net_4g_mqtt_info.topic, recv_msg, sizeof(recv_msg));
+                printf("[%d]4G mqtt test recv msg %s\n", send_cnt, recv_msg);
+                send_cnt++;
+            }
+
+            printf("webserver %s success\n", __func__);
+        }
     }
 }
 
@@ -671,12 +688,16 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
             Net4gGetInfo(net_4g_info.map_ip, net_4g_info.operator, net_4g_info.signal_strength);
 
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
-                "{%m:%m, %m:%m, %m:%m}\n",
+                "{%m:%m, %m:%m, %m:%m, %m:%m, %m:%m, %m:%d}\n",
                 MG_ESC("mapIp"), MG_ESC(net_4g_info.map_ip),
                 MG_ESC("operator"), MG_ESC(net_4g_info.operator),
-                MG_ESC("signalIntensity"), MG_ESC(net_4g_info.signal_strength));
+                MG_ESC("signalIntensity"), MG_ESC(net_4g_info.signal_strength),
+                MG_ESC("publicIp"), MG_ESC(net_4g_info.connect_ip),
+                MG_ESC("publicPort"), MG_ESC(net_4g_info.connect_port),
+                MG_ESC("status"), net_4g_info.connect_status);
         } else if (mg_http_match_uri(hm, "/net/set4gInfo")) {
             struct mg_str json = hm->body;
+            printf("json: %s\n", json.ptr);
             update_config_array(json, "$.publicIp", net_4g_info.connect_ip);
             update_config_array(json, "$.publicPort", net_4g_info.connect_port);
 
@@ -691,18 +712,20 @@ static void fn(struct mg_connection* c, int ev, void* ev_data, void* fn_data)
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else if (mg_http_match_uri(hm, "/net/getMQTTInfo")) {
             mg_http_reply(c, 200, "Content-Type: application/json\r\n",
-                "{%m:%m, %m:%m, %m:%m, %m:%d, %m:%d}\n",
+                "{%m:%m, %m:%m, %m:%m, %m:%m, %m:%d}\n",
                 MG_ESC("topic"), MG_ESC(net_4g_mqtt_info.topic),
                 MG_ESC("username"), MG_ESC(net_4g_mqtt_info.username),
                 MG_ESC("password"), MG_ESC(net_4g_mqtt_info.password),
-                MG_ESC("client_id"), net_4g_mqtt_info.client_id,
+                MG_ESC("clientId"), MG_ESC(net_4g_mqtt_info.client_id),
                 MG_ESC("status"), net_4g_mqtt_info.connect_status);
         } else if (mg_http_match_uri(hm, "/net/setMQTTInfo")) {
             struct mg_str json = hm->body;
+            printf("json: %s\n", json.ptr);
             update_config_array(json, "$.topic", net_4g_mqtt_info.topic);
             update_config_array(json, "$.username", net_4g_mqtt_info.username);
             update_config_array(json, "$.password", net_4g_mqtt_info.password);
-            net_4g_mqtt_info.client_id = mg_json_get_long(json, "$.client_id", 0);
+            update_config_array(json, "$.clientId", net_4g_mqtt_info.client_id);
+
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"status\":\"success\"}\r\n");
         } else if (mg_http_match_uri(hm, "/net/connectMQTT")) {
             //enable 4G MQTT connect function
@@ -849,6 +872,8 @@ static void* do_webserver(void* args)
 
     //4g init param
     net_4g_info.net_4g_init_flag = 0;
+    net_4g_info.connect_status = 0;
+    net_4g_mqtt_info.connect_status = 0;
 
     //lora init param
     net_lora_info.bw = 2;//bw 0:125 kHz 1:250 kHz 2:500 kHz,
