@@ -1,4 +1,4 @@
-OBJS := $(shell cat make.obj)
+OBJS :=  $(notdir $(shell cat make.obj))
 
 $(TARGET): $(OBJS) 
 	@echo ------------------------------------------------
@@ -7,4 +7,5 @@ $(TARGET): $(OBJS)
 	@echo ------------------------------------------------
 	@$(CROSS_COMPILE)objcopy -O binary $@ XiZi-$(BOARD)$(COMPILE_TYPE).bin
 	@$(CROSS_COMPILE)objcopy -O ihex $@  XiZi-$(BOARD)$(COMPILE_TYPE).hex
+	@$(CROSS_COMPILE)objdump -S -D $@ > XiZi-$(BOARD)$(COMPILE_TYPE).asm
 	@$(CROSS_COMPILE)size $@
