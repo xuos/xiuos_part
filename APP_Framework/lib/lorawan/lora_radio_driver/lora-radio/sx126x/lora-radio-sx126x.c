@@ -479,6 +479,7 @@ uint8_t RadioRxPayload[255];
 
 bool IrqFired = false;
 static bool lora_radio_init = false;
+static bool lora_spi_init = false;
 /*
  * SX126x DIO IRQ callback functions prototype
  */
@@ -552,6 +553,16 @@ static TimerEvent_t RxTimeoutTimer;
 uint8_t RadioCheck(void)
 {
     uint8_t test = 0;
+    
+    if( lora_spi_init == false ) {
+        int ret = lora_radio_spi_init();
+        if (ret < 0) {
+            LORA_RADIO_DEBUG_LOG(LR_DBG_INTERFACE, LOG_LEVEL, "SX126x SPI Init Failed\n");
+            return false;
+        }
+        lora_spi_init = true;
+        LORA_RADIO_DEBUG_LOG(LR_DBG_INTERFACE, LOG_LEVEL, "SX126x SPI Init Succeed\n");   
+    } 
 
     LORA_RADIO_DEBUG_LOG(LR_DBG_INTERFACE, LOG_LEVEL, "Packet Type is %s\n",( SX126x.PacketParams.PacketType == PACKET_TYPE_LORA )? "LoRa":"FSK");
     
@@ -668,13 +679,13 @@ bool RadioInit( RadioEvents_t *events )
         lora_radio_init = true;
     } 
 #elif defined LORA_RADIO_DRIVER_USING_RTOS_XIUOS
-    if( lora_radio_init == false ) {
+    if( lora_spi_init == false ) {
         int ret = lora_radio_spi_init();
         if (ret < 0) {
             LORA_RADIO_DEBUG_LOG(LR_DBG_INTERFACE, LOG_LEVEL, "SX126x SPI Init Failed\n");
             return false;
         }
-        
+        lora_spi_init = true;
         LORA_RADIO_DEBUG_LOG(LR_DBG_INTERFACE, LOG_LEVEL, "SX126x SPI Init Succeed\n");   
     } 
 #else

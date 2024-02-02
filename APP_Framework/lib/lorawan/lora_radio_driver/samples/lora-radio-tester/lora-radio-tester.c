@@ -92,7 +92,7 @@ static uint8_t lora_chip_initialized;
 static bool master_flag = true;
 static bool rx_only_flag = false;
 static bool tx_only_flag = false;
-static bool tx_continues = false;
+static int tx_continues = false;
 
 static lora_radio_test_t lora_radio_test_paras = 
 {
@@ -1119,7 +1119,7 @@ static void *lora_radio_test_thread_entry(void *parameter)
                 TX_LED_TOGGLE;
                 if (tx_only_flag == false) {
                     radio_rx();
-                } else if (tx_continues) {
+                } else if (tx_seq_cnt < tx_continues) {
                     PrivTaskDelay(1000);
                     PrivEvenTrigger(radio_event, EV_RADIO_TX_START);
                 } else {
@@ -1142,7 +1142,10 @@ static void *lora_radio_test_thread_entry(void *parameter)
                                                             LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON_DISABLE,
                                                             true, 0, 0, lora_radio_test_paras.iq_inversion, tx_timeout );
 
-                            send_ping_packet(master_address,slaver_address,payload_len);
+                            
+                            if (tx_seq_cnt < tx_continues) {
+                                send_ping_packet(master_address,slaver_address,payload_len);
+                            }
                         } else {
                             /* tx_seq_cnt start from 0 */
                             if( tx_seq_cnt < max_tx_nbtrials ) {
@@ -1226,6 +1229,18 @@ int TestLoraRadio(int argc, char *argv[])
         LORA_RADIO_DEBUG_LOG(LR_DBG_SHELL, LOG_LVL_INFO, "\n");
     } else {
         const char *cmd0 = argv[1];
+
+        if (!strcmp(cmd0, "check")) {   
+            LORA_RADIO_DEBUG_LOG(LR_DBG_SHELL, LOG_LVL_INFO, "LoRa Modules start to check using SPI");
+
+            if( Radio.Check() ) {
+                LORA_RADIO_DEBUG_LOG(LR_DBG_SHELL, LOG_LVL_INFO, "LoRa Modules check ok!");
+                return 1;
+            } else {
+                LORA_RADIO_DEBUG_LOG(LR_DBG_SHELL, LOG_LVL_INFO, "LoRa Modules check failed!\n!");
+                return -1;
+            }
+        }
 				
         if( lora_radio_tester_init() == false ) {
             LORA_RADIO_DEBUG_LOG(LR_DBG_SHELL, LOG_LVL_INFO, "LoRa Chip Init Failed");
@@ -1304,16 +1319,19 @@ int TestLoraRadio(int argc, char *argv[])
             }
             PrivEvenTrigger(radio_event, EV_RADIO_INIT);
         } else if(!strcmp(cmd0, "tx")) {   
-            /* eg: lora tx 1 0 */
+            /* eg: lora tx 1 0 1 */
             master_flag = true;
             tx_only_flag = true;
-            tx_continues = true;
+            tx_continues = 4;
             
             if (argc >= 3) {
                 tx_only_flag = atol(argv[2]);
             }
             if (argc >= 4) {
                 tx_timeout = atol(argv[3]);
+            }
+            if (argc >= 5) {
+                tx_continues = atol(argv[4]);
             }
             PrivEvenTrigger(radio_event, EV_RADIO_INIT);
         } else if(!strcmp(cmd0, "txdone")) {  

@@ -29,13 +29,5 @@ if BSP_USING_SPI
         config SPI_2_DRV_NAME
             string "spi bus 2 driver name"
             default "spi2_drv"
-        menuconfig RESOURCES_SPI_LORA
-            bool "Using spi lora function"
-            default n
-            if RESOURCES_SPI_LORA
-                config SX12XX_DEVICE_NAME
-                string "SX1276 lora device name"
-                default "spi2_lora"
-            endif
     endif  
 endif

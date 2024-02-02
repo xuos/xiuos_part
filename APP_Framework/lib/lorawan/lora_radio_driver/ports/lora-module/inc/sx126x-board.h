@@ -131,6 +131,10 @@ Modification:
     #define LORA_RADIO_RESET_PIN  144//PD02 on xishutong-arm32
     #endif
 
+    #ifndef LORA_RADIO_BUSY_PIN
+    #define LORA_RADIO_BUSY_PIN   141//PC12 on xishutong-arm32
+    #endif
+
     #ifndef LORA_SPI_DEV_NAME
     #define LORA_SPI_DEV_NAME "/dev/spi2_dev0"
     #endif
