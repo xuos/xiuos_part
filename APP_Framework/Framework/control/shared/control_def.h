@@ -130,7 +130,7 @@ struct ControlRecipe
 };
 
 /*Get Value Type Memory Size*/
-uint8_t GetValueTypeMemorySize(UniformValueType uniform_value_type);
+uint8_t GetValueTypeMemorySize(UniformValueType uniform_value_type,int value_num);
 
 /*Get basic information from recipe file*/
 int RecipeBasicInformation(struct ControlRecipe *p_recipe, cJSON *p_recipe_file_json);

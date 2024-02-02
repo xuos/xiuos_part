@@ -30,4 +30,8 @@ ifeq ($(CONFIG_LIB_USING_SQLITE),y)
   SRC_DIR += SQLite
 endif
 
+# ifeq ($(CONFIG_LIB_USING_FREEMODBUS),y)
+# 	SRC_DIR += freemodbus
+# endif
+
 include $(KERNEL_ROOT)/compiler.mk

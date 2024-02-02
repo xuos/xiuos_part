@@ -447,7 +447,7 @@ int ModbusTcpProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInf
         p_read_item_data);
 
     ControlPrintfList("CMD", modbustcp_read_item->data_info.base_data_info.p_command, modbustcp_read_item->data_info.base_data_info.command_length);
-    protocol_format_info->last_item_size = GetValueTypeMemorySize(modbustcp_read_item->value_type);
+    protocol_format_info->last_item_size = GetValueTypeMemorySize(modbustcp_read_item->value_type,1);
 
     last_item_size += protocol_format_info->last_item_size;
 

@@ -14,4 +14,8 @@ ifeq ($(CONFIG_CONTROL_PROTOCOL_S7), y)
 	SRC_DIR := s7
 endif
 
+ifeq ($(CONFIG_CONTROL_PROTOCOL_CIP), y)
+	SRC_DIR := ethernet_ip_cip
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

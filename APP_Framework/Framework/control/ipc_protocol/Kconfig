@@ -13,3 +13,5 @@ config CONTROL_PROTOCOL_MODBUS_UART
 if CONTROL_PROTOCOL_MODBUS_UART
         source "$APP_DIR/Framework/control/ipc_protocol/modbus_uart/Kconfig"
 endif
+
+

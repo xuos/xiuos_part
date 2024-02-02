@@ -810,7 +810,7 @@ int MelsecProtocolFormatCmd(struct ControlRecipe *p_recipe, ProtocolFormatInfo *
     ret = MelsecInitialDataInfo(melsec_read_item, p_read_item_data);
 
     ControlPrintfList("CMD", melsec_read_item->data_info.base_data_info.p_command, melsec_read_item->data_info.base_data_info.command_length);
-    protocol_format_info->last_item_size = GetValueTypeMemorySize(melsec_read_item->value_type);
+    protocol_format_info->last_item_size = GetValueTypeMemorySize(melsec_read_item->value_type,1);
 
     last_item_size += protocol_format_info->last_item_size;
 
