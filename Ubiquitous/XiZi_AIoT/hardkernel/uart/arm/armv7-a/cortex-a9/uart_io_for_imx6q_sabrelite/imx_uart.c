@@ -39,12 +39,12 @@
 /*************************************************
 File name: imx_uart.c
 Description: imx6q board uart function
-Others: 
+Others:
 History:
-1. Date: 2023-08-28
+1. Date: 2023-09-28
 Author: AIIT XUOS Lab
 Modification:
-1. first version
+1. Get init and read/write functions
 *************************************************/
 #include "crm_regs.h"
 #include "regs_pins.h"

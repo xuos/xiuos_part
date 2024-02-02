@@ -35,6 +35,16 @@
  * @file gpt.h
  * @brief GPT driver public interface.
  */
+/*************************************************
+File name: gpt.h
+Description: GPT driver public interface.
+Others:
+History:
+1. Date: 2023-11-23
+Author: AIIT XUOS Lab
+Modification:
+1. Not modifications
+*************************************************/
 
 #ifndef __GPT_H__
 #define __GPT_H__

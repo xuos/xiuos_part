@@ -27,7 +27,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * @file iomux_register.h
+ * @brief iomux registers addresses
+ * @version 3.0
+ * @author AIIT XUOS Lab
+ * @date 2023.08.25
+ */
 
+/*************************************************
+File name: iomux_register.h
+Description: iomux registers addresses
+Others:
+History:
+1. Date: 2023-08-28
+Author: AIIT XUOS Lab
+Modification:
+1. Comment unnecessary macros
+*************************************************/
 // File: iomux_register.h
 
 #ifndef _IOMUX_REGISTER_H_

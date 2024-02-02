@@ -23,6 +23,16 @@
  * @author AIIT XUOS Lab
  * @date 2023.09.08
  */
+/*************************************************
+File name: crm_regs.h
+Description: support imx6q clock control module define, reference from u-boot-2009-08/cpu/arm_cortexa8/mx6/crm_regs.h
+Others:
+History:
+1. Date: 2023-09-08
+Author: AIIT XUOS Lab
+Modification:
+1. Comment unnecessary macros.
+*************************************************/
 
 #ifndef __ARCH_ARM_MACH_MX6_CRM_REGS_H__
 #define __ARCH_ARM_MACH_MX6_CRM_REGS_H__

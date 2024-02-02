@@ -26,7 +26,16 @@
  * @author AIIT XUOS Lab
  * @date 2023.09.08
  */
-
+/*************************************************
+File name: iomux_v3.h
+Description: support imx6q iomux function define, reference from u-boot-2009-08/include/asm-arm/arch-mx6/iomux_v3.h
+Others:
+History:
+1. Date: 2023-09-08
+Author: AIIT XUOS Lab
+Modification:
+1. Not modifications
+*************************************************/
 
 #ifndef __MACH_IOMUX_V3_H__
 #define __MACH_IOMUX_V3_H__

@@ -180,7 +180,7 @@ int task_exec(struct TaskMicroDescriptor* task, struct Session* session, int fd,
     task->pgdir = pgdir;
 
     /// @todo record mem size used b task
-    task->mem_size = load_size;
+    task->mem_size = ALIGNUP(load_size, PAGE_SIZE);
 
     xizi_pager.free_user_pgdir(&old_pgdir);
     return 0;

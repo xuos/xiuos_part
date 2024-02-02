@@ -18,6 +18,16 @@
  *
  * This file was generated automatically and any changes may be lost.
  */
+/*************************************************
+File name: regsgpt.h
+Description:
+Others:
+History:
+1. Date: 2023-11-23
+Author: AIIT XUOS Lab
+Modification:
+1. Comment unnecessary macros
+*************************************************/
 #ifndef __HW_GPT_REGISTERS_H__
 #define __HW_GPT_REGISTERS_H__
 

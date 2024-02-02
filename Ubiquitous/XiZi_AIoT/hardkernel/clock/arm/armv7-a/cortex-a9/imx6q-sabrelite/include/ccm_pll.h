@@ -27,7 +27,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * @file ccm_pll.h
+ * @brief ccm pll source file
+ * @version 3.0
+ * @author AIIT XUOS Lab
+ * @date 2023.11.23
+ */
 
+/*************************************************
+File name: ccm_pll.h
+Description: ccm pll source file
+Others:
+History:
+1. Date: 2023-11-23
+Author: AIIT XUOS Lab
+Modification:
+1. Not modification
+*************************************************/
 #ifndef _CCM_PLL_H_
 #define _CCM_PLL_H_
 

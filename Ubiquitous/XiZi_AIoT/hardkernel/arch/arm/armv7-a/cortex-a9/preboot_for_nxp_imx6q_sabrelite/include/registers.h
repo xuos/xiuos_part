@@ -27,6 +27,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * @file registers.h
+ * @brief imx6q sabrelite registers
+ * @version 3.0
+ * @author AIIT XUOS Lab
+ * @date 2023.08.25
+ */
+
+/*************************************************
+File name: registers.h
+Description: imx6q sabrelite registers
+Others:
+History:
+1. Date: 2023-08-28
+Author: AIIT XUOS Lab
+Modification:
+1. Comment unnecessary macros
+*************************************************/
 #include "regs.h"
 
 //#################################################             

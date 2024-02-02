@@ -33,6 +33,16 @@
  * @brief This file contains cortexA9 functions
  *
  */
+/*************************************************
+File name: cortexA9.S
+Description: This file contains cortexA9 functions
+Others: 
+History:
+1. Date: 2023-08-28
+Author: AIIT XUOS Lab
+Modification:
+1. Not modifications
+*************************************************/
  
     .code 32
     .section ".text","ax"

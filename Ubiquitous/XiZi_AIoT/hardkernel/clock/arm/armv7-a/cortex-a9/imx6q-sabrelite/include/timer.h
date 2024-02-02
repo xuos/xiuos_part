@@ -35,6 +35,16 @@
  * @file timer.h
  * @brief various defines used by the timer driver.
  */
+/*************************************************
+File name: timer.h
+Description: various defines used by the timer driver.
+Others:
+History:
+1. Date: 2023-11-23
+Author: AIIT XUOS Lab
+Modification:
+1. Not modifications
+*************************************************/
 
 #ifndef __TIMER_H__
 #define __TIMER_H__

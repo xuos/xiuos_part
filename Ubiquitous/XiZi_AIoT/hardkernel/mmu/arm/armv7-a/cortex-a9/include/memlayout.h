@@ -36,7 +36,7 @@ Modification:
 
 /* A9 physical memory layout */
 #define PHY_MEM_BASE            (0x10000000)
-#define PHY_USER_FREEMEM_BASE   (0x40000000)
+#define PHY_USER_FREEMEM_BASE   (0x30000000)
 #define PHY_USER_FREEMEM_TOP    (0x50000000)
 #define PHY_MEM_STOP            (0x50000000)
 

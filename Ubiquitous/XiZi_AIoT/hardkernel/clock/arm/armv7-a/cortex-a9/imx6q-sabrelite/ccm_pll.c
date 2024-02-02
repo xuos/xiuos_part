@@ -27,6 +27,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * @file ccm_pll.c
+ * @brief support imx6q soc ccm pll functions
+ * @version 3.0
+ * @author AIIT XUOS Lab
+ * @date 2023.09.08
+ */
+/*************************************************
+File name: ccm_pll.c
+Description: support imx6q soc ccm pll functions
+Others:
+History:
+1. Date: 2023-08-28
+Author: AIIT XUOS Lab
+Modification:
+1. Delete unnecessary functions;
+2. Slim clock_gating_config to fit only uart and gpt(clock)
+*************************************************/
 #include "soc_memory_map.h"
 #include <stdbool.h>
 #include <stdint.h>

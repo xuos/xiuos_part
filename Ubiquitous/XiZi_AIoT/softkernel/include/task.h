@@ -39,7 +39,7 @@ Modification:
 
 #define TASK_CLOCK_TICK 50
 #define TASK_MAX_PRIORITY 32
-#define TASK_DEFAULT_PRIORITY 1
+#define TASK_DEFAULT_PRIORITY 2
 #define TASK_NAME_MAX_LEN 16
 
 enum ProcState {

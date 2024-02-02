@@ -18,6 +18,16 @@
  *
  * This file was generated automatically and any changes may be lost.
  */
+/*************************************************
+File name: regsccm.h
+Description: ccm registers
+Others:
+History:
+1. Date: 2023-11-23
+Author: AIIT XUOS Lab
+Modification:
+1. Not modifications
+*************************************************/
 #ifndef __HW_CCM_REGISTERS_H__
 #define __HW_CCM_REGISTERS_H__
 

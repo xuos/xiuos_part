@@ -23,6 +23,16 @@
  * @author AIIT XUOS Lab
  * @date 2023.09.08
  */
+/*************************************************
+File name: soc_memory_map.h
+Description: support imx6q soc memory map define, reference from u-boot-2009-08/include/asm-arm/arch-mx6/mx6.h
+Others:
+History:
+1. Date: 2023-08-28
+Author: AIIT XUOS Lab
+Modification:
+1. Comment unnecessary macros
+*************************************************/
 
 #ifndef SOC_MEMORY_MAP_H
 #define SOC_MEMORY_MAP_H

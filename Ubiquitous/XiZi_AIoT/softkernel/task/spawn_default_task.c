@@ -136,6 +136,7 @@ int spawn_embedded_task(char* img_start, char* name, char** argv)
     new_task_cb->pgdir = pgdir;
 
     /// @todo record mem size used b task
+    new_task_cb->mem_size = ALIGNUP(load_size, PAGE_SIZE);
 
     xizi_pager.free_user_pgdir(&old_pgdir);
 

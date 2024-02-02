@@ -7,7 +7,11 @@ user_ldflags = --specs=nosys.specs -Wl,-Map=user.map,-cref -N
 cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie
 c_useropts = -O0
 
-INC_DIR = -I$(KERNEL_ROOT)/services/shell/letter-shell -I$(KERNEL_ROOT)/services/lib/ipc -I$(KERNEL_ROOT)/services/boards/imx6q-sabrelite -I$(KERNEL_ROOT)/services/fs/include
+INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
+			-I$(KERNEL_ROOT)/services/lib/ipc \
+			-I$(KERNEL_ROOT)/services/lib/memory \
+			-I$(KERNEL_ROOT)/services/boards/imx6q-sabrelite \
+			-I$(KERNEL_ROOT)/services/fs/include
 
 all: init simple_client simple_server shell fs_server test_priority test_fs readme.txt | bin
 	../../tools/mkfs/mkfs ./fs.img $^
@@ -26,7 +30,7 @@ init: init.o fs_service.o libipc.o session.o libserial.o usyscall.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ 
 	@${objdump} -S $@ > $@.asm
 
-simple_client: simple_client.o libserial.o libipc.o session.o simple_service.o fs_service.o usyscall.o
+simple_client: simple_client.o libserial.o libipc.o session.o simple_service.o fs_service.o usyscall.o 
 	@${ld} ${user_ldflags} -e main -o $@ $^ 
 	@${objdump} -S $@ > $@.asm
 

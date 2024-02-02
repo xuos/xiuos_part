@@ -27,6 +27,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * @file cortex_a9.h
+ * @brief some cortex A9 core functions
+ * @version 3.0
+ * @author AIIT XUOS Lab
+ * @date 2023.08.25
+ */
+
+/*************************************************
+File name: cortex_a9.h
+Description: some cortex A9 core functions
+Others:
+History:
+1. Date: 2023-08-28
+Author: AIIT XUOS Lab
+Modification:
+1. Not modification
+*************************************************/
 #if !defined(__CORTEX_A9_H__)
 #define __CORTEX_A9_H__
 

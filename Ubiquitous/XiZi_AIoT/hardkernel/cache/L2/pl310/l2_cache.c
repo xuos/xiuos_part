@@ -34,12 +34,13 @@
 /*************************************************
 File name: l2_cache.c
 Description: the general management of L2 cache
-Others: 
-History: 
+Others:
+History:
 1. Date: 2023-04-27
 Author: AIIT XUOS Lab
-Modification: 
-1、support xiuos cache interface
+Modification:
+1. support xiuos cache interface
+2. implementations are modifications of imx6 SDK package
 *************************************************/
 
 #include "l2_cache.h"

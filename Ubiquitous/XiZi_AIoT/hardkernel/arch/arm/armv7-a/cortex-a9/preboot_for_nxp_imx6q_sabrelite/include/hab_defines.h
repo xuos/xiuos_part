@@ -34,6 +34,16 @@
  *
  * @ingroup diag_init
  */
+/*************************************************
+File name: hab_defines.h
+Description: defines for data structures and macros used for enabling secure boot
+Others:
+History:
+1. Date: 2023-11-23
+Author: AIIT XUOS Lab
+Modification:
+1. Not modifications
+*************************************************/
 #ifndef HAB_DEFINES_H
 #define HAB_DEFINES_H
 /*===========================================================================
@@ -46,7 +56,7 @@
                               CONSTANTS
 =============================================================================*/
 /** @addtogroup struct
- *  @{ 
+ *  @{
  */
 
 #define HDR_BYTES 4  /* cannot use sizeof(hab_hdr_t) in preprocessor */

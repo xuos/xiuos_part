@@ -26,6 +26,16 @@
  * @author AIIT XUOS Lab
  * @date 2023.09.08
  */
+/*************************************************
+File name: iomux_v3.c
+Description: support imx6q iomux function, reference from u-boot-2009-08/cpu/arm_cortexa8/mx6/iomux-v3.c
+Others:
+History:
+1. Date: 2023-11-23
+Author: AIIT XUOS Lab
+Modification:
+1. Not modifications
+*************************************************/
 
 #include <iomux_v3.h>
 

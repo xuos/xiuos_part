@@ -11,22 +11,11 @@
  */
 /**
  * @file spinlock.c
- * @brief spinlock c interfaces
+ * @brief spinlock interfaces
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2023.08.25
+ * @date 2023.11.23
  */
-
-/*************************************************
-File name: spinlock.c
-Description: spinlock c interfaces
-Others:
-History:
-1. Date: 2023-08-28
-Author: AIIT XUOS Lab
-Modification:
-1. add return of _spinlock_lock
-*************************************************/
 #include <stdint.h>
 #include <string.h>
 

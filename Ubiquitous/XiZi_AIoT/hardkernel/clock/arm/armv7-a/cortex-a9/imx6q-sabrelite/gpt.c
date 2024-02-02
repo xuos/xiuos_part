@@ -34,6 +34,16 @@
  *
  * @ingroup diag_timer
  */
+/*************************************************
+File name: soc_memory_map.h
+Description: GPT driver source file.
+Others:
+History:
+1. Date: 2023-08-28
+Author: AIIT XUOS Lab
+Modification:
+1. Delete a commented out function
+*************************************************/
 #include <stdint.h>
 
 #include "soc_memory_map.h"

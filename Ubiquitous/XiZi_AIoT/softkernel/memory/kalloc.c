@@ -33,8 +33,8 @@ Modification:
 #include "actracer.h"
 #include "buddy.h"
 
-struct KBuddy user_phy_freemem_buddy;
 struct KBuddy kern_virtmem_buddy;
+struct KBuddy user_phy_freemem_buddy;
 
 extern uint32_t kernel_data_end[];
 bool module_phymem_init()

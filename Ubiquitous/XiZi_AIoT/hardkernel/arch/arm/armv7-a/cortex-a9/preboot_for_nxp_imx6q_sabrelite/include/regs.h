@@ -13,7 +13,24 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
+/**
+ * @file regs.h
+ * @brief imx6q sabrelite register operation macros
+ * @version 3.0
+ * @author AIIT XUOS Lab
+ * @date 2023.08.25
+ */
 
+/*************************************************
+File name: regs.h
+Description: imx6q sabrelite register operation macros
+Others:
+History:
+1. Date: 2023-08-28
+Author: AIIT XUOS Lab
+Modification:
+1. Comment unnecessary macros
+*************************************************/
 #ifndef _REGS_H
 #define _REGS_H  1
 

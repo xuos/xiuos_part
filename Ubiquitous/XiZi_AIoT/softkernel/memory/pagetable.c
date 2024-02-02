@@ -143,6 +143,7 @@ static bool _map_user_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, 
 static void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
 {
     uintptr_t low_bound = kern_virtmem_buddy.mem_start, high_bound = kern_virtmem_buddy.mem_end;
+    uintptr_t user_low_bound = user_phy_freemem_buddy.mem_start, user_high_bound = user_phy_freemem_buddy.mem_end;
     uintptr_t end_idx = USER_MEM_TOP >> LEVEL3_PDE_SHIFT;
 
     for (uintptr_t i = 0; i < end_idx; i++) {
@@ -152,8 +153,12 @@ static void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
             // free each page
             for (uintptr_t j = 0; j < NUM_LEVEL4_PTE; j++) {
                 uintptr_t* page_paddr = (uintptr_t*)ALIGNDOWN(((uintptr_t*)P2V(pgtbl_paddr))[j], PAGE_SIZE);
-                if (page_paddr != NULL && (uintptr_t)page_paddr >= low_bound && (uintptr_t)page_paddr < high_bound) {
-                    kfree(P2V(page_paddr));
+                if (page_paddr != NULL) {
+                    if (LIKELY((uintptr_t)page_paddr >= low_bound && (uintptr_t)page_paddr < high_bound)) {
+                        kfree(P2V(page_paddr));
+                    } else if (LIKELY((uintptr_t)page_paddr >= user_low_bound && (uintptr_t)page_paddr < user_high_bound)) {
+                        raw_free((char*)page_paddr);
+                    }
                 }
             }
             kfree(P2V(pgtbl_paddr));

@@ -40,12 +40,13 @@
 /*************************************************
 File name: l1_cache.c
 Description: the general management of L1 cache
-Others: 
-History: 
+Others:
+History:
 1. Date: 2023-04-27
 Author: AIIT XUOS Lab
-Modification: 
-1、implement the l1 cache operations
+Modification:
+1. implement the l1 cache operations
+2. functions are modifications of imx6 SDK package
 *************************************************/
 
 #include "l1_cache.h"

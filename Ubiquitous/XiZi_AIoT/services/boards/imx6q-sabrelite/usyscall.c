@@ -83,6 +83,11 @@ int set_priority(sys_state_info* info)
     return syscall(SYSCALL_SYS_STATE, SYS_STATE_SET_TASK_PRIORITY, (intptr_t)info, 0, 0);
 }
 
+int task_heap_base()
+{
+    return syscall(SYSCALL_SYS_STATE, SYS_STATE_GET_HEAP_BASE, 0, 0, 0);
+}
+
 int show_task()
 {
     return syscall(SYSCALL_SYS_STATE, SYS_STATE_SHOW_TASKS, 0, 0, 0);
@@ -98,7 +103,7 @@ int show_cpu()
     return syscall(SYSCALL_SYS_STATE, SYS_STATE_SHOW_CPU_INFO, 0, 0, 0);
 }
 
-int mmap(int vaddr, int paddr, int len, bool is_dev)
+int mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 {
     return syscall(SYSCALL_MMAP, vaddr, paddr, (intptr_t)len, (intptr_t)is_dev);
 }

@@ -34,8 +34,9 @@
 
 typedef enum {
     SYS_STATE_TEST = 0,
-    SYS_STATE_MEMBLOCK_INFO,
     SYS_STATE_SET_TASK_PRIORITY,
+    SYS_STATE_GET_HEAP_BASE,
+    SYS_STATE_MEMBLOCK_INFO,
     SYS_STATE_SHOW_TASKS,
     SYS_STATE_SHOW_MEM_INFO,
     SYS_STATE_SHOW_CPU_INFO,
@@ -65,10 +66,11 @@ int register_server(char* name);
 int session(char* path, int capacity, struct Session* user_session);
 int poll_session(struct Session* userland_session_arr, int arr_capacity);
 int close_session(struct Session* session);
+int task_heap_base();
 int get_memblock_info(sys_state_info* info);
 int set_priority(sys_state_info* info);
 int show_task();
 int show_mem();
 int show_cpu();
-int mmap(int vaddr, int paddr, int len, bool is_dev);
+int mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev);
 int register_irq(int irq, int opcode);

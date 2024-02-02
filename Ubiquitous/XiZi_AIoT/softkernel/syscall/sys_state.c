@@ -128,6 +128,8 @@ int sys_state(sys_state_option option, sys_state_info* info)
     if (option == SYS_STATE_MEMBLOCK_INFO) {
         info->memblock_info.memblock_start = (uintptr_t)V2P(_binary_fs_img_start);
         info->memblock_info.memblock_end = (uintptr_t)V2P(_binary_fs_img_end);
+    } else if (option == SYS_STATE_GET_HEAP_BASE) {
+        return cur_cpu()->task->mem_size;
     } else if (option == SYS_STATE_SET_TASK_PRIORITY) {
         xizi_task_manager.set_cur_task_priority(info->priority);
     } else if (option == SYS_STATE_SHOW_TASKS) {

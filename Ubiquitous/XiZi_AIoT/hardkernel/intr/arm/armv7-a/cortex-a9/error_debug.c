@@ -25,7 +25,7 @@
  * @brief handle program abort
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2024.11.23
+ * @date 2023.11.23
  */
 
 /*************************************************
@@ -33,10 +33,11 @@ File name: error_debug.c
 Description: handle program abort
 Others:
 History:
-1. Date: 2024-11-23
+1. Date: 2023-11-23
 Author: AIIT XUOS Lab
 Modification:
-1. first version
+1. Take only armv7 abort reason part.
+2. Modify iabort and dabort handler
 *************************************************/
 #include "core.h"
 #include "memlayout.h"

@@ -25,7 +25,7 @@
  * @brief Format of an ELF executable file
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2024.11.23
+ * @date 2023.11.23
  */
 
 /*************************************************
@@ -33,7 +33,7 @@ File name: execelf.h
 Description: Format of an ELF executable file
 Others:
 History:
-1. Date: 2024-11-23
+1. Date: 2023-11-23
 Author: AIIT XUOS Lab
 Modification:
 1. reserve only necessary elfhdr structs

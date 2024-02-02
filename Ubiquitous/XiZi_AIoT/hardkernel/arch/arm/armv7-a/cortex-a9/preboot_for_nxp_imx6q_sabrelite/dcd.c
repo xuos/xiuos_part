@@ -39,12 +39,12 @@
 /*************************************************
 File name: dcd.c
 Description: imx6q device configuration data
-Others: 
+Others:
 History:
 1. Date: 2023-08-28
 Author: AIIT XUOS Lab
 Modification:
-1. first version
+1. Not modifications
 *************************************************/
 
 #include <hab_defines.h>

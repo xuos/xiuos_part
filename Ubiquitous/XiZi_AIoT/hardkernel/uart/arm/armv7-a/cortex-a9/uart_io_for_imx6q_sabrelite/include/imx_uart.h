@@ -21,12 +21,12 @@
 /*************************************************
 File name: imx_uart.h
 Description: imx6q board uart function
-Others: 
+Others:
 History:
-1. Date: 2023-08-28
+1. Date: 2023-09-08
 Author: AIIT XUOS Lab
 Modification:
-1. first version
+1. Not modifications
 *************************************************/
 
 #ifndef __IMX_UART_H__
