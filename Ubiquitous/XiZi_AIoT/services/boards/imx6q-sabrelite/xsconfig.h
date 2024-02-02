@@ -4,7 +4,7 @@
 /*  Automatically generated file; DO NOT EDIT. */
 /*  XiZi_AIoT Project Configuration */
 
-#define BOARD_IMX6Q_SABRELITE_EVB
+#define BOARD_IMX6Q_SABRELITE
 #define ARCH_ARM
 
 /*  imx6q sabrelite feature */

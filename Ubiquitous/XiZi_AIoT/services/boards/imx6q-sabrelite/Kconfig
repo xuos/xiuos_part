@@ -10,7 +10,7 @@ config KERNEL_DIR
     option env="KERNEL_ROOT"
     default "../.."
 
-config BOARD_IMX6Q_SABRELITE_EVB
+config BOARD_IMX6Q_SABRELITE
     bool
     select  ARCH_ARM
     default y
@@ -18,7 +18,6 @@ config BOARD_IMX6Q_SABRELITE_EVB
 source "$KERNEL_DIR/hardkernel/arch/Kconfig"
 
 menu "imx6q sabrelite feature"
-    source "$BSP_DIR/third_party_driver/Kconfig"
 
 endmenu
 

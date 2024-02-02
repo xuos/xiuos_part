@@ -1,5 +1,5 @@
 
-SRC_DIR := boards drivers lib
+SRC_DIR := fs shell lib tools boards
 
 
 
