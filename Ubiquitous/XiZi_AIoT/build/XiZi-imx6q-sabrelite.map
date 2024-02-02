@@ -1,0 +1,2295 @@
+Archive member included to satisfy reference by file (symbol)
+
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+                              ccm_pll.o (__aeabi_uidiv)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_dvmd_tls.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o) (__aeabi_idiv0)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_ctzdi2.o)
+                              object_allocator.o (__ctzdi2)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o (exit)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o) (_global_impure_ptr)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o (__libc_init_array)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memcpy.o)
+                              pagetable.o (memcpy)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memmove.o)
+                              actracer.o (memmove)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memset.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o (memset)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strlen-stub.o)
+                              spawn_default_task.o (strlen)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncmp.o)
+                              actracer.o (strncmp)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncpy.o)
+                              spinlock.o (strncpy)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o) (__call_exitprocs)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o) (atexit)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o) (__libc_fini_array)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o) (__retarget_lock_acquire_recursive)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o) (__register_exitproc)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libnosys.a(_exit.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o) (_exit)
+
+Allocating common symbols
+Common symbol       size              file
+
+__lock___atexit_recursive_mutex
+                    0x1               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+sys_tracer          0x1080            actracer.o
+user_phy_freemem_buddy
+                    0x4000e0          kalloc.o
+__lock___arc4random_mutex
+                    0x1               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___env_recursive_mutex
+                    0x1               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___sinit_recursive_mutex
+                    0x1               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+tracer_space        0x8000            actracer.o
+__lock___malloc_recursive_mutex
+                    0x1               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+kern_virtmem_buddy  0x4000e0          kalloc.o
+__lock___at_quick_exit_mutex
+                    0x1               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___dd_hash_mutex
+                    0x1               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___tz_mutex   0x1               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+global_cpus         0x30              task.o
+ready_task_priority
+                    0x4               task.o
+kern_pgdir          0x4               pagetable.o
+__lock___sfp_recursive_mutex
+                    0x1               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ocram            0x0000000000900000 0x0000000000040000 xrw
+ddr3             0x0000000010000000 0x0000000040000000 xrw
+virt_ddr3        0x0000000090010000 0x0000000040000000 xrw
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crti.o
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+LOAD ivt.o
+LOAD dcd.o
+LOAD imx6q_lowlevel_init.o
+LOAD cortexA9.o
+LOAD core.o
+LOAD boot.o
+LOAD context_switch.o
+LOAD ccm_pll.o
+LOAD clock.o
+LOAD gpt.o
+LOAD bootmmu.o
+LOAD mmu.o
+LOAD pagetable_attr.o
+LOAD gicv2_distributer_to_device.o
+LOAD gicv2_interface_to_core.o
+LOAD trap_common.o
+LOAD error_debug.o
+LOAD spinlock.o
+LOAD vector.o
+LOAD trampoline.o
+LOAD hard_spinlock.o
+LOAD imx_uart.o
+LOAD iomux_v3.o
+LOAD uart_common_ope.o
+LOAD l1_cache.o
+LOAD l2_cache.o
+LOAD cache_common_ope.o
+LOAD hardkernel_init.o
+LOAD actracer.o
+LOAD actracer_mem_chunk.o
+LOAD softkernel_init.o
+LOAD kalloc.o
+LOAD pagetable.o
+LOAD pagetable_level2.o
+LOAD buddy.o
+LOAD object_allocator.o
+LOAD default_irq_handler.o
+LOAD clock_irq_handler.o
+LOAD software_irq_handler.o
+LOAD task.o
+LOAD scheduler.o
+LOAD spawn_default_task.o
+LOAD syscall.o
+LOAD sys_spawn.o
+LOAD sys_exec.o
+LOAD sys_yield.o
+LOAD sys_register_as_server.o
+LOAD sys_connect_session.o
+LOAD sys_poll_session.o
+LOAD sys_close_session.o
+LOAD sys_register_irq.o
+LOAD sys_exit.o
+LOAD sys_state.o
+LOAD sys_mmap.o
+LOAD share_page.o
+LOAD main.o
+LOAD load_apps.o
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libstdc++.a
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libm.a
+START GROUP
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a
+END GROUP
+START GROUP
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libnosys.a
+END GROUP
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtend.o
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtn.o
+                0x0000000000004000                BOOT_STACK_SIZE = 0x4000
+                0x0000000000000048                RAM_VECTORS_SIZE = 0x48
+                0x0000000010000000                . = ORIGIN (ddr3)
+                0x0000000010000000                . = ALIGN (0x4)
+                0x0000000010000000                _start_image_addr = .
+
+.ivt            0x0000000010000000      0x420
+                0x0000000010000400                . = (. + 0x400)
+ *fill*         0x0000000010000000      0x400 
+ *(.ivt)
+ .ivt           0x0000000010000400       0x20 ivt.o
+                0x0000000010000400                input_ivt
+
+.boot_data      0x0000000010000420        0xc
+                0x0000000010000420                __start_boot_data = .
+ *(.boot_data)
+ .boot_data     0x0000000010000420        0xc ivt.o
+                0x0000000010000420                bd
+
+.dcd_hdr        0x0000000010000430        0x4
+ *(.dcd_hdr)
+ .dcd_hdr       0x0000000010000430        0x4 dcd.o
+                0x0000000010000430                input_dcd_hdr
+
+.dcd_wrt_cmd    0x0000000010000434        0x4
+ *(.dcd_wrt_cmd)
+ .dcd_wrt_cmd   0x0000000010000434        0x4 dcd.o
+                0x0000000010000434                input_dcd_wrt_cmd
+
+.dcd_data       0x0000000010000438      0x2d0
+ *(.dcd_data)
+ .dcd_data      0x0000000010000438      0x2d0 dcd.o
+                0x0000000010000438                input_dcd
+
+.start_sec      0x0000000010004000     0xc000
+                0x0000000010004000                . = ALIGN (0x1000)
+ boot.o(.text)
+ .text          0x0000000010004000       0xb8 boot.o
+                0x0000000010004000                _boot_start
+                0x0000000010004084                primary_cpu_init
+ imx6q_lowlevel_init.o(.text .text.*)
+ .text          0x00000000100040b8       0x34 imx6q_lowlevel_init.o
+                0x00000000100040b8                CpuInitCrit
+ .text.init     0x00000000100040ec      0x10c imx6q_lowlevel_init.o
+                0x00000000100040ec                lowlevel_init
+ bootmmu.o(.text .text.*)
+ .text          0x00000000100041f8      0x204 bootmmu.o
+                0x00000000100043b0                bootmain
+ *fill*         0x00000000100043fc        0x4 
+ .text.__stub   0x0000000010004400       0x10 linker stubs
+ boot.o(.rodata .rodata.*)
+ imx6q_lowlevel_init.o(.rodata .rodata.*)
+ bootmmu.o(.rodata .rodata.*)
+ boot.o(.data .data.*)
+ .data          0x0000000010004410        0x0 boot.o
+ imx6q_lowlevel_init.o(.data .data.*)
+ .data          0x0000000010004410        0x0 imx6q_lowlevel_init.o
+ bootmmu.o(.data .data.*)
+ .data          0x0000000010004410        0x0 bootmmu.o
+                0x0000000010004410                PROVIDE (boot_start_addr, .)
+ boot.o(.bss .bss.* COMMON)
+ .bss           0x0000000010004410        0x0 boot.o
+ imx6q_lowlevel_init.o(.bss .bss.* COMMON)
+ .bss           0x0000000010004410        0x0 imx6q_lowlevel_init.o
+ bootmmu.o(.bss .bss.* COMMON)
+ *fill*         0x0000000010004410     0x3bf0 
+ .bss           0x0000000010008000     0x4000 bootmmu.o
+                0x0000000010008000                boot_pgdir
+                0x000000001000c000                . = ALIGN (0x1000)
+                [!provide]                        PROVIDE (stacks_start, .)
+                0x0000000010010000                . = (. + BOOT_STACK_SIZE)
+ *fill*         0x000000001000c000     0x4000 
+                [!provide]                        PROVIDE (stacks_end, .)
+                0x0000000010010000                PROVIDE (stacks_top, .)
+                0x0000000010010000                PROVIDE (boot_end_addr, .)
+
+.text           0x0000000090010000    0x10dcc load address 0x0000000010010000
+ *(.vectors)
+ .vectors       0x0000000090010000       0x40 vector.o
+                0x0000000090010000                _vector_jumper
+                0x0000000090010020                _vector_start
+                0x0000000090010040                _vector_end
+                0x0000000090011000                . = ALIGN (0x1000)
+ *fill*         0x0000000090010040      0xfc0 
+ *(.text .text.* .gnu.linkonce.t.*)
+ .text          0x0000000090011000        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+ .text.startup  0x0000000090011000       0x10 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+ .text          0x0000000090011010        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crti.o
+ .text          0x0000000090011010       0x88 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+ .text          0x0000000090011098       0x74 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+                0x0000000090011098                _mainCRTStartup
+                0x0000000090011098                _start
+ .text          0x000000009001110c        0x0 ivt.o
+ .text          0x000000009001110c        0x0 dcd.o
+ .text          0x000000009001110c      0x164 cortexA9.o
+                0x000000009001110c                arm_set_interrupt_state
+                0x0000000090011130                cpu_get_current
+                0x000000009001113c                enable_neon_fpu
+                0x0000000090011158                disable_strict_align_check
+                0x000000009001116c                disable_L1_cache
+                0x000000009001118c                get_arm_private_peripheral_base
+                0x0000000090011194                arm_unified_tlb_invalidate
+                0x00000000900111a4                arm_unified_tlb_invalidate_is
+                0x00000000900111b4                arm_branch_prediction_enable
+                0x00000000900111c4                arm_branch_prediction_disable
+                0x00000000900111d4                arm_branch_target_cache_invalidate
+                0x00000000900111e0                arm_branch_target_cache_invalidate_is
+                0x00000000900111ec                scu_enable
+                0x0000000090011200                scu_join_smp
+                0x0000000090011210                scu_leave_smp
+                0x0000000090011220                scu_get_cpus_in_smp
+                0x0000000090011234                scu_enable_maintenance_broadcast
+                0x0000000090011244                scu_disable_maintenance_broadcast
+                0x0000000090011254                scu_secure_invalidate
+ .text          0x0000000090011270        0x0 core.o
+ .text          0x0000000090011270       0x5c context_switch.o
+                0x0000000090011270                context_switch
+ .text          0x00000000900112cc      0xa84 ccm_pll.o
+                0x00000000900112cc                ccm_init
+                0x00000000900114ec                get_main_clock
+                0x0000000090011814                get_peri_clock
+                0x0000000090011a00                ccm_ccgr_config
+                0x0000000090011a6c                clock_gating_config
+                0x0000000090011b84                ccm_set_lpm_wakeup_source
+                0x0000000090011c8c                ccm_enter_low_power
+                0x0000000090011d10                ipu_hsp_clk_config
+ .text          0x0000000090011d50      0x110 clock.o
+                0x0000000090011e2c                hardkernel_clock_init
+ .text          0x0000000090011e60      0x6bc gpt.o
+                0x0000000090011ea0                gpt_get_rollover_event
+                0x0000000090011f18                gpt_get_capture_event
+                0x000000009001200c                gpt_set_capture_event
+                0x00000000900120bc                gpt_get_compare_event
+                0x0000000090012148                gpt_set_compare_event
+                0x00000000900122e8                gpt_counter_disable
+                0x000000009001234c                gpt_counter_enable
+                0x00000000900123b8                gpt_init
+ .text          0x000000009001251c      0x1b0 mmu.o
+                0x000000009001251c                load_pgdir_critical
+                0x00000000900125a8                load_pgdir
+                0x0000000090012678                hardkernel_mmu_init
+ .text          0x00000000900126cc      0x2d4 pagetable_attr.o
+                0x00000000900126cc                GetDevPteAttr
+                0x0000000090012764                GetUsrPteAttr
+                0x0000000090012820                GetUsrDevPteAttr
+                0x00000000900128b4                GetKernPteAttr
+                0x0000000090012974                GetPdeAttr
+ .text          0x00000000900129a0      0x440 gicv2_distributer_to_device.o
+                0x00000000900129d8                gic_enable
+                0x0000000090012a38                gic_set_irq_security
+                0x0000000090012b00                gic_enable_irq
+                0x0000000090012b9c                gic_set_irq_priority
+                0x0000000090012be4                gic_set_cpu_target
+                0x0000000090012cbc                gic_send_sgi
+                0x0000000090012d10                gic_init
+ .text          0x0000000090012de0      0x160 gicv2_interface_to_core.o
+                0x0000000090012e18                gic_cpu_enable
+                0x0000000090012e78                gic_set_cpu_priority_mask
+                0x0000000090012eac                gic_read_irq_ack
+                0x0000000090012ed4                gic_write_end_of_irq
+                0x0000000090012f04                gic_init_cpu
+ .text          0x0000000090012f40      0x584 trap_common.o
+                0x0000000090012f40                panic
+                0x0000000090012f74                init_cpu_mode_stacks
+                0x0000000090013034                handle_reserved
+                0x0000000090013070                handle_fiq
+                0x0000000090013480                hardkernel_intr_init
+ .text          0x00000000900134c4      0x860 error_debug.o
+                0x0000000090013510                dump_tf
+                0x00000000900136ac                handle_undefined_instruction
+                0x00000000900136ec                dabort_handler
+                0x0000000090013a08                iabort_handler
+ .text          0x0000000090013d24      0x144 spinlock.o
+                0x0000000090013d24                module_spinlock_use_intr_init
+                0x0000000090013d40                spinlock_init
+                0x0000000090013d84                spinlock_lock
+                0x0000000090013e44                spinlock_unlock
+ .text          0x0000000090013e68        0x0 vector.o
+ .text          0x0000000090013e68      0x2c4 trampoline.o
+                0x0000000090013e68                trap_return
+                0x0000000090013eb4                user_trap_swi_enter
+                0x0000000090013f10                trap_irq_enter
+                0x0000000090013f9c                trap_reset_enter
+                0x0000000090013ff8                trap_dabort
+                0x0000000090014054                trap_iabort
+                0x00000000900140b0                trap_undefined_instruction
+                0x0000000090014108                init_stack
+ .text          0x000000009001412c       0x64 hard_spinlock.o
+                0x000000009001412c                _spinlock_lock
+                0x000000009001415c                _spinlock_unlock
+ .text          0x0000000090014190      0xe44 imx_uart.o
+                0x0000000090014fa0                hardkernel_uart_init
+ .text          0x0000000090014fd4      0x1f4 iomux_v3.o
+                0x0000000090014fd4                mxc_iomux_v3_init
+                0x0000000090015004                mxc_iomux_v3_setup_pad
+ .text          0x00000000900151c8      0x3dc uart_common_ope.o
+                0x00000000900151e8                serial_init
+                0x0000000090015378                KPrintf
+ .text          0x00000000900155a4      0x5e0 l1_cache.o
+                0x00000000900155a4                InvalidateL1Dcache
+                0x0000000090015660                InvalidateL1DcacheAll
+                0x0000000090015700                CleanL1Dcache
+                0x00000000900157bc                CleanL1DcacheAll
+                0x000000009001585c                FlushL1Dcache
+                0x0000000090015900                FlushL1DcacheAll
+                0x00000000900159a0                InvalidateL1IcacheAll
+                0x00000000900159d0                InvalidateL1Icache
+                0x0000000090015a74                EnableL1Icache
+                0x0000000090015ac0                DisableL1Icache
+                0x0000000090015afc                EnableL1Dcache
+                0x0000000090015b48                DisableL1Dcache
+ .text          0x0000000090015b84      0x780 l2_cache.o
+                0x0000000090015b84                pl310_flush_all
+                0x0000000090015c24                arm_l2ccinitialize
+                0x0000000090015d78                EnableL2Cache
+                0x0000000090015db8                DisableL2Cache
+                0x0000000090015dfc                SyncL2Cache
+                0x0000000090015e3c                InvalidateL2CacheAll
+                0x0000000090015f18                InvalidateL2Cache
+                0x0000000090016070                CleanL2CacheAll
+                0x0000000090016108                CleanL2Cache
+                0x00000000900161fc                FlushL2CacheAll
+                0x0000000090016210                FlushL2Cache
+ .text          0x0000000090016304      0x1bc cache_common_ope.o
+                0x0000000090016458                hardkernel_icache_init
+                0x000000009001648c                hardkernel_dcache_init
+ .text          0x00000000900164c0      0x7b0 hardkernel_init.o
+                0x0000000090016b94                hardkernel_init
+ .text          0x0000000090016c70     0x1608 actracer.o
+                0x0000000090016c70                RequireRootTag
+                0x0000000090017abc                tracer_write_trace
+                0x0000000090017b30                tracer_read_trace
+                0x0000000090017c6c                tracer_create_trace
+                0x0000000090017d08                tracer_delete_trace
+                0x0000000090017ecc                tracer_init
+                0x0000000090018000                tracer_find_tag
+                0x0000000090018090                AchieveResourceTag
+                0x00000000900180dc                AchieveResource
+                0x0000000090018174                CreateResourceTag
+                0x0000000090018248                DeleteResource
+ .text          0x0000000090018278      0x830 actracer_mem_chunk.o
+                0x0000000090018328                mem_chunk_synchronizer_init
+                0x00000000900185d4                tracer_mem_chunk_read
+                0x0000000090018634                tracer_mem_chunk_write
+                0x0000000090018678                tracer_mem_chunk_release
+                0x0000000090018954                tracer_mem_chunk_alloc
+                0x0000000090018988                tracer_mem_chunk_free
+ .text          0x0000000090018aa8      0x148 softkernel_init.o
+                0x0000000090018aa8                softkernel_init
+                0x0000000090018ba4                show_xizi_bar
+ .text          0x0000000090018bf0      0x1e8 kalloc.o
+                0x0000000090018bf0                module_phymem_init
+                0x0000000090018c74                kalloc
+                0x0000000090018d0c                kfree
+                0x0000000090018d44                raw_alloc
+                0x0000000090018d8c                raw_free
+                0x0000000090018dbc                show_phymem_info
+ .text          0x0000000090018dd8      0xb48 pagetable.o
+                0x0000000090019784                module_pager_init
+                0x00000000900197ec                load_kern_pgdir
+ .text          0x0000000090019920      0x110 pagetable_level2.o
+                0x0000000090019920                _page_walk
+ .text          0x0000000090019a30      0xa8c buddy.o
+                0x000000009001a020                KBuddySysInit
+                0x000000009001a218                KBuddyAlloc
+                0x000000009001a2cc                KBuddyFree
+                0x000000009001a41c                KFreePagesInfo
+ .text          0x000000009001a4bc      0x9fc object_allocator.o
+                0x000000009001a4bc                slab_init
+                0x000000009001a5d4                slab_alloc
+                0x000000009001a8fc                slab_free
+                0x000000009001adc0                slab_destroy
+ .text          0x000000009001aeb8      0x36c default_irq_handler.o
+                0x000000009001af04                intr_distributer_init
+                0x000000009001af6c                default_interrupt_routine
+                0x000000009001afb4                intr_irq_dispatch
+ .text          0x000000009001b224      0x170 clock_irq_handler.o
+                0x000000009001b270                clock_intr_handler_init
+                0x000000009001b2d4                xizi_clock_handler
+ .text          0x000000009001b394      0x300 software_irq_handler.o
+                0x000000009001b3e0                swi_distributer_init
+                0x000000009001b448                software_irq_dispatch
+ .text          0x000000009001b694      0xc74 task.o
+                0x000000009001c2e4                module_task_manager_init
+ .text          0x000000009001c308      0x3d8 scheduler.o
+                0x000000009001c308                max_priority_runnable_task
+                0x000000009001c440                round_robin_runnable_task
+                0x000000009001c544                recover_priority
+ .text          0x000000009001c6e0      0x740 spawn_default_task.o
+                0x000000009001c6e0                spawn_embedded_task
+ .text          0x000000009001ce20      0x1bc syscall.o
+                0x000000009001ce20                syscall
+ .text          0x000000009001cfdc      0x1a8 sys_spawn.o
+                0x000000009001cfdc                sys_spawn
+ .text          0x000000009001d184      0x954 sys_exec.o
+                0x000000009001d1d0                task_exec
+                0x000000009001d9ac                sys_exec
+ .text          0x000000009001dad8       0x24 sys_yield.o
+                0x000000009001dad8                sys_yield
+ .text          0x000000009001dafc      0x144 sys_register_as_server.o
+                0x000000009001db48                sys_register_as_server
+ .text          0x000000009001dc40      0x2c0 sys_connect_session.o
+                0x000000009001dc8c                create_session_inner
+                0x000000009001dd68                sys_connect_session
+ .text          0x000000009001df00      0x554 sys_poll_session.o
+                0x000000009001df4c                sys_poll_session
+ .text          0x000000009001e454      0x2e4 sys_close_session.o
+                0x000000009001e4a0                sys_close_session
+ .text          0x000000009001e738      0x438 sys_register_irq.o
+                0x000000009001e970                user_irq_handler
+                0x000000009001e9e0                sys_register_irq
+ .text          0x000000009001eb70      0x388 sys_exit.o
+                0x000000009001ebbc                sys_exit
+ .text          0x000000009001eef8      0x558 sys_state.o
+                0x000000009001efb8                show_tasks
+                0x000000009001f168                show_mem
+                0x000000009001f290                show_cpu
+                0x000000009001f36c                sys_state
+ .text          0x000000009001f450      0x1f4 sys_mmap.o
+                0x000000009001f49c                sys_mmap
+ .text          0x000000009001f644      0xbe4 share_page.o
+                0x000000009001fa40                task_map_pages
+                0x000000009001fba0                unmap_task_share_pages
+                0x000000009001fc9c                create_share_pages
+                0x000000009002007c                delete_share_pages
+                0x00000000900201e8                module_share_page_init
+ .text          0x0000000090020228      0x274 main.o
+                0x0000000090020228                main
+ .text          0x000000009002049c        0x0 load_apps.o
+ *fill*         0x000000009002049c        0x4 
+ .text          0x00000000900204a0      0x278 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+                0x00000000900204a0                __udivsi3
+                0x00000000900204a0                __aeabi_uidiv
+                0x00000000900206fc                __aeabi_uidivmod
+ .text          0x0000000090020718        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_dvmd_tls.o)
+                0x0000000090020718                __aeabi_ldiv0
+                0x0000000090020718                __aeabi_idiv0
+ .text          0x000000009002071c       0x20 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_ctzdi2.o)
+                0x000000009002071c                __ctzdi2
+ .text          0x000000009002073c        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+ .text.exit     0x000000009002073c       0x20 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+                0x000000009002073c                exit
+ .text          0x000000009002075c        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+ .text          0x000000009002075c        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+ .text.__libc_init_array
+                0x000000009002075c       0x58 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+                0x000000009002075c                __libc_init_array
+ .text          0x00000000900207b4       0xec /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memcpy.o)
+                0x00000000900207b4                memcpy
+ .text          0x00000000900208a0        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memmove.o)
+ .text.memmove  0x00000000900208a0       0xd4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memmove.o)
+                0x00000000900208a0                memmove
+ .text          0x0000000090020974        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memset.o)
+ .text.memset   0x0000000090020974       0xa4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memset.o)
+                0x0000000090020974                memset
+ .text          0x0000000090020a18        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strlen-stub.o)
+ .text.strlen   0x0000000090020a18       0x5c /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strlen-stub.o)
+                0x0000000090020a18                strlen
+ .text          0x0000000090020a74        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncmp.o)
+ .text.strncmp  0x0000000090020a74       0x9c /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncmp.o)
+                0x0000000090020a74                strncmp
+ .text          0x0000000090020b10        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncpy.o)
+ .text.strncpy  0x0000000090020b10       0x70 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncpy.o)
+                0x0000000090020b10                strncpy
+ .text          0x0000000090020b80        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+ .text.startup.register_fini
+                0x0000000090020b80       0x18 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+ .text.__call_exitprocs
+                0x0000000090020b98       0xf8 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+                0x0000000090020b98                __call_exitprocs
+ .text          0x0000000090020c90        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o)
+ .text.atexit   0x0000000090020c90        0xc /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o)
+                0x0000000090020c90                atexit
+ .text          0x0000000090020c9c        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+ .text.__libc_fini_array
+                0x0000000090020c9c       0x34 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+                0x0000000090020c9c                __libc_fini_array
+ .text          0x0000000090020cd0        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+ .text.__retarget_lock_init
+                0x0000000090020cd0        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020cd0                __retarget_lock_init
+ .text.__retarget_lock_init_recursive
+                0x0000000090020cd4        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020cd4                __retarget_lock_init_recursive
+ .text.__retarget_lock_close
+                0x0000000090020cd8        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020cd8                __retarget_lock_close
+ .text.__retarget_lock_close_recursive
+                0x0000000090020cdc        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020cdc                __retarget_lock_close_recursive
+ .text.__retarget_lock_acquire
+                0x0000000090020ce0        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020ce0                __retarget_lock_acquire
+ .text.__retarget_lock_acquire_recursive
+                0x0000000090020ce4        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020ce4                __retarget_lock_acquire_recursive
+ .text.__retarget_lock_try_acquire
+                0x0000000090020ce8        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020ce8                __retarget_lock_try_acquire
+ .text.__retarget_lock_try_acquire_recursive
+                0x0000000090020cec        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020cec                __retarget_lock_try_acquire_recursive
+ .text.__retarget_lock_release
+                0x0000000090020cf0        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020cf0                __retarget_lock_release
+ .text.__retarget_lock_release_recursive
+                0x0000000090020cf4        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x0000000090020cf4                __retarget_lock_release_recursive
+ .text          0x0000000090020cf8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+ .text.__register_exitproc
+                0x0000000090020cf8       0xd0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+                0x0000000090020cf8                __register_exitproc
+ .text          0x0000000090020dc8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libnosys.a(_exit.o)
+ .text._exit    0x0000000090020dc8        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libnosys.a(_exit.o)
+                0x0000000090020dc8                _exit
+ .text          0x0000000090020dcc        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtend.o
+ .text          0x0000000090020dcc        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtn.o
+
+.glue_7         0x0000000090020dcc        0x0 load address 0x0000000010020dcc
+ .glue_7        0x0000000090020dcc        0x0 linker stubs
+
+.glue_7t        0x0000000090020dcc        0x0 load address 0x0000000010020dcc
+ .glue_7t       0x0000000090020dcc        0x0 linker stubs
+
+.vfp11_veneer   0x0000000090020dcc        0x0 load address 0x0000000010020dcc
+ .vfp11_veneer  0x0000000090020dcc        0x0 linker stubs
+
+.v4_bx          0x0000000090020dcc        0x0 load address 0x0000000010020dcc
+ .v4_bx         0x0000000090020dcc        0x0 linker stubs
+
+.iplt           0x0000000090020dcc        0x0 load address 0x0000000010020dcc
+ .iplt          0x0000000090020dcc        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+
+.init           0x0000000090020dcc        0xc load address 0x0000000010020dcc
+ .init          0x0000000090020dcc        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crti.o
+                0x0000000090020dcc                _init
+ .init          0x0000000090020dd0        0x8 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtn.o
+
+.fini           0x0000000090020dd8        0xc load address 0x0000000010020dd8
+ .fini          0x0000000090020dd8        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crti.o
+                0x0000000090020dd8                _fini
+ .fini          0x0000000090020ddc        0x8 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtn.o
+
+.eh_frame       0x0000000090020de4        0x4 load address 0x0000000010020de4
+ .eh_frame      0x0000000090020de4        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+ .eh_frame      0x0000000090020de4        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtend.o
+
+.ARM.extab      0x0000000090020de8        0x0 load address 0x0000000010020de8
+ .ARM.extab     0x0000000090020de8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+
+.ARM.exidx      0x0000000090020de8        0x8 load address 0x0000000010020de8
+ .ARM.exidx     0x0000000090020de8        0x8 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+
+.rodata         0x0000000090020df0     0x2215 load address 0x0000000010020df0
+ .rodata        0x0000000090020df0       0x34 ccm_pll.o
+                0x0000000090020df0                PLL1_OUTPUT
+                0x0000000090020df4                PLL2_OUTPUT
+                0x0000000090020e08                PLL3_OUTPUT
+                0x0000000090020e1c                PLL4_OUTPUT
+                0x0000000090020e20                PLL5_OUTPUT
+ .rodata        0x0000000090020e24       0x73 trap_common.o
+ *fill*         0x0000000090020e97        0x1 
+ .rodata        0x0000000090020e98      0x2e7 error_debug.o
+ *fill*         0x000000009002117f        0x1 
+ .rodata        0x0000000090021180       0x9a spinlock.o
+ *fill*         0x000000009002121a        0x2 
+ .rodata        0x000000009002121c       0x13 uart_common_ope.o
+ *fill*         0x000000009002122f        0x1 
+ .rodata        0x0000000090021230      0x3ca hardkernel_init.o
+ *fill*         0x00000000900215fa        0x2 
+ .rodata        0x00000000900215fc      0x3cc actracer.o
+ .rodata        0x00000000900219c8      0x24e actracer_mem_chunk.o
+ *fill*         0x0000000090021c16        0x2 
+ .rodata        0x0000000090021c18      0x145 softkernel_init.o
+ *fill*         0x0000000090021d5d        0x3 
+ .rodata        0x0000000090021d60       0x8b kalloc.o
+ *fill*         0x0000000090021deb        0x1 
+ .rodata        0x0000000090021dec      0x214 pagetable.o
+ .rodata        0x0000000090022000       0xdf buddy.o
+ *fill*         0x00000000900220df        0x1 
+ .rodata        0x00000000900220e0       0xc1 object_allocator.o
+ *fill*         0x00000000900221a1        0x3 
+ .rodata        0x00000000900221a4       0xaa default_irq_handler.o
+ *fill*         0x000000009002224e        0x2 
+ .rodata        0x0000000090022250       0x9a software_irq_handler.o
+ *fill*         0x00000000900222ea        0x2 
+ .rodata        0x00000000900222ec      0x127 task.o
+ *fill*         0x0000000090022413        0x1 
+ .rodata        0x0000000090022414      0x148 spawn_default_task.o
+ .rodata        0x000000009002255c       0x3c syscall.o
+ .rodata        0x0000000090022598       0x3e sys_spawn.o
+ *fill*         0x00000000900225d6        0x2 
+ .rodata        0x00000000900225d8      0x1b6 sys_exec.o
+ *fill*         0x000000009002278e        0x2 
+ .rodata        0x0000000090022790       0xdb sys_register_as_server.o
+ *fill*         0x000000009002286b        0x1 
+ .rodata        0x000000009002286c      0x138 sys_connect_session.o
+ .rodata        0x00000000900229a4       0x71 sys_poll_session.o
+ *fill*         0x0000000090022a15        0x3 
+ .rodata        0x0000000090022a18       0x4a sys_close_session.o
+ *fill*         0x0000000090022a62        0x2 
+ .rodata        0x0000000090022a64       0x6d sys_register_irq.o
+ *fill*         0x0000000090022ad1        0x3 
+ .rodata        0x0000000090022ad4       0x89 sys_exit.o
+ *fill*         0x0000000090022b5d        0x3 
+ .rodata        0x0000000090022b60      0x249 sys_state.o
+ *fill*         0x0000000090022da9        0x3 
+ .rodata        0x0000000090022dac       0x41 sys_mmap.o
+ *fill*         0x0000000090022ded        0x3 
+ .rodata        0x0000000090022df0       0x8f share_page.o
+ *fill*         0x0000000090022e7f        0x1 
+ .rodata        0x0000000090022e80      0x185 main.o
+
+.rodata._global_impure_ptr
+                0x0000000090023008        0x4 load address 0x0000000010023008
+ .rodata._global_impure_ptr
+                0x0000000090023008        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+                0x0000000090023008                _global_impure_ptr
+
+.rel.dyn        0x000000009002300c        0x0 load address 0x000000001002300c
+ .rel.iplt      0x000000009002300c        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+                0x0000000090024000                . = ALIGN (0x1000)
+                [!provide]                        PROVIDE (kern_text, .)
+
+.data           0x0000000090023020   0x1377c8 load address 0x0000000010023020
+ *(.data .data.*)
+ .data          0x0000000090023020        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+ .data          0x0000000090023020        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crti.o
+ .data          0x0000000090023020        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+                0x0000000090023020                __dso_handle
+ .data          0x0000000090023024        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+ .data          0x0000000090023024        0x0 ivt.o
+ .data          0x0000000090023024        0x0 dcd.o
+ .data          0x0000000090023024        0x0 cortexA9.o
+ .data          0x0000000090023024        0x0 core.o
+ .data          0x0000000090023024        0x0 context_switch.o
+ .data          0x0000000090023024        0x0 ccm_pll.o
+ .data          0x0000000090023024       0x14 clock.o
+ .data          0x0000000090023038        0x0 gpt.o
+ .data          0x0000000090023038       0x20 mmu.o
+ .data          0x0000000090023058        0x0 pagetable_attr.o
+ .data          0x0000000090023058        0x0 gicv2_distributer_to_device.o
+ .data          0x0000000090023058        0x0 gicv2_interface_to_core.o
+ .data          0x0000000090023058      0x2c4 trap_common.o
+ .data          0x000000009002331c        0x0 error_debug.o
+ .data          0x000000009002331c        0x0 spinlock.o
+ .data          0x000000009002331c        0x0 vector.o
+ .data          0x000000009002331c        0x0 trampoline.o
+ .data          0x000000009002331c        0x0 hard_spinlock.o
+ .data          0x000000009002331c       0x10 imx_uart.o
+ .data          0x000000009002332c        0x0 iomux_v3.o
+ .data          0x000000009002332c       0x11 uart_common_ope.o
+ .data          0x000000009002333d        0x0 l1_cache.o
+ .data          0x000000009002333d        0x0 l2_cache.o
+ *fill*         0x000000009002333d        0x3 
+ .data          0x0000000090023340       0x30 cache_common_ope.o
+ .data          0x0000000090023370       0x3c hardkernel_init.o
+                0x0000000090023370                hardkernel_init_array
+ .data          0x00000000900233ac        0x0 actracer.o
+ .data          0x00000000900233ac        0x0 actracer_mem_chunk.o
+ .data          0x00000000900233ac        0x0 softkernel_init.o
+ .data          0x00000000900233ac        0x0 kalloc.o
+ .data          0x00000000900233ac       0x1c pagetable.o
+                0x00000000900233ac                xizi_pager
+ .data          0x00000000900233c8        0x0 pagetable_level2.o
+ .data          0x00000000900233c8        0x0 buddy.o
+ .data          0x00000000900233c8        0x0 object_allocator.o
+ .data          0x00000000900233c8        0x0 default_irq_handler.o
+ .data          0x00000000900233c8        0x0 clock_irq_handler.o
+ .data          0x00000000900233c8        0x0 software_irq_handler.o
+ *fill*         0x00000000900233c8       0x18 
+ .data          0x00000000900233e0      0x180 task.o
+                0x00000000900233e0                xizi_task_manager
+ .data          0x0000000090023560        0x0 scheduler.o
+ .data          0x0000000090023560        0x0 spawn_default_task.o
+ .data          0x0000000090023560        0x0 syscall.o
+ .data          0x0000000090023560        0x0 sys_spawn.o
+ .data          0x0000000090023560        0x0 sys_exec.o
+ .data          0x0000000090023560        0x0 sys_yield.o
+ .data          0x0000000090023560        0x0 sys_register_as_server.o
+ .data          0x0000000090023560        0x0 sys_connect_session.o
+ .data          0x0000000090023560        0x0 sys_poll_session.o
+ .data          0x0000000090023560        0x0 sys_close_session.o
+ .data          0x0000000090023560        0x0 sys_register_irq.o
+ .data          0x0000000090023560        0x0 sys_exit.o
+ .data          0x0000000090023560        0x0 sys_state.o
+ .data          0x0000000090023560        0x0 sys_mmap.o
+ .data          0x0000000090023560       0x18 share_page.o
+                0x0000000090023564                xizi_share_page_manager
+ .data          0x0000000090023578        0x0 main.o
+ .data          0x0000000090023578        0x0 load_apps.o
+ .data          0x0000000090023578        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+ .data          0x0000000090023578        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_dvmd_tls.o)
+ .data          0x0000000090023578        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_ctzdi2.o)
+ .data          0x0000000090023578        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+ .data          0x0000000090023578        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+ .data._impure_ptr
+                0x0000000090023578        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+                0x0000000090023578                _impure_ptr
+ *fill*         0x000000009002357c        0x4 
+ .data.impure_data
+                0x0000000090023580      0x428 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+ .data          0x00000000900239a8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+ .data          0x00000000900239a8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memcpy.o)
+ .data          0x00000000900239a8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memmove.o)
+ .data          0x00000000900239a8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memset.o)
+ .data          0x00000000900239a8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strlen-stub.o)
+ .data          0x00000000900239a8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncmp.o)
+ .data          0x00000000900239a8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncpy.o)
+ .data          0x00000000900239a8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+ .data.__atexit_recursive_mutex
+                0x00000000900239a8        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+                0x00000000900239a8                __atexit_recursive_mutex
+ .data          0x00000000900239ac        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o)
+ .data          0x00000000900239ac        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+ .data          0x00000000900239ac        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+ .data          0x00000000900239ac        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+ .data          0x00000000900239ac        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libnosys.a(_exit.o)
+ .data          0x00000000900239ac        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtend.o
+ .data          0x00000000900239ac        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtn.o
+                0x0000000090024000                . = ALIGN (0x1000)
+ *fill*         0x00000000900239ac      0x654 
+                0x0000000090024000                PROVIDE (_binary_fs_img_start, .)
+ *(.rawdata_fs_img*)
+ .rawdata_fs_img
+                0x0000000090024000   0x100000 load_apps.o
+                0x0000000090024000                user_apps
+                0x0000000090124000                PROVIDE (_binary_fs_img_end, .)
+                0x0000000090124000                PROVIDE (_binary_init_start, .)
+ *(.rawdata_init*)
+ .rawdata_init  0x0000000090124000    0x17370 load_apps.o
+                0x0000000090124000                initapp
+                [!provide]                        PROVIDE (_binary_init_end, .)
+                0x000000009013b370                PROVIDE (_binary_default_fs_start, .)
+ *(.rawdata_memfs*)
+ .rawdata_memfs
+                0x000000009013b370    0x1f478 load_apps.o
+                0x000000009013b370                memfs
+                [!provide]                        PROVIDE (_binary_default_fs_end, .)
+                0x000000009015a7e8                PROVIDE (kernel_data_begin, .)
+                0x000000000015a7e8                _image_size = (. - 0x90000000)
+
+.init_array     0x000000009015a7e8        0x8 load address 0x000000001015a7e8
+ .init_array    0x000000009015a7e8        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+ .init_array    0x000000009015a7ec        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+
+.igot.plt       0x000000009015a7f0        0x0 load address 0x000000001015a7f0
+ .igot.plt      0x000000009015a7f0        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+
+.fini_array     0x000000009015a7f0        0x4 load address 0x000000001015a7f0
+ .fini_array    0x000000009015a7f0        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+
+.jcr            0x000000009015a7f4        0x4 load address 0x000000001015a7f4
+ .jcr           0x000000009015a7f4        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+ .jcr           0x000000009015a7f4        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtend.o
+
+.init_array.00000
+                0x000000009015a7f8        0x4 load address 0x000000001015a7f8
+ .init_array.00000
+                0x000000009015a7f8        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+
+.bss            0x000000009015a800   0x84a669 load address 0x000000001015a800
+                0x000000009015a800                PROVIDE (__bss_start__, .)
+ *(.bss .bss.* COMMON)
+ .bss           0x000000009015a800        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+ .bss           0x000000009015a800        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crti.o
+ .bss           0x000000009015a800       0x1c /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+ .bss           0x000000009015a81c        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+ .bss           0x000000009015a81c        0x0 ivt.o
+ .bss           0x000000009015a81c        0x0 dcd.o
+ .bss           0x000000009015a81c        0x0 cortexA9.o
+ .bss           0x000000009015a81c        0x0 core.o
+ .bss           0x000000009015a81c        0x0 context_switch.o
+ .bss           0x000000009015a81c        0x0 ccm_pll.o
+ .bss           0x000000009015a81c        0x0 clock.o
+ .bss           0x000000009015a81c        0x0 gpt.o
+ .bss           0x000000009015a81c       0x18 mmu.o
+ .bss           0x000000009015a834       0x20 pagetable_attr.o
+ .bss           0x000000009015a854        0x0 gicv2_distributer_to_device.o
+ .bss           0x000000009015a854        0x0 gicv2_interface_to_core.o
+ .bss           0x000000009015a854    0x40000 trap_common.o
+ .bss           0x000000009019a854        0x0 error_debug.o
+ .bss           0x000000009019a854        0x0 spinlock.o
+ .bss           0x000000009019a854        0x0 vector.o
+ .bss           0x000000009019a854        0x0 trampoline.o
+ .bss           0x000000009019a854        0x0 hard_spinlock.o
+ .bss           0x000000009019a854        0x1 imx_uart.o
+ *fill*         0x000000009019a855        0x3 
+ .bss           0x000000009019a858        0x4 iomux_v3.o
+ .bss           0x000000009019a85c        0xc uart_common_ope.o
+ .bss           0x000000009019a868        0x0 l1_cache.o
+ .bss           0x000000009019a868        0x0 l2_cache.o
+ .bss           0x000000009019a868        0x0 cache_common_ope.o
+ .bss           0x000000009019a868        0x8 hardkernel_init.o
+ .bss           0x000000009019a870        0xc actracer.o
+ *fill*         0x000000009019a87c        0x4 
+ COMMON         0x000000009019a880     0x9080 actracer.o
+                0x000000009019a880                sys_tracer
+                0x000000009019b900                tracer_space
+ .bss           0x00000000901a3900      0xa60 actracer_mem_chunk.o
+ .bss           0x00000000901a4360        0x0 softkernel_init.o
+ .bss           0x00000000901a4360        0x0 kalloc.o
+ COMMON         0x00000000901a4360   0x8001c0 kalloc.o
+                0x00000000901a4360                user_phy_freemem_buddy
+                0x00000000905a4440                kern_virtmem_buddy
+ .bss           0x00000000909a4520        0xc pagetable.o
+                0x00000000909a4528                _p_pgtbl_mmu_access
+ COMMON         0x00000000909a452c        0x4 pagetable.o
+                0x00000000909a452c                kern_pgdir
+ .bss           0x00000000909a4530        0x0 pagetable_level2.o
+ .bss           0x00000000909a4530        0x0 buddy.o
+ .bss           0x00000000909a4530        0x0 object_allocator.o
+ .bss           0x00000000909a4530        0xc default_irq_handler.o
+ *fill*         0x00000000909a453c        0x4 
+ .bss           0x00000000909a4540       0x18 clock_irq_handler.o
+                0x00000000909a4550                global_tick
+ .bss           0x00000000909a4558        0xc software_irq_handler.o
+ .bss           0x00000000909a4564        0x8 task.o
+                0x00000000909a4564                next_task_emergency
+ COMMON         0x00000000909a456c       0x34 task.o
+                0x00000000909a456c                global_cpus
+                0x00000000909a459c                ready_task_priority
+ .bss           0x00000000909a45a0        0x0 scheduler.o
+ .bss           0x00000000909a45a0        0x0 spawn_default_task.o
+ .bss           0x00000000909a45a0        0x0 syscall.o
+ .bss           0x00000000909a45a0        0x0 sys_spawn.o
+ .bss           0x00000000909a45a0        0xc sys_exec.o
+ .bss           0x00000000909a45ac        0x0 sys_yield.o
+ .bss           0x00000000909a45ac        0x0 sys_register_as_server.o
+ .bss           0x00000000909a45ac        0x0 sys_connect_session.o
+ .bss           0x00000000909a45ac        0x0 sys_poll_session.o
+ .bss           0x00000000909a45ac        0x0 sys_close_session.o
+ *fill*         0x00000000909a45ac       0x14 
+ .bss           0x00000000909a45c0      0x848 sys_register_irq.o
+ .bss           0x00000000909a4e08        0x0 sys_exit.o
+ .bss           0x00000000909a4e08        0x0 sys_state.o
+ .bss           0x00000000909a4e08        0x0 sys_mmap.o
+ .bss           0x00000000909a4e08       0x40 share_page.o
+ .bss           0x00000000909a4e48        0x0 main.o
+ .bss           0x00000000909a4e48        0x0 load_apps.o
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_dvmd_tls.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_ctzdi2.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memcpy.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memmove.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memset.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strlen-stub.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncmp.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncpy.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+ .bss           0x00000000909a4e48        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+ COMMON         0x00000000909a4e48       0x21 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                0x00000000909a4e48                __lock___atexit_recursive_mutex
+                0x00000000909a4e4c                __lock___arc4random_mutex
+                0x00000000909a4e50                __lock___env_recursive_mutex
+                0x00000000909a4e54                __lock___sinit_recursive_mutex
+                0x00000000909a4e58                __lock___malloc_recursive_mutex
+                0x00000000909a4e5c                __lock___at_quick_exit_mutex
+                0x00000000909a4e60                __lock___dd_hash_mutex
+                0x00000000909a4e64                __lock___tz_mutex
+                0x00000000909a4e68                __lock___sfp_recursive_mutex
+ .bss           0x00000000909a4e69        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+ .bss           0x00000000909a4e69        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libnosys.a(_exit.o)
+ .bss           0x00000000909a4e69        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtend.o
+ .bss           0x00000000909a4e69        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtn.o
+                0x00000000909a4e69                PROVIDE (__bss_end__, .)
+                0x00000000909a5000                . = ALIGN (0x1000)
+                0x00000000909a5000                PROVIDE (kernel_data_end, .)
+OUTPUT(XiZi-imx6q-sabrelite.elf elf32-littlearm)
+
+.ARM.attributes
+                0x0000000000000000       0x2d
+ .ARM.attributes
+                0x0000000000000000       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+ .ARM.attributes
+                0x000000000000002b       0x1b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crti.o
+ .ARM.attributes
+                0x0000000000000046       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+ .ARM.attributes
+                0x0000000000000071       0x19 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+ .ARM.attributes
+                0x000000000000008a       0x2d ivt.o
+ .ARM.attributes
+                0x00000000000000b7       0x2d dcd.o
+ .ARM.attributes
+                0x00000000000000e4       0x1f imx6q_lowlevel_init.o
+ .ARM.attributes
+                0x0000000000000103       0x1f cortexA9.o
+ .ARM.attributes
+                0x0000000000000122       0x2d core.o
+ .ARM.attributes
+                0x000000000000014f       0x1f boot.o
+ .ARM.attributes
+                0x000000000000016e       0x1f context_switch.o
+ .ARM.attributes
+                0x000000000000018d       0x2d ccm_pll.o
+ .ARM.attributes
+                0x00000000000001ba       0x2d clock.o
+ .ARM.attributes
+                0x00000000000001e7       0x2d gpt.o
+ .ARM.attributes
+                0x0000000000000214       0x2d bootmmu.o
+ .ARM.attributes
+                0x0000000000000241       0x2d mmu.o
+ .ARM.attributes
+                0x000000000000026e       0x2d pagetable_attr.o
+ .ARM.attributes
+                0x000000000000029b       0x2d gicv2_distributer_to_device.o
+ .ARM.attributes
+                0x00000000000002c8       0x2d gicv2_interface_to_core.o
+ .ARM.attributes
+                0x00000000000002f5       0x2d trap_common.o
+ .ARM.attributes
+                0x0000000000000322       0x2d error_debug.o
+ .ARM.attributes
+                0x000000000000034f       0x2d spinlock.o
+ .ARM.attributes
+                0x000000000000037c       0x1f vector.o
+ .ARM.attributes
+                0x000000000000039b       0x1f trampoline.o
+ .ARM.attributes
+                0x00000000000003ba       0x1f hard_spinlock.o
+ .ARM.attributes
+                0x00000000000003d9       0x2d imx_uart.o
+ .ARM.attributes
+                0x0000000000000406       0x2d iomux_v3.o
+ .ARM.attributes
+                0x0000000000000433       0x2d uart_common_ope.o
+ .ARM.attributes
+                0x0000000000000460       0x2d l1_cache.o
+ .ARM.attributes
+                0x000000000000048d       0x2d l2_cache.o
+ .ARM.attributes
+                0x00000000000004ba       0x2d cache_common_ope.o
+ .ARM.attributes
+                0x00000000000004e7       0x2d hardkernel_init.o
+ .ARM.attributes
+                0x0000000000000514       0x2d actracer.o
+ .ARM.attributes
+                0x0000000000000541       0x2d actracer_mem_chunk.o
+ .ARM.attributes
+                0x000000000000056e       0x2d softkernel_init.o
+ .ARM.attributes
+                0x000000000000059b       0x2d kalloc.o
+ .ARM.attributes
+                0x00000000000005c8       0x2d pagetable.o
+ .ARM.attributes
+                0x00000000000005f5       0x2d pagetable_level2.o
+ .ARM.attributes
+                0x0000000000000622       0x2d buddy.o
+ .ARM.attributes
+                0x000000000000064f       0x2d object_allocator.o
+ .ARM.attributes
+                0x000000000000067c       0x2d default_irq_handler.o
+ .ARM.attributes
+                0x00000000000006a9       0x2d clock_irq_handler.o
+ .ARM.attributes
+                0x00000000000006d6       0x2d software_irq_handler.o
+ .ARM.attributes
+                0x0000000000000703       0x2d task.o
+ .ARM.attributes
+                0x0000000000000730       0x2d scheduler.o
+ .ARM.attributes
+                0x000000000000075d       0x2d spawn_default_task.o
+ .ARM.attributes
+                0x000000000000078a       0x2d syscall.o
+ .ARM.attributes
+                0x00000000000007b7       0x2d sys_spawn.o
+ .ARM.attributes
+                0x00000000000007e4       0x2d sys_exec.o
+ .ARM.attributes
+                0x0000000000000811       0x2d sys_yield.o
+ .ARM.attributes
+                0x000000000000083e       0x2d sys_register_as_server.o
+ .ARM.attributes
+                0x000000000000086b       0x2d sys_connect_session.o
+ .ARM.attributes
+                0x0000000000000898       0x2d sys_poll_session.o
+ .ARM.attributes
+                0x00000000000008c5       0x2d sys_close_session.o
+ .ARM.attributes
+                0x00000000000008f2       0x2d sys_register_irq.o
+ .ARM.attributes
+                0x000000000000091f       0x2d sys_exit.o
+ .ARM.attributes
+                0x000000000000094c       0x2d sys_state.o
+ .ARM.attributes
+                0x0000000000000979       0x2d sys_mmap.o
+ .ARM.attributes
+                0x00000000000009a6       0x2d share_page.o
+ .ARM.attributes
+                0x00000000000009d3       0x2d main.o
+ .ARM.attributes
+                0x0000000000000a00       0x1f load_apps.o
+ .ARM.attributes
+                0x0000000000000a1f       0x1b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+ .ARM.attributes
+                0x0000000000000a3a       0x1b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_dvmd_tls.o)
+ .ARM.attributes
+                0x0000000000000a55       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_ctzdi2.o)
+ .ARM.attributes
+                0x0000000000000a80       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+ .ARM.attributes
+                0x0000000000000aab       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+ .ARM.attributes
+                0x0000000000000ad6       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+ .ARM.attributes
+                0x0000000000000b01       0x19 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memcpy.o)
+ .ARM.attributes
+                0x0000000000000b1a       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memmove.o)
+ .ARM.attributes
+                0x0000000000000b45       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memset.o)
+ .ARM.attributes
+                0x0000000000000b70       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strlen-stub.o)
+ .ARM.attributes
+                0x0000000000000b9b       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncmp.o)
+ .ARM.attributes
+                0x0000000000000bc6       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncpy.o)
+ .ARM.attributes
+                0x0000000000000bf1       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+ .ARM.attributes
+                0x0000000000000c1c       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o)
+ .ARM.attributes
+                0x0000000000000c47       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+ .ARM.attributes
+                0x0000000000000c72       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+ .ARM.attributes
+                0x0000000000000c9d       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+ .ARM.attributes
+                0x0000000000000cc8       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libnosys.a(_exit.o)
+ .ARM.attributes
+                0x0000000000000cf3       0x2b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtend.o
+ .ARM.attributes
+                0x0000000000000d1e       0x1b /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtn.o
+
+.comment        0x0000000000000000       0x7f
+ .comment       0x0000000000000000       0x7f ivt.o
+                                         0x80 (size before relaxing)
+ .comment       0x000000000000007f       0x80 dcd.o
+ .comment       0x000000000000007f       0x80 core.o
+ .comment       0x000000000000007f       0x80 ccm_pll.o
+ .comment       0x000000000000007f       0x80 clock.o
+ .comment       0x000000000000007f       0x80 gpt.o
+ .comment       0x000000000000007f       0x80 bootmmu.o
+ .comment       0x000000000000007f       0x80 mmu.o
+ .comment       0x000000000000007f       0x80 pagetable_attr.o
+ .comment       0x000000000000007f       0x80 gicv2_distributer_to_device.o
+ .comment       0x000000000000007f       0x80 gicv2_interface_to_core.o
+ .comment       0x000000000000007f       0x80 trap_common.o
+ .comment       0x000000000000007f       0x80 error_debug.o
+ .comment       0x000000000000007f       0x80 spinlock.o
+ .comment       0x000000000000007f       0x80 imx_uart.o
+ .comment       0x000000000000007f       0x80 iomux_v3.o
+ .comment       0x000000000000007f       0x80 uart_common_ope.o
+ .comment       0x000000000000007f       0x80 l1_cache.o
+ .comment       0x000000000000007f       0x80 l2_cache.o
+ .comment       0x000000000000007f       0x80 cache_common_ope.o
+ .comment       0x000000000000007f       0x80 hardkernel_init.o
+ .comment       0x000000000000007f       0x80 actracer.o
+ .comment       0x000000000000007f       0x80 actracer_mem_chunk.o
+ .comment       0x000000000000007f       0x80 softkernel_init.o
+ .comment       0x000000000000007f       0x80 kalloc.o
+ .comment       0x000000000000007f       0x80 pagetable.o
+ .comment       0x000000000000007f       0x80 pagetable_level2.o
+ .comment       0x000000000000007f       0x80 buddy.o
+ .comment       0x000000000000007f       0x80 object_allocator.o
+ .comment       0x000000000000007f       0x80 default_irq_handler.o
+ .comment       0x000000000000007f       0x80 clock_irq_handler.o
+ .comment       0x000000000000007f       0x80 software_irq_handler.o
+ .comment       0x000000000000007f       0x80 task.o
+ .comment       0x000000000000007f       0x80 scheduler.o
+ .comment       0x000000000000007f       0x80 spawn_default_task.o
+ .comment       0x000000000000007f       0x80 syscall.o
+ .comment       0x000000000000007f       0x80 sys_spawn.o
+ .comment       0x000000000000007f       0x80 sys_exec.o
+ .comment       0x000000000000007f       0x80 sys_yield.o
+ .comment       0x000000000000007f       0x80 sys_register_as_server.o
+ .comment       0x000000000000007f       0x80 sys_connect_session.o
+ .comment       0x000000000000007f       0x80 sys_poll_session.o
+ .comment       0x000000000000007f       0x80 sys_close_session.o
+ .comment       0x000000000000007f       0x80 sys_register_irq.o
+ .comment       0x000000000000007f       0x80 sys_exit.o
+ .comment       0x000000000000007f       0x80 sys_state.o
+ .comment       0x000000000000007f       0x80 sys_mmap.o
+ .comment       0x000000000000007f       0x80 share_page.o
+ .comment       0x000000000000007f       0x80 main.o
+
+.debug_frame    0x0000000000000000     0x28e0
+ .debug_frame   0x0000000000000000       0x20 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtfastmath.o
+ .debug_frame   0x0000000000000020      0x118 ccm_pll.o
+ .debug_frame   0x0000000000000138       0xcc clock.o
+ .debug_frame   0x0000000000000204      0x130 gpt.o
+ .debug_frame   0x0000000000000334       0x6c bootmmu.o
+ .debug_frame   0x00000000000003a0       0x90 mmu.o
+ .debug_frame   0x0000000000000430       0xb0 pagetable_attr.o
+ .debug_frame   0x00000000000004e0      0x110 gicv2_distributer_to_device.o
+ .debug_frame   0x00000000000005f0       0xd0 gicv2_interface_to_core.o
+ .debug_frame   0x00000000000006c0      0x23c trap_common.o
+ .debug_frame   0x00000000000008fc       0xd0 error_debug.o
+ .debug_frame   0x00000000000009cc       0x90 spinlock.o
+ .debug_frame   0x0000000000000a5c      0x130 imx_uart.o
+ .debug_frame   0x0000000000000b8c       0x64 iomux_v3.o
+ .debug_frame   0x0000000000000bf0       0xb0 uart_common_ope.o
+ .debug_frame   0x0000000000000ca0      0x190 l1_cache.o
+ .debug_frame   0x0000000000000e30      0x16c l2_cache.o
+ .debug_frame   0x0000000000000f9c      0x1b0 cache_common_ope.o
+ .debug_frame   0x000000000000114c       0xd4 hardkernel_init.o
+ .debug_frame   0x0000000000001220      0x314 actracer.o
+ .debug_frame   0x0000000000001534      0x150 actracer_mem_chunk.o
+ .debug_frame   0x0000000000001684       0x4c softkernel_init.o
+ .debug_frame   0x00000000000016d0       0xcc kalloc.o
+ .debug_frame   0x000000000000179c      0x174 pagetable.o
+ .debug_frame   0x0000000000001910       0x30 pagetable_level2.o
+ .debug_frame   0x0000000000001940       0xf4 buddy.o
+ .debug_frame   0x0000000000001a34       0xac object_allocator.o
+ .debug_frame   0x0000000000001ae0       0xa8 default_irq_handler.o
+ .debug_frame   0x0000000000001b88       0x88 clock_irq_handler.o
+ .debug_frame   0x0000000000001c10       0x8c software_irq_handler.o
+ .debug_frame   0x0000000000001c9c      0x164 task.o
+ .debug_frame   0x0000000000001e00       0x70 scheduler.o
+ .debug_frame   0x0000000000001e70       0x34 spawn_default_task.o
+ .debug_frame   0x0000000000001ea4       0x30 syscall.o
+ .debug_frame   0x0000000000001ed4       0x34 sys_spawn.o
+ .debug_frame   0x0000000000001f08       0x8c sys_exec.o
+ .debug_frame   0x0000000000001f94       0x2c sys_yield.o
+ .debug_frame   0x0000000000001fc0       0x68 sys_register_as_server.o
+ .debug_frame   0x0000000000002028       0x88 sys_connect_session.o
+ .debug_frame   0x00000000000020b0       0x6c sys_poll_session.o
+ .debug_frame   0x000000000000211c       0x6c sys_close_session.o
+ .debug_frame   0x0000000000002188       0xa8 sys_register_irq.o
+ .debug_frame   0x0000000000002230       0x6c sys_exit.o
+ .debug_frame   0x000000000000229c       0xe8 sys_state.o
+ .debug_frame   0x0000000000002384       0x6c sys_mmap.o
+ .debug_frame   0x00000000000023f0      0x170 share_page.o
+ .debug_frame   0x0000000000002560       0x34 main.o
+ .debug_frame   0x0000000000002594       0x20 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+ .debug_frame   0x00000000000025b4       0x20 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_ctzdi2.o)
+ .debug_frame   0x00000000000025d4       0x28 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+ .debug_frame   0x00000000000025fc       0x2c /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+ .debug_frame   0x0000000000002628       0x30 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memmove.o)
+ .debug_frame   0x0000000000002658       0x38 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memset.o)
+ .debug_frame   0x0000000000002690       0x20 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strlen-stub.o)
+ .debug_frame   0x00000000000026b0       0x48 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncmp.o)
+ .debug_frame   0x00000000000026f8       0x34 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncpy.o)
+ .debug_frame   0x000000000000272c       0x5c /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+ .debug_frame   0x0000000000002788       0x20 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o)
+ .debug_frame   0x00000000000027a8       0x34 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+ .debug_frame   0x00000000000027dc       0xb0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+ .debug_frame   0x000000000000288c       0x34 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+ .debug_frame   0x00000000000028c0       0x20 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libnosys.a(_exit.o)
+
+.debug_info     0x0000000000000000    0x3cd58
+ .debug_info    0x0000000000000000      0x245 ivt.o
+ .debug_info    0x0000000000000245      0x10d dcd.o
+ .debug_info    0x0000000000000352      0x131 imx6q_lowlevel_init.o
+ .debug_info    0x0000000000000483      0x12a cortexA9.o
+ .debug_info    0x00000000000005ad      0x97d core.o
+ .debug_info    0x0000000000000f2a       0xe6 boot.o
+ .debug_info    0x0000000000001010       0xf0 context_switch.o
+ .debug_info    0x0000000000001100     0x1d44 ccm_pll.o
+ .debug_info    0x0000000000002e44      0x918 clock.o
+ .debug_info    0x000000000000375c     0x166c gpt.o
+ .debug_info    0x0000000000004dc8      0xac4 bootmmu.o
+ .debug_info    0x000000000000588c     0x1530 mmu.o
+ .debug_info    0x0000000000006dbc      0x4a2 pagetable_attr.o
+ .debug_info    0x000000000000725e      0x6aa gicv2_distributer_to_device.o
+ .debug_info    0x0000000000007908      0x343 gicv2_interface_to_core.o
+ .debug_info    0x0000000000007c4b     0x15cd trap_common.o
+ .debug_info    0x0000000000009218     0x17f4 error_debug.o
+ .debug_info    0x000000000000aa0c      0xab8 spinlock.o
+ .debug_info    0x000000000000b4c4       0xe8 vector.o
+ .debug_info    0x000000000000b5ac       0xec trampoline.o
+ .debug_info    0x000000000000b698       0xef hard_spinlock.o
+ .debug_info    0x000000000000b787     0x16fc imx_uart.o
+ .debug_info    0x000000000000ce83      0x280 iomux_v3.o
+ .debug_info    0x000000000000d103      0x4a2 uart_common_ope.o
+ .debug_info    0x000000000000d5a5      0xd89 l1_cache.o
+ .debug_info    0x000000000000e32e      0xedc l2_cache.o
+ .debug_info    0x000000000000f20a      0xe5b cache_common_ope.o
+ .debug_info    0x0000000000010065     0x175e hardkernel_init.o
+ .debug_info    0x00000000000117c3     0x24f9 actracer.o
+ .debug_info    0x0000000000013cbc     0x10e0 actracer_mem_chunk.o
+ .debug_info    0x0000000000014d9c     0x16c5 softkernel_init.o
+ .debug_info    0x0000000000016461     0x10d9 kalloc.o
+ .debug_info    0x000000000001753a     0x1941 pagetable.o
+ .debug_info    0x0000000000018e7b      0xe83 pagetable_level2.o
+ .debug_info    0x0000000000019cfe     0x1574 buddy.o
+ .debug_info    0x000000000001b272     0x1105 object_allocator.o
+ .debug_info    0x000000000001c377     0x1dbf default_irq_handler.o
+ .debug_info    0x000000000001e136     0x1b71 clock_irq_handler.o
+ .debug_info    0x000000000001fca7     0x1e01 software_irq_handler.o
+ .debug_info    0x0000000000021aa8     0x2003 task.o
+ .debug_info    0x0000000000023aab     0x17a1 scheduler.o
+ .debug_info    0x000000000002524c     0x1a77 spawn_default_task.o
+ .debug_info    0x0000000000026cc3     0x1786 syscall.o
+ .debug_info    0x0000000000028449     0x17de sys_spawn.o
+ .debug_info    0x0000000000029c27     0x1c14 sys_exec.o
+ .debug_info    0x000000000002b83b     0x1649 sys_yield.o
+ .debug_info    0x000000000002ce84     0x16d6 sys_register_as_server.o
+ .debug_info    0x000000000002e55a     0x17f0 sys_connect_session.o
+ .debug_info    0x000000000002fd4a     0x18af sys_poll_session.o
+ .debug_info    0x00000000000315f9     0x176e sys_close_session.o
+ .debug_info    0x0000000000032d67     0x1f8d sys_register_irq.o
+ .debug_info    0x0000000000034cf4     0x17aa sys_exit.o
+ .debug_info    0x000000000003649e     0x19e1 sys_state.o
+ .debug_info    0x0000000000037e7f     0x175e sys_mmap.o
+ .debug_info    0x00000000000395dd     0x20e4 share_page.o
+ .debug_info    0x000000000003b6c1     0x1697 main.o
+
+.debug_abbrev   0x0000000000000000     0x6caf
+ .debug_abbrev  0x0000000000000000       0xe6 ivt.o
+ .debug_abbrev  0x00000000000000e6       0x88 dcd.o
+ .debug_abbrev  0x000000000000016e       0x12 imx6q_lowlevel_init.o
+ .debug_abbrev  0x0000000000000180       0x14 cortexA9.o
+ .debug_abbrev  0x0000000000000194      0x16b core.o
+ .debug_abbrev  0x00000000000002ff       0x14 boot.o
+ .debug_abbrev  0x0000000000000313       0x14 context_switch.o
+ .debug_abbrev  0x0000000000000327      0x1f1 ccm_pll.o
+ .debug_abbrev  0x0000000000000518      0x150 clock.o
+ .debug_abbrev  0x0000000000000668      0x2f6 gpt.o
+ .debug_abbrev  0x000000000000095e      0x200 bootmmu.o
+ .debug_abbrev  0x0000000000000b5e      0x25e mmu.o
+ .debug_abbrev  0x0000000000000dbc      0x15f pagetable_attr.o
+ .debug_abbrev  0x0000000000000f1b      0x197 gicv2_distributer_to_device.o
+ .debug_abbrev  0x00000000000010b2      0x15a gicv2_interface_to_core.o
+ .debug_abbrev  0x000000000000120c      0x305 trap_common.o
+ .debug_abbrev  0x0000000000001511      0x270 error_debug.o
+ .debug_abbrev  0x0000000000001781      0x1cf spinlock.o
+ .debug_abbrev  0x0000000000001950       0x14 vector.o
+ .debug_abbrev  0x0000000000001964       0x14 trampoline.o
+ .debug_abbrev  0x0000000000001978       0x14 hard_spinlock.o
+ .debug_abbrev  0x000000000000198c      0x31f imx_uart.o
+ .debug_abbrev  0x0000000000001cab      0x108 iomux_v3.o
+ .debug_abbrev  0x0000000000001db3      0x174 uart_common_ope.o
+ .debug_abbrev  0x0000000000001f27      0x209 l1_cache.o
+ .debug_abbrev  0x0000000000002130      0x22f l2_cache.o
+ .debug_abbrev  0x000000000000235f      0x214 cache_common_ope.o
+ .debug_abbrev  0x0000000000002573      0x235 hardkernel_init.o
+ .debug_abbrev  0x00000000000027a8      0x333 actracer.o
+ .debug_abbrev  0x0000000000002adb      0x2d4 actracer_mem_chunk.o
+ .debug_abbrev  0x0000000000002daf      0x20d softkernel_init.o
+ .debug_abbrev  0x0000000000002fbc      0x22f kalloc.o
+ .debug_abbrev  0x00000000000031eb      0x2c3 pagetable.o
+ .debug_abbrev  0x00000000000034ae      0x1c8 pagetable_level2.o
+ .debug_abbrev  0x0000000000003676      0x2e4 buddy.o
+ .debug_abbrev  0x000000000000395a      0x224 object_allocator.o
+ .debug_abbrev  0x0000000000003b7e      0x263 default_irq_handler.o
+ .debug_abbrev  0x0000000000003de1      0x23e clock_irq_handler.o
+ .debug_abbrev  0x000000000000401f      0x2d3 software_irq_handler.o
+ .debug_abbrev  0x00000000000042f2      0x313 task.o
+ .debug_abbrev  0x0000000000004605      0x27f scheduler.o
+ .debug_abbrev  0x0000000000004884      0x2b6 spawn_default_task.o
+ .debug_abbrev  0x0000000000004b3a      0x204 syscall.o
+ .debug_abbrev  0x0000000000004d3e      0x277 sys_spawn.o
+ .debug_abbrev  0x0000000000004fb5      0x2d6 sys_exec.o
+ .debug_abbrev  0x000000000000528b      0x1e4 sys_yield.o
+ .debug_abbrev  0x000000000000546f      0x22b sys_register_as_server.o
+ .debug_abbrev  0x000000000000569a      0x22b sys_connect_session.o
+ .debug_abbrev  0x00000000000058c5      0x2a4 sys_poll_session.o
+ .debug_abbrev  0x0000000000005b69      0x234 sys_close_session.o
+ .debug_abbrev  0x0000000000005d9d      0x29b sys_register_irq.o
+ .debug_abbrev  0x0000000000006038      0x27b sys_exit.o
+ .debug_abbrev  0x00000000000062b3      0x29b sys_state.o
+ .debug_abbrev  0x000000000000654e      0x243 sys_mmap.o
+ .debug_abbrev  0x0000000000006791      0x31d share_page.o
+ .debug_abbrev  0x0000000000006aae      0x201 main.o
+
+.debug_aranges  0x0000000000000000      0x6f0
+ .debug_aranges
+                0x0000000000000000       0x18 ivt.o
+ .debug_aranges
+                0x0000000000000018       0x18 dcd.o
+ .debug_aranges
+                0x0000000000000030       0x28 imx6q_lowlevel_init.o
+ .debug_aranges
+                0x0000000000000058       0x20 cortexA9.o
+ .debug_aranges
+                0x0000000000000078       0x18 core.o
+ .debug_aranges
+                0x0000000000000090       0x20 boot.o
+ .debug_aranges
+                0x00000000000000b0       0x20 context_switch.o
+ .debug_aranges
+                0x00000000000000d0       0x20 ccm_pll.o
+ .debug_aranges
+                0x00000000000000f0       0x20 clock.o
+ .debug_aranges
+                0x0000000000000110       0x20 gpt.o
+ .debug_aranges
+                0x0000000000000130       0x20 bootmmu.o
+ .debug_aranges
+                0x0000000000000150       0x20 mmu.o
+ .debug_aranges
+                0x0000000000000170       0x20 pagetable_attr.o
+ .debug_aranges
+                0x0000000000000190       0x20 gicv2_distributer_to_device.o
+ .debug_aranges
+                0x00000000000001b0       0x20 gicv2_interface_to_core.o
+ .debug_aranges
+                0x00000000000001d0       0x20 trap_common.o
+ .debug_aranges
+                0x00000000000001f0       0x20 error_debug.o
+ .debug_aranges
+                0x0000000000000210       0x20 spinlock.o
+ .debug_aranges
+                0x0000000000000230       0x20 vector.o
+ .debug_aranges
+                0x0000000000000250       0x20 trampoline.o
+ .debug_aranges
+                0x0000000000000270       0x20 hard_spinlock.o
+ .debug_aranges
+                0x0000000000000290       0x20 imx_uart.o
+ .debug_aranges
+                0x00000000000002b0       0x20 iomux_v3.o
+ .debug_aranges
+                0x00000000000002d0       0x20 uart_common_ope.o
+ .debug_aranges
+                0x00000000000002f0       0x20 l1_cache.o
+ .debug_aranges
+                0x0000000000000310       0x20 l2_cache.o
+ .debug_aranges
+                0x0000000000000330       0x20 cache_common_ope.o
+ .debug_aranges
+                0x0000000000000350       0x20 hardkernel_init.o
+ .debug_aranges
+                0x0000000000000370       0x20 actracer.o
+ .debug_aranges
+                0x0000000000000390       0x20 actracer_mem_chunk.o
+ .debug_aranges
+                0x00000000000003b0       0x20 softkernel_init.o
+ .debug_aranges
+                0x00000000000003d0       0x20 kalloc.o
+ .debug_aranges
+                0x00000000000003f0       0x20 pagetable.o
+ .debug_aranges
+                0x0000000000000410       0x20 pagetable_level2.o
+ .debug_aranges
+                0x0000000000000430       0x20 buddy.o
+ .debug_aranges
+                0x0000000000000450       0x20 object_allocator.o
+ .debug_aranges
+                0x0000000000000470       0x20 default_irq_handler.o
+ .debug_aranges
+                0x0000000000000490       0x20 clock_irq_handler.o
+ .debug_aranges
+                0x00000000000004b0       0x20 software_irq_handler.o
+ .debug_aranges
+                0x00000000000004d0       0x20 task.o
+ .debug_aranges
+                0x00000000000004f0       0x20 scheduler.o
+ .debug_aranges
+                0x0000000000000510       0x20 spawn_default_task.o
+ .debug_aranges
+                0x0000000000000530       0x20 syscall.o
+ .debug_aranges
+                0x0000000000000550       0x20 sys_spawn.o
+ .debug_aranges
+                0x0000000000000570       0x20 sys_exec.o
+ .debug_aranges
+                0x0000000000000590       0x20 sys_yield.o
+ .debug_aranges
+                0x00000000000005b0       0x20 sys_register_as_server.o
+ .debug_aranges
+                0x00000000000005d0       0x20 sys_connect_session.o
+ .debug_aranges
+                0x00000000000005f0       0x20 sys_poll_session.o
+ .debug_aranges
+                0x0000000000000610       0x20 sys_close_session.o
+ .debug_aranges
+                0x0000000000000630       0x20 sys_register_irq.o
+ .debug_aranges
+                0x0000000000000650       0x20 sys_exit.o
+ .debug_aranges
+                0x0000000000000670       0x20 sys_state.o
+ .debug_aranges
+                0x0000000000000690       0x20 sys_mmap.o
+ .debug_aranges
+                0x00000000000006b0       0x20 share_page.o
+ .debug_aranges
+                0x00000000000006d0       0x20 main.o
+
+.debug_line     0x0000000000000000     0xcd2a
+ .debug_line    0x0000000000000000      0x1de ivt.o
+ .debug_line    0x00000000000001de      0x1f2 dcd.o
+ .debug_line    0x00000000000003d0       0xea imx6q_lowlevel_init.o
+ .debug_line    0x00000000000004ba      0x123 cortexA9.o
+ .debug_line    0x00000000000005dd      0x122 core.o
+ .debug_line    0x00000000000006ff       0xc2 boot.o
+ .debug_line    0x00000000000007c1       0xb1 context_switch.o
+ .debug_line    0x0000000000000872      0x4c8 ccm_pll.o
+ .debug_line    0x0000000000000d3a      0x366 clock.o
+ .debug_line    0x00000000000010a0      0x5d4 gpt.o
+ .debug_line    0x0000000000001674      0x259 bootmmu.o
+ .debug_line    0x00000000000018cd      0x403 mmu.o
+ .debug_line    0x0000000000001cd0      0x294 pagetable_attr.o
+ .debug_line    0x0000000000001f64      0x26c gicv2_distributer_to_device.o
+ .debug_line    0x00000000000021d0      0x1fc gicv2_interface_to_core.o
+ .debug_line    0x00000000000023cc      0x3c2 trap_common.o
+ .debug_line    0x000000000000278e      0x4b0 error_debug.o
+ .debug_line    0x0000000000002c3e      0x224 spinlock.o
+ .debug_line    0x0000000000002e62       0x9a vector.o
+ .debug_line    0x0000000000002efc      0x147 trampoline.o
+ .debug_line    0x0000000000003043       0xb4 hard_spinlock.o
+ .debug_line    0x00000000000030f7      0x8e3 imx_uart.o
+ .debug_line    0x00000000000039da      0x313 iomux_v3.o
+ .debug_line    0x0000000000003ced      0x250 uart_common_ope.o
+ .debug_line    0x0000000000003f3d      0x2c3 l1_cache.o
+ .debug_line    0x0000000000004200      0x43f l2_cache.o
+ .debug_line    0x000000000000463f      0x2f4 cache_common_ope.o
+ .debug_line    0x0000000000004933      0x566 hardkernel_init.o
+ .debug_line    0x0000000000004e99      0x686 actracer.o
+ .debug_line    0x000000000000551f      0x38c actracer_mem_chunk.o
+ .debug_line    0x00000000000058ab      0x403 softkernel_init.o
+ .debug_line    0x0000000000005cae      0x337 kalloc.o
+ .debug_line    0x0000000000005fe5      0x4cc pagetable.o
+ .debug_line    0x00000000000064b1      0x31f pagetable_level2.o
+ .debug_line    0x00000000000067d0      0x4a2 buddy.o
+ .debug_line    0x0000000000006c72      0x3ce object_allocator.o
+ .debug_line    0x0000000000007040      0x4bd default_irq_handler.o
+ .debug_line    0x00000000000074fd      0x4eb clock_irq_handler.o
+ .debug_line    0x00000000000079e8      0x4d8 software_irq_handler.o
+ .debug_line    0x0000000000007ec0      0x5e1 task.o
+ .debug_line    0x00000000000084a1      0x46b scheduler.o
+ .debug_line    0x000000000000890c      0x4d4 spawn_default_task.o
+ .debug_line    0x0000000000008de0      0x40b syscall.o
+ .debug_line    0x00000000000091eb      0x415 sys_spawn.o
+ .debug_line    0x0000000000009600      0x51d sys_exec.o
+ .debug_line    0x0000000000009b1d      0x3f2 sys_yield.o
+ .debug_line    0x0000000000009f0f      0x438 sys_register_as_server.o
+ .debug_line    0x000000000000a347      0x44f sys_connect_session.o
+ .debug_line    0x000000000000a796      0x4f8 sys_poll_session.o
+ .debug_line    0x000000000000ac8e      0x479 sys_close_session.o
+ .debug_line    0x000000000000b107      0x4ba sys_register_irq.o
+ .debug_line    0x000000000000b5c1      0x46d sys_exit.o
+ .debug_line    0x000000000000ba2e      0x4bf sys_state.o
+ .debug_line    0x000000000000beed      0x43e sys_mmap.o
+ .debug_line    0x000000000000c32b      0x5f6 share_page.o
+ .debug_line    0x000000000000c921      0x409 main.o
+
+.debug_str      0x0000000000000000     0x6218
+ .debug_str     0x0000000000000000      0x24c ivt.o
+                                        0x2c0 (size before relaxing)
+ .debug_str     0x000000000000024c       0xf7 dcd.o
+                                        0x26a (size before relaxing)
+ .debug_str     0x0000000000000343      0x3f2 core.o
+                                        0x5a0 (size before relaxing)
+ .debug_str     0x0000000000000735      0xd3c ccm_pll.o
+                                        0xf12 (size before relaxing)
+ .debug_str     0x0000000000001471      0xf06 clock.o
+                                       0x119e (size before relaxing)
+ .debug_str     0x0000000000002377      0x3bd gpt.o
+                                        0xcd9 (size before relaxing)
+ .debug_str     0x0000000000002734      0x10a bootmmu.o
+                                        0x667 (size before relaxing)
+ .debug_str     0x000000000000283e      0x284 mmu.o
+                                       0x158c (size before relaxing)
+ .debug_str     0x0000000000002ac2      0x15e pagetable_attr.o
+                                        0x4a1 (size before relaxing)
+ .debug_str     0x0000000000002c20      0x3ba gicv2_distributer_to_device.o
+                                        0x570 (size before relaxing)
+ .debug_str     0x0000000000002fda      0x1ef gicv2_interface_to_core.o
+                                        0x3fd (size before relaxing)
+ .debug_str     0x00000000000031c9      0x284 trap_common.o
+                                       0x15e3 (size before relaxing)
+ .debug_str     0x000000000000344d      0x443 error_debug.o
+                                        0xd72 (size before relaxing)
+ .debug_str     0x0000000000003890       0xdf spinlock.o
+                                        0x653 (size before relaxing)
+ .debug_str     0x000000000000396f      0x6a2 imx_uart.o
+                                       0x150f (size before relaxing)
+ .debug_str     0x0000000000004011      0x108 iomux_v3.o
+                                        0x2c7 (size before relaxing)
+ .debug_str     0x0000000000004119       0xa3 uart_common_ope.o
+                                        0x437 (size before relaxing)
+ .debug_str     0x00000000000041bc      0x16e l1_cache.o
+                                        0x6e7 (size before relaxing)
+ .debug_str     0x000000000000432a      0x146 l2_cache.o
+                                        0x6bd (size before relaxing)
+ .debug_str     0x0000000000004470      0x14d cache_common_ope.o
+                                        0x8f1 (size before relaxing)
+ .debug_str     0x00000000000045bd      0x16c hardkernel_init.o
+                                       0x16d3 (size before relaxing)
+ .debug_str     0x0000000000004729      0x348 actracer.o
+                                       0x1ae0 (size before relaxing)
+ .debug_str     0x0000000000004a71      0x22e actracer_mem_chunk.o
+                                        0xa04 (size before relaxing)
+ .debug_str     0x0000000000004c9f      0x109 softkernel_init.o
+                                        0xd9f (size before relaxing)
+ .debug_str     0x0000000000004da8      0x13f kalloc.o
+                                        0xa32 (size before relaxing)
+ .debug_str     0x0000000000004ee7      0x1fc pagetable.o
+                                       0x165d (size before relaxing)
+ .debug_str     0x00000000000050e3       0x82 pagetable_level2.o
+                                        0x921 (size before relaxing)
+ .debug_str     0x0000000000005165      0x138 buddy.o
+                                        0xad0 (size before relaxing)
+ .debug_str     0x000000000000529d       0xad object_allocator.o
+                                        0x9ee (size before relaxing)
+ .debug_str     0x000000000000534a       0xaa default_irq_handler.o
+                                       0x19b1 (size before relaxing)
+ .debug_str     0x00000000000053f4       0xa3 clock_irq_handler.o
+                                       0x187a (size before relaxing)
+ .debug_str     0x0000000000005497       0xb9 software_irq_handler.o
+                                       0x19b7 (size before relaxing)
+ .debug_str     0x0000000000005550      0x134 task.o
+                                       0x1968 (size before relaxing)
+ .debug_str     0x0000000000005684       0x97 scheduler.o
+                                        0xd5e (size before relaxing)
+ .debug_str     0x000000000000571b      0x1a1 spawn_default_task.o
+                                        0xe90 (size before relaxing)
+ .debug_str     0x00000000000058bc       0xd9 syscall.o
+                                        0xd66 (size before relaxing)
+ .debug_str     0x0000000000005995       0x68 sys_spawn.o
+                                        0xd3a (size before relaxing)
+ .debug_str     0x00000000000059fd       0x66 sys_exec.o
+                                        0xee9 (size before relaxing)
+ .debug_str     0x0000000000005a63       0x5e sys_yield.o
+                                        0xcee (size before relaxing)
+ .debug_str     0x0000000000005ac1       0x92 sys_register_as_server.o
+                                        0xd3d (size before relaxing)
+ .debug_str     0x0000000000005b53       0x9f sys_connect_session.o
+                                        0xd6f (size before relaxing)
+ .debug_str     0x0000000000005bf2       0x99 sys_poll_session.o
+                                        0xdb1 (size before relaxing)
+ .debug_str     0x0000000000005c8b       0x7c sys_close_session.o
+                                        0xd40 (size before relaxing)
+ .debug_str     0x0000000000005d07      0x11d sys_register_irq.o
+                                       0x1a32 (size before relaxing)
+ .debug_str     0x0000000000005e24       0x5c sys_exit.o
+                                        0xd4d (size before relaxing)
+ .debug_str     0x0000000000005e80      0x163 sys_state.o
+                                        0xf35 (size before relaxing)
+ .debug_str     0x0000000000005fe3       0x79 sys_mmap.o
+                                        0xd71 (size before relaxing)
+ .debug_str     0x000000000000605c      0x113 share_page.o
+                                       0x19ce (size before relaxing)
+ .debug_str     0x000000000000616f       0xa9 main.o
+                                        0xd49 (size before relaxing)
+
+.debug_ranges   0x0000000000000000       0x68
+ .debug_ranges  0x0000000000000000       0x20 imx6q_lowlevel_init.o
+ .debug_ranges  0x0000000000000020       0x18 imx_uart.o
+ .debug_ranges  0x0000000000000038       0x18 spawn_default_task.o
+ .debug_ranges  0x0000000000000050       0x18 sys_exec.o
+
+.debug_loc      0x0000000000000000     0x3d0c
+ .debug_loc     0x0000000000000000      0x1fc ccm_pll.o
+ .debug_loc     0x00000000000001fc      0x168 clock.o
+ .debug_loc     0x0000000000000364      0x240 gpt.o
+ .debug_loc     0x00000000000005a4       0xb4 bootmmu.o
+ .debug_loc     0x0000000000000658       0xec mmu.o
+ .debug_loc     0x0000000000000744      0x154 pagetable_attr.o
+ .debug_loc     0x0000000000000898      0x1cc gicv2_distributer_to_device.o
+ .debug_loc     0x0000000000000a64      0x15c gicv2_interface_to_core.o
+ .debug_loc     0x0000000000000bc0      0x3f0 trap_common.o
+ .debug_loc     0x0000000000000fb0      0x138 error_debug.o
+ .debug_loc     0x00000000000010e8       0xec spinlock.o
+ .debug_loc     0x00000000000011d4      0x204 imx_uart.o
+ .debug_loc     0x00000000000013d8       0x88 iomux_v3.o
+ .debug_loc     0x0000000000001460      0x110 uart_common_ope.o
+ .debug_loc     0x0000000000001570      0x330 l1_cache.o
+ .debug_loc     0x00000000000018a0      0x298 l2_cache.o
+ .debug_loc     0x0000000000001b38      0x2b0 cache_common_ope.o
+ .debug_loc     0x0000000000001de8      0x150 hardkernel_init.o
+ .debug_loc     0x0000000000001f38      0x54c actracer.o
+ .debug_loc     0x0000000000002484      0x230 actracer_mem_chunk.o
+ .debug_loc     0x00000000000026b4       0x64 softkernel_init.o
+ .debug_loc     0x0000000000002718      0x144 kalloc.o
+ .debug_loc     0x000000000000285c      0x268 pagetable.o
+ .debug_loc     0x0000000000002ac4       0x38 pagetable_level2.o
+ .debug_loc     0x0000000000002afc      0x194 buddy.o
+ .debug_loc     0x0000000000002c90       0xe0 object_allocator.o
+ .debug_loc     0x0000000000002d70       0xf4 default_irq_handler.o
+ .debug_loc     0x0000000000002e64       0xc8 clock_irq_handler.o
+ .debug_loc     0x0000000000002f2c       0xc8 software_irq_handler.o
+ .debug_loc     0x0000000000002ff4      0x238 task.o
+ .debug_loc     0x000000000000322c       0xb4 scheduler.o
+ .debug_loc     0x00000000000032e0       0x38 spawn_default_task.o
+ .debug_loc     0x0000000000003318       0x38 syscall.o
+ .debug_loc     0x0000000000003350       0x38 sys_spawn.o
+ .debug_loc     0x0000000000003388       0xc8 sys_exec.o
+ .debug_loc     0x0000000000003450       0x2c sys_yield.o
+ .debug_loc     0x000000000000347c       0x90 sys_register_as_server.o
+ .debug_loc     0x000000000000350c       0xc8 sys_connect_session.o
+ .debug_loc     0x00000000000035d4       0x90 sys_poll_session.o
+ .debug_loc     0x0000000000003664       0x90 sys_close_session.o
+ .debug_loc     0x00000000000036f4      0x100 sys_register_irq.o
+ .debug_loc     0x00000000000037f4       0x90 sys_exit.o
+ .debug_loc     0x0000000000003884      0x170 sys_state.o
+ .debug_loc     0x00000000000039f4       0x90 sys_mmap.o
+ .debug_loc     0x0000000000003a84      0x250 share_page.o
+ .debug_loc     0x0000000000003cd4       0x38 main.o
+
+Cross Reference Table
+
+Symbol                                            File
+AchieveResource                                   actracer.o
+                                                  share_page.o
+                                                  sys_register_irq.o
+                                                  sys_connect_session.o
+                                                  sys_exec.o
+                                                  task.o
+                                                  software_irq_handler.o
+                                                  clock_irq_handler.o
+                                                  default_irq_handler.o
+                                                  pagetable.o
+                                                  hardkernel_init.o
+                                                  uart_common_ope.o
+                                                  mmu.o
+AchieveResourceTag                                actracer.o
+                                                  main.o
+                                                  sys_exit.o
+                                                  sys_register_irq.o
+                                                  sys_connect_session.o
+                                                  sys_register_as_server.o
+                                                  sys_exec.o
+                                                  softkernel_init.o
+                                                  hardkernel_init.o
+                                                  mmu.o
+CleanL1Dcache                                     l1_cache.o
+                                                  cache_common_ope.o
+CleanL1DcacheAll                                  l1_cache.o
+                                                  cache_common_ope.o
+CleanL2Cache                                      l2_cache.o
+CleanL2CacheAll                                   l2_cache.o
+CpuInitCrit                                       imx6q_lowlevel_init.o
+                                                  boot.o
+CreateResourceTag                                 actracer.o
+                                                  main.o
+                                                  sys_register_as_server.o
+                                                  softkernel_init.o
+                                                  hardkernel_init.o
+DeleteResource                                    actracer.o
+                                                  sys_exit.o
+DisableL1Dcache                                   l1_cache.o
+                                                  cache_common_ope.o
+DisableL1Icache                                   l1_cache.o
+                                                  cache_common_ope.o
+DisableL2Cache                                    l2_cache.o
+EnableL1Dcache                                    l1_cache.o
+                                                  cache_common_ope.o
+EnableL1Icache                                    l1_cache.o
+                                                  cache_common_ope.o
+EnableL2Cache                                     l2_cache.o
+FlushL1Dcache                                     l1_cache.o
+                                                  cache_common_ope.o
+FlushL1DcacheAll                                  l1_cache.o
+                                                  cache_common_ope.o
+FlushL2Cache                                      l2_cache.o
+FlushL2CacheAll                                   l2_cache.o
+GetDevPteAttr                                     pagetable_attr.o
+                                                  mmu.o
+GetKernPteAttr                                    pagetable_attr.o
+                                                  mmu.o
+GetPdeAttr                                        pagetable_attr.o
+                                                  mmu.o
+GetUsrDevPteAttr                                  pagetable_attr.o
+                                                  mmu.o
+GetUsrPteAttr                                     pagetable_attr.o
+                                                  mmu.o
+InvalidateL1Dcache                                l1_cache.o
+                                                  cache_common_ope.o
+InvalidateL1DcacheAll                             l1_cache.o
+                                                  cache_common_ope.o
+InvalidateL1Icache                                l1_cache.o
+                                                  cache_common_ope.o
+InvalidateL1IcacheAll                             l1_cache.o
+                                                  cache_common_ope.o
+InvalidateL2Cache                                 l2_cache.o
+InvalidateL2CacheAll                              l2_cache.o
+KBuddyAlloc                                       buddy.o
+                                                  kalloc.o
+KBuddyFree                                        buddy.o
+                                                  kalloc.o
+KBuddySysInit                                     buddy.o
+                                                  kalloc.o
+KFreePagesInfo                                    buddy.o
+                                                  kalloc.o
+KPrintf                                           uart_common_ope.o
+                                                  main.o
+                                                  share_page.o
+                                                  sys_mmap.o
+                                                  sys_state.o
+                                                  sys_exit.o
+                                                  sys_register_irq.o
+                                                  sys_close_session.o
+                                                  sys_poll_session.o
+                                                  sys_connect_session.o
+                                                  sys_register_as_server.o
+                                                  sys_exec.o
+                                                  sys_spawn.o
+                                                  syscall.o
+                                                  spawn_default_task.o
+                                                  task.o
+                                                  software_irq_handler.o
+                                                  default_irq_handler.o
+                                                  object_allocator.o
+                                                  buddy.o
+                                                  pagetable.o
+                                                  kalloc.o
+                                                  softkernel_init.o
+                                                  actracer_mem_chunk.o
+                                                  actracer.o
+                                                  hardkernel_init.o
+                                                  spinlock.o
+                                                  error_debug.o
+                                                  trap_common.o
+PLL1_OUTPUT                                       ccm_pll.o
+PLL2_OUTPUT                                       ccm_pll.o
+PLL3_OUTPUT                                       ccm_pll.o
+PLL4_OUTPUT                                       ccm_pll.o
+PLL5_OUTPUT                                       ccm_pll.o
+RequireRootTag                                    actracer.o
+                                                  main.o
+                                                  sys_exit.o
+                                                  sys_register_irq.o
+                                                  sys_connect_session.o
+                                                  sys_register_as_server.o
+                                                  sys_exec.o
+                                                  sys_spawn.o
+                                                  spawn_default_task.o
+SyncL2Cache                                       l2_cache.o
+_Jv_RegisterClasses                               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+__aeabi_idiv0                                     /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_dvmd_tls.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+__aeabi_ldiv0                                     /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_dvmd_tls.o)
+__aeabi_uidiv                                     /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+                                                  object_allocator.o
+                                                  uart_common_ope.o
+                                                  imx_uart.o
+                                                  ccm_pll.o
+__aeabi_uidivmod                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+                                                  uart_common_ope.o
+__atexit_recursive_mutex                          /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+__bss_end__                                       /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+__bss_start__                                     /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+__call_exitprocs                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+__ctzdi2                                          /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_ctzdi2.o)
+                                                  object_allocator.o
+__deregister_frame_info                           /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+__dso_handle                                      /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+__fini_array_end                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+__fini_array_start                                /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+__init_array_end                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+__init_array_start                                /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+__libc_fini                                       /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+__libc_fini_array                                 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+__libc_init_array                                 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+__lock___arc4random_mutex                         /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___at_quick_exit_mutex                      /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___atexit_recursive_mutex                   /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+__lock___dd_hash_mutex                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___env_recursive_mutex                      /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___malloc_recursive_mutex                   /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___sfp_recursive_mutex                      /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___sinit_recursive_mutex                    /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__lock___tz_mutex                                 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__preinit_array_end                               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+__preinit_array_start                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+__register_exitproc                               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o)
+__register_frame_info                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crtbegin.o
+__retarget_lock_acquire                           /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__retarget_lock_acquire_recursive                 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+__retarget_lock_close                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__retarget_lock_close_recursive                   /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__retarget_lock_init                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__retarget_lock_init_recursive                    /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__retarget_lock_release                           /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__retarget_lock_release_recursive                 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+__retarget_lock_try_acquire                       /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__retarget_lock_try_acquire_recursive             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-lock.o)
+__stack                                           /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+__start_boot_data                                 ivt.o
+__udivsi3                                         /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/libgcc.a(_udivsi3.o)
+_binary_default_fs_start                          main.o
+_binary_fs_img_end                                sys_state.o
+_binary_fs_img_start                              sys_state.o
+_binary_init_start                                main.o
+_boot_start                                       boot.o
+                                                  vector.o
+                                                  ivt.o
+_exit                                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libnosys.a(_exit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+_fini                                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crti.o
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-fini.o)
+_global_impure_ptr                                /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+_image_size                                       ivt.o
+_impure_ptr                                       /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-impure.o)
+_init                                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/thumb/v7-ar/fpv3/softfp/crti.o
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-init.o)
+_mainCRTStartup                                   /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+_p_pgtbl_mmu_access                               pagetable.o
+                                                  pagetable_level2.o
+_page_walk                                        pagetable_level2.o
+                                                  pagetable.o
+_spinlock_lock                                    hard_spinlock.o
+                                                  spinlock.o
+_spinlock_unlock                                  hard_spinlock.o
+                                                  spinlock.o
+_start                                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+                                                  vector.o
+_start_image_addr                                 ivt.o
+_vector_end                                       vector.o
+_vector_jumper                                    vector.o
+                                                  trampoline.o
+                                                  trap_common.o
+_vector_start                                     vector.o
+                                                  trap_common.o
+arm_branch_prediction_disable                     cortexA9.o
+arm_branch_prediction_enable                      cortexA9.o
+arm_branch_target_cache_invalidate                cortexA9.o
+arm_branch_target_cache_invalidate_is             cortexA9.o
+arm_l2ccinitialize                                l2_cache.o
+arm_set_interrupt_state                           cortexA9.o
+                                                  trap_common.o
+arm_unified_tlb_invalidate                        cortexA9.o
+arm_unified_tlb_invalidate_is                     cortexA9.o
+atexit                                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+bd                                                ivt.o
+boot_end_addr                                     boot.o
+boot_pgdir                                        bootmmu.o
+boot_start_addr                                   boot.o
+bootmain                                          bootmmu.o
+                                                  boot.o
+ccm_ccgr_config                                   ccm_pll.o
+ccm_enter_low_power                               ccm_pll.o
+ccm_init                                          ccm_pll.o
+ccm_set_lpm_wakeup_source                         ccm_pll.o
+clock_gating_config                               ccm_pll.o
+                                                  gpt.o
+clock_intr_handler_init                           clock_irq_handler.o
+                                                  hardkernel_init.o
+context_switch                                    context_switch.o
+                                                  task.o
+                                                  software_irq_handler.o
+                                                  default_irq_handler.o
+cpu_get_current                                   cortexA9.o
+                                                  share_page.o
+                                                  sys_mmap.o
+                                                  sys_state.o
+                                                  sys_exit.o
+                                                  sys_register_irq.o
+                                                  sys_close_session.o
+                                                  sys_poll_session.o
+                                                  sys_connect_session.o
+                                                  sys_register_as_server.o
+                                                  sys_exec.o
+                                                  task.o
+                                                  software_irq_handler.o
+                                                  clock_irq_handler.o
+                                                  default_irq_handler.o
+                                                  hard_spinlock.o
+                                                  error_debug.o
+create_session_inner                              sys_connect_session.o
+                                                  sys_register_irq.o
+create_share_pages                                share_page.o
+dabort_handler                                    error_debug.o
+                                                  trampoline.o
+default_interrupt_routine                         default_irq_handler.o
+delete_share_pages                                share_page.o
+disable_L1_cache                                  cortexA9.o
+disable_strict_align_check                        cortexA9.o
+dump_tf                                           error_debug.o
+enable_neon_fpu                                   cortexA9.o
+exit                                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-exit.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+free                                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__call_atexit.o)
+get_arm_private_peripheral_base                   cortexA9.o
+get_main_clock                                    ccm_pll.o
+                                                  clock.o
+get_peri_clock                                    ccm_pll.o
+gic_cpu_enable                                    gicv2_interface_to_core.o
+gic_enable                                        gicv2_distributer_to_device.o
+gic_enable_irq                                    gicv2_distributer_to_device.o
+                                                  trap_common.o
+gic_init                                          gicv2_distributer_to_device.o
+                                                  trap_common.o
+gic_init_cpu                                      gicv2_interface_to_core.o
+                                                  gicv2_distributer_to_device.o
+gic_read_irq_ack                                  gicv2_interface_to_core.o
+                                                  trap_common.o
+gic_send_sgi                                      gicv2_distributer_to_device.o
+                                                  trap_common.o
+gic_set_cpu_priority_mask                         gicv2_interface_to_core.o
+gic_set_cpu_target                                gicv2_distributer_to_device.o
+                                                  trap_common.o
+gic_set_irq_priority                              gicv2_distributer_to_device.o
+                                                  trap_common.o
+gic_set_irq_security                              gicv2_distributer_to_device.o
+                                                  trap_common.o
+gic_write_end_of_irq                              gicv2_interface_to_core.o
+                                                  trap_common.o
+global_cpus                                       task.o
+                                                  share_page.o
+                                                  sys_mmap.o
+                                                  sys_state.o
+                                                  sys_exit.o
+                                                  sys_register_irq.o
+                                                  sys_close_session.o
+                                                  sys_poll_session.o
+                                                  sys_connect_session.o
+                                                  sys_register_as_server.o
+                                                  sys_exec.o
+                                                  software_irq_handler.o
+                                                  clock_irq_handler.o
+                                                  default_irq_handler.o
+                                                  error_debug.o
+global_tick                                       clock_irq_handler.o
+gpt_counter_disable                               gpt.o
+gpt_counter_enable                                gpt.o
+                                                  clock.o
+gpt_get_capture_event                             gpt.o
+gpt_get_compare_event                             gpt.o
+                                                  clock.o
+gpt_get_rollover_event                            gpt.o
+gpt_init                                          gpt.o
+                                                  clock.o
+gpt_set_capture_event                             gpt.o
+gpt_set_compare_event                             gpt.o
+                                                  clock.o
+handle_fiq                                        trap_common.o
+handle_reserved                                   trap_common.o
+handle_undefined_instruction                      error_debug.o
+                                                  trampoline.o
+hardkernel_clock_init                             clock.o
+                                                  hardkernel_init.o
+hardkernel_dcache_init                            cache_common_ope.o
+                                                  hardkernel_init.o
+hardkernel_icache_init                            cache_common_ope.o
+                                                  hardkernel_init.o
+hardkernel_init                                   hardkernel_init.o
+                                                  main.o
+hardkernel_init_array                             hardkernel_init.o
+hardkernel_intr_init                              trap_common.o
+                                                  hardkernel_init.o
+hardkernel_mmu_init                               mmu.o
+                                                  hardkernel_init.o
+hardkernel_uart_init                              imx_uart.o
+                                                  hardkernel_init.o
+hardware_init_hook                                /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+iabort_handler                                    error_debug.o
+                                                  trampoline.o
+init_cpu_mode_stacks                              trap_common.o
+init_stack                                        trampoline.o
+                                                  trap_common.o
+initapp                                           load_apps.o
+input_dcd                                         dcd.o
+input_dcd_hdr                                     dcd.o
+                                                  ivt.o
+input_dcd_wrt_cmd                                 dcd.o
+input_ivt                                         ivt.o
+intr_distributer_init                             default_irq_handler.o
+                                                  hardkernel_init.o
+intr_irq_dispatch                                 default_irq_handler.o
+                                                  trampoline.o
+ipu_hsp_clk_config                                ccm_pll.o
+kalloc                                            kalloc.o
+                                                  share_page.o
+                                                  sys_exec.o
+                                                  spawn_default_task.o
+                                                  task.o
+                                                  object_allocator.o
+                                                  pagetable_level2.o
+                                                  pagetable.o
+kern_pgdir                                        pagetable.o
+                                                  sys_exec.o
+                                                  spawn_default_task.o
+kern_virtmem_buddy                                kalloc.o
+                                                  sys_state.o
+                                                  pagetable.o
+kernel_data_begin                                 bootmmu.o
+kernel_data_end                                   sys_state.o
+                                                  kalloc.o
+                                                  bootmmu.o
+kfree                                             kalloc.o
+                                                  share_page.o
+                                                  sys_exec.o
+                                                  task.o
+                                                  object_allocator.o
+                                                  pagetable.o
+load_kern_pgdir                                   pagetable.o
+                                                  softkernel_init.o
+load_pgdir                                        mmu.o
+load_pgdir_critical                               mmu.o
+lowlevel_init                                     imx6q_lowlevel_init.o
+main                                              main.o
+                                                  bootmmu.o
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+malloc                                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-__atexit.o)
+max_priority_runnable_task                        scheduler.o
+                                                  task.o
+mem_chunk_synchronizer_init                       actracer_mem_chunk.o
+                                                  actracer.o
+memcpy                                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memcpy.o)
+                                                  sys_exec.o
+                                                  spawn_default_task.o
+                                                  pagetable.o
+memfs                                             load_apps.o
+memmove                                           /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memmove.o)
+                                                  actracer.o
+memset                                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-memset.o)
+                                                  sys_register_irq.o
+                                                  sys_spawn.o
+                                                  spawn_default_task.o
+                                                  task.o
+                                                  buddy.o
+                                                  pagetable_level2.o
+                                                  pagetable.o
+                                                  kalloc.o
+                                                  actracer_mem_chunk.o
+                                                  actracer.o
+                                                  trap_common.o
+                                                  bootmmu.o
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+module_pager_init                                 pagetable.o
+                                                  softkernel_init.o
+module_phymem_init                                kalloc.o
+                                                  softkernel_init.o
+module_share_page_init                            share_page.o
+                                                  softkernel_init.o
+module_spinlock_use_intr_init                     spinlock.o
+                                                  hardkernel_init.o
+module_task_manager_init                          task.o
+                                                  softkernel_init.o
+mxc_iomux_v3_init                                 iomux_v3.o
+                                                  imx_uart.o
+mxc_iomux_v3_setup_pad                            iomux_v3.o
+                                                  imx_uart.o
+next_task_emergency                               task.o
+                                                  sys_register_irq.o
+panic                                             trap_common.o
+                                                  main.o
+                                                  share_page.o
+                                                  sys_mmap.o
+                                                  sys_state.o
+                                                  sys_exit.o
+                                                  sys_close_session.o
+                                                  sys_connect_session.o
+                                                  sys_register_as_server.o
+                                                  sys_exec.o
+                                                  spawn_default_task.o
+                                                  task.o
+                                                  software_irq_handler.o
+                                                  default_irq_handler.o
+                                                  object_allocator.o
+                                                  pagetable.o
+                                                  actracer_mem_chunk.o
+                                                  actracer.o
+                                                  spinlock.o
+                                                  error_debug.o
+pl310_flush_all                                   l2_cache.o
+primary_cpu_init                                  boot.o
+raw_alloc                                         kalloc.o
+                                                  sys_mmap.o
+raw_free                                          kalloc.o
+                                                  sys_mmap.o
+                                                  pagetable.o
+ready_task_priority                               task.o
+                                                  scheduler.o
+recover_priority                                  scheduler.o
+                                                  task.o
+round_robin_runnable_task                         scheduler.o
+scu_disable_maintenance_broadcast                 cortexA9.o
+scu_enable                                        cortexA9.o
+scu_enable_maintenance_broadcast                  cortexA9.o
+scu_get_cpus_in_smp                               cortexA9.o
+scu_join_smp                                      cortexA9.o
+scu_leave_smp                                     cortexA9.o
+scu_secure_invalidate                             cortexA9.o
+serial_init                                       uart_common_ope.o
+                                                  hardkernel_init.o
+show_cpu                                          sys_state.o
+show_mem                                          sys_state.o
+show_phymem_info                                  kalloc.o
+show_tasks                                        sys_state.o
+show_xizi_bar                                     softkernel_init.o
+                                                  main.o
+slab_alloc                                        object_allocator.o
+                                                  share_page.o
+                                                  task.o
+slab_destroy                                      object_allocator.o
+slab_free                                         object_allocator.o
+                                                  share_page.o
+                                                  task.o
+slab_init                                         object_allocator.o
+                                                  share_page.o
+                                                  task.o
+softkernel_init                                   softkernel_init.o
+                                                  main.o
+software_init_hook                                /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/crt0.o
+software_irq_dispatch                             software_irq_handler.o
+                                                  trampoline.o
+spawn_embedded_task                               spawn_default_task.o
+                                                  main.o
+spinlock_init                                     spinlock.o
+                                                  sys_exec.o
+                                                  task.o
+                                                  buddy.o
+                                                  actracer_mem_chunk.o
+                                                  actracer.o
+spinlock_lock                                     spinlock.o
+                                                  share_page.o
+                                                  sys_exit.o
+                                                  sys_poll_session.o
+                                                  scheduler.o
+                                                  task.o
+                                                  buddy.o
+                                                  actracer_mem_chunk.o
+                                                  actracer.o
+spinlock_unlock                                   spinlock.o
+                                                  share_page.o
+                                                  sys_exit.o
+                                                  sys_poll_session.o
+                                                  scheduler.o
+                                                  task.o
+                                                  buddy.o
+                                                  actracer_mem_chunk.o
+                                                  actracer.o
+stacks_top                                        boot.o
+strlen                                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strlen-stub.o)
+                                                  sys_state.o
+                                                  sys_exec.o
+                                                  spawn_default_task.o
+strncmp                                           /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncmp.o)
+                                                  actracer.o
+strncpy                                           /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/thumb/v7-ar/fpv3/softfp/libc.a(lib_a-strncpy.o)
+                                                  sys_exec.o
+                                                  spawn_default_task.o
+                                                  actracer.o
+                                                  spinlock.o
+swi_distributer_init                              software_irq_handler.o
+                                                  hardkernel_init.o
+sys_close_session                                 sys_close_session.o
+                                                  syscall.o
+sys_connect_session                               sys_connect_session.o
+                                                  syscall.o
+sys_exec                                          sys_exec.o
+                                                  syscall.o
+sys_exit                                          sys_exit.o
+                                                  syscall.o
+                                                  error_debug.o
+sys_mmap                                          sys_mmap.o
+                                                  syscall.o
+sys_poll_session                                  sys_poll_session.o
+                                                  syscall.o
+sys_register_as_server                            sys_register_as_server.o
+                                                  syscall.o
+sys_register_irq                                  sys_register_irq.o
+                                                  syscall.o
+sys_spawn                                         sys_spawn.o
+                                                  syscall.o
+sys_state                                         sys_state.o
+                                                  syscall.o
+sys_tracer                                        actracer.o
+                                                  actracer_mem_chunk.o
+sys_yield                                         sys_yield.o
+                                                  syscall.o
+syscall                                           syscall.o
+                                                  software_irq_handler.o
+task_exec                                         sys_exec.o
+                                                  sys_spawn.o
+task_map_pages                                    share_page.o
+tracer_create_trace                               actracer.o
+tracer_delete_trace                               actracer.o
+tracer_find_tag                                   actracer.o
+tracer_init                                       actracer.o
+                                                  main.o
+tracer_mem_chunk_alloc                            actracer_mem_chunk.o
+                                                  actracer.o
+tracer_mem_chunk_free                             actracer_mem_chunk.o
+tracer_mem_chunk_read                             actracer_mem_chunk.o
+                                                  actracer.o
+tracer_mem_chunk_release                          actracer_mem_chunk.o
+                                                  actracer.o
+tracer_mem_chunk_write                            actracer_mem_chunk.o
+                                                  actracer.o
+tracer_read_trace                                 actracer.o
+tracer_space                                      actracer.o
+tracer_write_trace                                actracer.o
+trap_dabort                                       trampoline.o
+                                                  trap_common.o
+trap_iabort                                       trampoline.o
+                                                  trap_common.o
+trap_irq_enter                                    trampoline.o
+                                                  trap_common.o
+trap_reset_enter                                  trampoline.o
+trap_return                                       trampoline.o
+                                                  task.o
+trap_undefined_instruction                        trampoline.o
+                                                  trap_common.o
+unmap_task_share_pages                            share_page.o
+user_apps                                         load_apps.o
+user_irq_handler                                  sys_register_irq.o
+user_phy_freemem_buddy                            kalloc.o
+                                                  sys_state.o
+                                                  pagetable.o
+user_trap_swi_enter                               trampoline.o
+                                                  trap_common.o
+xizi_clock_handler                                clock_irq_handler.o
+                                                  hardkernel_init.o
+xizi_pager                                        pagetable.o
+                                                  share_page.o
+                                                  sys_exec.o
+                                                  spawn_default_task.o
+                                                  task.o
+xizi_share_page_manager                           share_page.o
+                                                  sys_mmap.o
+                                                  sys_exit.o
+                                                  sys_close_session.o
+                                                  sys_poll_session.o
+                                                  sys_connect_session.o
+xizi_task_manager                                 task.o
+                                                  main.o
+                                                  sys_state.o
+                                                  sys_exit.o
+                                                  sys_register_irq.o
+                                                  sys_yield.o
+                                                  sys_spawn.o
+                                                  spawn_default_task.o
+                                                  scheduler.o
+                                                  clock_irq_handler.o

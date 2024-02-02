@@ -1,0 +1,614 @@
+Archive member included to satisfy reference by file (symbol)
+
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+                              libserial.o (__aeabi_uidiv)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_dvmd_tls.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o) (__aeabi_idiv0)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o (__libc_init_array)
+/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-memset.o)
+                              /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o (memset)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crti.o
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+LOAD test_priority.o
+LOAD libserial.o
+LOAD usyscall.o
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libstdc++.a
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libm.a
+START GROUP
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a
+END GROUP
+START GROUP
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libnosys.a
+END GROUP
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtend.o
+LOAD /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtn.o
+                [!provide]                        PROVIDE (__executable_start, SEGMENT_START ("text-segment", 0x8000))
+                0x0000000000008000                . = SEGMENT_START ("text-segment", 0x8000)
+
+.interp
+ *(.interp)
+
+.note.gnu.build-id
+ *(.note.gnu.build-id)
+
+.hash
+ *(.hash)
+
+.gnu.hash
+ *(.gnu.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text .rel.text.* .rel.gnu.linkonce.t.*)
+
+.rela.text
+ *(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata .rel.rodata.* .rel.gnu.linkonce.r.*)
+
+.rela.rodata
+ *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
+
+.rel.data.rel.ro
+ *(.rel.data.rel.ro .rel.data.rel.ro.* .rel.gnu.linkonce.d.rel.ro.*)
+
+.rela.data.rel.ro
+ *(.rela.data.rel.ro .rela.data.rel.ro.* .rela.gnu.linkonce.d.rel.ro.*)
+
+.rel.data
+ *(.rel.data .rel.data.* .rel.gnu.linkonce.d.*)
+
+.rela.data
+ *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
+
+.rel.tdata
+ *(.rel.tdata .rel.tdata.* .rel.gnu.linkonce.td.*)
+
+.rela.tdata
+ *(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
+
+.rel.tbss
+ *(.rel.tbss .rel.tbss.* .rel.gnu.linkonce.tb.*)
+
+.rela.tbss
+ *(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss .rel.bss.* .rel.gnu.linkonce.b.*)
+
+.rela.bss
+ *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
+
+.rel.iplt       0x0000000000008000        0x0
+                [!provide]                        PROVIDE (__rel_iplt_start, .)
+ *(.rel.iplt)
+ .rel.iplt      0x0000000000008000        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+                [!provide]                        PROVIDE (__rel_iplt_end, .)
+
+.rela.iplt      0x0000000000008000        0x0
+                [!provide]                        PROVIDE (__rela_iplt_start, .)
+ *(.rela.iplt)
+                [!provide]                        PROVIDE (__rela_iplt_end, .)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.init           0x0000000000008000       0x18
+ *(SORT(.init))
+ .init          0x0000000000008000        0xc /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crti.o
+                0x0000000000008000                _init
+ .init          0x000000000000800c        0xc /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtn.o
+
+.plt
+ *(.plt)
+
+.iplt           0x0000000000008018        0x0
+ *(.iplt)
+ .iplt          0x0000000000008018        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+
+.text           0x0000000000008018      0xe40
+ *(.text.unlikely .text.*_unlikely .text.unlikely.*)
+ *(.text.exit .text.exit.*)
+ *(.text.startup .text.startup.*)
+ *(.text.hot .text.hot.*)
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ .text          0x0000000000008018        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crti.o
+ .text          0x0000000000008018       0xbc /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+ .text          0x00000000000080d4      0x114 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+                0x00000000000080d4                _mainCRTStartup
+                0x00000000000080d4                _start
+ .text          0x00000000000081e8       0xc4 test_priority.o
+                0x000000000000826c                main
+ .text          0x00000000000082ac      0x4dc libserial.o
+                0x00000000000083a4                getc
+                0x000000000000855c                printf
+ .text          0x0000000000008788      0x424 usyscall.o
+                0x00000000000087f8                spawn
+                0x000000000000885c                exit
+                0x0000000000008894                yield
+                0x00000000000088cc                register_server
+                0x0000000000008908                session
+                0x0000000000008950                poll_session
+                0x0000000000008990                close_session
+                0x00000000000089cc                get_memblock_info
+                0x0000000000008a08                set_priority
+                0x0000000000008a44                task_heap_base
+                0x0000000000008a7c                show_task
+                0x0000000000008ab4                show_mem
+                0x0000000000008aec                show_cpu
+                0x0000000000008b24                mmap
+                0x0000000000008b6c                register_irq
+ .text          0x0000000000008bac      0x114 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+                0x0000000000008bac                __udivsi3
+                0x0000000000008bac                __aeabi_uidiv
+                0x0000000000008ca0                __aeabi_uidivmod
+ .text          0x0000000000008cc0        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_dvmd_tls.o)
+                0x0000000000008cc0                __aeabi_ldiv0
+                0x0000000000008cc0                __aeabi_idiv0
+ .text          0x0000000000008cc4        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+ .text.__libc_init_array
+                0x0000000000008cc4       0x80 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+                0x0000000000008cc4                __libc_init_array
+ .text          0x0000000000008d44        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-memset.o)
+ .text.memset   0x0000000000008d44      0x114 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-memset.o)
+                0x0000000000008d44                memset
+ .text          0x0000000000008e58        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtend.o
+ .text          0x0000000000008e58        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtn.o
+ *(.gnu.warning)
+ *(.glue_7t)
+ .glue_7t       0x0000000000008e58        0x0 linker stubs
+ *(.glue_7)
+ .glue_7        0x0000000000008e58        0x0 linker stubs
+ *(.vfp11_veneer)
+ .vfp11_veneer  0x0000000000008e58        0x0 linker stubs
+ *(.v4_bx)
+ .v4_bx         0x0000000000008e58        0x0 linker stubs
+
+.fini           0x0000000000008e58       0x18
+ *(SORT(.fini))
+ .fini          0x0000000000008e58        0xc /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crti.o
+                0x0000000000008e58                _fini
+ .fini          0x0000000000008e64        0xc /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtn.o
+                [!provide]                        PROVIDE (__etext, .)
+                [!provide]                        PROVIDE (_etext, .)
+                [!provide]                        PROVIDE (etext, .)
+
+.rodata         0x0000000000008e70       0x37
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata        0x0000000000008e70       0x2d test_priority.o
+ *fill*         0x0000000000008e9d        0x3 
+ .rodata        0x0000000000008ea0        0x7 libserial.o
+
+.rodata1
+ *(.rodata1)
+
+.ARM.extab      0x0000000000008ea7        0x0
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+ .ARM.extab     0x0000000000008ea7        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+                [!provide]                        PROVIDE (__exidx_start, .)
+
+.ARM.exidx      0x0000000000008ea8        0x8
+ *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+ .ARM.exidx     0x0000000000008ea8        0x8 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+                [!provide]                        PROVIDE (__exidx_end, .)
+
+.eh_frame_hdr
+ *(.eh_frame_hdr)
+ *(.eh_frame_entry .eh_frame_entry.*)
+
+.eh_frame       0x0000000000008eb0        0x4
+ *(.eh_frame)
+ .eh_frame      0x0000000000008eb0        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+ .eh_frame      0x0000000000008eb0        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtend.o
+ *(.eh_frame.*)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.gnu_extab
+ *(.gnu_extab*)
+
+.exception_ranges
+ *(.exception_ranges .exception_ranges*)
+                0x0000000000008eb4                . = .
+
+.eh_frame
+ *(.eh_frame)
+ *(.eh_frame.*)
+
+.gnu_extab
+ *(.gnu_extab)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.exception_ranges
+ *(.exception_ranges .exception_ranges*)
+
+.tdata
+ *(.tdata .tdata.* .gnu.linkonce.td.*)
+
+.tbss
+ *(.tbss .tbss.* .gnu.linkonce.tb.*)
+ *(.tcommon)
+
+.preinit_array  0x0000000000008eb4        0x0
+                0x0000000000008eb4                PROVIDE (__preinit_array_start, .)
+ *(.preinit_array)
+                0x0000000000008eb4                PROVIDE (__preinit_array_end, .)
+
+.init_array     0x0000000000008eb4        0x4
+                0x0000000000008eb4                PROVIDE (__init_array_start, .)
+ *(SORT(.init_array.*) SORT(.ctors.*))
+ *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
+ .init_array    0x0000000000008eb4        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+                0x0000000000008eb8                PROVIDE (__init_array_end, .)
+
+.fini_array     0x0000000000008eb8        0x4
+                [!provide]                        PROVIDE (__fini_array_start, .)
+ *(SORT(.fini_array.*) SORT(.dtors.*))
+ *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
+ .fini_array    0x0000000000008eb8        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+                [!provide]                        PROVIDE (__fini_array_end, .)
+
+.ctors
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+ *(SORT(.ctors.*))
+ *(.ctors)
+
+.dtors
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ *(SORT(.dtors.*))
+ *(.dtors)
+
+.jcr            0x0000000000008ebc        0x4
+ *(.jcr)
+ .jcr           0x0000000000008ebc        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+ .jcr           0x0000000000008ebc        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtend.o
+
+.data.rel.ro
+ *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
+ *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*)
+
+.dynamic
+ *(.dynamic)
+
+.got            0x0000000000008ec0        0x0
+ *(.got.plt)
+ *(.igot.plt)
+ .igot.plt      0x0000000000008ec0        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+ *(.got)
+ *(.igot)
+
+.data           0x0000000000008ec0       0x15
+                0x0000000000008ec0                __data_start = .
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x0000000000008ec0        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crti.o
+ .data          0x0000000000008ec0        0x4 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+                0x0000000000008ec0                __dso_handle
+ .data          0x0000000000008ec4        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+ .data          0x0000000000008ec4        0x0 test_priority.o
+ .data          0x0000000000008ec4       0x11 libserial.o
+ .data          0x0000000000008ed5        0x0 usyscall.o
+ .data          0x0000000000008ed5        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+ .data          0x0000000000008ed5        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_dvmd_tls.o)
+ .data          0x0000000000008ed5        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+ .data          0x0000000000008ed5        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-memset.o)
+ .data          0x0000000000008ed5        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtend.o
+ .data          0x0000000000008ed5        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtn.o
+
+.data1
+ *(.data1)
+                0x0000000000008ed5                _edata = .
+                [!provide]                        PROVIDE (edata, .)
+                0x0000000000008ed5                . = .
+                0x0000000000008ed5                __bss_start = .
+                0x0000000000008ed5                __bss_start__ = .
+
+.bss            0x0000000000008ed8       0x20
+ *(.dynbss)
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ .bss           0x0000000000008ed8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crti.o
+ .bss           0x0000000000008ed8       0x1c /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+ .bss           0x0000000000008ef4        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+ .bss           0x0000000000008ef4        0x0 test_priority.o
+ .bss           0x0000000000008ef4        0x4 libserial.o
+ .bss           0x0000000000008ef8        0x0 usyscall.o
+ .bss           0x0000000000008ef8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+ .bss           0x0000000000008ef8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_dvmd_tls.o)
+ .bss           0x0000000000008ef8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+ .bss           0x0000000000008ef8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-memset.o)
+ .bss           0x0000000000008ef8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtend.o
+ .bss           0x0000000000008ef8        0x0 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtn.o
+ *(COMMON)
+                0x0000000000008ef8                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x0000000000008ef8                _bss_end__ = .
+                0x0000000000008ef8                __bss_end__ = .
+                0x0000000000008ef8                . = ALIGN (0x4)
+                0x0000000000008ef8                . = SEGMENT_START ("ldata-segment", .)
+                0x0000000000008ef8                . = ALIGN (0x4)
+                0x0000000000008ef8                __end__ = .
+                0x0000000000008ef8                _end = .
+                [!provide]                        PROVIDE (end, .)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x0000000000000000       0x7f
+ *(.comment)
+ .comment       0x0000000000000000       0x7f test_priority.o
+                                         0x80 (size before relaxing)
+ .comment       0x000000000000007f       0x80 libserial.o
+ .comment       0x000000000000007f       0x80 usyscall.o
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x0000000000000000       0x60
+ *(.debug_aranges)
+ .debug_aranges
+                0x0000000000000000       0x20 test_priority.o
+ .debug_aranges
+                0x0000000000000020       0x20 libserial.o
+ .debug_aranges
+                0x0000000000000040       0x20 usyscall.o
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x0000000000000000     0x23e8
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x0000000000000000      0x967 test_priority.o
+ .debug_info    0x0000000000000967      0xd7f libserial.o
+ .debug_info    0x00000000000016e6      0xd02 usyscall.o
+
+.debug_abbrev   0x0000000000000000      0x66d
+ *(.debug_abbrev)
+ .debug_abbrev  0x0000000000000000      0x1cc test_priority.o
+ .debug_abbrev  0x00000000000001cc      0x283 libserial.o
+ .debug_abbrev  0x000000000000044f      0x21e usyscall.o
+
+.debug_line     0x0000000000000000      0x554
+ *(.debug_line .debug_line.* .debug_line_end)
+ .debug_line    0x0000000000000000      0x17f test_priority.o
+ .debug_line    0x000000000000017f      0x1e1 libserial.o
+ .debug_line    0x0000000000000360      0x1f4 usyscall.o
+
+.debug_frame    0x0000000000000000      0x3b4
+ *(.debug_frame)
+ .debug_frame   0x0000000000000000       0x50 test_priority.o
+ .debug_frame   0x0000000000000050       0xc8 libserial.o
+ .debug_frame   0x0000000000000118      0x218 usyscall.o
+ .debug_frame   0x0000000000000330       0x20 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+ .debug_frame   0x0000000000000350       0x34 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+ .debug_frame   0x0000000000000384       0x30 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-memset.o)
+
+.debug_str      0x0000000000000000      0x9a6
+ *(.debug_str)
+ .debug_str     0x0000000000000000      0x5b0 test_priority.o
+                                        0x640 (size before relaxing)
+ .debug_str     0x00000000000005b0      0x20c libserial.o
+                                        0x7d4 (size before relaxing)
+ .debug_str     0x00000000000007bc      0x1ea usyscall.o
+                                        0x825 (size before relaxing)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges
+ *(.debug_ranges)
+
+.debug_macro
+ *(.debug_macro)
+
+.debug_addr
+ *(.debug_addr)
+
+.stack          0x0000000000080000        0x0
+                0x0000000000080000                _stack = .
+ *(.stack)
+
+.ARM.attributes
+                0x0000000000000000       0x2b
+ *(.ARM.attributes)
+ .ARM.attributes
+                0x0000000000000000       0x16 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crti.o
+ .ARM.attributes
+                0x0000000000000016       0x30 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+ .ARM.attributes
+                0x0000000000000046       0x14 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+ .ARM.attributes
+                0x000000000000005a       0x2f test_priority.o
+ .ARM.attributes
+                0x0000000000000089       0x2f libserial.o
+ .ARM.attributes
+                0x00000000000000b8       0x2f usyscall.o
+ .ARM.attributes
+                0x00000000000000e7       0x18 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+ .ARM.attributes
+                0x00000000000000ff       0x18 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_dvmd_tls.o)
+ .ARM.attributes
+                0x0000000000000117       0x30 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+ .ARM.attributes
+                0x0000000000000147       0x30 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-memset.o)
+ .ARM.attributes
+                0x0000000000000177       0x30 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtend.o
+ .ARM.attributes
+                0x00000000000001a7       0x18 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtn.o
+ *(.gnu.attributes)
+
+.note.gnu.arm.ident
+ *(.note.gnu.arm.ident)
+
+/DISCARD/
+ *(.note.GNU-stack)
+ *(.gnu_debuglink)
+ *(.gnu.lto_*)
+OUTPUT(test_priority elf32-littlearm)
+
+Cross Reference Table
+
+Symbol                                            File
+_Jv_RegisterClasses                               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+__aeabi_idiv0                                     /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_dvmd_tls.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+__aeabi_ldiv0                                     /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_dvmd_tls.o)
+__aeabi_uidiv                                     /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+                                                  libserial.o
+__aeabi_uidivmod                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+                                                  libserial.o
+__bss_end__                                       /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+__bss_start__                                     /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+__deregister_frame_info                           /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+__dso_handle                                      /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+__init_array_end                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+__init_array_start                                /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+__libc_fini_array                                 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+__libc_init_array                                 /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+__preinit_array_end                               /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+__preinit_array_start                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+__register_frame_info                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crtbegin.o
+__stack                                           /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+__udivsi3                                         /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/libgcc.a(_udivsi3.o)
+_fini                                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crti.o
+_init                                             /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/crti.o
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-init.o)
+_mainCRTStartup                                   /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+_start                                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+atexit                                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+close_session                                     usyscall.o
+exit                                              usyscall.o
+                                                  test_priority.o
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+get_memblock_info                                 usyscall.o
+getc                                              libserial.o
+hardware_init_hook                                /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+main                                              test_priority.o
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+memset                                            /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/libc.a(lib_a-memset.o)
+                                                  /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+mmap                                              usyscall.o
+                                                  libserial.o
+poll_session                                      usyscall.o
+printf                                            libserial.o
+                                                  test_priority.o
+register_irq                                      usyscall.o
+register_server                                   usyscall.o
+session                                           usyscall.o
+set_priority                                      usyscall.o
+                                                  test_priority.o
+show_cpu                                          usyscall.o
+show_mem                                          usyscall.o
+show_task                                         usyscall.o
+software_init_hook                                /opt/gcc-arm-none-eabi-6-2017-q1-update/bin/../lib/gcc/arm-none-eabi/6.3.1/../../../../arm-none-eabi/lib/crt0.o
+spawn                                             usyscall.o
+task_heap_base                                    usyscall.o
+yield                                             usyscall.o

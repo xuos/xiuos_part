@@ -12,7 +12,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "fs.h"
 #include "libipc.h"
 
 IPC_SERVICES(IpcFsServer, Ipc_ls, Ipc_cd, Ipc_mkdir, Ipc_delete, Ipc_cat,

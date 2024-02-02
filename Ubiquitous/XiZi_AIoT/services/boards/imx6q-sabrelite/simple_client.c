@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "fs_service.h"
+#include "libfs_to_client.h"
 #include "libserial.h"
 #include "simple_service.h"
 #include "usyscall.h"

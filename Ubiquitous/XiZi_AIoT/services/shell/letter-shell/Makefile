@@ -7,7 +7,7 @@ objdump = ${toolchain}objdump
 cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie
 c_useropts = -O0
 
-INC_DIR = -I$(KERNEL_ROOT)/services/boards/imx6q-sabrelite -I$(KERNEL_ROOT)/services/lib/ipc -I$(KERNEL_ROOT)/services/fs/include
+INC_DIR = -I$(KERNEL_ROOT)/services/boards/imx6q-sabrelite -I$(KERNEL_ROOT)/services/lib/ipc -I$(KERNEL_ROOT)/services/fs/libfs
 
 all: shell_cmd_list.o shell_ext.o shell.o
 	@mv shell_cmd_list.o ../../boards/imx6q-sabrelite

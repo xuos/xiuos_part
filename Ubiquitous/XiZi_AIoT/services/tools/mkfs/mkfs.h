@@ -48,7 +48,7 @@ Modification:
 
 #define ROOT_INUM 1 // root inode number
 #define BLOCK_SIZE 512 // block size
-#define nr_blocks_total 4096 // total number of blocks (including used blocks and free blocks)
+#define nr_blocks_total 2048 // total number of blocks (including used blocks and free blocks)
 #define nr_inodes 200 // total number of inodes
 
 #define NR_DIRECT_BLOCKS 5

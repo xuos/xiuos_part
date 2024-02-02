@@ -36,8 +36,8 @@ History:
 1. Date: 2023-11-23
 Author: AIIT XUOS Lab
 Modification:
-1. Take only armv7 abort reason part.
-2. Modify iabort and dabort handler
+1. Take only armv7 abort reason part(_abort_reason).
+2. Modify iabort and dabort handler(in dabort_handler() and iabort_handler())
 *************************************************/
 #include "core.h"
 #include "memlayout.h"

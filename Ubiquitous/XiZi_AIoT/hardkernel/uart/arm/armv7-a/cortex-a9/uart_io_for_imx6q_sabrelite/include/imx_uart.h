@@ -26,7 +26,7 @@ History:
 1. Date: 2023-09-08
 Author: AIIT XUOS Lab
 Modification:
-1. Not modifications
+1. No modifications
 *************************************************/
 
 #ifndef __IMX_UART_H__

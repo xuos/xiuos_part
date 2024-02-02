@@ -43,7 +43,7 @@ History:
 1. Date: 2023-11-23
 Author: AIIT XUOS Lab
 Modification:
-1. Not modification
+1. No modifications
 *************************************************/
 #ifndef _CCM_PLL_H_
 #define _CCM_PLL_H_

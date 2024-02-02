@@ -102,7 +102,6 @@ int InodeRead(struct Inode*, char*, int, int);
 int InodeWrite(struct Inode*, char*, uint32_t, uint32_t);
 struct Inode* InodeSeek(struct Inode*, char*);
 struct Inode* InodeParentSeek(struct Inode*, char*, char*);
-void InodeStateGet(struct Inode*, struct State*);
 
 // fs fd ops
 struct FileDescriptor* GetFileDescriptor(int fd);

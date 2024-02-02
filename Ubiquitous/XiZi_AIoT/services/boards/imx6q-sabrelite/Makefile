@@ -11,9 +11,9 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/lib/ipc \
 			-I$(KERNEL_ROOT)/services/lib/memory \
 			-I$(KERNEL_ROOT)/services/boards/imx6q-sabrelite \
-			-I$(KERNEL_ROOT)/services/fs/include
+			-I$(KERNEL_ROOT)/services/fs/libfs
 
-all: init simple_client simple_server shell fs_server test_priority test_fs readme.txt | bin
+all: init simple_client simple_server shell fs_server test_priority readme.txt | bin
 	../../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin
 	@mv *.o bin
@@ -22,15 +22,15 @@ all: init simple_client simple_server shell fs_server test_priority test_fs read
 bin:
 	@mkdir -p bin
 
-shell: shell_port.o libserial.o shell_cmd_list.o shell.o shell_ext.o fs_service.o libipc.o session.o usyscall.o
+shell: shell_port.o libserial.o shell_cmd_list.o shell.o shell_ext.o libfs_to_client.o libipc.o session.o usyscall.o
 	@${ld} ${user_ldflags} -e main -o $@ $^
 	@${objdump} -S $@ > $@.asm
 	
-init: init.o fs_service.o libipc.o session.o libserial.o usyscall.o
+init: init.o libfs_to_client.o libipc.o session.o libserial.o usyscall.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ 
 	@${objdump} -S $@ > $@.asm
 
-simple_client: simple_client.o libserial.o libipc.o session.o simple_service.o fs_service.o usyscall.o 
+simple_client: simple_client.o libserial.o libipc.o session.o simple_service.o libfs_to_client.o usyscall.o 
 	@${ld} ${user_ldflags} -e main -o $@ $^ 
 	@${objdump} -S $@ > $@.asm
 
@@ -38,15 +38,11 @@ simple_server: simple_server.o libserial.o libipc.o session.o simple_service.o u
 	@${ld} ${user_ldflags} -e main -o $@ $^ 
 	@${objdump} -S $@ > $@.asm
 
-fs_server: fs_server.o fs_service.o fs.o libserial.o libipc.o session.o block_io.o usyscall.o
+fs_server: fs_server.o libfs_to_client.o fs.o libserial.o libipc.o session.o block_io.o usyscall.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ 
 	@${objdump} -S $@ > $@.asm
 
 test_priority: test_priority.o libserial.o usyscall.o
-	@${ld} ${user_ldflags} -e main -o $@ $^ 
-	@${objdump} -S $@ > $@.asm
-
-test_fs: test_fs.o libserial.o fs_service.o libipc.o session.o usyscall.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ 
 	@${objdump} -S $@ > $@.asm
 

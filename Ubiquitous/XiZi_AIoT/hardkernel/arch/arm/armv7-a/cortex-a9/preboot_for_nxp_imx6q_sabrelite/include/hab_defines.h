@@ -42,7 +42,7 @@ History:
 1. Date: 2023-11-23
 Author: AIIT XUOS Lab
 Modification:
-1. Not modifications
+1. No modifications
 *************************************************/
 #ifndef HAB_DEFINES_H
 #define HAB_DEFINES_H

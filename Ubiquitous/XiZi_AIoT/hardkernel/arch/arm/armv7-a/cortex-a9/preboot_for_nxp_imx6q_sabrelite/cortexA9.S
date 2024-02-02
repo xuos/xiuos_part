@@ -41,7 +41,7 @@ History:
 1. Date: 2023-08-28
 Author: AIIT XUOS Lab
 Modification:
-1. Not modifications
+1. No modifications
 *************************************************/
  
     .code 32

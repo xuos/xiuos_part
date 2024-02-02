@@ -43,7 +43,7 @@ History:
 1. Date: 2023-11-23
 Author: AIIT XUOS Lab
 Modification:
-1. Not modifications
+1. No modifications
 *************************************************/
 
 #ifndef __TIMER_H__

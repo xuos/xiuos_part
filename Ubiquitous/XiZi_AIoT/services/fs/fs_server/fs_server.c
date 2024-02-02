@@ -14,7 +14,7 @@
 
 #include "block_io.h"
 #include "fs.h"
-#include "fs_service.h"
+#include "libfs_to_client.h"
 #include "libserial.h"
 #include "usyscall.h"
 
@@ -256,7 +256,6 @@ int IPC_DO_SERVE_FUNC(Ipc_open)(char* path)
     strncpy(fdp->path, path, strlen(path) + 1);
     ip->nlink++;
     fdp->data = ip;
-    InodeStateGet(ip, &fdp->st);
 
     return fd;
 }
@@ -327,8 +326,16 @@ IPC_SERVER_INTERFACE(Ipc_close, 1);
 IPC_SERVER_INTERFACE(Ipc_read, 4);
 IPC_SERVER_INTERFACE(Ipc_write, 4);
 
-IPC_SERVER_REGISTER_INTERFACES(IpcFsServer, 9, Ipc_ls, Ipc_cd, Ipc_mkdir, Ipc_delete, Ipc_cat,
-    Ipc_open, Ipc_close, Ipc_read, Ipc_write);
+IPC_SERVER_REGISTER_INTERFACES(IpcFsServer, 9,
+    Ipc_ls,
+    Ipc_cd,
+    Ipc_mkdir,
+    Ipc_delete,
+    Ipc_cat,
+    Ipc_open,
+    Ipc_close,
+    Ipc_read,
+    Ipc_write);
 
 int main(int argc, char* argv[])
 {

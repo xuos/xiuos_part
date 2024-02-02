@@ -16,7 +16,7 @@
 #include <string.h>
 
 #include "libserial.h"
-#include "fs_service.h"
+#include "libfs_to_client.h"
 #include "usyscall.h"
 
 int main(int argc, char* argv[])

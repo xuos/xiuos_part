@@ -46,7 +46,8 @@ History:
 Author: AIIT XUOS Lab
 Modification:
 1. implement the l1 cache operations
-2. functions are modifications of imx6 SDK package
+2. function names are modified to apply softkernel developement
+3. function implementations are from modifications of imx6 SDK package
 *************************************************/
 
 #include "l1_cache.h"

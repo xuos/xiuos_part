@@ -12,7 +12,7 @@
 // init: The initial user-level program
 #include <stdbool.h>
 
-#include "fs_service.h"
+#include "libfs_to_client.h"
 #include "libserial.h"
 #include "usyscall.h"
 

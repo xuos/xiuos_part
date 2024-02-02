@@ -17,8 +17,7 @@
 #include "shell_cfg.h"
 #include "shell_ext.h"
 
-#include "fs.h"
-#include "fs_service.h"
+#include "libfs_to_client.h"
 #include "libipc.h"
 
 #if SHELL_USING_CMD_EXPORT == 1

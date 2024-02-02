@@ -45,7 +45,7 @@ History:
 1. Date: 2024-01-25
 Author: AIIT XUOS Lab
 Modification:
-1. modify the L1-level page table name and properties name
+1. modify the L1-level page table name and properties name to apply hardkernel implementation
 *************************************************/
 #pragma once
 

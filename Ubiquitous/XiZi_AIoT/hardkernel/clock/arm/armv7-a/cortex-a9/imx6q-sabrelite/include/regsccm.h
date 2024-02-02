@@ -26,7 +26,7 @@ History:
 1. Date: 2023-11-23
 Author: AIIT XUOS Lab
 Modification:
-1. Not modifications
+1. Comment unnecessary macros
 *************************************************/
 #ifndef __HW_CCM_REGISTERS_H__
 #define __HW_CCM_REGISTERS_H__

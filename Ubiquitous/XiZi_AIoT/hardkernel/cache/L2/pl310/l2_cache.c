@@ -39,8 +39,9 @@ History:
 1. Date: 2023-04-27
 Author: AIIT XUOS Lab
 Modification:
-1. support xiuos cache interface
-2. implementations are modifications of imx6 SDK package
+1. implement the l2 cache operations
+2. function names are modified to apply softkernel developement
+3. function implementations are from modifications of imx6 SDK package
 *************************************************/
 
 #include "l2_cache.h"

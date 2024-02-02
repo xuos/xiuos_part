@@ -44,7 +44,9 @@ History:
 1. Date: 2023-09-28
 Author: AIIT XUOS Lab
 Modification:
-1. Get init and read/write functions
+1. Get init and read/write functions(GetUartClk() and UartInitGpio())
+2. Rename read/write char functions to UartPutCharInstance() and UartGetCharInstance() to support multiple uart instances
+2. Add UartGetIrqnumInstance() and Global XiziSerialDriver object hardkernel_serial_driver;
 *************************************************/
 #include "crm_regs.h"
 #include "regs_pins.h"

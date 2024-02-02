@@ -43,7 +43,7 @@ History:
 1. Date: 2023-08-28
 Author: AIIT XUOS Lab
 Modification:
-1. Not modification
+1. No modifications
 *************************************************/
 #if !defined(__CORTEX_A9_H__)
 #define __CORTEX_A9_H__

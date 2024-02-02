@@ -39,13 +39,14 @@ Modification:
 1. support inode create and delete
 3. remove inode lock and unlock
 4. remove inode cache
+5. rename function names(DirInodeAddEntry,DirInodeLookup, InodeAlloc, InodeFree, PathElementExtract, InodeBlockMapping, Seek, InodeSeek, InodeParentSeek, InodeRead, InodeWrite) to fit XIZI_AIoT use sceneries
 *************************************************/
 
 #include <string.h>
 
 #include "block_io.h"
-#include "libserial.h"
 #include "fs.h"
+#include "libserial.h"
 
 static void Error(char* s)
 {
@@ -358,15 +359,6 @@ struct Inode* InodeSeek(struct Inode* source, char* path)
 struct Inode* InodeParentSeek(struct Inode* source, char* path, char* name)
 {
     return Seek(source, path, 1, name);
-}
-
-/// @brief Copy State information from Inode.
-void InodeStateGet(struct Inode* ip, struct State* st)
-{
-    st->ino = ip->inum;
-    st->type = ip->type;
-    st->nlink = ip->nlink;
-    st->size = ip->size;
 }
 
 /// @brief Read data from the Inode to the dst buffer.
