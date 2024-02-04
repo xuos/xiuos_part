@@ -38,7 +38,7 @@ Author: AIIT XUOS Lab
 Modification:
 1. remove inode lock and unlock
 2. remove inode cache
-3. rename skipelem function names to PathElementExtract to fit XIZI_AIoT use sceneries
+3. rewrite skipelem function to PathElementExtract to fit XIZI_AIoT use sceneries
 *************************************************/
 
 #include <string.h>
