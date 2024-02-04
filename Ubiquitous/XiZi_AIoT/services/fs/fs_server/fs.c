@@ -36,10 +36,9 @@ History:
 1. Date: 2024-01-25
 Author: AIIT XUOS Lab
 Modification:
-1. support inode create and delete
-3. remove inode lock and unlock
-4. remove inode cache
-5. rename function names(DirInodeAddEntry,DirInodeLookup, InodeAlloc, InodeFree, PathElementExtract, InodeBlockMapping, Seek, InodeSeek, InodeParentSeek, InodeRead, InodeWrite) to fit XIZI_AIoT use sceneries
+1. remove inode lock and unlock
+2. remove inode cache
+3. rename skipelem function names to PathElementExtract to fit XIZI_AIoT use sceneries
 *************************************************/
 
 #include <string.h>
@@ -48,22 +47,15 @@ Modification:
 #include "fs.h"
 #include "libserial.h"
 
-static void Error(char* s)
-{
-    printf("Error: %s\n", s);
-    for (;;)
-        ;
-}
-
-#define min(a, b) ((a) < (b) ? (a) : (b))
+#define MIN_LENGTH(len1, len2) ((len1) < (len2) ? (len1) : (len2))
 
 static int DirInodeAddEntry(struct Inode* dp, char* name, uint32_t inum);
-static struct Inode* DirInodeLookup(struct Inode* dp, char* name, uint32_t* poff);
-static struct Inode* InodeAlloc(short type);
-static int InodeFree(struct Inode* ip);
+static int DirInodeDelEntry(struct Inode* parent_inode, char* name);
+static struct Inode* DirInodeLookup(struct Inode* dp, char* name);
+static struct Inode* InodeAlloc(int type);
 static int InodeFreeRecursive(struct Inode* dp);
 static char* PathElementExtract(char* path, char* name);
-static uint32_t InodeBlockMapping(struct Inode* ip, uint32_t block_num);
+static uint32_t InodeBlockMapping(struct Inode* inode, uint32_t block_num);
 
 #define MAX_SUPPORT_FD 1024
 static struct FileDescriptor fd_table[MAX_SUPPORT_FD];
@@ -80,83 +72,236 @@ void MemFsInit(uintptr_t _binary_fs_img_start, uint32_t fs_img_len)
 /// @brief Read the super block.
 void ReadSuperBlock(struct SuperBlock* sb)
 {
-    uint8_t* data = BlockRead(ROOT_INUM);
-    memmove(sb, data, sizeof(*sb));
+    uint8_t* block = BlockRead(ROOT_INUM);
+    memmove(sb, block, sizeof(*sb));
 }
 
 /// @brief Get a existed Inode by inum
 struct Inode* InodeGet(uint32_t inum)
 {
-    struct Inode* ip;
-    uint8_t* data = BlockRead(BLOCK_INDEX(inum));
-    ip = (struct Inode*)data + INODE_INDEX(inum);
-    return ip;
+    struct Inode* inode;
+    uint8_t* block = BlockRead(BLOCK_INDEX(inum));
+    inode = (struct Inode*)block + INODE_INDEX(inum);
+    return inode;
+}
+
+/// @brief Create a new Inode under the parent Inode
+struct Inode* InodeCreate(struct Inode* parent_inode, char* name, int type)
+{
+    struct Inode* inode;
+    if ((inode = DirInodeLookup(parent_inode, name)) != 0) {
+        if (type == FS_FILE && inode->type == FS_FILE) {
+            return inode;
+        }
+        return 0;
+    }
+
+    if ((inode = InodeAlloc(type)) == 0) {
+        printf("InodeCreate: alloc Inode failed, no free inode\n");
+        return 0;
+    }
+
+    if (type == FS_DIRECTORY) {
+        if (DirInodeAddEntry(inode, ".", inode->inum) < 0 || DirInodeAddEntry(inode, "..", parent_inode->inum) < 0) {
+            printf("InodeCreate: create dots");
+            return 0;
+        }
+    }
+
+    if (DirInodeAddEntry(parent_inode, name, inode->inum) < 0) {
+        printf("InodeCreate: DirInodeAddEntry failed");
+        return 0;
+    }
+
+    return inode;
+}
+
+/// @brief Delete a file Inode or a dir Inode
+int InodeDelete(struct Inode* parent_inode, char* name)
+{
+    uint32_t offset;
+    struct Inode* inode;
+    struct DirectEntry de;
+
+    if ((inode = DirInodeLookup(parent_inode, name)) == 0) {
+        printf("Inode delete failed, file not exsit");
+        return -1;
+    }
+
+    if (inode->type == FS_FILE) {
+        inode->type = 0;
+    } else if (inode->type == FS_DIRECTORY) {
+        // recursive free alloced Inode
+        if (InodeFreeRecursive(inode) < 0) {
+            return -1;
+        }
+    }
+
+    DirInodeDelEntry(parent_inode, name);
+    return 0;
+}
+
+/// @brief Read data from the Inode to the dst buffer.
+int InodeRead(struct Inode* inode, char* dst, int offset, int len)
+{
+    uint32_t location, writen_len;
+    uint8_t* block;
+
+    if (len < 0 || offset > inode->size) {
+        return -1;
+    }
+    if (offset + len > inode->size) {
+        len = inode->size - offset;
+    }
+
+    location = 0;
+    while (location < len) {
+        if ((block = BlockRead(InodeBlockMapping(inode, offset / BLOCK_SIZE))) == 0) {
+            return 0;
+        }
+        writen_len = MIN_LENGTH(len - location, BLOCK_SIZE - offset % BLOCK_SIZE);
+        memmove(dst, block + offset % BLOCK_SIZE, writen_len);
+        location += writen_len;
+        offset += writen_len;
+        dst += writen_len;
+    }
+
+    return len;
+}
+
+/// @brief Write data from src buffer to the Inode, then increase the Inode size if neccessary.
+int InodeWrite(struct Inode* inode, char* src, int offset, int len)
+{
+    uint32_t location, writen_len;
+    uint8_t* block;
+
+    if (len < 0 || offset > inode->size) {
+        return -1;
+    }
+    if (offset + len > MAX_FILE_SIZE * BLOCK_SIZE) {
+        return -1;
+    }
+
+    location = 0;
+    while (location < len) {
+        if ((block = BlockRead(InodeBlockMapping(inode, offset / BLOCK_SIZE))) == 0) {
+            return 0;
+        }
+        writen_len = MIN_LENGTH(len - location, BLOCK_SIZE - offset % BLOCK_SIZE);
+        memmove(block + offset % BLOCK_SIZE, src, writen_len);
+        location += writen_len;
+        offset += writen_len;
+        src += writen_len;
+    }
+
+    if (len > 0 && offset > inode->size) {
+        inode->size = offset;
+    }
+
+    return len;
+}
+
+/// @brief Find target Inode from source Inode
+struct Inode* InodeSeek(struct Inode* source, char* path)
+{
+    if (source->size == 0) {
+        printf("Inode is empty\n");
+        return 0;
+    }
+
+    char name[DIR_NAME_SIZE] = { 0 };
+    struct Inode *cur_inode, *next_inode;
+    cur_inode = source;
+    while ((path = PathElementExtract(path, name)) != 0) {
+        if (cur_inode->type != FS_DIRECTORY) {
+            return NULL;
+        }
+        if ((next_inode = DirInodeLookup(cur_inode, name)) == 0) {
+            return NULL;
+        }
+        cur_inode = next_inode;
+    }
+    return cur_inode;
+}
+
+/// @brief Find target parent Inode from source Inode
+struct Inode* InodeParentSeek(struct Inode* source, char* path, char* name)
+{
+    if (source->size == 0) {
+        printf("Inode is empty\n");
+        return 0;
+    }
+
+    struct Inode *cur_inode, *next_inode;
+    cur_inode = source;
+    while ((path = PathElementExtract(path, name)) != 0) {
+        if (cur_inode->type != FS_DIRECTORY) {
+            return NULL;
+        }
+        if (*path == '\0') {
+            return cur_inode;
+        }
+        if ((next_inode = DirInodeLookup(cur_inode, name)) == 0) {
+            return NULL;
+        }
+        cur_inode = next_inode;
+    }
+
+    return NULL;
 }
 
 /// @brief Alloc a new Inode using type
-static struct Inode* InodeAlloc(short type)
+static struct Inode* InodeAlloc(int type)
 {
     int inum;
-    struct Inode* ip;
+    struct Inode* inode;
     struct SuperBlock sb;
 
     ReadSuperBlock(&sb);
     for (inum = 1; inum < sb.ninodes; inum++) {
-        uint8_t* data = BlockRead(BLOCK_INDEX(inum));
-        ip = (struct Inode*)data + INODE_INDEX(inum);
-        if (ip->type == 0) {
-            memset(ip, 0, sizeof(*ip));
-            ip->inum = inum;
-            ip->type = type;
-            ip->nlink = 1;
-            ip->size = 0;
-            return ip;
+        uint8_t* block = BlockRead(BLOCK_INDEX(inum));
+        inode = (struct Inode*)block + INODE_INDEX(inum);
+        if (inode->type == 0) {
+            memset(inode, 0, sizeof(*inode));
+            inode->inum = inum;
+            inode->type = type;
+            inode->size = 0;
+            return inode;
         }
     }
 
-    Error("InodeAlloc: no inodes");
     return NULL;
 }
 
-/// @brief Free the existed Inode
-static int InodeFree(struct Inode* ip)
-{
-    uint8_t* data = BlockRead(BLOCK_INDEX(ip->inum));
-    struct Inode* dip = (struct Inode*)data + INODE_INDEX(ip->inum);
-    dip->type = 0;
-
-    return 0;
-}
-
 /// @brief Delete the dir and all files or dirs under the dir.
-static int InodeFreeRecursive(struct Inode* dp)
+static int InodeFreeRecursive(struct Inode* parent_inode)
 {
-    uint32_t off;
-    struct Inode* ip;
+    uint32_t offset;
+    struct Inode* inode;
     struct DirectEntry de;
 
-    for (off = 0; off < dp->size; off += sizeof(de)) {
-        if (InodeRead(dp, (char*)&de, off, sizeof(de)) != sizeof(de)) {
-            Error("inode_delete_dir failed: read directory entry failed");
+    for (offset = 0; offset < parent_inode->size; offset += sizeof(de)) {
+        if (InodeRead(parent_inode, (char*)&de, offset, sizeof(de)) != sizeof(de)) {
+            printf("inode_delete_dir failed: read directory entry failed");
+            return -1;
         }
 
-        // unlink dir
         if (de.inum == 0 || strcmp(de.name, "..") == 0 || strcmp(de.name, ".") == 0) {
             continue;
         }
 
-        ip = InodeGet(de.inum);
-        if (ip->type == T_DIR) {
-            if (InodeFreeRecursive(ip) < 0) {
+        inode = InodeGet(de.inum);
+        if (inode->type == FS_DIRECTORY) {
+            if (InodeFreeRecursive(inode) < 0) {
                 return -1;
             }
-        } else if (ip->type == T_FILE) {
-            InodeFree(ip);
+        } else if (inode->type == FS_FILE) {
+            inode->type = 0;
         }
 
         // delete the dir entry
         de.inum = 0;
-        if (InodeWrite(dp, (char*)&de, off, sizeof(de)) != sizeof(de)) {
+        if (InodeWrite(parent_inode, (char*)&de, offset, sizeof(de)) != sizeof(de)) {
             printf("InodeDelete failed: clear directory entry failed");
             return -1;
         }
@@ -164,74 +309,14 @@ static int InodeFreeRecursive(struct Inode* dp)
     return 0;
 }
 
-/// @brief Delete a file Inode or a dir Inode
-int InodeDelete(struct Inode* dp, char* name)
-{
-    uint32_t off;
-    struct Inode* ip;
-    struct DirectEntry de;
-
-    if ((ip = DirInodeLookup(dp, name, &off)) == 0) {
-        Error("Inode delete failed, file not exsit");
-        return -1;
-    }
-
-    InodeFree(ip);
-    if (ip->type == T_DIR) {
-        // recursive free alloced Inode
-        if (InodeFreeRecursive(ip) < 0) {
-            return -1;
-        }
-    }
-
-    // delete the dir entry
-    de.inum = 0;
-    if (InodeWrite(dp, (char*)&de, off, sizeof(de)) != sizeof(de)) {
-        printf("InodeDelete failed: clear directory entry failed");
-        return -1;
-    }
-    return 0;
-}
-
-/// @brief Create a new Inode under the parent Inode
-struct Inode* InodeCreate(struct Inode* dp, char* name, short type, short major, short minor)
-{
-    uint32_t off;
-    struct Inode* ip;
-
-    if ((ip = DirInodeLookup(dp, name, &off)) != 0) {
-        if (type == T_FILE && ip->type == T_FILE) {
-            return ip;
-        }
-        return 0;
-    }
-
-    if ((ip = InodeAlloc(type)) == 0) {
-        Error("InodeCreate: create Inode failed\n");
-    }
-
-    if (type == T_DIR) {
-        dp->nlink++;
-        if (DirInodeAddEntry(ip, ".", ip->inum) < 0 || DirInodeAddEntry(ip, "..", dp->inum) < 0) {
-            Error("InodeCreate: create dots");
-        }
-    }
-
-    if (DirInodeAddEntry(dp, name, ip->inum) < 0) {
-        Error("InodeCreate: DirInodeAddEntry failed");
-    }
-
-    return ip;
-}
-
 /// @brief Mapping the direct block addrs or indirect block addrs of the Inode using the block_num
-static uint32_t InodeBlockMapping(struct Inode* ip, uint32_t block_num)
+static uint32_t InodeBlockMapping(struct Inode* inode, uint32_t block_num)
 {
     uint32_t addr;
     // block is in range of direct mapping
     if (block_num < NR_DIRECT_BLOCKS) {
-        if ((addr = ip->addrs[block_num]) == 0) {
-            ip->addrs[block_num] = addr = BlockAlloc();
+        if ((addr = inode->addrs[block_num]) == 0) {
+            inode->addrs[block_num] = addr = BlockAlloc();
         }
         return addr;
     }
@@ -240,12 +325,12 @@ static uint32_t InodeBlockMapping(struct Inode* ip, uint32_t block_num)
     block_num -= NR_DIRECT_BLOCKS;
     int indirect_block_id = block_num / MAX_INDIRECT_BLOCKS;
     if (indirect_block_id < NR_INDIRECT_BLOCKS) {
-        if ((addr = ip->addrs[NR_DIRECT_BLOCKS + indirect_block_id]) == 0) {
-            ip->addrs[NR_DIRECT_BLOCKS + indirect_block_id] = addr = BlockAlloc();
+        if ((addr = inode->addrs[NR_DIRECT_BLOCKS + indirect_block_id]) == 0) {
+            inode->addrs[NR_DIRECT_BLOCKS + indirect_block_id] = addr = BlockAlloc();
         }
         block_num -= indirect_block_id * MAX_INDIRECT_BLOCKS;
     } else {
-        Error("InodeBlockMapping: out of range");
+        printf("InodeBlockMapping: out of range");
         return 0;
     }
 
@@ -259,18 +344,20 @@ static uint32_t InodeBlockMapping(struct Inode* ip, uint32_t block_num)
 }
 
 /// @brief Look up the directory Inode for searching the target Inode
-static struct Inode* DirInodeLookup(struct Inode* dp, char* name, uint32_t* poff)
+static struct Inode* DirInodeLookup(struct Inode* parent_inode, char* name)
 {
-    uint32_t off, inum;
+    uint32_t offset, inum;
     struct DirectEntry de;
 
-    if (dp->type != T_DIR) {
-        Error("DirInodeLookup not DIR");
+    if (parent_inode->type != FS_DIRECTORY) {
+        printf("DirInodeLookup not DIR");
+        return 0;
     }
 
-    for (off = 0; off < dp->size; off += sizeof(de)) {
-        if (InodeRead(dp, (char*)&de, off, sizeof(de)) != sizeof(de)) {
-            Error("DirInodeAddEntry read");
+    for (offset = 0; offset < parent_inode->size; offset += sizeof(de)) {
+        if (InodeRead(parent_inode, (char*)&de, offset, sizeof(de)) != sizeof(de)) {
+            printf("DirInodeAddEntry read");
+            return 0;
         }
 
         if (de.inum == 0) {
@@ -278,9 +365,6 @@ static struct Inode* DirInodeLookup(struct Inode* dp, char* name, uint32_t* poff
         }
 
         if (strncmp((const char*)name, (const char*)de.name, DIR_NAME_SIZE) == 0) {
-            if (poff) {
-                *poff = off;
-            }
             inum = de.inum;
             return InodeGet(inum);
         }
@@ -290,21 +374,22 @@ static struct Inode* DirInodeLookup(struct Inode* dp, char* name, uint32_t* poff
 }
 
 /// @brief Add a new directory entry for dir Inode
-static int DirInodeAddEntry(struct Inode* dp, char* name, uint32_t inum)
+static int DirInodeAddEntry(struct Inode* parent_inode, char* name, uint32_t inum)
 {
-    int off;
+    int offset;
     struct DirectEntry de;
-    struct Inode* ip;
+    struct Inode* inode;
 
-    // Check that direct entry is existed.
-    if ((ip = DirInodeLookup(dp, name, 0)) != 0) {
+    // Check the direct entry is not existed.
+    if ((inode = DirInodeLookup(parent_inode, name)) != 0) {
         return -1;
     }
 
     // Look for an empty dir entry.
-    for (off = 0; off < dp->size; off += sizeof(de)) {
-        if (InodeRead(dp, (char*)&de, off, sizeof(de)) != sizeof(de)) {
-            Error("DirInodeAddEntry: read failed");
+    for (offset = 0; offset < parent_inode->size; offset += sizeof(de)) {
+        if (InodeRead(parent_inode, (char*)&de, offset, sizeof(de)) != sizeof(de)) {
+            printf("DirInodeAddEntry: read failed");
+            return -1;
         }
 
         if (de.inum == 0) {
@@ -315,98 +400,45 @@ static int DirInodeAddEntry(struct Inode* dp, char* name, uint32_t inum)
     // build a new direct entry.
     strncpy(de.name, name, DIR_NAME_SIZE);
     de.inum = inum;
-    if (InodeWrite(dp, (char*)&de, off, sizeof(de)) != sizeof(de)) {
-        Error("DirInodeAddEntry: write failed");
+    if (InodeWrite(parent_inode, (char*)&de, offset, sizeof(de)) != sizeof(de)) {
+        printf("DirInodeAddEntry: write failed");
+        return -1;
     }
 
     return 0;
 }
 
-static struct Inode* Seek(struct Inode* ip, char* path, int nameiparent, char* name)
+/// @brief Delete the directory entry for dir Inode
+static int DirInodeDelEntry(struct Inode* parent_inode, char* name)
 {
-    if (ip->size == 0) {
-        Error("Inode is not sync\n");
-    }
+    int offset;
+    struct DirectEntry de;
+    struct Inode* inode;
 
-    struct Inode* next;
-    while ((path = PathElementExtract(path, name)) != 0) {
-        if (ip->type != T_DIR) {
-            return NULL;
-        }
-        if (nameiparent && *path == '\0') {
-            return ip;
-        }
-        if ((next = DirInodeLookup(ip, name, 0)) == 0) {
-            return NULL;
-        }
-        ip = next;
-    }
-
-    if (nameiparent) {
-        return NULL;
-    }
-    return ip;
-}
-
-/// @brief Find target Inode from source Inode
-struct Inode* InodeSeek(struct Inode* source, char* path)
-{
-    char name[DIR_NAME_SIZE] = { 0 };
-    return Seek(source, path, 0, name);
-}
-
-/// @brief Find target parent Inode from source Inode
-struct Inode* InodeParentSeek(struct Inode* source, char* path, char* name)
-{
-    return Seek(source, path, 1, name);
-}
-
-/// @brief Read data from the Inode to the dst buffer.
-int InodeRead(struct Inode* ip, char* dst, int off, int n)
-{
-    uint32_t tot, m;
-
-    if (off > ip->size || off + n < off) {
+    // Check the direct entry is existed.
+    if ((inode = DirInodeLookup(parent_inode, name)) == 0) {
         return -1;
     }
 
-    if (off + n > ip->size) {
-        n = ip->size - off;
+    // Look for an empty dir entry.
+    for (offset = 0; offset < parent_inode->size; offset += sizeof(de)) {
+        if (InodeRead(parent_inode, (char*)&de, offset, sizeof(de)) != sizeof(de)) {
+            printf("DirInodeAddEntry: read failed");
+            return -1;
+        }
+
+        if (strncmp(de.name, name, DIR_NAME_SIZE) == 0) {
+            break;
+        }
     }
 
-    for (tot = 0; tot < n; tot += m, off += m, dst += m) {
-        uint8_t* data = BlockRead(InodeBlockMapping(ip, off / BLOCK_SIZE));
-        m = min(n - tot, BLOCK_SIZE - off % BLOCK_SIZE);
-        memmove(dst, data + off % BLOCK_SIZE, m);
-    }
-
-    return n;
-}
-
-/// @brief Write data from src buffer to the Inode, then increase the Inode size if neccessary.
-int InodeWrite(struct Inode* ip, char* src, uint32_t off, uint32_t n)
-{
-    uint32_t tot, m;
-
-    if (off > ip->size || off + n < off) {
+    de.inum = 0;
+    if (InodeWrite(parent_inode, (char*)&de, offset, sizeof(de)) != sizeof(de)) {
+        printf("DirInodeAddEntry: write failed");
         return -1;
     }
 
-    if (off + n > MAX_FILE_SIZE * BLOCK_SIZE) {
-        return -1;
-    }
-
-    for (tot = 0; tot < n; tot += m, off += m, src += m) {
-        uint8_t* data = BlockRead(InodeBlockMapping(ip, off / BLOCK_SIZE));
-        m = min(n - tot, BLOCK_SIZE - off % BLOCK_SIZE);
-        memmove(data + off % BLOCK_SIZE, src, m);
-    }
-
-    if (n > 0 && off > ip->size) {
-        ip->size = off;
-    }
-
-    return n;
+    return 0;
 }
 
 // Paths process

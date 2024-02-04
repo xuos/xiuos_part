@@ -37,14 +37,14 @@ History:
 Author: AIIT XUOS Lab
 Modification:
 1. Increse the number of indirect blocks
-2. Rename some variables' name for readability
+2. Remove unused nlink of inode struct
 *************************************************/
 
 #pragma once
 
-#define T_DIR 1 // Directory
-#define T_FILE 2 // File
-#define T_DEV 3 // Device
+#define FS_DIRECTORY 1 // Directory
+#define FS_FILE 2 // File
+#define FS_DEVICE 3 // Device
 
 #define ROOT_INUM 1 // root inode number
 #define BLOCK_SIZE 512 // block size
@@ -74,8 +74,7 @@ struct SuperBlock {
 // Inode structure
 struct Inode {
     uint inum; // inode number
-    short type; // File type
-    short nlink; // Number of links to inode in file system
+    uint type; // File type
     uint size; // Size of file (bytes)
     uint addrs[NR_DIRECT_BLOCKS + NR_INDIRECT_BLOCKS]; // Data block addresses
 };

@@ -38,7 +38,7 @@ Author: AIIT XUOS Lab
 Modification:
 1. Increse the number of blocks and inodes
 2. support more than one indirect blocks
-3. remove unused stat
+3. remove unused stat and nlink property of inode struct
 *************************************************/
 
 #include <assert.h>
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
     wsect(1, buf);
 
     // build root
-    rootino = ialloc(T_DIR);
+    rootino = ialloc(FS_DIRECTORY);
     assert(rootino == ROOT_INUM);
 
     bzero(&de, sizeof(de));
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
         if (argv[i][0] == '_')
             ++argv[i];
 
-        inum = ialloc(T_FILE);
+        inum = ialloc(FS_FILE);
 
         bzero(&de, sizeof(de));
         de.inum = xshort(inum);
@@ -251,7 +251,6 @@ uint ialloc(ushort type)
 
     bzero(&din, sizeof(din));
     din.type = xshort(type);
-    din.nlink = xshort(1);
     din.size = xint(0);
     din.inum = inum;
     winode(inum, &din);
