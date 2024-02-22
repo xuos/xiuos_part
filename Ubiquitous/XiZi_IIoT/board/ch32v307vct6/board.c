@@ -62,14 +62,13 @@ extern RxBuffer2;
 extern uint16_t UART_ReceiveData(USART_TypeDef* USARTx);
 void InitBoardHardware()
 {
-    // USART_Printf_Init(115200);
-    /* System Tick Configuration */
+
     _SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
     /* initialize memory system */
     InitBoardMemory(MEMORY_START_ADDRESS, (void*)MEMORY_END_ADDRESS);
     InitHwUart();
-#ifdef BSP_USING_UART1
-    InstallConsole("uart1", "uart1_drv", "uart1_dev1");
+#ifdef BSP_USING_UART4
+    InstallConsole("uart4", "uart4_drv", "uart4_dev4");
 #endif
     // #ifdef BSP_USING_UART2
     //     InstallConsole("uart2", "uart2_drv", "uart2_dev2");
@@ -81,15 +80,7 @@ void InitBoardHardware()
 
     KPrintf("consle init completed.\n");
     KPrintf("board initialization......\n");
-    // KPrintf("memory address range: [0x%08x - 0x%08x], size: %d\n", (x_ubase) MEMORY_START_ADDRESS, (x_ubase) MEMORY_END_ADDRESS, gd32vf103_SRAM_SIZE);
-    /* initialize memory system */
 
     KPrintf("board init done.\n");
     KPrintf("start okernel...\n");
-    while (1) {
-        uint16_t ans = UART_ReceiveData(USART3);
-        KPrintf("%d\n", ans);
-        for (int i = 0; i < 1000; i++)
-            ;
-    }
 }
