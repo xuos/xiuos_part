@@ -39,6 +39,33 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/rzv/linaro/open-amp/lib/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rzg2ul-m33)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m33 \
+	-I$(BSP_ROOT)/rzg/arm/CMSIS_5/CMSIS/Core/Include \
+	-I$(BSP_ROOT)/rzg/board/rzg2ul_smarc \
+	-I$(BSP_ROOT)/rzg/fsp/inc \
+	-I$(BSP_ROOT)/rzg/fsp/inc/api \
+	-I$(BSP_ROOT)/rzg/fsp/inc/instances \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G043U \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G043U/iobitmasks \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G043U/iodefines \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G044L \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G044L/iobitmasks \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G044L/iodefines \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A08G045S \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A08G045S/iobitmasks \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A08G045S/iodefines \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/mcu/all  \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/mcu/rzg2ul  \
+	-I$(BSP_ROOT)/rzg_cfg/fsp_cfg  \
+	-I$(BSP_ROOT)/rzg_cfg/fsp_cfg/bsp  \
+	-I$(BSP_ROOT)/rzg_gen \
+	-I$(BSP_ROOT)/rzg/linaro/libmetal/include \
+	-I$(BSP_ROOT)/rzg/linaro/open-amp/lib/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \

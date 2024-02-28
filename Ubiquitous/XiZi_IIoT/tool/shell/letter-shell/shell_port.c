@@ -50,7 +50,7 @@ void userShellWrite(char data)
  */
 signed char userShellRead(char *data)
 {
-#ifdef BOARD_RZV2L_M33
+#if defined(BOARD_RZV2L_M33) || defined(BOARD_RZG2UL_M33)
 
     return scanf_raw(data);
 #else
