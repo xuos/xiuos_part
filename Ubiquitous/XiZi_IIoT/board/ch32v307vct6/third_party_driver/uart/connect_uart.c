@@ -167,7 +167,7 @@ static int SerialGetChar(struct SerialHardwareDevice* serial_dev)
 }
 
 static const struct SerialDataCfg data_cfg_init = {
-    .serial_baud_rate = 1500000,
+    .serial_baud_rate = BAUD_RATE_9600,
     .serial_data_bits = DATA_BITS_8,
     .serial_stop_bits = STOP_BITS_1,
     .serial_parity_mode = PARITY_NONE,
@@ -259,7 +259,7 @@ void USART1_IRQHandler(void)
 
 uint16_t UART_ReceiveData(USART_TypeDef* USARTx)
 {
-    return (uint16_t)(USARTx->DATAR & (uint16_t)0x01FF);
+    return (uint16_t)(USARTx->DATAR);
 }
 
 #ifdef BSP_USING_UART2
@@ -365,7 +365,7 @@ int InitHwUart(void)
     GPIO_Init(GPIOA, &gpio_init_struct);
 
     USART_InitTypeDef usart_init_struct;
-    usart_init_struct.USART_BaudRate = 1500000;
+    usart_init_struct.USART_BaudRate = 9600;
     usart_init_struct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     usart_init_struct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     usart_init_struct.USART_WordLength = USART_WordLength_8b;
@@ -429,7 +429,7 @@ int InitHwUart(void)
     GPIO_Init(GPIOB, &gpio_init_struct_2);
 
     USART_InitTypeDef usart_init_struct_2;
-    usart_init_struct_2.USART_BaudRate = 1500000;
+    usart_init_struct_2.USART_BaudRate = 9600;
     usart_init_struct_2.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     usart_init_struct_2.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     usart_init_struct_2.USART_WordLength = USART_WordLength_8b;
@@ -493,7 +493,7 @@ int InitHwUart(void)
     GPIO_Init(GPIOC, &gpio_init_struct_4);
 
     USART_InitTypeDef usart_init_struct_4;
-    usart_init_struct_4.USART_BaudRate = 1500000;
+    usart_init_struct_4.USART_BaudRate = 9600;
     usart_init_struct_4.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     usart_init_struct_4.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     usart_init_struct_4.USART_WordLength = USART_WordLength_8b;

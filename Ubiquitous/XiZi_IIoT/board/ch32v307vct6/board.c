@@ -62,7 +62,6 @@ extern RxBuffer2;
 extern uint16_t UART_ReceiveData(USART_TypeDef* USARTx);
 void InitBoardHardware()
 {
-
     _SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
     /* initialize memory system */
     InitBoardMemory(MEMORY_START_ADDRESS, (void*)MEMORY_END_ADDRESS);
@@ -70,17 +69,19 @@ void InitBoardHardware()
 #ifdef BSP_USING_UART4
     InstallConsole("uart4", "uart4_drv", "uart4_dev4");
 #endif
-    // #ifdef BSP_USING_UART2
-    //     InstallConsole("uart2", "uart2_drv", "uart2_dev2");
-    // #endif
 
 #ifdef BSP_USING_ETH
     InitHwEth();
 #endif
-
     KPrintf("consle init completed.\n");
     KPrintf("board initialization......\n");
 
     KPrintf("board init done.\n");
     KPrintf("start okernel...\n");
+    // while (1) {
+    //     uint32_t ans = (uint32_t)UART_ReceiveData(USART3);
+    //     KPrintf("%d\n", ans);
+    //     for (int i = 0; i < 10000; i++)
+    //         ;
+    // }
 }
