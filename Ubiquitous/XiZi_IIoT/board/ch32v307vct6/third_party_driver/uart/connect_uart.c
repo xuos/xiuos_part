@@ -177,6 +177,17 @@ static const struct SerialDataCfg data_cfg_init = {
     .serial_timeout = WAITING_FOREVER,
 };
 
+static const struct SerialDataCfg data_cfg_init_uart3 = {
+    .serial_baud_rate = BAUD_RATE_115200,
+    .serial_data_bits = DATA_BITS_8,
+    .serial_stop_bits = STOP_BITS_1,
+    .serial_parity_mode = PARITY_NONE,
+    .serial_bit_order = BIT_ORDER_LSB,
+    .serial_invert_mode = NRZ_NORMAL,
+    .serial_buffer_size = SERIAL_RB_BUFSZ,
+    .serial_timeout = WAITING_FOREVER,
+};
+
 /*manage the serial device operations*/
 static const struct SerialDrvDone drv_done = {
     .init = SerialInit,
@@ -259,7 +270,12 @@ void USART1_IRQHandler(void)
 
 uint16_t UART_ReceiveData(USART_TypeDef* USARTx)
 {
-    return (uint16_t)(USARTx->DATAR);
+    return (uint16_t)(USARTx->DATAR & (uint16_t)0x01FF);
+}
+
+void UART_SendData(USART_TypeDef* USARTx, uint16_t Data)
+{
+    USARTx->DATAR = (Data & (uint16_t)0x01FF);
 }
 
 #ifdef BSP_USING_UART2

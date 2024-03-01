@@ -60,6 +60,8 @@ static uint32_t _SysTick_Config(uint32_t ticks)
 
 extern RxBuffer2;
 extern uint16_t UART_ReceiveData(USART_TypeDef* USARTx);
+extern void UART_SendData(USART_TypeDef* USARTx, uint16_t Data);
+
 void InitBoardHardware()
 {
     _SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
@@ -78,10 +80,22 @@ void InitBoardHardware()
 
     KPrintf("board init done.\n");
     KPrintf("start okernel...\n");
-    // while (1) {
-    //     uint32_t ans = (uint32_t)UART_ReceiveData(USART3);
-    //     KPrintf("%d\n", ans);
-    //     for (int i = 0; i < 10000; i++)
-    //         ;
-    // }
+
+    uint16_t ans = 0;
+    uint16_t recv_data = 0;
+    uint16_t send_data = 0;
+    int cnt = 0;
+    while (1) {
+
+        recv_data = UART_ReceiveData(USART3);
+
+        if (recv_data < 58 && recv_data > 47) {
+            ans = recv_data;
+
+            KPrintf("recv data: %d\n", ans - 48);
+        }
+        send_data = ans + 17;
+        KPrintf("send data: %d\n", send_data);
+        UART_SendData(USART3, send_data);
+    }
 }
