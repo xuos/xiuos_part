@@ -4,7 +4,7 @@ MAKEFLAGS += --no-print-directory
 .PHONY:COMPILE_APP COMPILE_KERNEL
 
 riscv_support := 
-arm_support += imx6q-sabrelite
+arm_support += imx6q-sabrelite zynq7000-zc702
 emulator_support += 
 support := $(riscv_support) $(arm_support) $(emulator_support) 
 SRC_DIR :=
@@ -31,14 +31,14 @@ MAKEFILES  =$(KERNEL_ROOT)/.config
 
 export BSP_ROOT ?= $(KERNEL_ROOT)/services/boards/$(BOARD)
 export UBIQUITOUS_ROOT ?= ..
-include $(KERNEL_ROOT)/hardkernel/arch/arm/armv7-a/cortex-a9/preboot_for_nxp_imx6q_sabrelite/config.mk
+include $(KERNEL_ROOT)/hardkernel/arch/arm/armv7-a/cortex-a9/preboot_for_$(BOARD)/config.mk
 export BSP_BUILD_DIR := $(KERNEL_ROOT)
 export HOSTTOOLS_DIR ?= $(KERNEL_ROOT)/services/tools/hosttools
 export CONFIG2H_EXE ?= $(HOSTTOOLS_DIR)/xsconfig.sh
 
 export CPPPATHS
 export SRC_APP_DIR := ../../APP_Framework
-export SRC_KERNEL_DIR := hardkernel kernel_actracer services softkernel testing 
+export SRC_KERNEL_DIR := hardkernel kernel_actracer services softkernel
 export SRC_DIR := $(SRC_KERNEL_DIR)
 export LIBCC 
 
@@ -123,12 +123,10 @@ clean:
 	@echo Clean target and build_dir
 	@rm -rf build
 	@rm -rf temp.txt
-	@rm -rf services/boards/imx6q-sabrelite/*.o
-	@rm -rf services/boards/imx6q-sabrelite/*.asm
-	@rm -rf services/boards/imx6q-sabrelite/bin
+	@rm -rf services/app/bin
 	@rm -rf services/tools/mkfs/mkfs
-	@rm -rf services/boards/imx6q-sabrelite/fs.img
-	@rm -rf services/boards/imx6q-sabrelite/user.map
+	@rm -rf services/app/fs.img
+	@rm -rf services/app/user.map
 
 distclean:
 	@echo Clean all configuration

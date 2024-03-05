@@ -88,8 +88,7 @@ struct IpcNode {
 
 #define _IPC_INSERT_SERVE(interface) [interface] = IPC_SERVE(interface)
 #define IPC_SERVER_REGISTER_INTERFACES(ipc_node_name, num_interfaces, ...)      \
-    static struct IpcNode ipc_node_name = (struct IpcNode)                      \
-    {                                                                           \
+    static struct IpcNode ipc_node_name = {                                     \
         .interfaces = {                                                         \
             _VA_FRONT_WRAP_ARG##num_interfaces(_IPC_INSERT_SERVE, __VA_ARGS__), \
         },                                                                      \

@@ -198,7 +198,9 @@ static void _scheduler(struct SchedulerRightGroup right_group)
 
         struct CPU* cpu = cur_cpu();
         cpu->task = next_task;
+        // DEBUG("%s %d\n", __func__, __LINE__);
         context_switch(&cpu->scheduler, next_task->main_thread.context);
+        // DEBUG("%s %d\n", __func__, __LINE__);
     }
 }
 
@@ -256,7 +258,7 @@ static void _set_cur_task_priority(int priority)
     return;
 }
 
-struct XiziTaskManager xizi_task_manager = (struct XiziTaskManager) {
+struct XiziTaskManager xizi_task_manager = {
     .init = _task_manager_init,
     .new_task_cb = _new_task_cb,
     .free_pcb = _dealloc_task_cb,

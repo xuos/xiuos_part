@@ -71,7 +71,7 @@ extern struct MmuCommonDone* _p_pgtbl_mmu_access;
 uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc);
 
 extern struct TopLevelPageDirectory kern_pgdir;
-void load_kern_pgdir(struct TraceTag* mmu_driver_tag);
+void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driver_tag);
 
 extern struct XiziPageManager xizi_pager;
 bool module_pager_init(struct PagerRightGroup*);

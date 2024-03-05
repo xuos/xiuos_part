@@ -32,6 +32,8 @@ Modification:
 #include "assert.h"
 #include "task.h"
 
+#include "trap_common.h"
+
 extern uint32_t _binary_init_start[], _binary_default_fs_start[];
 extern int sys_spawn(char* path, char** argv);
 int main(void)
@@ -64,11 +66,19 @@ int main(void)
     spawn_embedded_task((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
 
     /* start scheduler */
-    struct SchedulerRightGroup scheduler_rights = { 0 };
+    struct SchedulerRightGroup scheduler_rights;
     assert(AchieveResourceTag(&scheduler_rights.mmu_driver_tag, &hardkernel_tag, "mmu-ac-resource"));
     assert(AchieveResourceTag(&scheduler_rights.intr_driver_tag, &hardkernel_tag, "intr-ac-resource"));
     xizi_task_manager.task_scheduler(scheduler_rights);
 
     // never reached
     return 0;
+}
+
+__attribute__((weak)) void _exit(int32_t status)
+{
+    (void)status;
+    while (1) {
+        ;
+    }
 }

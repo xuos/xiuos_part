@@ -34,6 +34,8 @@ Modification:
 #include "multicores.h"
 #include "task.h"
 
+#include "log.h"
+
 static struct TraceTag clock_driver_tag;
 static struct XiziClockDriver* p_clock_driver = NULL;
 
@@ -48,14 +50,16 @@ uint64_t global_tick = 0;
 int xizi_clock_handler(int irq, void* tf, void* arg)
 {
     /* handle clock interrupt using driver */
-    p_clock_driver->clear_clock_intr();
-    global_tick++;
-    struct TaskMicroDescriptor* current_task = cur_cpu()->task;
-    if (current_task) {
-        current_task->remain_tick--;
-        current_task->maxium_tick--;
-        if (current_task->remain_tick == 0) {
-            xizi_task_manager.cur_task_yield_noschedule();
+    if (p_clock_driver->is_timer_expired()) {
+        p_clock_driver->clear_clock_intr();
+        global_tick++;
+        struct TaskMicroDescriptor* current_task = cur_cpu()->task;
+        if (current_task) {
+            current_task->remain_tick--;
+            current_task->maxium_tick--;
+            if (current_task->remain_tick == 0) {
+                xizi_task_manager.cur_task_yield_noschedule();
+            }
         }
     }
     return 0;

@@ -35,6 +35,7 @@ Modification:
 struct XiziClockDriver {
     void (*sys_clock_init)();
     uint32_t (*get_clock_int)();
+    bool (*is_timer_expired)();
     void (*clear_clock_intr)();
 
     uint64_t (*get_tick)();

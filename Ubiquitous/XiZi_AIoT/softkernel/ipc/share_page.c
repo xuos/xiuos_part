@@ -250,7 +250,7 @@ int delete_share_pages(struct session_backend* session_backend)
     return 0;
 }
 
-struct XiziSharePageManager xizi_share_page_manager = (struct XiziSharePageManager) {
+struct XiziSharePageManager xizi_share_page_manager = {
     .create_share_pages = create_share_pages,
     .unmap_task_share_pages = unmap_task_share_pages,
     .delete_share_pages = delete_share_pages,

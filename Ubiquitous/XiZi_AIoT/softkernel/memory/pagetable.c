@@ -252,7 +252,7 @@ static uintptr_t _cross_vspace_data_copy(struct TopLevelPageDirectory* pgdir, ui
     return len;
 }
 
-struct XiziPageManager xizi_pager = (struct XiziPageManager) {
+struct XiziPageManager xizi_pager = {
     .new_pgdir = _new_pgdir,
     .free_user_pgdir = _free_user_pgdir,
     .map_pages = _map_user_pages,
@@ -273,7 +273,7 @@ bool module_pager_init(struct PagerRightGroup* _right_group)
 /// @brief kernel pagedir
 struct TopLevelPageDirectory kern_pgdir;
 
-void load_kern_pgdir(struct TraceTag* mmu_driver_tag)
+void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driver_tag)
 {
     if (mmu_driver_tag->meta == NULL) {
         ERROR("Invalid mmu driver tag.\n");
@@ -288,10 +288,12 @@ void load_kern_pgdir(struct TraceTag* mmu_driver_tag)
     uintptr_t dev_attr = 0;
     _p_pgtbl_mmu_access->MmuDevPteAttr(&dev_attr);
 
+    _map_pages((uintptr_t*)kern_pgdir.pd_addr, PHY_MEM_BASE, PHY_MEM_BASE, (PHY_MEM_STOP - PHY_MEM_BASE), kern_attr);
     // kern mem
     _map_pages((uintptr_t*)kern_pgdir.pd_addr, KERN_MEM_BASE, PHY_MEM_BASE, (PHY_MEM_STOP - PHY_MEM_BASE), kern_attr);
     // dev mem
     _map_pages((uintptr_t*)kern_pgdir.pd_addr, DEV_VRTMEM_BASE, DEV_PHYMEM_BASE, DEV_MEM_SZ, dev_attr);
 
-    _p_pgtbl_mmu_access->LoadPgdir((uintptr_t)V2P(kern_pgdir.pd_addr));
+    // _p_pgtbl_mmu_access->LoadPgdir((uintptr_t)V2P(kern_pgdir.pd_addr));
+    _p_pgtbl_mmu_access->LoadPgdirCrit((uintptr_t)V2P(kern_pgdir.pd_addr), intr_driver_tag);
 }

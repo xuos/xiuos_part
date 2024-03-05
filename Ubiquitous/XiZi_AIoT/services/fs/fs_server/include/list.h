@@ -31,15 +31,15 @@ struct double_list_node {
 #define DOUBLE_LIST_ENTRY(item, type, member) \
     CONTAINER_OF(item, type, member)
 
-#define DOUBLE_LIST_FOR_EACH_ENTRY(item, head, member)                  \
-    for (item = DOUBLE_LIST_ENTRY((head)->next, typeof(*item), member); \
-         &item->member != (head);                                       \
-         item = DOUBLE_LIST_ENTRY(item->member.next, typeof(*item), member))
+#define DOUBLE_LIST_FOR_EACH_ENTRY(item, head, member)                      \
+    for (item = DOUBLE_LIST_ENTRY((head)->next, __typeof__(*item), member); \
+         &item->member != (head);                                           \
+         item = DOUBLE_LIST_ENTRY(item->member.next, __typeof__(*item), member))
 
-#define DOUBLE_LIST_FOR_EACH_ENTRY_REVERSE(item, head, member)          \
-    for (item = DOUBLE_LIST_ENTRY((head)->prev, typeof(*item), member); \
-         &item->member != (head);                                       \
-         item = DOUBLE_LIST_ENTRY(item->member.prev, typeof(*item), member))
+#define DOUBLE_LIST_FOR_EACH_ENTRY_REVERSE(item, head, member)              \
+    for (item = DOUBLE_LIST_ENTRY((head)->prev, __typeof__(*item), member); \
+         &item->member != (head);                                           \
+         item = DOUBLE_LIST_ENTRY(item->member.prev, __typeof__(*item), member))
 
 __attribute__((always_inline)) static void inline doubleListNodeInit(struct double_list_node* list)
 {
