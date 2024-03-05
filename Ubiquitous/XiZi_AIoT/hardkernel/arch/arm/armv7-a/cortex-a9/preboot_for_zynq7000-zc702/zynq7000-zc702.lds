@@ -36,8 +36,6 @@ SECTIONS
 	.start_sec : {
 		. = ALIGN(0x1000);
 
-		*(.vectors)
-
 		/* read only area. */
 		boot.o(.text)
 		xil-crt0.o(.text .text.*)

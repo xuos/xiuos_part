@@ -288,7 +288,6 @@ void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driv
     uintptr_t dev_attr = 0;
     _p_pgtbl_mmu_access->MmuDevPteAttr(&dev_attr);
 
-    _map_pages((uintptr_t*)kern_pgdir.pd_addr, PHY_MEM_BASE, PHY_MEM_BASE, (PHY_MEM_STOP - PHY_MEM_BASE), kern_attr);
     // kern mem
     _map_pages((uintptr_t*)kern_pgdir.pd_addr, KERN_MEM_BASE, PHY_MEM_BASE, (PHY_MEM_STOP - PHY_MEM_BASE), kern_attr);
     // dev mem

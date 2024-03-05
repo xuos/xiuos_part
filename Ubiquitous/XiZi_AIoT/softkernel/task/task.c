@@ -198,9 +198,7 @@ static void _scheduler(struct SchedulerRightGroup right_group)
 
         struct CPU* cpu = cur_cpu();
         cpu->task = next_task;
-        // DEBUG("%s %d\n", __func__, __LINE__);
         context_switch(&cpu->scheduler, next_task->main_thread.context);
-        // DEBUG("%s %d\n", __func__, __LINE__);
     }
 }
 

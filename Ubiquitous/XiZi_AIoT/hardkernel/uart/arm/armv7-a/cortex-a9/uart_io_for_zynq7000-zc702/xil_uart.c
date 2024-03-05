@@ -50,6 +50,7 @@
  *****************************************************************************/
 
 /***************************** Include Files ********************************/
+#include "xparameters.h"
 #include "xuartps_hw.h"
 
 #include "mmio_access.h"
@@ -176,8 +177,6 @@ void XUartPs_ResetHw(u32 BaseAddress)
         ((u32)XUARTPS_CR_RX_DIS | (u32)XUARTPS_CR_TX_DIS | (u32)XUARTPS_CR_STOPBRK));
 }
 
-#define STDIN_BASEADDRESS 0xE0001000
-#define STDOUT_BASEADDRESS 0xE0001000
 void UartPutChar(uint8_t ch)
 {
     if (ch == '\n') {

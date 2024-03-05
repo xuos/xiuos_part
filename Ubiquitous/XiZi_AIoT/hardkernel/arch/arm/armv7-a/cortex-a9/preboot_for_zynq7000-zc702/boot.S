@@ -140,7 +140,7 @@ OKToRun:
 	mcr	p15, 0, r0, c8, c7, 0		/* invalidate TLBs */
 	mcr	p15, 0, r0, c7, c5, 0		/* invalidate icache */
 	mcr	p15, 0, r0, c7, c5, 6		/* Invalidate branch predictor array */
-	bl	invalidate_dcache		/* invalidate dcache */
+	bl	boot_invalidate_dcache		/* invalidate dcache */
 
 	/* Disable MMU, if enabled */
 	mrc	p15, 0, r0, c1, c0, 0		/* read CP15 register 1 */
@@ -193,14 +193,14 @@ OKToRun:
 /*
  *************************************************************************
  *
- * invalidate_dcache - invalidate the entire d-cache by set/way
+ * boot_invalidate_dcache - invalidate the entire d-cache by set/way
  *
  * Note: for Cortex-A9, there is no cp instruction for invalidating
  * the whole D-cache. Need to invalidate each line.
  *
  *************************************************************************
  */
-invalidate_dcache:
+boot_invalidate_dcache:
 	mrc	p15, 1, r0, c0, c0, 1		/* read CLIDR */
 	ands	r3, r0, #0x7000000
 	mov	r3, r3, lsr #23			/* cache level value (naturally aligned) */
