@@ -21,7 +21,7 @@
 #include "xsconfig.h"
 #include <device.h>
 
-#ifdef BOARD_RZV2L_M33
+#if defined(BOARD_RZV2L_M33) || defined(BOARD_RZG2UL_M33)
 #include <console.h>
 #endif
 
@@ -119,7 +119,7 @@ int userShellInit(void)
     shell.write = userShellWrite;
     shell.read = userShellRead;
 
-#ifdef BOARD_RZV2L_M33
+#if defined(BOARD_RZV2L_M33) || defined(BOARD_RZG2UL_M33)
 
 #else
     console = ObtainConsole();
