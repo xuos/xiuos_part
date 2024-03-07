@@ -182,6 +182,14 @@ void ipc_server_loop(struct IpcNode* ipc_node);
 #define IPC_SERVE(ipc_name) ipc_serve_##ipc_name
 #define IPC_DO_SERVE_FUNC(ipc_name) ipc_do_serve_##ipc_name
 
+/// when defining a ipc server:
+///     1. requires a IPC_SERVICES(server_name, interface_name, ...) to announce the name and interfaces that the server will support
+///     2. implement IPC_DO_SERVE_FUNC(interface_name) for each interface
+///     3. use IPC_SERVER_INTERFACE(interface_name, argc) to generate necessary helper functions
+///     4. use IPC_SERVER_REGISTER_INTERFACES(server_name, nr_interfaces, interface_names, ...) to bind interfaces to server after implementations
+///     5. use ipc_server_loop in main()
+///     Refer to simple_service.h, simple_service.c and simple_server.c for example
+
 #define IPC_INTERFACE(ipc_name, argc, ...)                                                                                                     \
     __always_inline static inline struct IpcMsg* IPC_CREATE_MSG_FUNC(ipc_name)(struct Session * session, _VA_FRONT_PTR_ARG##argc(__VA_ARGS__)) \
     {                                                                                                                                          \

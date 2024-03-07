@@ -23,7 +23,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app 
 
-all: init simple_client simple_server shell fs_server test_priority readme.txt | bin
+all: init test_fs simple_client simple_server shell fs_server test_priority readme.txt | bin
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin
 	@mv *.o bin
@@ -37,6 +37,10 @@ shell: shell_port.o libserial.o shell_cmd_list.o shell.o shell_ext.o libfs_to_cl
 	@${objdump} -S $@ > $@.asm
 	
 init: init.o libfs_to_client.o libipc.o session.o libserial.o usyscall.o
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
+
+test_fs: test_fs.o libfs_to_client.o libipc.o session.o libserial.o usyscall.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 

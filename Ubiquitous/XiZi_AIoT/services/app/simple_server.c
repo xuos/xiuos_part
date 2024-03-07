@@ -15,6 +15,8 @@
 #include "simple_service.h"
 #include "usyscall.h"
 
+/// @warning all the parameters should in the form of pointers
+///          for the true storing memory of parameters is session(shared memory between tasks)
 int IPC_DO_SERVE_FUNC(Ipc_add)(int* a, int* b)
 {
     return *a + *b;

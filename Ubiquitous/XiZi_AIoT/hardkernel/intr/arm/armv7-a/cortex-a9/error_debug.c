@@ -91,6 +91,7 @@ void handle_undefined_instruction(struct trapframe* tf)
     panic("");
 }
 
+extern void context_switch(struct context**, struct context*);
 void dabort_handler(struct trapframe* r)
 {
     uint32_t dfs, dfa;
@@ -100,15 +101,16 @@ void dabort_handler(struct trapframe* r)
 
     if (r->pc < KERN_MEM_BASE) { // Exception occured in User space: exit
         ERROR("dabort in user space: %s\n", cur_cpu()->task->name);
-        LOG("program counter: 0x%x(%s) caused\n", r->pc, cur_cpu()->task);
+        LOG("program counter: 0x%x caused\n", r->pc);
         LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
         _abort_reason(dfs);
         dump_tf(r);
     }
     if (cur_cpu()->task != NULL) {
         sys_exit();
+        context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
     } else { // Exception occured in Kernel space: panic
-        LOG("program counter: 0x%x(%s) caused\n", r->pc, cur_cpu()->task);
+        LOG("program counter: 0x%x caused\n", r->pc);
         LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
         _abort_reason(dfs);
         dump_tf(r);
@@ -132,6 +134,7 @@ void iabort_handler(struct trapframe* r)
     }
     if (cur_cpu()->task != NULL) {
         sys_exit();
+        context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
     } else { // Exception occured in Kernel space: panic
         LOG("program counter: 0x%x(%s) caused\n", r->pc, cur_cpu()->task);
         LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, ifs);

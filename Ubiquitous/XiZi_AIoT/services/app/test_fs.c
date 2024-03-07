@@ -19,14 +19,13 @@
 #include "libfs_to_client.h"
 #include "usyscall.h"
 
+#define BLOCK_SIZE 256
 int main(int argc, char* argv[])
 {
     printf("file system test\n");
 
     struct Session session;
     connect_session(&session, "MemFS", 4096);
-
-    register_server("TEST_FS");
 
     int fd;
     char* fd_path = "/readme.txt";
@@ -43,8 +42,11 @@ int main(int argc, char* argv[])
     printf("file content: %s\n", buffer);
 
     close(&session, fd);
-
     free_session(&session);
+
+    printf("file test done.\n");
+    printf("Test memry error %s.\n", 0x50000000);
+    printf("After error computing.\n");
 
     exit();
     return 0;
