@@ -35,7 +35,7 @@ Modification:
 #include "log.h"
 
 XScuTimer global_timer;
-#define TIMER_LOAD_VALUE 0xFFFF 
+#define TIMER_LOAD_VALUE 0x514C7
 
 static void _sys_clock_init()
 {

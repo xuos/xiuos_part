@@ -495,7 +495,7 @@ void tracer_find_tag(struct TraceTag* target, struct TraceTag* const source, cha
 bool AchieveResourceTag(struct TraceTag* target, struct TraceTag* owner, char* name)
 {
     tracer_find_tag(target, owner, name);
-    if (target == NULL) {
+    if (target->meta == NULL) {
         return false;
     }
     return true;
