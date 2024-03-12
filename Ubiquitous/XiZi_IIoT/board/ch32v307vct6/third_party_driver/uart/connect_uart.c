@@ -325,6 +325,28 @@ void UART4_IRQHandler(void)
 }
 #endif
 
+#ifdef BSP_USING_UART5
+struct SerialDriver serial_driver_5;
+struct SerialHardwareDevice serial_device_5;
+
+#define TxSize5 100
+uint16_t RxBuffer5[TxSize5] = { 0 };
+uint16_t TxCnt5 = 0, RxCnt5 = 0;
+
+void USART5_IRQHandler(void) __attribute__((interrupt()));
+
+void USART5_IRQHandler(void)
+{
+    if (USART_GetITStatus(UART5, USART_IT_RXNE) != RESET) {
+        RxBuffer5[RxCnt5++] = UART_ReceiveData(UART5);
+        if (RxCnt5 == 100) {
+            USART_ITConfig(UART5, USART_IT_RXNE, DISABLE);
+        }
+    }
+}
+#endif
+
+
 int InitHwUart(void)
 {
     x_err_t ret = EOK;
@@ -517,6 +539,70 @@ int InitHwUart(void)
     usart_init_struct_4.USART_Parity = USART_Parity_No;
     USART_Init((USART_TypeDef*)serial_cfg_4.hw_cfg.serial_register_base, &usart_init_struct_4);
     USART_Cmd((USART_TypeDef*)serial_cfg_4.hw_cfg.serial_register_base, ENABLE);
+#endif
+
+#ifdef BSP_USING_UART5
+    static struct SerialBus serial_bus_5;
+    memset(&serial_bus_5, 0, sizeof(struct SerialBus));
+
+    memset(&serial_driver_5, 0, sizeof(struct SerialDriver));
+
+    memset(&serial_device_5, 0, sizeof(struct SerialHardwareDevice));
+
+    static struct SerialCfgParam serial_cfg_5;
+    memset(&serial_cfg_5, 0, sizeof(struct SerialCfgParam));
+
+    static struct SerialDevParam serial_dev_param_5;
+    memset(&serial_dev_param_5, 0, sizeof(struct SerialDevParam));
+
+    serial_driver_5.drv_done = &drv_done;
+    serial_driver_5.configure = &SerialDrvConfigure;
+    serial_device_5.hwdev_done = &hwdev_done;
+
+    serial_cfg_5.data_cfg = data_cfg_init;
+
+    serial_cfg_5.hw_cfg.serial_register_base = (uint32)UART5;
+    serial_cfg_5.hw_cfg.serial_irq_interrupt = UART5_IRQn;
+
+    serial_driver_5.private_data = (void*)&serial_cfg_5;
+
+    serial_dev_param_5.serial_work_mode = SIGN_OPER_INT_RX;
+    serial_device_5.haldev.private_data = (void*)&serial_dev_param_5;
+
+    ret = BoardSerialBusInit(&serial_bus_5, &serial_driver_5, SERIAL_BUS_NAME_5, SERIAL_DRV_NAME_5);
+    if (EOK != ret) {
+        KPrintf("InitHwUart 5 uarths error ret %u\n", ret);
+        return ERROR;
+    }
+
+    ret = BoardSerialDevBend(&serial_device_5, (void*)&serial_cfg_5, SERIAL_BUS_NAME_5, SERIAL_5_DEVICE_NAME_0);
+    if (EOK != ret) {
+        KPrintf("InitHwUart 5 uarths error ret %u\n", ret);
+        return ERROR;
+    }
+
+    GPIO_InitTypeDef gpio_init_struct_5;
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD, ENABLE);
+
+    gpio_init_struct_5.GPIO_Pin = GPIO_Pin_12;
+    gpio_init_struct_5.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init_struct_5.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_Init(GPIOC, &gpio_init_struct_5);
+    gpio_init_struct_5.GPIO_Pin = GPIO_Pin_2;
+    gpio_init_struct_5.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init_struct_5.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOD, &gpio_init_struct_5);
+
+    USART_InitTypeDef usart_init_struct_5;
+    usart_init_struct_5.USART_BaudRate = 9600;
+    usart_init_struct_5.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    usart_init_struct_5.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    usart_init_struct_5.USART_WordLength = USART_WordLength_8b;
+    usart_init_struct_5.USART_StopBits = USART_StopBits_1;
+    usart_init_struct_5.USART_Parity = USART_Parity_No;
+    USART_Init((USART_TypeDef*)serial_cfg_5.hw_cfg.serial_register_base, &usart_init_struct_5);
+    USART_Cmd((USART_TypeDef*)serial_cfg_5.hw_cfg.serial_register_base, ENABLE);
 #endif
 
     return ret;

@@ -30,6 +30,7 @@
 #include "ch32v30x.h"
 #include "connect_ether.h"
 #include "connect_uart.h"
+#include "connect_can.h"
 #include "core_riscv.h"
 #include "xsconfig.h"
 #include <board.h>
@@ -75,27 +76,32 @@ void InitBoardHardware()
 #ifdef BSP_USING_ETH
     InitHwEth();
 #endif
+
+#ifdef BSP_USING_CAN
+    InitHwCan();
+#endif
+
     KPrintf("consle init completed.\n");
     KPrintf("board initialization......\n");
 
     KPrintf("board init done.\n");
     KPrintf("start okernel...\n");
 
-    uint16_t ans = 0;
-    uint16_t recv_data = 0;
-    uint16_t send_data = 0;
-    int cnt = 0;
-    while (1) {
+    // uint16_t ans = 0;
+    // uint16_t recv_data = 0;
+    // uint16_t send_data = 0;
+    // int cnt = 0;
+    // while (1) {
 
-        recv_data = UART_ReceiveData(USART3);
+    //     recv_data = UART_ReceiveData(USART3);
 
-        if (recv_data < 58 && recv_data > 47) {
-            ans = recv_data;
+    //     if (recv_data < 58 && recv_data > 47) {
+    //         ans = recv_data;
 
-            KPrintf("recv data: %d\n", ans - 48);
-        }
-        send_data = ans + 17;
-        KPrintf("send data: %d\n", send_data);
-        UART_SendData(USART3, send_data);
-    }
+    //         KPrintf("recv data: %d\n", ans - 48);
+    //     }
+    //     send_data = ans + 17;
+    //     KPrintf("send data: %d\n", send_data);
+    //     UART_SendData(USART3, send_data);
+    // }
 }
