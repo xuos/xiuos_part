@@ -110,7 +110,7 @@ int IPC_DO_SERVE_FUNC(Ipc_cd)(char* path)
         return -1;
     }
 
-    if (ip->type != T_DIR) {
+    if (ip->type != FS_DIRECTORY) {
         printf("cd:not a dir\n");
         return -1;
     }
@@ -148,7 +148,7 @@ int IPC_DO_SERVE_FUNC(Ipc_mkdir)(char* path)
         return -1;
     }
 
-    if (InodeCreate(ip, name, T_DIR, 0, 0) == 0) {
+    if (InodeCreate(ip, name, FS_DIRECTORY) == 0) {
         printf("create target Inode %s failed\n", path);
         return -1;
     }
@@ -207,7 +207,7 @@ int IPC_DO_SERVE_FUNC(Ipc_cat)(char* path)
         return -1;
     }
 
-    if (ip->type != T_FILE) {
+    if (ip->type != FS_FILE) {
         printf("cat: %s Is not a file\n", path);
         return -1;
     }
@@ -254,7 +254,6 @@ int IPC_DO_SERVE_FUNC(Ipc_open)(char* path)
 
     /// @todo record absolute path
     strncpy(fdp->path, path, strlen(path) + 1);
-    ip->nlink++;
     fdp->data = ip;
 
     return fd;
@@ -262,15 +261,6 @@ int IPC_DO_SERVE_FUNC(Ipc_open)(char* path)
 
 int IPC_DO_SERVE_FUNC(Ipc_close)(int* fd)
 {
-    struct FileDescriptor* fdp = GetFileDescriptor(*fd);
-    if (!fdp) {
-        printf("read: fd invalid\n");
-        return -1;
-    }
-
-    struct Inode* ip = fdp->data;
-    ip->nlink--;
-
     FreeFileDescriptor(*fd);
     return 0;
 }
@@ -285,7 +275,7 @@ int IPC_DO_SERVE_FUNC(Ipc_read)(int* fd, char* dst, int* offset, int* len)
     }
 
     struct Inode* ip = fdp->data;
-    if (ip->type != T_FILE) {
+    if (ip->type != FS_FILE) {
         printf("read: %s Is not a file\n", fdp->path);
         return -1;
     }
@@ -305,7 +295,7 @@ int IPC_DO_SERVE_FUNC(Ipc_write)(int* fd, char* src, int* offset, int* len)
     }
 
     struct Inode* ip = fdp->data;
-    if (ip->type != T_FILE) {
+    if (ip->type != FS_FILE) {
         printf("read: %s Is not a file\n", fdp->path);
         return -1;
     }

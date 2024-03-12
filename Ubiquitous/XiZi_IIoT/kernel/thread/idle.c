@@ -75,7 +75,7 @@ void InitIdleKTask(void)
 
     for (coreid = 0; coreid < CORE_NUM; coreid++) {
 
-    #ifdef BOARD_RZV2L_M33
+    #if defined(BOARD_RZV2L_M33) || defined(BOARD_RZG2UL_M33)
         char * name_str = "ktaskidle-";
 
         char ch_coreid_id = 0x30 + coreid;

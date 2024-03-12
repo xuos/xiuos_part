@@ -662,7 +662,7 @@ void KPrintf(const char *fmt, ...)
 {
 #ifdef KERNEL_CONSOLE
 
-#ifdef BOARD_RZV2L_M33
+#if defined(BOARD_RZV2L_M33) || defined(BOARD_RZG2UL_M33)
     _console = NONE;
     va_list args;
     x_size_t length = 0;

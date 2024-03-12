@@ -1,14 +1,45 @@
-/*
- * Copyright (c) 2020 AIIT XUOS Lab
- * XiUOS is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- *        http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
+// Copyright (c) 2006-2018 Frans Kaashoek, Robert Morris, Russ Cox, Massachusetts Institute of Technology
+
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+/**
+ * @file fs.h
+ * @brief file system important struct definition
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2024-01-25
  */
+
+/*************************************************
+File name: fs.h
+Description: file system important struct definition
+Others: take ARM_XV6 kernel/fs.h and kernel/file.h for references
+                https://github.com/KingofHamyang/ARM_xv6
+History:
+1. Date: 2024-01-25
+Author: AIIT XUOS Lab
+Modification:
+1. remove nlog member of superblock struct
+2. rebuild inode struct to fit XIZI_AIoT use sceneries
+3. change direct and indirect block number to fit XIZI_AIoT use sceneries
+*************************************************/
 
 #pragma once
 
@@ -33,19 +64,12 @@ struct MemFsRange {
     uint32_t memfs_nr_blocks;
 };
 
-// current state of the Inode
-enum INODE_STATE {
-    I_RESERVED = 0,
-    I_BUSY,
-    I_VALID
-};
-
 // memfs file type
 enum FILE_TYPE {
-    T_RESERVED = 0,
-    T_DIR, // Directory
-    T_FILE, // File
-    T_DEV, // Device
+    FS_RESERVED = 0,
+    FS_DIRECTORY, // Directory
+    FS_FILE, // File
+    FS_DEVICE, // Device
 };
 
 // File system super block
@@ -55,20 +79,10 @@ struct SuperBlock {
     uint32_t ninodes; // Number of inodes.
 };
 
-// state of the Inode
-struct State {
-    short type; // Type of file
-    int dev; // File system's disk device
-    uint32_t ino; // Inode number
-    short nlink; // Number of links to file
-    uint32_t size; // Size of file in bytes
-};
-
 // Inode structure
 struct Inode {
     uint32_t inum; // Inode number
-    short type; // File type
-    short nlink; // Number of links to Inode in file system
+    uint32_t type; // File type
     uint32_t size; // Size of file (bytes)
     uint32_t addrs[NR_DIRECT_BLOCKS + NR_INDIRECT_BLOCKS]; // Data block addresses
 };
@@ -85,7 +99,6 @@ struct DirectEntry {
 struct FileDescriptor {
     char path[MAX_PATH_LEN];
     void* data;
-    struct State st;
 };
 
 // range of memory fs
@@ -96,10 +109,10 @@ void ReadSuperBlock(struct SuperBlock*);
 
 // fs Inode ops
 struct Inode* InodeGet(uint32_t inum);
-struct Inode* InodeCreate(struct Inode*, char*, short, short, short);
+struct Inode* InodeCreate(struct Inode*, char*, int);
 int InodeDelete(struct Inode*, char*);
 int InodeRead(struct Inode*, char*, int, int);
-int InodeWrite(struct Inode*, char*, uint32_t, uint32_t);
+int InodeWrite(struct Inode*, char*, int, int);
 struct Inode* InodeSeek(struct Inode*, char*);
 struct Inode* InodeParentSeek(struct Inode*, char*, char*);
 
