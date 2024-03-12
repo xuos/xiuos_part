@@ -53,11 +53,20 @@ int main(void)
     if (!hardkernel_init(&hardkernel_tag)) {
         return -1;
     }
-    /* init softkernel */
-    if (!softkernel_init(&hardkernel_tag, &softkernel_tag)) {
-        return -1;
+
+    struct TraceTag main_intr_tag;
+    AchieveResourceTag(&main_intr_tag, &hardkernel_tag, "intr-ac-resource");
+    struct XiziTrapDriver* p_intr_driver = (struct XiziTrapDriver*)AchieveResource(&main_intr_tag);
+    int cpu_id = p_intr_driver->cur_cpu_id();
+    if (cpu_id == 0) {
+        /* init softkernel */
+        if (!softkernel_init(&hardkernel_tag, &softkernel_tag)) {
+            return -1;
+        }
+        show_xizi_bar();
+
+        int cpu_count = NR_CPU;
     }
-    show_xizi_bar();
 
     /* start first task */
     char* init_task_param[2] = { "/app/init", 0 };

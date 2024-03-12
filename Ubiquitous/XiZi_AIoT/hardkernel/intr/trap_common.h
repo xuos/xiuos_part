@@ -60,6 +60,7 @@ struct XiziTrapDriver {
     uint32_t curr_int[NR_CPU];
 
     void (*sys_irq_init)();
+    int (*cur_cpu_id)();
 
     void (*cpu_irq_enable)();
     void (*cpu_irq_disable)();

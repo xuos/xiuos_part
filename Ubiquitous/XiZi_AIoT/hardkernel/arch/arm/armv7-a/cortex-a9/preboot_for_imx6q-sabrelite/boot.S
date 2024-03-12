@@ -84,11 +84,10 @@ _boot_start:
     @ check cpu id - cpu0 is primary cpu
     cmp     r5, 	#0
     beq     primary_cpu_init
-    bx      r4     @ for secondary cpus, jump to argument function pointer passed in by ROM
-    
-    @ control should not return from the secondary cpu entry point
-    b       .
+    bl      bootmain     @ for secondary cpus, jump to argument function pointer passed in by ROM
 
+    bl      .
+    
 primary_cpu_init:
    	/* init .bss */
     /* clear the .bss section (zero init) */

@@ -215,8 +215,14 @@ static int _is_interruptable(void)
     return !(val & DIS_INT);
 }
 
+int _cur_cpu_id()
+{
+    return cpu_get_current();
+}
+
 static struct XiziTrapDriver xizi_trap_driver = {
     .sys_irq_init = _sys_irq_init,
+    .cur_cpu_id = _cur_cpu_id,
 
     .cpu_irq_enable = _cpu_irq_enable,
     .cpu_irq_disable = _cpu_irq_disable,
