@@ -37,5 +37,6 @@ struct XiziBootNode {
 };
 
 bool hardkernel_init(struct TraceTag*);
+bool secondary_cpu_hardkernel_init(int cpu_id, struct TraceTag* _hardkernel_tag);
 bool softkernel_init(struct TraceTag* _hardkernel_tag, struct TraceTag* _softkernel_tag);
 void show_xizi_bar(void);

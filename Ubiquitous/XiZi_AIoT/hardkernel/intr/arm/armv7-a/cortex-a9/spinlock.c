@@ -21,6 +21,7 @@
 
 #include "assert.h"
 #include "spinlock.h"
+#include "trap_common.h"
 
 bool module_spinlock_use_intr_init(void)
 {
@@ -43,11 +44,11 @@ void spinlock_init(struct spinlock* lock, char* name)
 extern int _spinlock_lock(struct spinlock* lock, uint32_t timeout);
 void spinlock_lock(struct spinlock* lock)
 {
-    if (lock->owner_cpu != SPINLOCK_STATE_UNLOCK) {
+    if (lock->owner_cpu != SPINLOCK_STATE_UNLOCK && lock->owner_cpu == cur_cpuid()) {
         ERROR("spinlock %s lock double locked by core %d\n", lock->name, lock->owner_cpu);
         panic("");
     }
-    assert(_spinlock_lock(lock, SPINLOCK_LOCK_WAITFOREVER) == 0);
+    _spinlock_lock(lock, SPINLOCK_LOCK_WAITFOREVER);
 }
 
 void _spinlock_unlock(struct spinlock* lock);

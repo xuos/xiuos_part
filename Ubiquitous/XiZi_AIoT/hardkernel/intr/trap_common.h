@@ -59,7 +59,7 @@ struct XiziTrapDriver {
     /* current irq number happening in cpu*/
     uint32_t curr_int[NR_CPU];
 
-    void (*sys_irq_init)();
+    void (*sys_irq_init)(int);
     int (*cur_cpu_id)();
 
     void (*cpu_irq_enable)();

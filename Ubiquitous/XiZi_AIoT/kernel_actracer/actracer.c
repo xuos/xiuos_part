@@ -447,9 +447,11 @@ bool tracer_delete_trace(struct TraceTag* target, struct TraceTag* owner)
     return true;
 }
 
+static struct spinlock ac_tracer_lock;
 void tracer_init(void)
 {
     /* init sys_tracer, the manager */
+    spinlock_init(&ac_tracer_lock, "tracerlock");
     spinlock_init(&sys_tracer.mem_chunk_bitmap_lock, "tracer_mem_chunk_bitmap");
     spinlock_init(&sys_tracer.trace_meta_bitmap_lock, "tracer_meta_bitmap");
     memset(sys_tracer.mem_chunks_bit_map, 0, sizeof(sys_tracer.mem_chunk_bitmap_lock));
@@ -494,26 +496,31 @@ void tracer_find_tag(struct TraceTag* target, struct TraceTag* const source, cha
 
 bool AchieveResourceTag(struct TraceTag* target, struct TraceTag* owner, char* name)
 {
+    spinlock_lock(&ac_tracer_lock);
     tracer_find_tag(target, owner, name);
     if (target->meta == NULL) {
         return false;
     }
+    spinlock_unlock(&ac_tracer_lock);
     return true;
 }
 
 void* AchieveResource(struct TraceTag* target)
 {
+    spinlock_lock(&ac_tracer_lock);
     if (target->type == TRACER_OWNER) {
         return NULL;
     }
     void* p_resource = NULL;
     tracer_read_trace(target, (char*)&p_resource, 0, sizeof(void*));
     assert(p_resource != NULL);
+    spinlock_unlock(&ac_tracer_lock);
     return p_resource;
 }
 
 bool CreateResourceTag(struct TraceTag* new_tag, struct TraceTag* owner, char* name, tracemeta_ac_type type, void* p_resource)
 {
+    // spinlock_lock(&ac_tracer_lock);
     new_tag->type = type;
     if (type == TRACER_OWNER) {
         return tracer_create_trace(new_tag, owner, name, type);
@@ -527,10 +534,14 @@ bool CreateResourceTag(struct TraceTag* new_tag, struct TraceTag* owner, char* n
     if (!tracer_create_trace(new_tag, owner, name, type)) {
         return false;
     }
-    return tracer_write_trace(new_tag, (char*)&p_resource, 0, sizeof(void*)) == sizeof(void*);
+    bool ret = tracer_write_trace(new_tag, (char*)&p_resource, 0, sizeof(void*)) == sizeof(void*);
+    // spinlock_unlock(&ac_tracer_lock);
+    return ret;
 }
 
 bool DeleteResource(struct TraceTag* target, struct TraceTag* owner)
 {
+    spinlock_lock(&ac_tracer_lock);
     return tracer_delete_trace(target, owner);
+    spinlock_unlock(&ac_tracer_lock);
 }

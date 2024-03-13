@@ -66,7 +66,7 @@ int IPC_DO_SERVE_FUNC(Ipc_ls)(char* path)
         printf("ls: find target Inode failed, ip: %x(%d), dp: %x(%d)\n", ip, ip->inum, dp, dp->inum);
         return -1;
     }
-    if (ip->type != T_DIR) {
+    if (ip->type != FS_DIRECTORY) {
         printf("ls: not a dir\n");
         return -1;
     }

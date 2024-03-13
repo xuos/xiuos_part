@@ -36,6 +36,7 @@ Modification:
 #include "uart_common_ope.h"
 
 #include "assert.h"
+#include "pagetable.h"
 
 #define KERN_BOOT_DRIVER(n, bi, f) \
     {                              \
@@ -195,5 +196,32 @@ bool hardkernel_init(struct TraceTag* _hardkernel_tag)
         LOG_PRINTF(hardkernel_init_array[i].bootinfo);
         LOG_PRINTF("\n");
     }
+    return true;
+}
+
+bool secondary_cpu_hardkernel_init(int cpu_id, struct TraceTag* _hardkernel_tag)
+{
+    struct TraceTag init_intr_tag, init_icache_tag, init_dcache_tag, init_clock_tag, init_mmu_tag;
+    AchieveResourceTag(&init_intr_tag, _hardkernel_tag, "intr-ac-resource");
+    AchieveResourceTag(&init_icache_tag, _hardkernel_tag, "icache-ac-resource");
+    AchieveResourceTag(&init_dcache_tag, _hardkernel_tag, "dcache-ac-resource");
+    AchieveResourceTag(&init_clock_tag, _hardkernel_tag, "clock-ac-resource");
+    AchieveResourceTag(&init_mmu_tag, _hardkernel_tag, "mmu-ac-resource");
+    struct XiziTrapDriver* p_intr_driver = (struct XiziTrapDriver*)AchieveResource(&init_intr_tag);
+    struct ICacheDone* p_icache_driver = (struct ICacheDone*)AchieveResource(&init_icache_tag);
+    struct DCacheDone* p_dcache_driver = (struct DCacheDone*)AchieveResource(&init_dcache_tag);
+    struct XiziClockDriver* p_clock_driver = (struct XiziClockDriver*)AchieveResource(&init_clock_tag);
+
+    // secondary cpu init hardwares
+    // intr
+    p_intr_driver->sys_irq_init(cpu_id);
+    // cache
+    p_icache_driver->enable();
+    p_dcache_driver->enable();
+    // clock
+    p_clock_driver->sys_clock_init();
+    p_intr_driver->single_irq_enable(p_clock_driver->get_clock_int(), cpu_id, 0);
+    // mmu
+    secondary_cpu_load_kern_pgdir(&init_mmu_tag, &init_intr_tag);
     return true;
 }

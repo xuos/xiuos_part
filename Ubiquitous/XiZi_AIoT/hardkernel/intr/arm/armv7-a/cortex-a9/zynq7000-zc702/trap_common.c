@@ -85,21 +85,23 @@ void handle_fiq(void)
     panic("");
 }
 
-static void _sys_irq_init()
+static void _sys_irq_init(int cpu_id)
 {
-    /* load exception vectors */
-    volatile uint32_t* vector_base = &_vector_start;
+    if (cpu_id == 0) {
+        /* load exception vectors */
+        volatile uint32_t* vector_base = &_vector_start;
 
-    // Set Interrupt handler start address
-    vector_base[1] = (uint32_t)trap_undefined_instruction; // Undefined Instruction
-    vector_base[2] = (uint32_t)user_trap_swi_enter; // Software Interrupt
-    vector_base[3] = (uint32_t)trap_iabort; // Prefetch Abort
-    vector_base[4] = (uint32_t)trap_dabort; // Data Abort
-    vector_base[5] = (uint32_t)handle_reserved; // Reserved
-    vector_base[6] = (uint32_t)trap_irq_enter; // IRQ
-    vector_base[7] = (uint32_t)handle_fiq; // FIQ
+        // Set Interrupt handler start address
+        vector_base[1] = (uint32_t)trap_undefined_instruction; // Undefined Instruction
+        vector_base[2] = (uint32_t)user_trap_swi_enter; // Software Interrupt
+        vector_base[3] = (uint32_t)trap_iabort; // Prefetch Abort
+        vector_base[4] = (uint32_t)trap_dabort; // Data Abort
+        vector_base[5] = (uint32_t)handle_reserved; // Reserved
+        vector_base[6] = (uint32_t)trap_irq_enter; // IRQ
+        vector_base[7] = (uint32_t)handle_fiq; // FIQ
+    }
 
-    init_cpu_mode_stacks(0);
+    init_cpu_mode_stacks(cpu_id);
 
     /* active hardware irq responser */
     XScuGic_Config* gic_config = XScuGic_LookupConfig(XPAR_PS7_SCUGIC_0_DEVICE_ID);

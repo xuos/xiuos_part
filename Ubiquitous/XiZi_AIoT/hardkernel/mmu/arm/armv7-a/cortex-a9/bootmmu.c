@@ -94,6 +94,7 @@ void bootmain()
     build_boot_pgdir();
     load_boot_pgdir();
     __asm__ __volatile__("add sp, sp, %0" ::"r"(KERN_MEM_BASE - PHY_MEM_BASE));
-    memset(&kernel_data_begin, 0x00, (uint32_t)kernel_data_end - (uint32_t)kernel_data_begin);
+    // memset(&kernel_data_begin, 0x00, (uint32_t)kernel_data_end - (uint32_t)kernel_data_begin);
+
     main();
 }

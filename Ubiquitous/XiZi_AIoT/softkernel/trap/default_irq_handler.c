@@ -77,7 +77,9 @@ void intr_irq_dispatch(struct trapframe* tf)
     // distribute irq
     irq_handler_t isr = p_intr_driver->sw_irqtbl[irq].handler;
     if (isr) {
+        // spinlock_lock(&whole_kernel_lock);
         isr(irq, tf, NULL);
+        // spinlock_unlock(&whole_kernel_lock);
     } else {
         default_interrupt_routine();
     }

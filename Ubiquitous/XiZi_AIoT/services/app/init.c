@@ -19,7 +19,11 @@
 int main(int argc, char* argv[])
 {
     struct Session session;
-    connect_session(&session, "MemFS", 8092);
+    printf("connecting MemFS\n");
+    while (connect_session(&session, "MemFS", 8092) < 0) {
+        printf("connecting MemFS\n");
+    }
+    printf("connect MemFS success\n");
 
     int fd;
     char* shell_task_param[2] = { "/shell", 0 };

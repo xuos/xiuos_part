@@ -82,22 +82,22 @@ void handle_fiq(void)
     panic("");
 }
 
-static void _sys_irq_init()
+static void _sys_irq_init(int cpu_id)
 {
     /* load exception vectors */
-    volatile uint32_t* vector_base = &_vector_start;
+    init_cpu_mode_stacks(cpu_id);
+    if (cpu_id == 0) {
+        volatile uint32_t* vector_base = &_vector_start;
 
-    // Set Interrupt handler start address
-    vector_base[1] = (uint32_t)trap_undefined_instruction; // Undefined Instruction
-    vector_base[2] = (uint32_t)user_trap_swi_enter; // Software Interrupt
-    vector_base[3] = (uint32_t)trap_iabort; // Prefetch Abort
-    vector_base[4] = (uint32_t)trap_dabort; // Data Abort
-    vector_base[5] = (uint32_t)handle_reserved; // Reserved
-    vector_base[6] = (uint32_t)trap_irq_enter; // IRQ
-    vector_base[7] = (uint32_t)handle_fiq; // FIQ
-
-    init_cpu_mode_stacks(0);
-
+        // Set Interrupt handler start address
+        vector_base[1] = (uint32_t)trap_undefined_instruction; // Undefined Instruction
+        vector_base[2] = (uint32_t)user_trap_swi_enter; // Software Interrupt
+        vector_base[3] = (uint32_t)trap_iabort; // Prefetch Abort
+        vector_base[4] = (uint32_t)trap_dabort; // Data Abort
+        vector_base[5] = (uint32_t)handle_reserved; // Reserved
+        vector_base[6] = (uint32_t)trap_irq_enter; // IRQ
+        vector_base[7] = (uint32_t)handle_fiq; // FIQ
+    }
     /* active hardware irq responser */
     gic_init();
     xizi_trap_driver.switch_hw_irqtbl((uint32_t*)&_vector_jumper);
@@ -240,7 +240,7 @@ static struct XiziTrapDriver xizi_trap_driver = {
 
 struct XiziTrapDriver* hardkernel_intr_init(struct TraceTag* hardkernel_tag)
 {
-    xizi_trap_driver.sys_irq_init();
+    xizi_trap_driver.sys_irq_init(0);
     xizi_trap_driver.cpu_irq_disable();
     return &xizi_trap_driver;
 }

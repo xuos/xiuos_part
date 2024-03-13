@@ -50,7 +50,7 @@ Modification:
 #define CPSR_MODE (0x1f) //!< Current processor mode
 //@}
 
-#define MODE_STACK_SIZE 0x4000
+#define MODE_STACK_SIZE 0x1000
 
 //! @name Interrupt enable bits in CPSR
 //@{
@@ -74,7 +74,7 @@ Modification:
 
 #include "cortex_a9.h"
 
-#define NR_CPU 4
+#define NR_CPU 2
 
 __attribute__((always_inline)) static inline uint32_t user_mode()
 {

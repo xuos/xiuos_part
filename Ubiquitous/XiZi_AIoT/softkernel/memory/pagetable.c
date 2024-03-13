@@ -296,3 +296,9 @@ void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driv
     // _p_pgtbl_mmu_access->LoadPgdir((uintptr_t)V2P(kern_pgdir.pd_addr));
     _p_pgtbl_mmu_access->LoadPgdirCrit((uintptr_t)V2P(kern_pgdir.pd_addr), intr_driver_tag);
 }
+
+void secondary_cpu_load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driver_tag)
+{
+    // _p_pgtbl_mmu_access->LoadPgdir((uintptr_t)V2P(kern_pgdir.pd_addr));
+    _p_pgtbl_mmu_access->LoadPgdirCrit((uintptr_t)V2P(kern_pgdir.pd_addr), intr_driver_tag);
+}
