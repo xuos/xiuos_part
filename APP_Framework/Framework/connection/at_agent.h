@@ -29,7 +29,7 @@
 #define REPLY_TIME_OUT 10
 
 #ifdef TOOL_USING_OTA
-#define ENTM_RECV_MAX OTA_RX_BUFFERSIZE
+#define ENTM_RECV_MAX (OTA_FRAME_SIZE + 1024)
 #else
 #define ENTM_RECV_MAX 256
 #endif
@@ -104,5 +104,6 @@ int ParseATReply(char* str, const char *format, ...);
 void DeleteATReply(ATReplyType reply);
 int ATOrderSend(ATAgentType agent, uint32_t timeout_s, ATReplyType reply, const char *cmd_expr, ...);
 int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check);
+int AtGetNetworkInfoReply(ATAgentType agent, char *cmd, char *result);
 
 #endif

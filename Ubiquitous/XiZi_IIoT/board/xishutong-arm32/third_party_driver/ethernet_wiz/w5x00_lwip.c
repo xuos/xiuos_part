@@ -113,7 +113,6 @@ void ethernetif_input2(void* netif_arg)
     struct pbuf* p = NULL;
     for (;;) {
         sys_arch_sem_wait(get_eth_recv_sem2(), WAITING_FOREVER);
-        KPrintf("%s -->\n", netif->name);
         sys_mutex_lock(&wiz_trans_mtx);
         while (1) {
 

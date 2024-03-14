@@ -49,6 +49,8 @@ MEMORY
     OTP_LOCK    (rx): ORIGIN = __OTP_LOCK_START, LENGTH = __OTP_LOCK_SIZE
     RAM        (rwx): ORIGIN = 0x1FFE0000, LENGTH = 512K
     RAMB       (rwx): ORIGIN = 0x200F0000, LENGTH = 4K
+
+    SDRAM      (rwx): ORIGIN = 0x80000000, LENGTH = 8M
 }
 
 ENTRY(Reset_Handler)

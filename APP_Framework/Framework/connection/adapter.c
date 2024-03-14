@@ -902,3 +902,118 @@ int AdapterDeviceNetstat(struct Adapter *adapter)
     return result;
 }
 
+
+/**
+ * @description: Connect to a certain mqtt server
+ * @param adapter - adapter device pointer
+ * @param ip - connect ip
+ * @param port - connect port
+ * @param client_id - client id
+ * @param username - client username
+ * @param password - client password
+ * @return success: 0 , failure: other
+ */
+int AdapterDeviceMqttConnect(struct Adapter *adapter, const char *ip, const char *port, const char *client_id, const char *username, const char *password)
+{
+    if (!adapter)
+        return -1;
+        
+    if (PRIVATE_PROTOCOL == adapter->net_protocol) {
+        printf("AdapterDeviceMqttConnect not suuport private_protocol, please use join\n");
+        return -1;
+    } else if (IP_PROTOCOL == adapter->net_protocol) {
+        struct IpProtocolDone *ip_done = (struct IpProtocolDone *)adapter->done;
+    
+        if (NULL == ip_done->mqttconnect)
+            return -1;
+    
+        return ip_done->mqttconnect(adapter, ip, port, client_id, username, password);
+    } else {
+        printf("AdapterDeviceMqttConnect net_protocol %d not support\n", adapter->net_protocol);
+        return -1;
+    }
+}
+
+/**
+ * @description: Adapter disconnect from mqtt server 
+ * @param adapter - adapter device pointer
+ * @return success: 0 , failure: other
+ */
+int AdapterDeviceMqttDisconnect(struct Adapter *adapter)
+{
+    if (!adapter)
+        return -1;
+        
+    if (PRIVATE_PROTOCOL == adapter->net_protocol) {
+        printf("AdapterDeviceMqttDisconnect not suuport private_protocol, please use join\n");
+        return -1;
+    } else if (IP_PROTOCOL == adapter->net_protocol) {
+        struct IpProtocolDone *ip_done = (struct IpProtocolDone *)adapter->done;
+    
+        if (NULL == ip_done->mqttdisconnect)
+            return -1;
+    
+        return ip_done->mqttdisconnect(adapter);
+    } else {
+        printf("AdapterDeviceMqttDisconnect net_protocol %d not support\n", adapter->net_protocol);
+        return -1;
+    }
+}
+
+/**
+ * @description: Send data to mqtt server
+ * @param adapter - adapter device pointer
+ * @param topic - publish topic
+ * @param buf - data buffer
+ * @param len - data length
+ * @return length of data written
+ */
+ssize_t AdapterDeviceMqttSend(struct Adapter *adapter, const char *topic, const void *buf, size_t len)
+{
+    if (!adapter)
+        return -1;
+
+    if (PRIVATE_PROTOCOL == adapter->net_protocol) {
+        printf("AdapterDeviceMqttSend not support private_protocol, please use join\n");
+        return -1;
+    } else if (IP_PROTOCOL == adapter->net_protocol) {
+        struct IpProtocolDone *ip_done = (struct IpProtocolDone *)adapter->done;
+    
+        if (NULL == ip_done->mqttsend)
+            return -1;
+    
+        return ip_done->mqttsend(adapter, topic, buf, len);
+    } else {
+        printf("AdapterDeviceMqttSend net_protocol %d not support\n", adapter->net_protocol);
+        return -1;
+    }
+}
+
+/**
+ * @description: Receice data from mqtt server
+ * @param adapter - adapter device pointer
+ * @param topic - subscribe topic
+ * @param buf - buffer to save data
+ * @param len - buffer length
+ * @return gotten data length
+ */
+ssize_t AdapterDeviceMqttRecv(struct Adapter *adapter, const char *topic, void *buf, size_t len)
+{
+    if (!adapter)
+        return -1;
+
+    if (PRIVATE_PROTOCOL == adapter->net_protocol) {
+        printf("AdapterDeviceMqttRecv not support private_protocol, please use join\n");
+        return -1;;
+    } else if (IP_PROTOCOL == adapter->net_protocol) {
+        struct IpProtocolDone *ip_done = (struct IpProtocolDone *)adapter->done;
+    
+        if (NULL == ip_done->mqttrecv)
+            return -1;
+    
+        return ip_done->mqttrecv(adapter, topic, buf, len);
+    } else {
+        printf("AdapterDeviceMqttRecv net_protocol %d not support\n", adapter->net_protocol);
+        return -1;
+    }
+}

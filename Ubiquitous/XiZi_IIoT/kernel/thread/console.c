@@ -661,6 +661,24 @@ int VsnPrintf(char *buf, int32 size, const char *fmt, va_list args)
 void KPrintf(const char *fmt, ...)
 {
 #ifdef KERNEL_CONSOLE
+
+#if defined(BOARD_RZV2L_M33) || defined(BOARD_RZG2UL_M33)
+    _console = NONE;
+    va_list args;
+    x_size_t length = 0;
+    static char logbuf[KERNEL_CONSOLEBUF_SIZE] = {0};
+
+    va_start(args, fmt);
+
+    length = VsnPrintf(logbuf, sizeof(logbuf) - 1, fmt, args);
+    if (length > KERNEL_CONSOLEBUF_SIZE - 1)
+        length = KERNEL_CONSOLEBUF_SIZE - 1;
+
+    printf_raw("%s",logbuf);
+    
+    va_end(args);
+#endif
+
     if(_console != NONE) {
         va_list args;
         x_size_t length = 0;

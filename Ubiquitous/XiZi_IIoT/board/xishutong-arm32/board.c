@@ -82,6 +82,10 @@ Modification:
 #include <connect_ethernet.h>
 #endif
 
+#ifdef BSP_USING_EXTSDRAM
+#include <connect_sdram.h>
+#endif
+
 extern void entry(void);
 extern int HwUsartInit();
 
@@ -180,6 +184,9 @@ struct InitSequenceDesc _board_init[] = {
 #ifdef BSP_USING_GPIO
     { "hw_pin", HwGpioInit },
 #endif
+#ifdef BSP_USING_EXTSDRAM
+    { "ext_sdram", ExtSdramInit},
+#endif
 #ifdef BSP_USING_SDIO
     { "sdio", HwSdioInit },
 #endif
@@ -210,7 +217,7 @@ struct InitSequenceDesc _board_init[] = {
 #ifdef BSP_USING_CAN
     { "can", HwCanInit },
 #endif
-#ifdef BSP_USING_LWIP
+#ifdef BSP_USING_W5500
     { "wiz", HwWiznetInit },
 #endif
     { " NONE ", NONE },

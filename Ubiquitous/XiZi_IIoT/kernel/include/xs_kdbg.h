@@ -44,15 +44,16 @@ extern "C" {
 
 #define MSGQUEUE_DEBUG 0
 #define FILESYS_DEBUG 0
-#define NETDEV_DEBUG 0
+#define NETDEV_DEBUG 1
 #define WEBNET_DEBUG 0
 #define WIZNET_DEBUG 0
 
-#define SYS_KDEBUG_LOG(section, information) \
-    do {                                     \
-        if (section) {                       \
-            KPrintf information;             \
-        }                                    \
+#define SYS_KDEBUG_LOG(section, information)         \
+    do {                                             \
+        if (section) {                               \
+            KPrintf("[%s:%d] ", __func__, __LINE__); \
+            KPrintf information;                     \
+        }                                            \
     } while (0)
 
 #define KDYN_NONE 0

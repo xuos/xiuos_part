@@ -1,3 +1,4 @@
-SRC_FILES := boot.S  cache.S exception.S cortexA9.S gic.c interrupt.c mmu.c ccm_pll.c
+SRC_DIR := preboot_for_$(BOARD)
+SRC_FILES := context_switch.S core.c
 
 include $(KERNEL_ROOT)/compiler.mk

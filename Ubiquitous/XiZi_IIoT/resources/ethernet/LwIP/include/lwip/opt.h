@@ -521,7 +521,7 @@
  * (only needed if you use the sequential API, like api_lib.c)
  */
 #if !defined MEMP_NUM_NETBUF || defined __DOXYGEN__
-#define MEMP_NUM_NETBUF                 2
+#define MEMP_NUM_NETBUF 8
 #endif
 
 /**
@@ -529,7 +529,7 @@
  * (only needed if you use the sequential API, like api_lib.c)
  */
 #if !defined MEMP_NUM_NETCONN || defined __DOXYGEN__
-#define MEMP_NUM_NETCONN                4
+#define MEMP_NUM_NETCONN 8
 #endif
 
 /**
@@ -538,7 +538,7 @@
  * In that case, you need one per thread calling lwip_select.)
  */
 #if !defined MEMP_NUM_SELECT_CB || defined __DOXYGEN__
-#define MEMP_NUM_SELECT_CB              4
+#define MEMP_NUM_SELECT_CB 4
 #endif
 
 /**
@@ -547,7 +547,7 @@
  * (only needed if you use tcpip.c)
  */
 #if !defined MEMP_NUM_TCPIP_MSG_API || defined __DOXYGEN__
-#define MEMP_NUM_TCPIP_MSG_API          8
+#define MEMP_NUM_TCPIP_MSG_API 8
 #endif
 
 /**
@@ -556,7 +556,7 @@
  * (only needed if you use tcpip.c)
  */
 #if !defined MEMP_NUM_TCPIP_MSG_INPKT || defined __DOXYGEN__
-#define MEMP_NUM_TCPIP_MSG_INPKT        8
+#define MEMP_NUM_TCPIP_MSG_INPKT 8
 #endif
 
 /**
@@ -564,7 +564,7 @@
  * (before freeing the corresponding memory using lwip_freeaddrinfo()).
  */
 #if !defined MEMP_NUM_NETDB || defined __DOXYGEN__
-#define MEMP_NUM_NETDB                  1
+#define MEMP_NUM_NETDB 2
 #endif
 
 /**
@@ -572,7 +572,7 @@
  * if DNS_LOCAL_HOSTLIST_IS_DYNAMIC==1.
  */
 #if !defined MEMP_NUM_LOCALHOSTLIST || defined __DOXYGEN__
-#define MEMP_NUM_LOCALHOSTLIST          1
+#define MEMP_NUM_LOCALHOSTLIST 2
 #endif
 
 /**

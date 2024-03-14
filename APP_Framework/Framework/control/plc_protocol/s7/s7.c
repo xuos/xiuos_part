@@ -133,7 +133,7 @@ int8_t ReadPlcDataByRecipe(struct ControlRecipe *p_recipe)
                 }
                 TS7DataItem data_info = ((S7ReadItem*)p_read_item + i)->data_info;
                 Cli_ReadMultiVars(s7_plc, &data_info, 1);
-                uint16_t Size = GetValueTypeMemorySize(((S7ReadItem*)p_read_item + i)->value_type);
+                uint16_t Size = GetValueTypeMemorySize(((S7ReadItem*)p_read_item + i)->value_type,data_info.Amount);
                 ControlPrintfList("S7 RECV", data_info.pdata,Size);          
                 PushDataIntoStack(s7_data,data_info.pdata,Size);
                 PrivTaskDelay(100);
@@ -196,7 +196,7 @@ static uint8_t InitialS7ReadItem(S7ReadItem* p_read_item, cJSON* read_item_json,
     printf("value_type is %d, amount is %d, start is %04d, db_number is %d, area is 0x%03x, wordlen is %d.\n",
         p_read_item->value_type, p_data_info->Amount, p_data_info->Start, p_data_info->DBNumber,
         p_data_info->Area, p_data_info->WordLen);
-    return GetValueTypeMemorySize(p_read_item->value_type);
+    return GetValueTypeMemorySize(p_read_item->value_type, p_data_info->Amount);
 }
 
 /**

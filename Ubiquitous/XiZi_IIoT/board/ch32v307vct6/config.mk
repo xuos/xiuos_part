@@ -15,6 +15,8 @@ export CROSS_COMPILE ?=/opt/riscv-embedded-gcc/bin/riscv-none-embed-
 
 export DEFINES := -DHAVE_CCONFIG_H -DHAVE_SIGINFO
 
+export LINK_WCH_NET := $(KERNEL_ROOT)/board/ch32v307vct6/third_party_driver/ethernet/libwchnet.a
+
 export ARCH = risc-v
 export MCU =  GH32V307
 

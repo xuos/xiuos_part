@@ -19,6 +19,53 @@ ifeq ($(CONFIG_LIB_NEWLIB),y)
 KERNELPATHS += -I$(KERNEL_ROOT)/lib/newlib/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rzv2l-m33)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m33 \
+	-I$(BSP_ROOT)/rzv/arm/CMSIS_5/CMSIS/Core/Include \
+	-I$(BSP_ROOT)/rzv/board/rzv2l_smarc \
+	-I$(BSP_ROOT)/rzv/fsp/inc \
+	-I$(BSP_ROOT)/rzv/fsp/inc/api \
+	-I$(BSP_ROOT)/rzv/fsp/inc/instances \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/cmsis/Device/RENESAS/Include \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/cmsis/Device/RENESAS/Include/iobitmasks  \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/cmsis/Device/RENESAS/Include/iodefines  \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/mcu/all  \
+	-I$(BSP_ROOT)/rzv/fsp/src/bsp/mcu/rzv2l  \
+	-I$(BSP_ROOT)/rzv_cfg/fsp_cfg  \
+	-I$(BSP_ROOT)/rzv_cfg/fsp_cfg/bsp  \
+	-I$(BSP_ROOT)/rzv_gen \
+	-I$(BSP_ROOT)/rzv/linaro/libmetal/include \
+	-I$(BSP_ROOT)/rzv/linaro/open-amp/lib/include #
+endif
+
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rzg2ul-m33)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m33 \
+	-I$(BSP_ROOT)/rzg/arm/CMSIS_5/CMSIS/Core/Include \
+	-I$(BSP_ROOT)/rzg/board/rzg2ul_smarc \
+	-I$(BSP_ROOT)/rzg/fsp/inc \
+	-I$(BSP_ROOT)/rzg/fsp/inc/api \
+	-I$(BSP_ROOT)/rzg/fsp/inc/instances \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G043U \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G043U/iobitmasks \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G043U/iodefines \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G044L \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G044L/iobitmasks \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A07G044L/iodefines \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A08G045S \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A08G045S/iobitmasks \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/cmsis/Device/RENESAS/Include/R9A08G045S/iodefines \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/mcu/all  \
+	-I$(BSP_ROOT)/rzg/fsp/src/bsp/mcu/rzg2ul  \
+	-I$(BSP_ROOT)/rzg_cfg/fsp_cfg  \
+	-I$(BSP_ROOT)/rzg_cfg/fsp_cfg/bsp  \
+	-I$(BSP_ROOT)/rzg_gen \
+	-I$(BSP_ROOT)/rzg/linaro/libmetal/include \
+	-I$(BSP_ROOT)/rzg/linaro/open-amp/lib/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xidatong-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
@@ -535,6 +582,20 @@ endif
 ifeq ($(CONFIG_SUPPORT_CONNECTION_FRAMEWORK), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/zigbee #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_network/freemodbus_tcp #
+
+ifeq ($(CONFIG_CONNECTION_MODBUS), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_fieldbus/modbus/freemodbus-latest/modbus/include #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_fieldbus/modbus/freemodbus-latest/port #
+
+ifeq ($(CONFIG_CONNECTION_MODBUS_USING_RTU), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_fieldbus/modbus/freemodbus-latest/modbus/rtu #
+endif
+
+ifeq ($(CONFIG_CONNECTION_MODBUS_USING_TCP), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_fieldbus/modbus/freemodbus-latest/modbus/tcp #
+endif
+endif
 endif
 
 ifeq ($(CONFIG_ADAPTER_HFA21_ETHERCAT), y)
@@ -576,16 +637,25 @@ KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protoc
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/include #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/modbus_tcp #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/modbus_uart #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/ethercat #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/ethercat/comm #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/ethercat/soem #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/include #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/fins #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/melsec #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/opcua #
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/s7 #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/ipc_protocol/freemodbustcpserver #
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc_protocol/cip #
 endif
 
 ifeq ($(CONFIG_LIB_USING_CJSON), y)
 KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/cJSON
+endif
+
+ifeq ($(CONFIG_LIB_USING_FREEMODBUS), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/freemodbus
 endif
 
 ifeq ($(CONFIG_LIB_USING_SQLITE), y)
@@ -648,8 +718,15 @@ KERNELPATHS +=-I$(KERNEL_ROOT)/tool/bootloader/flash \
 	-I$(KERNEL_ROOT)/tool/bootloader/ota #
 endif
 
-ifeq ($(CONFIG_TOOL_USING_MQTT), y)
+ifeq ($(CONFIG_LIB_USING_MQTT), y)
 KERNELPATHS +=-I$(KERNEL_ROOT)/../../APP_Framework/lib/mqtt
+endif
+
+ifeq ($(CONFIG_LIB_USING_JERRYSCRIPT), y)
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/JerryScript
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/JerryScript/jerryscript/jerry-core/include
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/JerryScript/jerryscript/jerry-ext/include
+KERNELPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/lib/JerryScript/jerryscript/jerry-math/include
 endif
 
 ifeq ($(CONFIG_FS_LWEXT4),y)

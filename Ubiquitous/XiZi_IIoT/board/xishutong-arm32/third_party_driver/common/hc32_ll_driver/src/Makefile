@@ -28,7 +28,7 @@ ifeq ($(CONFIG_BSP_USING_I2C),y)
   SRC_FILES += hc32_ll_i2c.c
 endif
 
-ifeq ($(CONFIG_BSP_USING_LWIP),y)
+ifeq ($(CONFIG_BSP_USING_ETHERNET),y)
   SRC_FILES += hc32_ll_eth.c
 endif
 
@@ -46,6 +46,10 @@ endif
 
 ifeq ($(CONFIG_BSP_USING_CAN),y)
   SRC_FILES += hc32_ll_can.c
+endif
+
+ifeq ($(CONFIG_BSP_USING_EXTSDRAM),y)
+  SRC_FILES += hc32_ll_dmc.c
 endif
 
 include $(KERNEL_ROOT)/compiler.mk

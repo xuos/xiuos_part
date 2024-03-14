@@ -23,12 +23,13 @@
 void TimerFunction(union sigval sig_val)
 {
     static int cnt = 0;
-    printf("%s cnt %d\n", __func__, cnt++);
+    printf("%s cnt %d ms %d\n", __func__, cnt++, PrivGetTickTime());
 }
 
 void TestTimer(void)
 {
     int ret = 0;
+    static int count = 0;
     int timer_flags;
     timer_t timer_id;
     struct sigevent evp;
@@ -40,7 +41,9 @@ void TestTimer(void)
     evp.sigev_notify_function = TimerFunction;
     evp.sigev_notify_attributes = &timer_flags;
 
-    ret = timer_create(CLOCK_REALTIME, &evp, &timer_id);
+    count++;
+
+    ret = PrivTimerCreate(count, &evp, &timer_id);
     if (ret < 0) {
         printf("%s create timer failed ret %d\n", __func__, ret);
         return;
@@ -48,14 +51,14 @@ void TestTimer(void)
 
     struct itimerspec value; 
     //active time interval
-    value.it_interval.tv_sec = 2; 
-    value.it_interval.tv_nsec = 0;
+    value.it_interval.tv_sec = 0; 
+    value.it_interval.tv_nsec = 1000000 * 10;
 
     //first timer set time 
     value.it_value.tv_sec = 2; 
     value.it_value.tv_nsec = 0; 
 
-    ret = timer_settime(timer_id, 1, &value, NULL);
+    ret = PrivTimerModify(timer_id, 1, &value, NULL);
     if (ret < 0) { 
         printf("%s set timer time failed ret %d\n", __func__, ret);
         return;

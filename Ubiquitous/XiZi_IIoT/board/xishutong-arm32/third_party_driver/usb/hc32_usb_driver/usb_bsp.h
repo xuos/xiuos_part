@@ -20,18 +20,18 @@
 
 /**
 * @file usb_bsp.h
-* @brief support edu-arm32-board usb bsp function
-* @version 2.0 
+* @brief support xishutong-arm32-board usb bsp function
+* @version 3.0 
 * @author AIIT XUOS Lab
-* @date 2022-11-08
+* @date 2023-12-29
 */
 
 /*************************************************
 File name: usb_bsp.h
-Description: support edu-arm32-board usb bsp function
+Description: support xishutong-arm32-board usb bsp function
 Others: 
 History: 
-1. Date: 2022-11-08
+1. Date: 2023-12-29
 Author: AIIT XUOS Lab
 Modification: 
 *************************************************/

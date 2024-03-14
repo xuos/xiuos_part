@@ -49,6 +49,18 @@ extern int ModbusUartProtocolInit(struct ControlRecipe *p_recipe);
 extern int S7ProtocolInit(struct ControlRecipe *p_recipe);
 #endif
 
+#ifdef CONTROL_PROTOCOL_FREEMODBUS_TCP_SERVER
+extern int FreeModbusTcpServerInit(struct ControlRecipe *p_recipe);
+#endif
+
+#ifdef CONTROL_PROTOCOL_CIP
+extern int CipProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
+#ifdef CONTROL_PROTOCOL_ETHERCAT
+extern int EthercatProtocolInit(struct ControlRecipe *p_recipe);
+#endif
+
 /*
 CONTROL FRAMEWORK READ DATA FORMAT:
 |  HEAD |device_id|read data length|read item count|         data         |
@@ -86,6 +98,18 @@ static struct ControlProtocolInitParam protocol_init[] =
 #endif
 #ifdef CONTROL_PROTOCOL_S7
     { PROTOCOL_S7, S7ProtocolInit },
+#endif
+
+#ifdef CONTROL_PROTOCOL_FREEMODBUS_TCP_SERVER
+    { PROTOCOL_FREEMODBUS_TCP_SERVER, FreeModbusTcpServerInit },
+#endif
+
+#ifdef CONTROL_PROTOCOL_CIP
+    { PROTOCOL_CIP, CipProtocolInit },
+#endif
+
+#ifdef CONTROL_PROTOCOL_ETHERCAT
+    { PROTOCOL_ETHERCAT, EthercatProtocolInit },
 #endif
 
 	{ PROTOCOL_END, NULL },
@@ -143,7 +167,8 @@ static uint16_t GetRecipeTotalDataLength(cJSON* read_item_list_json)
     for (uint16_t read_item_index = 0; read_item_index < read_item_count; read_item_index++) {
         cJSON* read_item_json = cJSON_GetArrayItem(read_item_list_json, read_item_index);
         UniformValueType value_type = cJSON_GetObjectItem(read_item_json, "value_type")->valueint;
-        total_data_length += GetValueTypeMemorySize(value_type);
+        int value_num = cJSON_GetObjectItem(read_item_json, "amount")->valueint;
+        total_data_length += GetValueTypeMemorySize(value_type, value_num);
     }
     return total_data_length;
 }
@@ -320,7 +345,7 @@ int ControlProtocolOpenDef(struct ControlProtocol *control_protocol)
 
     pthread_attr_t attr;
     attr.schedparam.sched_priority = 19;
-    attr.stacksize = 2048;
+    attr.stacksize = 4096;
 
     char task_name[] = "control_recv_data";
     pthread_args_t args;
@@ -350,26 +375,26 @@ int ControlProtocolCloseDef(void)
  * @param uniform_value_type - uniform value type
  * @return success : size error : 0
  */
-uint8_t GetValueTypeMemorySize(UniformValueType uniform_value_type)
+uint8_t GetValueTypeMemorySize(UniformValueType uniform_value_type,int value_num)
 {
     switch (uniform_value_type)
     {
     case UNIFORM_BOOL:
     case UNIFORM_INT8:
     case UNIFORM_UINT8:
-        return 1;
+        return 1* value_num;
         break;
     case UNIFORM_INT16:
     case UNIFORM_UINT16:
-        return 2;
+        return 2* value_num;
         break;
     case UNIFORM_INT32:
     case UNIFORM_UINT32:
     case UNIFORM_FLOAT:
-        return 4;
+        return 4* value_num;
         break;
     case UNIFORM_DOUBLE:
-        return 8;
+        return 8* value_num;
         break;
     default:
         break;

@@ -20,6 +20,7 @@ endif
 
 ifeq ($(CONFIG_SUPPORT_CONNECTION_FRAMEWORK), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection #
+APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/connection/industrial_network/freemodbus_tcp #
 endif
 
 ifeq ($(CONFIG_SUPPORT_KNOWING_FRAMEWORK), y)
@@ -35,11 +36,12 @@ APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control #
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/control/plc/interoperability/opcua #
 endif
 
+
 ifeq ($(CONFIG_CRYPTO), y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Framework/security/crypto/include #
 endif
 
-ifeq ($(CONFIG_USE_MONGOOSE),y)
+ifeq ($(CONFIG_APPLICATION_WEBSERVER),y)
 APPPATHS += -I$(KERNEL_ROOT)/../../APP_Framework/Applications/mongoose #
 endif
 

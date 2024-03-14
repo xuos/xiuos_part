@@ -7,7 +7,7 @@ menu "OTA function"
     if TOOL_USING_OTA
         choice 
             prompt "Compile bootloader bin or application bin."
-            default MCUBOOT_BOOTLOADER
+            default MCUBOOT_APPLICATION
 
             config MCUBOOT_BOOTLOADER
                     bool "Config as bootloader."
@@ -23,7 +23,7 @@ menu "OTA function"
 
                 config OTA_BY_PLATFORM
                     bool "Through IoT management platform."
-                    select TOOL_USING_MQTT
+                    select LIB_USING_MQTT
 
                 config OTA_BY_TCPSERVER
                     bool "Through the public network TCP server."
@@ -65,11 +65,11 @@ menu "OTA function"
             default 10000 if OTA_BY_TCPSERVER
             default 10000 if MCUBOOT_BOOTLOADER
         
-        config OTA_RX_BUFFERSIZE
-            int "OTA receive data buffer size."
-            default 3072 if OTA_BY_PLATFORM
-            default 2048 if OTA_BY_TCPSERVER
-            default 256 if MCUBOOT_BOOTLOADER
+        config OTA_FRAME_SIZE
+            int "OTA receive data frame size."
+            default 2048 if OTA_BY_PLATFORM
+            default 1024 if OTA_BY_TCPSERVER
+            default 0 if MCUBOOT_BOOTLOADER
     endif
 
 endmenu

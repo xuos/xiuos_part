@@ -1,0 +1,14 @@
+SRC_FILES := syscall.c \
+	sys_spawn.c \
+	sys_exec.c \
+	sys_yield.c \
+	sys_register_as_server.c \
+	sys_connect_session.c \
+	sys_poll_session.c \
+	sys_close_session.c \
+	sys_register_irq.c \
+	sys_exit.c \
+	sys_state.c \
+	sys_mmap.c
+
+include $(KERNEL_ROOT)/compiler.mk

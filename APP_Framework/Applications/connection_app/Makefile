@@ -15,6 +15,10 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
 		SRC_DIR += socket_demo
 	endif
 
+	ifeq ($(CONFIG_CONNECTION_ADAPTER_FREEMODBUSTCP),y)
+		SRC_DIR += freemodbus_tcp_slave
+	endif
+
     include $(KERNEL_ROOT)/compiler.mk
 endif
 

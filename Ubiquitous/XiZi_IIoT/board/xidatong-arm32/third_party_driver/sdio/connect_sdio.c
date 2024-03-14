@@ -274,6 +274,8 @@ static struct SdioDevDone dev_done =
     SdioRead,
 };
 
+static bool is_mount_ok = false;
+
 #if defined(FS_VFS) && defined(MOUNT_SDCARD_FS)
 #include <iot-vfs.h>
 
@@ -283,11 +285,14 @@ static struct SdioDevDone dev_done =
  */
 static int MountSDCardFs(enum FilesystemType fs_type)
 {
-    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, fs_type, "/") == 0)
+    if (MountFilesystem(SDIO_BUS_NAME, SDIO_DEVICE_NAME, SDIO_DRIVER_NAME, fs_type, "/") == 0) {
         KPrintf("Sd card mount to '/'");
-    else
+        is_mount_ok = true;
+    } else {
         KPrintf("Sd card mount to '/' failed!");
-    
+        is_mount_ok = false;
+    }
+
     return 0;
 }
 #endif
@@ -329,6 +334,7 @@ static void SdCardDetach(void)
 
 #ifdef MOUNT_SDCARD_FS
     UnmountFileSystem("/");
+    is_mount_ok = false;
 #endif
 }
 
@@ -385,6 +391,13 @@ int MountSDCard()
     return EOK;
 }
 #endif
+
+bool GetSdMountStatus(void)
+{
+    if(!is_mount_ok) 
+        KPrintf("SD card is not inserted or failed to mount, please check!\r\n");
+    return is_mount_ok;
+}
 
 int Imxrt1052HwSdioInit(void)
 {

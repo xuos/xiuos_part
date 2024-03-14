@@ -60,4 +60,12 @@ ifeq ($(CONFIG_BOARD_NUVOTON_M2354),y)
 SRC_DIR += cortex-m23
 endif
 
+ifeq ($(CONFIG_BOARD_RZV2L_M33),y)
+SRC_DIR += cortex-m33
+endif
+
+ifeq ($(CONFIG_BOARD_RZG2UL_M33),y)
+SRC_DIR += cortex-m33
+endif
+
 include $(KERNEL_ROOT)/compiler.mk

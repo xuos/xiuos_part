@@ -228,6 +228,95 @@ ip4_route(const ip4_addr_t *dest)
   return netif_default;
 }
 
+/**
+ * Finds the appropriate network interface for a given IP address. It
+ * searches the list of network interfaces linearly. A match is found
+ * if the masked IP address of the network interface equals the masked
+ * IP address given to the function.
+ *
+ * @param dest the destination IP address for which to find the route
+ * @return the netif on which to send to reach dest
+ */
+struct netif*
+ip4_route2(const ip4_addr_t* src, const ip4_addr_t* dest)
+{
+#if !LWIP_SINGLE_NETIF
+    struct netif* netif;
+    LWIP_ASSERT_CORE_LOCKED();
+
+#if LWIP_MULTICAST_TX_OPTIONS
+    /* Use administratively selected interface for multicast by default */
+    if (ip4_addr_ismulticast(dest) && ip4_default_multicast_netif) {
+        return ip4_default_multicast_netif;
+    }
+#endif /* LWIP_MULTICAST_TX_OPTIONS */
+
+    /* bug #54569: in case LWIP_SINGLE_NETIF=1 and LWIP_DEBUGF() disabled, the following loop is optimized away */
+    LWIP_UNUSED_ARG(dest);
+
+    /* iterate through netifs */
+    NETIF_FOREACH(netif)
+    {
+        /* is the netif up, does it have a link and a valid address? */
+        if (netif_is_up(netif) && netif_is_link_up(netif) && !ip4_addr_isany_val(*netif_ip4_addr(netif))) {
+
+            /* network mask matches? */
+            // if (ip4_addr_netcmp(dest, netif_ip4_addr(netif), netif_ip4_netmask(netif))) {
+            if (ip4_addr_cmp(src, netif_ip4_addr(netif))) {
+                /* return netif on which to forward IP packet */
+                return netif;
+            }
+            /* gateway matches on a non broadcast interface? (i.e. peer in a point to point interface) */
+            if (((netif->flags & NETIF_FLAG_BROADCAST) == 0) && ip4_addr_cmp(dest, netif_ip4_gw(netif))) {
+                /* return netif on which to forward IP packet */
+                return netif;
+            }
+        }
+    }
+
+#if LWIP_NETIF_LOOPBACK && !LWIP_HAVE_LOOPIF
+    /* loopif is disabled, looopback traffic is passed through any netif */
+    if (ip4_addr_isloopback(dest)) {
+        /* don't check for link on loopback traffic */
+        if (netif_default != NULL && netif_is_up(netif_default)) {
+            return netif_default;
+        }
+        /* default netif is not up, just use any netif for loopback traffic */
+        NETIF_FOREACH(netif)
+        {
+            if (netif_is_up(netif)) {
+                return netif;
+            }
+        }
+        return NULL;
+    }
+#endif /* LWIP_NETIF_LOOPBACK && !LWIP_HAVE_LOOPIF */
+
+#ifdef LWIP_HOOK_IP4_ROUTE_SRC
+    netif = LWIP_HOOK_IP4_ROUTE_SRC(NULL, dest);
+    if (netif != NULL) {
+        return netif;
+    }
+#elif defined(LWIP_HOOK_IP4_ROUTE)
+    netif = LWIP_HOOK_IP4_ROUTE(dest);
+    if (netif != NULL) {
+        return netif;
+    }
+#endif
+#endif /* !LWIP_SINGLE_NETIF */
+
+    if ((netif_default == NULL) || !netif_is_up(netif_default) || !netif_is_link_up(netif_default) || ip4_addr_isany_val(*netif_ip4_addr(netif_default)) || ip4_addr_isloopback(dest)) {
+        /* No matching netif found and default netif is not usable.
+           If this is not good enough for you, use LWIP_HOOK_IP4_ROUTE() */
+        LWIP_DEBUGF(IP_DEBUG | LWIP_DBG_LEVEL_SERIOUS, ("ip4_route: No route to %" U16_F ".%" U16_F ".%" U16_F ".%" U16_F "\n", ip4_addr1_16(dest), ip4_addr2_16(dest), ip4_addr3_16(dest), ip4_addr4_16(dest)));
+        IP_STATS_INC(ip.rterr);
+        MIB2_STATS_INC(mib2.ipoutnoroutes);
+        return NULL;
+    }
+
+    return netif_default;
+}
+
 #if IP_FORWARD
 /**
  * Determine whether an IP address is in a reserved set of addresses

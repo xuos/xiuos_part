@@ -640,7 +640,8 @@ lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
   LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_accept(%d)...\n", s));
   sock = get_socket(s);
   if (!sock) {
-    return -1;
+      KPrintf("sock = get_socket(s);\n");
+      return -1;
   }
 
   /* wait for a new connection */
@@ -655,6 +656,7 @@ lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
       sock_set_errno(sock, err_to_errno(err));
     }
     done_socket(sock);
+    KPrintf("err = netconn_accept(sock->conn, &newconn);\n");
     return -1;
   }
   LWIP_ASSERT("newconn != NULL", newconn != NULL);
@@ -664,6 +666,7 @@ lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
     netconn_delete(newconn);
     sock_set_errno(sock, ENFILE);
     done_socket(sock);
+    KPrintf("newsock = alloc_socket(newconn, 1);\n");
     return -1;
   }
   LWIP_ASSERT("invalid socket index", (newsock >= LWIP_SOCKET_OFFSET) && (newsock < NUM_SOCKETS + LWIP_SOCKET_OFFSET));
@@ -701,6 +704,7 @@ lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
       free_socket(nsock, 1);
       sock_set_errno(sock, err_to_errno(err));
       done_socket(sock);
+      KPrintf("err = netconn_peer(newconn, &naddr, &port);\n");
       return -1;
     }
 
@@ -1242,6 +1246,8 @@ lwip_recvfrom(int s, void *mem, size_t len, int flags,
     if (err != ERR_OK) {
       LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_recvfrom[UDP/RAW](%d): buf == NULL, error is \"%s\"!\n",
                                   s, lwip_strerr(err)));
+      KPrintf("lwip_recvfrom[UDP/RAW](%d): buf == NULL, error is \"%s\"!\n",
+          s, lwip_strerr(err));
       sock_set_errno(sock, err_to_errno(err));
       done_socket(sock);
       return -1;
