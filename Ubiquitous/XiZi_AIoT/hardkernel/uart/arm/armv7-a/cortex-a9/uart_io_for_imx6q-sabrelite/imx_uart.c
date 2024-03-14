@@ -59,17 +59,17 @@ Modification:
 
 static void UartInitGpio(void)
 {
-	/* UART1 TXD */
-	mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT6__UART1_TXD);
+    /* UART1 TXD */
+    mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT6__UART1_TXD);
 
-	/* UART1 RXD */
-	mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT7__UART1_RXD);
+    /* UART1 RXD */
+    mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT7__UART1_RXD);
 
-	/* UART2 TXD */
-	mxc_iomux_v3_setup_pad(MX6Q_PAD_EIM_D26__UART2_TXD);
+    /* UART2 TXD */
+    mxc_iomux_v3_setup_pad(MX6Q_PAD_EIM_D26__UART2_TXD);
 
-	/* UART2 RXD */
-	mxc_iomux_v3_setup_pad(MX6Q_PAD_EIM_D27__UART2_RXD);
+    /* UART2 RXD */
+    mxc_iomux_v3_setup_pad(MX6Q_PAD_EIM_D27__UART2_RXD);
 }
 
 static uint32_t GetUartClk(void)
@@ -131,13 +131,13 @@ __attribute__((__always_inline__)) static inline uint8_t UartGetCharInstance(uin
     if (!(HW_UART_USR2(instance).B.RDR))
         return 0xFF;
 
-    read_data = HW_UART_URXD_RD(instance); 
+    read_data = HW_UART_URXD_RD(instance);
 
     /* If error are detected */
     if (read_data & 0x7C00)
         return 0xFF;
 
-    return (uint8_t) read_data;
+    return (uint8_t)read_data;
 }
 
 __attribute__((__always_inline__)) static inline uint32_t UartGetIrqnumInstance(uint32_t instance)
@@ -177,7 +177,7 @@ static uint32_t UartGetIrqnum()
 }
 
 /// @todo make this static
-static struct XiziSerialDriver hardkernel_serial_driver = (struct XiziSerialDriver) {
+static struct XiziSerialDriver hardkernel_serial_driver = {
     .sys_serial_init = UartInit,
     .get_serial_irqnum = UartGetIrqnum,
     .putc = UartPutChar,

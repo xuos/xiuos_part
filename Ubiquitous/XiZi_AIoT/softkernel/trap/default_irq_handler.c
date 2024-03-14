@@ -60,7 +60,7 @@ void intr_irq_dispatch(struct trapframe* tf)
 
     p_intr_driver->cpu_irq_disable();
     // enter irq
-    uint32_t int_info = 0;
+    uintptr_t int_info = 0;
     if ((int_info = p_intr_driver->hw_before_irq()) == 0) {
         return;
     }

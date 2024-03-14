@@ -256,7 +256,7 @@ static void _set_cur_task_priority(int priority)
     return;
 }
 
-struct XiziTaskManager xizi_task_manager = (struct XiziTaskManager) {
+struct XiziTaskManager xizi_task_manager = {
     .init = _task_manager_init,
     .new_task_cb = _new_task_cb,
     .free_pcb = _dealloc_task_cb,

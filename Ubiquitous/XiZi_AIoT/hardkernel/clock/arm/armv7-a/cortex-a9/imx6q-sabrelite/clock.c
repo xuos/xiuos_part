@@ -63,11 +63,17 @@ static void _clear_clock_intr()
     gpt_get_compare_event(kGPTOutputCompare1);
 }
 
-static struct XiziClockDriver hardkernel_clock_driver = (struct XiziClockDriver) {
+static bool _is_timer_expired()
+{
+    return true;
+}
+
+static struct XiziClockDriver hardkernel_clock_driver = {
     .sys_clock_init = _sys_clock_init,
     .get_clock_int = _get_clock_int,
     .get_tick = _get_tick,
     .get_second = _get_second,
+    .is_timer_expired = _is_timer_expired,
     .clear_clock_intr = _clear_clock_intr,
 };
 

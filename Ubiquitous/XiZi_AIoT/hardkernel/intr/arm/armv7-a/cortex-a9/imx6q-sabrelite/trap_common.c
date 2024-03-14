@@ -213,7 +213,7 @@ static int _is_interruptable(void)
     return !(val & DIS_INT);
 }
 
-static struct XiziTrapDriver xizi_trap_driver = (struct XiziTrapDriver) {
+static struct XiziTrapDriver xizi_trap_driver = {
     .sys_irq_init = _sys_irq_init,
 
     .cpu_irq_enable = _cpu_irq_enable,
@@ -235,6 +235,6 @@ static struct XiziTrapDriver xizi_trap_driver = (struct XiziTrapDriver) {
 struct XiziTrapDriver* hardkernel_intr_init(struct TraceTag* hardkernel_tag)
 {
     xizi_trap_driver.sys_irq_init();
-    xizi_trap_driver.cpu_irq_enable();
+    xizi_trap_driver.cpu_irq_disable();
     return &xizi_trap_driver;
 }

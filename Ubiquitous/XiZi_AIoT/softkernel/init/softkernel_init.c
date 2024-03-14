@@ -42,17 +42,18 @@ bool softkernel_init(struct TraceTag* _hardkernel_tag, struct TraceTag* _softker
     /* init soft kernel */
     module_phymem_init(); // init buddy management system
 
-    struct PagerRightGroup pager_rights = { 0 };
+    struct PagerRightGroup pager_rights;
     AchieveResourceTag(&pager_rights.mmu_driver_tag, _hardkernel_tag, "mmu-ac-resource");
     module_pager_init(&pager_rights);
 
-    struct TraceTag mmu_driver_tag;
+    struct TraceTag mmu_driver_tag, intr_driver_tag;
     AchieveResourceTag(&mmu_driver_tag, _hardkernel_tag, "mmu-ac-resource");
-    load_kern_pgdir(&mmu_driver_tag); // enter kernel virtmem space
+    AchieveResourceTag(&intr_driver_tag, _hardkernel_tag, "intr-ac-resource");
+    load_kern_pgdir(&mmu_driver_tag, &intr_driver_tag); // enter kernel virtmem space
 
     module_task_manager_init(); // init task
 
-    struct SharePageRightGroup sp_rights = { 0 };
+    struct SharePageRightGroup sp_rights;
     AchieveResourceTag(&sp_rights.dcache_driver_tag, _hardkernel_tag, "dcache-ac-resource");
     AchieveResourceTag(&sp_rights.mmu_driver_tag, _hardkernel_tag, "mmu-ac-resource");
     module_share_page_init(&sp_rights);

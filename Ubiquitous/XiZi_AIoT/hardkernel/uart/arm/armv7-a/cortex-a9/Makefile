@@ -1,3 +1,3 @@
-SRC_DIR := uart_io_for_imx6q_sabrelite
+SRC_DIR := uart_io_for_$(BOARD)
 
 include $(KERNEL_ROOT)/compiler.mk

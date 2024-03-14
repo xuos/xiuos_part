@@ -1,4 +1,4 @@
-SRC_DIR := init memory trap task syscall ipc
+SRC_DIR := init memory trap task syscall
 
 SRC_FILES := main.c load_apps.S
 

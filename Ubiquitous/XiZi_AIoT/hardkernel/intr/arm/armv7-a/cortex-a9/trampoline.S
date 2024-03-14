@@ -246,9 +246,9 @@ init_stack:
 	bic     r2, 	r2, #ARM_CPSR_MODE_MASK
 	orr     r2, 	r2, r0
 	msr     cpsr_cxsf, r2
-
-	# switch back to the SVC mode
 	mov     sp, 	r1
+
+	@ # switch back to the SVC mode
 	bic     r2, 	r2, #ARM_CPSR_MODE_MASK
 	orr     r2, 	r2, #ARM_MODE_SVC
 	msr     cpsr_cxsf, r2
