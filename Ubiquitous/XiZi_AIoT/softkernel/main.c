@@ -94,21 +94,18 @@ void cpu_start_secondary(uint8_t coreNumber, cpu_entry_point_t entryPoint, void*
     switch (coreNumber) {
     case 1:
         HW_SRC_GPR3_WR((uint32_t)&_boot_start);
-        // HW_SRC_GPR4_WR((uint32_t)common_cpu_entry);
 
         HW_SRC_SCR.B.CORE1_ENABLE = 1;
         break;
 
     case 2:
         HW_SRC_GPR5_WR((uint32_t)&_boot_start);
-        // HW_SRC_GPR6_WR((uint32_t)common_cpu_entry);
 
         HW_SRC_SCR.B.CORE2_ENABLE = 1;
         break;
 
     case 3:
         HW_SRC_GPR7_WR((uint32_t)&_boot_start);
-        // HW_SRC_GPR8_WR((uint32_t)common_cpu_entry);
 
         HW_SRC_SCR.B.CORE3_ENABLE = 1;
         break;
@@ -148,9 +145,11 @@ int main(void)
         DEBUG_PRINTF("CPU %d started done.\n", cur_cpuid());
     }
 
-    // struct TraceTag main_intr_tag;
-    // AchieveResourceTag(&main_intr_tag, &hardkernel_tag, "intr-ac-resource");
-    // struct XiziTrapDriver* p_intr_driver = (struct XiziTrapDriver*)AchieveResource(&main_intr_tag);
+    struct TraceTag main_intr_tag;
+    AchieveResourceTag(&main_intr_tag, &hardkernel_tag, "intr-ac-resource");
+    struct XiziTrapDriver* p_intr_driver = (struct XiziTrapDriver*)AchieveResource(&main_intr_tag);
+    p_intr_driver->cpu_irq_disable();
+
     if (cpu_id == 0) {
         /* init softkernel */
         if (!softkernel_init(&hardkernel_tag, &softkernel_tag)) {
@@ -174,6 +173,7 @@ int main(void)
 
         init = true;
     }
+    // p_intr_driver->cpu_irq_disable();
 
     while (!init)
         ;

@@ -48,14 +48,12 @@ bool swi_distributer_init(struct SwiDispatcherRightGroup* _right_group)
 extern void context_switch(struct context**, struct context*);
 void software_irq_dispatch(struct trapframe* tf)
 {
-    bool is_my_lock = false;
-    if (whole_kernel_lock.owner_cpu != cur_cpuid()) {
-        spinlock_lock(&whole_kernel_lock);
-        is_my_lock = true;
-    }
+
     assert(p_intr_driver != NULL);
 
     p_intr_driver->cpu_irq_disable();
+    spinlock_lock(&whole_kernel_lock);
+    // DEBUG("CPU %d in kernel %s %d\n", cur_cpuid(), __func__, __LINE__);
     // get current task
     struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
     /// @todo: Handle dead task
@@ -82,8 +80,7 @@ void software_irq_dispatch(struct trapframe* tf)
         ERROR("Exit reaches");
     }
 
-    if (is_my_lock) {
-        spinlock_unlock(&whole_kernel_lock);
-    }
+    // DEBUG("CPU %d out kernel %s %d\n", cur_cpuid(), __func__, __LINE__);
+    spinlock_unlock(&whole_kernel_lock);
     p_intr_driver->cpu_irq_enable();
 }

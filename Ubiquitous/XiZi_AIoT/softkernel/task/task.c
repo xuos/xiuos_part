@@ -112,6 +112,13 @@ static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
 }
 
 /* alloc a new task with init */
+extern void trap_return(void);
+void task_prepare_enter()
+{
+    spinlock_unlock(&whole_kernel_lock);
+    trap_return();
+}
+
 static struct TaskMicroDescriptor* _new_task_cb()
 {
     // alloc task space
@@ -170,10 +177,11 @@ extern void context_switch(struct context**, struct context*);
 static void _scheduler(struct SchedulerRightGroup right_group)
 {
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
-
     struct TaskMicroDescriptor* next_task;
 
+    spinlock_lock(&whole_kernel_lock);
     while (1) {
+        spinlock_unlock(&whole_kernel_lock);
         spinlock_lock(&xizi_task_manager.lock);
         next_task = NULL;
         /* find next runnable task */
@@ -192,12 +200,15 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         if (UNLIKELY(next_task == NULL)) {
             continue;
         }
+
+        spinlock_lock(&whole_kernel_lock);
         assert(next_task->state == RUNNING);
         // p_mmu_driver->LoadPgdirCrit((uintptr_t)V2P(next_task->pgdir.pd_addr), &right_group.intr_driver_tag);
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->pgdir.pd_addr));
 
         struct CPU* cpu = cur_cpu();
         cpu->task = next_task;
+        // DEBUG_PRINTF("CPU %d switch to task %s\n", cur_cpuid(), next_task->name);
         context_switch(&cpu->scheduler, next_task->main_thread.context);
     }
 }

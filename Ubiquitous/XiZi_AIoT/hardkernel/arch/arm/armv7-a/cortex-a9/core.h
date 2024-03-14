@@ -74,7 +74,7 @@ Modification:
 
 #include "cortex_a9.h"
 
-#define NR_CPU 2
+#define NR_CPU 4
 
 __attribute__((always_inline)) static inline uint32_t user_mode()
 {
@@ -107,11 +107,11 @@ struct context {
 
 /// @brief init task context, set return address to trap return
 /// @param
-extern void trap_return(void);
+extern void task_prepare_enter();
 __attribute__((__always_inline__)) static inline void arch_init_context(struct context* ctx)
 {
     memset(ctx, 0, sizeof(*ctx));
-    ctx->lr = (uint32_t)(trap_return);
+    ctx->lr = (uint32_t)(task_prepare_enter + 4);
 }
 
 struct trapframe {

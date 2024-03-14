@@ -59,11 +59,14 @@ void intr_irq_dispatch(struct trapframe* tf)
     assert(p_intr_driver != NULL);
 
     p_intr_driver->cpu_irq_disable();
+
     // enter irq
     uintptr_t int_info = 0;
     if ((int_info = p_intr_driver->hw_before_irq()) == 0) {
         return;
     }
+    spinlock_lock(&whole_kernel_lock);
+    // DEBUG("CPU %d in kernel %s %d\n", cur_cpuid(), __func__, __LINE__);
 
     struct TaskMicroDescriptor* current_task = cur_cpu()->task;
     if (LIKELY(current_task != NULL)) {
@@ -77,9 +80,7 @@ void intr_irq_dispatch(struct trapframe* tf)
     // distribute irq
     irq_handler_t isr = p_intr_driver->sw_irqtbl[irq].handler;
     if (isr) {
-        // spinlock_lock(&whole_kernel_lock);
         isr(irq, tf, NULL);
-        // spinlock_unlock(&whole_kernel_lock);
     } else {
         default_interrupt_routine();
     }
@@ -93,5 +94,7 @@ void intr_irq_dispatch(struct trapframe* tf)
     }
     assert(current_task == cur_cpu()->task);
 
+    // DEBUG("CPU %d out kernel %s %d\n", cur_cpuid(), __func__, __LINE__);
+    spinlock_unlock(&whole_kernel_lock);
     p_intr_driver->cpu_irq_enable();
 }

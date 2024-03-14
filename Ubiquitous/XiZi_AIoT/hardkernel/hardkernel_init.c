@@ -131,7 +131,6 @@ static bool xizi_gpt_init()
     struct XiziTrapDriver* p_intr_driver = (struct XiziTrapDriver*)AchieveResource(&intr_driver_tag);
     p_intr_driver->bind_irq_handler(p_clock_driver->get_clock_int(), xizi_clock_handler);
     p_intr_driver->single_irq_enable(p_clock_driver->get_clock_int(), 0, 0);
-
     return true;
 }
 

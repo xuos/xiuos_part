@@ -50,7 +50,8 @@ int main(void)
 
     shellInit(&shell, shellBuffer, 512);
 
-    connect_session(&session_fs, "MemFS", 8092);
+    while (connect_session(&session_fs, "MemFS", 8092) < 0)
+        ;
     if (!session_fs.buf) {
         printf("session connect faield\n");
         return -1;
