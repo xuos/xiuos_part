@@ -1,7 +1,5 @@
 /*
  * Copyright (c) 2022 AIIT XUOS Lab
- /*
- * Copyright (c) 2022 AIIT XUOS Lab
  * XiUOS is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
@@ -13,18 +11,18 @@
  */
 
 /**
- * @file delta_as332t.c
- * @brief PLC DELTA AS332T app
+ * @file panasonic_fpxh_ethernet.c
+ * @brief PLC panasonic fpxh app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2022.10.10
+ * @date 2023.11.22
  */
 
 #include <control.h>
 
 extern int Adapter4GActive(void);
 
-void ControlDeltaas332tTest(void)
+void ControlPanasonicFpxhTCPTest(void)
 {
     int i, j = 0;
     int read_data_length = 0;
@@ -61,9 +59,6 @@ void ControlDeltaas332tTest(void)
         //ControlProtocolClose(modbus_tcp_protocol);
     }
 }
-PRIV_SHELL_CMD_FUNCTION(ControlDeltaas332tTest, Delta as332t Demo, PRIV_SHELL_CMD_MAIN_ATTR);
-
-
-
+PRIV_SHELL_CMD_FUNCTION(ControlPanasonicFpxhTCPTest, panasonic Fpxh TCP Demo, PRIV_SHELL_CMD_MAIN_ATTR);
 
 

@@ -1,7 +1,5 @@
 /*
  * Copyright (c) 2022 AIIT XUOS Lab
- /*
- * Copyright (c) 2022 AIIT XUOS Lab
  * XiUOS is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
@@ -13,18 +11,18 @@
  */
 
 /**
- * @file delta_as332t.c
- * @brief PLC DELTA AS332T app
+ * @file fatek_fbs_24mc_uart.c
+ * @brief PLC fatek fbs app
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2022.10.10
+ * @date 2023.11.28
  */
 
 #include <control.h>
 
 extern int Adapter4GActive(void);
 
-void ControlDeltaas332tTest(void)
+void ControlFatekFBsUartTest(void)
 {
     int i, j = 0;
     int read_data_length = 0;
@@ -34,20 +32,20 @@ void ControlDeltaas332tTest(void)
     Adapter4GActive();
 #endif
 
-    ControlProtocolType modbus_tcp_protocol = ControlProtocolFind();
-    if (NULL == modbus_tcp_protocol) {
-        printf("%s get modbus tcp protocol %p failed\n", __func__, modbus_tcp_protocol);
+    ControlProtocolType modbus_rtu_protocol = ControlProtocolFind();
+    if (NULL == modbus_rtu_protocol) {
+        printf("%s get modbus rtu protocol %p failed\n", __func__, modbus_rtu_protocol);
         return;
     }
 
-    printf("%s get modbus tcp protocol %p successfull\n", __func__, modbus_tcp_protocol);
+    printf("%s get modbus rtu protocol %p successfull\n", __func__, modbus_rtu_protocol);
 
-    if (CONTROL_REGISTERED == modbus_tcp_protocol->protocol_status) {
-        ControlProtocolOpen(modbus_tcp_protocol);
+    if (CONTROL_REGISTERED == modbus_rtu_protocol->protocol_status) {
+        ControlProtocolOpen(modbus_rtu_protocol);
 
         for (;;) {
-            read_data_length = ControlProtocolRead(modbus_tcp_protocol, read_data, sizeof(read_data));
-            printf("%s read [%d] modbus tcp data %d using receipe file\n", __func__, i, read_data_length);
+            read_data_length = ControlProtocolRead(modbus_rtu_protocol, read_data, sizeof(read_data));
+            printf("%s read [%d] modbus rtu data %d using receipe file\n", __func__, i, read_data_length);
             if (read_data_length) {
                 for (j = 0; j < read_data_length; j ++) {
                     printf("j %d data 0x%x\n", j, read_data[j]);
@@ -58,12 +56,9 @@ void ControlDeltaas332tTest(void)
             PrivTaskDelay(10000);
         }
 
-        //ControlProtocolClose(modbus_tcp_protocol);
+        //ControlProtocolClose(modbus_rtu_protocol);
     }
 }
-PRIV_SHELL_CMD_FUNCTION(ControlDeltaas332tTest, Delta as332t Demo, PRIV_SHELL_CMD_MAIN_ATTR);
-
-
-
+PRIV_SHELL_CMD_FUNCTION(ControlFatekFBsUartTest, fatek fbs uart Demo, PRIV_SHELL_CMD_MAIN_ATTR);
 
 
