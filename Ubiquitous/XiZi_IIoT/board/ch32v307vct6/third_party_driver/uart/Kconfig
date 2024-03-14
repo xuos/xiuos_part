@@ -1,6 +1,6 @@
 menuconfig BSP_USING_UART1
     bool "Enable UART1"
-    default y
+    default n
     if BSP_USING_UART1
         config SERIAL_BUS_NAME_1
             string "serial bus  name"
@@ -15,7 +15,7 @@ menuconfig BSP_USING_UART1
 
 menuconfig BSP_USING_UART2
     bool "Enable UART2"
-    default y
+    default n
     if BSP_USING_UART2
         config SERIAL_BUS_NAME_2
             string "serial bus  name"
@@ -41,4 +41,19 @@ menuconfig BSP_USING_UART4
         config SERIAL_4_DEVICE_NAME_0
                 string "serial bus  device name"
                 default "uart4_dev4"   
+    endif
+
+menuconfig BSP_USING_UART5
+    bool "Enable UART5"
+    default y
+    if BSP_USING_UART5
+        config SERIAL_BUS_NAME_5
+            string "serial bus name"
+            default "uart5"
+        config SERIAL_DRV_NAME_5
+            string "serial bus  driver name"
+            default "uart5_drv"
+        config SERIAL_5_DEVICE_NAME_0
+                string "serial bus  device name"
+                default "uart5_dev5"   
     endif

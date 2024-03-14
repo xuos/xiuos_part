@@ -13,4 +13,12 @@ ifeq ($(CONFIG_BSP_USING_ETH),y)
   SRC_DIR += ethernet
 endif
 
+ifeq ($(CONFIG_BSP_USING_CAN),y)
+  SRC_DIR += can
+endif
+
+ifeq ($(CONFIG_BSP_USING_USB),y)
+  SRC_DIR += usb
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
