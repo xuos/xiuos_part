@@ -62,12 +62,10 @@ static void _task_manager_init()
 /// @brief alloc a new task without init
 static struct TaskMicroDescriptor* _alloc_task_cb()
 {
-    spinlock_lock(&xizi_task_manager.lock);
     // alloc task and add it to used task list
     struct TaskMicroDescriptor* task = (struct TaskMicroDescriptor*)slab_alloc(&xizi_task_manager.task_allocator);
     if (UNLIKELY(task == NULL)) {
         ERROR("Not enough memory\n");
-        spinlock_unlock(&xizi_task_manager.lock);
         return NULL;
     }
     // set pid once task is allocated
@@ -76,7 +74,6 @@ static struct TaskMicroDescriptor* _alloc_task_cb()
     // update pcb used
     xizi_task_manager.nr_pcb_used += 1;
 
-    spinlock_unlock(&xizi_task_manager.lock);
     return task;
 }
 
@@ -213,7 +210,6 @@ static void _cur_task_yield_noschedule(void)
 {
     yield_cnt++;
 
-    spinlock_lock(&xizi_task_manager.lock);
     struct TaskMicroDescriptor* current_task = cur_cpu()->task;
     assert(current_task != NULL);
 
@@ -230,16 +226,13 @@ static void _cur_task_yield_noschedule(void)
     doubleListAddOnBack(&current_task->node, &xizi_task_manager.task_list_head[current_task->priority]);
     ready_task_priority |= (1 << current_task->priority);
     // set current task state
-    spinlock_lock(&current_task->lock);
     current_task->state = READY;
     current_task->remain_tick = TASK_CLOCK_TICK;
-    spinlock_unlock(&current_task->lock);
     cur_cpu()->task = NULL;
     if (yield_cnt == 50) {
         recover_priority();
         yield_cnt = 0;
     }
-    spinlock_unlock(&xizi_task_manager.lock);
 }
 
 static void _set_cur_task_priority(int priority)

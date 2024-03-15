@@ -85,9 +85,7 @@ int sys_exit()
 
     // delete task for pcb_list
     xizi_task_manager.cur_task_yield_noschedule();
-    spinlock_lock(&cur_task->lock);
     cur_task->state = DEAD;
-    spinlock_unlock(&cur_task->lock);
 
     return 0;
 }

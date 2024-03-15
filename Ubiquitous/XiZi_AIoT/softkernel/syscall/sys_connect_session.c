@@ -70,7 +70,7 @@ int sys_connect_session(char* path, int capacity, struct Session* user_session)
 
     struct TraceTag server_tag;
     if (!AchieveResourceTag(&server_tag, &server_identifier_owner, path)) {
-        ERROR("Not server: %s\n", path);
+        DEBUG("Not server: %s\n", path);
         return -1;
     }
 

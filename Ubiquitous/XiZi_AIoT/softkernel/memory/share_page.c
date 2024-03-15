@@ -91,23 +91,18 @@ static uintptr_t map_task_share_page(struct TaskMicroDescriptor* task, const uin
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
 
-    spinlock_lock(&task->lock);
     // map double vaddr page to support uniform ring buffer r/w
     uintptr_t vaddr = alloc_share_page_addr(task, nr_pages * 2);
     if (UNLIKELY(vaddr == 0)) {
-        spinlock_unlock(&task->lock);
         return (uintptr_t)NULL;
     }
     if (!xizi_pager.map_pages(task->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false)) {
-        spinlock_unlock(&task->lock);
         return (uintptr_t)NULL;
     }
     if (!xizi_pager.map_pages(task->pgdir.pd_addr, vaddr + (nr_pages * PAGE_SIZE), paddr, nr_pages * PAGE_SIZE, false)) {
         xizi_pager.unmap_pages(task->pgdir.pd_addr, vaddr, nr_pages * PAGE_SIZE);
-        spinlock_unlock(&task->lock);
         return (uintptr_t)NULL;
     }
-    spinlock_unlock(&task->lock);
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(vaddr, 2 * nr_pages * PAGE_SIZE);
         /// @todo clean range rather than all
@@ -123,14 +118,12 @@ uintptr_t task_map_pages(struct TaskMicroDescriptor* task, const uintptr_t vaddr
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
 
-    spinlock_lock(&task->lock);
     bool ret = false;
     if (is_dev) {
         ret = xizi_pager.map_pages(task->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, true);
     } else {
         ret = xizi_pager.map_pages(task->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false);
     }
-    spinlock_unlock(&task->lock);
     if (!ret) {
         return (uintptr_t)NULL;
     }
@@ -150,10 +143,8 @@ void unmap_task_share_pages(struct TaskMicroDescriptor* task, const uintptr_t ta
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
 
-    spinlock_lock(&task->lock);
     xizi_pager.unmap_pages(task->pgdir.pd_addr, task_vaddr, nr_pages * PAGE_SIZE);
     xizi_pager.unmap_pages(task->pgdir.pd_addr, task_vaddr + (nr_pages * PAGE_SIZE), nr_pages * PAGE_SIZE);
-    spinlock_unlock(&task->lock);
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(task_vaddr, 2 * nr_pages * PAGE_SIZE);
         /// @todo clean range rather than all
@@ -200,20 +191,16 @@ struct session_backend* create_share_pages(struct TaskMicroDescriptor* client, s
     session_backend->client_side.buf_addr = client_vaddr;
     session_backend->client_side.capacity = true_capacity;
     session_backend->client_side.closed = false;
-    spinlock_lock(&client->lock);
     doubleListNodeInit(&session_backend->client_side.node);
     doubleListAddOnBack(&session_backend->client_side.node, &client->cli_sess_listhead);
-    spinlock_unlock(&client->lock);
     // init server side session struct
     session_backend->server_side.buf_addr = server_vaddr;
     session_backend->server_side.capacity = true_capacity;
     session_backend->server_side.head = 0;
     session_backend->server_side.tail = 0;
     session_backend->server_side.closed = false;
-    spinlock_lock(&server->lock);
     doubleListNodeInit(&session_backend->server_side.node);
     doubleListAddOnBack(&session_backend->server_side.node, &server->svr_sess_listhead);
-    spinlock_unlock(&server->lock);
 
     return session_backend;
 }
@@ -232,15 +219,11 @@ int delete_share_pages(struct session_backend* session_backend)
 
     /* unmap share pages */
     if (session_backend->client) {
-        spinlock_lock(&session_backend->client->lock);
         doubleListDel(&session_backend->client_side.node);
-        spinlock_unlock(&session_backend->client->lock);
     }
 
     if (session_backend->server) {
-        spinlock_lock(&session_backend->server->lock);
         doubleListDel(&session_backend->server_side.node);
-        spinlock_unlock(&session_backend->server->lock);
     }
 
     /* free seesion backend */

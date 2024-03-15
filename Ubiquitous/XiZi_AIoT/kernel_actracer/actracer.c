@@ -60,8 +60,6 @@ static inline int namecmp(const char* s, const char* t)
 static struct TraceMeta* alloc_trace_meta()
 {
     int index = -1;
-
-    spinlock_lock(&sys_tracer.trace_meta_bitmap_lock);
     for (uint32_t idx = 0; idx < BITS_TRACEMETA_BITMAP; idx++) {
         if (sys_tracer.trace_meta_bit_map[idx] == 0xFFFFFFFF) {
             continue;
@@ -74,7 +72,6 @@ static struct TraceMeta* alloc_trace_meta()
             break;
         }
     }
-    spinlock_unlock(&sys_tracer.trace_meta_bitmap_lock);
 
     if (index == -1) {
         panic("Tracer no enough TracerMeta.");
@@ -87,15 +84,12 @@ static struct TraceMeta* alloc_trace_meta()
 static bool dealloc_trace_meta(struct TraceMeta* meta)
 {
     int index = meta->index;
-
-    spinlock_lock(&sys_tracer.trace_meta_bitmap_lock);
     // clear bitmap
     uint32_t outer_index = index / 32;
     uint32_t inner_index = index % 32;
     sys_tracer.trace_meta_bit_map[outer_index] &= (uint32_t)(~(1 << inner_index));
     // clear meta
     sys_tracer.trace_meta_poll[index].type = TRACER_INVALID;
-    spinlock_unlock(&sys_tracer.trace_meta_bitmap_lock);
 
     if (index == -1) {
         panic("Tracer no enough TracerMeta.");
@@ -337,7 +331,7 @@ static struct TraceMeta* tracer_find_meta(struct TraceMeta* const p_owner, char*
             return p_owner_inside;
         }
         if ((vnp = tracer_find_meta_onestep(p_owner_inside, name, NULL)) == 0) {
-            ERROR("Not such object: %s\n", path);
+            DEBUG("Not such object: %s\n", path);
             return NULL;
         }
         p_owner_inside = vnp;

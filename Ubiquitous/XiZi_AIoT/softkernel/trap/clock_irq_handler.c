@@ -49,9 +49,6 @@ bool clock_intr_handler_init(struct TraceTag* p_clock_driver_tag)
 uint64_t global_tick = 0;
 int xizi_clock_handler(int irq, void* tf, void* arg)
 {
-    // spinlock_lock(&whole_kernel_lock);
-    // DEBUG_PRINTF("CPU %d\n", cpu_get_current());
-    // spinlock_unlock(&whole_kernel_lock);
     /* handle clock interrupt using driver */
     if (p_clock_driver->is_timer_expired()) {
         p_clock_driver->clear_clock_intr();

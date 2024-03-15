@@ -34,6 +34,7 @@ Modification:
 #include "trap_common.h"
 
 #include "log.h"
+#include "multicores.h"
 
 extern void init_stack(uint32_t, uint32_t);
 extern void user_trap_swi_enter(void);
@@ -47,6 +48,7 @@ static struct XiziTrapDriver xizi_trap_driver;
 void panic(char* s)
 {
     xizi_trap_driver.cpu_irq_disable();
+    spinlock_unlock(&whole_kernel_lock);
     KPrintf("panic: %s\n", s);
     for (;;)
         ;
