@@ -233,6 +233,7 @@ struct ICacheDone* hardkernel_icache_init(struct TraceTag* hardkernel_tag)
 {
     /* init icache */
     icache_done.enable();
+    // icache_done.disable();
     return &icache_done;
 }
 
@@ -240,5 +241,6 @@ struct DCacheDone* hardkernel_dcache_init(struct TraceTag* hardkernel_tag)
 {
     /* init dcache */
     dcache_done.enable();
+    // dcache_done.disable();
     return &dcache_done;
 }

@@ -37,7 +37,10 @@ Modification:
 #include "assert.h"
 #include "task.h"
 
-#include "trap_common.h"
+#include "cache_common_ope.h"
+
+extern uint32_t _binary_init_start[], _binary_default_fs_start[];
+static struct TraceTag hardkernel_tag, softkernel_tag;
 
 void configure_cpu(uint32_t cpu)
 {
@@ -55,6 +58,18 @@ void configure_cpu(uint32_t cpu)
     // arm_icache_enable();
     // arm_icache_invalidate();
 
+    struct TraceTag main_icache_tag, main_dcache_tag;
+    AchieveResourceTag(&main_icache_tag, &hardkernel_tag, "icache-ac-resource");
+    AchieveResourceTag(&main_dcache_tag, &hardkernel_tag, "dcache-ac-resource");
+    struct ICacheDone* p_icache_driver = AchieveResource(&main_icache_tag);
+    struct DCacheDone* p_dcache_driver = AchieveResource(&main_dcache_tag);
+    // p_dcache_driver->enable();
+    // p_dcache_driver->invalidateall();
+    // p_icache_driver->enable();
+    // p_icache_driver->invalidateall();
+    p_dcache_driver->disable();
+    p_icache_driver->disable();
+
     // Invalidate SCU copy of TAG RAMs
     scu_secure_invalidate(cpu, all_ways);
 
@@ -63,59 +78,31 @@ void configure_cpu(uint32_t cpu)
     scu_enable_maintenance_broadcast();
 }
 
-typedef void (*cpu_entry_point_t)(void* arg);
-typedef struct _core_startup_info {
-    cpu_entry_point_t entry; //!< Function to call after starting a core.
-    void* arg; //!< Argument to pass core entry point.
-} core_startup_info_t;
-static core_startup_info_t s_core_info[NR_CPU] = { { 0 } };
-
-static void common_cpu_entry(void)
-{
-    uint32_t myCoreNumber = cpu_get_current();
-    core_startup_info_t* info = &s_core_info[myCoreNumber];
-
-    // Call the requested entry point for this CPU number.
-    if (info->entry) {
-        info->entry(info->arg);
-    }
-}
-
 extern void _boot_start();
-void cpu_start_secondary(uint8_t coreNumber, cpu_entry_point_t entryPoint, void* arg)
+void cpu_start_secondary(uint8_t coreNumber)
 {
-    // Save entry point and arg.
-    s_core_info[coreNumber].entry = entryPoint;
-    s_core_info[coreNumber].arg = arg;
-
     // Prepare pointers for ROM code. The entry point is always _start, which does some
     // basic preparatory work and then calls the common_cpu_entry function, which itself
     // calls the entry point saved in s_core_info.
     switch (coreNumber) {
     case 1:
         HW_SRC_GPR3_WR((uint32_t)&_boot_start);
-
         HW_SRC_SCR.B.CORE1_ENABLE = 1;
         break;
 
     case 2:
         HW_SRC_GPR5_WR((uint32_t)&_boot_start);
-
         HW_SRC_SCR.B.CORE2_ENABLE = 1;
         break;
 
     case 3:
         HW_SRC_GPR7_WR((uint32_t)&_boot_start);
-
         HW_SRC_SCR.B.CORE3_ENABLE = 1;
         break;
     }
 }
 
-extern uint32_t _binary_init_start[], _binary_default_fs_start[];
-static struct TraceTag hardkernel_tag, softkernel_tag;
-
-static bool init = false;
+static int core_init_done = 0;
 int main(void)
 {
     /* init tracer */
@@ -135,21 +122,19 @@ int main(void)
             return -1;
         }
 
+        // scu_enable();
+        // configure_cpu(cpu_id);
+
         spinlock_init(&whole_kernel_lock, "wklock");
     } else {
         configure_cpu(cpu_id);
-        DEBUG_PRINTF("CPU %d started init: %d(at %x).\n", cur_cpuid(), init, &init);
         spinlock_lock(&whole_kernel_lock);
         secondary_cpu_hardkernel_init(cpu_id, &hardkernel_tag);
+        DEBUG_PRINTF("CPU %d init done.\n", cur_cpuid());
         spinlock_unlock(&whole_kernel_lock);
-        DEBUG_PRINTF("CPU %d started done.\n", cur_cpuid());
     }
 
-    struct TraceTag main_intr_tag;
-    AchieveResourceTag(&main_intr_tag, &hardkernel_tag, "intr-ac-resource");
-    struct XiziTrapDriver* p_intr_driver = (struct XiziTrapDriver*)AchieveResource(&main_intr_tag);
-    p_intr_driver->cpu_irq_disable();
-
+    spinlock_lock(&whole_kernel_lock);
     if (cpu_id == 0) {
         /* init softkernel */
         if (!softkernel_init(&hardkernel_tag, &softkernel_tag)) {
@@ -158,11 +143,10 @@ int main(void)
         show_xizi_bar();
 
         int cpu_count = NR_CPU;
-        scu_enable();
-        configure_cpu(cpu_id);
+        ;
         for (int i = 1; i < cpu_count; i++) {
             // start secondary cpus
-            cpu_start_secondary(i, NULL, 0);
+            cpu_start_secondary(i);
         }
 
         /* start first task */
@@ -170,19 +154,19 @@ int main(void)
         spawn_embedded_task((char*)_binary_init_start, "init", init_task_param);
         char* fs_server_task_param[2] = { "/app/fs_server", 0 };
         spawn_embedded_task((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
-
-        init = true;
     }
-    // p_intr_driver->cpu_irq_disable();
-
-    while (!init)
-        ;
 
     /* start scheduler */
     struct SchedulerRightGroup scheduler_rights;
     assert(AchieveResourceTag(&scheduler_rights.mmu_driver_tag, &hardkernel_tag, "mmu-ac-resource"));
     assert(AchieveResourceTag(&scheduler_rights.intr_driver_tag, &hardkernel_tag, "intr-ac-resource"));
-    // while (true) { }
+
+    core_init_done |= (1 << cpu_id);
+    DEBUG("core_init_done: %x\n", core_init_done);
+    spinlock_unlock(&whole_kernel_lock);
+
+    while (core_init_done != (1 << NR_CPU) - 1)
+        ;
     xizi_task_manager.task_scheduler(scheduler_rights);
 
     // never reached
