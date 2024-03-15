@@ -44,6 +44,7 @@ Modification:
 
 #include "log.h"
 #include "multicores.h"
+#include "spinlock.h"
 #include "syscall.h"
 
 __attribute__((always_inline)) static inline void _abort_reason(uint32_t fault_status)
@@ -94,6 +95,7 @@ void handle_undefined_instruction(struct trapframe* tf)
 extern void context_switch(struct context**, struct context*);
 void dabort_handler(struct trapframe* r)
 {
+    spinlock_lock(&whole_kernel_lock);
     uint32_t dfs, dfa;
 
     __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 0" : "=r"(dfs)::);
@@ -105,8 +107,6 @@ void dabort_handler(struct trapframe* r)
         LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
         _abort_reason(dfs);
         dump_tf(r);
-    }
-    if (cur_cpu()->task != NULL) {
         sys_exit();
         context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
     } else { // Exception occured in Kernel space: panic
@@ -120,6 +120,7 @@ void dabort_handler(struct trapframe* r)
 
 void iabort_handler(struct trapframe* r)
 {
+    spinlock_lock(&whole_kernel_lock);
     uint32_t ifs, ifa;
 
     __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 1" : "=r"(ifs)::);
@@ -131,8 +132,6 @@ void iabort_handler(struct trapframe* r)
         LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, ifs);
         _abort_reason(ifs);
         dump_tf(r);
-    }
-    if (cur_cpu()->task != NULL) {
         sys_exit();
         context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
     } else { // Exception occured in Kernel space: panic

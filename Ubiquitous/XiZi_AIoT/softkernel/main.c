@@ -122,13 +122,9 @@ int main(void)
             return -1;
         }
 
-        scu_enable();
-        configure_cpu(cpu_id);
-
         spinlock_init(&whole_kernel_lock, "wklock");
     } else {
         spinlock_lock(&whole_kernel_lock);
-        configure_cpu(cpu_id);
         secondary_cpu_hardkernel_init(cpu_id, &hardkernel_tag);
         spinlock_unlock(&whole_kernel_lock);
     }

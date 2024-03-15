@@ -85,8 +85,6 @@ static struct tracer_mem_chunk* tracer_get_mem_chunk_cache(uint32_t chunk_id)
                 b->flag |= TRACER_MEM_CHUNK_BUSY;
                 return b;
             }
-            ERROR("tracer mem_chunk syner is locked\n");
-            panic("");
         }
     }
 
@@ -126,7 +124,7 @@ void tracer_mem_chunk_write(struct tracer_mem_chunk* b)
 void tracer_mem_chunk_release(struct tracer_mem_chunk* b)
 {
     if ((b->flag & TRACER_MEM_CHUNK_BUSY) == 0) {
-        panic("tracer mem_chunk release but it's busy occupied");
+        panic("tracer mem_chunk release but it's not busy occupied");
     }
 
     // move mem_chunk that just used to the head of cache list
