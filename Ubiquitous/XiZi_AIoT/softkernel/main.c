@@ -58,17 +58,17 @@ void configure_cpu(uint32_t cpu)
     // arm_icache_enable();
     // arm_icache_invalidate();
 
-    struct TraceTag main_icache_tag, main_dcache_tag;
-    AchieveResourceTag(&main_icache_tag, &hardkernel_tag, "icache-ac-resource");
-    AchieveResourceTag(&main_dcache_tag, &hardkernel_tag, "dcache-ac-resource");
-    struct ICacheDone* p_icache_driver = AchieveResource(&main_icache_tag);
-    struct DCacheDone* p_dcache_driver = AchieveResource(&main_dcache_tag);
-    // p_dcache_driver->enable();
-    // p_dcache_driver->invalidateall();
-    // p_icache_driver->enable();
-    // p_icache_driver->invalidateall();
-    p_dcache_driver->disable();
-    p_icache_driver->disable();
+    // struct TraceTag main_icache_tag, main_dcache_tag;
+    // AchieveResourceTag(&main_icache_tag, &hardkernel_tag, "icache-ac-resource");
+    // AchieveResourceTag(&main_dcache_tag, &hardkernel_tag, "dcache-ac-resource");
+    // struct ICacheDone* p_icache_driver = AchieveResource(&main_icache_tag);
+    // struct DCacheDone* p_dcache_driver = AchieveResource(&main_dcache_tag);
+    // // p_dcache_driver->enable();
+    // // p_dcache_driver->invalidateall();
+    // // p_icache_driver->enable();
+    // // p_icache_driver->invalidateall();
+    // p_dcache_driver->disable();
+    // p_icache_driver->disable();
 
     // Invalidate SCU copy of TAG RAMs
     scu_secure_invalidate(cpu, all_ways);
@@ -122,15 +122,14 @@ int main(void)
             return -1;
         }
 
-        // scu_enable();
-        // configure_cpu(cpu_id);
+        scu_enable();
+        configure_cpu(cpu_id);
 
         spinlock_init(&whole_kernel_lock, "wklock");
     } else {
-        configure_cpu(cpu_id);
         spinlock_lock(&whole_kernel_lock);
+        configure_cpu(cpu_id);
         secondary_cpu_hardkernel_init(cpu_id, &hardkernel_tag);
-        DEBUG_PRINTF("CPU %d init done.\n", cur_cpuid());
         spinlock_unlock(&whole_kernel_lock);
     }
 
@@ -162,7 +161,7 @@ int main(void)
     assert(AchieveResourceTag(&scheduler_rights.intr_driver_tag, &hardkernel_tag, "intr-ac-resource"));
 
     core_init_done |= (1 << cpu_id);
-    DEBUG("core_init_done: %x\n", core_init_done);
+    LOG_PRINTF("CPU %d init done\n", cpu_id);
     spinlock_unlock(&whole_kernel_lock);
 
     while (core_init_done != (1 << NR_CPU) - 1)

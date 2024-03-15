@@ -10,7 +10,7 @@
  * See the Mulan PSL v2 for more details.
  */
 /**
- * @file libmalloc.h
+ * @file libmem.h
  * @brief support malloc and free in userland
  * @version 3.0
  * @author AIIT XUOS Lab
@@ -18,7 +18,7 @@
  */
 
 /*************************************************
-File name: libmalloc.h
+File name: libmem.h
 Description: support malloc and free in userland
 Others:
 History:

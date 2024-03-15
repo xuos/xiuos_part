@@ -447,11 +447,9 @@ bool tracer_delete_trace(struct TraceTag* target, struct TraceTag* owner)
     return true;
 }
 
-static struct spinlock ac_tracer_lock;
 void tracer_init(void)
 {
     /* init sys_tracer, the manager */
-    spinlock_init(&ac_tracer_lock, "tracerlock");
     spinlock_init(&sys_tracer.mem_chunk_bitmap_lock, "tracer_mem_chunk_bitmap");
     spinlock_init(&sys_tracer.trace_meta_bitmap_lock, "tracer_meta_bitmap");
     memset(sys_tracer.mem_chunks_bit_map, 0, sizeof(sys_tracer.mem_chunk_bitmap_lock));

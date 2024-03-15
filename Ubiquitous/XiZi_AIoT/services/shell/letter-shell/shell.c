@@ -1282,7 +1282,7 @@ void shellExec(Shell* shell)
             if (fd < 0) {
                 shellWriteString(shell, shellText[SHELL_TEXT_CMD_NOT_FOUND]);
             } else {
-                if (spawn(&session_fs, fd, read, shell->parser.param[0], shell->parser.param) < 0) {
+                if (spawn(&session_fs, fd, read, fsize, shell->parser.param[0], shell->parser.param) < 0) {
                     shellWriteString(shell, shellText[SHELL_TEXT_CMD_NOT_FOUND]);
                 }
                 close(&session_fs, fd);

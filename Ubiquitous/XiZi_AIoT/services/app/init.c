@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
         exit();
     }
 
-    if (spawn(&session, fd, read, shell_task_param[0], shell_task_param) < 0) {
+    if (spawn(&session, fd, read, fsize, shell_task_param[0], shell_task_param) < 0) {
         printf("Syscall Spawn shell failed\n");
     }
 

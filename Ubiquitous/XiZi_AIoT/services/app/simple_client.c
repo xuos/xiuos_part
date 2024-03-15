@@ -113,10 +113,10 @@ int main(int argc, char** argv)
             itoa(id - 1, id_buf, 10);
             char* shell_task_param[3] = { "/simple_client", id_buf, 0 };
             if ((fd = open(&session, shell_task_param[0])) >= 0) {
-                if (spawn(&session, fd, read, shell_task_param[0], shell_task_param) < 0) {
+                if (spawn(&session, fd, read, fsize, shell_task_param[0], shell_task_param) < 0) {
                     printf("Syscall Spawn simple_client failed\n");
                 }
-                if (spawn(&session, fd, read, shell_task_param[0], shell_task_param) < 0) {
+                if (spawn(&session, fd, read, fsize, shell_task_param[0], shell_task_param) < 0) {
                     printf("Syscall Spawn simple_client failed\n");
                 }
                 close(&session, fd);

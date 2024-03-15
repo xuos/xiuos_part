@@ -35,7 +35,7 @@ user_apps:
 .section .rawdata_init
 .globl initapp
 initapp:
-    .incbin "../services/app/bin/shell"
+    .incbin "../services/app/bin/init"
 
 .section .rawdata_memfs
 .globl memfs

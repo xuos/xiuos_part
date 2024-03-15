@@ -65,7 +65,7 @@ void intr_irq_dispatch(struct trapframe* tf)
     if ((int_info = p_intr_driver->hw_before_irq()) == 0) {
         return;
     }
-    // spinlock_lock(&whole_kernel_lock);
+    spinlock_lock(&whole_kernel_lock);
     DSB();
     // DEBUG("CPU %d in\n", cur_cpuid());
 
@@ -96,6 +96,6 @@ void intr_irq_dispatch(struct trapframe* tf)
     assert(current_task == cur_cpu()->task);
 
     // DEBUG("CPU %d out\n", cur_cpuid());
-    // spinlock_unlock(&whole_kernel_lock);
+    spinlock_unlock(&whole_kernel_lock);
     p_intr_driver->cpu_irq_enable();
 }

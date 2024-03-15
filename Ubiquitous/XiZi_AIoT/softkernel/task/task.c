@@ -181,34 +181,29 @@ static void _scheduler(struct SchedulerRightGroup right_group)
 
     spinlock_lock(&whole_kernel_lock);
     while (1) {
-        spinlock_unlock(&whole_kernel_lock);
-        spinlock_lock(&xizi_task_manager.lock);
         next_task = NULL;
         /* find next runnable task */
         assert(cur_cpu()->task == NULL);
         if (next_task_emergency != NULL) {
             next_task = next_task_emergency;
-            spinlock_lock(&next_task->lock);
             next_task->state = RUNNING;
-            spinlock_unlock(&next_task->lock);
             next_task_emergency = NULL;
         } else {
             next_task = xizi_task_manager.next_runnable_task();
         }
-        spinlock_unlock(&xizi_task_manager.lock);
+        spinlock_unlock(&whole_kernel_lock);
+
         /* not a runnable task */
-        if (UNLIKELY(next_task == NULL)) {
+        if (UNLIKELY(next_task == NULL) || UNLIKELY(next_task->state != RUNNING)) {
+            spinlock_lock(&whole_kernel_lock);
             continue;
         }
 
+        /* a runnable task */
         spinlock_lock(&whole_kernel_lock);
-        assert(next_task->state == RUNNING);
-        // p_mmu_driver->LoadPgdirCrit((uintptr_t)V2P(next_task->pgdir.pd_addr), &right_group.intr_driver_tag);
-        p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->pgdir.pd_addr));
-
         struct CPU* cpu = cur_cpu();
         cpu->task = next_task;
-        // DEBUG_PRINTF("CPU %d switch to task %s\n", cur_cpuid(), next_task->name);
+        p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->pgdir.pd_addr));
         context_switch(&cpu->scheduler, next_task->main_thread.context);
     }
 }

@@ -33,8 +33,8 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-extern int task_exec(struct TaskMicroDescriptor* task, struct Session* session, int fd, ipc_read_fn ipc_read, char* name, char** argv);
-int sys_spawn(struct KernReadTool* read_tool, char* name, char** argv)
+extern int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, char** argv);
+int sys_spawn(char* img_start, char* name, char** argv)
 {
     // alloc a new pcb
     struct TaskMicroDescriptor* new_task_cb = xizi_task_manager.new_task_cb();
@@ -44,11 +44,7 @@ int sys_spawn(struct KernReadTool* read_tool, char* name, char** argv)
     }
     // init trapframe
     arch_init_trapframe(new_task_cb->main_thread.trapframe, 0, 0);
-
-    struct Session* session = read_tool->session;
-    int fd = read_tool->fd;
-    ipc_read_fn ipc_read = read_tool->ipc_read;
-    if (UNLIKELY(task_exec(new_task_cb, session, fd, ipc_read, name, argv)) < 0) {
+    if (UNLIKELY(task_exec(new_task_cb, img_start, name, argv)) < 0) {
         xizi_task_manager.free_pcb(new_task_cb);
         return -1;
     }

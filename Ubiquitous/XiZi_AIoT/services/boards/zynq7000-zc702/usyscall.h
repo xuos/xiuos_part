@@ -51,15 +51,10 @@ typedef union {
 } sys_state_info;
 
 typedef int (*ipc_read_fn)(struct Session* session, int fd, char* dst, int offset, int len);
+typedef int (*ipc_fsize_fn)(struct Session* session, int fd);
 typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offset, int len);
 
-struct KernReadTool {
-    struct Session* session;
-    int fd;
-    ipc_read_fn ipc_read;
-};
-
-int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, char* name, char** argv);
+int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv);
 int exit();
 int yield();
 int register_server(char* name);

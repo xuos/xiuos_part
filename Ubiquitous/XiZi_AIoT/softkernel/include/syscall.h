@@ -74,15 +74,9 @@ typedef union {
 typedef int (*ipc_read_fn)(struct Session* session, int fd, char* dst, int offset, int len);
 typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offset, int len);
 
-struct KernReadTool {
-    struct Session* session;
-    int fd;
-    ipc_read_fn ipc_read;
-};
-
 int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, uintptr_t param4);
 
-int sys_spawn(struct KernReadTool* read_tool, char* name, char** argv);
+int sys_spawn(char* img_start, char* name, char** argv);
 int sys_exit();
 int sys_yield();
 
@@ -91,7 +85,7 @@ int sys_connect_session(char* path, int capacity, struct Session* user_session);
 int sys_poll_session(struct Session* userland_session_arr, int arr_capacity);
 int sys_close_session(struct Session* session);
 
-int sys_exec(struct KernReadTool* read_tool, char* name, char** argv);
+int sys_exec(char* img_start, char* name, char** argv);
 int sys_state(sys_state_option option, sys_state_info* info);
 int sys_mmap(uintptr_t vaddr, uintptr_t paddr, int len, int is_dev);
 

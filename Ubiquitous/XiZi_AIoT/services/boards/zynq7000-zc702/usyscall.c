@@ -10,6 +10,7 @@
  * See the Mulan PSL v2 for more details.
  */
 #include "usyscall.h"
+#include "libmem.h"
 
 static int
 syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4)
@@ -33,14 +34,18 @@ syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4)
     return ret;
 }
 
-int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, char* name, char** argv)
+int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv)
 {
-    struct KernReadTool read_tool = {
-        .session = session,
-        .fd = fd,
-        .ipc_read = ipc_read,
-    };
-    return syscall(SYSCALL_SPAWN, (intptr_t)&read_tool, (intptr_t)name, (intptr_t)argv, 0);
+    int file_size = ipc_fsize(session, fd);
+    void* img = malloc(file_size);
+    int read_len = 0, cur_read_len = 0;
+    while (read_len < file_size) {
+        cur_read_len = file_size - read_len < 4096 ? file_size - read_len : 4096;
+        read_len += ipc_read(session, fd, img + read_len, read_len, cur_read_len);
+    }
+    int ret = syscall(SYSCALL_SPAWN, (intptr_t)img, (intptr_t)name, (intptr_t)argv, 0);
+    free(img);
+    return ret;
 }
 
 int exit()

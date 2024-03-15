@@ -52,7 +52,7 @@ void software_irq_dispatch(struct trapframe* tf)
     assert(p_intr_driver != NULL);
 
     p_intr_driver->cpu_irq_disable();
-    // spinlock_lock(&whole_kernel_lock);
+    spinlock_lock(&whole_kernel_lock);
     DSB();
     // DEBUG("CPU %d in\n", cur_cpuid());
     // get current task
@@ -78,10 +78,10 @@ void software_irq_dispatch(struct trapframe* tf)
     }
     assert(cur_task == cur_cpu()->task);
     if (syscall_num == SYSCALL_EXIT) {
-        ERROR("Exit reaches");
+        panic("Exit reaches");
     }
 
     // DEBUG("CPU %d out\n", cur_cpuid());
-    // spinlock_unlock(&whole_kernel_lock);
+    spinlock_unlock(&whole_kernel_lock);
     p_intr_driver->cpu_irq_enable();
 }

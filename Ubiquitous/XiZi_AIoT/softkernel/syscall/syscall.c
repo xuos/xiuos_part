@@ -41,7 +41,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = 0;
         break;
     case SYSCALL_SPAWN:
-        ret = sys_spawn((struct KernReadTool*)param1, (char*)param2, (char**)param3);
+        ret = sys_spawn((char*)param1, (char*)param2, (char**)param3);
         break;
     case SYSCALL_EXIT:
         ret = sys_exit();
@@ -62,7 +62,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_close_session((struct Session*)param1);
         break;
     case SYSCALL_EXEC:
-        ret = sys_exec((struct KernReadTool*)param1, (char*)param2, (char**)param3);
+        ret = sys_exec((char*)param1, (char*)param2, (char**)param3);
         break;
     case SYSCALL_SYS_STATE:
         ret = sys_state(param1, (sys_state_info*)param2);
