@@ -66,8 +66,6 @@ void intr_irq_dispatch(struct trapframe* tf)
         return;
     }
     spinlock_lock(&whole_kernel_lock);
-    DSB();
-    // DEBUG("CPU %d in\n", cur_cpuid());
 
     struct TaskMicroDescriptor* current_task = cur_cpu()->task;
     if (LIKELY(current_task != NULL)) {
@@ -95,7 +93,6 @@ void intr_irq_dispatch(struct trapframe* tf)
     }
     assert(current_task == cur_cpu()->task);
 
-    // DEBUG("CPU %d out\n", cur_cpuid());
     spinlock_unlock(&whole_kernel_lock);
     p_intr_driver->cpu_irq_enable();
 }

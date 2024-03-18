@@ -30,20 +30,6 @@ Modification:
 #include "mmu.h"
 #include "mmu_common.h"
 
-void GetDevPteAttr(uintptr_t* attr)
-{
-    static char init = 0;
-    static PageTblEntry dev_pte_attr;
-    if (init == 0) {
-        init = 1;
-
-        dev_pte_attr.entry = 0;
-        dev_pte_attr.desc_type = PAGE_4K;
-        dev_pte_attr.AP1_0 = AccessPermission_KernelOnly;
-    }
-    *attr = dev_pte_attr.entry;
-}
-
 void GetUsrPteAttr(uintptr_t* attr)
 {
     static char init = 0;
@@ -55,6 +41,7 @@ void GetUsrPteAttr(uintptr_t* attr)
         usr_pte_attr.desc_type = PAGE_4K;
         usr_pte_attr.B = 1;
         usr_pte_attr.C = 1;
+        usr_pte_attr.S = 1;
         usr_pte_attr.AP1_0 = AccessPermission_KernelUser;
     }
     *attr = usr_pte_attr.entry;
@@ -68,10 +55,26 @@ void GetUsrDevPteAttr(uintptr_t* attr)
         init = 1;
 
         usr_pte_attr.entry = 0;
+        usr_pte_attr.S = 1;
         usr_pte_attr.desc_type = PAGE_4K;
         usr_pte_attr.AP1_0 = AccessPermission_KernelUser;
     }
     *attr = usr_pte_attr.entry;
+}
+
+void GetDevPteAttr(uintptr_t* attr)
+{
+    static char init = 0;
+    static PageTblEntry dev_pte_attr;
+    if (init == 0) {
+        init = 1;
+
+        dev_pte_attr.entry = 0;
+        dev_pte_attr.S = 1;
+        dev_pte_attr.desc_type = PAGE_4K;
+        dev_pte_attr.AP1_0 = AccessPermission_KernelOnly;
+    }
+    *attr = dev_pte_attr.entry;
 }
 
 void GetKernPteAttr(uintptr_t* attr)
@@ -85,6 +88,7 @@ void GetKernPteAttr(uintptr_t* attr)
         kern_pte_attr.desc_type = PAGE_4K;
         kern_pte_attr.B = 1;
         kern_pte_attr.C = 1;
+        kern_pte_attr.S = 1;
         kern_pte_attr.AP1_0 = AccessPermission_KernelOnly;
     }
     *attr = kern_pte_attr.entry;

@@ -58,18 +58,6 @@ void configure_cpu(uint32_t cpu)
     // arm_icache_enable();
     // arm_icache_invalidate();
 
-    // struct TraceTag main_icache_tag, main_dcache_tag;
-    // AchieveResourceTag(&main_icache_tag, &hardkernel_tag, "icache-ac-resource");
-    // AchieveResourceTag(&main_dcache_tag, &hardkernel_tag, "dcache-ac-resource");
-    // struct ICacheDone* p_icache_driver = AchieveResource(&main_icache_tag);
-    // struct DCacheDone* p_dcache_driver = AchieveResource(&main_dcache_tag);
-    // // p_dcache_driver->enable();
-    // // p_dcache_driver->invalidateall();
-    // // p_icache_driver->enable();
-    // // p_icache_driver->invalidateall();
-    // p_dcache_driver->disable();
-    // p_icache_driver->disable();
-
     // Invalidate SCU copy of TAG RAMs
     scu_secure_invalidate(cpu, all_ways);
 
@@ -138,7 +126,6 @@ int main(void)
         show_xizi_bar();
 
         int cpu_count = NR_CPU;
-        ;
         for (int i = 1; i < cpu_count; i++) {
             // start secondary cpus
             cpu_start_secondary(i);
@@ -156,12 +143,38 @@ int main(void)
     assert(AchieveResourceTag(&scheduler_rights.mmu_driver_tag, &hardkernel_tag, "mmu-ac-resource"));
     assert(AchieveResourceTag(&scheduler_rights.intr_driver_tag, &hardkernel_tag, "intr-ac-resource"));
 
+    struct TraceTag main_icache_tag, main_dcache_tag;
+    AchieveResourceTag(&main_icache_tag, &hardkernel_tag, "icache-ac-resource");
+    AchieveResourceTag(&main_dcache_tag, &hardkernel_tag, "dcache-ac-resource");
+    struct ICacheDone* p_icache_driver = AchieveResource(&main_icache_tag);
+    struct DCacheDone* p_dcache_driver = AchieveResource(&main_dcache_tag);
+
     core_init_done |= (1 << cpu_id);
     LOG_PRINTF("CPU %d init done\n", cpu_id);
     spinlock_unlock(&whole_kernel_lock);
 
     while (core_init_done != (1 << NR_CPU) - 1)
         ;
+    DEBUG_PRINTF("%d", cpu_id);
+
+    // scu_enable();
+    // configure_cpu(cpu_id);
+    // p_dcache_driver->enable();
+    // p_icache_driver->enable();
+
+    // spinlock_lock(&whole_kernel_lock);
+    // p_dcache_driver->flushall();
+    // spinlock_unlock(&whole_kernel_lock);
+
+    // while (true) {
+    //     spinlock_lock(&whole_kernel_lock);
+    //     DEBUG("CPU: %d\n", cpu_id);
+    //     secondary_cpu_load_kern_pgdir(&scheduler_rights.mmu_driver_tag, NULL);
+    //     CLEARTLB(0);
+    //     p_dcache_driver->flushall();
+    //     spinlock_unlock(&whole_kernel_lock);
+    // }
+
     xizi_task_manager.task_scheduler(scheduler_rights);
 
     // never reached

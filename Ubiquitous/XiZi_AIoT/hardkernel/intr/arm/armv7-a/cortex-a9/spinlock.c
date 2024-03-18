@@ -20,7 +20,9 @@
 #include <string.h>
 
 #include "assert.h"
+#include "multicores.h"
 #include "spinlock.h"
+#include "task.h"
 #include "trap_common.h"
 
 bool module_spinlock_use_intr_init(void)
@@ -55,4 +57,9 @@ void _spinlock_unlock(struct spinlock* lock);
 void spinlock_unlock(struct spinlock* lock)
 {
     _spinlock_unlock(lock);
+}
+
+bool is_spinlock_locked(struct spinlock* lock)
+{
+    return lock->owner_cpu != SPINLOCK_STATE_UNLOCK;
 }

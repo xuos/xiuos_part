@@ -53,8 +53,7 @@ void software_irq_dispatch(struct trapframe* tf)
 
     p_intr_driver->cpu_irq_disable();
     spinlock_lock(&whole_kernel_lock);
-    DSB();
-    // DEBUG("CPU %d in\n", cur_cpuid());
+
     // get current task
     struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
     /// @todo: Handle dead task
@@ -81,7 +80,6 @@ void software_irq_dispatch(struct trapframe* tf)
         panic("Exit reaches");
     }
 
-    // DEBUG("CPU %d out\n", cur_cpuid());
     spinlock_unlock(&whole_kernel_lock);
     p_intr_driver->cpu_irq_enable();
 }

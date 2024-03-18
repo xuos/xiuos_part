@@ -105,8 +105,10 @@ static uintptr_t map_task_share_page(struct TaskMicroDescriptor* task, const uin
     }
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(vaddr, 2 * nr_pages * PAGE_SIZE);
+
         /// @todo clean range rather than all
-        p_dcache_done->flushall();
+        // p_dcache_done->flushall();
+        p_dcache_done->invalidateall();
         // p_dcache_done->flush(vaddr, vaddr + 2 * nr_pages * PAGE_SIZE);
     }
     return vaddr;
@@ -129,8 +131,10 @@ uintptr_t task_map_pages(struct TaskMicroDescriptor* task, const uintptr_t vaddr
     }
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(vaddr, nr_pages * PAGE_SIZE);
+
         /// @todo clean range rather than all
-        p_dcache_done->flushall();
+        // p_dcache_done->flushall();
+        p_dcache_done->invalidateall();
         // p_dcache_done->flush(vaddr, vaddr + nr_pages * PAGE_SIZE);
     }
 
@@ -147,8 +151,10 @@ void unmap_task_share_pages(struct TaskMicroDescriptor* task, const uintptr_t ta
     xizi_pager.unmap_pages(task->pgdir.pd_addr, task_vaddr + (nr_pages * PAGE_SIZE), nr_pages * PAGE_SIZE);
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(task_vaddr, 2 * nr_pages * PAGE_SIZE);
+
         /// @todo clean range rather than all
-        p_dcache_done->flushall();
+        // p_dcache_done->flushall();
+        p_dcache_done->invalidateall();
         // p_dcache_done->flush(task_vaddr, task_vaddr + 2 * nr_pages * PAGE_SIZE);
     }
 }

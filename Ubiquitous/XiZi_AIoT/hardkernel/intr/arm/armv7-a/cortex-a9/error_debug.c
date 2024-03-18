@@ -95,7 +95,9 @@ void handle_undefined_instruction(struct trapframe* tf)
 extern void context_switch(struct context**, struct context*);
 void dabort_handler(struct trapframe* r)
 {
-    spinlock_lock(&whole_kernel_lock);
+    if (!is_spinlock_locked(&whole_kernel_lock)) {
+        spinlock_lock(&whole_kernel_lock);
+    }
     uint32_t dfs, dfa;
 
     __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 0" : "=r"(dfs)::);
@@ -120,7 +122,9 @@ void dabort_handler(struct trapframe* r)
 
 void iabort_handler(struct trapframe* r)
 {
-    spinlock_lock(&whole_kernel_lock);
+    if (!is_spinlock_locked(&whole_kernel_lock)) {
+        spinlock_lock(&whole_kernel_lock);
+    }
     uint32_t ifs, ifa;
 
     __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 1" : "=r"(ifs)::);

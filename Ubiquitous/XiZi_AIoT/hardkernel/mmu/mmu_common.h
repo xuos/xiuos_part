@@ -29,6 +29,7 @@ struct MmuCommonDone
 
     void (*LoadPgdirCrit)(uintptr_t pgdir_paddr, struct TraceTag*);
     void (*LoadPgdir)(uintptr_t pgdir_paddr);
+    void (*TlbFlushAll)();
     void (*TlbFlush)(uintptr_t vaddr, int len);
 };
 
