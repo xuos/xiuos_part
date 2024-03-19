@@ -55,7 +55,6 @@ void GetUsrDevPteAttr(uintptr_t* attr)
         init = 1;
 
         usr_pte_attr.entry = 0;
-        usr_pte_attr.S = 1;
         usr_pte_attr.desc_type = PAGE_4K;
         usr_pte_attr.AP1_0 = AccessPermission_KernelUser;
     }
@@ -70,7 +69,6 @@ void GetDevPteAttr(uintptr_t* attr)
         init = 1;
 
         dev_pte_attr.entry = 0;
-        dev_pte_attr.S = 1;
         dev_pte_attr.desc_type = PAGE_4K;
         dev_pte_attr.AP1_0 = AccessPermission_KernelOnly;
     }

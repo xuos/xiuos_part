@@ -216,10 +216,10 @@ bool secondary_cpu_hardkernel_init(int cpu_id, struct TraceTag* _hardkernel_tag)
     p_intr_driver->sys_irq_init(cpu_id);
     p_intr_driver->cpu_irq_disable();
     // cache
-    // p_icache_driver->enable();
-    // p_dcache_driver->enable();
-    p_icache_driver->disable();
-    p_dcache_driver->disable();
+    p_icache_driver->enable();
+    p_dcache_driver->enable();
+    // p_icache_driver->disable();
+    // p_dcache_driver->disable();
     // clock
     // p_clock_driver->sys_clock_init();
     p_intr_driver->single_irq_enable(p_clock_driver->get_clock_int(), cpu_id, 0);
