@@ -68,22 +68,22 @@ void spinlock_lock(struct spinlock* lock)
         ERROR("spinlock %s lock double locked by core %d\n", lock->name, lock->owner_cpu);
         panic("");
     }
-    // _spinlock_lock(&request_lock, SPINLOCK_LOCK_WAITFOREVER);
-    // doubleListAddOnBack(&core_lock_request[cur_cpuid()].node, &lock_request_guard);
-    // _spinlock_unlock(&request_lock);
+    _spinlock_lock(&request_lock, SPINLOCK_LOCK_WAITFOREVER);
+    doubleListAddOnBack(&core_lock_request[cur_cpuid()].node, &lock_request_guard);
+    _spinlock_unlock(&request_lock);
 
-    // while (lock_request_guard.next != &core_lock_request[cur_cpuid()].node)
-    //     ;
+    while (lock_request_guard.next != &core_lock_request[cur_cpuid()].node)
+        ;
 
     _spinlock_lock(lock, SPINLOCK_LOCK_WAITFOREVER);
 }
 
 void spinlock_unlock(struct spinlock* lock)
 {
-    // assert(lock_request_guard.next == &core_lock_request[cur_cpuid()].node);
-    // _spinlock_lock(&request_lock, SPINLOCK_LOCK_WAITFOREVER);
-    // _double_list_del(core_lock_request[cur_cpuid()].node.prev, core_lock_request[cur_cpuid()].node.next);
-    // _spinlock_unlock(&request_lock);
+    assert(lock_request_guard.next == &core_lock_request[cur_cpuid()].node);
+    _spinlock_lock(&request_lock, SPINLOCK_LOCK_WAITFOREVER);
+    _double_list_del(core_lock_request[cur_cpuid()].node.prev, core_lock_request[cur_cpuid()].node.next);
+    _spinlock_unlock(&request_lock);
 
     _spinlock_unlock(lock);
 }

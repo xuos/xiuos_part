@@ -95,7 +95,7 @@ void handle_undefined_instruction(struct trapframe* tf)
 extern void context_switch(struct context**, struct context*);
 void dabort_handler(struct trapframe* r)
 {
-    if (!is_spinlock_locked(&whole_kernel_lock)) {
+    if (!is_spinlock_locked(&whole_kernel_lock) || whole_kernel_lock.owner_cpu != cur_cpuid()) {
         spinlock_lock(&whole_kernel_lock);
     }
     uint32_t dfs, dfa;
@@ -122,7 +122,7 @@ void dabort_handler(struct trapframe* r)
 
 void iabort_handler(struct trapframe* r)
 {
-    if (!is_spinlock_locked(&whole_kernel_lock)) {
+    if (!is_spinlock_locked(&whole_kernel_lock) || whole_kernel_lock.owner_cpu != cur_cpuid()) {
         spinlock_lock(&whole_kernel_lock);
     }
     uint32_t ifs, ifa;
