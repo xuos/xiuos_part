@@ -68,11 +68,10 @@ void software_irq_dispatch(struct trapframe* tf)
         if (syscall_num != SYSCALL_EXEC) {
             arch_set_return(tf, ret);
         }
-    } else {
-        ERROR("syscall by killed task.\n");
     }
 
-    if (cur_cpu()->task == NULL && cur_task != NULL) {
+    if ((cur_cpu()->task == NULL && cur_task != NULL) || cur_task->state != RUNNING) {
+        cur_cpu()->task = NULL;
         context_switch(&cur_task->main_thread.context, cur_cpu()->scheduler);
     }
     assert(cur_task == cur_cpu()->task);

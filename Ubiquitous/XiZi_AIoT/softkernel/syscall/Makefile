@@ -9,6 +9,7 @@ SRC_FILES := syscall.c \
 	sys_register_irq.c \
 	sys_exit.c \
 	sys_state.c \
-	sys_mmap.c
+	sys_mmap.c \
+	sys_kill.c
 
 include $(KERNEL_ROOT)/compiler.mk

@@ -1725,6 +1725,11 @@ int shellRun(Shell* shell, const char* cmd)
     }
 }
 
+void shellKill(int pid)
+{
+    kill(pid);
+}
+
 /**
  * @brief ls 打印当前路径下所有文件(文件系统调用)
  */

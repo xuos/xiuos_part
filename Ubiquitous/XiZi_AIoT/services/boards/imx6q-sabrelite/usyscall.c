@@ -58,6 +58,11 @@ int yield()
     return syscall(SYSCALL_YIELD, 0, 0, 0, 0);
 }
 
+int kill(int pid)
+{
+    return syscall(SYSCALL_KILL, (intptr_t)pid, 0, 0, 0);
+}
+
 int register_server(char* name)
 {
     return syscall(SYSCALL_SERVER, (intptr_t)name, 0, 0, 0);

@@ -88,7 +88,8 @@ void intr_irq_dispatch(struct trapframe* tf)
     p_intr_driver->curr_int[cpu] = 0;
     p_intr_driver->hw_after_irq(int_info);
 
-    if (UNLIKELY(cur_cpu()->task == NULL && current_task != NULL)) {
+    if ((cur_cpu()->task == NULL && current_task != NULL) || current_task->state != RUNNING) {
+        cur_cpu()->task = NULL;
         context_switch(&current_task->main_thread.context, cur_cpu()->scheduler);
     }
     assert(current_task == cur_cpu()->task);

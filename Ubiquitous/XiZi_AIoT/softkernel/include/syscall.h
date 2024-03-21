@@ -44,6 +44,8 @@ Modification:
 #define SYSCALL_EXEC            9   // run elf using current task
 #define SYSCALL_SYS_STATE       10  // run system state
 #define SYSCALL_REGISTER_IRQ    11  //
+
+#define SYSCALL_KILL            12  // kill the task by id
 // clang-format on
 
 #ifndef __ASSEMBLER__
@@ -77,8 +79,9 @@ typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offs
 int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, uintptr_t param4);
 
 int sys_spawn(char* img_start, char* name, char** argv);
-int sys_exit();
+int sys_exit(struct TaskMicroDescriptor* ptask);
 int sys_yield();
+int sys_kill(int id);
 
 int sys_register_as_server(char* name);
 int sys_connect_session(char* path, int capacity, struct Session* user_session);

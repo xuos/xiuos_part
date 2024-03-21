@@ -28,6 +28,7 @@ Modification:
 1. first version
 *************************************************/
 #include "log.h"
+#include "multicores.h"
 #include "trap_common.h"
 
 #include "syscall.h"
@@ -44,7 +45,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_spawn((char*)param1, (char*)param2, (char**)param3);
         break;
     case SYSCALL_EXIT:
-        ret = sys_exit();
+        ret = sys_exit(cur_cpu()->task);
         break;
     case SYSCALL_YIELD:
         ret = sys_yield();
@@ -72,6 +73,9 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         break;
     case SYSCALL_REGISTER_IRQ:
         ret = sys_register_irq((int)param1, (int)param2);
+        break;
+    case SYSCALL_KILL:
+        ret = sys_kill((int)param1);
         break;
 
     default:

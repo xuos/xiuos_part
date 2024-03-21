@@ -36,20 +36,18 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-int sys_exit()
+int sys_exit(struct TaskMicroDescriptor* ptask)
 {
-
-    struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
-    assert(cur_task != NULL);
+    assert(ptask != NULL);
 
     /* handle sessions for condition 1, ref. delete_share_pages() */
     // close all server_sessions
     struct server_session* server_session = NULL;
-    while (!IS_DOUBLE_LIST_EMPTY(&cur_task->svr_sess_listhead)) {
-        server_session = CONTAINER_OF(cur_task->svr_sess_listhead.next, struct server_session, node);
+    while (!IS_DOUBLE_LIST_EMPTY(&ptask->svr_sess_listhead)) {
+        server_session = CONTAINER_OF(ptask->svr_sess_listhead.next, struct server_session, node);
         // cut the connection from task to session
         if (!server_session->closed) {
-            xizi_share_page_manager.unmap_task_share_pages(cur_task, server_session->buf_addr, CLIENT_SESSION_BACKEND(server_session)->nr_pages);
+            xizi_share_page_manager.unmap_task_share_pages(ptask, server_session->buf_addr, CLIENT_SESSION_BACKEND(server_session)->nr_pages);
             server_session->closed = true;
         }
         doubleListDel(&server_session->node);
@@ -61,11 +59,11 @@ int sys_exit()
     }
     // close all client_sessions
     struct client_session* client_session = NULL;
-    while (!IS_DOUBLE_LIST_EMPTY(&cur_task->cli_sess_listhead)) {
-        client_session = CONTAINER_OF(cur_task->cli_sess_listhead.next, struct client_session, node);
+    while (!IS_DOUBLE_LIST_EMPTY(&ptask->cli_sess_listhead)) {
+        client_session = CONTAINER_OF(ptask->cli_sess_listhead.next, struct client_session, node);
         // cut the connection from task to session
         if (!client_session->closed) {
-            xizi_share_page_manager.unmap_task_share_pages(cur_task, client_session->buf_addr, CLIENT_SESSION_BACKEND(client_session)->nr_pages);
+            xizi_share_page_manager.unmap_task_share_pages(ptask, client_session->buf_addr, CLIENT_SESSION_BACKEND(client_session)->nr_pages);
             client_session->closed = true;
         }
         doubleListDel(&client_session->node);
@@ -76,16 +74,16 @@ int sys_exit()
         }
     }
 
-    if (cur_task->server_identifier.meta != NULL) {
+    if (ptask->server_identifier.meta != NULL) {
         struct TraceTag server_identifier_owner;
         AchieveResourceTag(&server_identifier_owner, RequireRootTag(), "softkernel/server-identifier");
         assert(server_identifier_owner.meta != NULL);
-        DeleteResource(&cur_task->server_identifier, &server_identifier_owner);
+        DeleteResource(&ptask->server_identifier, &server_identifier_owner);
     }
 
     // delete task for pcb_list
     xizi_task_manager.cur_task_yield_noschedule();
-    cur_task->state = DEAD;
+    ptask->state = DEAD;
 
     return 0;
 }

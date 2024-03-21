@@ -193,4 +193,6 @@ __attribute__((__always_inline__)) static inline void arch_set_return(struct tra
     tf->r0 = (uint32_t)ret;
 }
 
+void cpu_start_secondary(uint8_t cpu_id);
+void start_smp_cache_broadcast(int cpu_id);
 #endif

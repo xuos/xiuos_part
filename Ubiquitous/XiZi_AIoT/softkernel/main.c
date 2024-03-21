@@ -28,8 +28,6 @@ Modification:
 1. first version
 *************************************************/
 /// @todo use hardkernel
-#include "cortex_a9.h"
-#include "regssrc.h"
 
 #include "kern_init.h"
 #include "multicores.h"
@@ -37,36 +35,8 @@ Modification:
 #include "assert.h"
 #include "task.h"
 
-#include "cache_common_ope.h"
-
 extern uint32_t _binary_init_start[], _binary_default_fs_start[];
 static struct TraceTag hardkernel_tag, softkernel_tag;
-
-extern void _boot_start();
-void cpu_start_secondary(uint8_t coreNumber)
-{
-    // Prepare pointers for ROM code. The entry point is always _start, which does some
-    // basic preparatory work and then calls the common_cpu_entry function, which itself
-    // calls the entry point saved in s_core_info.
-    switch (coreNumber) {
-    case 1:
-        HW_SRC_GPR3_WR((uint32_t)&_boot_start);
-        HW_SRC_SCR.B.CORE1_ENABLE = 1;
-        break;
-
-    case 2:
-        HW_SRC_GPR5_WR((uint32_t)&_boot_start);
-        HW_SRC_SCR.B.CORE2_ENABLE = 1;
-        break;
-
-    case 3:
-        HW_SRC_GPR7_WR((uint32_t)&_boot_start);
-        HW_SRC_SCR.B.CORE3_ENABLE = 1;
-        break;
-    default:
-        break;
-    }
-}
 
 static int core_init_done = 0;
 int main(void)
@@ -126,6 +96,7 @@ int main(void)
 
     while (core_init_done != (1 << NR_CPU) - 1)
         ;
+    start_smp_cache_broadcast(cpu_id);
     xizi_task_manager.task_scheduler(scheduler_rights);
 
     // never reached

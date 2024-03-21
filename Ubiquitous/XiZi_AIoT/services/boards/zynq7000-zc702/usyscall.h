@@ -30,6 +30,8 @@
 #define SYSCALL_EXEC            9   // run elf using current task
 #define SYSCALL_SYS_STATE       10  // run system state
 #define SYSCALL_REGISTER_IRQ    11  //
+
+#define SYSCALL_KILL            12  // kill the task by id
 // clang-format on
 
 typedef enum {
@@ -57,6 +59,7 @@ typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offs
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv);
 int exit();
 int yield();
+int kill(int pid);
 int register_server(char* name);
 int session(char* path, int capacity, struct Session* user_session);
 int poll_session(struct Session* userland_session_arr, int arr_capacity);

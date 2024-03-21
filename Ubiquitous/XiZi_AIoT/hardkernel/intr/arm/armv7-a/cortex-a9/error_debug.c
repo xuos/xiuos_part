@@ -109,7 +109,7 @@ void dabort_handler(struct trapframe* r)
         LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
         _abort_reason(dfs);
         dump_tf(r);
-        sys_exit();
+        sys_exit(cur_cpu()->task);
         context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
     } else { // Exception occured in Kernel space: panic
         LOG("program counter: 0x%x caused\n", r->pc);
@@ -136,7 +136,7 @@ void iabort_handler(struct trapframe* r)
         LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, ifs);
         _abort_reason(ifs);
         dump_tf(r);
-        sys_exit();
+        sys_exit(cur_cpu()->task);
         context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
     } else { // Exception occured in Kernel space: panic
         LOG("program counter: 0x%x(%s) caused\n", r->pc, cur_cpu()->task);

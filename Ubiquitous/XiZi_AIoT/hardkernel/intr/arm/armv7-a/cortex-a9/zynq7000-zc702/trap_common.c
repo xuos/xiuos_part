@@ -87,6 +87,8 @@ void handle_fiq(void)
 
 static void _sys_irq_init(int cpu_id)
 {
+
+    init_cpu_mode_stacks(cpu_id);
     if (cpu_id == 0) {
         /* load exception vectors */
         volatile uint32_t* vector_base = &_vector_start;
@@ -100,8 +102,6 @@ static void _sys_irq_init(int cpu_id)
         vector_base[6] = (uint32_t)trap_irq_enter; // IRQ
         vector_base[7] = (uint32_t)handle_fiq; // FIQ
     }
-
-    init_cpu_mode_stacks(cpu_id);
 
     /* active hardware irq responser */
     XScuGic_Config* gic_config = XScuGic_LookupConfig(XPAR_PS7_SCUGIC_0_DEVICE_ID);
@@ -244,7 +244,7 @@ static struct XiziTrapDriver xizi_trap_driver = {
 
 struct XiziTrapDriver* hardkernel_intr_init(struct TraceTag* hardkernel_tag)
 {
-    xizi_trap_driver.sys_irq_init();
+    xizi_trap_driver.sys_irq_init(0);
     xizi_trap_driver.cpu_irq_enable();
     return &xizi_trap_driver;
 }
