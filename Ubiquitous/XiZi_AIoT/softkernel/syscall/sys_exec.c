@@ -200,7 +200,6 @@ int sys_exec(char* img_start, char* name, char** argv)
     struct TaskMicroDescriptor* current_task = cur_cpu()->task;
     int ret = task_exec(current_task, img_start, name, argv);
     if (ret >= 0) {
-        spinlock_init(&current_task->lock, current_task->name);
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(current_task->pgdir.pd_addr));
         return ret;
     }

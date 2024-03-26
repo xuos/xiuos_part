@@ -61,7 +61,6 @@ static void tracer_mem_chunk_sync(struct tracer_mem_chunk* b)
 
 void mem_chunk_synchronizer_init(uintptr_t mem_chunk_base, uint32_t mem_chunk_size, uint32_t nr_mem_chunks)
 {
-    spinlock_init(&tracer_mem_chunk_syner.lock, "tracer_mem_chunk_syner");
     tracer_mem_chunk_syner.mem_chunk_base = mem_chunk_base;
     tracer_mem_chunk_syner.mem_chunk_size = mem_chunk_size;
     tracer_mem_chunk_syner.nr_mem_chunks = nr_mem_chunks;

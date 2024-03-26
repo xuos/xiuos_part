@@ -144,9 +144,6 @@ void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
     struct KPage* page = NULL;
     struct KFreeList* free_list = NULL;
 
-    // init spinlock
-    spinlock_init(&pbuddy->lock, "kbuddy");
-
     // init global kernel Buddy system
     pbuddy->mem_start = mem_start;
     pbuddy->mem_end = mem_end;

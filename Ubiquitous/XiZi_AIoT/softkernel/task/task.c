@@ -43,8 +43,6 @@ uint32_t ready_task_priority;
 
 static void _task_manager_init()
 {
-    // init lock for task list
-    spinlock_init(&xizi_task_manager.lock, "proclist");
     // init task list to NULL
     for (int i = 0; i < TASK_MAX_PRIORITY; i++) {
         doubleListNodeInit(&xizi_task_manager.task_list_head[i]);
@@ -159,7 +157,6 @@ static struct TaskMicroDescriptor* _new_task_cb()
 
 static void _task_set_default_schedule_attr(struct TaskMicroDescriptor* task, struct TraceTag* cwd)
 {
-    spinlock_init(&task->lock, task->name);
     task->remain_tick = TASK_CLOCK_TICK;
     task->maxium_tick = TASK_CLOCK_TICK * 10;
     task->state = READY;

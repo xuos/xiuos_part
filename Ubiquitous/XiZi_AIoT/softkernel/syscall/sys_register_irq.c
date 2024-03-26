@@ -74,6 +74,7 @@ int user_irq_handler(int irq, void* tf, void* arg)
 }
 
 extern int create_session_inner(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, int capacity, struct Session* user_session);
+/// @warning no tested.
 int sys_register_irq(int irq_num, int irq_opcode)
 {
     static struct TraceTag intr_ac_tag;
