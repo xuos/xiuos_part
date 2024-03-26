@@ -19,13 +19,12 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "assert.h"
-#include "multicores.h"
 #include "spinlock.h"
-#include "task.h"
 #include "trap_common.h"
 
+#include "assert.h"
 #include "list.h"
+#include "multicores.h"
 
 struct lock_node {
     int cpu_id;
