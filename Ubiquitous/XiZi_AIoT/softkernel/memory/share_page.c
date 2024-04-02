@@ -178,12 +178,14 @@ struct session_backend* create_share_pages(struct TaskMicroDescriptor* client, s
     uintptr_t client_vaddr = map_task_share_page(client, V2P_WO(kern_vaddr), nr_pages);
     if (UNLIKELY(client_vaddr == 0)) {
         kfree((char*)kern_vaddr);
+        slab_free(SessionAllocator(), session_backend);
         return NULL;
     }
     uintptr_t server_vaddr = map_task_share_page(server, V2P_WO(kern_vaddr), nr_pages);
     if (UNLIKELY(server_vaddr == 0)) {
         unmap_task_share_pages(client, client_vaddr, nr_pages);
         kfree((char*)kern_vaddr);
+        slab_free(SessionAllocator(), session_backend);
         return NULL;
     }
 
@@ -208,6 +210,9 @@ struct session_backend* create_share_pages(struct TaskMicroDescriptor* client, s
     doubleListNodeInit(&session_backend->server_side.node);
     doubleListAddOnBack(&session_backend->server_side.node, &server->svr_sess_listhead);
 
+    server->mem_size += true_capacity;
+    client->mem_size += true_capacity;
+
     return session_backend;
 }
 
@@ -231,6 +236,9 @@ int delete_share_pages(struct session_backend* session_backend)
     if (session_backend->server) {
         doubleListDel(&session_backend->server_side.node);
     }
+
+    session_backend->server->mem_size -= session_backend->nr_pages * PAGE_SIZE;
+    session_backend->client->mem_size -= session_backend->nr_pages * PAGE_SIZE;
 
     /* free seesion backend */
     kfree((void*)session_backend->buf_kernel_addr);

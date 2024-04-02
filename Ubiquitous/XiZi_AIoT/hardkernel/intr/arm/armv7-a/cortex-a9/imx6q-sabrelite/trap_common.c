@@ -94,7 +94,7 @@ static void _sys_irq_init(int cpu_id)
         // Set Interrupt handler start address
         vector_base[1] = (uint32_t)trap_undefined_instruction; // Undefined Instruction
         vector_base[2] = (uint32_t)user_trap_swi_enter; // Software Interrupt
-        vector_base[3] = (uint32_t)trap_iabort; // Prefetch Abort
+        // vector_base[3] = (uint32_t)trap_iabort; // Prefetch Abort
         vector_base[4] = (uint32_t)trap_dabort; // Data Abort
         vector_base[5] = (uint32_t)handle_reserved; // Reserved
         vector_base[6] = (uint32_t)trap_irq_enter; // IRQ

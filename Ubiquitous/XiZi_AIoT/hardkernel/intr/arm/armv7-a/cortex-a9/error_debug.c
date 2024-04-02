@@ -116,6 +116,9 @@ void dabort_handler(struct trapframe* r)
         LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
         _abort_reason(dfs);
         dump_tf(r);
+        if (is_spinlock_locked(&whole_kernel_lock) && whole_kernel_lock.owner_cpu == cur_cpuid()) {
+            spinlock_unlock(&whole_kernel_lock);
+        }
         panic("data abort exception\n");
     }
 }
@@ -143,6 +146,9 @@ void iabort_handler(struct trapframe* r)
         LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, ifs);
         _abort_reason(ifs);
         dump_tf(r);
+        if (is_spinlock_locked(&whole_kernel_lock) && whole_kernel_lock.owner_cpu == cur_cpuid()) {
+            spinlock_unlock(&whole_kernel_lock);
+        }
         panic("prefetch abort exception\n");
     }
 }

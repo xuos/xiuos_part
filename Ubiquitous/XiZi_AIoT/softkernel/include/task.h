@@ -59,33 +59,35 @@ struct Thread {
 
 /* Process Control Block */
 struct TaskMicroDescriptor {
-    struct double_list_node node;
-
-    struct spinlock lock;
-    /* task->lock needed */
+    /* task debug resources */
     int pid;
+    char name[TASK_NAME_MAX_LEN];
+
+    /// @todo support return value
+    int ret; // state val that be returned to parent
     /// @todo support parent
     struct TaskMicroDescriptor* parent;
-    enum ProcState state;
-    /// @todo support ret value
-    int ret; // state val that be returned to parent
+
+    /* task context resources */
+    struct Thread main_thread; // will only access by task itself
+
+    /* task memory resources */
     struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address
+    uintptr_t heap_base; // mem size of proc used(allocated by kernel)
+    /// @todo support heap_base
+    uintptr_t mem_size;
+
+    /* task communication resources */
     struct double_list_node cli_sess_listhead;
     struct double_list_node svr_sess_listhead;
     struct TraceTag server_identifier;
 
-    /* task->lock not necessary */
-    struct Thread main_thread; // will only access by task itself
+    /* task schedule attributes */
+    struct double_list_node node;
+    enum ProcState state;
+    int priority; // priority
     int remain_tick;
     int maxium_tick;
-
-    struct TraceTag cwd; // current directory
-
-    int priority; // priority
-
-    /// @todo support mem_size
-    uintptr_t mem_size; // mem size of proc used(allocated by kernel)
-    char name[TASK_NAME_MAX_LEN];
 };
 
 struct SchedulerRightGroup {
@@ -94,16 +96,9 @@ struct SchedulerRightGroup {
 };
 
 struct XiziTaskManager {
-    struct spinlock lock; // lock to organize free and used task list
     struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
-    int nr_pcb_used; // for debug
     struct slab_allocator task_allocator;
-
-    /// @todo Add pid to task
     uint32_t next_pid;
-
-    /* number of tcbs in which one page contains */
-    int nr_tcb_per_page;
 
     /* init task manager */
     void (*init)();
@@ -112,7 +107,7 @@ struct XiziTaskManager {
     /* free a task control block, this calls #free_user_pgdir to free all vitual spaces */
     void (*free_pcb)(struct TaskMicroDescriptor*);
     /* init a task control block, set name, remain_tick, state, cwd, priority, etc. */
-    void (*task_set_default_schedule_attr)(struct TaskMicroDescriptor*, struct TraceTag* cwd);
+    void (*task_set_default_schedule_attr)(struct TaskMicroDescriptor*);
 
     /* use by task_scheduler, find next READY task, should be in locked */
     struct TaskMicroDescriptor* (*next_runnable_task)(void);

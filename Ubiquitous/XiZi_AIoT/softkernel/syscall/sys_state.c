@@ -65,7 +65,7 @@ void show_tasks(void)
         }
     }
     LOG_PRINTF("******************************************************\n");
-    LOG_PRINTF("STAT     ID   TASK            PRI   LEFT_TICKS\n");
+    LOG_PRINTF("STAT     ID   TASK            PRI   MEM(KB)\n");
     for (int i = 0; i < TASK_MAX_PRIORITY; i++) {
         if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[i])) {
             continue;
@@ -82,7 +82,7 @@ void show_tasks(void)
                 LOG_PRINTF("   DEAD ");
 
             _padding(task->name);
-            LOG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->remain_tick);
+            LOG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->mem_size >> 10);
         }
     }
     LOG_PRINTF("******************************************************\n");
@@ -138,7 +138,7 @@ int sys_state(sys_state_option option, sys_state_info* info)
         info->memblock_info.memblock_start = (uintptr_t)V2P(_binary_fs_img_start);
         info->memblock_info.memblock_end = (uintptr_t)V2P(_binary_fs_img_end);
     } else if (option == SYS_STATE_GET_HEAP_BASE) {
-        return cur_cpu()->task->mem_size;
+        return cur_cpu()->task->heap_base;
     } else if (option == SYS_STATE_SET_TASK_PRIORITY) {
         xizi_task_manager.set_cur_task_priority(info->priority);
     } else if (option == SYS_STATE_SHOW_TASKS) {

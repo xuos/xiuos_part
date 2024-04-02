@@ -69,8 +69,6 @@ static struct TaskMicroDescriptor* _alloc_task_cb()
     // set pid once task is allocated
     memset(task, 0, sizeof(*task));
     task->pid = xizi_task_manager.next_pid++;
-    // update pcb used
-    xizi_task_manager.nr_pcb_used += 1;
 
     return task;
 }
@@ -98,7 +96,6 @@ static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
 
     // free task back to allocator
     slab_free(&xizi_task_manager.task_allocator, (void*)task);
-    xizi_task_manager.nr_pcb_used -= 1;
 
     // remove priority
     if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[task->priority])) {
@@ -155,12 +152,11 @@ static struct TaskMicroDescriptor* _new_task_cb()
     return task;
 }
 
-static void _task_set_default_schedule_attr(struct TaskMicroDescriptor* task, struct TraceTag* cwd)
+static void _task_set_default_schedule_attr(struct TaskMicroDescriptor* task)
 {
     task->remain_tick = TASK_CLOCK_TICK;
     task->maxium_tick = TASK_CLOCK_TICK * 10;
     task->state = READY;
-    task->cwd = *cwd;
     task->priority = TASK_DEFAULT_PRIORITY;
     doubleListAddOnHead(&task->node, &xizi_task_manager.task_list_head[task->priority]);
     ready_task_priority |= (1 << task->priority);

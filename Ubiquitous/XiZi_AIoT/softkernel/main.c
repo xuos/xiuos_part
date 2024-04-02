@@ -36,8 +36,9 @@ Modification:
 #include "task.h"
 
 extern uint32_t _binary_init_start[], _binary_default_fs_start[];
-static struct TraceTag hardkernel_tag, softkernel_tag;
+extern int sys_spawn(char* img_start, char* name, char** argv);
 
+static struct TraceTag hardkernel_tag, softkernel_tag;
 static int core_init_done = 0;
 int main(void)
 {
@@ -80,9 +81,9 @@ int main(void)
 
         /* start first task */
         char* init_task_param[2] = { "/app/init", 0 };
-        spawn_embedded_task((char*)_binary_init_start, "init", init_task_param);
+        sys_spawn((char*)_binary_init_start, "init", init_task_param);
         char* fs_server_task_param[2] = { "/app/fs_server", 0 };
-        spawn_embedded_task((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
+        sys_spawn((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
     }
 
     /* start scheduler */

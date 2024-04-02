@@ -169,13 +169,11 @@ int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, cha
     }
     strncpy(task->name, last, sizeof(task->name));
 
-    struct TopLevelPageDirectory old_pgdir = task->pgdir;
+    xizi_pager.free_user_pgdir(&task->pgdir);
     task->pgdir = pgdir;
 
-    /// @todo record mem size used b task
-    task->mem_size = ALIGNUP(load_size, PAGE_SIZE);
-
-    xizi_pager.free_user_pgdir(&old_pgdir);
+    task->heap_base = ALIGNUP(load_size, PAGE_SIZE);
+    task->mem_size = task->heap_base + USER_STACK_SIZE;
     return 0;
 
 error_exec:

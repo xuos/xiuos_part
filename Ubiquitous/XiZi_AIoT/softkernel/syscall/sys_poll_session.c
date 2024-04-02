@@ -61,28 +61,6 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         doubleListAddOnBack(cur_node, &cur_task->svr_sess_listhead);
     }
 
-    /* handle sessions for condition 2, ref. delete_share_pages() */
-    bool has_delete = true;
-    while (has_delete) {
-        has_delete = false;
-
-        DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
-        {
-            if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
-                // client had closed it, then server will close it too
-                struct session_backend* session_backend = SERVER_SESSION_BACKEND(server_session);
-
-                if (!session_backend->server_side.closed) {
-                    session_backend->server_side.closed = true;
-                    xizi_share_page_manager.unmap_task_share_pages(cur_task, session_backend->server_side.buf_addr, session_backend->nr_pages);
-                }
-                xizi_share_page_manager.delete_share_pages(session_backend);
-                has_delete = true;
-                break;
-            }
-        }
-    }
-
     /* poll with new sessions */
     int i = 0;
     DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
@@ -90,6 +68,19 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         if (i >= arr_capacity) {
             break;
         }
+
+        if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
+            // client had closed it, then server will close it too
+            struct session_backend* session_backend = SERVER_SESSION_BACKEND(server_session);
+
+            if (!session_backend->server_side.closed) {
+                session_backend->server_side.closed = true;
+                xizi_share_page_manager.unmap_task_share_pages(cur_task, session_backend->server_side.buf_addr, session_backend->nr_pages);
+            }
+            xizi_share_page_manager.delete_share_pages(session_backend);
+            break;
+        }
+
         userland_session_arr[i++] = (struct Session) {
             .buf = (void*)server_session->buf_addr,
             .capacity = server_session->capacity,
