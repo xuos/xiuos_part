@@ -28,6 +28,7 @@
  * @date 2022-08-08
  */
 #include "ch32v30x.h"
+#include "connect_can.h"
 #include "connect_ether.h"
 #include "connect_uart.h"
 #include "core_riscv.h"
@@ -71,6 +72,11 @@ void InitBoardHardware()
 #ifdef BSP_USING_ETH
     InitHwEth();
 #endif
+
+#ifdef BSP_USING_CAN
+    InitHwCan();
+#endif
+
     KPrintf("consle init completed.\n");
     KPrintf("board initialization......\n");
 
