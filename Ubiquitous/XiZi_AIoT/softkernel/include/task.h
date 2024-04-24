@@ -31,6 +31,7 @@ Modification:
 
 #include "core.h"
 
+#include "buddy.h"
 #include "list.h"
 #include "object_allocator.h"
 #include "pagetable.h"
@@ -80,6 +81,7 @@ struct TaskMicroDescriptor {
     /* task communication resources */
     struct double_list_node cli_sess_listhead;
     struct double_list_node svr_sess_listhead;
+    struct KBuddy* massive_ipc_allocator;
     struct TraceTag server_identifier;
 
     /* task schedule attributes */
@@ -98,6 +100,7 @@ struct SchedulerRightGroup {
 struct XiziTaskManager {
     struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
     struct slab_allocator task_allocator;
+    struct slab_allocator task_buddy_allocator;
     uint32_t next_pid;
 
     /* init task manager */

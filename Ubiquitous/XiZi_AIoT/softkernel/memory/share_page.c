@@ -92,8 +92,23 @@ static uintptr_t map_task_share_page(struct TaskMicroDescriptor* task, const uin
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
 
     // map double vaddr page to support uniform ring buffer r/w
-    uintptr_t vaddr = alloc_share_page_addr(task, nr_pages * 2);
-    if (UNLIKELY(vaddr == 0)) {
+    uintptr_t vaddr = (uintptr_t)NULL;
+    if (task->massive_ipc_allocator != NULL) {
+        vaddr = (uintptr_t)KBuddyAlloc(task->massive_ipc_allocator, PAGE_SIZE * nr_pages * 2);
+    } else {
+        vaddr = alloc_share_page_addr(task, nr_pages * 2);
+        if (vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
+            task->massive_ipc_allocator = (struct KBuddy*)slab_alloc(&xizi_task_manager.task_buddy_allocator);
+            KBuddyInit(task->massive_ipc_allocator, USER_IPC_USE_ALLOCATOR_WATERMARK, USER_IPC_SPACE_TOP);
+            if (!task->massive_ipc_allocator) {
+                ERROR("Alloc task buddy failed.\n");
+                return (uintptr_t)NULL;
+            }
+            vaddr = (uintptr_t)KBuddyAlloc(task->massive_ipc_allocator, nr_pages * 2);
+        }
+    }
+
+    if (UNLIKELY(vaddr == (uintptr_t)NULL)) {
         return (uintptr_t)NULL;
     }
     if (!xizi_pager.map_pages(task->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false)) {
@@ -149,6 +164,9 @@ void unmap_task_share_pages(struct TaskMicroDescriptor* task, const uintptr_t ta
 
     xizi_pager.unmap_pages(task->pgdir.pd_addr, task_vaddr, nr_pages * PAGE_SIZE);
     xizi_pager.unmap_pages(task->pgdir.pd_addr, task_vaddr + (nr_pages * PAGE_SIZE), nr_pages * PAGE_SIZE);
+    if (task_vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
+        KBuddyFree(task->massive_ipc_allocator, (void*)task_vaddr);
+    }
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(task_vaddr, 2 * nr_pages * PAGE_SIZE);
 

@@ -68,7 +68,6 @@ struct KFreeList {
     struct double_list_node list_head;
 };
 
-#define MAX_NR_PAGES MAX_NR_FREE_PAGES
 struct KBuddy {
     uint32_t n_pages;
     uint32_t use_lock;
@@ -77,7 +76,7 @@ struct KBuddy {
     struct KPage* first_page;
     uint32_t mem_start;
     uint32_t mem_end;
-    struct KPage pages[MAX_NR_PAGES];
+    struct KPage* pages;
 };
 
 /*********************************************
@@ -89,6 +88,7 @@ struct KBuddy {
  * @param mem_end  free memory region end
  * @return void
  */
+bool KBuddyInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end);
 void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end);
 
 /*
@@ -104,6 +104,8 @@ char* KBuddyAlloc(struct KBuddy* pbuddy, uint32_t size);
  * @param isFreeSuccess(bool) return false if free failed, or return true
  */
 bool KBuddyFree(struct KBuddy* pbuddy, char* vaddr);
+
+void KBuddyDestory(struct KBuddy* pbuddy);
 
 /*
  * Print current free pages for debug.

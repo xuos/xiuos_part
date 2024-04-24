@@ -49,6 +49,7 @@ static void _task_manager_init()
     }
     // init task (slab) allocator
     slab_init(&xizi_task_manager.task_allocator, sizeof(struct TaskMicroDescriptor));
+    slab_init(&xizi_task_manager.task_buddy_allocator, sizeof(struct KBuddy));
 
     // pid pool
     xizi_task_manager.next_pid = 0;
@@ -95,6 +96,10 @@ static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
     doubleListDel(cur_node);
 
     // free task back to allocator
+    if (task->massive_ipc_allocator != NULL) {
+        KBuddyDestory(task->massive_ipc_allocator);
+        slab_free(&xizi_task_manager.task_buddy_allocator, (void*)task->massive_ipc_allocator);
+    }
     slab_free(&xizi_task_manager.task_allocator, (void*)task);
 
     // remove priority

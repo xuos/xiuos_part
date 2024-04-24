@@ -60,6 +60,7 @@ Modification:
 #define USER_MEM_BASE       (0x00000000)
 #define USER_MEM_TOP        DEV_VRTMEM_BASE
 #define USER_IPC_SPACE_BASE (0x70000000)
+#define USER_IPC_USE_ALLOCATOR_WATERMARK    (0x70010000)
 #define USER_IPC_SPACE_TOP  (USER_MEM_TOP - USER_STACK_SIZE)
 
 /* Deivce memory layout */
