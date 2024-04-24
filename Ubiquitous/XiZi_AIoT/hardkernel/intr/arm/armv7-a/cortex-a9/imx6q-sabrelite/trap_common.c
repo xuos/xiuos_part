@@ -47,8 +47,10 @@ static struct XiziTrapDriver xizi_trap_driver;
 
 void panic(char* s)
 {
-    xizi_trap_driver.cpu_irq_disable();
-    spinlock_unlock(&whole_kernel_lock);
+    // xizi_trap_driver.cpu_irq_disable();
+    if (is_spinlock_locked(&whole_kernel_lock) && whole_kernel_lock.owner_cpu == cur_cpuid()) {
+        spinlock_unlock(&whole_kernel_lock);
+    }
     KPrintf("panic: %s\n", s);
     for (;;)
         ;

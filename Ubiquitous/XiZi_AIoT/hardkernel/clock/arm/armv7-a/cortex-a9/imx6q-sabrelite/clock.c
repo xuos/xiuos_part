@@ -40,22 +40,7 @@ static void _sys_clock_init()
 {
     uint32_t freq = get_main_clock(IPG_CLK);
     gpt_init(CLKSRC_IPG_CLK, freq / 1000000, RESTART_MODE, WAIT_MODE_EN | STOP_MODE_EN);
-    switch (cur_cpuid()) {
-    case 0:
-        gpt_set_compare_event(kGPTOutputCompare1, OUTPUT_CMP_DISABLE, 1000);
-        gpt_counter_enable(kGPTOutputCompare1);
-        break;
-    case 1:
-        gpt_set_compare_event(kGPTOutputCompare2, OUTPUT_CMP_DISABLE, 5000);
-        gpt_counter_enable(kGPTOutputCompare2);
-        break;
-    case 2:
-        gpt_set_compare_event(kGPTOutputCompare3, OUTPUT_CMP_DISABLE, 10000);
-        gpt_counter_enable(kGPTOutputCompare3);
-        break;
-    default:
-        break;
-    }
+    gpt_set_compare_event(kGPTOutputCompare1, OUTPUT_CMP_DISABLE, 1000);
 }
 
 static uint32_t _get_clock_int()
@@ -75,20 +60,7 @@ static uint64_t _get_second()
 
 static void _clear_clock_intr()
 {
-    switch (cur_cpuid()) {
-    case 0:
-        gpt_get_compare_event(kGPTOutputCompare1);
-        break;
-    case 1:
-        gpt_get_compare_event(kGPTOutputCompare2);
-        break;
-    case 2:
-        gpt_get_compare_event(kGPTOutputCompare3);
-        break;
-    case 3:
-        gpt_get_compare_event(kGPTOutputCompare1);
-        break;
-    }
+    gpt_get_compare_event(kGPTOutputCompare1);
 }
 
 static bool _is_timer_expired()

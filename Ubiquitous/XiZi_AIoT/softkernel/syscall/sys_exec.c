@@ -69,9 +69,15 @@ Modification:
 int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, char** argv)
 {
     /* load img to task */
+    if (img_start == NULL) {
+        return -1;
+    }
     /* 1. load elf header */
     struct elfhdr elf;
     memcpy((void*)&elf, img_start, sizeof(elf));
+    if (elf.magic != ELF_MAGIC) {
+        return -1;
+    }
     // pgdir for new task
     struct TopLevelPageDirectory pgdir;
     pgdir.pd_addr = NULL;
