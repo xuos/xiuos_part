@@ -104,7 +104,7 @@ static uintptr_t map_task_share_page(struct TaskMicroDescriptor* task, const uin
                 ERROR("Alloc task buddy failed.\n");
                 return (uintptr_t)NULL;
             }
-            vaddr = (uintptr_t)KBuddyAlloc(task->massive_ipc_allocator, nr_pages * 2);
+            return map_task_share_page(task, paddr, nr_pages);
         }
     }
 

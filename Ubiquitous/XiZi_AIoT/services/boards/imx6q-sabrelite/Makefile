@@ -18,7 +18,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/fs/libfs \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app
 
-board: libserial.o usyscall.o
+board: libserial.o usyscall.o test_irq_sender.o
 	@mv $^ ../../app
 
 %.o: %.c

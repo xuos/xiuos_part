@@ -48,6 +48,7 @@ enum ProcState {
     READY,
     RUNNING,
     DEAD,
+    NEVER_RUN,
 };
 
 /* Thread Control Block */
