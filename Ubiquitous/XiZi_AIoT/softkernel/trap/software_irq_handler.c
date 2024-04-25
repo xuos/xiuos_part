@@ -48,11 +48,8 @@ bool swi_distributer_init(struct SwiDispatcherRightGroup* _right_group)
 extern void context_switch(struct context**, struct context*);
 void software_irq_dispatch(struct trapframe* tf)
 {
-
+    xizi_enter_kernel();
     assert(p_intr_driver != NULL);
-
-    p_intr_driver->cpu_irq_disable();
-    spinlock_lock(&whole_kernel_lock);
 
     // get current task
     struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
@@ -79,6 +76,5 @@ void software_irq_dispatch(struct trapframe* tf)
         panic("Exit reaches");
     }
 
-    spinlock_unlock(&whole_kernel_lock);
-    p_intr_driver->cpu_irq_enable();
+    xizi_leave_kernel();
 }

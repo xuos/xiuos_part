@@ -95,106 +95,54 @@ trap_irq_enter:
 	b   	trap_return
 
 trap_reset_enter:
-	mov     r14, 	#0 
-	sub 	r13, r13, #56
-	str 	r14, [r13, #52]
-	str 	r12, [r13, #48]
-	str 	r11, [r13, #44]
-	str 	r10, [r13, #40]
-	str 	r9, [r13, #36]
-	str 	r8, [r13, #32]
-	str 	r7, [r13, #28]
-	str 	r6, [r13, #24]
-	str 	r5, [r13, #20]
-	str 	r4, [r13, #16]
-	str 	r3, [r13, #12]
-	str 	r2, [r13, #8]
-	str 	r1, [r13, #4]
-	str 	r0, [r13]
-
-	mrs     r2, 	spsr       
-	stmfd   r13!, 	{r2}       	
-	stmfd   r13!, 	{r14}      
-	stmfd   r13, 	{sp, lr}^  
+	mov     r14, 	#0           	// lr: not defined on reset
+	stmfd   r13!, 	{r0-r12, r14}
+	mrs     r2, 	spsr            // copy spsr to r2
+	stmfd   r13!, 	{r2}       		// save r2(spsr) to the stack
+	stmfd   r13!, 	{r14}      		// save r14 again (it is not really correct)
+	stmfd   r13, 	{sp, lr}^      	// save user mode sp and lr
 	sub     r13, 	r13, #8
-	mov     r0, 	r13
+
+	# call traps (trapframe *fp)
+	mov     r0, 	r13           	// copy r13_svc to r0
 	bl      _vector_jumper
 
 trap_dabort:
-	sub     r14, 	r14, #8
-	sub 	r13, r13, #56
-	str 	r14, [r13, #52]
-	str 	r12, [r13, #48]
-	str 	r11, [r13, #44]
-	str 	r10, [r13, #40]
-	str 	r9, [r13, #36]
-	str 	r8, [r13, #32]
-	str 	r7, [r13, #28]
-	str 	r6, [r13, #24]
-	str 	r5, [r13, #20]
-	str 	r4, [r13, #16]
-	str 	r3, [r13, #12]
-	str 	r2, [r13, #8]
-	str 	r1, [r13, #4]
-	str 	r0, [r13]
-
-	mrs     r2, 	spsr 
-	stmfd   r13!, 	{r2}     
-	stmfd   r13!, 	{r14} 
-	stmfd   r13, 	{sp, lr}^ 
+	sub     r14, 	r14, #8        	// lr: instruction causing the abort
+	stmfd   r13!, 	{r0-r12, r14}
+	mrs     r2, 	spsr          	// copy spsr to r2
+	stmfd   r13!, 	{r2}           	// save r2(spsr) to the stack
+	stmfd   r13!, 	{r14}         	// save r14 again (it is not really correct)
+	stmfd   r13, 	{sp, lr}^     	// save user mode sp and lr
 	sub     r13, 	r13, #8
-	mov     r0, 	r13
+
+	# call traps (trapframe *fp)
+	mov     r0, r13                 // save trapframe as the first parameter
 	bl      dabort_handler
 
 trap_iabort:
-	sub     r14, 	r14, #4
-	sub 	r13, r13, #56
-	str 	r14, [r13, #52]
-	str 	r12, [r13, #48]
-	str 	r11, [r13, #44]
-	str 	r10, [r13, #40]
-	str 	r9, [r13, #36]
-	str 	r8, [r13, #32]
-	str 	r7, [r13, #28]
-	str 	r6, [r13, #24]
-	str 	r5, [r13, #20]
-	str 	r4, [r13, #16]
-	str 	r3, [r13, #12]
-	str 	r2, [r13, #8]
-	str 	r1, [r13, #4]
-	str 	r0, [r13]
-
-	mrs     r2, 	spsr
-	stmfd   r13!, 	{r2}
-	stmfd   r13!, 	{r14}
-	stmfd   r13, 	{sp, lr}^
+	sub     r14, 	r14, #4        	// lr: instruction causing the abort
+	stmfd   r13!, 	{r0-r12, r14}
+	mrs     r2, 	spsr           	// copy spsr to r2
+	stmfd   r13!, 	{r2}           	// save r2(spsr) to the stack
+	stmfd   r13!, 	{r14}          	// save r14 again (it is not really correct)
+	stmfd   r13, 	{sp, lr}^      	// save user mode sp and lr
 	sub     r13, 	r13, #8
-	mov     r0, 	r13 
+
+	# call traps (trapframe *fp)
+	mov     r0, 	r13            	// save trapframe as the first parameter
 	bl      iabort_handler
 
 trap_undefined_instruction:
-	sub 	r13, r13, #56
-	str 	r14, [r13, #52]
-	str 	r12, [r13, #48]
-	str 	r11, [r13, #44]
-	str 	r10, [r13, #40]
-	str 	r9, [r13, #36]
-	str 	r8, [r13, #32]
-	str 	r7, [r13, #28]
-	str 	r6, [r13, #24]
-	str 	r5, [r13, #20]
-	str 	r4, [r13, #16]
-	str 	r3, [r13, #12]
-	str 	r2, [r13, #8]
-	str 	r1, [r13, #4]
-	str 	r0, [r13]
-
-	mrs     r2, 	spsr 
-	stmfd   r13!, 	{r2}
-	stmfd   r13!, 	{r14}
-	stmfd   r13, 	{sp, lr}^
+	stmfd   r13!, 	{r0-r12, r14}
+	mrs     r2, 	spsr           	// copy spsr to r2
+	stmfd   r13!, 	{r2}           	// save r2(spsr) to the stack
+	stmfd   r13!, 	{r14}          	// save r14 again (it is not really correct)
+	stmfd   r13, 	{sp, lr}^      	// save user mode sp and lr
 	sub     r13, 	r13, #8
-	mov     r0, 	r13
+
+	# call traps (trapframe *fp)
+	mov     r0, 	r13            	// save trapframe as the first parameter
 	bl      handle_undefined_instruction
 
 

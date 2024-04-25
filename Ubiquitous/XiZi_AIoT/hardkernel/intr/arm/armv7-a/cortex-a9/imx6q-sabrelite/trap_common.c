@@ -42,15 +42,13 @@ extern void trap_iabort(void);
 extern void trap_dabort(void);
 extern void trap_irq_enter(void);
 extern void trap_undefined_instruction(void);
+extern void handle_reserved(void);
+extern void handle_fiq(void);
 
 static struct XiziTrapDriver xizi_trap_driver;
 
 void panic(char* s)
 {
-    // xizi_trap_driver.cpu_irq_disable();
-    if (is_spinlock_locked(&whole_kernel_lock) && whole_kernel_lock.owner_cpu == cur_cpuid()) {
-        spinlock_unlock(&whole_kernel_lock);
-    }
     KPrintf("panic: %s\n", s);
     for (;;)
         ;
@@ -58,7 +56,6 @@ void panic(char* s)
 
 /* stack for different mode*/
 static char mode_stack_pages[NR_CPU][NR_MODE_STACKS][MODE_STACK_SIZE];
-
 extern uint32_t _vector_jumper;
 extern uint32_t _vector_start;
 extern uint32_t _vector_end;
@@ -71,19 +68,6 @@ void init_cpu_mode_stacks(int cpu_id)
         memset(mode_stack_pages[cpu_id][i], 0, MODE_STACK_SIZE);
         init_stack(modes[i], (uint32_t)mode_stack_pages[cpu_id][i]);
     }
-}
-
-void handle_reserved(void)
-{
-    // unimplemented trap handler
-    LOG("Unimplemented Reserved\n");
-    panic("");
-}
-
-void handle_fiq(void)
-{
-    LOG("Unimplemented FIQ\n");
-    panic("");
 }
 
 static void _sys_irq_init(int cpu_id)

@@ -56,16 +56,15 @@ void default_interrupt_routine(void)
 extern void context_switch(struct context**, struct context*);
 void intr_irq_dispatch(struct trapframe* tf)
 {
-    assert(p_intr_driver != NULL);
-
-    p_intr_driver->cpu_irq_disable();
+    xizi_enter_kernel();
 
     // enter irq
+    assert(p_intr_driver != NULL);
     uintptr_t int_info = 0;
     if ((int_info = p_intr_driver->hw_before_irq()) == 0) {
+        xizi_leave_kernel();
         return;
     }
-    spinlock_lock(&whole_kernel_lock);
 
     struct TaskMicroDescriptor* current_task = cur_cpu()->task;
     if (LIKELY(current_task != NULL)) {
@@ -94,6 +93,17 @@ void intr_irq_dispatch(struct trapframe* tf)
     }
     assert(current_task == cur_cpu()->task);
 
+    xizi_leave_kernel();
+}
+
+void xizi_enter_kernel()
+{
+    p_intr_driver->cpu_irq_disable();
+    spinlock_lock(&whole_kernel_lock);
+}
+
+void xizi_leave_kernel()
+{
     spinlock_unlock(&whole_kernel_lock);
     p_intr_driver->cpu_irq_enable();
 }

@@ -48,3 +48,6 @@ static inline struct CPU* cur_cpu(void)
 }
 
 struct spinlock whole_kernel_lock;
+
+void xizi_enter_kernel();
+void xizi_leave_kernel();

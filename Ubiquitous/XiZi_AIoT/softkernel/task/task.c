@@ -171,10 +171,10 @@ struct TaskMicroDescriptor* next_task_emergency = NULL;
 extern void context_switch(struct context**, struct context*);
 static void _scheduler(struct SchedulerRightGroup right_group)
 {
+    xizi_enter_kernel();
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
     struct TaskMicroDescriptor* next_task;
 
-    spinlock_lock(&whole_kernel_lock);
     while (1) {
         next_task = NULL;
         /* find next runnable task */

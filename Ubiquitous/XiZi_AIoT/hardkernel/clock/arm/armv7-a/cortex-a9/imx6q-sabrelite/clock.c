@@ -41,6 +41,7 @@ static void _sys_clock_init()
     uint32_t freq = get_main_clock(IPG_CLK);
     gpt_init(CLKSRC_IPG_CLK, freq / 1000000, RESTART_MODE, WAIT_MODE_EN | STOP_MODE_EN);
     gpt_set_compare_event(kGPTOutputCompare1, OUTPUT_CMP_DISABLE, 1000);
+    gpt_counter_enable(kGPTOutputCompare1);
 }
 
 static uint32_t _get_clock_int()
