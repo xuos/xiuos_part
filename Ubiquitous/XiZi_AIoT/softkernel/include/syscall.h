@@ -93,4 +93,6 @@ int sys_state(sys_state_option option, sys_state_info* info);
 int sys_mmap(uintptr_t vaddr, uintptr_t paddr, int len, int is_dev);
 
 int sys_register_irq(int irq_num, int irq_opcode);
+int sys_unbind_irq_all(struct TaskMicroDescriptor* task);
+int sys_unbind_irq(struct TaskMicroDescriptor* task, int irq_num);
 #endif

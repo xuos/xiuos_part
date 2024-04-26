@@ -62,8 +62,7 @@ void intr_irq_dispatch(struct trapframe* tf)
     assert(p_intr_driver != NULL);
     uintptr_t int_info = 0;
     if ((int_info = p_intr_driver->hw_before_irq()) == 0) {
-        xizi_leave_kernel();
-        return;
+        goto intr_leave_interrupt;
     }
 
     struct TaskMicroDescriptor* current_task = cur_cpu()->task;
@@ -77,7 +76,7 @@ void intr_irq_dispatch(struct trapframe* tf)
 
     // distribute irq
     irq_handler_t isr = p_intr_driver->sw_irqtbl[irq].handler;
-    if (isr) {
+    if (isr != NULL) {
         isr(irq, tf, NULL);
     } else {
         default_interrupt_routine();
@@ -93,6 +92,7 @@ void intr_irq_dispatch(struct trapframe* tf)
     }
     assert(current_task == cur_cpu()->task);
 
+intr_leave_interrupt:
     xizi_leave_kernel();
 }
 
@@ -106,4 +106,9 @@ void xizi_leave_kernel()
 {
     spinlock_unlock(&whole_kernel_lock);
     p_intr_driver->cpu_irq_enable();
+}
+
+bool xizi_is_in_kernel()
+{
+    return is_spinlock_locked(&whole_kernel_lock);
 }

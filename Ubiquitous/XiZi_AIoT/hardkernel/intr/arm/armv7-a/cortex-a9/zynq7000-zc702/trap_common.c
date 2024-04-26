@@ -164,24 +164,6 @@ static void _bind_irq_handler(int irq, irq_handler_t handler)
     xizi_trap_driver.sw_irqtbl[irq].handler = handler;
 }
 
-static bool _send_sgi(uint32_t irq, uint32_t bitmask, enum SgiFilterType type)
-{
-    if (bitmask > (1 << NR_CPU) - 1) {
-        return false;
-    }
-
-    int cpu_id = 0;
-    while (bitmask != 0) {
-        if ((bitmask & 0x1) != 0) {
-            XScuGic_SoftwareIntr(&IntcInstance, irq, cpu_id);
-        }
-        cpu_id++;
-        bitmask >>= 1;
-    }
-
-    return true;
-}
-
 static uint32_t _hw_before_irq()
 {
 
@@ -233,7 +215,6 @@ static struct XiziTrapDriver xizi_trap_driver = {
     .switch_hw_irqtbl = _switch_hw_irqtbl,
 
     .bind_irq_handler = _bind_irq_handler,
-    .send_sgi = _send_sgi,
 
     .is_interruptable = _is_interruptable,
     .hw_before_irq = _hw_before_irq,

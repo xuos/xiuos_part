@@ -175,9 +175,10 @@ int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, cha
     }
     strncpy(task->name, last, sizeof(task->name));
 
-    xizi_pager.free_user_pgdir(&task->pgdir);
+    if (task->pgdir.pd_addr != NULL) {
+        xizi_pager.free_user_pgdir(&task->pgdir);
+    }
     task->pgdir = pgdir;
-
     task->heap_base = ALIGNUP(load_size, PAGE_SIZE);
     task->mem_size = task->heap_base + USER_STACK_SIZE;
     return 0;

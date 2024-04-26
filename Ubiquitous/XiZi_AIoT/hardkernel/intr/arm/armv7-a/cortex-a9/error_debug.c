@@ -110,50 +110,56 @@ void handle_fiq(void)
 extern void context_switch(struct context**, struct context*);
 void dabort_handler(struct trapframe* r)
 {
-    xizi_enter_kernel();
-
-    uint32_t dfs, dfa;
-    __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 0" : "=r"(dfs)::);
-    __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 0" : "=r"(dfa)::);
-
-    if (r->pc < KERN_MEM_BASE) { // Exception occured in User space: exit
-        ERROR("dabort in user space: %s\n", cur_cpu()->task->name);
-        LOG("program counter: 0x%x caused\n", r->pc);
-        LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
-        _abort_reason(dfs);
-        dump_tf(r);
-        sys_exit(cur_cpu()->task);
-        context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
-    } else { // Exception occured in Kernel space: panic
+    if (xizi_is_in_kernel()) {
+        uint32_t dfs, dfa;
+        __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 0" : "=r"(dfs)::);
+        __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 0" : "=r"(dfa)::);
         LOG("program counter: 0x%x caused\n", r->pc);
         LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
         _abort_reason(dfs);
         dump_tf(r);
         panic("data abort exception\n");
     }
+
+    xizi_enter_kernel();
+
+    uint32_t dfs, dfa;
+    __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 0" : "=r"(dfs)::);
+    __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 0" : "=r"(dfa)::);
+
+    ERROR("dabort in user space: %s\n", cur_cpu()->task->name);
+    LOG("program counter: 0x%x caused\n", r->pc);
+    LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
+    _abort_reason(dfs);
+    dump_tf(r);
+    sys_exit(cur_cpu()->task);
+    context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
 }
 
 void iabort_handler(struct trapframe* r)
 {
-    xizi_enter_kernel();
-    uint32_t ifs, ifa;
-
-    __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 1" : "=r"(ifs)::);
-    __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 2" : "=r"(ifa)::);
-
-    if (r->pc < KERN_MEM_BASE) { // Exception occured in User space: exit
-        ERROR("iabort in user space: %s\n", cur_cpu()->task->name);
-        LOG("program counter: 0x%x(%s) caused\n", r->pc, cur_cpu()->task);
-        LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, ifs);
-        _abort_reason(ifs);
-        dump_tf(r);
-        sys_exit(cur_cpu()->task);
-        context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
-    } else { // Exception occured in Kernel space: panic
-        LOG("program counter: 0x%x(%s) caused\n", r->pc, cur_cpu()->task);
+    if (xizi_is_in_kernel()) {
+        uint32_t ifs, ifa;
+        __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 1" : "=r"(ifs)::);
+        __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 2" : "=r"(ifa)::);
+        LOG("program counter: 0x%x caused\n", r->pc);
         LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, ifs);
         _abort_reason(ifs);
         dump_tf(r);
         panic("prefetch abort exception\n");
     }
+
+    xizi_enter_kernel();
+
+    uint32_t ifs, ifa;
+    __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 1" : "=r"(ifs)::);
+    __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 2" : "=r"(ifa)::);
+
+    ERROR("iabort in user space: %s\n", cur_cpu()->task->name);
+    LOG("program counter: 0x%x(%s) caused\n", r->pc, cur_cpu()->task);
+    LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, ifs);
+    _abort_reason(ifs);
+    dump_tf(r);
+    sys_exit(cur_cpu()->task);
+    context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
 }

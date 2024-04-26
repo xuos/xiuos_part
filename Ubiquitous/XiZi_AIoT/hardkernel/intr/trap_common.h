@@ -66,9 +66,8 @@ struct XiziTrapDriver {
     void (*cpu_irq_disable)();
     void (*single_irq_enable)(int irq, int cpu, int prio);
     void (*single_irq_disable)(int irq, int cpu);
-    uint32_t* (*switch_hw_irqtbl)(uint32_t*);
 
-    bool (*send_sgi)(uint32_t, uint32_t, enum SgiFilterType);
+    uint32_t* (*switch_hw_irqtbl)(uint32_t*);
     void (*bind_irq_handler)(int, irq_handler_t);
 
     /* check if no if interruptable */

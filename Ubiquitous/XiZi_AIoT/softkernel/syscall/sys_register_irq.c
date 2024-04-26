@@ -79,26 +79,33 @@ int user_irq_handler(int irq, void* tf, void* arg)
         AchieveResourceTag(&mmu_driver_tag, RequireRootTag(), "/hardkernel/mmu-ac-resource");
         p_mmu_driver = (struct MmuCommonDone*)AchieveResource(&mmu_driver_tag);
     }
-    p_mmu_driver->LoadPgdir((uintptr_t)V2P(kernel_irq_proxy->pgdir.pd_addr));
-    send_irq_to_user(irq);
-    p_mmu_driver->LoadPgdir((uintptr_t)V2P(cur_cpu()->task->pgdir.pd_addr));
 
-    next_task_emergency = irq_forward_table[irq].handle_task;
-    xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
+    if (irq_forward_table[irq].handle_task != NULL) {
+        p_mmu_driver->LoadPgdir((uintptr_t)V2P(kernel_irq_proxy->pgdir.pd_addr));
+        send_irq_to_user(irq);
+        p_mmu_driver->LoadPgdir((uintptr_t)V2P(cur_cpu()->task->pgdir.pd_addr));
+
+        next_task_emergency = irq_forward_table[irq].handle_task;
+        xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
+    }
     return 0;
 }
 
 extern int create_session_inner(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, int capacity, struct Session* user_session);
 /// @warning no tested.
+
+static struct XiziTrapDriver* p_intr_driver = NULL;
 int sys_register_irq(int irq_num, int irq_opcode)
 {
     // init intr resource;
-    static struct TraceTag intr_ac_tag;
-    if (!AchieveResourceTag(&intr_ac_tag, RequireRootTag(), "hardkernel/intr-ac-resource")) {
-        ERROR("intr not initialized.\n");
-        return -1;
+    if (p_intr_driver == NULL) {
+        struct TraceTag intr_ac_tag;
+        if (!AchieveResourceTag(&intr_ac_tag, RequireRootTag(), "hardkernel/intr-ac-resource")) {
+            ERROR("intr not initialized.\n");
+            return -1;
+        }
+        p_intr_driver = (struct XiziTrapDriver*)AchieveResource(&intr_ac_tag);
     }
-    struct XiziTrapDriver* p_intr_driver = AchieveResource(&intr_ac_tag);
 
     // init kerenl sender proxy
     if (kernel_irq_proxy == NULL) {
@@ -118,6 +125,30 @@ int sys_register_irq(int irq_num, int irq_opcode)
     irq_forward_table[irq_num].opcode = irq_opcode;
     create_session_inner(kernel_irq_proxy, cur_task, PAGE_SIZE, &irq_forward_table[irq_num].session);
     p_intr_driver->bind_irq_handler(irq_num, user_irq_handler);
+    cur_task->bind_irq = true;
 
+    return 0;
+}
+
+int sys_unbind_irq(struct TaskMicroDescriptor* task, int irq_num)
+{
+    if (irq_forward_table[irq_num].handle_task != task) {
+        return -1;
+    }
+
+    irq_forward_table[irq_num].handle_task = NULL;
+    sys_close_session(&irq_forward_table[irq_num].session);
+    DEBUG("Unbind: %s to irq %d", task->name, irq_num);
+    return 0;
+}
+
+int sys_unbind_irq_all(struct TaskMicroDescriptor* task)
+{
+    for (int idx = 0; idx < NR_IRQS; idx++) {
+        if (irq_forward_table[idx].handle_task == task) {
+            sys_unbind_irq(task, idx);
+        }
+    }
+    task->bind_irq = false;
     return 0;
 }

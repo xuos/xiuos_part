@@ -51,3 +51,4 @@ struct spinlock whole_kernel_lock;
 
 void xizi_enter_kernel();
 void xizi_leave_kernel();
+bool xizi_is_in_kernel();

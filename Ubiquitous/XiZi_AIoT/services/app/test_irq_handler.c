@@ -35,7 +35,10 @@ IPC_SERVER_INTERFACE(Ipc_intr_3, 1);
 IPC_SERVER_REGISTER_INTERFACES(IpcSwIntrHandler, 1, Ipc_intr_3);
 int main()
 {
-    register_irq(SW_INTERRUPT_3, Ipc_intr_3);
+    if (register_irq(SW_INTERRUPT_3, Ipc_intr_3) == -1) {
+        printf("TEST_SW_HDLR: bind failed");
+        exit();
+    }
     ipc_server_loop(&IpcSwIntrHandler);
 
     exit();

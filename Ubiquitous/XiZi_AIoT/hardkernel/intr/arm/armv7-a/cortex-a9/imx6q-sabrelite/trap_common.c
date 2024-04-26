@@ -85,9 +85,10 @@ static void _sys_irq_init(int cpu_id)
         vector_base[5] = (uint32_t)handle_reserved; // Reserved
         vector_base[6] = (uint32_t)trap_irq_enter; // IRQ
         vector_base[7] = (uint32_t)handle_fiq; // FIQ
+
+        gic_init();
     }
     /* active hardware irq responser */
-    gic_init();
     xizi_trap_driver.switch_hw_irqtbl((uint32_t*)&_vector_jumper);
 }
 
@@ -137,29 +138,6 @@ static inline uint32_t* _switch_hw_irqtbl(uint32_t* new_tbl_base)
 static void _bind_irq_handler(int irq, irq_handler_t handler)
 {
     xizi_trap_driver.sw_irqtbl[irq].handler = handler;
-}
-
-static bool _send_sgi(uint32_t irq, uint32_t bitmask, enum SgiFilterType type)
-{
-    if (bitmask > (1 << NR_CPU) - 1) {
-        return false;
-    }
-
-    enum _gicd_sgi_filter sgi_filter;
-    switch (type) {
-    case SgiFilter_TargetList:
-        sgi_filter = kGicSgiFilter_UseTargetList;
-        break;
-    case SgiFilter_AllOtherCPUs:
-        sgi_filter = kGicSgiFilter_AllOtherCPUs;
-        break;
-    default:
-        sgi_filter = kGicSgiFilter_OnlyThisCPU;
-        break;
-    }
-    gic_send_sgi(irq, bitmask, sgi_filter);
-
-    return true;
 }
 
 static uint32_t _hw_before_irq()
@@ -217,7 +195,6 @@ static struct XiziTrapDriver xizi_trap_driver = {
     .switch_hw_irqtbl = _switch_hw_irqtbl,
 
     .bind_irq_handler = _bind_irq_handler,
-    .send_sgi = _send_sgi,
 
     .is_interruptable = _is_interruptable,
     .hw_before_irq = _hw_before_irq,

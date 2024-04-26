@@ -64,6 +64,8 @@ struct Thread {
 struct TaskMicroDescriptor {
     /* task debug resources */
     int pid;
+    bool bind_irq;
+    bool dead;
     char name[TASK_NAME_MAX_LEN];
 
     /// @todo support return value

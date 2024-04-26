@@ -32,10 +32,11 @@ Modification:
 #include "core.h"
 
 #include "assert.h"
+#include "kalloc.h"
 #include "log.h"
 #include "multicores.h"
-#include "kalloc.h"
 #include "scheduler.h"
+#include "syscall.h"
 #include "task.h"
 
 struct CPU global_cpus[NR_CPU];
@@ -74,6 +75,59 @@ static struct TaskMicroDescriptor* _alloc_task_cb()
     return task;
 }
 
+int _task_retrieve_sys_resources(struct TaskMicroDescriptor* ptask)
+{
+    assert(ptask != NULL);
+
+    /* handle sessions for condition 1, ref. delete_share_pages() */
+    // close all server_sessions
+    struct server_session* server_session = NULL;
+    while (!IS_DOUBLE_LIST_EMPTY(&ptask->svr_sess_listhead)) {
+        server_session = CONTAINER_OF(ptask->svr_sess_listhead.next, struct server_session, node);
+        // cut the connection from task to session
+        if (!server_session->closed) {
+            xizi_share_page_manager.unmap_task_share_pages(ptask, server_session->buf_addr, CLIENT_SESSION_BACKEND(server_session)->nr_pages);
+            server_session->closed = true;
+        }
+        doubleListDel(&server_session->node);
+        SERVER_SESSION_BACKEND(server_session)->server = NULL;
+        // delete session (also cut connection from session to task)
+        if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
+            xizi_share_page_manager.delete_share_pages(SERVER_SESSION_BACKEND(server_session));
+        }
+    }
+    // close all client_sessions
+    struct client_session* client_session = NULL;
+    while (!IS_DOUBLE_LIST_EMPTY(&ptask->cli_sess_listhead)) {
+        client_session = CONTAINER_OF(ptask->cli_sess_listhead.next, struct client_session, node);
+        // cut the connection from task to session
+        if (!client_session->closed) {
+            xizi_share_page_manager.unmap_task_share_pages(ptask, client_session->buf_addr, CLIENT_SESSION_BACKEND(client_session)->nr_pages);
+            client_session->closed = true;
+        }
+        doubleListDel(&client_session->node);
+        CLIENT_SESSION_BACKEND(client_session)->client = NULL;
+        // delete session (also cut connection from session to task)
+        if (CLIENT_SESSION_BACKEND(client_session)->server_side.closed) {
+            xizi_share_page_manager.delete_share_pages(CLIENT_SESSION_BACKEND(client_session));
+        }
+    }
+
+    if (ptask->server_identifier.meta != NULL) {
+        struct TraceTag server_identifier_owner;
+        AchieveResourceTag(&server_identifier_owner, RequireRootTag(), "softkernel/server-identifier");
+        assert(server_identifier_owner.meta != NULL);
+        DeleteResource(&ptask->server_identifier, &server_identifier_owner);
+    }
+
+    // delete registered irq if there is one
+    if (ptask->bind_irq) {
+        sys_unbind_irq_all(ptask);
+    }
+
+    return 0;
+}
+
 /// @brief this function changes task list without locking, so it must be called inside a lock critical area
 /// @param task
 static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
@@ -82,6 +136,8 @@ static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
         ERROR("deallocating a NULL task\n");
         return;
     }
+
+    _task_retrieve_sys_resources(task);
 
     // stack is mapped in vspace, so it should be free by pgdir
     if (task->pgdir.pd_addr) {
@@ -112,7 +168,7 @@ static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
 extern void trap_return(void);
 void task_prepare_enter()
 {
-    spinlock_unlock(&whole_kernel_lock);
+    xizi_leave_kernel();
     trap_return();
 }
 
@@ -124,10 +180,7 @@ static struct TaskMicroDescriptor* _new_task_cb()
         return NULL;
     }
     // init vm
-    if (!xizi_pager.new_pgdir(&task->pgdir)) {
-        _dealloc_task_cb(task);
-        return NULL;
-    }
+    task->pgdir.pd_addr = NULL;
     /* init basic task member */
     doubleListNodeInit(&task->cli_sess_listhead);
     doubleListNodeInit(&task->svr_sess_listhead);
@@ -180,14 +233,12 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         assert(cur_cpu()->task == NULL);
         if (next_task_emergency != NULL && next_task->state == READY) {
             next_task = next_task_emergency;
-            next_task->state = RUNNING;
         } else {
             next_task = xizi_task_manager.next_runnable_task();
         }
         next_task_emergency = NULL;
         if (next_task != NULL) {
             assert(next_task->state == READY);
-            next_task->state = RUNNING;
         }
         spinlock_unlock(&whole_kernel_lock);
 
@@ -199,11 +250,16 @@ static void _scheduler(struct SchedulerRightGroup right_group)
 
         /* a runnable task */
         spinlock_lock(&whole_kernel_lock);
-        assert(next_task->state == RUNNING);
+        if (next_task->state == READY) {
+            next_task->state = RUNNING;
+        } else {
+            continue;
+        }
         struct CPU* cpu = cur_cpu();
         cpu->task = next_task;
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->pgdir.pd_addr));
         context_switch(&cpu->scheduler, next_task->main_thread.context);
+        assert(next_task->state != RUNNING);
     }
 }
 
