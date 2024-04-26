@@ -24,6 +24,19 @@ enum {
     ARM_PERIPHERAL_VIRT_BASE = 0x50000000,
 };
 
+enum _gicd_sgi_filter {
+    //! Forward the interrupt to the CPU interfaces specified in the @a target_list parameter.
+    kGicSgiFilter_UseTargetList = 0,
+
+    //! Forward the interrupt to all CPU interfaces except that of the processor that requested
+    //! the interrupt.
+    kGicSgiFilter_AllOtherCPUs = 1,
+
+    //! Forward the interrupt only to the CPU interface of the processor that requested the
+    //! interrupt.
+    kGicSgiFilter_OnlyThisCPU = 2
+};
+
 struct _gicd_registers {
     uint32_t CTLR; //!< Distributor Control Register.
     uint32_t TYPER; //!< Interrupt Controller Type Register.
@@ -76,7 +89,7 @@ int main()
     mmap(ARM_PERIPHERAL_VIRT_BASE, ARM_PERIPHERAL_BASE, 0x2000, true);
 
     printf("%s: Sending soft interrupt\n", prog_name);
-    gic_send_sgi(SW_INTERRUPT_3, 0, 2);
+    gic_send_sgi(SW_INTERRUPT_3, 0, kGicSgiFilter_OnlyThisCPU);
     printf("%s: Soft interrupt send done\n", prog_name);
     exit();
 }

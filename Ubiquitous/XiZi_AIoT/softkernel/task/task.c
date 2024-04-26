@@ -171,7 +171,6 @@ struct TaskMicroDescriptor* next_task_emergency = NULL;
 extern void context_switch(struct context**, struct context*);
 static void _scheduler(struct SchedulerRightGroup right_group)
 {
-    xizi_enter_kernel();
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
     struct TaskMicroDescriptor* next_task;
 
@@ -182,20 +181,25 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         if (next_task_emergency != NULL && next_task->state == READY) {
             next_task = next_task_emergency;
             next_task->state = RUNNING;
-            next_task_emergency = NULL;
         } else {
             next_task = xizi_task_manager.next_runnable_task();
+        }
+        next_task_emergency = NULL;
+        if (next_task != NULL) {
+            assert(next_task->state == READY);
+            next_task->state = RUNNING;
         }
         spinlock_unlock(&whole_kernel_lock);
 
         /* not a runnable task */
-        if (UNLIKELY(next_task == NULL) || UNLIKELY(next_task->state != RUNNING)) {
+        if (UNLIKELY(next_task == NULL)) {
             spinlock_lock(&whole_kernel_lock);
             continue;
         }
 
         /* a runnable task */
         spinlock_lock(&whole_kernel_lock);
+        assert(next_task->state == RUNNING);
         struct CPU* cpu = cur_cpu();
         cpu->task = next_task;
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->pgdir.pd_addr));
@@ -203,34 +207,24 @@ static void _scheduler(struct SchedulerRightGroup right_group)
     }
 }
 
-static uint32_t yield_cnt = 0;
-static void _cur_task_yield_noschedule(void)
+static void _task_yield_noschedule(struct TaskMicroDescriptor* task, bool blocking)
 {
-    yield_cnt++;
-
-    struct TaskMicroDescriptor* current_task = cur_cpu()->task;
-    assert(current_task != NULL);
+    assert(task != NULL);
 
     // rearrage current task position
-    doubleListDel(&current_task->node);
-    // DEBUG("%s,%d\n", current_task->name, strcmp(current_task->name, name1));
-    if (current_task->maxium_tick <= 0) {
-        if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[current_task->priority])) {
-            ready_task_priority &= ~(1 << current_task->priority);
+    doubleListDel(&task->node);
+    if (task->state == RUNNING) {
+        if (!blocking) {
+            task->state = READY;
+        } else {
+            task->state = BLOCKED;
         }
-        current_task->priority += 1;
-        current_task->maxium_tick = TASK_CLOCK_TICK * 10;
     }
-    doubleListAddOnBack(&current_task->node, &xizi_task_manager.task_list_head[current_task->priority]);
-    ready_task_priority |= (1 << current_task->priority);
-    // set current task state
-    current_task->state = READY;
-    current_task->remain_tick = TASK_CLOCK_TICK;
-    cur_cpu()->task = NULL;
-    if (yield_cnt == 50) {
-        recover_priority();
-        yield_cnt = 0;
+    task->remain_tick = TASK_CLOCK_TICK;
+    if (task == cur_cpu()->task) {
+        cur_cpu()->task = NULL;
     }
+    doubleListAddOnBack(&task->node, &xizi_task_manager.task_list_head[task->priority]);
 }
 
 static void _set_cur_task_priority(int priority)
@@ -261,7 +255,7 @@ struct XiziTaskManager xizi_task_manager = {
 
     .next_runnable_task = max_priority_runnable_task,
     .task_scheduler = _scheduler,
-    .cur_task_yield_noschedule = _cur_task_yield_noschedule,
+    .task_yield_noschedule = _task_yield_noschedule,
     .set_cur_task_priority = _set_cur_task_priority
 };
 

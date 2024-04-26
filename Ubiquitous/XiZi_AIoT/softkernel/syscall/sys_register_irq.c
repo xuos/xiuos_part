@@ -84,7 +84,7 @@ int user_irq_handler(int irq, void* tf, void* arg)
     p_mmu_driver->LoadPgdir((uintptr_t)V2P(cur_cpu()->task->pgdir.pd_addr));
 
     next_task_emergency = irq_forward_table[irq].handle_task;
-    xizi_task_manager.cur_task_yield_noschedule();
+    xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
     return 0;
 }
 

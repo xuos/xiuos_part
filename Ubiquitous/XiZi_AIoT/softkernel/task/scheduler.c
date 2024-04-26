@@ -40,7 +40,6 @@ struct TaskMicroDescriptor* max_priority_runnable_task(void)
     {
         if (task->state == READY) {
             // found a runnable task, stop this look up
-            task->state = RUNNING;
             return task;
         } else if (task->state == DEAD) {
             // found a killed task, stop this loop
@@ -61,7 +60,6 @@ struct TaskMicroDescriptor* round_robin_runnable_task(uint32_t priority)
 
         if (task->state == READY) {
             // found a runnable task, stop this look up
-            task->state = RUNNING;
             return task;
         } else if (task->state == DEAD) {
             // found a killed task, stop this loop

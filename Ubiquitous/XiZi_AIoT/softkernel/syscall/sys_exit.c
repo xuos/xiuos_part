@@ -82,7 +82,7 @@ int sys_exit(struct TaskMicroDescriptor* ptask)
     }
 
     // delete task for pcb_list
-    xizi_task_manager.cur_task_yield_noschedule();
+    xizi_task_manager.task_yield_noschedule(ptask, true);
     ptask->state = DEAD;
 
     return 0;

@@ -35,6 +35,6 @@ Modification:
 
 int sys_yield()
 {
-    xizi_task_manager.cur_task_yield_noschedule();
+    xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
     return 0;
 }

@@ -58,7 +58,7 @@ int xizi_clock_handler(int irq, void* tf, void* arg)
             current_task->remain_tick--;
             current_task->maxium_tick--;
             if (current_task->remain_tick == 0) {
-                xizi_task_manager.cur_task_yield_noschedule();
+                xizi_task_manager.task_yield_noschedule(current_task, false);
             }
         }
     }

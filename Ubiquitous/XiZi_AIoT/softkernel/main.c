@@ -90,13 +90,14 @@ int main(void)
     struct SchedulerRightGroup scheduler_rights;
     assert(AchieveResourceTag(&scheduler_rights.mmu_driver_tag, &hardkernel_tag, "mmu-ac-resource"));
     assert(AchieveResourceTag(&scheduler_rights.intr_driver_tag, &hardkernel_tag, "intr-ac-resource"));
-
     core_init_done |= (1 << cpu_id);
     LOG_PRINTF("CPU %d init done\n", cpu_id);
     spinlock_unlock(&whole_kernel_lock);
 
     while (core_init_done != (1 << NR_CPU) - 1)
         ;
+
+    xizi_enter_kernel();
     start_smp_cache_broadcast(cpu_id);
     xizi_task_manager.task_scheduler(scheduler_rights);
 

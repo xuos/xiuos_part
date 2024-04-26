@@ -48,6 +48,7 @@ enum ProcState {
     READY,
     RUNNING,
     DEAD,
+    BLOCKED,
     NEVER_RUN,
 };
 
@@ -118,7 +119,7 @@ struct XiziTaskManager {
     /* function that's runing by kernel thread context, schedule use tasks */
     void (*task_scheduler)(struct SchedulerRightGroup);
     /* call to yield current use task */
-    void (*cur_task_yield_noschedule)(void);
+    void (*task_yield_noschedule)(struct TaskMicroDescriptor* task, bool is_blocking);
     /* set task priority */
     void (*set_cur_task_priority)(int priority);
 };
