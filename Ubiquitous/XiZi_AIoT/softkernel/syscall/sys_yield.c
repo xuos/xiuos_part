@@ -33,7 +33,7 @@ Modification:
 
 #include "log.h"
 
-int sys_yield()
+int sys_yield(task_yield_reason reason)
 {
     xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
     return 0;

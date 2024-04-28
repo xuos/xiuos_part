@@ -101,3 +101,6 @@ bool intr_distributer_init(struct IrqDispatcherRightGroup*);
 void intr_irq_dispatch(struct trapframe* tf);
 bool swi_distributer_init(struct SwiDispatcherRightGroup*);
 void software_irq_dispatch(struct trapframe* tf);
+
+void dabort_reason(struct trapframe* r);
+void iabort_reason(struct trapframe* r);

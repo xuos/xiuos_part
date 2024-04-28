@@ -34,6 +34,7 @@ Modification:
 #include "actracer.h"
 #include "assert.h"
 #include "ipc.h"
+#include "kalloc.h"
 #include "mmu_common.h"
 #include "multicores.h"
 #include "share_page.h"
@@ -52,9 +53,10 @@ static void send_irq_to_user(int irq_num)
     struct Session* session = &irq_forward_table[irq_num].session;
     int len = IPC_ARG_INFO_BASE_OFFSET;
     len += sizeof(struct IpcArgInfo);
+    /* get message space and add session tail */
 
-    /* add session tail */
-    struct IpcMsg* buf = session->buf + session->tail;
+    void* session_kern_vaddr = P2V(xizi_pager.address_translate(&kernel_irq_proxy->pgdir, (uintptr_t)session->buf));
+    struct IpcMsg* buf = session_kern_vaddr + session->tail;
     memset((void*)buf, 0, len);
     session->tail = (session->tail + len) % session->capacity;
 
@@ -73,20 +75,13 @@ static void send_irq_to_user(int irq_num)
 
 int user_irq_handler(int irq, void* tf, void* arg)
 {
-    static struct MmuCommonDone* p_mmu_driver = NULL;
-    if (p_mmu_driver == NULL) {
-        struct TraceTag mmu_driver_tag;
-        AchieveResourceTag(&mmu_driver_tag, RequireRootTag(), "/hardkernel/mmu-ac-resource");
-        p_mmu_driver = (struct MmuCommonDone*)AchieveResource(&mmu_driver_tag);
-    }
-
     if (irq_forward_table[irq].handle_task != NULL) {
-        p_mmu_driver->LoadPgdir((uintptr_t)V2P(kernel_irq_proxy->pgdir.pd_addr));
         send_irq_to_user(irq);
-        p_mmu_driver->LoadPgdir((uintptr_t)V2P(cur_cpu()->task->pgdir.pd_addr));
 
         next_task_emergency = irq_forward_table[irq].handle_task;
-        xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
+        if (cur_cpu()->task != NULL) {
+            xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
+        }
     }
     return 0;
 }

@@ -64,6 +64,12 @@ typedef enum {
     SYS_STATE_SHOW_CPU_INFO,
 } sys_state_option;
 
+typedef enum {
+    SYS_TASK_YIELD_NO_REASON = 0x0,
+    SYS_TASK_YIELD_FOREVER = 0x1,
+    SYS_TASK_YIELD_BLOCK_IPC = 0x2,
+} task_yield_reason;
+
 typedef union {
     struct {
         uintptr_t memblock_start;
@@ -80,7 +86,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
 
 int sys_spawn(char* img_start, char* name, char** argv);
 int sys_exit(struct TaskMicroDescriptor* ptask);
-int sys_yield();
+int sys_yield(task_yield_reason reason);
 int sys_kill(int id);
 
 int sys_register_as_server(char* name);

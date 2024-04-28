@@ -89,7 +89,7 @@ int main()
     mmap(ARM_PERIPHERAL_VIRT_BASE, ARM_PERIPHERAL_BASE, 0x2000, true);
 
     printf("%s: Sending soft interrupt\n", prog_name);
-    gic_send_sgi(SW_INTERRUPT_3, 0, kGicSgiFilter_OnlyThisCPU);
+    gic_send_sgi(SW_INTERRUPT_3, 0xF, kGicSgiFilter_UseTargetList);
     printf("%s: Soft interrupt send done\n", prog_name);
     exit();
 }

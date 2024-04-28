@@ -71,10 +71,10 @@ void software_irq_dispatch(struct trapframe* tf)
         cur_cpu()->task = NULL;
         context_switch(&cur_task->main_thread.context, cur_cpu()->scheduler);
     }
-    assert(cur_task == cur_cpu()->task);
     if (syscall_num == SYSCALL_EXIT) {
         panic("Exit reaches");
     }
 
+    assert(cur_task == cur_cpu()->task);
     xizi_leave_kernel();
 }

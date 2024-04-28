@@ -53,9 +53,9 @@ int exit()
     return syscall(SYSCALL_EXIT, 0, 0, 0, 0);
 }
 
-int yield()
+int yield(task_yield_reason reason)
 {
-    return syscall(SYSCALL_YIELD, 0, 0, 0, 0);
+    return syscall(SYSCALL_YIELD, (uintptr_t)reason, 0, 0, 0);
 }
 
 int kill(int pid)

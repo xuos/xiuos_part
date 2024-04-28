@@ -35,7 +35,7 @@ signed short userShellRead(char* data, unsigned short len)
     while (length--) {
         cur_read = getc();
         if (cur_read == 0xff) {
-            yield();
+            yield(SYS_TASK_YIELD_NO_REASON);
         }
         // *data++ = getc();
         *data++ = cur_read;

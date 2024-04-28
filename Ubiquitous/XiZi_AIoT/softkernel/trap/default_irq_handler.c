@@ -66,9 +66,8 @@ void intr_irq_dispatch(struct trapframe* tf)
     }
 
     struct TaskMicroDescriptor* current_task = cur_cpu()->task;
-    if (LIKELY(current_task != NULL)) {
-        current_task->main_thread.trapframe = tf;
-    }
+    assert(current_task != NULL);
+    current_task->main_thread.trapframe = tf;
 
     unsigned cpu = p_intr_driver->hw_cur_int_cpu(int_info);
     unsigned irq = p_intr_driver->hw_cur_int_num(int_info);
@@ -86,7 +85,7 @@ void intr_irq_dispatch(struct trapframe* tf)
     p_intr_driver->curr_int[cpu] = 0;
     p_intr_driver->hw_after_irq(int_info);
 
-    if ((cur_cpu()->task == NULL && current_task != NULL) || current_task->state != RUNNING) {
+    if (cur_cpu()->task == NULL || current_task->state != RUNNING) {
         cur_cpu()->task = NULL;
         context_switch(&current_task->main_thread.context, cur_cpu()->scheduler);
     }
@@ -102,13 +101,18 @@ void xizi_enter_kernel()
     spinlock_lock(&whole_kernel_lock);
 }
 
+bool xizi_try_enter_kernel()
+{
+    p_intr_driver->cpu_irq_disable();
+    if (spinlock_try_lock(&whole_kernel_lock)) {
+        return true;
+    }
+
+    return false;
+}
+
 void xizi_leave_kernel()
 {
     spinlock_unlock(&whole_kernel_lock);
     p_intr_driver->cpu_irq_enable();
-}
-
-bool xizi_is_in_kernel()
-{
-    return is_spinlock_locked(&whole_kernel_lock);
 }

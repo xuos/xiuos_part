@@ -121,7 +121,7 @@ void ipc_msg_send_wait(struct IpcMsg* msg)
     msg->header.done = 0;
     while (msg->header.done == 0) {
         /// @todo syscall yield with prio decrease
-        yield();
+        yield(SYS_TASK_YIELD_BLOCK_IPC);
     }
     assert(msg->header.done == 1);
 }
@@ -138,7 +138,7 @@ int ipc_session_wait(struct Session* session)
     struct IpcMsg* msg = IPCSESSION_MSG(session);
     while (msg->header.done == 0) {
         /// @todo syscall yield with prio decrease
-        yield();
+        yield(SYS_TASK_YIELD_BLOCK_IPC);
     }
     assert(msg->header.done == 1);
     return msg->header.ret_val;
@@ -169,7 +169,7 @@ void ipc_server_loop(struct IpcNode* ipc_node)
         /* handle each session */
         for (int i = 0; i < NR_MAX_SESSION; i++) {
             if (session_list[i].buf == NULL) {
-                yield();
+                yield(SYS_TASK_YIELD_NO_REASON);
                 break;
             }
             cur_sess_id = session_list[i].id;

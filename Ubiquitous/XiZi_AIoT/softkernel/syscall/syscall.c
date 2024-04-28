@@ -48,7 +48,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_exit(cur_cpu()->task);
         break;
     case SYSCALL_YIELD:
-        ret = sys_yield();
+        ret = sys_yield((task_yield_reason)param1);
         break;
     case SYSCALL_SERVER:
         ret = sys_register_as_server((char*)param1);

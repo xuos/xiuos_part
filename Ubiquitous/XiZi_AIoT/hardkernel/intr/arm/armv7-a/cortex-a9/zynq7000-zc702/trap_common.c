@@ -42,12 +42,13 @@ extern void trap_iabort(void);
 extern void trap_dabort(void);
 extern void trap_irq_enter(void);
 extern void trap_undefined_instruction(void);
+extern void handle_reserved(void);
+extern void handle_fiq(void);
 
 static struct XiziTrapDriver xizi_trap_driver;
 
 void panic(char* s)
 {
-    xizi_trap_driver.cpu_irq_disable();
     KPrintf("panic: %s\n", s);
     for (;;)
         ;
@@ -55,7 +56,6 @@ void panic(char* s)
 
 /* stack for different mode*/
 static char mode_stack_pages[NR_CPU][NR_MODE_STACKS][MODE_STACK_SIZE];
-
 extern uint32_t _vector_jumper;
 extern uint32_t _vector_start;
 extern uint32_t _vector_end;
@@ -70,19 +70,6 @@ void init_cpu_mode_stacks(int cpu_id)
         memset(mode_stack_pages[cpu_id][i], 0, MODE_STACK_SIZE);
         init_stack(modes[i], (uint32_t)mode_stack_pages[cpu_id][i]);
     }
-}
-
-void handle_reserved(void)
-{
-    // unimplemented trap handler
-    LOG("Unimplemented Reserved\n");
-    panic("");
-}
-
-void handle_fiq(void)
-{
-    LOG("Unimplemented FIQ\n");
-    panic("");
 }
 
 static void _sys_irq_init(int cpu_id)
@@ -101,18 +88,18 @@ static void _sys_irq_init(int cpu_id)
         vector_base[5] = (uint32_t)handle_reserved; // Reserved
         vector_base[6] = (uint32_t)trap_irq_enter; // IRQ
         vector_base[7] = (uint32_t)handle_fiq; // FIQ
-    }
 
-    /* active hardware irq responser */
-    XScuGic_Config* gic_config = XScuGic_LookupConfig(XPAR_PS7_SCUGIC_0_DEVICE_ID);
-    if (NULL == gic_config) {
-        ERROR("Error while looking up gic config\n");
-        return;
-    }
-    int gic_init_status = XScuGic_CfgInitialize(&IntcInstance, gic_config, gic_config->CpuBaseAddress);
-    if (gic_init_status != XST_SUCCESS) {
-        ERROR("Error initializing gic\n");
-        return;
+        /* active hardware irq responser */
+        XScuGic_Config* gic_config = XScuGic_LookupConfig(XPAR_PS7_SCUGIC_0_DEVICE_ID);
+        if (NULL == gic_config) {
+            ERROR("Error while looking up gic config\n");
+            return;
+        }
+        int gic_init_status = XScuGic_CfgInitialize(&IntcInstance, gic_config, gic_config->CpuBaseAddress);
+        if (gic_init_status != XST_SUCCESS) {
+            ERROR("Error initializing gic\n");
+            return;
+        }
     }
 
     xizi_trap_driver.switch_hw_irqtbl((uint32_t*)&_vector_jumper);
@@ -226,6 +213,6 @@ static struct XiziTrapDriver xizi_trap_driver = {
 struct XiziTrapDriver* hardkernel_intr_init(struct TraceTag* hardkernel_tag)
 {
     xizi_trap_driver.sys_irq_init(0);
-    xizi_trap_driver.cpu_irq_enable();
+    xizi_trap_driver.cpu_irq_disable();
     return &xizi_trap_driver;
 }

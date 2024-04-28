@@ -23,7 +23,11 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app 
 
+ifeq ($(BOARD), imx6q-sabrelite)
 all: init test_fs simple_client simple_server shell fs_server test_priority test_irq_hdlr test_irq_send readme.txt | bin
+else 
+all: init test_fs simple_client simple_server shell fs_server test_priority test_irq_hdlr readme.txt | bin
+endif
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin
 	@mv *.o bin
@@ -32,9 +36,11 @@ all: init test_fs simple_client simple_server shell fs_server test_priority test
 bin:
 	@mkdir -p bin
 
+ifeq ($(BOARD), imx6q-sabrelite)
 test_irq_send: test_irq_sender.o usyscall.o libserial.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
+endif
 
 test_irq_hdlr: test_irq_handler.o libserial.o libipc.o session.o usyscall.o libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}

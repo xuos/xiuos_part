@@ -259,6 +259,7 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         cpu->task = next_task;
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->pgdir.pd_addr));
         context_switch(&cpu->scheduler, next_task->main_thread.context);
+        assert(cur_cpu()->task == NULL);
         assert(next_task->state != RUNNING);
     }
 }
