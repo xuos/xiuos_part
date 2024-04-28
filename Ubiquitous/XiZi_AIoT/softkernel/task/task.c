@@ -48,6 +48,7 @@ static void _task_manager_init()
     for (int i = 0; i < TASK_MAX_PRIORITY; i++) {
         doubleListNodeInit(&xizi_task_manager.task_list_head[i]);
     }
+    doubleListNodeInit(&xizi_task_manager.task_blocked_list_head);
     // init task (slab) allocator
     slab_init(&xizi_task_manager.task_allocator, sizeof(struct TaskMicroDescriptor));
     slab_init(&xizi_task_manager.task_buddy_allocator, sizeof(struct KBuddy));
@@ -271,17 +272,35 @@ static void _task_yield_noschedule(struct TaskMicroDescriptor* task, bool blocki
     // rearrage current task position
     doubleListDel(&task->node);
     if (task->state == RUNNING) {
-        if (!blocking) {
-            task->state = READY;
-        } else {
-            task->state = BLOCKED;
-        }
+        task->state = READY;
     }
     task->remain_tick = TASK_CLOCK_TICK;
     if (task == cur_cpu()->task) {
         cur_cpu()->task = NULL;
     }
     doubleListAddOnBack(&task->node, &xizi_task_manager.task_list_head[task->priority]);
+}
+
+static void _task_block(struct TaskMicroDescriptor* task)
+{
+    assert(task != NULL);
+    assert(task->state != RUNNING);
+    doubleListDel(&task->node);
+    if (xizi_task_manager.task_list_head[task->priority].next == &xizi_task_manager.task_list_head[task->priority]) {
+        ready_task_priority &= ~(1 << task->priority);
+    }
+    task->state = BLOCKED;
+    doubleListAddOnHead(&task->node, &xizi_task_manager.task_blocked_list_head);
+}
+
+static void _task_unblock(struct TaskMicroDescriptor* task)
+{
+    assert(task != NULL);
+    assert(task->state == BLOCKED);
+    doubleListDel(&task->node);
+    task->state = READY;
+    doubleListAddOnHead(&task->node, &xizi_task_manager.task_list_head[task->priority]);
+    ready_task_priority |= (1 << task->priority);
 }
 
 static void _set_cur_task_priority(int priority)
@@ -312,6 +331,9 @@ struct XiziTaskManager xizi_task_manager = {
 
     .next_runnable_task = max_priority_runnable_task,
     .task_scheduler = _scheduler,
+
+    .task_block = _task_block,
+    .task_unblock = _task_unblock,
     .task_yield_noschedule = _task_yield_noschedule,
     .set_cur_task_priority = _set_cur_task_priority
 };

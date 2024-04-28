@@ -85,6 +85,14 @@ void show_tasks(void)
             LOG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->mem_size >> 10);
         }
     }
+
+    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_blocked_list_head, node)
+    {
+        LOG_PRINTF("  BLOCK ");
+        _padding(task->name);
+        LOG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->mem_size >> 10);
+    }
+
     LOG_PRINTF("******************************************************\n");
     return;
 }

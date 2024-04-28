@@ -35,6 +35,16 @@ Modification:
 
 int sys_yield(task_yield_reason reason)
 {
-    xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
+    struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
+    xizi_task_manager.task_yield_noschedule(cur_task, false);
+
+    // handle ipc block
+    if ((reason & SYS_TASK_YIELD_BLOCK_IPC) != 0) {
+        if (cur_task->current_ipc_handled) {
+            cur_task->current_ipc_handled = false;
+        } else {
+            xizi_task_manager.task_block(cur_task);
+        }
+    }
     return 0;
 }

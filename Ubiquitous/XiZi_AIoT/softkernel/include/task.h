@@ -85,6 +85,7 @@ struct TaskMicroDescriptor {
     /* task communication resources */
     struct double_list_node cli_sess_listhead;
     struct double_list_node svr_sess_listhead;
+    bool current_ipc_handled;
     struct KBuddy* massive_ipc_allocator;
     struct TraceTag server_identifier;
 
@@ -103,6 +104,7 @@ struct SchedulerRightGroup {
 
 struct XiziTaskManager {
     struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
+    struct double_list_node task_blocked_list_head;
     struct slab_allocator task_allocator;
     struct slab_allocator task_buddy_allocator;
     uint32_t next_pid;
@@ -120,8 +122,13 @@ struct XiziTaskManager {
     struct TaskMicroDescriptor* (*next_runnable_task)(void);
     /* function that's runing by kernel thread context, schedule use tasks */
     void (*task_scheduler)(struct SchedulerRightGroup);
+
+    /* handle task state */
     /* call to yield current use task */
     void (*task_yield_noschedule)(struct TaskMicroDescriptor* task, bool is_blocking);
+    /* block and unblock task */
+    void (*task_block)(struct TaskMicroDescriptor* task);
+    void (*task_unblock)(struct TaskMicroDescriptor* task);
     /* set task priority */
     void (*set_cur_task_priority)(int priority);
 };

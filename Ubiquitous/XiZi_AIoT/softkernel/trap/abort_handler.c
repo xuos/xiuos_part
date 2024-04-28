@@ -65,6 +65,7 @@ void dabort_handler(struct trapframe* r)
     sys_exit(cur_task);
     assert(cur_cpu()->task == NULL);
     context_switch(&cur_task->main_thread.context, cur_cpu()->scheduler);
+    panic("dabort end should never be reashed.\n");
 }
 
 void iabort_handler(struct trapframe* r)
@@ -83,4 +84,5 @@ void iabort_handler(struct trapframe* r)
     sys_exit(cur_task);
     assert(cur_cpu()->task == NULL);
     context_switch(&cur_task->main_thread.context, cur_cpu()->scheduler);
+    panic("iabort end should never be reashed.\n");
 }

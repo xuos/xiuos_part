@@ -55,6 +55,15 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
             return -1;
         }
         // update session_backend
+        // if current session is handled
+        if (server_session->head != userland_session_arr[i].head) {
+            struct TaskMicroDescriptor* client = SERVER_SESSION_BACKEND(server_session)->client;
+            if (client->state == BLOCKED) {
+                xizi_task_manager.task_unblock(client);
+            } else {
+                client->current_ipc_handled = true;
+            }
+        }
         server_session->head = userland_session_arr[i].head;
         server_session->tail = userland_session_arr[i].tail;
         doubleListDel(cur_node);
