@@ -53,6 +53,7 @@ void dabort_handler(struct trapframe* r)
 {
     if (r->pc >= DEV_VRTMEM_BASE && is_spinlock_hold_by_current_cpu(&whole_kernel_lock)) {
         assert(is_spinlock_hold_by_current_cpu(&whole_kernel_lock));
+        ERROR("dabort in kernel, current task: %s\n", cur_cpu()->task == NULL ? "NULL" : cur_cpu()->task->name);
         dabort_reason(r);
         panic("data abort exception\n");
     }
@@ -72,6 +73,7 @@ void iabort_handler(struct trapframe* r)
 {
     if (r->pc >= DEV_VRTMEM_BASE && is_spinlock_hold_by_current_cpu(&whole_kernel_lock)) {
         assert(is_spinlock_hold_by_current_cpu(&whole_kernel_lock));
+        ERROR("iabort in kernel, current task: %s\n", cur_cpu()->task == NULL ? "NULL" : cur_cpu()->task->name);
         iabort_reason(r);
         panic("kernel prefetch abort exception\n");
     }

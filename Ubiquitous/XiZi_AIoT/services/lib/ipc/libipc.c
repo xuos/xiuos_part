@@ -159,6 +159,7 @@ void delay_session(void)
 void ipc_server_loop(struct IpcNode* ipc_node)
 {
     struct Session session_list[NR_MAX_SESSION];
+    memset(session_list, 0, sizeof(session_list));
     for (;;) {
         /* if connect sessions are greater than NR_MAX_SESSION,
             a full round will require multiple polls.

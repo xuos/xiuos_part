@@ -114,5 +114,4 @@ bool xizi_try_enter_kernel()
 void xizi_leave_kernel()
 {
     spinlock_unlock(&whole_kernel_lock);
-    p_intr_driver->cpu_irq_enable();
 }

@@ -34,7 +34,7 @@ Modification:
 #define STACK_DEPTH 32
 
 struct spinlock { // Mutex.
-    uint32_t owner_cpu; // 1 for locked, 0 for unlocked
+    volatile uint32_t owner_cpu; // 1 for locked, 0 for unlocked
     char name[28]; // The call stack (an array of program counters)
 } __attribute__((aligned(32)));
 

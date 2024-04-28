@@ -47,10 +47,13 @@ trap_return:
 	ldmfd   r13!, 	{r14}         	
 	ldmfd   r13!, 	{r2}          	
 	msr     spsr_cxsf, r2
-	ldmfd   r13!,	{r0-r12, pc}^  	// restore context and return
+	ldmfd   r13!,	{r0-r12}  	// restore context and return
+	cpsie i
+	ldmfd   r13!,	{pc}^  	// restore context and return
 
 user_trap_swi_enter:
 	# save trapframe to swi stack
+	cpsid i
     stmfd   sp!, 	{r0-r12, r14}  	// save context
 	mrs     r2, 	spsr            // copy spsr to r2
 	stmfd   r13!, 	{r2}          	// save r2(spsr) to the stack
@@ -66,6 +69,7 @@ user_trap_swi_enter:
 
 trap_irq_enter:
 	# save it on the stack as r14 is banked
+	cpsid i
 	sub     r14, 	r14, #4       	// r14 (lr) contains the interrupted PC
 	stmfd   r13!, 	{r0-r2, r14}   	//
 	mrs     r1, 	spsr        	// save spsr_irq
@@ -95,6 +99,7 @@ trap_irq_enter:
 	b   	trap_return
 
 trap_reset_enter:
+	cpsid i
 	mov     r14, 	#0           	// lr: not defined on reset
 	stmfd   r13!, 	{r0-r12, r14}
 	mrs     r2, 	spsr            // copy spsr to r2
@@ -108,6 +113,7 @@ trap_reset_enter:
 	bl      _vector_jumper
 
 trap_dabort:
+	cpsid i
 	sub     r14, 	r14, #8        	// lr: instruction causing the abort
 	stmfd   r13!, 	{r0-r12, r14}
 	mrs     r2, 	spsr          	// copy spsr to r2
@@ -121,6 +127,7 @@ trap_dabort:
 	bl      dabort_handler
 
 trap_iabort:
+	cpsid i
 	sub     r14, 	r14, #4        	// lr: instruction causing the abort
 	stmfd   r13!, 	{r0-r12, r14}
 	mrs     r2, 	spsr           	// copy spsr to r2
@@ -134,6 +141,7 @@ trap_iabort:
 	bl      iabort_handler
 
 trap_undefined_instruction:
+	cpsid i
 	stmfd   r13!, 	{r0-r12, r14}
 	mrs     r2, 	spsr           	// copy spsr to r2
 	stmfd   r13!, 	{r2}           	// save r2(spsr) to the stack

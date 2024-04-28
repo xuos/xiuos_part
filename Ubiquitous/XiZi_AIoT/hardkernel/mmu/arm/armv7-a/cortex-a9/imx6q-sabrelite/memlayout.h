@@ -56,7 +56,7 @@ Modification:
 #define MAX_NR_FREE_PAGES   ((PHY_MEM_STOP - PHY_MEM_BASE) >> LEVEL4_PTE_SHIFT)
 
 /* User memory layout */
-#define USER_STACK_SIZE     PAGE_SIZE
+#define USER_STACK_SIZE     MODE_STACK_SIZE
 #define USER_MEM_BASE       (0x00000000)
 #define USER_MEM_TOP        DEV_VRTMEM_BASE
 #define USER_IPC_SPACE_BASE (0x70000000)
