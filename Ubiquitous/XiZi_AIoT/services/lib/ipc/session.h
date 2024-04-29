@@ -56,7 +56,7 @@ __attribute__((__always_inline__)) static inline int session_remain_capacity(str
 __attribute__((__always_inline__)) static inline int session_forward_head(struct Session* session, int len)
 {
     if (len > session_used_size(session)) {
-        printf("forward head with too much size\n");
+        printf("forward head with too much size, session used size: %d\n", session_used_size(session));
         return -1;
     }
     session->head = (session->head + len) % session->capacity;

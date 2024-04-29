@@ -47,9 +47,7 @@ trap_return:
 	ldmfd   r13!, 	{r14}         	
 	ldmfd   r13!, 	{r2}          	
 	msr     spsr_cxsf, r2
-	ldmfd   r13!,	{r0-r12}  	// restore context and return
-	cpsie i
-	ldmfd   r13!,	{pc}^  	// restore context and return
+	ldmfd   r13!,	{r0-r12, pc}^  	// restore context and return
 
 user_trap_swi_enter:
 	# save trapframe to swi stack
@@ -98,61 +96,95 @@ trap_irq_enter:
 	bl      intr_irq_dispatch
 	b   	trap_return
 
-trap_reset_enter:
-	cpsid i
-	mov     r14, 	#0           	// lr: not defined on reset
-	stmfd   r13!, 	{r0-r12, r14}
-	mrs     r2, 	spsr            // copy spsr to r2
-	stmfd   r13!, 	{r2}       		// save r2(spsr) to the stack
-	stmfd   r13!, 	{r14}      		// save r14 again (it is not really correct)
-	stmfd   r13, 	{sp, lr}^      	// save user mode sp and lr
-	sub     r13, 	r13, #8
-
-	# call traps (trapframe *fp)
-	mov     r0, 	r13           	// copy r13_svc to r0
-	bl      _vector_jumper
-
 trap_dabort:
+	# save it on the stack as r14 is banked
 	cpsid i
-	sub     r14, 	r14, #8        	// lr: instruction causing the abort
-	stmfd   r13!, 	{r0-r12, r14}
-	mrs     r2, 	spsr          	// copy spsr to r2
-	stmfd   r13!, 	{r2}           	// save r2(spsr) to the stack
-	stmfd   r13!, 	{r14}         	// save r14 again (it is not really correct)
+	sub     r14, 	r14, #8       	// r14 (lr) contains the interrupted PC
+	stmfd   r13!, 	{r0-r2, r14}   	//
+	mrs     r1, 	spsr        	// save spsr_irq
+	mov     r0, 	r13          	// save stack stop (r13_irq)
+	add     r13,	r13, #16    	// reset the IRQ stack
+
+	# switch to the SVC mode
+	mrs     r2, 	cpsr
+	bic     r2, 	r2, #ARM_CPSR_MODE_MASK
+	orr     r2, 	r2, #ARM_MODE_SVC
+	msr     cpsr_cxsf, r2
+
+	# build the trap frame
+	ldr     r2, 	[r0, #12]    	// read the r14_irq, then save it
+	stmfd   r13!, 	{r2}
+	stmfd   r13!, 	{r3-r12}   		// r4-r12 are preserved (non-banked)
+	ldmfd   r0, 	{r3-r5}     	// copy r0-r2 over from irq stack
+	stmfd   r13!, 	{r3-r5}
+	stmfd   r13!, 	{r1}         	// save spsr
+	stmfd   r13!, 	{lr}          	// save lr_svc
+
 	stmfd   r13, 	{sp, lr}^     	// save user mode sp and lr
 	sub     r13, 	r13, #8
 
-	# call traps (trapframe *fp)
-	mov     r0, r13                 // save trapframe as the first parameter
+	mov     r0, 	r13           	// trapframe as parameters
 	bl      dabort_handler
 
 trap_iabort:
+# save it on the stack as r14 is banked
 	cpsid i
-	sub     r14, 	r14, #4        	// lr: instruction causing the abort
-	stmfd   r13!, 	{r0-r12, r14}
-	mrs     r2, 	spsr           	// copy spsr to r2
-	stmfd   r13!, 	{r2}           	// save r2(spsr) to the stack
-	stmfd   r13!, 	{r14}          	// save r14 again (it is not really correct)
-	stmfd   r13, 	{sp, lr}^      	// save user mode sp and lr
+	sub     r14, 	r14, #4       	// r14 (lr) contains the interrupted PC
+	stmfd   r13!, 	{r0-r2, r14}   	//
+	mrs     r1, 	spsr        	// save spsr_irq
+	mov     r0, 	r13          	// save stack stop (r13_irq)
+	add     r13,	r13, #16    	// reset the IRQ stack
+
+	# switch to the SVC mode
+	mrs     r2, 	cpsr
+	bic     r2, 	r2, #ARM_CPSR_MODE_MASK
+	orr     r2, 	r2, #ARM_MODE_SVC
+	msr     cpsr_cxsf, r2
+
+	# build the trap frame
+	ldr     r2, 	[r0, #12]    	// read the r14_irq, then save it
+	stmfd   r13!, 	{r2}
+	stmfd   r13!, 	{r3-r12}   		// r4-r12 are preserved (non-banked)
+	ldmfd   r0, 	{r3-r5}     	// copy r0-r2 over from irq stack
+	stmfd   r13!, 	{r3-r5}
+	stmfd   r13!, 	{r1}         	// save spsr
+	stmfd   r13!, 	{lr}          	// save lr_svc
+
+	stmfd   r13, 	{sp, lr}^     	// save user mode sp and lr
 	sub     r13, 	r13, #8
 
-	# call traps (trapframe *fp)
-	mov     r0, 	r13            	// save trapframe as the first parameter
+	mov     r0, 	r13           	// trapframe as parameters
 	bl      iabort_handler
 
 trap_undefined_instruction:
+	# save it on the stack as r14 is banked
 	cpsid i
-	stmfd   r13!, 	{r0-r12, r14}
-	mrs     r2, 	spsr           	// copy spsr to r2
-	stmfd   r13!, 	{r2}           	// save r2(spsr) to the stack
-	stmfd   r13!, 	{r14}          	// save r14 again (it is not really correct)
-	stmfd   r13, 	{sp, lr}^      	// save user mode sp and lr
+	sub     r14, 	r14, #4       	// r14 (lr) contains the interrupted PC
+	stmfd   r13!, 	{r0-r2, r14}   	//
+	mrs     r1, 	spsr        	// save spsr_irq
+	mov     r0, 	r13          	// save stack stop (r13_irq)
+	add     r13,	r13, #16    	// reset the IRQ stack
+
+	# switch to the SVC mode
+	mrs     r2, 	cpsr
+	bic     r2, 	r2, #ARM_CPSR_MODE_MASK
+	orr     r2, 	r2, #ARM_MODE_SVC
+	msr     cpsr_cxsf, r2
+
+	# build the trap frame
+	ldr     r2, 	[r0, #12]    	// read the r14_irq, then save it
+	stmfd   r13!, 	{r2}
+	stmfd   r13!, 	{r3-r12}   		// r4-r12 are preserved (non-banked)
+	ldmfd   r0, 	{r3-r5}     	// copy r0-r2 over from irq stack
+	stmfd   r13!, 	{r3-r5}
+	stmfd   r13!, 	{r1}         	// save spsr
+	stmfd   r13!, 	{lr}          	// save lr_svc
+
+	stmfd   r13, 	{sp, lr}^     	// save user mode sp and lr
 	sub     r13, 	r13, #8
 
-	# call traps (trapframe *fp)
-	mov     r0, 	r13            	// save trapframe as the first parameter
+	mov     r0, 	r13           	// trapframe as parameters
 	bl      handle_undefined_instruction
-
 
 init_stack:
 	# set the stack for Other mode

@@ -88,9 +88,11 @@ int main()
     printf("%s: Mapping GIC\n", prog_name);
     mmap(ARM_PERIPHERAL_VIRT_BASE, ARM_PERIPHERAL_BASE, 0x2000, true);
 
-    printf("%s: Sending soft interrupt\n", prog_name);
-    while (1) {
+    int send_time = 1000;
+    printf("%s: Sending soft interrupt for %d times\n", prog_name, send_time);
+    for (int i = 0; i < send_time; i++) {
         gic_send_sgi(SW_INTERRUPT_3, 0xF, kGicSgiFilter_UseTargetList);
+        printf("%s: Soft interrupt send 1 time\n", prog_name);
     }
     printf("%s: Soft interrupt send done\n", prog_name);
     exit();

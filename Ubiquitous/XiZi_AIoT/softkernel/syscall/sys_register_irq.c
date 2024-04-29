@@ -45,6 +45,7 @@ static struct TaskMicroDescriptor* kernel_irq_proxy;
 static struct {
     struct TaskMicroDescriptor* handle_task;
     struct Session session;
+    struct session_backend* p_kernel_session;
     int opcode;
 } irq_forward_table[NR_IRQS];
 
@@ -53,10 +54,16 @@ static void send_irq_to_user(int irq_num)
     struct Session* session = &irq_forward_table[irq_num].session;
     int len = IPC_ARG_INFO_BASE_OFFSET;
     len += sizeof(struct IpcArgInfo);
-    /* get message space and add session tail */
 
+    /* get message space and add session tail */
     void* session_kern_vaddr = P2V(xizi_pager.address_translate(&kernel_irq_proxy->pgdir, (uintptr_t)session->buf));
     struct IpcMsg* buf = session_kern_vaddr + session->tail;
+
+    /* check if server session is full */
+    if (buf->header.magic == IPC_MSG_MAGIC && buf->header.done == 0) {
+        DEBUG("irq server cannot handle new interrupt by now.\n");
+        return;
+    }
     memset((void*)buf, 0, len);
     session->tail = (session->tail + len) % session->capacity;
 
@@ -86,7 +93,7 @@ int user_irq_handler(int irq, void* tf, void* arg)
     return 0;
 }
 
-extern int create_session_inner(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, int capacity, struct Session* user_session);
+extern struct session_backend* create_session_inner(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, int capacity, struct Session* user_session);
 /// @warning no tested.
 
 static struct XiziTrapDriver* p_intr_driver = NULL;
@@ -118,7 +125,7 @@ int sys_register_irq(int irq_num, int irq_opcode)
     struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
     irq_forward_table[irq_num].handle_task = cur_task;
     irq_forward_table[irq_num].opcode = irq_opcode;
-    create_session_inner(kernel_irq_proxy, cur_task, PAGE_SIZE, &irq_forward_table[irq_num].session);
+    irq_forward_table[irq_num].p_kernel_session = create_session_inner(kernel_irq_proxy, cur_task, PAGE_SIZE, &irq_forward_table[irq_num].session);
     p_intr_driver->bind_irq_handler(irq_num, user_irq_handler);
     cur_task->bind_irq = true;
 

@@ -179,24 +179,22 @@ void ipc_server_loop(struct IpcNode* ipc_node)
                 a session could be delay in case one of its message(current message) needs to wait for an interrupt message's arrival
                 interfaces[opcode] should explicitly call delay_session() and return to delay this session
             */
-            while (msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1) {
+            while (msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1 && msg->header.done == 0) {
                 // printf("session %d [%d, %d]\n", session_list[i].id, session_list[i].head, session_list[i].tail);
                 if (session_used_size(&session_list[i]) == 0 && session_forward_tail(&session_list[i], msg->header.len) < 0) {
                     break;
                 }
 
                 // this is a message needs to handle
-                if (msg->header.done != 1) {
-                    if (ipc_node->interfaces[msg->header.opcode]) {
-                        ipc_node->interfaces[msg->header.opcode](msg);
-                        // check if this session is delayed by op handler, all messages after the delayed message in current session is blocked.
-                        if (session_delayed) {
-                            session_delayed = false;
-                            break;
-                        }
-                    } else {
-                        printf("Unsupport opcode(%d) for server: %s\n", msg->header.opcode, ipc_node->name);
+                if (ipc_node->interfaces[msg->header.opcode]) {
+                    ipc_node->interfaces[msg->header.opcode](msg);
+                    // check if this session is delayed by op handler, all messages after the delayed message in current session is blocked.
+                    if (session_delayed) {
+                        session_delayed = false;
+                        break;
                     }
+                } else {
+                    printf("Unsupport opcode(%d) for server: %s\n", msg->header.opcode, ipc_node->name);
                 }
                 // current msg is a message that needs to ignore
                 // finish this message in server's perspective

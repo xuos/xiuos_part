@@ -97,13 +97,13 @@ intr_leave_interrupt:
 
 void xizi_enter_kernel()
 {
-    p_intr_driver->cpu_irq_disable();
+    /// @warning trampoline is responsible for closing interrupt
     spinlock_lock(&whole_kernel_lock);
 }
 
 bool xizi_try_enter_kernel()
 {
-    p_intr_driver->cpu_irq_disable();
+    /// @warning trampoline is responsible for closing interrupt
     if (spinlock_try_lock(&whole_kernel_lock)) {
         return true;
     }
@@ -113,5 +113,6 @@ bool xizi_try_enter_kernel()
 
 void xizi_leave_kernel()
 {
+    /// @warning trampoline is responsible for eabling interrupt by using user's state register
     spinlock_unlock(&whole_kernel_lock);
 }
