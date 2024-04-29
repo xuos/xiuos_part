@@ -167,7 +167,7 @@ static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
 
 /* alloc a new task with init */
 extern void trap_return(void);
-void task_prepare_enter()
+__attribute__((optimize("O0"))) void task_prepare_enter()
 {
     xizi_leave_kernel();
     trap_return();
@@ -227,6 +227,7 @@ static void _scheduler(struct SchedulerRightGroup right_group)
 {
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
     struct TaskMicroDescriptor* next_task;
+    struct CPU* cpu = cur_cpu();
 
     while (1) {
         next_task = NULL;
@@ -238,29 +239,21 @@ static void _scheduler(struct SchedulerRightGroup right_group)
             next_task = xizi_task_manager.next_runnable_task();
         }
         next_task_emergency = NULL;
-        if (next_task != NULL) {
-            assert(next_task->state == READY);
-        }
-        spinlock_unlock(&whole_kernel_lock);
 
-        /* not a runnable task */
-        if (UNLIKELY(next_task == NULL)) {
-            spinlock_lock(&whole_kernel_lock);
+        /* if there's not a runnable task, wait for one */
+        if (next_task == NULL) {
+            xizi_leave_kernel();
+            /* leave kernel for other cores, so they may create a runnable task */
+            xizi_enter_kernel();
             continue;
         }
 
-        /* a runnable task */
-        spinlock_lock(&whole_kernel_lock);
-        if (next_task->state == READY) {
-            next_task->state = RUNNING;
-        } else {
-            continue;
-        }
-        struct CPU* cpu = cur_cpu();
+        /* run the chosen task */
+        assert(next_task->state == READY);
+        next_task->state = RUNNING;
         cpu->task = next_task;
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->pgdir.pd_addr));
         context_switch(&cpu->scheduler, next_task->main_thread.context);
-        assert(cur_cpu()->task == NULL);
         assert(next_task->state != RUNNING);
     }
 }

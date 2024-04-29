@@ -54,7 +54,7 @@ void default_interrupt_routine(void)
 }
 
 extern void context_switch(struct context**, struct context*);
-void intr_irq_dispatch(struct trapframe* tf)
+__attribute__((optimize("O0"))) void intr_irq_dispatch(struct trapframe* tf)
 {
     xizi_enter_kernel();
 
@@ -101,7 +101,7 @@ void xizi_enter_kernel()
     spinlock_lock(&whole_kernel_lock);
 }
 
-bool xizi_try_enter_kernel()
+inline bool xizi_try_enter_kernel()
 {
     /// @warning trampoline is responsible for closing interrupt
     if (spinlock_try_lock(&whole_kernel_lock)) {
@@ -111,7 +111,7 @@ bool xizi_try_enter_kernel()
     return false;
 }
 
-void xizi_leave_kernel()
+inline void xizi_leave_kernel()
 {
     /// @warning trampoline is responsible for eabling interrupt by using user's state register
     spinlock_unlock(&whole_kernel_lock);

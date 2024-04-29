@@ -33,9 +33,8 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-int sys_close_session(struct Session* session)
+int sys_close_session(struct TaskMicroDescriptor* cur_task, struct Session* session)
 {
-    struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
     assert(cur_task != NULL);
     /* check if session is available */
     if (session->buf == NULL || (uintptr_t)session->buf < USER_IPC_SPACE_BASE || (uintptr_t)session->buf > USER_IPC_SPACE_TOP) {

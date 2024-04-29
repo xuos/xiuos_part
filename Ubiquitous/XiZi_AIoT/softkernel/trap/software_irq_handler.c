@@ -46,7 +46,7 @@ bool swi_distributer_init(struct SwiDispatcherRightGroup* _right_group)
 }
 
 extern void context_switch(struct context**, struct context*);
-void software_irq_dispatch(struct trapframe* tf)
+__attribute__((optimize("O0"))) void software_irq_dispatch(struct trapframe* tf)
 {
     xizi_enter_kernel();
     assert(p_intr_driver != NULL);

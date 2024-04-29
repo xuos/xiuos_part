@@ -35,12 +35,14 @@ Modification:
 #include "assert.h"
 #include "task.h"
 
+struct spinlock whole_kernel_lock;
+
 extern uint32_t _binary_init_start[], _binary_default_fs_start[];
 extern int sys_spawn(char* img_start, char* name, char** argv);
 
 static struct TraceTag hardkernel_tag, softkernel_tag;
-static int core_init_done = 0;
-int main(void)
+static volatile int core_init_done = 0;
+__attribute__((optimize("O0"))) int main(void)
 {
     /* init tracer */
     uint32_t cpu_id = cur_cpuid();

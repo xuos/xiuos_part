@@ -24,9 +24,9 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/app 
 
 ifeq ($(BOARD), imx6q-sabrelite)
-all: init test_fs simple_client simple_server shell fs_server test_priority test_irq_hdlr test_irq_send readme.txt | bin
+all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr test_irq_send readme.txt | bin
 else 
-all: init test_fs simple_client simple_server shell fs_server test_priority test_irq_hdlr readme.txt | bin
+all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr readme.txt | bin
 endif
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin

@@ -52,7 +52,7 @@ enum {
     SPINLOCK_LOCK_WAITFOREVER = 0xFFFFFFFF,
 };
 
-void spinlock_init(struct spinlock* lock, char* name)
+__attribute__((optimize("O0"))) void spinlock_init(struct spinlock* lock, char* name)
 {
     lock->owner_cpu = SPINLOCK_STATE_UNLOCK;
     strncpy(lock->name, name, 24);
@@ -61,7 +61,7 @@ void spinlock_init(struct spinlock* lock, char* name)
 extern int _spinlock_lock(struct spinlock* lock, uint32_t timeout);
 void _spinlock_unlock(struct spinlock* lock);
 
-void spinlock_lock(struct spinlock* lock)
+__attribute__((optimize("O0"))) void spinlock_lock(struct spinlock* lock)
 {
     int cur_cpu_id = cur_cpuid();
     if (lock->owner_cpu != SPINLOCK_STATE_UNLOCK && lock->owner_cpu == cur_cpu_id) {
@@ -80,7 +80,7 @@ void spinlock_lock(struct spinlock* lock)
     _spinlock_lock(lock, SPINLOCK_LOCK_WAITFOREVER);
 }
 
-void spinlock_unlock(struct spinlock* lock)
+__attribute__((optimize("O0"))) void spinlock_unlock(struct spinlock* lock)
 {
     struct double_list_node* p_lock_node = &core_lock_request[cur_cpuid()].node;
     assert(lock_request_guard.next == p_lock_node);
@@ -91,7 +91,7 @@ void spinlock_unlock(struct spinlock* lock)
     _spinlock_unlock(lock);
 }
 
-bool spinlock_try_lock(struct spinlock* lock)
+__attribute__((optimize("O0"))) bool spinlock_try_lock(struct spinlock* lock)
 {
     int cur_cpu_id = cur_cpuid();
     if (lock->owner_cpu != SPINLOCK_STATE_UNLOCK && lock->owner_cpu == cur_cpu_id) {

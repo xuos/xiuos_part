@@ -101,7 +101,7 @@ static bool dealloc_trace_meta(struct TraceMeta* meta)
 
 static tracer_mem_chunk_idx_t trace_meta_map_mem_chunk(struct TraceMeta* const p_trace_meta, tracer_mem_chunk_idx_t mem_chunk_num)
 {
-    tracer_mem_chunk_idx_t addr;
+    tracer_mem_chunk_idx_t addr = 0;
     /* direct mapping */
     if (mem_chunk_num < TRACEMETA_NR_DIRECT) {
         if ((addr = p_trace_meta->addr[mem_chunk_num]) == 0) {

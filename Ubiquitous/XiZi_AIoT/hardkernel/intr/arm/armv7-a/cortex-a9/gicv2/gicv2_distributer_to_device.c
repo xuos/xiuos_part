@@ -45,6 +45,8 @@ Author: AIIT XUOS Lab
 Modification:
 1. take only gicd part of functions
 *************************************************/
+#include "string.h"
+
 #include "gicv2_common_opa.h"
 #include "gicv2_registers.h"
 
@@ -139,7 +141,7 @@ void gic_send_sgi(uint32_t irqID, uint32_t target_list, uint32_t filter_list)
 
 void gic_init(void)
 {
-    gicd_t* gicd = gic_get_gicd();
+    volatile gicd_t* gicd = gic_get_gicd();
 
     // First disable the distributor.
     gic_enable(false);
@@ -150,7 +152,9 @@ void gic_init(void)
 
     for (uint32_t i = 0; i < 255; i++) {
         *(uint32_t*)(&gicd->IPRIORITYRn[i * sizeof(uint32_t)]) = (uint32_t)0x80808080;
+        // memset((void*)&gicd->IPRIORITYRn[i * sizeof(uint32_t)], 0x80, sizeof(uint32_t));
         *(uint32_t*)(&gicd->ITARGETSRn[i * sizeof(uint32_t)]) = (uint32_t)0x01010101;
+        // memset((void*)&gicd->IPRIORITYRn[i * sizeof(uint32_t)], 0x01, sizeof(uint32_t));
     }
 
     // Init the GIC CPU interface.
