@@ -38,20 +38,13 @@ struct TaskMicroDescriptor* max_priority_runnable_task(void)
 
     DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[priority], node)
     {
-        spinlock_lock(&task->lock);
-        if (task->state == READY) {
+        if (task->state == READY && !task->dead) {
             // found a runnable task, stop this look up
-            task->state = RUNNING;
-            spinlock_unlock(&task->lock);
             return task;
-        } else if (task->state == DEAD) {
-            // found a killed task, stop this loop
-            // change in pcb_list may break this loop, so find a runnable in next look up
-            spinlock_unlock(&task->lock);
+        } else if (task->dead && task->state != RUNNING) {
             xizi_task_manager.free_pcb(task);
             return NULL;
         }
-        spinlock_unlock(&task->lock);
     }
     return NULL;
 }
@@ -62,21 +55,13 @@ struct TaskMicroDescriptor* round_robin_runnable_task(uint32_t priority)
 
     DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[priority], node)
     {
-
-        spinlock_lock(&task->lock);
-        if (task->state == READY) {
+        if (task->state == READY && !task->dead) {
             // found a runnable task, stop this look up
-            spinlock_unlock(&task->lock);
-            task->state = RUNNING;
             return task;
-        } else if (task->state == DEAD) {
-            // found a killed task, stop this loop
-            // change in pcb_list may break this loop, so find a runnable in next look up
-            spinlock_unlock(&task->lock);
+        } else if (task->dead && task->state != RUNNING) {
             xizi_task_manager.free_pcb(task);
             return NULL;
         }
-        spinlock_unlock(&task->lock);
     }
 
     return NULL;

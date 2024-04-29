@@ -82,6 +82,11 @@ static void tlb_flush_range(uintptr_t vstart, int len)
     }
 }
 
+static void tlb_flush_all()
+{
+    CLEARTLB(0);
+}
+
 static struct MmuCommonDone mmu_common_done = {
     .MmuDevPteAttr = GetDevPteAttr,
     .MmuPdeAttr = GetPdeAttr,
@@ -91,6 +96,7 @@ static struct MmuCommonDone mmu_common_done = {
 
     .LoadPgdirCrit = load_pgdir_critical,
     .LoadPgdir = load_pgdir,
+    .TlbFlushAll = tlb_flush_all,
     .TlbFlush = tlb_flush_range,
 };
 

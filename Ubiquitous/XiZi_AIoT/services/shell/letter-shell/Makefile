@@ -16,9 +16,10 @@ objdump = ${toolchain}objdump
 c_useropts = -O0
 
 INC_DIR = 	-I$(KERNEL_ROOT)/services/app \
+			-I$(KERNEL_ROOT)/services/fs/libfs \
+		  	-I$(KERNEL_ROOT)/services/lib/memory \
 			-I$(KERNEL_ROOT)/services/lib/ipc \
-			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
-			-I$(KERNEL_ROOT)/services/fs/libfs
+			-I$(KERNEL_ROOT)/services/boards/$(BOARD) 
 
 all: shell_cmd_list.o shell_ext.o shell.o
 	@mv $^ ../../app

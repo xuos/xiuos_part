@@ -50,7 +50,7 @@ Modification:
 #define CPSR_MODE (0x1f) //!< Current processor mode
 //@}
 
-#define MODE_STACK_SIZE 0x4000
+#define MODE_STACK_SIZE 0x1000
 
 //! @name Interrupt enable bits in CPSR
 //@{
@@ -107,11 +107,11 @@ struct context {
 
 /// @brief init task context, set return address to trap return
 /// @param
-extern void trap_return(void);
+extern void task_prepare_enter();
 __attribute__((__always_inline__)) static inline void arch_init_context(struct context* ctx)
 {
     memset(ctx, 0, sizeof(*ctx));
-    ctx->lr = (uint32_t)(trap_return);
+    ctx->lr = (uint32_t)(task_prepare_enter + 4);
 }
 
 struct trapframe {
@@ -193,4 +193,6 @@ __attribute__((__always_inline__)) static inline void arch_set_return(struct tra
     tf->r0 = (uint32_t)ret;
 }
 
+void cpu_start_secondary(uint8_t cpu_id);
+void start_smp_cache_broadcast(int cpu_id);
 #endif

@@ -36,6 +36,7 @@ extern void shellMkdir(const char* path);
 extern void shellRm(const char* path);
 extern void shellCat(const char* path);
 
+extern void shellKill(int pid);
 extern void shellShowTasks();
 extern void shellShowMemInfo();
 extern void shellShowCpusInfo();
@@ -98,7 +99,10 @@ const ShellCommand shellCommandList[] = {
         sh, SHELL_AGENCY_FUNC_NAME(shellRun), run command directly),
 
     SHELL_CMD_ITEM(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_DISABLE_RETURN,
+        kill, shellKill, kill task by id),
+    SHELL_CMD_ITEM(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_DISABLE_RETURN,
         ls, shellLs, ls files),
+
     SHELL_CMD_ITEM(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_DISABLE_RETURN,
         cd, shellCd, go to target path),
     SHELL_CMD_ITEM(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_DISABLE_RETURN,

@@ -41,31 +41,18 @@ Modification:
 *************************************************/
 #include "core.h"
 #include "memlayout.h"
+#include "spinlock.h"
+#include "trap_common.h"
 
-#include "log.h"
+#include "assert.h"
 #include "multicores.h"
 #include "syscall.h"
-
-__attribute__((always_inline)) static inline void _abort_reason(uint32_t fault_status)
-{
-    if ((fault_status & 0xd) == 0x1) // Alignment failure
-        KPrintf("reason: alignment\n");
-    else if ((fault_status & 0xd) == 0x5) // External abort "on translation"
-        KPrintf("reason: ext. abort on trnslt.\n");
-    else if ((fault_status & 0xd) == 0x5) // Translation
-        KPrintf("reason: sect. translation\n");
-    else if ((fault_status & 0xd) == 0x9) // Domain
-        KPrintf("reason: sect. domain\n");
-    else if ((fault_status & 0xd) == 0xd) // Permission
-        KPrintf("reason: sect. permission\n");
-    else if ((fault_status & 0xd) == 0x8) // External abort
-        KPrintf("reason: ext. abort\n");
-    else
-        KPrintf("reason: unknown???\n");
-}
+#include "task.h"
 
 void dump_tf(struct trapframe* tf)
 {
+    KPrintf("sp_usr:  0x%x\n", tf->sp_usr);
+    KPrintf("lr_usr:  0x%x\n", tf->lr_usr);
     KPrintf("lr_svc:  0x%x\n", tf->lr_svc);
     KPrintf("   spsr: 0x%x\n", tf->spsr);
     KPrintf("     r0: 0x%x\n", tf->r0);
@@ -84,62 +71,74 @@ void dump_tf(struct trapframe* tf)
     KPrintf("     pc: 0x%x\n", tf->pc);
 }
 
+void dabort_reason(struct trapframe* r)
+{
+    uint32_t fault_status, dfa;
+    __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 0" : "=r"(fault_status)::);
+    __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 0" : "=r"(dfa)::);
+    LOG("program counter: 0x%x caused\n", r->pc);
+    LOG("data abort at 0x%x, status 0x%x\n", dfa, fault_status);
+
+    if ((fault_status & 0xd) == 0x1) // Alignment failure
+        KPrintf("reason: alignment\n");
+    else if ((fault_status & 0xd) == 0x5) // External abort "on translation"
+        KPrintf("reason: ext. abort on trnslt.\n");
+    else if ((fault_status & 0xd) == 0x5) // Translation
+        KPrintf("reason: sect. translation\n");
+    else if ((fault_status & 0xd) == 0x9) // Domain
+        KPrintf("reason: sect. domain\n");
+    else if ((fault_status & 0xd) == 0xd) // Permission
+        KPrintf("reason: sect. permission\n");
+    else if ((fault_status & 0xd) == 0x8) // External abort
+        KPrintf("reason: ext. abort\n");
+    else
+        KPrintf("reason: unknown???\n");
+
+    dump_tf(r);
+}
+
+void iabort_reason(struct trapframe* r)
+{
+    uint32_t fault_status, ifa;
+    __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 1" : "=r"(fault_status)::);
+    __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 2" : "=r"(ifa)::);
+    LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, fault_status);
+
+    if ((fault_status & 0xd) == 0x1) // Alignment failure
+        KPrintf("reason: alignment\n");
+    else if ((fault_status & 0xd) == 0x5) // External abort "on translation"
+        KPrintf("reason: ext. abort on trnslt.\n");
+    else if ((fault_status & 0xd) == 0x5) // Translation
+        KPrintf("reason: sect. translation\n");
+    else if ((fault_status & 0xd) == 0x9) // Domain
+        KPrintf("reason: sect. domain\n");
+    else if ((fault_status & 0xd) == 0xd) // Permission
+        KPrintf("reason: sect. permission\n");
+    else if ((fault_status & 0xd) == 0x8) // External abort
+        KPrintf("reason: ext. abort\n");
+    else
+        KPrintf("reason: unknown???\n");
+
+    dump_tf(r);
+}
+
 void handle_undefined_instruction(struct trapframe* tf)
 {
     // unimplemented trap handler
-    KPrintf("undefined instruction at %x\n", tf->pc);
+    xizi_enter_kernel();
+    ERROR("undefined instruction at %x\n", tf->pc);
     panic("");
 }
 
-extern void context_switch(struct context**, struct context*);
-void dabort_handler(struct trapframe* r)
+void handle_reserved(void)
 {
-    uint32_t dfs, dfa;
-
-    __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 0" : "=r"(dfs)::);
-    __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 0" : "=r"(dfa)::);
-
-    if (r->pc < KERN_MEM_BASE) { // Exception occured in User space: exit
-        ERROR("dabort in user space: %s\n", cur_cpu()->task->name);
-        LOG("program counter: 0x%x caused\n", r->pc);
-        LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
-        _abort_reason(dfs);
-        dump_tf(r);
-    }
-    if (cur_cpu()->task != NULL) {
-        sys_exit();
-        context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
-    } else { // Exception occured in Kernel space: panic
-        LOG("program counter: 0x%x caused\n", r->pc);
-        LOG("data abort at 0x%x, status 0x%x\n", dfa, dfs);
-        _abort_reason(dfs);
-        dump_tf(r);
-        panic("data abort exception\n");
-    }
+    // unimplemented trap handler
+    xizi_enter_kernel();
+    panic("Unimplemented Reserved\n");
 }
 
-void iabort_handler(struct trapframe* r)
+void handle_fiq(void)
 {
-    uint32_t ifs, ifa;
-
-    __asm__ __volatile__("mrc p15, 0, %0, c5, c0, 1" : "=r"(ifs)::);
-    __asm__ __volatile__("mrc p15, 0, %0, c6, c0, 2" : "=r"(ifa)::);
-
-    if (r->pc < KERN_MEM_BASE) { // Exception occured in User space: exit
-        ERROR("iabort in user space: %s\n", cur_cpu()->task->name);
-        LOG("program counter: 0x%x(%s) caused\n", r->pc, cur_cpu()->task);
-        LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, ifs);
-        _abort_reason(ifs);
-        dump_tf(r);
-    }
-    if (cur_cpu()->task != NULL) {
-        sys_exit();
-        context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
-    } else { // Exception occured in Kernel space: panic
-        LOG("program counter: 0x%x(%s) caused\n", r->pc, cur_cpu()->task);
-        LOG("prefetch abort at 0x%x, status 0x%x\n", ifa, ifs);
-        _abort_reason(ifs);
-        dump_tf(r);
-        panic("prefetch abort exception\n");
-    }
+    xizi_enter_kernel();
+    panic("Unimplemented FIQ\n");
 }

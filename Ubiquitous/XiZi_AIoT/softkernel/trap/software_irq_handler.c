@@ -48,9 +48,9 @@ bool swi_distributer_init(struct SwiDispatcherRightGroup* _right_group)
 extern void context_switch(struct context**, struct context*);
 void software_irq_dispatch(struct trapframe* tf)
 {
+    xizi_enter_kernel();
     assert(p_intr_driver != NULL);
 
-    p_intr_driver->cpu_irq_disable();
     // get current task
     struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
     /// @todo: Handle dead task
@@ -59,21 +59,22 @@ void software_irq_dispatch(struct trapframe* tf)
     if (cur_task && cur_task->state != DEAD) {
         cur_task->main_thread.trapframe = tf;
         // call syscall
+
         int ret = arch_syscall(cur_task->main_thread.trapframe, &syscall_num);
 
         if (syscall_num != SYSCALL_EXEC) {
             arch_set_return(tf, ret);
         }
-    } else {
-        ERROR("syscall by killed task.\n");
     }
 
-    if (cur_cpu()->task == NULL && cur_task != NULL) {
+    if ((cur_cpu()->task == NULL && cur_task != NULL) || cur_task->state != RUNNING) {
+        cur_cpu()->task = NULL;
         context_switch(&cur_task->main_thread.context, cur_cpu()->scheduler);
     }
-    assert(cur_task == cur_cpu()->task);
     if (syscall_num == SYSCALL_EXIT) {
-        ERROR("Exit reaches");
+        panic("Exit reaches");
     }
-    p_intr_driver->cpu_irq_enable();
+
+    assert(cur_task == cur_cpu()->task);
+    xizi_leave_kernel();
 }

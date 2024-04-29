@@ -59,15 +59,15 @@ struct XiziTrapDriver {
     /* current irq number happening in cpu*/
     uint32_t curr_int[NR_CPU];
 
-    void (*sys_irq_init)();
+    void (*sys_irq_init)(int);
+    int (*cur_cpu_id)();
 
     void (*cpu_irq_enable)();
     void (*cpu_irq_disable)();
     void (*single_irq_enable)(int irq, int cpu, int prio);
     void (*single_irq_disable)(int irq, int cpu);
-    uint32_t* (*switch_hw_irqtbl)(uint32_t*);
 
-    bool (*send_sgi)(uint32_t, uint32_t, enum SgiFilterType);
+    uint32_t* (*switch_hw_irqtbl)(uint32_t*);
     void (*bind_irq_handler)(int, irq_handler_t);
 
     /* check if no if interruptable */
@@ -101,3 +101,6 @@ bool intr_distributer_init(struct IrqDispatcherRightGroup*);
 void intr_irq_dispatch(struct trapframe* tf);
 bool swi_distributer_init(struct SwiDispatcherRightGroup*);
 void software_irq_dispatch(struct trapframe* tf);
+
+void dabort_reason(struct trapframe* r);
+void iabort_reason(struct trapframe* r);

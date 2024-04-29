@@ -15,13 +15,14 @@
 #include "libipc.h"
 
 IPC_SERVICES(IpcFsServer, Ipc_ls, Ipc_cd, Ipc_mkdir, Ipc_delete, Ipc_cat,
-    Ipc_open, Ipc_close, Ipc_read, Ipc_write);
+    Ipc_open, Ipc_close, Ipc_read, Ipc_write, Ipc_fsize);
 
 int ls(struct Session* session, char* path);
 int cd(struct Session* session, char* path);
 int mkdir(struct Session* session, char* path);
 int rm(struct Session* session, char* path);
 int cat(struct Session* session, char* path);
+int fsize(struct Session* session, int fd);
 
 int open(struct Session* session, char* path);
 int close(struct Session* session, int fd);

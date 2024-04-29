@@ -71,7 +71,7 @@ arm_set_interrupt_state:
 cpu_get_current: 
     mrc   p15, 0, r0, c0, c0, 5
     and   r0, r0, #3
-	BX	  lr
+	  BX	  lr
   .endfunc    @cpu_get_current()@
 
   .global enable_neon_fpu
@@ -128,8 +128,8 @@ disable_L1_cache:
 get_arm_private_peripheral_base: 
 
   @ Get base address of private perpherial space
-  mrc     p15, 4, r0, c15, c0, 0  @ Read periph base address
-  @ mov r0, #0x00A00000
+  @ mrc     p15, 4, r0, c15, c0, 0  @ Read periph base address
+  mov     r0, #0x00A00000
   bx      lr
   
   .endfunc    @get_arm_private_peripheral_base()@
@@ -213,7 +213,8 @@ arm_branch_target_cache_invalidate_is:
 scu_enable:
 
   @ mrc     p15, 4, r0, c15, c0, 0  @ Read periph base address
-  mov r0, #0x00A00000
+  mov     r0, #0x00A00000
+  add     r0, #0x80000000
 
   ldr     r1, [r0, #0x0]          @ Read the SCU Control Register
   orr     r1, r1, #0x1            @ Set bit 0 (The Enable bit)
@@ -268,7 +269,8 @@ scu_leave_smp:
 scu_get_cpus_in_smp:
 
   @ mrc     p15, 4, r0, c15, c0, 0  @ Read periph base address
-  mov r0, #0x00A00000
+  mov     r0, #0x00A00000
+  add     r0, #0x80000000
 
   ldr     r0, [r0, #0x004]        @ Read SCU Configuration register
   mov     r0, r0, lsr #4          @ Bits 7:4 gives the cores in SMP mode, shift then mask
@@ -327,6 +329,7 @@ scu_secure_invalidate:
   mov     r1, r1, lsl r0          @ Shift ways into the correct CPU field
 
   mrc     p15, 4, r2, c15, c0, 0  @ Read periph base address
+  add     r2, #0x80000000
 
   str     r1, [r2, #0x0C]         @ Write to SCU Invalidate All in Secure State
   

@@ -10,41 +10,26 @@
  * See the Mulan PSL v2 for more details.
  */
 /**
- * @file sys_yield.c
- * @brief task yield
+ * @file libmem.h
+ * @brief support malloc and free in userland
  * @version 3.0
  * @author AIIT XUOS Lab
- * @date 2023.08.25
+ * @date 2024.01.31
  */
 
 /*************************************************
-File name: sys_yield.c
-Description: task yield
+File name: libmem.h
+Description: support malloc and free in userland
 Others:
 History:
-1. Date: 2023-08-28
+1. Date: 2024-01-31
 Author: AIIT XUOS Lab
 Modification:
 1. first version
 *************************************************/
-#include "multicores.h"
-#include "syscall.h"
-#include "task.h"
+#pragma once
 
-#include "log.h"
+#include <stddef.h>
 
-int sys_yield(task_yield_reason reason)
-{
-    struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
-    xizi_task_manager.task_yield_noschedule(cur_task, false);
-
-    // handle ipc block
-    if ((reason & SYS_TASK_YIELD_BLOCK_IPC) != 0) {
-        if (cur_task->current_ipc_handled) {
-            cur_task->current_ipc_handled = false;
-        } else {
-            xizi_task_manager.task_block(cur_task);
-        }
-    }
-    return 0;
-}
+void* malloc(size_t size);
+void free(void* ptr);

@@ -45,7 +45,7 @@ bool module_phymem_init()
     uint32_t user_freemem_start = PHY_USER_FREEMEM_BASE;
     uint32_t user_freemem_end = PHY_MEM_STOP;
     KBuddySysInit(&kern_virtmem_buddy, kern_freemem_start, kern_freemem_end);
-    KBuddySysInit(&user_phy_freemem_buddy, user_freemem_start, user_freemem_end);
+    KBuddyInit(&user_phy_freemem_buddy, user_freemem_start, user_freemem_end);
     LOG_PRINTF("Free memory organized done.\n");
     return true;
 }

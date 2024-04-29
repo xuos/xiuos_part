@@ -19,7 +19,10 @@
 int main(int argc, char* argv[])
 {
     struct Session session;
-    connect_session(&session, "MemFS", 8092);
+    printf("init: connecting MemFS\n");
+    while (connect_session(&session, "MemFS", 8092) < 0)
+        ;
+    printf("init: connect MemFS success\n");
 
     int fd;
     char* shell_task_param[2] = { "/shell", 0 };
@@ -28,7 +31,7 @@ int main(int argc, char* argv[])
         exit();
     }
 
-    if (spawn(&session, fd, read, shell_task_param[0], shell_task_param) < 0) {
+    if (spawn(&session, fd, read, fsize, shell_task_param[0], shell_task_param) < 0) {
         printf("Syscall Spawn shell failed\n");
     }
 

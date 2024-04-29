@@ -41,8 +41,6 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         return -1;
     }
 
-    spinlock_lock(&cur_task->lock);
-
     struct double_list_node* cur_node = NULL;
     struct server_session* server_session = NULL;
     /* update old sessions */
@@ -54,52 +52,44 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         server_session = CONTAINER_OF(cur_node, struct server_session, node);
         if (UNLIKELY(server_session->buf_addr != (uintptr_t)userland_session_arr[i].buf)) {
             ERROR("mismatched old session addr, user buf: %x, server buf: %x\n", userland_session_arr[i].buf, server_session->buf_addr);
-            spinlock_unlock(&cur_task->lock);
             return -1;
         }
         // update session_backend
+        // if current session is handled
+        if (server_session->head != userland_session_arr[i].head) {
+            struct TaskMicroDescriptor* client = SERVER_SESSION_BACKEND(server_session)->client;
+            if (client->state == BLOCKED) {
+                xizi_task_manager.task_unblock(client);
+            } else {
+                client->current_ipc_handled = true;
+            }
+        }
         server_session->head = userland_session_arr[i].head;
         server_session->tail = userland_session_arr[i].tail;
         doubleListDel(cur_node);
         doubleListAddOnBack(cur_node, &cur_task->svr_sess_listhead);
     }
-    spinlock_unlock(&cur_task->lock);
-
-    /* handle sessions for condition 2, ref. delete_share_pages() */
-    bool has_delete = true;
-    while (has_delete) {
-        has_delete = false;
-
-        spinlock_lock(&cur_task->lock);
-        DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
-        {
-            if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
-                // client had closed it, then server will close it too
-                struct session_backend* session_backend = SERVER_SESSION_BACKEND(server_session);
-
-                spinlock_unlock(&cur_task->lock);
-                if (!session_backend->server_side.closed) {
-                    session_backend->server_side.closed = true;
-                    xizi_share_page_manager.unmap_task_share_pages(cur_task, session_backend->server_side.buf_addr, session_backend->nr_pages);
-                }
-                xizi_share_page_manager.delete_share_pages(session_backend);
-                has_delete = true;
-                break;
-            }
-        }
-        if (!has_delete) {
-            spinlock_unlock(&cur_task->lock);
-        }
-    }
 
     /* poll with new sessions */
-    spinlock_lock(&cur_task->lock);
     int i = 0;
     DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
     {
         if (i >= arr_capacity) {
             break;
         }
+
+        if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
+            // client had closed it, then server will close it too
+            struct session_backend* session_backend = SERVER_SESSION_BACKEND(server_session);
+
+            if (!session_backend->server_side.closed) {
+                session_backend->server_side.closed = true;
+                xizi_share_page_manager.unmap_task_share_pages(cur_task, session_backend->server_side.buf_addr, session_backend->nr_pages);
+            }
+            xizi_share_page_manager.delete_share_pages(session_backend);
+            break;
+        }
+
         userland_session_arr[i++] = (struct Session) {
             .buf = (void*)server_session->buf_addr,
             .capacity = server_session->capacity,
@@ -111,7 +101,6 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
     if (LIKELY(i < arr_capacity)) {
         userland_session_arr[i].buf = 0;
     }
-    spinlock_unlock(&cur_task->lock);
 
     return 0;
 }

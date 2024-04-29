@@ -55,8 +55,17 @@ static inline void _padding(char* name)
 void show_tasks(void)
 {
     struct TaskMicroDescriptor* task = NULL;
-    DEBUG_PRINTF("******************************************************\n");
-    DEBUG_PRINTF("STAT     ID   TASK            PRI   LEFT_TICKS\n");
+    LOG_PRINTF("******************************************************\n");
+    for (int i = 0; i < NR_CPU; i++) {
+        LOG_PRINTF("CPU %d: ", i);
+        if (global_cpus[i].task != NULL) {
+            LOG_PRINTF("%s\n", global_cpus[i].task->name);
+        } else {
+            LOG_PRINTF("NULL\n");
+        }
+    }
+    LOG_PRINTF("******************************************************\n");
+    LOG_PRINTF("STAT     ID   TASK            PRI   MEM(KB)\n");
     for (int i = 0; i < TASK_MAX_PRIORITY; i++) {
         if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[i])) {
             continue;
@@ -64,19 +73,27 @@ void show_tasks(void)
         DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[i], node)
         {
             if (task->state == INIT)
-                DEBUG_PRINTF("   INIT ");
+                LOG_PRINTF("   INIT ");
             else if (task->state == READY)
-                DEBUG_PRINTF("  READY ");
+                LOG_PRINTF("  READY ");
             else if (task->state == RUNNING)
-                DEBUG_PRINTF("RUNNING ");
+                LOG_PRINTF("RUNNING ");
             else if (task->state == DEAD)
-                DEBUG_PRINTF("   DEAD ");
+                LOG_PRINTF("   DEAD ");
 
             _padding(task->name);
-            DEBUG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->remain_tick);
+            LOG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->mem_size >> 10);
         }
     }
-    DEBUG_PRINTF("******************************************************\n");
+
+    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_blocked_list_head, node)
+    {
+        LOG_PRINTF("  BLOCK ");
+        _padding(task->name);
+        LOG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->mem_size >> 10);
+    }
+
+    LOG_PRINTF("******************************************************\n");
     return;
 }
 
@@ -85,8 +102,8 @@ extern struct KBuddy kern_virtmem_buddy;
 extern uint32_t kernel_data_end[];
 void show_mem(void)
 {
-    DEBUG_PRINTF("*********************************************************\n");
-    DEBUG_PRINTF(" TOTAL(KB)        USED(KB)        FREE(KB) \n");
+    LOG_PRINTF("*********************************************************\n");
+    LOG_PRINTF(" TOTAL(KB)        USED(KB)        FREE(KB) \n");
 
     uint32_t total = (PHY_MEM_STOP - V2P(kernel_data_end)) >> 10;
     uint32_t used = 0;
@@ -96,14 +113,14 @@ void show_mem(void)
     }
     used = used >> 10;
 
-    DEBUG_PRINTF(" %d           %d           %d\n", total, total - used, used);
-    DEBUG_PRINTF("*********************************************************\n");
+    LOG_PRINTF(" %d           %d           %d\n", total, total - used, used);
+    LOG_PRINTF("*********************************************************\n");
     return;
 }
 
 void show_cpu(void)
 {
-    DEBUG_PRINTF("**********************************************************\n");
+    LOG_PRINTF("**********************************************************\n");
 #ifdef ARCH_SMP
     /// @todo support smp
     KPrintf(" cpu  VALUE \n");
@@ -116,10 +133,10 @@ void show_cpu(void)
 
     _padding(current_task->name);
 
-    DEBUG_PRINTF(" ID  COMMAND        USED_TICKS  FREE_TICKS \n");
-    DEBUG_PRINTF(" %d   %s   %d          %d\n", cpu_id, current_task->name, TASK_CLOCK_TICK - current_task->remain_tick, current_task->remain_tick);
+    LOG_PRINTF(" ID  COMMAND        USED_TICKS  FREE_TICKS \n");
+    LOG_PRINTF(" %d   %s   %d          %d\n", cpu_id, current_task->name, TASK_CLOCK_TICK - current_task->remain_tick, current_task->remain_tick);
 
-    DEBUG_PRINTF("***********************************************************\n");
+    LOG_PRINTF("***********************************************************\n");
     return;
 }
 
@@ -129,7 +146,7 @@ int sys_state(sys_state_option option, sys_state_info* info)
         info->memblock_info.memblock_start = (uintptr_t)V2P(_binary_fs_img_start);
         info->memblock_info.memblock_end = (uintptr_t)V2P(_binary_fs_img_end);
     } else if (option == SYS_STATE_GET_HEAP_BASE) {
-        return cur_cpu()->task->mem_size;
+        return cur_cpu()->task->heap_base;
     } else if (option == SYS_STATE_SET_TASK_PRIORITY) {
         xizi_task_manager.set_cur_task_priority(info->priority);
     } else if (option == SYS_STATE_SHOW_TASKS) {

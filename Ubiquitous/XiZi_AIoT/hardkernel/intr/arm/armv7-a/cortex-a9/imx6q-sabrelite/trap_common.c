@@ -34,6 +34,7 @@ Modification:
 #include "trap_common.h"
 
 #include "log.h"
+#include "multicores.h"
 
 extern void init_stack(uint32_t, uint32_t);
 extern void user_trap_swi_enter(void);
@@ -41,12 +42,13 @@ extern void trap_iabort(void);
 extern void trap_dabort(void);
 extern void trap_irq_enter(void);
 extern void trap_undefined_instruction(void);
+extern void handle_reserved(void);
+extern void handle_fiq(void);
 
 static struct XiziTrapDriver xizi_trap_driver;
 
 void panic(char* s)
 {
-    xizi_trap_driver.cpu_irq_disable();
     KPrintf("panic: %s\n", s);
     for (;;)
         ;
@@ -54,7 +56,6 @@ void panic(char* s)
 
 /* stack for different mode*/
 static char mode_stack_pages[NR_CPU][NR_MODE_STACKS][MODE_STACK_SIZE];
-
 extern uint32_t _vector_jumper;
 extern uint32_t _vector_start;
 extern uint32_t _vector_end;
@@ -69,37 +70,25 @@ void init_cpu_mode_stacks(int cpu_id)
     }
 }
 
-void handle_reserved(void)
-{
-    // unimplemented trap handler
-    LOG("Unimplemented Reserved\n");
-    panic("");
-}
-
-void handle_fiq(void)
-{
-    LOG("Unimplemented FIQ\n");
-    panic("");
-}
-
-static void _sys_irq_init()
+static void _sys_irq_init(int cpu_id)
 {
     /* load exception vectors */
-    volatile uint32_t* vector_base = &_vector_start;
+    init_cpu_mode_stacks(cpu_id);
+    if (cpu_id == 0) {
+        volatile uint32_t* vector_base = &_vector_start;
 
-    // Set Interrupt handler start address
-    vector_base[1] = (uint32_t)trap_undefined_instruction; // Undefined Instruction
-    vector_base[2] = (uint32_t)user_trap_swi_enter; // Software Interrupt
-    vector_base[3] = (uint32_t)trap_iabort; // Prefetch Abort
-    vector_base[4] = (uint32_t)trap_dabort; // Data Abort
-    vector_base[5] = (uint32_t)handle_reserved; // Reserved
-    vector_base[6] = (uint32_t)trap_irq_enter; // IRQ
-    vector_base[7] = (uint32_t)handle_fiq; // FIQ
+        // Set Interrupt handler start address
+        vector_base[1] = (uint32_t)trap_undefined_instruction; // Undefined Instruction
+        vector_base[2] = (uint32_t)user_trap_swi_enter; // Software Interrupt
+        vector_base[3] = (uint32_t)trap_iabort; // Prefetch Abort
+        vector_base[4] = (uint32_t)trap_dabort; // Data Abort
+        vector_base[5] = (uint32_t)handle_reserved; // Reserved
+        vector_base[6] = (uint32_t)trap_irq_enter; // IRQ
+        vector_base[7] = (uint32_t)handle_fiq; // FIQ
 
-    init_cpu_mode_stacks(0);
-
+        gic_init();
+    }
     /* active hardware irq responser */
-    gic_init();
     xizi_trap_driver.switch_hw_irqtbl((uint32_t*)&_vector_jumper);
 }
 
@@ -151,29 +140,6 @@ static void _bind_irq_handler(int irq, irq_handler_t handler)
     xizi_trap_driver.sw_irqtbl[irq].handler = handler;
 }
 
-static bool _send_sgi(uint32_t irq, uint32_t bitmask, enum SgiFilterType type)
-{
-    if (bitmask > (1 << NR_CPU) - 1) {
-        return false;
-    }
-
-    enum _gicd_sgi_filter sgi_filter;
-    switch (type) {
-    case SgiFilter_TargetList:
-        sgi_filter = kGicSgiFilter_UseTargetList;
-        break;
-    case SgiFilter_AllOtherCPUs:
-        sgi_filter = kGicSgiFilter_AllOtherCPUs;
-        break;
-    default:
-        sgi_filter = kGicSgiFilter_OnlyThisCPU;
-        break;
-    }
-    gic_send_sgi(irq, bitmask, sgi_filter);
-
-    return true;
-}
-
 static uint32_t _hw_before_irq()
 {
 
@@ -213,8 +179,14 @@ static int _is_interruptable(void)
     return !(val & DIS_INT);
 }
 
+int _cur_cpu_id()
+{
+    return cpu_get_current();
+}
+
 static struct XiziTrapDriver xizi_trap_driver = {
     .sys_irq_init = _sys_irq_init,
+    .cur_cpu_id = _cur_cpu_id,
 
     .cpu_irq_enable = _cpu_irq_enable,
     .cpu_irq_disable = _cpu_irq_disable,
@@ -223,7 +195,6 @@ static struct XiziTrapDriver xizi_trap_driver = {
     .switch_hw_irqtbl = _switch_hw_irqtbl,
 
     .bind_irq_handler = _bind_irq_handler,
-    .send_sgi = _send_sgi,
 
     .is_interruptable = _is_interruptable,
     .hw_before_irq = _hw_before_irq,
@@ -234,7 +205,7 @@ static struct XiziTrapDriver xizi_trap_driver = {
 
 struct XiziTrapDriver* hardkernel_intr_init(struct TraceTag* hardkernel_tag)
 {
-    xizi_trap_driver.sys_irq_init();
+    xizi_trap_driver.sys_irq_init(0);
     xizi_trap_driver.cpu_irq_disable();
     return &xizi_trap_driver;
 }

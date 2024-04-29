@@ -121,7 +121,7 @@ void ipc_msg_send_wait(struct IpcMsg* msg)
     msg->header.done = 0;
     while (msg->header.done == 0) {
         /// @todo syscall yield with prio decrease
-        yield();
+        yield(SYS_TASK_YIELD_BLOCK_IPC);
     }
     assert(msg->header.done == 1);
 }
@@ -138,7 +138,7 @@ int ipc_session_wait(struct Session* session)
     struct IpcMsg* msg = IPCSESSION_MSG(session);
     while (msg->header.done == 0) {
         /// @todo syscall yield with prio decrease
-        yield();
+        yield(SYS_TASK_YIELD_BLOCK_IPC);
     }
     assert(msg->header.done == 1);
     return msg->header.ret_val;
@@ -159,6 +159,7 @@ void delay_session(void)
 void ipc_server_loop(struct IpcNode* ipc_node)
 {
     struct Session session_list[NR_MAX_SESSION];
+    memset(session_list, 0, sizeof(session_list));
     for (;;) {
         /* if connect sessions are greater than NR_MAX_SESSION,
             a full round will require multiple polls.
@@ -169,7 +170,7 @@ void ipc_server_loop(struct IpcNode* ipc_node)
         /* handle each session */
         for (int i = 0; i < NR_MAX_SESSION; i++) {
             if (session_list[i].buf == NULL) {
-                yield();
+                yield(SYS_TASK_YIELD_NO_REASON);
                 break;
             }
             cur_sess_id = session_list[i].id;
@@ -178,11 +179,13 @@ void ipc_server_loop(struct IpcNode* ipc_node)
                 a session could be delay in case one of its message(current message) needs to wait for an interrupt message's arrival
                 interfaces[opcode] should explicitly call delay_session() and return to delay this session
             */
-            while (msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1 && msg->header.done != 1) {
+            while (msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1 && msg->header.done == 0) {
                 // printf("session %d [%d, %d]\n", session_list[i].id, session_list[i].head, session_list[i].tail);
                 if (session_used_size(&session_list[i]) == 0 && session_forward_tail(&session_list[i], msg->header.len) < 0) {
                     break;
                 }
+
+                // this is a message needs to handle
                 if (ipc_node->interfaces[msg->header.opcode]) {
                     ipc_node->interfaces[msg->header.opcode](msg);
                     // check if this session is delayed by op handler, all messages after the delayed message in current session is blocked.
@@ -193,9 +196,10 @@ void ipc_server_loop(struct IpcNode* ipc_node)
                 } else {
                     printf("Unsupport opcode(%d) for server: %s\n", msg->header.opcode, ipc_node->name);
                 }
+                // current msg is a message that needs to ignore
                 // finish this message in server's perspective
-                while (session_forward_head(&session_list[i], msg->header.len) < 0) {
-                    yield();
+                if (session_forward_head(&session_list[i], msg->header.len) < 0) {
+                    break;
                 }
                 msg = IPCSESSION_MSG(&session_list[i]);
             }

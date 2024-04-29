@@ -64,3 +64,9 @@ int write(struct Session* session, int fd, char* src, int offset, int len)
 {
     return IPC_CALL(Ipc_write)(session, &fd, src, &offset, &len);
 }
+
+IPC_INTERFACE(Ipc_fsize, 1, fd, sizeof(int));
+int fsize(struct Session* session, int fd)
+{
+    return IPC_CALL(Ipc_fsize)(session, &fd);
+}

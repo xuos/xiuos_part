@@ -29,6 +29,7 @@ Modification:
 *************************************************/
 
 #include "buddy.h"
+#include "kalloc.h"
 #include "log.h"
 
 static void _buddy_split_page(struct KPage* page, uint32_t low_order, uint32_t high_order, struct KFreeList* list)
@@ -75,8 +76,6 @@ static struct KPage* KBuddyPagesAlloc(struct KBuddy* pbuddy, int nPages)
     struct KFreeList* list = NULL;
     int i = 0, order = 0;
 
-    spinlock_lock(&pbuddy->lock);
-
     // find order
     for (order = 0; (FREE_LIST_INDEX(order)) < nPages; order++)
         ;
@@ -99,12 +98,10 @@ static struct KPage* KBuddyPagesAlloc(struct KBuddy* pbuddy, int nPages)
         // set the pages' order
         _buddy_set_pages_order(page, order);
 
-        spinlock_unlock(&pbuddy->lock);
         return page;
     }
 
     // there is no enough free page to satisfy the nPages
-    spinlock_unlock(&pbuddy->lock);
     return NULL;
 }
 
@@ -115,8 +112,6 @@ static void KBuddyPagesFree(struct KBuddy* pbuddy, struct KPage* page)
     uint32_t order = (page->order >= MAX_BUDDY_ORDER) ? 0 : page->order;
     uint32_t buddy_idx = 0, new_buddy_idx = 0;
     uint32_t page_idx = page - pbuddy->pages;
-
-    spinlock_lock(&pbuddy->lock);
 
     for (; order < MAX_BUDDY_ORDER - 1; order++) {
         // find and delete buddy to combine
@@ -141,18 +136,21 @@ static void KBuddyPagesFree(struct KBuddy* pbuddy, struct KPage* page)
     doubleListAddOnHead(&page->node, &pbuddy->free_list[order].list_head);
     pbuddy->free_list[order].n_free_pages++;
 
-    spinlock_unlock(&pbuddy->lock);
     return;
 }
 
-void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
+bool KBuddyInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
 {
+    if (pbuddy->pages == NULL) {
+        if ((pbuddy->pages = (struct KPage*)kalloc(((mem_end - mem_start) >> LEVEL4_PTE_SHIFT) * sizeof(struct KPage))) == NULL) {
+            ERROR("Not space to init a buddy object.\n");
+            return false;
+        }
+    }
+
     uint32_t i = 0;
     struct KPage* page = NULL;
     struct KFreeList* free_list = NULL;
-
-    // init spinlock
-    spinlock_init(&pbuddy->lock, "kbuddy");
 
     // init global kernel Buddy system
     pbuddy->mem_start = mem_start;
@@ -183,6 +181,16 @@ void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
         doubleListNodeInit(&page->node);
         KBuddyPagesFree(pbuddy, page);
     }
+
+    return true;
+}
+
+void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
+{
+#define MAX_NR_PAGES MAX_NR_FREE_PAGES
+    static struct KPage kern_free_pages[MAX_NR_PAGES];
+    pbuddy->pages = kern_free_pages;
+    KBuddyInit(pbuddy, mem_start, mem_end);
 }
 
 char* KBuddyAlloc(struct KBuddy* pbuddy, uint32_t size)
@@ -219,6 +227,13 @@ bool KBuddyFree(struct KBuddy* pbuddy, char* vaddr)
     KBuddyPagesFree(pbuddy, page);
 
     return true;
+}
+
+void KBuddyDestory(struct KBuddy* pbuddy)
+{
+    if (pbuddy->pages) {
+        kfree((void*)pbuddy->pages);
+    }
 }
 
 void KFreePagesInfo(struct KBuddy* pbuddy)

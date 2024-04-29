@@ -66,7 +66,7 @@ int IPC_DO_SERVE_FUNC(Ipc_ls)(char* path)
         printf("ls: find target Inode failed, ip: %x(%d), dp: %x(%d)\n", ip, ip->inum, dp, dp->inum);
         return -1;
     }
-    if (ip->type != T_DIR) {
+    if (ip->type != FS_DIRECTORY) {
         printf("ls: not a dir\n");
         return -1;
     }
@@ -282,7 +282,7 @@ int IPC_DO_SERVE_FUNC(Ipc_read)(int* fd, char* dst, int* offset, int* len)
 
     int cur_read_len = InodeRead(ip, dst, *offset, *len);
 
-    return *len;
+    return cur_read_len;
 }
 
 int IPC_DO_SERVE_FUNC(Ipc_write)(int* fd, char* src, int* offset, int* len)
@@ -305,18 +305,36 @@ int IPC_DO_SERVE_FUNC(Ipc_write)(int* fd, char* src, int* offset, int* len)
     return cur_write_len;
 }
 
+int IPC_DO_SERVE_FUNC(Ipc_fsize)(int* fd)
+{
+    struct FileDescriptor* fdp = GetFileDescriptor(*fd);
+    if (!fdp) {
+        printf("read: fd invalid\n");
+        return -1;
+    }
+
+    struct Inode* ip = fdp->data;
+    if (ip->type != FS_FILE) {
+        printf("read: %s Is not a file\n", fdp->path);
+        return -1;
+    }
+
+    return ip->size;
+}
+
 IPC_SERVER_INTERFACE(Ipc_ls, 1);
 IPC_SERVER_INTERFACE(Ipc_cd, 1);
 IPC_SERVER_INTERFACE(Ipc_mkdir, 1);
 IPC_SERVER_INTERFACE(Ipc_delete, 1);
 IPC_SERVER_INTERFACE(Ipc_cat, 1);
+IPC_SERVER_INTERFACE(Ipc_fsize, 1);
 
 IPC_SERVER_INTERFACE(Ipc_open, 1);
 IPC_SERVER_INTERFACE(Ipc_close, 1);
 IPC_SERVER_INTERFACE(Ipc_read, 4);
 IPC_SERVER_INTERFACE(Ipc_write, 4);
 
-IPC_SERVER_REGISTER_INTERFACES(IpcFsServer, 9,
+IPC_SERVER_REGISTER_INTERFACES(IpcFsServer, 10,
     Ipc_ls,
     Ipc_cd,
     Ipc_mkdir,
@@ -325,7 +343,8 @@ IPC_SERVER_REGISTER_INTERFACES(IpcFsServer, 9,
     Ipc_open,
     Ipc_close,
     Ipc_read,
-    Ipc_write);
+    Ipc_write,
+    Ipc_fsize);
 
 int main(int argc, char* argv[])
 {

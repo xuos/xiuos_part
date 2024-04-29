@@ -37,7 +37,7 @@ Modification:
 #include "ipcargs.h"
 #include "session.h"
 
-#define NR_MAX_SESSION 16
+#define NR_MAX_SESSION 32
 #define IPC_MSG_MAGIC 0xABCDDCBA
 
 typedef struct {

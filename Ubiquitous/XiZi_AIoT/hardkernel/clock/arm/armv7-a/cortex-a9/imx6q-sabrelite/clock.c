@@ -34,6 +34,7 @@ Modification:
 
 #include "clock_common_op.h"
 #include "irq_numbers.h"
+#include "multicores.h"
 
 static void _sys_clock_init()
 {

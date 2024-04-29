@@ -13,12 +13,12 @@ cflags = -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=so
 c_useropts = -O0
 
 INC_DIR = 	-I$(KERNEL_ROOT)/services/fs/libfs \
-			-I$(KERNEL_ROOT)/services/fs/fs_server/include \
 			-I$(KERNEL_ROOT)/services/lib/ipc \
+		  	-I$(KERNEL_ROOT)/services/lib/memory \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app
 
-board: libserial.o usyscall.o
+board: libserial.o usyscall.o test_irq_sender.o
 	@mv $^ ../../app
 
 %.o: %.c

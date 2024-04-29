@@ -28,6 +28,7 @@ Modification:
 1. first version
 *************************************************/
 #include "log.h"
+#include "multicores.h"
 #include "trap_common.h"
 
 #include "syscall.h"
@@ -41,13 +42,13 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = 0;
         break;
     case SYSCALL_SPAWN:
-        ret = sys_spawn((struct KernReadTool*)param1, (char*)param2, (char**)param3);
+        ret = sys_spawn((char*)param1, (char*)param2, (char**)param3);
         break;
     case SYSCALL_EXIT:
-        ret = sys_exit();
+        ret = sys_exit(cur_cpu()->task);
         break;
     case SYSCALL_YIELD:
-        ret = sys_yield();
+        ret = sys_yield((task_yield_reason)param1);
         break;
     case SYSCALL_SERVER:
         ret = sys_register_as_server((char*)param1);
@@ -62,7 +63,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_close_session((struct Session*)param1);
         break;
     case SYSCALL_EXEC:
-        ret = sys_exec((struct KernReadTool*)param1, (char*)param2, (char**)param3);
+        ret = sys_exec((char*)param1, (char*)param2, (char**)param3);
         break;
     case SYSCALL_SYS_STATE:
         ret = sys_state(param1, (sys_state_info*)param2);
@@ -72,6 +73,9 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         break;
     case SYSCALL_REGISTER_IRQ:
         ret = sys_register_irq((int)param1, (int)param2);
+        break;
+    case SYSCALL_KILL:
+        ret = sys_kill((int)param1);
         break;
 
     default:

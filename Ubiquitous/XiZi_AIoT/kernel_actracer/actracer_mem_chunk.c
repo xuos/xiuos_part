@@ -61,7 +61,6 @@ static void tracer_mem_chunk_sync(struct tracer_mem_chunk* b)
 
 void mem_chunk_synchronizer_init(uintptr_t mem_chunk_base, uint32_t mem_chunk_size, uint32_t nr_mem_chunks)
 {
-    spinlock_init(&tracer_mem_chunk_syner.lock, "tracer_mem_chunk_syner");
     tracer_mem_chunk_syner.mem_chunk_base = mem_chunk_base;
     tracer_mem_chunk_syner.mem_chunk_size = mem_chunk_size;
     tracer_mem_chunk_syner.nr_mem_chunks = nr_mem_chunks;
@@ -76,8 +75,6 @@ void mem_chunk_synchronizer_init(uintptr_t mem_chunk_base, uint32_t mem_chunk_si
 
 static struct tracer_mem_chunk* tracer_get_mem_chunk_cache(uint32_t chunk_id)
 {
-    spinlock_lock(&tracer_mem_chunk_syner.lock);
-
     // cached mem_chunk cache
     struct tracer_mem_chunk* b;
     DOUBLE_LIST_FOR_EACH_ENTRY(b, &tracer_mem_chunk_syner.head, list_node)
@@ -85,11 +82,8 @@ static struct tracer_mem_chunk* tracer_get_mem_chunk_cache(uint32_t chunk_id)
         if (b->chunk_id == chunk_id) {
             if (!(b->flag & TRACER_MEM_CHUNK_BUSY)) {
                 b->flag |= TRACER_MEM_CHUNK_BUSY;
-                spinlock_unlock(&tracer_mem_chunk_syner.lock);
                 return b;
             }
-            ERROR("tracer mem_chunk syner is locked\n");
-            panic("");
         }
     }
 
@@ -99,7 +93,6 @@ static struct tracer_mem_chunk* tracer_get_mem_chunk_cache(uint32_t chunk_id)
         if ((b->flag & TRACER_MEM_CHUNK_BUSY) == 0) {
             b->chunk_id = chunk_id;
             b->flag = TRACER_MEM_CHUNK_BUSY;
-            spinlock_unlock(&tracer_mem_chunk_syner.lock);
             return b;
         }
     }
@@ -130,17 +123,13 @@ void tracer_mem_chunk_write(struct tracer_mem_chunk* b)
 void tracer_mem_chunk_release(struct tracer_mem_chunk* b)
 {
     if ((b->flag & TRACER_MEM_CHUNK_BUSY) == 0) {
-        panic("tracer mem_chunk release but it's busy occupied");
+        panic("tracer mem_chunk release but it's not busy occupied");
     }
 
     // move mem_chunk that just used to the head of cache list
-    spinlock_lock(&tracer_mem_chunk_syner.lock);
-
     doubleListDel(&b->list_node);
     doubleListAddOnHead(&b->list_node, &tracer_mem_chunk_syner.head);
     b->flag &= ~TRACER_MEM_CHUNK_BUSY;
-
-    spinlock_unlock(&tracer_mem_chunk_syner.lock);
 }
 
 static void tracer_mem_chunk_zero(uint32_t chunk_id)
@@ -157,7 +146,6 @@ static void tracer_mem_chunk_zero(uint32_t chunk_id)
 static uint32_t find_first_free_mem_chunk()
 {
     /// @todo another mem_chunk
-    spinlock_lock(&sys_tracer.mem_chunk_bitmap_lock);
     for (uint32_t idx = 0; idx < BITS_MEM_CHUNK_BITMAP; idx++) {
         if (sys_tracer.mem_chunks_bit_map[idx] == 0xFFFFFFFF) {
             continue;
@@ -165,11 +153,9 @@ static uint32_t find_first_free_mem_chunk()
         uint32_t position = __builtin_ffs(~sys_tracer.mem_chunks_bit_map[idx]);
         if (position != 32) {
             sys_tracer.mem_chunks_bit_map[idx] |= (1 << (position - 1));
-            spinlock_unlock(&sys_tracer.mem_chunk_bitmap_lock);
             return idx * 32 + position;
         }
     }
-    spinlock_unlock(&sys_tracer.mem_chunk_bitmap_lock);
     panic("Tracer no enough space.");
     return 0;
 }
@@ -184,11 +170,9 @@ uint32_t tracer_mem_chunk_alloc()
 void tracer_mem_chunk_free(uint32_t chunk_id)
 {
     assert(chunk_id >= 0 && chunk_id < NR_TRACER_MEM_CHUNKS);
-    spinlock_lock(&sys_tracer.mem_chunk_bitmap_lock);
     uint32_t idx = chunk_id % 32;
     uint32_t inner_mem_chunk_bit = chunk_id / 32;
     // assert mem_chunk is allocated
     assert((sys_tracer.mem_chunks_bit_map[idx] & (1 << inner_mem_chunk_bit)) != 0);
     sys_tracer.mem_chunks_bit_map[idx] &= (uint32_t)(~(1 << inner_mem_chunk_bit));
-    spinlock_unlock(&sys_tracer.mem_chunk_bitmap_lock);
 }

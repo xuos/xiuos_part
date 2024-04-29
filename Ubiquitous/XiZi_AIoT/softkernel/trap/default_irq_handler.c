@@ -56,19 +56,18 @@ void default_interrupt_routine(void)
 extern void context_switch(struct context**, struct context*);
 void intr_irq_dispatch(struct trapframe* tf)
 {
-    assert(p_intr_driver != NULL);
+    xizi_enter_kernel();
 
-    p_intr_driver->cpu_irq_disable();
     // enter irq
+    assert(p_intr_driver != NULL);
     uintptr_t int_info = 0;
     if ((int_info = p_intr_driver->hw_before_irq()) == 0) {
-        return;
+        goto intr_leave_interrupt;
     }
 
     struct TaskMicroDescriptor* current_task = cur_cpu()->task;
-    if (LIKELY(current_task != NULL)) {
-        current_task->main_thread.trapframe = tf;
-    }
+    assert(current_task != NULL);
+    current_task->main_thread.trapframe = tf;
 
     unsigned cpu = p_intr_driver->hw_cur_int_cpu(int_info);
     unsigned irq = p_intr_driver->hw_cur_int_num(int_info);
@@ -76,7 +75,7 @@ void intr_irq_dispatch(struct trapframe* tf)
 
     // distribute irq
     irq_handler_t isr = p_intr_driver->sw_irqtbl[irq].handler;
-    if (isr) {
+    if (isr != NULL) {
         isr(irq, tf, NULL);
     } else {
         default_interrupt_routine();
@@ -86,10 +85,34 @@ void intr_irq_dispatch(struct trapframe* tf)
     p_intr_driver->curr_int[cpu] = 0;
     p_intr_driver->hw_after_irq(int_info);
 
-    if (UNLIKELY(cur_cpu()->task == NULL && current_task != NULL)) {
+    if (cur_cpu()->task == NULL || current_task->state != RUNNING) {
+        cur_cpu()->task = NULL;
         context_switch(&current_task->main_thread.context, cur_cpu()->scheduler);
     }
     assert(current_task == cur_cpu()->task);
 
-    p_intr_driver->cpu_irq_enable();
+intr_leave_interrupt:
+    xizi_leave_kernel();
+}
+
+void xizi_enter_kernel()
+{
+    /// @warning trampoline is responsible for closing interrupt
+    spinlock_lock(&whole_kernel_lock);
+}
+
+bool xizi_try_enter_kernel()
+{
+    /// @warning trampoline is responsible for closing interrupt
+    if (spinlock_try_lock(&whole_kernel_lock)) {
+        return true;
+    }
+
+    return false;
+}
+
+void xizi_leave_kernel()
+{
+    /// @warning trampoline is responsible for eabling interrupt by using user's state register
+    spinlock_unlock(&whole_kernel_lock);
 }

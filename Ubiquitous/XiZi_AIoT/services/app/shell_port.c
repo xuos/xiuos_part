@@ -35,7 +35,7 @@ signed short userShellRead(char* data, unsigned short len)
     while (length--) {
         cur_read = getc();
         if (cur_read == 0xff) {
-            yield();
+            yield(SYS_TASK_YIELD_NO_REASON);
         }
         // *data++ = getc();
         *data++ = cur_read;
@@ -50,7 +50,8 @@ int main(void)
 
     shellInit(&shell, shellBuffer, 512);
 
-    connect_session(&session_fs, "MemFS", 8092);
+    while (connect_session(&session_fs, "MemFS", 8092) < 0)
+        ;
     if (!session_fs.buf) {
         printf("session connect faield\n");
         return -1;

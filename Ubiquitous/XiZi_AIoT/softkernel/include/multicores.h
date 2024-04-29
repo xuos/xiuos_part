@@ -30,6 +30,7 @@ Modification:
 #pragma once
 
 #include "core.h"
+#include "spinlock.h"
 #include "trap_common.h"
 
 struct CPU {
@@ -45,3 +46,10 @@ static inline struct CPU* cur_cpu(void)
 {
     return &global_cpus[cur_cpuid()];
 }
+
+struct spinlock whole_kernel_lock;
+
+void xizi_enter_kernel();
+bool xizi_try_enter_kernel();
+void xizi_leave_kernel();
+bool xizi_is_in_kernel();

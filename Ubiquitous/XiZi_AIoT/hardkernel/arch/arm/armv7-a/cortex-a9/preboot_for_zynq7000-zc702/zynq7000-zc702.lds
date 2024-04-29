@@ -72,7 +72,6 @@ SECTIONS
 		PROVIDE(boot_end_addr = .);
 	} > ddr3
 
-	/* Other Kernel code is placed over 0x80000000 + 128KB. */
 	.text : AT(0x00110000) {
 		*(.vectors)
 		. = ALIGN(0x1000);

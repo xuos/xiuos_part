@@ -34,6 +34,7 @@ Modification:
 #define OUTPUT_LEVLE_ERROR 2
 
 #define OUTPUT_LEVLE OUTPUT_LEVLE_DEBUG
+// #define OUTPUT_LEVLE OUTPUT_LEVLE_LOG
 
 extern void KPrintf(char* fmt, ...);
 

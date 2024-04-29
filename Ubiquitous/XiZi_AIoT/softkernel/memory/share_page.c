@@ -91,27 +91,39 @@ static uintptr_t map_task_share_page(struct TaskMicroDescriptor* task, const uin
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
 
-    spinlock_lock(&task->lock);
     // map double vaddr page to support uniform ring buffer r/w
-    uintptr_t vaddr = alloc_share_page_addr(task, nr_pages * 2);
-    if (UNLIKELY(vaddr == 0)) {
-        spinlock_unlock(&task->lock);
+    uintptr_t vaddr = (uintptr_t)NULL;
+    if (task->massive_ipc_allocator != NULL) {
+        vaddr = (uintptr_t)KBuddyAlloc(task->massive_ipc_allocator, PAGE_SIZE * nr_pages * 2);
+    } else {
+        vaddr = alloc_share_page_addr(task, nr_pages * 2);
+        if (vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
+            task->massive_ipc_allocator = (struct KBuddy*)slab_alloc(&xizi_task_manager.task_buddy_allocator);
+            KBuddyInit(task->massive_ipc_allocator, USER_IPC_USE_ALLOCATOR_WATERMARK, USER_IPC_SPACE_TOP);
+            if (!task->massive_ipc_allocator) {
+                ERROR("Alloc task buddy failed.\n");
+                return (uintptr_t)NULL;
+            }
+            return map_task_share_page(task, paddr, nr_pages);
+        }
+    }
+
+    if (UNLIKELY(vaddr == (uintptr_t)NULL)) {
         return (uintptr_t)NULL;
     }
     if (!xizi_pager.map_pages(task->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false)) {
-        spinlock_unlock(&task->lock);
         return (uintptr_t)NULL;
     }
     if (!xizi_pager.map_pages(task->pgdir.pd_addr, vaddr + (nr_pages * PAGE_SIZE), paddr, nr_pages * PAGE_SIZE, false)) {
         xizi_pager.unmap_pages(task->pgdir.pd_addr, vaddr, nr_pages * PAGE_SIZE);
-        spinlock_unlock(&task->lock);
         return (uintptr_t)NULL;
     }
-    spinlock_unlock(&task->lock);
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(vaddr, 2 * nr_pages * PAGE_SIZE);
+
         /// @todo clean range rather than all
-        p_dcache_done->flushall();
+        // p_dcache_done->flushall();
+        p_dcache_done->invalidateall();
         // p_dcache_done->flush(vaddr, vaddr + 2 * nr_pages * PAGE_SIZE);
     }
     return vaddr;
@@ -123,21 +135,21 @@ uintptr_t task_map_pages(struct TaskMicroDescriptor* task, const uintptr_t vaddr
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
 
-    spinlock_lock(&task->lock);
     bool ret = false;
     if (is_dev) {
         ret = xizi_pager.map_pages(task->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, true);
     } else {
         ret = xizi_pager.map_pages(task->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false);
     }
-    spinlock_unlock(&task->lock);
     if (!ret) {
         return (uintptr_t)NULL;
     }
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(vaddr, nr_pages * PAGE_SIZE);
+
         /// @todo clean range rather than all
-        p_dcache_done->flushall();
+        // p_dcache_done->flushall();
+        p_dcache_done->invalidateall();
         // p_dcache_done->flush(vaddr, vaddr + nr_pages * PAGE_SIZE);
     }
 
@@ -150,14 +162,17 @@ void unmap_task_share_pages(struct TaskMicroDescriptor* task, const uintptr_t ta
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
 
-    spinlock_lock(&task->lock);
     xizi_pager.unmap_pages(task->pgdir.pd_addr, task_vaddr, nr_pages * PAGE_SIZE);
     xizi_pager.unmap_pages(task->pgdir.pd_addr, task_vaddr + (nr_pages * PAGE_SIZE), nr_pages * PAGE_SIZE);
-    spinlock_unlock(&task->lock);
+    if (task_vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
+        KBuddyFree(task->massive_ipc_allocator, (void*)task_vaddr);
+    }
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(task_vaddr, 2 * nr_pages * PAGE_SIZE);
+
         /// @todo clean range rather than all
-        p_dcache_done->flushall();
+        // p_dcache_done->flushall();
+        p_dcache_done->invalidateall();
         // p_dcache_done->flush(task_vaddr, task_vaddr + 2 * nr_pages * PAGE_SIZE);
     }
 }
@@ -181,12 +196,14 @@ struct session_backend* create_share_pages(struct TaskMicroDescriptor* client, s
     uintptr_t client_vaddr = map_task_share_page(client, V2P_WO(kern_vaddr), nr_pages);
     if (UNLIKELY(client_vaddr == 0)) {
         kfree((char*)kern_vaddr);
+        slab_free(SessionAllocator(), session_backend);
         return NULL;
     }
     uintptr_t server_vaddr = map_task_share_page(server, V2P_WO(kern_vaddr), nr_pages);
     if (UNLIKELY(server_vaddr == 0)) {
         unmap_task_share_pages(client, client_vaddr, nr_pages);
         kfree((char*)kern_vaddr);
+        slab_free(SessionAllocator(), session_backend);
         return NULL;
     }
 
@@ -200,20 +217,19 @@ struct session_backend* create_share_pages(struct TaskMicroDescriptor* client, s
     session_backend->client_side.buf_addr = client_vaddr;
     session_backend->client_side.capacity = true_capacity;
     session_backend->client_side.closed = false;
-    spinlock_lock(&client->lock);
     doubleListNodeInit(&session_backend->client_side.node);
     doubleListAddOnBack(&session_backend->client_side.node, &client->cli_sess_listhead);
-    spinlock_unlock(&client->lock);
     // init server side session struct
     session_backend->server_side.buf_addr = server_vaddr;
     session_backend->server_side.capacity = true_capacity;
     session_backend->server_side.head = 0;
     session_backend->server_side.tail = 0;
     session_backend->server_side.closed = false;
-    spinlock_lock(&server->lock);
     doubleListNodeInit(&session_backend->server_side.node);
     doubleListAddOnBack(&session_backend->server_side.node, &server->svr_sess_listhead);
-    spinlock_unlock(&server->lock);
+
+    server->mem_size += true_capacity;
+    client->mem_size += true_capacity;
 
     return session_backend;
 }
@@ -232,16 +248,15 @@ int delete_share_pages(struct session_backend* session_backend)
 
     /* unmap share pages */
     if (session_backend->client) {
-        spinlock_lock(&session_backend->client->lock);
         doubleListDel(&session_backend->client_side.node);
-        spinlock_unlock(&session_backend->client->lock);
     }
 
     if (session_backend->server) {
-        spinlock_lock(&session_backend->server->lock);
         doubleListDel(&session_backend->server_side.node);
-        spinlock_unlock(&session_backend->server->lock);
     }
+
+    session_backend->server->mem_size -= session_backend->nr_pages * PAGE_SIZE;
+    session_backend->client->mem_size -= session_backend->nr_pages * PAGE_SIZE;
 
     /* free seesion backend */
     kfree((void*)session_backend->buf_kernel_addr);

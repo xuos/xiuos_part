@@ -18,6 +18,7 @@ c_useropts = -O0
 INC_DIR = 	-I$(KERNEL_ROOT)/services/fs/libfs \
 			-I$(KERNEL_ROOT)/services/fs/fs_server/include \
 			-I$(KERNEL_ROOT)/services/lib/ipc \
+		  	-I$(KERNEL_ROOT)/services/lib/memory \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app
 
