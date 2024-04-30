@@ -140,8 +140,6 @@ int sys_unbind_irq(struct TaskMicroDescriptor* task, int irq_num)
     }
 
     irq_forward_table[irq_num].handle_task = NULL;
-    sys_close_session(kernel_irq_proxy, &irq_forward_table[irq_num].session);
-    DEBUG("Unbind: %s to irq %d", task->name, irq_num);
     return 0;
 }
 

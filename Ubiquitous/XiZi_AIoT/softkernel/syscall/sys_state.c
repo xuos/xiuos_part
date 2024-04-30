@@ -66,6 +66,13 @@ void show_tasks(void)
     }
     LOG_PRINTF("******************************************************\n");
     LOG_PRINTF("STAT     ID   TASK            PRI   MEM(KB)\n");
+    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_running_list_head, node)
+    {
+        LOG_PRINTF("RUNNING ");
+        _padding(task->name);
+        LOG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->mem_size >> 10);
+    }
+
     for (int i = 0; i < TASK_MAX_PRIORITY; i++) {
         if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[i])) {
             continue;
