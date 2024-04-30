@@ -95,13 +95,13 @@ intr_leave_interrupt:
     xizi_leave_kernel();
 }
 
-void xizi_enter_kernel()
+__attribute__((always_inline)) inline void xizi_enter_kernel()
 {
     /// @warning trampoline is responsible for closing interrupt
     spinlock_lock(&whole_kernel_lock);
 }
 
-inline bool xizi_try_enter_kernel()
+__attribute__((always_inline)) inline bool xizi_try_enter_kernel()
 {
     /// @warning trampoline is responsible for closing interrupt
     if (spinlock_try_lock(&whole_kernel_lock)) {
@@ -111,7 +111,7 @@ inline bool xizi_try_enter_kernel()
     return false;
 }
 
-inline void xizi_leave_kernel()
+__attribute__((always_inline)) inline void xizi_leave_kernel()
 {
     /// @warning trampoline is responsible for eabling interrupt by using user's state register
     spinlock_unlock(&whole_kernel_lock);

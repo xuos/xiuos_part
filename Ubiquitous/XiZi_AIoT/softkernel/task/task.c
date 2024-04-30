@@ -233,7 +233,7 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         next_task = NULL;
         /* find next runnable task */
         assert(cur_cpu()->task == NULL);
-        if (next_task_emergency != NULL && next_task->state == READY) {
+        if (next_task_emergency != NULL && next_task_emergency->state == READY) {
             next_task = next_task_emergency;
         } else {
             next_task = xizi_task_manager.next_runnable_task();

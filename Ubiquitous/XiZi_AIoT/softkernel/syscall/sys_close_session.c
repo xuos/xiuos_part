@@ -75,6 +75,9 @@ int sys_close_session(struct TaskMicroDescriptor* cur_task, struct Session* sess
     }
 
     /* close this session */
+    if (session_backend == NULL) {
+        return -1;
+    }
     if (UNLIKELY(session_backend->client_side.closed && session_backend->server_side.closed) && LIKELY(session_valid)) {
         xizi_share_page_manager.delete_share_pages(session_backend);
     }

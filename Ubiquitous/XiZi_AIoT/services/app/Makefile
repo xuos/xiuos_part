@@ -1,12 +1,12 @@
 ifeq ($(BOARD), imx6q-sabrelite)
 toolchain ?= arm-none-eabi-
 user_ldflags = --specs=nosys.specs -Wl,-Map=user.map,-cref -N
-cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie
+cflags = -std=c11 -O2 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie
 endif
 ifeq ($(BOARD), zynq7000-zc702)
 toolchain ?= arm-xilinx-eabi-
 user_ldflags = -Wl,--start-group,-lgcc,-lc,--end-group -N
-cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
+cflags = -std=c11 -O2 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
 board_specs = stub.o
 #cflags = -Wall -g -std=c11 
 endif

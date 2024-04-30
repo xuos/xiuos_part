@@ -105,6 +105,9 @@ static struct tracer_mem_chunk* tracer_get_mem_chunk_cache(uint32_t chunk_id)
 struct tracer_mem_chunk* tracer_mem_chunk_read(uint32_t chunk_id)
 {
     struct tracer_mem_chunk* b = tracer_get_mem_chunk_cache(chunk_id);
+    if (b == NULL) {
+        return NULL;
+    }
     if (!(b->flag & TRACER_MEM_CHUNK_VALID)) {
         tracer_mem_chunk_sync(b);
         b->flag |= TRACER_MEM_CHUNK_VALID;
@@ -137,6 +140,9 @@ static void tracer_mem_chunk_zero(uint32_t chunk_id)
     assert(chunk_id >= 0 && chunk_id < tracer_mem_chunk_syner.nr_mem_chunks);
     struct tracer_mem_chunk* tracer_mem_chunk = NULL;
     tracer_mem_chunk = tracer_mem_chunk_read(chunk_id);
+    if (tracer_mem_chunk == NULL) {
+        return;
+    }
     memset(tracer_mem_chunk->data, 0, tracer_mem_chunk_syner.mem_chunk_size);
     tracer_mem_chunk_write(tracer_mem_chunk);
     tracer_mem_chunk_release(tracer_mem_chunk);

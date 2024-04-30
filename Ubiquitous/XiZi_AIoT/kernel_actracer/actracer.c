@@ -367,8 +367,9 @@ static void trace_locate_inner(struct TraceTag* target, struct TraceTag* const p
     // p_trace_meta: TRACER_OWNER, VT_FS or other.
     //      TRACER_OWNER: path: "", name: "dir name"
     //      other:  path: "", name: "file name"
-    if (!p_trace_meta) {
+    if (p_trace_meta == NULL) {
         DEBUG("trace_locate, not found\n");
+        return;
     }
     target->type = p_trace_meta->type;
     target->meta = p_trace_meta;
