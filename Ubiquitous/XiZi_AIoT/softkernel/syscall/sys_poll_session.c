@@ -28,10 +28,19 @@ Modification:
 1. first version
 *************************************************/
 #include "assert.h"
+#include "ipc.h"
 #include "multicores.h"
 #include "share_page.h"
 #include "syscall.h"
 #include "task.h"
+
+#define IPCSESSION_MSG(session) ((struct IpcMsg*)((char*)((session)->buf) + (session)->head))
+
+static inline bool is_msg_needed(struct IpcMsg* msg)
+{
+    assert(msg != NULL);
+    return msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1 && msg->header.done == 0 && msg->header.delayed == 0;
+}
 
 int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
 {
@@ -71,10 +80,11 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
     }
 
     /* poll with new sessions */
-    int i = 0;
+    int nr_sessions_need_to_handle = 0;
+    int session_idx = 0;
     DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
     {
-        if (i >= arr_capacity) {
+        if (session_idx >= arr_capacity) {
             break;
         }
 
@@ -90,16 +100,24 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
             break;
         }
 
-        userland_session_arr[i++] = (struct Session) {
+        userland_session_arr[session_idx] = (struct Session) {
             .buf = (void*)server_session->buf_addr,
             .capacity = server_session->capacity,
             .head = server_session->head,
             .tail = server_session->tail,
             .id = SERVER_SESSION_BACKEND(server_session)->session_id,
         };
+
+        struct IpcMsg* msg = IPCSESSION_MSG(&userland_session_arr[session_idx]);
+        if (is_msg_needed(msg)) {
+            nr_sessions_need_to_handle++;
+        }
+
+        session_idx++;
     }
-    if (LIKELY(i < arr_capacity)) {
-        userland_session_arr[i].buf = 0;
+    if (session_idx < arr_capacity && nr_sessions_need_to_handle == 0) {
+        userland_session_arr[session_idx].buf = 0;
+        sys_yield(SYS_TASK_YIELD_BLOCK_IPC);
     }
 
     return 0;

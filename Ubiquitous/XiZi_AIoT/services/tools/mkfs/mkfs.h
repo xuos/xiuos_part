@@ -80,7 +80,7 @@ struct Inode {
 };
 
 // Directory is a file containing a sequence of DirEntry structures.
-#define DIR_NAME_SIZE 14
+#define DIR_NAME_SIZE 30
 struct DirEntry {
     ushort inum;
     char name[DIR_NAME_SIZE];

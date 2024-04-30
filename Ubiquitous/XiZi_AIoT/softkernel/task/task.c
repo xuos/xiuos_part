@@ -291,6 +291,7 @@ static void _task_yield_noschedule(struct TaskMicroDescriptor* task, bool blocki
         task->state = READY;
     }
     task->remain_tick = TASK_CLOCK_TICK;
+    cur_cpu()->task = NULL;
     task_node_add_to_ready_list_back(task);
 }
 

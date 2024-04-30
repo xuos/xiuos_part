@@ -47,7 +47,7 @@ typedef struct {
             uint64_t valid : 1; // for server to peek new msg
             uint64_t done : 1; // for client to check request done
             uint64_t init : 1; // for client to check request done
-            uint64_t reserved : 1;
+            uint64_t delayed : 1;
             uint64_t nr_args : 4;
             uint64_t opcode : 8;
             uint64_t len : 16;
@@ -225,6 +225,7 @@ void ipc_server_loop(struct IpcNode* ipc_node);
         return res;                                                                                                                            \
     }
 
+bool is_cur_session_delayed(void);
 #define IPC_SERVER_INTERFACE(ipc_name, argc)            \
     static int IPC_SERVE(ipc_name)(struct IpcMsg * msg) \
     {                                                   \
@@ -233,8 +234,10 @@ void ipc_server_loop(struct IpcNode* ipc_node);
             argv[i] = ipc_msg_get_nth_arg_buf(msg, i);  \
         }                                               \
         int32_t _ret = IPC_DO_SERVE##argc(ipc_name);    \
-        ipc_msg_set_return(msg, &_ret);                 \
-        msg->header.done = 1;                           \
+        if (!is_cur_session_delayed()) {                \
+            ipc_msg_set_return(msg, &_ret);             \
+            msg->header.done = 1;                       \
+        }                                               \
         return 0;                                       \
     }
 

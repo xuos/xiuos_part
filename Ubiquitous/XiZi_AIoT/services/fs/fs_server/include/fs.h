@@ -88,7 +88,7 @@ struct Inode {
 };
 
 // directory entry
-#define DIR_NAME_SIZE 14
+#define DIR_NAME_SIZE 30
 struct DirectEntry {
     uint16_t inum;
     char name[DIR_NAME_SIZE];

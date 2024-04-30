@@ -76,6 +76,10 @@ static void send_irq_to_user(int irq_num)
         buf->header.magic = IPC_MSG_MAGIC;
         buf->header.valid = 1;
 
+        if (irq_forward_table[irq_num].handle_task->state == BLOCKED) {
+            xizi_task_manager.task_unblock(irq_forward_table[irq_num].handle_task);
+        }
+
         /* add session head */
         session->head = (session->head + len) % session->capacity;
     }
