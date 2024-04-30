@@ -50,7 +50,13 @@ static inline void task_node_leave_list(struct TaskMicroDescriptor* task)
     }
 }
 
-static inline void task_node_add_to_ready_list(struct TaskMicroDescriptor* task)
+static inline void task_node_add_to_ready_list_head(struct TaskMicroDescriptor* task)
+{
+    doubleListAddOnHead(&task->node, &xizi_task_manager.task_list_head[task->priority]);
+    ready_task_priority |= ((uint32_t)1 << task->priority);
+}
+
+static inline void task_node_add_to_ready_list_back(struct TaskMicroDescriptor* task)
 {
     doubleListAddOnBack(&task->node, &xizi_task_manager.task_list_head[task->priority]);
     ready_task_priority |= ((uint32_t)1 << task->priority);
@@ -226,7 +232,7 @@ static void _task_set_default_schedule_attr(struct TaskMicroDescriptor* task)
     task->maxium_tick = TASK_CLOCK_TICK * 10;
     task->state = READY;
     task->priority = TASK_DEFAULT_PRIORITY;
-    task_node_add_to_ready_list(task);
+    task_node_add_to_ready_list_head(task);
 }
 
 static void task_state_set_running(struct TaskMicroDescriptor* task)
@@ -285,7 +291,7 @@ static void _task_yield_noschedule(struct TaskMicroDescriptor* task, bool blocki
         task->state = READY;
     }
     task->remain_tick = TASK_CLOCK_TICK;
-    task_node_add_to_ready_list(task);
+    task_node_add_to_ready_list_back(task);
 }
 
 static void _task_block(struct TaskMicroDescriptor* task)
@@ -303,7 +309,7 @@ static void _task_unblock(struct TaskMicroDescriptor* task)
     assert(task->state == BLOCKED);
     task_node_leave_list(task);
     task->state = READY;
-    task_node_add_to_ready_list(task);
+    task_node_add_to_ready_list_head(task);
 }
 
 /// @brief  @warning not tested function
@@ -322,7 +328,7 @@ static void _set_cur_task_priority(int priority)
 
     current_task->priority = priority;
 
-    task_node_add_to_ready_list(current_task);
+    task_node_add_to_ready_list_back(current_task);
 
     return;
 }
