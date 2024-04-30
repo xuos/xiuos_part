@@ -81,6 +81,7 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
 
     /* poll with new sessions */
     int nr_sessions_need_to_handle = 0;
+    bool has_middle_delete = false;
     int session_idx = 0;
     DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
     {
@@ -97,6 +98,7 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
                 xizi_share_page_manager.unmap_task_share_pages(cur_task, session_backend->server_side.buf_addr, session_backend->nr_pages);
             }
             xizi_share_page_manager.delete_share_pages(session_backend);
+            has_middle_delete = true;
             break;
         }
 
@@ -115,9 +117,12 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
 
         session_idx++;
     }
-    if (session_idx < arr_capacity && nr_sessions_need_to_handle == 0) {
-        userland_session_arr[session_idx].buf = 0;
-        sys_yield(SYS_TASK_YIELD_BLOCK_IPC);
+    if (session_idx < arr_capacity) {
+        userland_session_arr[session_idx].buf = NULL;
+        if (!has_middle_delete && nr_sessions_need_to_handle == 0) {
+            xizi_task_manager.task_yield_noschedule(cur_task, false);
+            xizi_task_manager.task_block(cur_task);
+        }
     }
 
     return 0;

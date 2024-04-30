@@ -173,11 +173,14 @@ void ipc_server_loop(struct IpcNode* ipc_node)
         */
         poll_session(session_list, NR_MAX_SESSION);
         /* handle each session */
-        for (int repeat = 0; repeat <= 1; repeat++) {
+        bool has_delayed = true;
+        for (int repeat = 0; repeat <= 1 && has_delayed; repeat++) {
+            has_delayed = false;
             for (int i = 0; i < NR_MAX_SESSION; i++) {
+                session_delayed = false;
                 if (session_list[i].buf == NULL) {
                     yield(SYS_TASK_YIELD_NO_REASON);
-                    continue;
+                    break;
                 }
                 cur_sess_id = session_list[i].id;
                 struct IpcMsg* msg = IPCSESSION_MSG(&session_list[i]);
@@ -197,7 +200,7 @@ void ipc_server_loop(struct IpcNode* ipc_node)
                         // check if this session is delayed by op handler, all messages after the delayed message in current session is blocked.
                         if (is_cur_session_delayed()) {
                             msg->header.delayed = 1;
-                            session_delayed = false;
+                            has_delayed = true;
                             break;
                         }
                     } else {
