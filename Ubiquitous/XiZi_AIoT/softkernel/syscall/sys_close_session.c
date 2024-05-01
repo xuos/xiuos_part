@@ -33,6 +33,11 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
+/// @brief close a session syscall
+/// @warning best to be called by a client
+/// @param cur_task
+/// @param session
+/// @return
 int sys_close_session(struct TaskMicroDescriptor* cur_task, struct Session* session)
 {
     assert(cur_task != NULL);
@@ -43,18 +48,16 @@ int sys_close_session(struct TaskMicroDescriptor* cur_task, struct Session* sess
 
     /* check if session is a client one or a server one */
     struct session_backend* session_backend = NULL;
-    bool session_valid = false;
 
     struct client_session* client_session = NULL;
     DOUBLE_LIST_FOR_EACH_ENTRY(client_session, &cur_task->cli_sess_listhead, node)
     {
         if ((uintptr_t)session->buf == client_session->buf_addr) {
-            session_valid = true;
             session_backend = CLIENT_SESSION_BACKEND(client_session);
-            if (!client_session->closed) {
-                client_session->closed = true;
-                xizi_share_page_manager.unmap_task_share_pages(cur_task, session_backend->client_side.buf_addr, session_backend->nr_pages);
-            }
+            assert(session_backend->client == cur_task);
+            assert(client_session->closed == false);
+            client_session->closed = true;
+            xizi_share_page_manager.delete_share_pages(session_backend);
             break;
         }
     }
@@ -63,12 +66,11 @@ int sys_close_session(struct TaskMicroDescriptor* cur_task, struct Session* sess
         DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
         {
             if ((uintptr_t)session->buf == server_session->buf_addr) {
-                session_valid = true;
                 session_backend = SERVER_SESSION_BACKEND(server_session);
-                if (!server_session->closed) {
-                    server_session->closed = true;
-                    xizi_share_page_manager.unmap_task_share_pages(cur_task, session_backend->server_side.buf_addr, session_backend->nr_pages);
-                }
+                assert(session_backend->server == cur_task);
+                assert(server_session->closed == false);
+                server_session->closed = true;
+                xizi_share_page_manager.delete_share_pages(session_backend);
                 break;
             }
         }
@@ -77,9 +79,6 @@ int sys_close_session(struct TaskMicroDescriptor* cur_task, struct Session* sess
     /* close this session */
     if (session_backend == NULL) {
         return -1;
-    }
-    if (UNLIKELY(session_backend->client_side.closed && session_backend->server_side.closed) && LIKELY(session_valid)) {
-        xizi_share_page_manager.delete_share_pages(session_backend);
     }
 
     return 0;

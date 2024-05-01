@@ -54,7 +54,7 @@ void default_interrupt_routine(void)
 }
 
 extern void context_switch(struct context**, struct context*);
-__attribute__((optimize("O0"))) void intr_irq_dispatch(struct trapframe* tf)
+void intr_irq_dispatch(struct trapframe* tf)
 {
     xizi_enter_kernel();
 

@@ -96,11 +96,11 @@ __attribute__((optimize("O0"))) int main(void)
     LOG_PRINTF("CPU %d init done\n", cpu_id);
     spinlock_unlock(&whole_kernel_lock);
 
-    while (core_init_done != (1 << NR_CPU) - 1)
-        ;
-
-    xizi_enter_kernel();
+    // sync memory
+    __sync_synchronize();
     start_smp_cache_broadcast(cpu_id);
+    // enter kernel seriously
+    xizi_enter_kernel();
     xizi_task_manager.task_scheduler(scheduler_rights);
 
     // never reached

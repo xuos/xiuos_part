@@ -38,9 +38,10 @@ Modification:
 struct session_backend* create_session_inner(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, int capacity, struct Session* user_session)
 {
     // create share pages
+    assert(server != NULL && client != NULL);
     struct session_backend* session_backend = xizi_share_page_manager.create_share_pages(client, server, capacity);
     if (UNLIKELY(session_backend == NULL)) {
-        DEBUG("create_share_pages failed\n");
+        DEBUG("create_share_pages to server: %s failed\n", server->name);
         return NULL;
     }
 

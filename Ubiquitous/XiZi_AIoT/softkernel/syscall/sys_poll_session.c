@@ -92,12 +92,12 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
             // client had closed it, then server will close it too
             struct session_backend* session_backend = SERVER_SESSION_BACKEND(server_session);
-
-            if (!session_backend->server_side.closed) {
-                session_backend->server_side.closed = true;
-                xizi_share_page_manager.unmap_task_share_pages(cur_task, session_backend->server_side.buf_addr, session_backend->nr_pages);
-            }
+            assert(session_backend->server == cur_task);
+            assert(session_backend->client == NULL);
+            assert(server_session->closed == false);
+            server_session->closed = true;
             xizi_share_page_manager.delete_share_pages(session_backend);
+            // signal that there is a middle deletion of session
             has_middle_delete = true;
             break;
         }

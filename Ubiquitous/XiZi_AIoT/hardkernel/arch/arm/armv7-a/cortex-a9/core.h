@@ -92,6 +92,16 @@ __attribute__((always_inline, optimize("O0"))) static inline uint32_t user_mode(
     return val;
 }
 
+__attribute__((always_inline, optimize("O0"))) static inline void cpu_into_low_power()
+{
+    WFE();
+}
+
+__attribute__((always_inline, optimize("O0"))) static inline void cpu_leave_low_power()
+{
+    SEV();
+}
+
 struct context {
     uint32_t r4;
     uint32_t r5;

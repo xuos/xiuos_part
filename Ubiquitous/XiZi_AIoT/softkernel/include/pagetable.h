@@ -69,6 +69,7 @@ struct XiziPageManager {
 
 extern struct MmuCommonDone* _p_pgtbl_mmu_access;
 uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc);
+void _free_user_pgdir(struct TopLevelPageDirectory* pgdir);
 
 extern struct TopLevelPageDirectory kern_pgdir;
 void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driver_tag);
