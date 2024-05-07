@@ -49,13 +49,11 @@ __attribute__((optimize("O0"))) int main(void)
 
     if (cpu_id == 0) {
         tracer_init(); // init tracer system
-        // clang-format off
-        if (!CreateResourceTag(&hardkernel_tag, RequireRootTag(), "hardkernel", TRACER_OWNER, NULL) || 
+        if (!CreateResourceTag(&hardkernel_tag, RequireRootTag(), "hardkernel", TRACER_OWNER, NULL) || //
             !CreateResourceTag(&softkernel_tag, RequireRootTag(), "softkernel", TRACER_OWNER, NULL)) {
             ERROR("Failed to create hardkernel owner and softkernel owner.\n");
             return -1;
         }
-        // clang-format on
         /* init hardkernel */
         if (!hardkernel_init(&hardkernel_tag)) {
             return -1;
