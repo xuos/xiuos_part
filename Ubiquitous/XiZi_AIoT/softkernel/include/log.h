@@ -29,13 +29,14 @@ Modification:
 *************************************************/
 #pragma once
 
+#include "uart_common_ope.h"
+
 #define OUTPUT_LEVLE_LOG 0
 #define OUTPUT_LEVLE_DEBUG 1
 #define OUTPUT_LEVLE_ERROR 2
 
 #define OUTPUT_LEVLE OUTPUT_LEVLE_DEBUG
-
-extern void KPrintf(char* fmt, ...);
+// #define OUTPUT_LEVLE OUTPUT_LEVLE_LOG
 
 #if (OUTPUT_LEVLE >= OUTPUT_LEVLE_LOG)
 #define LOG_PRINTF(f, args...) \

@@ -76,7 +76,7 @@ Modification:
 
 #define NR_CPU 4
 
-__attribute__((always_inline)) static inline uint32_t user_mode()
+__attribute__((always_inline, optimize("O0"))) static inline uint32_t user_mode()
 {
     uint32_t val;
 
@@ -92,6 +92,16 @@ __attribute__((always_inline)) static inline uint32_t user_mode()
     return val;
 }
 
+__attribute__((always_inline, optimize("O0"))) static inline void cpu_into_low_power()
+{
+    WFE();
+}
+
+__attribute__((always_inline, optimize("O0"))) static inline void cpu_leave_low_power()
+{
+    SEV();
+}
+
 struct context {
     uint32_t r4;
     uint32_t r5;
@@ -103,12 +113,12 @@ struct context {
     uint32_t r11;
     uint32_t r12;
     uint32_t lr;
-};
+} __attribute__((packed));
 
 /// @brief init task context, set return address to trap return
 /// @param
 extern void task_prepare_enter();
-__attribute__((__always_inline__)) static inline void arch_init_context(struct context* ctx)
+__attribute__((always_inline, optimize("O0"))) static inline void arch_init_context(struct context* ctx)
 {
     memset(ctx, 0, sizeof(*ctx));
     ctx->lr = (uint32_t)(task_prepare_enter + 4);
@@ -133,13 +143,13 @@ struct trapframe {
     uint32_t r11;
     uint32_t r12;
     uint32_t pc;
-};
+} __attribute__((packed));
 
 /// @brief init task trapframe (*especially the user mode cpsr)
 /// @param tf
 /// @param sp
 /// @param pc
-__attribute__((__always_inline__)) static inline void arch_init_trapframe(struct trapframe* tf, uintptr_t sp, uintptr_t pc)
+__attribute__((always_inline, optimize("O0"))) static inline void arch_init_trapframe(struct trapframe* tf, uintptr_t sp, uintptr_t pc)
 {
     memset(tf, 0, sizeof(*tf));
     tf->spsr = user_mode();
@@ -153,7 +163,7 @@ __attribute__((__always_inline__)) static inline void arch_init_trapframe(struct
 /// @param tf
 /// @param sp
 /// @param pc
-__attribute__((__always_inline__)) static inline void arch_trapframe_set_sp_pc(struct trapframe* tf, uintptr_t sp, uintptr_t pc)
+__attribute__((always_inline, optimize("O0"))) static inline void arch_trapframe_set_sp_pc(struct trapframe* tf, uintptr_t sp, uintptr_t pc)
 {
     tf->sp_usr = sp;
     tf->pc = pc;
@@ -163,7 +173,7 @@ __attribute__((__always_inline__)) static inline void arch_trapframe_set_sp_pc(s
 /// @param tf
 /// @param argc
 /// @param argv
-__attribute__((__always_inline__)) static inline void arch_set_main_params(struct trapframe* tf, int argc, uintptr_t argv)
+__attribute__((always_inline, optimize("O0"))) static inline void arch_set_main_params(struct trapframe* tf, int argc, uintptr_t argv)
 {
     tf->r0 = (uint32_t)argc;
     tf->r1 = (uint32_t)argv;
@@ -178,7 +188,7 @@ __attribute__((__always_inline__)) static inline void arch_set_main_params(struc
 /// @param param5
 /// @return
 extern int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, uintptr_t param4);
-__attribute__((__always_inline__)) static inline int arch_syscall(struct trapframe* tf, int* syscall_num)
+__attribute__((always_inline, optimize("O0"))) static inline int arch_syscall(struct trapframe* tf, int* syscall_num)
 {
     // call syscall
     *syscall_num = tf->r0;
@@ -188,7 +198,7 @@ __attribute__((__always_inline__)) static inline int arch_syscall(struct trapfra
 /// @brief set return reg to trapframe
 /// @param tf
 /// @param ret
-__attribute__((__always_inline__)) static inline void arch_set_return(struct trapframe* tf, int ret)
+__attribute__((always_inline, optimize("O0"))) static inline void arch_set_return(struct trapframe* tf, int ret)
 {
     tf->r0 = (uint32_t)ret;
 }

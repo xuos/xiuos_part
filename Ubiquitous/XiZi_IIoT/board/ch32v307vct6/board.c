@@ -28,6 +28,7 @@
  * @date 2022-08-08
  */
 #include "ch32v30x.h"
+#include "connect_can.h"
 #include "connect_ether.h"
 #include "connect_uart.h"
 #include "core_riscv.h"
@@ -57,24 +58,27 @@ static uint32_t _SysTick_Config(uint32_t ticks)
 /**
  * This function will initial your board.
  */
+
 void InitBoardHardware()
 {
-    USART_Printf_Init(115200);
-    /* System Tick Configuration */
     _SysTick_Config(SystemCoreClock / TICK_PER_SECOND);
     /* initialize memory system */
     InitBoardMemory(MEMORY_START_ADDRESS, (void*)MEMORY_END_ADDRESS);
     InitHwUart();
-    InstallConsole("uart1", "uart1_drv", "uart1_dev1");
+#ifdef BSP_USING_UART4
+    InstallConsole("uart4", "uart4_drv", "uart4_dev4");
+#endif
 
 #ifdef BSP_USING_ETH
     InitHwEth();
 #endif
 
+#ifdef BSP_USING_CAN
+    InitHwCan();
+#endif
+
     KPrintf("consle init completed.\n");
     KPrintf("board initialization......\n");
-    // KPrintf("memory address range: [0x%08x - 0x%08x], size: %d\n", (x_ubase) MEMORY_START_ADDRESS, (x_ubase) MEMORY_END_ADDRESS, gd32vf103_SRAM_SIZE);
-    /* initialize memory system */
 
     KPrintf("board init done.\n");
     KPrintf("start okernel...\n");

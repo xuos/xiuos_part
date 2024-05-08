@@ -63,5 +63,7 @@ int sys_mmap(uintptr_t vaddr, uintptr_t paddr, int len, int is_dev)
             load_len += PAGE_SIZE;
         }
     }
+
+    cur_task->mem_size += true_len;
     return vaddr + true_len;
 }

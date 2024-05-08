@@ -84,7 +84,7 @@ int main(int argc, char** argv)
     if (argc >= 2) {
         id = string_to_integer(argv[1]);
     }
-    printf("This is Simple Client %d, size is 0x%x\n", id, task_heap_base());
+    // printf("This is Simple Client %d, size is 0x%x\n", id, task_heap_base());
 
     struct Session session_wait;
     struct Session session_nowait;

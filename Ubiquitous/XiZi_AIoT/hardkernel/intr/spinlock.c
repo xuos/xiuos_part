@@ -27,8 +27,8 @@
 #include "multicores.h"
 
 struct lock_node {
-    int cpu_id;
     struct double_list_node node;
+    int cpu_id;
 };
 
 static struct double_list_node lock_request_guard;
@@ -52,7 +52,7 @@ enum {
     SPINLOCK_LOCK_WAITFOREVER = 0xFFFFFFFF,
 };
 
-void spinlock_init(struct spinlock* lock, char* name)
+__attribute__((optimize("O0"))) void spinlock_init(struct spinlock* lock, char* name)
 {
     lock->owner_cpu = SPINLOCK_STATE_UNLOCK;
     strncpy(lock->name, name, 24);
@@ -61,33 +61,59 @@ void spinlock_init(struct spinlock* lock, char* name)
 extern int _spinlock_lock(struct spinlock* lock, uint32_t timeout);
 void _spinlock_unlock(struct spinlock* lock);
 
-void spinlock_lock(struct spinlock* lock)
+__attribute__((optimize("O0"))) void spinlock_lock(struct spinlock* lock)
 {
-    if (lock->owner_cpu != SPINLOCK_STATE_UNLOCK && lock->owner_cpu == cur_cpuid()) {
+    int cur_cpu_id = cur_cpuid();
+    if (lock->owner_cpu != SPINLOCK_STATE_UNLOCK && lock->owner_cpu == cur_cpu_id) {
         ERROR("spinlock %s lock double locked by core %d\n", lock->name, lock->owner_cpu);
         panic("");
     }
+
+    struct double_list_node* p_lock_node = &core_lock_request[cur_cpu_id].node;
     _spinlock_lock(&request_lock, SPINLOCK_LOCK_WAITFOREVER);
-    doubleListAddOnBack(&core_lock_request[cur_cpuid()].node, &lock_request_guard);
+    doubleListAddOnBack(p_lock_node, &lock_request_guard);
     _spinlock_unlock(&request_lock);
 
-    while (lock_request_guard.next != &core_lock_request[cur_cpuid()].node)
+    while (lock_request_guard.next != p_lock_node)
         ;
 
     _spinlock_lock(lock, SPINLOCK_LOCK_WAITFOREVER);
 }
 
-void spinlock_unlock(struct spinlock* lock)
+__attribute__((optimize("O0"))) void spinlock_unlock(struct spinlock* lock)
 {
-    assert(lock_request_guard.next == &core_lock_request[cur_cpuid()].node);
+    struct double_list_node* p_lock_node = &core_lock_request[cur_cpuid()].node;
+    assert(lock_request_guard.next == p_lock_node);
     _spinlock_lock(&request_lock, SPINLOCK_LOCK_WAITFOREVER);
-    _double_list_del(core_lock_request[cur_cpuid()].node.prev, core_lock_request[cur_cpuid()].node.next);
+    _double_list_del(p_lock_node->prev, p_lock_node->next);
     _spinlock_unlock(&request_lock);
 
     _spinlock_unlock(lock);
 }
 
-bool is_spinlock_locked(struct spinlock* lock)
+__attribute__((optimize("O0"))) bool spinlock_try_lock(struct spinlock* lock)
 {
-    return lock->owner_cpu != SPINLOCK_STATE_UNLOCK;
+    int cur_cpu_id = cur_cpuid();
+    if (lock->owner_cpu != SPINLOCK_STATE_UNLOCK && lock->owner_cpu == cur_cpu_id) {
+        ERROR("spinlock %s lock double locked by core %d\n", lock->name, lock->owner_cpu);
+        panic("");
+    }
+
+    struct double_list_node* p_lock_node = &core_lock_request[cur_cpu_id].node;
+    _spinlock_lock(&request_lock, SPINLOCK_LOCK_WAITFOREVER);
+    doubleListAddOnBack(p_lock_node, &lock_request_guard);
+    if (lock_request_guard.next != p_lock_node) {
+        _double_list_del(p_lock_node->prev, p_lock_node->next);
+        _spinlock_unlock(&request_lock);
+        return false;
+    }
+    _spinlock_unlock(&request_lock);
+    _spinlock_lock(lock, SPINLOCK_LOCK_WAITFOREVER);
+
+    return true;
+}
+
+bool is_spinlock_hold_by_current_cpu(struct spinlock* lock)
+{
+    return lock->owner_cpu;
 }

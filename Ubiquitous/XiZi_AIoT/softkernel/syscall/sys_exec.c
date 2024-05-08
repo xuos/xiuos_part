@@ -69,9 +69,15 @@ Modification:
 int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, char** argv)
 {
     /* load img to task */
+    if (img_start == NULL) {
+        return -1;
+    }
     /* 1. load elf header */
     struct elfhdr elf;
     memcpy((void*)&elf, img_start, sizeof(elf));
+    if (elf.magic != ELF_MAGIC) {
+        return -1;
+    }
     // pgdir for new task
     struct TopLevelPageDirectory pgdir;
     pgdir.pd_addr = NULL;
@@ -106,7 +112,7 @@ int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, cha
         for (int addr_offset = 0; addr_offset < ph.filesz; addr_offset += PAGE_SIZE) {
             uintptr_t page_paddr = xizi_pager.address_translate(&pgdir, ph.vaddr + addr_offset);
             if (page_paddr == 0) {
-                ERROR("copy elf file to unmapped addr\n");
+                ERROR("copy elf file to unmapped addr: %x(pgdir: %x)\n", ph.vaddr + addr_offset, pgdir.pd_addr);
                 goto error_exec;
             }
             uintptr_t read_size = (ph.filesz - addr_offset < PAGE_SIZE ? ph.filesz - addr_offset : PAGE_SIZE);
@@ -169,13 +175,12 @@ int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, cha
     }
     strncpy(task->name, last, sizeof(task->name));
 
-    struct TopLevelPageDirectory old_pgdir = task->pgdir;
+    if (task->pgdir.pd_addr != NULL) {
+        xizi_pager.free_user_pgdir(&task->pgdir);
+    }
     task->pgdir = pgdir;
-
-    /// @todo record mem size used b task
-    task->mem_size = ALIGNUP(load_size, PAGE_SIZE);
-
-    xizi_pager.free_user_pgdir(&old_pgdir);
+    task->heap_base = ALIGNUP(load_size, PAGE_SIZE);
+    task->mem_size = task->heap_base + USER_STACK_SIZE;
     return 0;
 
 error_exec:

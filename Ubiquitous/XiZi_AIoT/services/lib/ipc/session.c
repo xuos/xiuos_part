@@ -61,6 +61,6 @@ bool session_free_buf(struct Session* session, int len)
     if (len > session_used_size(session)) {
         return false;
     }
-    assert(session_forward_head(session, len) != 1);
+    assert(session_forward_head(session, len) != -1);
     return true;
 }

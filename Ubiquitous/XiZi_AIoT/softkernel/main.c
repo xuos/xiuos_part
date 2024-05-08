@@ -35,24 +35,25 @@ Modification:
 #include "assert.h"
 #include "task.h"
 
-extern uint32_t _binary_init_start[], _binary_default_fs_start[];
-static struct TraceTag hardkernel_tag, softkernel_tag;
+struct spinlock whole_kernel_lock;
 
-static int core_init_done = 0;
-int main(void)
+extern uint32_t _binary_init_start[], _binary_default_fs_start[];
+extern int sys_spawn(char* img_start, char* name, char** argv);
+
+static struct TraceTag hardkernel_tag, softkernel_tag;
+static volatile int core_init_done = 0;
+__attribute__((optimize("O0"))) int main(void)
 {
     /* init tracer */
     uint32_t cpu_id = cur_cpuid();
 
     if (cpu_id == 0) {
         tracer_init(); // init tracer system
-        // clang-format off
-        if (!CreateResourceTag(&hardkernel_tag, RequireRootTag(), "hardkernel", TRACER_OWNER, NULL) || 
+        if (!CreateResourceTag(&hardkernel_tag, RequireRootTag(), "hardkernel", TRACER_OWNER, NULL) || //
             !CreateResourceTag(&softkernel_tag, RequireRootTag(), "softkernel", TRACER_OWNER, NULL)) {
             ERROR("Failed to create hardkernel owner and softkernel owner.\n");
             return -1;
         }
-        // clang-format on
         /* init hardkernel */
         if (!hardkernel_init(&hardkernel_tag)) {
             return -1;
@@ -80,23 +81,24 @@ int main(void)
 
         /* start first task */
         char* init_task_param[2] = { "/app/init", 0 };
-        spawn_embedded_task((char*)_binary_init_start, "init", init_task_param);
+        sys_spawn((char*)_binary_init_start, "init", init_task_param);
         char* fs_server_task_param[2] = { "/app/fs_server", 0 };
-        spawn_embedded_task((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
+        sys_spawn((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
     }
 
     /* start scheduler */
     struct SchedulerRightGroup scheduler_rights;
     assert(AchieveResourceTag(&scheduler_rights.mmu_driver_tag, &hardkernel_tag, "mmu-ac-resource"));
     assert(AchieveResourceTag(&scheduler_rights.intr_driver_tag, &hardkernel_tag, "intr-ac-resource"));
-
     core_init_done |= (1 << cpu_id);
     LOG_PRINTF("CPU %d init done\n", cpu_id);
     spinlock_unlock(&whole_kernel_lock);
 
-    while (core_init_done != (1 << NR_CPU) - 1)
-        ;
+    // sync memory
+    __sync_synchronize();
     start_smp_cache_broadcast(cpu_id);
+    // enter kernel seriously
+    xizi_enter_kernel();
     xizi_task_manager.task_scheduler(scheduler_rights);
 
     // never reached

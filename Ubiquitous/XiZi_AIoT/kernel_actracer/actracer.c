@@ -101,7 +101,7 @@ static bool dealloc_trace_meta(struct TraceMeta* meta)
 
 static tracer_mem_chunk_idx_t trace_meta_map_mem_chunk(struct TraceMeta* const p_trace_meta, tracer_mem_chunk_idx_t mem_chunk_num)
 {
-    tracer_mem_chunk_idx_t addr;
+    tracer_mem_chunk_idx_t addr = 0;
     /* direct mapping */
     if (mem_chunk_num < TRACEMETA_NR_DIRECT) {
         if ((addr = p_trace_meta->addr[mem_chunk_num]) == 0) {
@@ -367,8 +367,9 @@ static void trace_locate_inner(struct TraceTag* target, struct TraceTag* const p
     // p_trace_meta: TRACER_OWNER, VT_FS or other.
     //      TRACER_OWNER: path: "", name: "dir name"
     //      other:  path: "", name: "file name"
-    if (!p_trace_meta) {
+    if (p_trace_meta == NULL) {
         DEBUG("trace_locate, not found\n");
+        return;
     }
     target->type = p_trace_meta->type;
     target->meta = p_trace_meta;

@@ -19,10 +19,12 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/fs/libfs \
 			-I$(KERNEL_ROOT)/services/fs/fs_server/include \
 			-I$(KERNEL_ROOT)/services/lib/ipc \
 		  	-I$(KERNEL_ROOT)/services/lib/memory \
+			-I$(KERNEL_ROOT)/services/lib/serial \
+			-I$(KERNEL_ROOT)/services/lib/usyscall \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app
 
-board: libserial.o stub.o usyscall.o
+board: libserial.o stub.o arch_usyscall.o
 	@mv $^ ../../app
 
 %.o: %.c

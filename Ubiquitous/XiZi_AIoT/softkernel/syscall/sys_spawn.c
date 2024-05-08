@@ -49,7 +49,7 @@ int sys_spawn(char* img_start, char* name, char** argv)
         return -1;
     }
     // init pcb
-    xizi_task_manager.task_set_default_schedule_attr(new_task_cb, RequireRootTag());
+    xizi_task_manager.task_set_default_schedule_attr(new_task_cb);
 
     return 0;
 }

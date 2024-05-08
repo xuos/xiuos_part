@@ -48,7 +48,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_exit(cur_cpu()->task);
         break;
     case SYSCALL_YIELD:
-        ret = sys_yield();
+        ret = sys_yield((task_yield_reason)param1);
         break;
     case SYSCALL_SERVER:
         ret = sys_register_as_server((char*)param1);
@@ -60,7 +60,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_poll_session((struct Session*)param1, (int)param2);
         break;
     case SYSCALL_CLOSE_SESSION:
-        ret = sys_close_session((struct Session*)param1);
+        ret = sys_close_session(cur_cpu()->task, (struct Session*)param1);
         break;
     case SYSCALL_EXEC:
         ret = sys_exec((char*)param1, (char*)param2, (char**)param3);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 AIIT XUOS Lab
+ * Copyright (c) 2020 AIIT XUOS Lab
  * XiUOS is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
@@ -9,12 +9,12 @@
  * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
+#include "libipc.h"
+#include "libserial.h"
+#include "usyscall.h"
 
-/**
- * @file siemens_s7_300.c
- * @brief PLC SIEMENS S7-300 app
- * @version 3.0
- * @author AIIT XUOS Lab
- * @date 2023.3.27
- */
+IPC_SERVICES(IpcSwIntrHandler, Ipc_intr_3, Ipc_wait_intr_3);
 
+enum {
+    SW_INTERRUPT_3 = 3,
+};

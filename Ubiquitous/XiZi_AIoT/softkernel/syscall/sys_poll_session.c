@@ -28,10 +28,19 @@ Modification:
 1. first version
 *************************************************/
 #include "assert.h"
+#include "ipc.h"
 #include "multicores.h"
 #include "share_page.h"
 #include "syscall.h"
 #include "task.h"
+
+#define IPCSESSION_MSG(session) ((struct IpcMsg*)((char*)((session)->buf) + (session)->head))
+
+static inline bool is_msg_needed(struct IpcMsg* msg)
+{
+    assert(msg != NULL);
+    return msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1 && msg->header.done == 0 && msg->header.delayed == 0;
+}
 
 int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
 {
@@ -55,51 +64,65 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
             return -1;
         }
         // update session_backend
+        // if current session is handled
+        if (server_session->head != userland_session_arr[i].head) {
+            struct TaskMicroDescriptor* client = SERVER_SESSION_BACKEND(server_session)->client;
+            if (client->state == BLOCKED) {
+                xizi_task_manager.task_unblock(client);
+            } else {
+                client->current_ipc_handled = true;
+            }
+        }
         server_session->head = userland_session_arr[i].head;
         server_session->tail = userland_session_arr[i].tail;
         doubleListDel(cur_node);
         doubleListAddOnBack(cur_node, &cur_task->svr_sess_listhead);
     }
 
-    /* handle sessions for condition 2, ref. delete_share_pages() */
-    bool has_delete = true;
-    while (has_delete) {
-        has_delete = false;
-
-        DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
-        {
-            if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
-                // client had closed it, then server will close it too
-                struct session_backend* session_backend = SERVER_SESSION_BACKEND(server_session);
-
-                if (!session_backend->server_side.closed) {
-                    session_backend->server_side.closed = true;
-                    xizi_share_page_manager.unmap_task_share_pages(cur_task, session_backend->server_side.buf_addr, session_backend->nr_pages);
-                }
-                xizi_share_page_manager.delete_share_pages(session_backend);
-                has_delete = true;
-                break;
-            }
-        }
-    }
-
     /* poll with new sessions */
-    int i = 0;
+    int nr_sessions_need_to_handle = 0;
+    bool has_middle_delete = false;
+    int session_idx = 0;
     DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
     {
-        if (i >= arr_capacity) {
+        if (session_idx >= arr_capacity) {
             break;
         }
-        userland_session_arr[i++] = (struct Session) {
+
+        if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
+            // client had closed it, then server will close it too
+            struct session_backend* session_backend = SERVER_SESSION_BACKEND(server_session);
+            assert(session_backend->server == cur_task);
+            assert(session_backend->client == NULL);
+            assert(server_session->closed == false);
+            server_session->closed = true;
+            xizi_share_page_manager.delete_share_pages(session_backend);
+            // signal that there is a middle deletion of session
+            has_middle_delete = true;
+            break;
+        }
+
+        userland_session_arr[session_idx] = (struct Session) {
             .buf = (void*)server_session->buf_addr,
             .capacity = server_session->capacity,
             .head = server_session->head,
             .tail = server_session->tail,
             .id = SERVER_SESSION_BACKEND(server_session)->session_id,
         };
+
+        struct IpcMsg* msg = IPCSESSION_MSG(&userland_session_arr[session_idx]);
+        if (is_msg_needed(msg)) {
+            nr_sessions_need_to_handle++;
+        }
+
+        session_idx++;
     }
-    if (LIKELY(i < arr_capacity)) {
-        userland_session_arr[i].buf = 0;
+    if (session_idx < arr_capacity) {
+        userland_session_arr[session_idx].buf = NULL;
+        if (!has_middle_delete && nr_sessions_need_to_handle == 0) {
+            xizi_task_manager.task_yield_noschedule(cur_task, false);
+            xizi_task_manager.task_block(cur_task);
+        }
     }
 
     return 0;

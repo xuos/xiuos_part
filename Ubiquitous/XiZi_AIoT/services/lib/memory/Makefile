@@ -16,6 +16,8 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/app \
 			-I$(KERNEL_ROOT)/services/fs/libfs \
 		  	-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 		  	-I$(KERNEL_ROOT)/services/lib/memory \
+			-I$(KERNEL_ROOT)/services/lib/serial \
+			-I$(KERNEL_ROOT)/services/lib/usyscall \
 		  	-I$(KERNEL_ROOT)/services/lib/ipc 
 
 all: libmem.o

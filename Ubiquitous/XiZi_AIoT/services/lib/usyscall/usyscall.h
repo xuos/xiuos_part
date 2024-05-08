@@ -44,6 +44,12 @@ typedef enum {
     SYS_STATE_SHOW_CPU_INFO,
 } sys_state_option;
 
+typedef enum {
+    SYS_TASK_YIELD_NO_REASON = 0x0,
+    SYS_TASK_YIELD_FOREVER = 0x1,
+    SYS_TASK_YIELD_BLOCK_IPC = 0x2,
+} task_yield_reason;
+
 typedef union {
     struct {
         uintptr_t memblock_start;
@@ -56,9 +62,11 @@ typedef int (*ipc_read_fn)(struct Session* session, int fd, char* dst, int offse
 typedef int (*ipc_fsize_fn)(struct Session* session, int fd);
 typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offset, int len);
 
+int syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4);
+
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv);
 int exit();
-int yield();
+int yield(task_yield_reason reason);
 int kill(int pid);
 int register_server(char* name);
 int session(char* path, int capacity, struct Session* user_session);

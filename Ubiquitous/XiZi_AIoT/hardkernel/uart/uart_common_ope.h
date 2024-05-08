@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "actracer.h"
+#include "printf.h"
 
 struct XiziSerialDriver {
     void (*sys_serial_init)();
@@ -32,8 +33,6 @@ struct XiziSerialDriver {
     uint8_t (*getc)();
     void (*putc)(uint8_t);
 };
-
-void KPrintf(char* fmt, ...);
 
 struct XiziSerialDriver* hardkernel_uart_init(struct TraceTag* hardkernel_tag);
 

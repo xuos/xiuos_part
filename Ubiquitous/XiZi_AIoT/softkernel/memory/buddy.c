@@ -29,6 +29,7 @@ Modification:
 *************************************************/
 
 #include "buddy.h"
+#include "kalloc.h"
 #include "log.h"
 
 static void _buddy_split_page(struct KPage* page, uint32_t low_order, uint32_t high_order, struct KFreeList* list)
@@ -138,8 +139,15 @@ static void KBuddyPagesFree(struct KBuddy* pbuddy, struct KPage* page)
     return;
 }
 
-void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
+bool KBuddyInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
 {
+    if (pbuddy->pages == NULL) {
+        if ((pbuddy->pages = (struct KPage*)kalloc(((mem_end - mem_start) >> LEVEL4_PTE_SHIFT) * sizeof(struct KPage))) == NULL) {
+            ERROR("Not space to init a buddy object.\n");
+            return false;
+        }
+    }
+
     uint32_t i = 0;
     struct KPage* page = NULL;
     struct KFreeList* free_list = NULL;
@@ -173,6 +181,16 @@ void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
         doubleListNodeInit(&page->node);
         KBuddyPagesFree(pbuddy, page);
     }
+
+    return true;
+}
+
+void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
+{
+#define MAX_NR_PAGES MAX_NR_FREE_PAGES
+    static struct KPage kern_free_pages[MAX_NR_PAGES];
+    pbuddy->pages = kern_free_pages;
+    KBuddyInit(pbuddy, mem_start, mem_end);
 }
 
 char* KBuddyAlloc(struct KBuddy* pbuddy, uint32_t size)
@@ -209,6 +227,13 @@ bool KBuddyFree(struct KBuddy* pbuddy, char* vaddr)
     KBuddyPagesFree(pbuddy, page);
 
     return true;
+}
+
+void KBuddyDestory(struct KBuddy* pbuddy)
+{
+    if (pbuddy->pages) {
+        kfree((void*)pbuddy->pages);
+    }
 }
 
 void KFreePagesInfo(struct KBuddy* pbuddy)
