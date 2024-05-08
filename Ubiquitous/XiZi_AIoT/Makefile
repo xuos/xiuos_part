@@ -4,7 +4,7 @@ MAKEFLAGS += --no-print-directory
 .PHONY:COMPILE_APP COMPILE_KERNEL
 
 riscv_support := 
-arm_support += imx6q-sabrelite zynq7000-zc702
+arm_support += imx6q-sabrelite zynq7000-zc702 ok1028a-c
 emulator_support += 
 support := $(riscv_support) $(arm_support) $(emulator_support) 
 SRC_DIR :=
@@ -33,6 +33,9 @@ export BSP_ROOT ?= $(KERNEL_ROOT)/services/boards/$(BOARD)
 export UBIQUITOUS_ROOT ?= ..
 ifneq ($(findstring $(BOARD), imx6q-sabrelite zynq7000-zc702), )
 include $(KERNEL_ROOT)/hardkernel/arch/arm/armv7-a/cortex-a9/preboot_for_$(BOARD)/config.mk
+endif
+ifneq ($(findstring $(BOARD), ok1028a-c), )
+include $(KERNEL_ROOT)/hardkernel/arch/arm/armv8-a/cortex-a72/preboot_for_$(BOARD)/config.mk
 endif
 export BSP_BUILD_DIR := $(KERNEL_ROOT)
 export HOSTTOOLS_DIR ?= $(KERNEL_ROOT)/services/tools/hosttools
