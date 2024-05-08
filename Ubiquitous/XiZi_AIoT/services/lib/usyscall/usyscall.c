@@ -12,28 +12,6 @@
 #include "usyscall.h"
 #include "libmem.h"
 
-static int
-syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4)
-{
-    int ret = -1;
-
-    __asm__ volatile(
-        "mov r0, %1;\
-        mov r1, %2;\
-        mov r2, %3;\
-        mov r3, %4;\
-        mov r4, %5;\
-        swi 0;\
-        dsb;\
-        isb;\
-        mov %0, r0"
-        : "=r"(ret)
-        : "r"(sys_num), "r"(a1), "r"(a2), "r"(a3), "r"(a4)
-        : "memory", "r0", "r1", "r2", "r3", "r4");
-
-    return ret;
-}
-
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv)
 {
     int file_size = ipc_fsize(session, fd);

@@ -20,7 +20,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/app \
 			-I$(KERNEL_ROOT)/services/lib/usyscall \
 		  	-I$(KERNEL_ROOT)/services/lib/ipc 
 
-all: libmem.o
+all: usyscall.o
 	@mv $^ ../../app
 
 %.o: %.c

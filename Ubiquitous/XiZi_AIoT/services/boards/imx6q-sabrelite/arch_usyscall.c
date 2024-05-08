@@ -9,10 +9,25 @@
  * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
+#include "usyscall.h"
 
-/// this file is only used for debug
-#pragma once
+int syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4)
+{
+    int ret = -1;
 
-void printf(char* fmt, ...);
+    __asm__ volatile(
+        "mov r0, %1;\
+        mov r1, %2;\
+        mov r2, %3;\
+        mov r3, %4;\
+        mov r4, %5;\
+        swi 0;\
+        dsb;\
+        isb;\
+        mov %0, r0"
+        : "=r"(ret)
+        : "r"(sys_num), "r"(a1), "r"(a2), "r"(a3), "r"(a4)
+        : "memory", "r0", "r1", "r2", "r3", "r4");
 
-char getc();
+    return ret;
+}

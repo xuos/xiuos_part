@@ -62,6 +62,8 @@ typedef int (*ipc_read_fn)(struct Session* session, int fd, char* dst, int offse
 typedef int (*ipc_fsize_fn)(struct Session* session, int fd);
 typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offset, int len);
 
+int syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4);
+
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv);
 int exit();
 int yield(task_yield_reason reason);
