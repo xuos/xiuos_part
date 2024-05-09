@@ -23,7 +23,7 @@ struct CwdPair {
     struct Inode* Inode;
 };
 
-#define MAX_SUPPORT_SESSION 1024
+#define MAX_SUPPORT_SESSION 2048
 static struct CwdPair session_cwd[MAX_SUPPORT_SESSION];
 
 static struct CwdPair* get_session_cwd(void)

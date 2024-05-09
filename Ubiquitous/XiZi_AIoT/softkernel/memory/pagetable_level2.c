@@ -53,7 +53,7 @@ uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc)
         pgtbl_vaddr = (uintptr_t*)P2V(pgtbl_paddr);
     } else {
         if (!alloc || !(pgtbl_vaddr = (uintptr_t*)kalloc(sizeof(uintptr_t) * NUM_LEVEL4_PTE))) {
-            return 0;
+            return NULL;
         }
 
         memset(pgtbl_vaddr, 0, sizeof(uintptr_t) * NUM_LEVEL4_PTE);
