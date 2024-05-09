@@ -35,7 +35,7 @@ Modification:
 static struct SysTracer sys_tracer;
 static char root_name[TRACER_NODE_NAME_LEN] = "ROOT\0";
 
-void _tracer_init_node(TracerNode* node, char* name, tracemeta_ac_type type, void* p_resource)
+static void tracer_init_node(TracerNode* node, char* name, tracemeta_ac_type type, void* p_resource)
 {
     node->type = type;
     node->parent = NULL;
@@ -56,7 +56,7 @@ void _tracer_init_node(TracerNode* node, char* name, tracemeta_ac_type type, voi
 void sys_tracer_init()
 {
     // set sys_tracer resource identity
-    _tracer_init_node(&sys_tracer.root_node, NULL, TRACER_OWNER, NULL);
+    tracer_init_node(&sys_tracer.root_node, NULL, TRACER_OWNER, NULL);
     sys_tracer.root_node.name = root_name;
     sys_tracer.sys_tracer_tag.meta = &sys_tracer.root_node;
 
@@ -122,11 +122,11 @@ bool AchieveResourceTag(TraceTag* target, TraceTag* owner, char* name)
     static char name_buffer[TRACER_NODE_NAME_LEN];
 
     TracerNode* inner_node = owner->meta;
-    assert(inner_node->type == TRACER_OWNER);
+    assert(inner_node != NULL && inner_node->type == TRACER_OWNER);
     while ((name = parse_path(name, name_buffer)) != NULL) {
         if ((inner_node = tracer_find_node_onestep(inner_node, name_buffer)) == NULL) {
             DEBUG("Tracer: No such object, owner: %s, child: %s\n", //
-                owner->meta->name == NULL ? "NULL" : owner->meta->name, name == NULL ? "NULL" : name);
+                owner->meta->name == NULL ? "NULL" : owner->meta->name, name == NULL ? "NULL" : name_buffer);
             return false;
         }
     }
@@ -158,7 +158,7 @@ bool CreateResourceTag(TraceTag* new_tag, TraceTag* owner, char* name, tracemeta
         ERROR("Tracer: No memory for new node\n");
         return false;
     }
-    _tracer_init_node(new_node, name, type, p_resource);
+    tracer_init_node(new_node, name, type, p_resource);
 
     // new node add to owner's children list
     doubleListAddOnHead(&new_node->list_node, &owner->meta->children_guard);
