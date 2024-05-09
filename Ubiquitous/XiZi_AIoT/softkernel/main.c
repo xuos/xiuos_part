@@ -33,6 +33,7 @@ Modification:
 #include "multicores.h"
 
 #include "assert.h"
+#include "kalloc.h"
 #include "task.h"
 
 struct spinlock whole_kernel_lock;
@@ -42,13 +43,16 @@ extern int sys_spawn(char* img_start, char* name, char** argv);
 
 static struct TraceTag hardkernel_tag, softkernel_tag;
 static volatile int core_init_done = 0;
-__attribute__((optimize("O0"))) int main(void)
+int main(void)
 {
     /* init tracer */
     uint32_t cpu_id = cur_cpuid();
 
     if (cpu_id == 0) {
-        tracer_init(); // init tracer system
+        /* init memory management first */
+        module_phymem_init(); // init buddy management system
+        /* init tracer system */
+        sys_tracer_init();
         if (!CreateResourceTag(&hardkernel_tag, RequireRootTag(), "hardkernel", TRACER_OWNER, NULL) || //
             !CreateResourceTag(&softkernel_tag, RequireRootTag(), "softkernel", TRACER_OWNER, NULL)) {
             ERROR("Failed to create hardkernel owner and softkernel owner.\n");

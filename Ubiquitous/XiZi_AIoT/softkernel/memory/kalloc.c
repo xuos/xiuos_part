@@ -39,14 +39,14 @@ struct KBuddy user_phy_freemem_buddy;
 extern uint32_t kernel_data_end[];
 bool module_phymem_init()
 {
-    LOG_PRINTF("Organizing free memory...\n");
+    // LOG_PRINTF("Organizing free memory...\n");
     uint32_t kern_freemem_start = V2P(&kernel_data_end);
     uint32_t kern_freemem_end = PHY_USER_FREEMEM_BASE;
     uint32_t user_freemem_start = PHY_USER_FREEMEM_BASE;
     uint32_t user_freemem_end = PHY_MEM_STOP;
     KBuddySysInit(&kern_virtmem_buddy, kern_freemem_start, kern_freemem_end);
     KBuddyInit(&user_phy_freemem_buddy, user_freemem_start, user_freemem_end);
-    LOG_PRINTF("Free memory organized done.\n");
+    // LOG_PRINTF("Free memory organized done.\n");
     return true;
 }
 
