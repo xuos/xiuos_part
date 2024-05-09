@@ -115,5 +115,5 @@ __attribute__((optimize("O0"))) bool spinlock_try_lock(struct spinlock* lock)
 
 bool is_spinlock_hold_by_current_cpu(struct spinlock* lock)
 {
-    return lock->owner_cpu;
+    return lock->owner_cpu == cur_cpuid();
 }
