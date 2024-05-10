@@ -32,9 +32,9 @@ Modification:
 #include "kalloc.h"
 #include "log.h"
 
-static void _buddy_split_page(struct KPage* page, uint32_t low_order, uint32_t high_order, struct KFreeList* list)
+static void _buddy_split_page(struct KPage* page, uintptr_t low_order, uintptr_t high_order, struct KFreeList* list)
 {
-    uint32_t size = (1 << high_order);
+    uintptr_t size = (1 << high_order);
     while (high_order > low_order) {
         list--;
         size >>= 1;
@@ -57,14 +57,14 @@ __attribute__((always_inline)) static void inline _buddy_set_pages_order(struct 
 
 __attribute__((always_inline)) static void inline _buddy_page_to_vaddr(struct KBuddy* pbuddy, struct KPage* page, char** vaddr)
 {
-    uint32_t offset = page - pbuddy->pages;
+    uintptr_t offset = page - pbuddy->pages;
     *vaddr = (char*)(pbuddy->mem_start + (offset << LEVEL4_PTE_SHIFT));
     return;
 }
 
 __attribute__((always_inline)) static void inline _buddy_vaddr_to_page(struct KBuddy* pbuddy, struct KPage** page, char* vaddr)
 {
-    uint32_t offset = (uint32_t)vaddr - pbuddy->mem_start;
+    uintptr_t offset = (uintptr_t)vaddr - pbuddy->mem_start;
     *page = (struct KPage*)(pbuddy->pages + (offset >> LEVEL4_PTE_SHIFT));
     return;
 }
@@ -109,9 +109,9 @@ static struct KPage* KBuddyPagesAlloc(struct KBuddy* pbuddy, int nPages)
 static void KBuddyPagesFree(struct KBuddy* pbuddy, struct KPage* page)
 {
     struct KPage* buddy = NULL;
-    uint32_t order = (page->order >= MAX_BUDDY_ORDER) ? 0 : page->order;
-    uint32_t buddy_idx = 0, new_buddy_idx = 0;
-    uint32_t page_idx = page - pbuddy->pages;
+    uintptr_t order = (page->order >= MAX_BUDDY_ORDER) ? 0 : page->order;
+    uintptr_t buddy_idx = 0, new_buddy_idx = 0;
+    uintptr_t page_idx = page - pbuddy->pages;
 
     for (; order < MAX_BUDDY_ORDER - 1; order++) {
         // find and delete buddy to combine
@@ -139,7 +139,7 @@ static void KBuddyPagesFree(struct KBuddy* pbuddy, struct KPage* page)
     return;
 }
 
-bool KBuddyInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
+bool KBuddyInit(struct KBuddy* pbuddy, uintptr_t mem_start, uintptr_t mem_end)
 {
     if (pbuddy->pages == NULL) {
         if ((pbuddy->pages = (struct KPage*)kalloc(((mem_end - mem_start) >> LEVEL4_PTE_SHIFT) * sizeof(struct KPage))) == NULL) {
@@ -148,7 +148,7 @@ bool KBuddyInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
         }
     }
 
-    uint32_t i = 0;
+    uintptr_t i = 0;
     struct KPage* page = NULL;
     struct KFreeList* free_list = NULL;
 
@@ -160,7 +160,7 @@ bool KBuddyInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
     pbuddy->mem_start = ALIGNUP(pbuddy->mem_start, 4 * PAGE_SIZE);
 
     // total number of free pages
-    pbuddy->n_pages = (pbuddy->mem_end - (uint32_t)pbuddy->mem_start) >> LEVEL4_PTE_SHIFT;
+    pbuddy->n_pages = (pbuddy->mem_end - (uintptr_t)pbuddy->mem_start) >> LEVEL4_PTE_SHIFT;
 
     memset(pbuddy->pages, 0, pbuddy->n_pages);
 
@@ -185,7 +185,7 @@ bool KBuddyInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
     return true;
 }
 
-void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
+void KBuddySysInit(struct KBuddy* pbuddy, uintptr_t mem_start, uintptr_t mem_end)
 {
 #define MAX_NR_PAGES MAX_NR_FREE_PAGES
     static struct KPage kern_free_pages[MAX_NR_PAGES];
@@ -193,7 +193,7 @@ void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end)
     KBuddyInit(pbuddy, mem_start, mem_end);
 }
 
-char* KBuddyAlloc(struct KBuddy* pbuddy, uint32_t size)
+char* KBuddyAlloc(struct KBuddy* pbuddy, uintptr_t size)
 {
     int nPages = CALCULATE_NPAGES(size);
     struct KPage* page = KBuddyPagesAlloc(pbuddy, nPages);
@@ -210,15 +210,15 @@ bool KBuddyFree(struct KBuddy* pbuddy, char* vaddr)
 {
     struct KPage* page = NULL;
 
-    if ((uint32_t)vaddr % (PAGE_SIZE)) {
+    if ((uintptr_t)vaddr % (PAGE_SIZE)) {
         ERROR("kbuddyfree - unaligned: %x\n", vaddr);
         return false;
     }
-    if ((uint32_t)vaddr < pbuddy->mem_start) {
+    if ((uintptr_t)vaddr < pbuddy->mem_start) {
         ERROR("kbuddyfree - under buddy free page address: %x\n", vaddr);
         return false;
     }
-    if ((uint32_t)vaddr >= pbuddy->mem_end) {
+    if ((uintptr_t)vaddr >= pbuddy->mem_end) {
         ERROR("kbuddyfree - over buddy free page address: %x\n", vaddr);
         return false;
     }

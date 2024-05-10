@@ -38,7 +38,7 @@ Modification:
 
 struct spinlock whole_kernel_lock;
 
-extern uint32_t _binary_init_start[], _binary_default_fs_start[];
+extern uintptr_t _binary_init_start[], _binary_default_fs_start[];
 extern int sys_spawn(char* img_start, char* name, char** argv);
 
 static struct TraceTag hardkernel_tag, softkernel_tag;

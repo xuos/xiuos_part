@@ -57,7 +57,7 @@ static struct slab_allocator* SessionAllocator()
 static inline bool check_pages_unmapped(struct TaskMicroDescriptor* task, uintptr_t vaddr, int nr_pages)
 {
     static uintptr_t paddr = UINT32_MAX;
-    for (uint32_t i = 0; i < nr_pages; i++) {
+    for (uintptr_t i = 0; i < nr_pages; i++) {
         if ((paddr = xizi_pager.address_translate(&task->pgdir, vaddr)) != 0) {
             return false;
         }

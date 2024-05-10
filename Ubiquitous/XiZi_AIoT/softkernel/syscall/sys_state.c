@@ -97,7 +97,7 @@ void show_tasks(void)
 
 extern struct KBuddy user_phy_freemem_buddy;
 extern struct KBuddy kern_virtmem_buddy;
-extern uint32_t kernel_data_end[];
+extern uintptr_t kernel_data_end[];
 void show_mem(void)
 {
     SHOWINFO_BORDER_LINE();

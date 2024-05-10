@@ -36,19 +36,19 @@ Modification:
 struct KBuddy kern_virtmem_buddy;
 struct KBuddy user_phy_freemem_buddy;
 
-extern uint32_t kernel_data_end[];
+extern uintptr_t kernel_data_end[];
 bool module_phymem_init()
 {
-    uint32_t kern_freemem_start = V2P(&kernel_data_end);
-    uint32_t kern_freemem_end = PHY_USER_FREEMEM_BASE;
-    uint32_t user_freemem_start = PHY_USER_FREEMEM_BASE;
-    uint32_t user_freemem_end = PHY_MEM_STOP;
+    uintptr_t kern_freemem_start = V2P(&kernel_data_end);
+    uintptr_t kern_freemem_end = PHY_USER_FREEMEM_BASE;
+    uintptr_t user_freemem_start = PHY_USER_FREEMEM_BASE;
+    uintptr_t user_freemem_end = PHY_MEM_STOP;
     KBuddySysInit(&kern_virtmem_buddy, kern_freemem_start, kern_freemem_end);
     KBuddyInit(&user_phy_freemem_buddy, user_freemem_start, user_freemem_end);
     return true;
 }
 
-char* kalloc(uint32_t size)
+char* kalloc(size_t size)
 {
     char* mem_alloc = KBuddyAlloc(&kern_virtmem_buddy, size);
     if (mem_alloc == NULL) {
@@ -67,7 +67,7 @@ bool kfree(char* vaddr)
     return KBuddyFree(&kern_virtmem_buddy, V2P_WO(vaddr));
 }
 
-char* raw_alloc(uint32_t size)
+char* raw_alloc(size_t size)
 {
     char* mem_alloc = KBuddyAlloc(&user_phy_freemem_buddy, size);
     if (mem_alloc == NULL) {
