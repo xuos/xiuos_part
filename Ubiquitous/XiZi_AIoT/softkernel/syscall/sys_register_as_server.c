@@ -44,7 +44,7 @@ int sys_register_as_server(char* name)
     if (!AchieveResourceTag(&server_identifier_set_tag, RequireRootTag(), "softkernel/server-identifier")) {
         panic("Server identifier not initialized.\b");
     }
-    assert(server_identifier_set_tag.meta != NULL || server_identifier_set_tag.type == TRACER_OWNER);
+    assert(server_identifier_set_tag.meta != NULL);
 
     if (!CreateResourceTag(&server->server_identifier, &server_identifier_set_tag, name, TRACER_SERVER_IDENTITY_AC_RESOURCE, server)) {
         return -1;

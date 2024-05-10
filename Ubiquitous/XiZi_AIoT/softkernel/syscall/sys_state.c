@@ -41,7 +41,7 @@ Modification:
 extern uint8_t _binary_fs_img_start[], _binary_fs_img_end[];
 
 #define SHOWINFO_BORDER_LINE() LOG_PRINTF("******************************************************\n");
-#define SHOWTASK_TASK_BASE_INFO(task) LOG_PRINTF(" %-4d %-16s %-4d 0x%x(%-d)\n", task->pid, task->name, task->priority, task->mem_size >> 10, task->mem_size >> 10)
+#define SHOWTASK_TASK_BASE_INFO(task) LOG_PRINTF(" %-6d %-16s %-4d 0x%x(%-d)\n", task->pid, task->name, task->priority, task->mem_size >> 10, task->mem_size >> 10)
 
 void show_tasks(void)
 {
@@ -51,7 +51,7 @@ void show_tasks(void)
         LOG_PRINTF("CPU %-2d: %s\n", i, (global_cpus[i].task == NULL ? "NULL" : global_cpus[i].task->name));
     }
     SHOWINFO_BORDER_LINE();
-    LOG_PRINTF("%-8s %-4s %-16s %-4s %-8s\n", "STAT", "ID", "TASK", "PRI", "MEM(KB)");
+    LOG_PRINTF("%-8s %-6s %-16s %-4s %-8s\n", "STAT", "ID", "TASK", "PRI", "MEM(KB)");
     DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_running_list_head, node)
     {
         LOG_PRINTF("%-8s", "RUNNING");
@@ -97,7 +97,7 @@ void show_tasks(void)
 
 extern struct KBuddy user_phy_freemem_buddy;
 extern struct KBuddy kern_virtmem_buddy;
-extern uint32_t kernel_data_end[];
+extern uintptr_t kernel_data_end[];
 void show_mem(void)
 {
     SHOWINFO_BORDER_LINE();

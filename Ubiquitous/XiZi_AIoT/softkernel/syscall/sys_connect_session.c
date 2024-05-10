@@ -67,7 +67,7 @@ int sys_connect_session(char* path, int capacity, struct Session* user_session)
     if (!AchieveResourceTag(&server_identifier_owner, RequireRootTag(), "softkernel/server-identifier")) {
         panic("Server identifier not initialized.\b");
     }
-    assert(server_identifier_owner.meta != NULL || server_identifier_owner.type == TRACER_OWNER);
+    assert(server_identifier_owner.meta != NULL);
 
     struct TraceTag server_tag;
     if (!AchieveResourceTag(&server_tag, &server_identifier_owner, path)) {

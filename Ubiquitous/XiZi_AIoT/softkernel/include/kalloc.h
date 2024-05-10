@@ -32,10 +32,10 @@ Modification:
 #include "pagetable.h"
 
 bool module_phymem_init();
-char* kalloc(uint32_t size);
+char* kalloc(size_t size);
 bool kfree(char* vaddr);
 
-char* raw_alloc(uint32_t size);
+char* raw_alloc(size_t size);
 bool raw_free(char* paddr);
 
 void show_phymem_info();

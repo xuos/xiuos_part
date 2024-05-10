@@ -57,7 +57,7 @@ static int InodeFreeRecursive(struct Inode* dp);
 static char* PathElementExtract(char* path, char* name);
 static uint32_t InodeBlockMapping(struct Inode* inode, uint32_t block_num);
 
-#define MAX_SUPPORT_FD 1024
+#define MAX_SUPPORT_FD 2048
 static struct FileDescriptor fd_table[MAX_SUPPORT_FD];
 
 struct MemFsRange MemFsRange;
@@ -486,7 +486,7 @@ void FreeFileDescriptor(int fd)
         printf("fd invlid.\n");
         return;
     }
-    fd_table[fd].data = 0;
+    fd_table[fd].data = NULL;
     return;
 }
 
@@ -495,8 +495,9 @@ int AllocFileDescriptor(void)
     int free_idx = -1;
     for (int i = 0; i < MAX_SUPPORT_FD; i++) {
         // found free fd
-        if (free_idx == -1 && fd_table[i].data == 0) {
+        if (free_idx == -1 && fd_table[i].data == NULL) {
             free_idx = i;
+            break;
         }
     }
     if (free_idx == -1) {
