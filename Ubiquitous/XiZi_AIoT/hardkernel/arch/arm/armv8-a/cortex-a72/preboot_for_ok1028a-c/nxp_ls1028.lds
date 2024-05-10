@@ -35,6 +35,8 @@
  * @author AIIT XUOS Lab
  * @date 2024.04.10
  */ 
+BOOT_STACK_SIZE = 0x4000;
+
 OUTPUT_FORMAT("elf64-littleaarch64")
 OUTPUT_ARCH( "aarch64" )
 ENTRY( _entry )

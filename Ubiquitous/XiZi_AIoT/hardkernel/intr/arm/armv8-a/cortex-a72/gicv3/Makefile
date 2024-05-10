@@ -1,3 +1,3 @@
-SRC_DIR:= arm
+SRC_FILES :=giv3.c 
 
 include $(KERNEL_ROOT)/compiler.mk

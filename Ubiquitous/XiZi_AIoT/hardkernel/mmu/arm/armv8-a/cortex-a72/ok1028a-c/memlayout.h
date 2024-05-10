@@ -72,10 +72,10 @@ Modification:
 #define USER_IPC_SPACE_TOP  (USER_MEM_TOP - USER_STACK_SIZE)
 
 /* Kernel memory layout */
-#define KERN_MEM_BASE       (0xffff000000000000) // First kernel virtual address
+#define KERN_MEM_BASE       (0xffff000000000000ULL) // First kernel virtual address
 #define KERN_OFFSET         (KERN_MEM_BASE - PHY_MEM_BASE)
 
-#define V2P(a) (((uint64)(a)) - KERN_MEM_BASE)
+#define V2P(a) (((uint64_t)(a)) - KERN_MEM_BASE)
 #define P2V(a) ((void *)(((char *)(a)) + KERN_MEM_BASE))
 
 #define V2P_WO(x) ((x) - KERN_MEM_BASE)    // same as V2P, but without casts

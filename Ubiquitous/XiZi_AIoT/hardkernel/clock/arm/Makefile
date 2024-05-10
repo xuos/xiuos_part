@@ -1,4 +1,3 @@
-# The following three platforms support compatiable instructions.
 ifneq ($(findstring $(BOARD), ok1028a-c), )
 SRC_DIR := armv8-a
 endif

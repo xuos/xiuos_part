@@ -1,3 +1,3 @@
-SRC_DIR:= arm
+SRC_DIR := $(BOARD)
 
 include $(KERNEL_ROOT)/compiler.mk

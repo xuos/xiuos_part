@@ -40,9 +40,9 @@ extern uint64_t kernel_data_begin[];
 
 #define NR_PDE_ENTRIES 512
 #define L1_TYPE_SEC (2 << 0)
-#define L1_SECT_DEV ((0B00)<<2)            //Device memory
-#define L1_SECT_AP0 (1 << 6)                   //Data Access Permissions
-uint64_t boot_ptable[NR_PTE_ENTRIES] __attribute__((aligned(0x4000))) = { 0 };
+#define L1_SECT_DEV ((0B00) << 2) // Device memory
+#define L1_SECT_AP0 (1 << 6) // Data Access Permissions
+uint64_t boot_pgdir[NR_PDE_ENTRIES] __attribute__((aligned(0x4000))) = { 0 };
 
 static void build_boot_pgdir()
 {
@@ -68,24 +68,23 @@ static void build_boot_pgdir()
     }
 }
 
-
-
 static void load_boot_pgdir()
 {
     uint64_t val;
 
-   // DACR_W(0x55555555); // set domain access control as client
-    TTBCR_W(0x0);
-    TTBR0_W((uint64_t)boot_pgdir);
-
+    // DACR_W(0x55555555); // set domain access control as client
+    // TTBCR_W(0x0);
+    // TTBR0_W((uint64_t)boot_pgdir);
+    TTBR0_W(0x0);
+    TTBR1_W((uint64_t)boot_pgdir);
     // Enable paging using read/modify/write
     SCTLR_R(val);
-    val |= (1 << 0);     //EL1 and EL0 stage 1 address translation enabled.
-    val |= (1 << 1);    //Alignment check enable
-    val |= (1 << 2);     // Cacheability control, for data caching.
-    val |= (1 << 12);    // Instruction access Cacheability control
-    val |= (1 << 19);   //forced to XN for the EL1&0 translation regime.
- 
+    val |= (1 << 0); // EL1 and EL0 stage 1 address translation enabled.
+    val |= (1 << 1); // Alignment check enable
+    val |= (1 << 2); // Cacheability control, for data caching.
+    val |= (1 << 12); // Instruction access Cacheability control
+    val |= (1 << 19); // forced to XN for the EL1&0 translation regime.
+
     SCTLR_W(val);
 
     // flush all TLB

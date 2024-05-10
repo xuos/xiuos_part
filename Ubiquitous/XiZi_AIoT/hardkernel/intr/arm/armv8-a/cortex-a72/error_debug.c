@@ -42,7 +42,7 @@ Modification:
 #include "log.h"
 #include "multicores.h"
 #include "spinlock.h"
-#include "syscall.h"
+// #include "syscall.h"
 
 __attribute__((always_inline)) static inline void _abort_reason(uint32_t fault_status)
 {
@@ -53,17 +53,17 @@ __attribute__((always_inline)) static inline void _abort_reason(uint32_t fault_s
     else if ((fault_status & 0x3f) == 0x5) // Translation fault, level 1
         KPrintf("reason: sect. translation level 1\n");
     else if ((fault_status & 0x3f) == 0x6) // Translation fault, level 2
-        KPrintf("reason: sect. translation level 2\n");        
+        KPrintf("reason: sect. translation level 2\n");
     else if ((fault_status & 0x3f) == 0x7) // Translation fault, level 3
         KPrintf("reason: sect. translation level 3\n");
-    else if ((fault_status & 0x3f) == 0x3d) //Section Domain fault
+    else if ((fault_status & 0x3f) == 0x3d) // Section Domain fault
         KPrintf("reason: sect. domain\n");
     else if ((fault_status & 0x3f) == 0x13) // Permission level 1
         KPrintf("reason: sect. permission level 1\n");
     else if ((fault_status & 0x3f) == 0x14) // Permission level 2
         KPrintf("reason: sect. permission level 2\n");
     else if ((fault_status & 0x3f) == 0x15) // Permission level 3
-        KPrintf("reason: sect. permission level 3\n");                
+        KPrintf("reason: sect. permission level 3\n");
     else if ((fault_status & 0x3f) == 0x8) // External abort
         KPrintf("reason: ext. abort\n");
     else if ((fault_status & 0x3f) == 0x9) // Access flag fault, level 1

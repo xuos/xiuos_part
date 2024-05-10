@@ -80,11 +80,11 @@ user_trap_swi_enter:
     stp x3, x4, [sp, #-16]!
     stp x1, x2, [sp, #-16]!
 
-    mrs  x2,    spsr_el1
-    str     x2, [sp, #-8]       
-    str     x30, [sp, #-8]
-    stp sp, elr_el1, [sp, #-16]!         	
-    str     sp, [sp, #-8] 
+    // mrs  x2,    spsr_el1
+    //str     x2, [sp, #-8]       
+    //str     x30, [sp, #-8]
+    //stp sp, elr_el1, [sp, #-16]!         	
+    //str     sp, [sp, #-8] 
 
     // Call syscall handler
     mov 	x0, sp

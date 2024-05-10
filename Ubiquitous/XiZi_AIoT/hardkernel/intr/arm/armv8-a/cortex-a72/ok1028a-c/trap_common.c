@@ -29,7 +29,7 @@ Modification:
 #include <string.h>
 
 #include "core.h"
-#include "gicv2_common_opa.h"
+#include "gicv3_common_opa.h"
 #include "trap_common.h"
 
 #include "log.h"
@@ -101,7 +101,7 @@ static void _sys_irq_init(int cpu_id)
     }
     /* active hardware irq responser */
     gic_init();
-    xizi_trap_driver.switch_hw_irqtbl((uint64_t*)&_vector_jumper);
+    xizi_trap_driver.switch_hw_irqtbl((uint32_t*)&_vector_jumper);
 }
 
 static void _cpu_irq_enable(void)
@@ -116,27 +116,22 @@ static void _cpu_irq_disable(void)
 
 static void _single_irq_enable(int irq, int cpu, int prio)
 {
-    gic_set_irq_priority(irq, prio);
-    gic_set_irq_security(irq, false); // set IRQ as non-secure
-    gic_set_cpu_target(irq, cpu, true);
-    gic_enable_irq(irq, true);
+    gic_enable();
 }
 
 static void _single_irq_disable(int irq, int cpu)
 {
-    gic_enable_irq(irq, false);
-    gic_set_cpu_target(irq, cpu, false);
 }
 
 #define VBAR
-static inline uint64_t _switch_hw_irqtbl(uint64_t* new_tbl_base)
+static inline uint32_t _switch_hw_irqtbl(uint32_t* new_tbl_base)
 {
-    uint64_t old_tbl_base = 0;
-    //get old irq table base addr
-    asm volatile("mrs %0, vbar_el1" : "=r" (old_tbl_base));
+    uint32_t old_tbl_base = 0;
+    // get old irq table base addr
+    __asm__ volatile("mrs %0, vbar_el1" : "=r"(old_tbl_base));
 
     // set new irq table base addr
-    asm volatile("msr vbar_el1, %0" : : "r" (new_tbl_base));
+    __asm__ volatile("msr vbar_el1, %0" : : "r"(new_tbl_base));
 
     return old_tbl_base;
 }
@@ -144,29 +139,6 @@ static inline uint64_t _switch_hw_irqtbl(uint64_t* new_tbl_base)
 static void _bind_irq_handler(int irq, irq_handler_t handler)
 {
     xizi_trap_driver.sw_irqtbl[irq].handler = handler;
-}
-
-static bool _send_sgi(uint32_t irq, uint32_t bitmask, enum SgiFilterType type)
-{
-    if (bitmask > (1 << NR_CPU) - 1) {
-        return false;
-    }
-
-    enum _gicd_sgi_filter sgi_filter;
-    switch (type) {
-    case SgiFilter_TargetList:
-        sgi_filter = kGicSgiFilter_UseTargetList;
-        break;
-    case SgiFilter_AllOtherCPUs:
-        sgi_filter = kGicSgiFilter_AllOtherCPUs;
-        break;
-    default:
-        sgi_filter = kGicSgiFilter_OnlyThisCPU;
-        break;
-    }
-    gic_send_sgi(irq, bitmask, sgi_filter);
-
-    return true;
 }
 
 static uint32_t _hw_before_irq()
@@ -185,7 +157,7 @@ static uint32_t _hw_cur_int_num(uint32_t int_info)
     return int_info & 0x1FF;
 }
 
-static uint32_t _hw_cur_int_cpu(uint32_t int_info)
+static __attribute__((unused)) uint32_t _hw_cur_int_cpu(uint32_t int_info)
 {
     return (int_info >> 10) & 0x7;
 }
@@ -195,7 +167,7 @@ static void _hw_after_irq(uint32_t int_info)
     gic_write_end_of_irq(int_info);
 }
 
-static int _is_interruptable(void)
+static __attribute__((unused)) int _is_interruptable(void)
 {
     uint32_t val;
 
@@ -217,15 +189,12 @@ static struct XiziTrapDriver xizi_trap_driver = {
     .cpu_irq_disable = _cpu_irq_disable,
     .single_irq_enable = _single_irq_enable,
     .single_irq_disable = _single_irq_disable,
-    .switch_hw_irqtbl = _switch_hw_irqtbl,
+    //.switch_hw_irqtbl = _switch_hw_irqtbl,
 
     .bind_irq_handler = _bind_irq_handler,
-    .send_sgi = _send_sgi,
 
-    .is_interruptable = _is_interruptable,
     .hw_before_irq = _hw_before_irq,
     .hw_cur_int_num = _hw_cur_int_num,
-    .hw_cur_int_cpu = _hw_cur_int_cpu,
     .hw_after_irq = _hw_after_irq,
 };
 

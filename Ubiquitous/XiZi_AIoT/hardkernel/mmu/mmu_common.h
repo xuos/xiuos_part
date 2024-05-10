@@ -19,8 +19,7 @@ struct MmuDriverRightGroup {
     struct TraceTag intr_driver_tag;
 };
 
-struct MmuCommonDone
-{
+struct MmuCommonDone {
     void (*MmuDevPteAttr)(uintptr_t* attr);
     void (*MmuPdeAttr)(uintptr_t* attr);
     void (*MmuUsrPteAttr)(uintptr_t* attr);

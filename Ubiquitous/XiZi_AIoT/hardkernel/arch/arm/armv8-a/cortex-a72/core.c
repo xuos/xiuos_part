@@ -30,9 +30,9 @@ Modification:
 *************************************************/
 
 /*********cortex-a72 general register************
-   EL0               |              EL1            |              EL2            |            EL3
+   EL0            |         EL1        |       EL2      |       EL3
 
-     x0;            
+     x0;
      x1;
      x2;
       x3;
@@ -57,19 +57,18 @@ Modification:
      x22;
      x23;
      x24;
-     x25;    
+     x25;
      x26;
      x27;
      x28;
-     x29;    
+     x29;
      x30;
-/*********cortex-a72  special register************
-                                                XZR            
+*********cortex-a72  special register************
+                                                XZR
                                                 PC
-     SP_EL0              SP_EL1             SP_EL2              SP_EL3
-                                  SPSR_EL1        SPSR_EL2         SPSR_EL3
-                                  ELR_EL1           ELR_EL2            ELR_EL3
+     SP_EL0             SP_EL1            SP_EL2           SP_EL3
+                        SPSR_EL1          SPSR_EL2         SPSR_EL3
+                        ELR_EL1           ELR_EL2          ELR_EL3
 ************************************************/
-
 
 #include "core.h"

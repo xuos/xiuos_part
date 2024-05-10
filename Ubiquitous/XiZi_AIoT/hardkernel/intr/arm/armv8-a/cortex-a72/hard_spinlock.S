@@ -47,7 +47,7 @@ Author: AIIT XUOS Lab
 Modification:
 *************************************************/
 
-    .code 64
+    .arch armv8-a
     .section ".text","ax"
     
     .global cpu_get_current
@@ -61,15 +61,15 @@ _spinlock_lock:
 ldxr      x1, [x0]                            // check if the spinlock is currently unlocked
 cmp     x1, #UNLOCKED
 
-wfene                                           // wait for an event signal
+wfe                                           // wait for an event signal
 bne      _spinlock_lock
 
 mrs     x1, mpidr_el1                // get our CPU ID
 and     x1, x1, #3
-stxr     x2, x1, [x0]
+stxr     w2, x1, [x0]
 cbnz   x2, _spinlock_lock        // check if the write was successful, if the write failed, start over
 
-dmb                                                  // Ensure that accesses to shared resource have completed
+dmb    ish                                              // Ensure that accesses to shared resource have completed
 
 mov    x0, #0
 ret
@@ -89,12 +89,12 @@ ldr       x2, [x0]
 cmp    x1, x2
 bne    1f                                       //doesn't match,jump to 1
 
-dmb
+dmb    ish
 
 mov     x1, #UNLOCKED 
 str         x1, [x0]
 
-dsb                                                 //Ensure that no instructions following the barrier execute until
+dsb   ish                                              //Ensure that no instructions following the barrier execute until
                                                          // all memory accesses prior to the barrier have completed.
 
 

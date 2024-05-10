@@ -33,6 +33,8 @@ Modification:
 #define NO_INT 0x80 // disable IRQ.
 #define DIS_INT 0xc0 // disable both IRQ and FIQ.
 
+#define MODE_STACK_SIZE 0x1000
+
 //! @name SPSR fields
 //@{
 #define SPSR_EL1_N (1 << 31) //!< Negative
@@ -211,12 +213,12 @@ __attribute__((__always_inline__)) static inline void arch_set_main_params(struc
 /// @param param4
 /// @param param5
 /// @return
-extern int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, uintptr_t param4, uintptr_t param5);
+extern int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, uintptr_t param4);
 __attribute__((__always_inline__)) static inline int arch_syscall(struct trapframe* tf, int* syscall_num)
 {
     // call syscall
     *syscall_num = tf->x8;
-    return syscall(*syscall_num, tf->x1, tf->x2, tf->x3, tf->x4, tf->x5);
+    return syscall(*syscall_num, tf->x1, tf->x2, tf->x3, tf->x4);
 }
 
 /// @brief set return reg to trapframe

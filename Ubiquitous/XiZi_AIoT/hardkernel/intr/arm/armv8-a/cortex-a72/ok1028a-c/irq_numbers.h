@@ -86,9 +86,9 @@ enum _ls_interrupts {
     LS_INT_GPIO3 = 69, //!< GPIO3
 
     LS_INT_FLETIMER1 = 76, //!< ORed all Flextimer 1 interrupt signals
-    LS_INT_FLETIMER1 = 77, //!< ORed all Flextimer 2 interrupt signals
-    LS_INT_FLETIMER1 = 78, //!< ORed all Flextimer 3 interrupt signals
-    LS_INT_FLETIMER1 = 79, //!< ORed all Flextimer 4 interrupt signals
+    LS_INT_FLETIMER2 = 77, //!< ORed all Flextimer 2 interrupt signals
+    LS_INT_FLETIMER3 = 78, //!< ORed all Flextimer 3 interrupt signals
+    LS_INT_FLETIMER4 = 79, //!< ORed all Flextimer 4 interrupt signals
 
     LS_INT_I2C5_6 = 106, //!< I2C5 and I2C6 ORed
     LS_INT_I2C7_8 = 107, //!< I2C7 and I2C8 ORed

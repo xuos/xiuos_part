@@ -38,24 +38,6 @@ Modification:
 // extern struct MmuCommonDone mmu_common_done;
 static struct MmuDriverRightGroup right_group;
 
-void load_pgdir_critical(uintptr_t pgdir_paddr, struct TraceTag* intr_driver_tag)
-{
-
-    /* get cache driver */
-    struct ICacheDone* p_icache_done = AchieveResource(&right_group.icache_driver_tag);
-    struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
-
-    /* get intr driver */
-    struct XiziTrapDriver* p_intr_driver = AchieveResource(intr_driver_tag);
-
-    p_intr_driver->cpu_irq_disable();
-    TTBR0_W((uint64_t)pgdir_paddr);
-    CLEARTLB(0);
-    p_icache_done->invalidateall();
-    p_dcache_done->flushall();
-    p_intr_driver->cpu_irq_enable();
-}
-
 void load_pgdir(uintptr_t pgdir_paddr)
 {
     /* get cache driver */
@@ -70,7 +52,7 @@ void load_pgdir(uintptr_t pgdir_paddr)
 
 __attribute__((always_inline)) inline static void _tlb_flush(uintptr_t va)
 {
-    __asm__ volatile("tlbi vae1is, %0" :: "r"(va) );
+    __asm__ volatile("tlbi vae1is, %0" ::"r"(va));
 }
 
 static void tlb_flush_range(uintptr_t vstart, int len)
@@ -94,7 +76,6 @@ static struct MmuCommonDone mmu_common_done = {
     .MmuUsrDevPteAttr = GetUsrDevPteAttr,
     .MmuKernPteAttr = GetKernPteAttr,
 
-    .LoadPgdirCrit = load_pgdir_critical,
     .LoadPgdir = load_pgdir,
     .TlbFlushAll = tlb_flush_all,
     .TlbFlush = tlb_flush_range,

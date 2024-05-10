@@ -48,8 +48,8 @@ Modification:
 #if !defined(__CORTEX_A72_H__)
 #define __CORTEX_A72_H__
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 //! @name Instruction macros
@@ -58,8 +58,8 @@ Modification:
 #define WFI() __asm__ volatile("wfi\n\t")
 #define WFE() __asm__ volatile("wfe\n\t")
 #define SEV() __asm__ volatile("sev\n\t")
-#define DMB() __asm__ volatile("dmb\n\t")
-#define DSB() __asm__ volatile("dsb\n\t")
+#define DMB() __asm__ volatile("dmb ish\n\t")
+#define DSB() __asm__ volatile("dsb ish\n\t")
 #define ISB() __asm__ volatile("isb\n\t")
 
 #define _ARM_MRS(coproc, opcode1, Rt, CRn, CRm, opcode2) \
@@ -71,11 +71,9 @@ Modification:
 #define WriteReg(value, address) (*(volatile unsigned int*)(address) = (value))
 #define ReadReg(address) (*(volatile unsigned int*)(address))
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
 
 //! @name Misc
 //@{
@@ -115,24 +113,24 @@ void arm_dcache_disable();
 void arm_dcache_invalidate();
 
 //! @brief Invalidate a line of data cache.
-void arm_dcache_invalidate_line(const void * addr);
+void arm_dcache_invalidate_line(const void* addr);
 
 //! @brief Invalidate a number of lines of data cache.
 //!
 //! Number of lines depends on length parameter and size of line.
 //! Size of line for A9 L1 cache is 32B.
-void arm_dcache_invalidate_mlines(const void * addr, size_t length);
+void arm_dcache_invalidate_mlines(const void* addr, size_t length);
 
 //! @brief Flush (clean) all lines of cache (all sets in all ways).
 void arm_dcache_flush();
 
 //! @brief Flush (clean) one line of cache.
-void arm_dcache_flush_line(const void * addr);
+void arm_dcache_flush_line(const void* addr);
 
 // @brief Flush (clean) multiple lines of cache.
 //!
 //! Number of lines depends on length parameter and size of line.
-void arm_dcache_flush_mlines(const void * addr, size_t length);
+void arm_dcache_flush_mlines(const void* addr, size_t length);
 //@}
 
 //! @name Instrution cache operations
@@ -156,12 +154,12 @@ void arm_icache_invalidate();
 void arm_icache_invalidate_is();
 
 //! @brief Invalidate a line of the instruction cache.
-void arm_icache_invalidate_line(const void * addr);
+void arm_icache_invalidate_line(const void* addr);
 
 //! @brief Invalidate a number of lines of instruction cache.
 //!
 //! Number of lines depends on length parameter and size of line.
-void arm_icache_invalidate_mlines(const void * addr, size_t length);
+void arm_icache_invalidate_mlines(const void* addr, size_t length);
 //@}
 
 //! @name TLB operations
@@ -232,4 +230,5 @@ void scu_secure_invalidate(unsigned int cpu, unsigned int ways);
 #if defined(__cplusplus)
 }
 #endif
-#endif//__CORTEX_A72_H__
+
+#endif //__CORTEX_A72_H__

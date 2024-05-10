@@ -1,37 +1,37 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
-* XiUOS is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*        http://license.coscl.org.cn/MulanPSL2
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-* See the Mulan PSL v2 for more details.
-*/
+ * Copyright (c) 2020 AIIT XUOS Lab
+ * XiUOS is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *        http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 
 /**
-* @file:    cache_common_ope.c
-* @brief:   the general management of cache
-* @version: 3.0
-* @author:  AIIT XUOS Lab
-* @date:    2023/11/06
-*
-*/
+ * @file:    cache_common_ope.c
+ * @brief:   the general management of cache
+ * @version: 3.0
+ * @author:  AIIT XUOS Lab
+ * @date:    2023/11/06
+ *
+ */
 
 /*************************************************
 File name: cache_common_ope.c
 Description: the general management of cache
-Others: 
-History: 
+Others:
+History:
 1. Date: 2023-11-06
 Author: AIIT XUOS Lab
-Modification: 
+Modification:
 1、implement xiuos cache operations
 *************************************************/
 #include "cache_common_ope.h"
 #include "l1_cache.h"
-#include "l2_cache.h"
+// #include "l2_cache.h"
 
 /****************************************************************************
  * Public Functions
