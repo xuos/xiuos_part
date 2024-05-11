@@ -51,8 +51,8 @@ Modification:
 // [ block 0 ]  [  block 1  ]  [block 2] [...]  [  block 28  ]   [ ... ]
 // [ unused  ]  [super block]  [Inode bit map]  [block bit map]  [data blocks]
 
-#define NR_DIRECT_BLOCKS 5 // direct block number
-#define NR_INDIRECT_BLOCKS 8 // indirect block number
+#define NR_DIRECT_BLOCKS 4 // direct block number
+#define NR_INDIRECT_BLOCKS 25 // indirect block number
 #define ROOT_INUM 1 // root inode number
 
 #define MAX_INDIRECT_BLOCKS (BLOCK_SIZE / sizeof(uint32_t)) // Mmaximum number of indirect blocks mapped per block

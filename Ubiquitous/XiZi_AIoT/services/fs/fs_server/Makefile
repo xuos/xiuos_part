@@ -25,7 +25,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/fs/libfs \
 			-I$(KERNEL_ROOT)/services/app
 
 fs_server: fs_server.o fs.o block_io.o
-	@mv $^ ../../app
+	@mv $^ $(KERNEL_ROOT)/services/app
 
 %.o: %.c
 	@echo "cc $^"

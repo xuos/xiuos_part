@@ -56,6 +56,10 @@ void GetUsrDevPteAttr(uintptr_t* attr)
 
         usr_pte_attr.entry = 0;
         usr_pte_attr.desc_type = PAGE_4K;
+        usr_pte_attr.C = 0;
+        usr_pte_attr.B = 0;
+        usr_pte_attr.TEX = 2;
+        usr_pte_attr.S = 0;
         usr_pte_attr.AP1_0 = AccessPermission_KernelUser;
     }
     *attr = usr_pte_attr.entry;
@@ -87,6 +91,7 @@ void GetKernPteAttr(uintptr_t* attr)
         kern_pte_attr.B = 1;
         kern_pte_attr.C = 1;
         kern_pte_attr.S = 1;
+        kern_pte_attr.TEX = 1;
         kern_pte_attr.AP1_0 = AccessPermission_KernelOnly;
     }
     *attr = kern_pte_attr.entry;

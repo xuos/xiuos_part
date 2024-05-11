@@ -12,7 +12,10 @@
 
 /// this file is only used for debug
 #pragma once
+#include <stdbool.h>
 
-void printf(char* fmt, ...);
+#include "printf.h"
 
+bool init_uart_mmio();
+void putc(char c);
 char getc();

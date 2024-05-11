@@ -21,7 +21,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/fs/libfs \
 			-I$(KERNEL_ROOT)/services/app
 
 board: libserial.o arch_usyscall.o test_irq_sender.o
-	@mv $^ ../../app
+	@mv $^ $(KERNEL_ROOT)/services/app
 
 %.o: %.c
 	@echo "cc $^"

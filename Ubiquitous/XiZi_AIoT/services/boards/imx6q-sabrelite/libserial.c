@@ -82,7 +82,7 @@ typedef union _hw_uart_utxd {
 #define USER_UART_BASE 0x6FFFF000
 // #define USER_UART_BASE 0x621e8000
 
-static bool init_uart_mmio()
+bool init_uart_mmio()
 {
     static int mapped = 0;
     if (mapped == 0) {
@@ -94,7 +94,7 @@ static bool init_uart_mmio()
     return true;
 }
 
-static void putc(char c)
+void putc(char c)
 {
     while ((*(volatile hw_uart_uts_t*)(USER_UART_BASE + 0xb4)).B.TXFULL)
         ;
@@ -126,81 +126,4 @@ char getc(void)
         return 0xFF;
 
     return (char)read_data;
-}
-
-static void printint(int xx, int base, int sgn)
-{
-    static char digits[] = "0123456789ABCDEF";
-    char buf[16];
-    int i, neg;
-    uint32_t x;
-
-    neg = 0;
-    if (sgn && xx < 0) {
-        neg = 1;
-        x = -xx;
-    } else {
-        x = xx;
-    }
-
-    i = 0;
-    do {
-        buf[i++] = digits[x % base];
-    } while ((x /= base) != 0);
-    if (neg)
-        buf[i++] = '-';
-
-    while (--i >= 0)
-        putc(buf[i]);
-}
-
-// Print to usart. Only understands %d, %x, %p, %s.
-void printf(char* fmt, ...)
-{
-    if (!init_uart_mmio()) {
-        return;
-    }
-    char* s;
-    int c, i, state;
-    uint32_t* ap;
-
-    state = 0;
-    ap = (uint32_t*)(void*)&fmt + 1;
-    for (i = 0; fmt[i]; i++) {
-        c = fmt[i] & 0xff;
-        if (state == 0) {
-            if (c == '%') {
-                state = '%';
-            } else {
-                putc(c);
-            }
-        } else if (state == '%') {
-            if (c == 'd') {
-                printint(*ap, 10, 1);
-                ap++;
-            } else if (c == 'x' || c == 'p') {
-                printint(*ap, 16, 0);
-                ap++;
-            } else if (c == 's') {
-                s = (char*)*ap;
-                ap++;
-                if (s == 0)
-                    s = "(null)";
-                while (*s != 0) {
-                    putc(*s);
-                    s++;
-                }
-            } else if (c == 'c') {
-                putc(*ap);
-                ap++;
-            } else if (c == '%') {
-                putc(c);
-            } else {
-                // Unknown % sequence.  Print it to draw attention.
-                putc('%');
-                putc(c);
-            }
-            state = 0;
-        }
-    }
 }
