@@ -70,10 +70,10 @@ Modification:
 #define ISB() __asm__ volatile("isb\n\t")
 
 #define _ARM_MRC(coproc, opcode1, Rt, CRn, CRm, opcode2) \
-    asm volatile("mrc p" #coproc ", " #opcode1 ", %[output], c" #CRn ", c" #CRm ", " #opcode2 "\n" : [output] "=r"(Rt))
+    __asm__ volatile("mrc p" #coproc ", " #opcode1 ", %[output], c" #CRn ", c" #CRm ", " #opcode2 "\n" : [output] "=r"(Rt))
 
 #define _ARM_MCR(coproc, opcode1, Rt, CRn, CRm, opcode2) \
-    asm volatile("mcr p" #coproc ", " #opcode1 ", %[input], c" #CRn ", c" #CRm ", " #opcode2 "\n" ::[input] "r"(Rt))
+    __asm__ volatile("mcr p" #coproc ", " #opcode1 ", %[input], c" #CRn ", c" #CRm ", " #opcode2 "\n" ::[input] "r"(Rt))
 
 #define WriteReg(value, address) (*(volatile unsigned int*)(address) = (value))
 #define ReadReg(address) (*(volatile unsigned int*)(address))

@@ -13,7 +13,7 @@
 #include "test_irq.h"
 
 IPC_INTERFACE(Ipc_wait_intr_3, 1, ignore, 0);
-int wait_intr(struct Session* session, void* ignore_param)
+int wait_intr(struct Session* session)
 {
     return IPC_CALL(Ipc_wait_intr_3)(session, NULL);
 }
@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     }
 
     printf("%s start waiting for IRQ.\n", prog_name);
-    wait_intr(&session, NULL);
+    wait_intr(&session);
     printf("%s return from waiting for IRQ.\n", prog_name);
 
     exit();

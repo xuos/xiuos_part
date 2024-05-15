@@ -38,20 +38,11 @@
 #include <string.h>
 
 #include "enet.h"
+#include "sdk_types.h"
 #include "soc_memory_map.h"
 
 #include "libserial.h"
 #include "usyscall.h"
-
-typedef enum _test_return {
-    TEST_NOT_STARTED = -3, // present in the menu, but not run
-    TEST_NOT_IMPLEMENTED = -2, // present in the menu, but not functional
-    TEST_FAILED = -1,
-    TEST_PASSED = 0,
-    TEST_BYPASSED = 2, // user elected to exit the test before it was run
-    TEST_NOT_PRESENT = 3, // not present in the menu.
-    TEST_CONTINUE = 4 // proceed with the test. opposite of TEST_BYPASSED
-} test_return_t;
 
 #define ENET_PHY_ADDR 6
 
@@ -99,6 +90,53 @@ static int pkt_compare(unsigned char* packet1, unsigned char* packet2, int lengt
         return 0;
 }
 
+//////////////////////////////////////////
+void print_hw_enet(const hw_enet_t* enet)
+{
+    printf("********************************\n");
+    printf("EIR: %08x\n", enet->EIR.U);
+    printf("EIMR: %08x\n", enet->EIMR.U);
+    printf("RDAR: %08x\n", enet->RDAR.U);
+    printf("TDAR: %08x\n", enet->TDAR.U);
+    printf("ECR: %08x\n", enet->ECR.U);
+    printf("MMFR: %08x\n", enet->MMFR.U);
+    printf("MSCR: %08x\n", enet->MSCR.U);
+    printf("MIBC: %08x\n", enet->MIBC.U);
+    printf("RCR: %08x\n", enet->RCR.U);
+    printf("TCR: %08x\n", enet->TCR.U);
+    printf("PALR: %08x\n", enet->PALR.U);
+    printf("PAUR: %08x\n", enet->PAUR.U);
+    printf("OPD: %08x\n", enet->OPD.U);
+    printf("IAUR: %08x\n", enet->IAUR.U);
+    printf("IALR: %08x\n", enet->IALR.U);
+    printf("GAUR: %08x\n", enet->GAUR.U);
+    printf("GALR: %08x\n", enet->GALR.U);
+    printf("TFWR: %08x\n", enet->TFWR.U);
+    printf("RDSR: %08x\n", enet->RDSR.U);
+    printf("TDSR: %08x\n", enet->TDSR.U);
+    printf("MRBR: %08x\n", enet->MRBR.U);
+    printf("RSFL: %08x\n", enet->RSFL.U);
+    printf("RSEM: %08x\n", enet->RSEM.U);
+    printf("RAEM: %08x\n", enet->RAEM.U);
+    printf("RAFL: %08x\n", enet->RAFL.U);
+    printf("TSEM: %08x\n", enet->TSEM.U);
+    printf("TAEM: %08x\n", enet->TAEM.U);
+    printf("TAFL: %08x\n", enet->TAFL.U);
+    printf("TIPG: %08x\n", enet->TIPG.U);
+    printf("FTRL: %08x\n", enet->FTRL.U);
+    printf("TACC: %08x\n", enet->TACC.U);
+    printf("RACC: %08x\n", enet->RACC.U);
+    printf("ATCR: %08x\n", enet->ATCR.U);
+    printf("ATVR: %08x\n", enet->ATVR.U);
+    printf("ATOFF: %08x\n", enet->ATOFF.U);
+    printf("ATPER: %08x\n", enet->ATPER.U);
+    printf("ATCOR: %08x\n", enet->ATCOR.U);
+    printf("ATINC: %08x\n", enet->ATINC.U);
+    printf("ATSTMP: %08x\n", enet->ATSTMP.U);
+    printf("********************************\n");
+}
+//////////////////////////////////////////
+
 /*!
  * This test performs a loopback transfer on the RGMII interface through
  * an external AR8031 giga ethernet PHY.
@@ -136,10 +174,10 @@ int enet_test()
             printf("Ethernet link is up!\n");
             break;
         }
-        yield(SYS_TASK_YIELD_NO_REASON);
+        hal_delay_us(100000); // 100 ms
     }
 
-    imx_enet_phy_enable_external_loopback(dev0);
+    // imx_enet_phy_enable_external_loopback(dev0);
 
     printf("ENET %0d: [ %s ] [ %s ] [ %s ]:\n", dev0->phy_addr,
         (dev0->status & ENET_STATUS_FULL_DPLX) ? "FULL_DUPLEX" : "HALF_DUPLEX",
@@ -152,7 +190,6 @@ int enet_test()
         printf("ENET link status check fail\n");
         return TEST_FAILED;
     }
-
     imx_enet_start(dev0, mac_addr0);
 
     // send packet
@@ -174,7 +211,7 @@ int enet_test()
     }
 
     if (!(ENET_EVENT_TX & enet_events)) {
-        printf("ENET tx fail\n");
+        printf("ENET tx fail event: %08x\n", enet_events);
         return TEST_FAILED;
     }
 
@@ -217,19 +254,20 @@ int main(int argc, char** argv)
         exit();
     }
 
-    printf("%s: Mapping %x(size: %x) to %x\n", enet_server_name, AIPS1_ARB_PHY_BASE_ADDR, AIPS1_ARB_END_ADDR - AIPS1_ARB_BASE_ADDR, AIPS1_ARB_BASE_ADDR);
+    printf("%s: Mapping %08x(size: %x) to %08x\n", enet_server_name, AIPS1_ARB_PHY_BASE_ADDR, AIPS1_ARB_END_ADDR - AIPS1_ARB_BASE_ADDR, AIPS1_ARB_BASE_ADDR);
     if (!mmap(AIPS1_ARB_BASE_ADDR, AIPS1_ARB_PHY_BASE_ADDR, AIPS1_ARB_END_ADDR - AIPS1_ARB_BASE_ADDR, true)) {
-        printf("%s: mmap AIPS1 ARB(%x) failed\n", enet_server_name, AIPS1_ARB_PHY_BASE_ADDR);
+        printf("%s: mmap AIPS1 ARB(%8x) failed\n", enet_server_name, AIPS1_ARB_PHY_BASE_ADDR);
         exit();
     }
 
-    printf("%s: Mapping %x(size: %x) to %x\n", enet_server_name, AIPS2_ARB_PHY_BASE_ADDR, AIPS2_ARB_END_ADDR - AIPS2_ARB_BASE_ADDR, AIPS2_ARB_BASE_ADDR);
+    printf("%s: Mapping %08x(size: %x) to %8x\n", enet_server_name, AIPS2_ARB_PHY_BASE_ADDR, AIPS2_ARB_END_ADDR - AIPS2_ARB_BASE_ADDR, AIPS2_ARB_BASE_ADDR);
     if (!mmap(AIPS2_ARB_BASE_ADDR, AIPS2_ARB_PHY_BASE_ADDR, AIPS2_ARB_END_ADDR - AIPS2_ARB_BASE_ADDR, true)) {
-        printf("%s: mmap AIPS1 ARB(%x) failed\n", enet_server_name, AIPS2_ARB_PHY_BASE_ADDR);
+        printf("%s: mmap AIPS1 ARB(%08x) failed\n", enet_server_name, AIPS2_ARB_PHY_BASE_ADDR);
         exit();
     }
 
     enet_test();
 
     exit();
+    return 0;
 }

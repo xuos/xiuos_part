@@ -22,11 +22,10 @@
 #define __HW_GPIO_REGISTERS_H__
 
 #include "regs.h"
-
 #include "soc_memory_map.h"
 
 /*
- * i.MX6SL GPIO
+ * i.MX6DQ GPIO
  *
  * GPIO
  *

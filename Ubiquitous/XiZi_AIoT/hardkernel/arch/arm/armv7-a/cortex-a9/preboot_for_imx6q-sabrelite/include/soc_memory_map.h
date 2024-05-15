@@ -18,14 +18,14 @@
 
 /**
  * @file soc_memory_map.h
- * @brief support imx6q soc memory map define, reference from u-boot-2009-08/include/asm-arm/arch-mx6/mx6.h
+ * @brief support imx6q soc memory map define, reference from u-boot-2009-08/include/__asm__-arm/arch-mx6/mx6.h
  * @version 3.0
  * @author AIIT XUOS Lab
  * @date 2023.09.08
  */
 /*************************************************
 File name: soc_memory_map.h
-Description: support imx6q soc memory map define, reference from u-boot-2009-08/include/asm-arm/arch-mx6/mx6.h
+Description: support imx6q soc memory map define, reference from u-boot-2009-08/include/__asm__-arm/arch-mx6/mx6.h
 Others:
 History:
 1. Date: 2023-08-28

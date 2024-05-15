@@ -110,15 +110,6 @@ void imx_enet_iomux(void)
     gpio_set_direction(GPIO_PORT6, 24, GPIO_GDIR_OUTPUT);
     gpio_set_level(GPIO_PORT6, 24, GPIO_HIGH_LEVEL);
 #endif
-
-#ifdef BOARD_SABRE_AI
-    /* Select ENET, ENET_CAN1_STEER(PORT_EXP_B3) */
-    max7310_set_gpio_output(1, 2, GPIO_LOW_LEVEL);
-    /* Select ALT5 mode of GPIO_19 for GPIO4_5 - PGMIT_INT_B */
-    /* active low input */
-    gpio_set_gpio(GPIO_PORT4, 5);
-    gpio_set_direction(GPIO_PORT4, 5, GPIO_GDIR_INPUT);
-#endif
 }
 
 #ifdef BOARD_SABRE_LITE

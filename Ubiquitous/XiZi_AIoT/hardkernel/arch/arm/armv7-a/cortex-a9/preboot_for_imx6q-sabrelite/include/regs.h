@@ -56,7 +56,7 @@ typedef unsigned int reg32_t;
 #endif
 
 //
-// Typecast macro for C or asm. In C, the cast is applied, while in asm it is excluded. This is
+// Typecast macro for C or __asm__. In C, the cast is applied, while in __asm__ it is excluded. This is
 // used to simplify macro definitions in the module register headers.
 //
 #ifndef __REG_VALUE_TYPE

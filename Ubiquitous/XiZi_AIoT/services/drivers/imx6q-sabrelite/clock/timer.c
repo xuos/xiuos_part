@@ -109,20 +109,20 @@ void system_time_init(void)
 
 int IPC_DO_SERVE_FUNC(Ipc_delay_us)(uint32_t* usecs)
 {
-    uint32_t instance = g_system_timer_port;
-    if (*usecs == 0) {
-        return 0;
-    }
+    // uint32_t instance = g_system_timer_port;
+    // if (*usecs == 0) {
+    //     return 0;
+    // }
 
-    /* enable the counter first */
-    epit_counter_enable(instance, *usecs, POLLING_MODE);
+    // /* enable the counter first */
+    // epit_counter_enable(instance, *usecs, POLLING_MODE);
 
-    /* wait for the compare event */
-    while (!epit_get_compare_event(instance))
-        ;
+    // /* wait for the compare event */
+    // while (!epit_get_compare_event(instance))
+    //     ;
 
-    /* disable the counter to save power */
-    epit_counter_disable(instance);
+    // /* disable the counter to save power */
+    // epit_counter_disable(instance);
     return 0;
 }
 
@@ -159,19 +159,19 @@ IPC_SERVER_REGISTER_INTERFACES(IpcSabreliteTimer, 2, Ipc_delay_us, Ipc_get_micro
 
 int main(int argc, char** argv)
 {
-    printf("TIMER: Mapping %x(size: %x) to %x\n", AIPS1_ARB_PHY_BASE_ADDR, AIPS1_ARB_END_ADDR - AIPS1_ARB_BASE_ADDR, AIPS1_ARB_BASE_ADDR);
+    printf("TIMER: Mapping %08x(size: %x) to %08x\n", AIPS1_ARB_PHY_BASE_ADDR, AIPS1_ARB_END_ADDR - AIPS1_ARB_BASE_ADDR, AIPS1_ARB_BASE_ADDR);
     if (!mmap(AIPS1_ARB_BASE_ADDR, AIPS1_ARB_PHY_BASE_ADDR, AIPS1_ARB_END_ADDR - AIPS1_ARB_BASE_ADDR, true)) {
-        printf("TIMER : mmap AIPS1 ARB(%x) failed\n", AIPS1_ARB_PHY_BASE_ADDR);
+        printf("TIMER : mmap AIPS1 ARB(%-08x) failed\n", AIPS1_ARB_PHY_BASE_ADDR);
     }
 
-    printf("TIMER: Mapping %x(size: %x) to %x\n", AIPS2_ARB_PHY_BASE_ADDR, AIPS2_ARB_END_ADDR - AIPS2_ARB_BASE_ADDR, AIPS2_ARB_BASE_ADDR);
+    printf("TIMER: Mapping %08x(size: %x) to %08x\n", AIPS2_ARB_PHY_BASE_ADDR, AIPS2_ARB_END_ADDR - AIPS2_ARB_BASE_ADDR, AIPS2_ARB_BASE_ADDR);
     if (!mmap(AIPS2_ARB_BASE_ADDR, AIPS2_ARB_PHY_BASE_ADDR, AIPS2_ARB_END_ADDR - AIPS2_ARB_BASE_ADDR, true)) {
-        printf("TIMER : mmap AIPS1 ARB(%x) failed\n", AIPS2_ARB_PHY_BASE_ADDR);
+        printf("TIMER : mmap AIPS1 ARB(%-08x) failed\n", AIPS2_ARB_PHY_BASE_ADDR);
     }
 
-    printf("TIMER: Mapping %x(size: %x) to %x\n", REGS_ARMGLOBALTIMER_BASE, 0x1000, 0x00a00000);
+    printf("TIMER: Mapping %08x(size: %x) to %08x\n", REGS_ARMGLOBALTIMER_BASE, 0x1000, 0x00a00000);
     if (!mmap(REGS_ARMGLOBALTIMER_BASE, 0x00a00000, 0x1000, true)) {
-        printf("TIMER : mmap GLOBAL TIMER(%x) failed\n", 0x00a00000);
+        printf("TIMER : mmap GLOBAL TIMER(%-08x) failed\n", 0x00a00000);
     }
 
     static char server_name[] = "TimerServer";

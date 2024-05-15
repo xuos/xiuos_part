@@ -27,9 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __SDK_TYPES_H__
-#define __SDK_TYPES_H__
-
+#pragma once
 //! @addtogroup sdk_common
 //! @{
 
@@ -117,7 +115,6 @@ enum display_type {
 
 //! @}
 
-#endif // __SDK_TYPES_H__
 ////////////////////////////////////////////////////////////////////////////////
 // EOF
 ////////////////////////////////////////////////////////////////////////////////

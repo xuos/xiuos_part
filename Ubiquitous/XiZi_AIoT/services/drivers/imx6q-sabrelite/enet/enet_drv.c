@@ -63,15 +63,17 @@ int imx_enet_mii_read(volatile hw_enet_t* enet_reg, unsigned char phy_addr,
 
     while (1) {
         if (enet_reg->EIR.U & ENET_EVENT_MII) {
+            printf("[%s %d], EIR: %08x\n", __func__, __LINE__, enet_reg->EIR.U);
             enet_reg->EIR.U = ENET_EVENT_MII;
             break;
         }
         if ((--waiting) == 0)
             return -1;
 
-        hal_delay_us(ENET_MII_TICK);
+        hal_delay_us(0);
     }
 
+    printf("[%s %d], EIR: %08x\n", __func__, __LINE__, enet_reg->EIR.U);
     *value = ENET_MII_GET_DATA(enet_reg->MMFR.U);
     return 0;
 }
@@ -89,6 +91,7 @@ int imx_enet_mii_write(volatile hw_enet_t* enet_reg, unsigned char phy_addr,
     }
 
     enet_reg->MMFR.U = ENET_MII_WRITE(phy_addr, reg_addr, value); /* Write CMD */
+    printf("MMFR.U: %08x value: %08x\n", enet_reg->MMFR.U, value);
 
     while (1) {
         if (enet_reg->EIR.U & ENET_EVENT_MII) {
@@ -112,18 +115,16 @@ static void imx_enet_bd_init(imx_enet_priv_t* dev, int dev_idx)
 {
     int i;
     imx_enet_bd_t* p;
-    imx_enet_bd_t *rx_bd_base = (imx_enet_bd_t*)malloc(sizeof(imx_enet_bd_t)), //
-        *tx_bd_base = (imx_enet_bd_t*)malloc(sizeof(imx_enet_bd_t));
+    imx_enet_bd_t *rx_bd_base = (imx_enet_bd_t*)malloc(sizeof(imx_enet_bd_t) * (ENET_BD_RX_NUM * NUM_OF_ETH_DEVS)), //
+        *tx_bd_base = (imx_enet_bd_t*)malloc(sizeof(imx_enet_bd_t) * (ENET_BD_TX_NUM * NUM_OF_ETH_DEVS));
 
-    rx_bd_base += (dev_idx * ENET_BD_RX_NUM);
-    tx_bd_base += (dev_idx * ENET_BD_TX_NUM);
-
+#define _SABRELITE_ENET_BUFFER_SIZE 2048
     p = dev->rx_bd = (imx_enet_bd_t*)rx_bd_base;
 
     for (i = 0; i < ENET_BD_RX_NUM; i++, p++) {
         p->status = BD_RX_ST_EMPTY;
         p->length = 0;
-        p->data = (unsigned char*)malloc(2048);
+        p->data = (unsigned char*)malloc(_SABRELITE_ENET_BUFFER_SIZE);
         // printf("rx bd %x, buffer is %x\n", (unsigned int)p, (unsigned int)p->data);
     }
 
@@ -135,7 +136,7 @@ static void imx_enet_bd_init(imx_enet_priv_t* dev, int dev_idx)
     for (i = 0; i < ENET_BD_TX_NUM; i++, p++) {
         p->status = 0;
         p->length = 0;
-        p->data = (unsigned char*)malloc(2048);
+        p->data = (unsigned char*)malloc(_SABRELITE_ENET_BUFFER_SIZE);
         // printf("tx bd %x, buffer is %x\n", (unsigned int)p, (unsigned int)p->data);
     }
 
@@ -156,7 +157,7 @@ static void imx_enet_chip_init(imx_enet_priv_t* dev)
     enet_reg->ECR.U = ENET_RESET;
 
     while (enet_reg->ECR.U & ENET_RESET) {
-        yield(SYS_TASK_YIELD_NO_REASON);
+        hal_delay_us(ENET_COMMON_TICK);
     }
 
     enet_reg->EIMR.U = 0x00000000;
@@ -471,13 +472,15 @@ int imx_enet_send(imx_enet_priv_t* dev, unsigned char* buf, int length, unsigned
 
     if (p->status & BD_TX_ST_WRAP) {
         p = dev->tx_bd;
-    } else
+    } else {
         p++;
+    }
 
     dev->tx_cur = p;
     dev->tx_busy = 1;
     dev->tx_key = key;
     enet_reg->TDAR.U = ENET_RX_TX_ACTIVE;
+    printf("EIR: %08x, ECR: %08x, TDAR.U: %08x, RDAR.U: %08x (%08x)\n", dev->enet_reg->EIR.U, dev->enet_reg->ECR.U, dev->enet_reg->TDAR.U, dev->enet_reg->RDAR.U, ENET_RX_TX_ACTIVE);
 
     return 0;
 }
@@ -552,6 +555,9 @@ void imx_enet_start(imx_enet_priv_t* dev, unsigned char* enaddr)
     dev->tx_busy = 0;
     dev->enet_reg->ECR.U |= ENET_ETHER_EN | ENET_ETHER_SPEED_1000M | ENET_ETHER_LITTLE_ENDIAN;
     dev->enet_reg->RDAR.U |= ENET_RX_TX_ACTIVE;
+    HW_ENET_RDAR_WR(ENET_RX_TX_ACTIVE);
+    printf("addr1: %x, addr2: %x\n", &dev->enet_reg->RDAR.U, HW_ENET_RDAR_ADDR);
+    printf("EIR: %08x, ECR: %08x, TDAR.U: %08x, RDAR.U: %08x (%08x)\n", dev->enet_reg->EIR.U, dev->enet_reg->ECR.U, dev->enet_reg->TDAR.U, dev->enet_reg->RDAR.U, ENET_RX_TX_ACTIVE);
 }
 
 void imx_enet_stop(imx_enet_priv_t* dev)
@@ -609,5 +615,6 @@ int imx_enet_mii_type(imx_enet_priv_t* dev, enum imx_mii_type mii_type)
         printf("BUG:unknow MII type=%x\n", mii_type);
         break;
     }
+    printf("RCR: %08x, TFWR: %08x\n", enet_reg->RCR.U, enet_reg->TFWR.U);
     return 0;
 }

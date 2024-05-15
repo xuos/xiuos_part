@@ -33,9 +33,12 @@
 //
 
 #ifndef __LANGUAGE_ASM__
-typedef unsigned char reg8_t;
-typedef unsigned short reg16_t;
-typedef unsigned int reg32_t;
+#include <stddef.h>
+#include <stdint.h>
+
+typedef uint8_t reg8_t;
+typedef uint16_t reg16_t;
+typedef uint32_t reg32_t;
 #endif
 
 //

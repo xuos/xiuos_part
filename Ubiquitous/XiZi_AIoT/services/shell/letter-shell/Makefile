@@ -13,7 +13,7 @@ cc = ${toolchain}gcc
 ld = ${toolchain}g++
 objdump = ${toolchain}objdump
 
-c_useropts = -O0
+c_useropts = -O2
 
 INC_DIR = 	-I$(KERNEL_ROOT)/services/app \
 			-I$(KERNEL_ROOT)/services/fs/libfs \

@@ -109,10 +109,10 @@ void show_mem(void)
         user_dynamic_free += user_phy_freemem_buddy.free_list[j].n_free_pages * (1 << j) * PAGE_SIZE;
         kernel_free += kern_virtmem_buddy.free_list[j].n_free_pages * (1 << j) * PAGE_SIZE;
     }
-    LOG_PRINTF("%-16s 0x%064lx\n", "TOTAL(B)", total);
-    LOG_PRINTF("%-16s 0x%064lx\n", "KERNEL USED(B)", (kern_virtmem_buddy.mem_end - kern_virtmem_buddy.mem_start - kernel_free));
-    LOG_PRINTF("%-16s 0x%064lx\n", "LIBMEM USED(B)", (user_phy_freemem_buddy.mem_end - user_phy_freemem_buddy.mem_start - user_dynamic_free));
-    LOG_PRINTF("%-16s 0x%064lx\n", "FREE(B)", user_dynamic_free + kernel_free);
+    LOG_PRINTF("%-16s 0x%016lx\n", "TOTAL(B)", total);
+    LOG_PRINTF("%-16s 0x%016lx\n", "KERNEL USED(B)", (kern_virtmem_buddy.mem_end - kern_virtmem_buddy.mem_start - kernel_free));
+    LOG_PRINTF("%-16s 0x%016lx\n", "LIBMEM USED(B)", (user_phy_freemem_buddy.mem_end - user_phy_freemem_buddy.mem_start - user_dynamic_free));
+    LOG_PRINTF("%-16s 0x%016lx\n", "FREE(B)", user_dynamic_free + kernel_free);
 
     SHOWINFO_BORDER_LINE();
     return;

@@ -60,13 +60,13 @@ typedef struct {
 struct IpcArgInfo {
     uint16_t offset;
     uint16_t len;
-};
+} __attribute__((packed));
 
 /* [header, ipc_arg_buffer_len[], ipc_arg_buffer[]] */
 struct IpcMsg {
     ipc_msg_header header;
     uintptr_t buf[];
-};
+} __attribute__((packed));
 enum {
     IPC_ARG_INFO_BASE_OFFSET = sizeof(ipc_msg_header),
 };
@@ -76,7 +76,7 @@ typedef int (*IpcInterface)(struct IpcMsg* msg);
 struct IpcNode {
     char* name;
     IpcInterface interfaces[UINT8_MAX];
-};
+} __attribute__((packed));
 
 #define IPC_SERVER_LOOP(ipc_node_name) rpc_server_loop_##rpc_node_name
 #define IPC_SERVICES(ipc_node_name, ...)         \

@@ -23,6 +23,8 @@
 
 #include "regs.h"
 
+#include "soc_memory_map.h"
+
 /*
  * i.MX6DQ ENET
  *
@@ -76,7 +78,7 @@
 //@{
 #ifndef REGS_ENET_BASE
 #define HW_ENET_INSTANCE_COUNT (1) //!< Number of instances of the ENET module.
-#define REGS_ENET_BASE (0x02188000) //!< Base address for ENET.
+#define REGS_ENET_BASE USERLAND_MMIO_P2V(0x02188000) //!< Base address for ENET.
 #endif
 //@}
 

@@ -21,14 +21,14 @@
 
 /**
  * @file iomux_v3.h
- * @brief support imx6q iomux function define, reference from u-boot-2009-08/include/asm-arm/arch-mx6/iomux_v3.h
+ * @brief support imx6q iomux function define, reference from u-boot-2009-08/include/__asm__-arm/arch-mx6/iomux_v3.h
  * @version 3.0
  * @author AIIT XUOS Lab
  * @date 2023.09.08
  */
 /*************************************************
 File name: iomux_v3.h
-Description: support imx6q iomux function define, reference from u-boot-2009-08/include/asm-arm/arch-mx6/iomux_v3.h
+Description: support imx6q iomux function define, reference from u-boot-2009-08/include/__asm__-arm/arch-mx6/iomux_v3.h
 Others:
 History:
 1. Date: 2023-09-08
