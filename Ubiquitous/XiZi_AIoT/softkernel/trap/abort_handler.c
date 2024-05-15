@@ -49,7 +49,7 @@ Modification:
 #include "task.h"
 
 extern void context_switch(struct context**, struct context*);
-void dabort_handler(struct trapframe* r)
+__attribute__((optimize("O0"))) void dabort_handler(struct trapframe* r)
 {
     if (r->pc >= DEV_VRTMEM_BASE && is_spinlock_hold_by_current_cpu(&whole_kernel_lock)) {
         assert(is_spinlock_hold_by_current_cpu(&whole_kernel_lock));
@@ -58,18 +58,18 @@ void dabort_handler(struct trapframe* r)
         panic("data abort exception\n");
     }
 
-    xizi_enter_kernel();
-
     struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
     ERROR("dabort in user space: %s\n", cur_task->name);
     dabort_reason(r);
+
+    xizi_enter_kernel();
     sys_exit(cur_task);
     assert(cur_cpu()->task == NULL);
     context_switch(&cur_task->main_thread.context, cur_cpu()->scheduler);
     panic("dabort end should never be reashed.\n");
 }
 
-void iabort_handler(struct trapframe* r)
+__attribute__((optimize("O0"))) void iabort_handler(struct trapframe* r)
 {
     if (r->pc >= DEV_VRTMEM_BASE && is_spinlock_hold_by_current_cpu(&whole_kernel_lock)) {
         assert(is_spinlock_hold_by_current_cpu(&whole_kernel_lock));
@@ -78,11 +78,11 @@ void iabort_handler(struct trapframe* r)
         panic("kernel prefetch abort exception\n");
     }
 
-    xizi_enter_kernel();
-
     struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
     ERROR("iabort in user space: %s\n", cur_task->name);
     iabort_reason(r);
+
+    xizi_enter_kernel();
     sys_exit(cur_task);
     assert(cur_cpu()->task == NULL);
     context_switch(&cur_task->main_thread.context, cur_cpu()->scheduler);

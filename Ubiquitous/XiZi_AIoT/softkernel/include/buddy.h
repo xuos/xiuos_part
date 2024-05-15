@@ -57,25 +57,25 @@ Modification:
 struct KPage {
     struct double_list_node node;
     union {
-        uint32_t order;
+        uintptr_t order;
         struct KPage* page_node;
     };
     uintptr_t mapped_addr;
 };
 
 struct KFreeList {
-    uint32_t n_free_pages;
+    uintptr_t n_free_pages;
     struct double_list_node list_head;
 };
 
 struct KBuddy {
-    uint32_t n_pages;
-    uint32_t use_lock;
+    uintptr_t n_pages;
+    uintptr_t use_lock;
     struct spinlock lock;
     struct KFreeList free_list[MAX_BUDDY_ORDER];
     struct KPage* first_page;
-    uint32_t mem_start;
-    uint32_t mem_end;
+    uintptr_t mem_start;
+    uintptr_t mem_end;
     struct KPage* pages;
 };
 
@@ -88,15 +88,15 @@ struct KBuddy {
  * @param mem_end  free memory region end
  * @return void
  */
-bool KBuddyInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end);
-void KBuddySysInit(struct KBuddy* pbuddy, uint32_t mem_start, uint32_t mem_end);
+bool KBuddyInit(struct KBuddy* pbuddy, uintptr_t mem_start, uintptr_t mem_end);
+void KBuddySysInit(struct KBuddy* pbuddy, uintptr_t mem_start, uintptr_t mem_end);
 
 /*
  * Continuous pages alloc by size
- * @param  size（uint32_t） size of need alloc
+ * @param  size（uintptr_t） size of need alloc
  * @return NULL or v_addr (char*) return NULL if alloc failed, or return virtual page's addr
  */
-char* KBuddyAlloc(struct KBuddy* pbuddy, uint32_t size);
+char* KBuddyAlloc(struct KBuddy* pbuddy, uintptr_t size);
 
 /*
  * Continuous pages free from vaddr

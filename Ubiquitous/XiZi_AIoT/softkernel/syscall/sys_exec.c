@@ -112,7 +112,7 @@ int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, cha
         for (int addr_offset = 0; addr_offset < ph.filesz; addr_offset += PAGE_SIZE) {
             uintptr_t page_paddr = xizi_pager.address_translate(&pgdir, ph.vaddr + addr_offset);
             if (page_paddr == 0) {
-                ERROR("copy elf file to unmapped addr\n");
+                ERROR("copy elf file to unmapped addr: %x(pgdir: %x)\n", ph.vaddr + addr_offset, pgdir.pd_addr);
                 goto error_exec;
             }
             uintptr_t read_size = (ph.filesz - addr_offset < PAGE_SIZE ? ph.filesz - addr_offset : PAGE_SIZE);

@@ -125,20 +125,22 @@ void iabort_reason(struct trapframe* r)
 void handle_undefined_instruction(struct trapframe* tf)
 {
     // unimplemented trap handler
-    xizi_enter_kernel();
     ERROR("undefined instruction at %x\n", tf->pc);
+    xizi_enter_kernel();
     panic("");
 }
 
 void handle_reserved(void)
 {
     // unimplemented trap handler
+    ERROR("Unimplemented Reserved\n");
     xizi_enter_kernel();
-    panic("Unimplemented Reserved\n");
+    panic("");
 }
 
 void handle_fiq(void)
 {
+    ERROR("Unimplemented FIQ\n");
     xizi_enter_kernel();
-    panic("Unimplemented FIQ\n");
+    panic("");
 }

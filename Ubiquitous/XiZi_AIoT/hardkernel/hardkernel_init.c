@@ -37,6 +37,7 @@ Modification:
 
 #include "assert.h"
 #include "pagetable.h"
+#include "spinlock.h"
 
 #define KERN_BOOT_DRIVER(n, bi, f) \
     {                              \

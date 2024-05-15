@@ -38,9 +38,10 @@ Modification:
 struct session_backend* create_session_inner(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, int capacity, struct Session* user_session)
 {
     // create share pages
+    assert(server != NULL && client != NULL);
     struct session_backend* session_backend = xizi_share_page_manager.create_share_pages(client, server, capacity);
     if (UNLIKELY(session_backend == NULL)) {
-        DEBUG("create_share_pages failed\n");
+        DEBUG("create_share_pages to server: %s failed\n", server->name);
         return NULL;
     }
 
@@ -66,7 +67,7 @@ int sys_connect_session(char* path, int capacity, struct Session* user_session)
     if (!AchieveResourceTag(&server_identifier_owner, RequireRootTag(), "softkernel/server-identifier")) {
         panic("Server identifier not initialized.\b");
     }
-    assert(server_identifier_owner.meta != NULL || server_identifier_owner.type == TRACER_OWNER);
+    assert(server_identifier_owner.meta != NULL);
 
     struct TraceTag server_tag;
     if (!AchieveResourceTag(&server_tag, &server_identifier_owner, path)) {

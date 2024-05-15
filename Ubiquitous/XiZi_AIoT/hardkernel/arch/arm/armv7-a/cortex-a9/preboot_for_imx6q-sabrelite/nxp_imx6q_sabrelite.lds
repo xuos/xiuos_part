@@ -77,11 +77,15 @@ BOOT_STACK_SIZE = 0x4000;
 RAM_VECTORS_SIZE = 72;
 
 /* Specify the memory areas */
+/*
+	ddr3: physical area: [0x10000000, 0x50000000);
+	virt_ddr3: virt area exclude boot(start_sec), that will be [0x90000000 + 0x11000, 0xD0000000)
+*/
 MEMORY
 {
     ocram (rwx)  			: ORIGIN = 0x00900000, LENGTH = 256K
     ddr3 (rwx)   			: ORIGIN = 0x10000000, LENGTH = 1024M
-    virt_ddr3 (WRX)   		: ORIGIN = 0x90011000, LENGTH = 1024M
+    virt_ddr3 (WRX)   		: ORIGIN = 0x90014000, LENGTH = 1024M
 }
 
 SECTIONS
@@ -154,8 +158,8 @@ SECTIONS
 		PROVIDE(boot_end_addr = .);
 	} > ddr3
 
-	/* Other Kernel code is placed over 0x80000000 + 128KB. */
-	.text : AT(0x10011000) {
+	/* Other Kernel code is placed over 0x10011000(phy) and 0x90011000(virt). */
+	.text : AT(0x10014000) {
 		*(.vectors)
 		. = ALIGN(0x1000);
 		*(.text .text.* .gnu.linkonce.t.*)

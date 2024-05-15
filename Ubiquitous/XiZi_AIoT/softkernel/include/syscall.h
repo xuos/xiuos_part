@@ -92,7 +92,7 @@ int sys_kill(int id);
 int sys_register_as_server(char* name);
 int sys_connect_session(char* path, int capacity, struct Session* user_session);
 int sys_poll_session(struct Session* userland_session_arr, int arr_capacity);
-int sys_close_session(struct Session* session);
+int sys_close_session(struct TaskMicroDescriptor* task, struct Session* session);
 
 int sys_exec(char* img_start, char* name, char** argv);
 int sys_state(sys_state_option option, sys_state_info* info);

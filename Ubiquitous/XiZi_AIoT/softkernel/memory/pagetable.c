@@ -62,7 +62,8 @@ static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, uintp
 
     uintptr_t* pte;
     while (true) {
-        if ((pte = _page_walk(pgdir, vaddr, true)) == 0) {
+        if ((pte = _page_walk(pgdir, vaddr, true)) == NULL) {
+            ERROR("pte not found for vaddr %x.\n", vaddr);
             return false;
         }
 
@@ -81,6 +82,7 @@ static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, uintp
         paddr += PAGE_SIZE;
     }
 
+    assert(vaddr == vaddr_last);
     return true;
 }
 
@@ -94,7 +96,8 @@ static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t len)
 
     uintptr_t* pte;
     while (true) {
-        if ((pte = _page_walk(pgdir, vaddr, true)) == 0) {
+        if ((pte = _page_walk(pgdir, vaddr, false)) == NULL) {
+            ERROR("pte not found for vaddr %x.\n", vaddr);
             return false;
         }
 
@@ -112,6 +115,7 @@ static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t len)
         vaddr += PAGE_SIZE;
     }
 
+    assert(vaddr == vaddr_last);
     return true;
 }
 
@@ -140,33 +144,6 @@ static bool _map_user_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, 
     return _map_pages(pgdir, vaddr, paddr, len, mem_attr);
 }
 
-static void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
-{
-    uintptr_t low_bound = kern_virtmem_buddy.mem_start, high_bound = kern_virtmem_buddy.mem_end;
-    uintptr_t user_low_bound = user_phy_freemem_buddy.mem_start, user_high_bound = user_phy_freemem_buddy.mem_end;
-    uintptr_t end_idx = USER_MEM_TOP >> LEVEL3_PDE_SHIFT;
-
-    for (uintptr_t i = 0; i < end_idx; i++) {
-        // free each page table
-        uintptr_t* pgtbl_paddr = (uintptr_t*)LEVEL4_PTE_ADDR(pgdir->pd_addr[i]);
-        if (pgtbl_paddr != 0) {
-            // free each page
-            for (uintptr_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-                uintptr_t* page_paddr = (uintptr_t*)ALIGNDOWN(((uintptr_t*)P2V(pgtbl_paddr))[j], PAGE_SIZE);
-                if (page_paddr != NULL) {
-                    if (LIKELY((uintptr_t)page_paddr >= low_bound && (uintptr_t)page_paddr < high_bound)) {
-                        kfree(P2V(page_paddr));
-                    } else if (LIKELY((uintptr_t)page_paddr >= user_low_bound && (uintptr_t)page_paddr < user_high_bound)) {
-                        raw_free((char*)page_paddr);
-                    }
-                }
-            }
-            kfree(P2V(pgtbl_paddr));
-        }
-    }
-    kfree((char*)pgdir->pd_addr);
-}
-
 /// assume that a user pagedir is allocated from [0, size)
 /// if new_size > old_size, allocate more space,
 /// if old_size > new_size, free extra space, to avoid unnecessary alloc/free.
@@ -191,7 +168,9 @@ static uintptr_t _resize_user_pgdir(struct TopLevelPageDirectory* pgdir, uintptr
         }
         memset(new_page, 0, PAGE_SIZE);
 
-        xizi_pager.map_pages(pgdir->pd_addr, cur_size, V2P(new_page), PAGE_SIZE, false);
+        if (!xizi_pager.map_pages(pgdir->pd_addr, cur_size, V2P(new_page), PAGE_SIZE, false)) {
+            return cur_size;
+        }
         cur_size += PAGE_SIZE;
     }
 
@@ -294,11 +273,9 @@ void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driv
     _map_pages((uintptr_t*)kern_pgdir.pd_addr, DEV_VRTMEM_BASE, DEV_PHYMEM_BASE, DEV_MEM_SZ, dev_attr);
 
     _p_pgtbl_mmu_access->LoadPgdir((uintptr_t)V2P(kern_pgdir.pd_addr));
-    // _p_pgtbl_mmu_access->LoadPgdirCrit((uintptr_t)V2P(kern_pgdir.pd_addr), intr_driver_tag);
 }
 
 void secondary_cpu_load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driver_tag)
 {
     _p_pgtbl_mmu_access->LoadPgdir((uintptr_t)V2P(kern_pgdir.pd_addr));
-    // _p_pgtbl_mmu_access->LoadPgdirCrit((uintptr_t)V2P(kern_pgdir.pd_addr), intr_driver_tag);
 }

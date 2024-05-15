@@ -35,7 +35,6 @@ Modification:
 #include "assert.h"
 #include "ipc.h"
 #include "kalloc.h"
-#include "mmu_common.h"
 #include "multicores.h"
 #include "share_page.h"
 #include "syscall.h"
@@ -51,33 +50,39 @@ static struct {
 
 static void send_irq_to_user(int irq_num)
 {
-    struct Session* session = &irq_forward_table[irq_num].session;
-    int len = IPC_ARG_INFO_BASE_OFFSET;
-    len += sizeof(struct IpcArgInfo);
+    if (irq_forward_table[irq_num].handle_task != NULL) {
+        struct Session* session = &irq_forward_table[irq_num].session;
+        int len = IPC_ARG_INFO_BASE_OFFSET;
+        len += sizeof(struct IpcArgInfo);
 
-    /* get message space and add session tail */
-    void* session_kern_vaddr = P2V(xizi_pager.address_translate(&kernel_irq_proxy->pgdir, (uintptr_t)session->buf));
-    struct IpcMsg* buf = session_kern_vaddr + session->tail;
+        /* get message space and add session tail */
+        void* session_kern_vaddr = P2V(xizi_pager.address_translate(&kernel_irq_proxy->pgdir, (uintptr_t)session->buf));
+        struct IpcMsg* buf = session_kern_vaddr + session->tail;
 
-    /* check if server session is full */
-    if (buf->header.magic == IPC_MSG_MAGIC && buf->header.done == 0) {
-        DEBUG("irq server cannot handle new interrupt by now.\n");
-        return;
+        /* check if server session is full */
+        if (buf->header.magic == IPC_MSG_MAGIC && buf->header.done == 0) {
+            DEBUG("irq server cannot handle new interrupt by now.\n");
+            return;
+        }
+        memset((void*)buf, 0, len);
+        session->tail = (session->tail + len) % session->capacity;
+
+        /* construct message */
+        buf->header.len = len;
+        buf->header.nr_args = 1;
+        buf->header.init = 1;
+        buf->header.opcode = irq_forward_table[irq_num].opcode;
+        buf->header.done = 0;
+        buf->header.magic = IPC_MSG_MAGIC;
+        buf->header.valid = 1;
+
+        if (irq_forward_table[irq_num].handle_task->state == BLOCKED) {
+            xizi_task_manager.task_unblock(irq_forward_table[irq_num].handle_task);
+        }
+
+        /* add session head */
+        session->head = (session->head + len) % session->capacity;
     }
-    memset((void*)buf, 0, len);
-    session->tail = (session->tail + len) % session->capacity;
-
-    /* construct message */
-    buf->header.len = len;
-    buf->header.nr_args = 1;
-    buf->header.init = 1;
-    buf->header.opcode = irq_forward_table[irq_num].opcode;
-    buf->header.done = 0;
-    buf->header.magic = IPC_MSG_MAGIC;
-    buf->header.valid = 1;
-
-    /* add session head */
-    session->head = (session->head + len) % session->capacity;
 }
 
 int user_irq_handler(int irq, void* tf, void* arg)
@@ -118,7 +123,7 @@ int sys_register_irq(int irq_num, int irq_opcode)
     }
 
     // bind irq to session
-    if (p_intr_driver->sw_irqtbl[irq_num].handler != NULL) {
+    if (irq_forward_table[irq_num].handle_task != NULL) {
         ERROR("irq %d is occupied.\n", irq_num);
         return -1;
     }
@@ -139,8 +144,6 @@ int sys_unbind_irq(struct TaskMicroDescriptor* task, int irq_num)
     }
 
     irq_forward_table[irq_num].handle_task = NULL;
-    sys_close_session(&irq_forward_table[irq_num].session);
-    DEBUG("Unbind: %s to irq %d", task->name, irq_num);
     return 0;
 }
 

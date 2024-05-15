@@ -27,14 +27,18 @@ Author: AIIT XUOS Lab
 Modification:
 1. first version
 *************************************************/
+#include "log.h"
 #include "scheduler.h"
 
 struct TaskMicroDescriptor* max_priority_runnable_task(void)
 {
-    struct TaskMicroDescriptor* task = NULL;
-    uint32_t priority = 0;
+    static struct TaskMicroDescriptor* task = NULL;
+    static int priority = 0;
 
     priority = __builtin_ffs(ready_task_priority) - 1;
+    if (priority > 31 || priority < 0) {
+        return NULL;
+    }
 
     DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[priority], node)
     {

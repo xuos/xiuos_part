@@ -57,7 +57,7 @@ static struct slab_allocator* SessionAllocator()
 static inline bool check_pages_unmapped(struct TaskMicroDescriptor* task, uintptr_t vaddr, int nr_pages)
 {
     static uintptr_t paddr = UINT32_MAX;
-    for (uint32_t i = 0; i < nr_pages; i++) {
+    for (uintptr_t i = 0; i < nr_pages; i++) {
         if ((paddr = xizi_pager.address_translate(&task->pgdir, vaddr)) != 0) {
             return false;
         }
@@ -95,6 +95,7 @@ static uintptr_t map_task_share_page(struct TaskMicroDescriptor* task, const uin
     uintptr_t vaddr = (uintptr_t)NULL;
     if (task->massive_ipc_allocator != NULL) {
         vaddr = (uintptr_t)KBuddyAlloc(task->massive_ipc_allocator, PAGE_SIZE * nr_pages * 2);
+        assert(xizi_pager.address_translate(&task->pgdir, vaddr) == (uintptr_t)NULL);
     } else {
         vaddr = alloc_share_page_addr(task, nr_pages * 2);
         if (vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
@@ -122,9 +123,7 @@ static uintptr_t map_task_share_page(struct TaskMicroDescriptor* task, const uin
         p_mmu_driver->TlbFlush(vaddr, 2 * nr_pages * PAGE_SIZE);
 
         /// @todo clean range rather than all
-        // p_dcache_done->flushall();
         p_dcache_done->invalidateall();
-        // p_dcache_done->flush(vaddr, vaddr + 2 * nr_pages * PAGE_SIZE);
     }
     return vaddr;
 }
@@ -148,9 +147,7 @@ uintptr_t task_map_pages(struct TaskMicroDescriptor* task, const uintptr_t vaddr
         p_mmu_driver->TlbFlush(vaddr, nr_pages * PAGE_SIZE);
 
         /// @todo clean range rather than all
-        // p_dcache_done->flushall();
         p_dcache_done->invalidateall();
-        // p_dcache_done->flush(vaddr, vaddr + nr_pages * PAGE_SIZE);
     }
 
     return vaddr;
@@ -171,9 +168,7 @@ void unmap_task_share_pages(struct TaskMicroDescriptor* task, const uintptr_t ta
         p_mmu_driver->TlbFlush(task_vaddr, 2 * nr_pages * PAGE_SIZE);
 
         /// @todo clean range rather than all
-        // p_dcache_done->flushall();
         p_dcache_done->invalidateall();
-        // p_dcache_done->flush(task_vaddr, task_vaddr + 2 * nr_pages * PAGE_SIZE);
     }
 }
 
@@ -246,21 +241,31 @@ int delete_share_pages(struct session_backend* session_backend)
         return -1;
     }
 
+    assert(session_backend->server_side.closed || session_backend->client_side.closed);
+
     /* unmap share pages */
-    if (session_backend->client) {
-        doubleListDel(&session_backend->client_side.node);
-    }
-
-    if (session_backend->server) {
+    // close ssesion in server's perspective
+    if (session_backend->server_side.closed && session_backend->server != NULL) {
+        xizi_share_page_manager.unmap_task_share_pages(session_backend->server, session_backend->server_side.buf_addr, session_backend->nr_pages);
         doubleListDel(&session_backend->server_side.node);
+        session_backend->server->mem_size -= session_backend->nr_pages * PAGE_SIZE;
+        session_backend->server = NULL;
     }
 
-    session_backend->server->mem_size -= session_backend->nr_pages * PAGE_SIZE;
-    session_backend->client->mem_size -= session_backend->nr_pages * PAGE_SIZE;
+    // close ssesion in client's perspective
+    if (session_backend->client_side.closed && session_backend->client != NULL) {
+        xizi_share_page_manager.unmap_task_share_pages(session_backend->client, session_backend->client_side.buf_addr, session_backend->nr_pages);
+        doubleListDel(&session_backend->client_side.node);
+        session_backend->client->mem_size -= session_backend->nr_pages * PAGE_SIZE;
+        session_backend->client = NULL;
+    }
 
     /* free seesion backend */
-    kfree((void*)session_backend->buf_kernel_addr);
-    slab_free(SessionAllocator(), (void*)session_backend);
+    if (session_backend->server_side.closed && session_backend->client_side.closed) {
+        assert(session_backend->client == NULL && session_backend->server == NULL);
+        kfree((void*)session_backend->buf_kernel_addr);
+        slab_free(SessionAllocator(), (void*)session_backend);
+    }
 
     return 0;
 }

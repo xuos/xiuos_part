@@ -104,6 +104,7 @@ struct SchedulerRightGroup {
 
 struct XiziTaskManager {
     struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
+    struct double_list_node task_running_list_head;
     struct double_list_node task_blocked_list_head;
     struct slab_allocator task_allocator;
     struct slab_allocator task_buddy_allocator;

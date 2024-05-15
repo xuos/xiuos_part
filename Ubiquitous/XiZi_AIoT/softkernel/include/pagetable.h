@@ -39,8 +39,8 @@ Modification:
 #include "mmu_common.h"
 
 // clang-format off
-#define ALIGNUP(sz, al)         (((uint32_t)(sz) + (uint32_t)(al) - 1) & ~((uint32_t)(al) - 1))
-#define ALIGNDOWN(sz, al)       ((uint32_t)(sz) & ~((uint32_t)(al) - 1))
+#define ALIGNUP(sz, al)         (((uintptr_t)(sz) + (uintptr_t)(al) - 1) & ~((uintptr_t)(al) - 1))
+#define ALIGNDOWN(sz, al)       ((uintptr_t)(sz) & ~((uintptr_t)(al) - 1))
 
 #define LEVEL4_PTE_IDX(v)       (((uintptr_t)(v) >> LEVEL4_PTE_SHIFT) & (NUM_LEVEL4_PTE - 1))
 #define LEVEL4_PTE_ADDR(v)      ALIGNDOWN(v, LEVEL4_PTE_SIZE)
@@ -69,6 +69,7 @@ struct XiziPageManager {
 
 extern struct MmuCommonDone* _p_pgtbl_mmu_access;
 uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc);
+void _free_user_pgdir(struct TopLevelPageDirectory* pgdir);
 
 extern struct TopLevelPageDirectory kern_pgdir;
 void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driver_tag);

@@ -46,11 +46,11 @@ bool intr_distributer_init(struct IrqDispatcherRightGroup* _right_group)
     return p_intr_driver != NULL;
 }
 
-void default_interrupt_routine(void)
+void default_interrupt_routine(int irq)
 {
     /* default handler borrow the rights of dispatcher */
     ///@todo Support other cores. (currently assume that CPU_0 is used)
-    ERROR("Interrupt %d has been asserted\n", p_intr_driver->curr_int[0]);
+    ERROR("Interrupt %d has been asserted\n", irq);
 }
 
 extern void context_switch(struct context**, struct context*);
@@ -69,20 +69,19 @@ void intr_irq_dispatch(struct trapframe* tf)
     assert(current_task != NULL);
     current_task->main_thread.trapframe = tf;
 
-    unsigned cpu = p_intr_driver->hw_cur_int_cpu(int_info);
+    int cpu = cur_cpuid();
+    assert(cpu >= 0 && cpu < NR_CPU);
     unsigned irq = p_intr_driver->hw_cur_int_num(int_info);
-    p_intr_driver->curr_int[cpu] = irq;
 
     // distribute irq
     irq_handler_t isr = p_intr_driver->sw_irqtbl[irq].handler;
     if (isr != NULL) {
         isr(irq, tf, NULL);
     } else {
-        default_interrupt_routine();
+        default_interrupt_routine(irq);
     }
 
     // finish irq.
-    p_intr_driver->curr_int[cpu] = 0;
     p_intr_driver->hw_after_irq(int_info);
 
     if (cur_cpu()->task == NULL || current_task->state != RUNNING) {
@@ -95,13 +94,13 @@ intr_leave_interrupt:
     xizi_leave_kernel();
 }
 
-void xizi_enter_kernel()
+__attribute__((always_inline)) inline void xizi_enter_kernel()
 {
     /// @warning trampoline is responsible for closing interrupt
     spinlock_lock(&whole_kernel_lock);
 }
 
-bool xizi_try_enter_kernel()
+__attribute__((always_inline)) inline bool xizi_try_enter_kernel()
 {
     /// @warning trampoline is responsible for closing interrupt
     if (spinlock_try_lock(&whole_kernel_lock)) {
@@ -111,7 +110,7 @@ bool xizi_try_enter_kernel()
     return false;
 }
 
-void xizi_leave_kernel()
+__attribute__((always_inline)) inline void xizi_leave_kernel()
 {
     /// @warning trampoline is responsible for eabling interrupt by using user's state register
     spinlock_unlock(&whole_kernel_lock);

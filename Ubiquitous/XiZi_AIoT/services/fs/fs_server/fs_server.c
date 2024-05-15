@@ -23,7 +23,7 @@ struct CwdPair {
     struct Inode* Inode;
 };
 
-#define MAX_SUPPORT_SESSION 1024
+#define MAX_SUPPORT_SESSION 2048
 static struct CwdPair session_cwd[MAX_SUPPORT_SESSION];
 
 static struct CwdPair* get_session_cwd(void)
@@ -357,7 +357,7 @@ int main(int argc, char* argv[])
     MemFsInit((uintptr_t)FS_IMG_ADDR, (uint32_t)len);
 
     if (register_server("MemFS") < 0) {
-        printf("register server name: %s failed.\n", "SimpleServer");
+        printf("register server name: %s failed.\n", "MemFs");
         exit();
     }
     ipc_server_loop(&IpcFsServer);

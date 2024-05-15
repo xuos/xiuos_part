@@ -47,7 +47,7 @@ typedef struct {
             uint64_t valid : 1; // for server to peek new msg
             uint64_t done : 1; // for client to check request done
             uint64_t init : 1; // for client to check request done
-            uint64_t reserved : 1;
+            uint64_t delayed : 1;
             uint64_t nr_args : 4;
             uint64_t opcode : 8;
             uint64_t len : 16;
@@ -60,13 +60,13 @@ typedef struct {
 struct IpcArgInfo {
     uint16_t offset;
     uint16_t len;
-};
+} __attribute__((packed));
 
 /* [header, ipc_arg_buffer_len[], ipc_arg_buffer[]] */
 struct IpcMsg {
     ipc_msg_header header;
     uintptr_t buf[];
-};
+} __attribute__((packed));
 enum {
     IPC_ARG_INFO_BASE_OFFSET = sizeof(ipc_msg_header),
 };
@@ -76,7 +76,7 @@ typedef int (*IpcInterface)(struct IpcMsg* msg);
 struct IpcNode {
     char* name;
     IpcInterface interfaces[UINT8_MAX];
-};
+} __attribute__((packed));
 
 #define IPC_SERVER_LOOP(ipc_node_name) rpc_server_loop_##rpc_node_name
 #define IPC_SERVICES(ipc_node_name, ...)         \
@@ -225,6 +225,7 @@ void ipc_server_loop(struct IpcNode* ipc_node);
         return res;                                                                                                                            \
     }
 
+bool is_cur_session_delayed(void);
 #define IPC_SERVER_INTERFACE(ipc_name, argc)            \
     static int IPC_SERVE(ipc_name)(struct IpcMsg * msg) \
     {                                                   \
@@ -233,8 +234,10 @@ void ipc_server_loop(struct IpcNode* ipc_node);
             argv[i] = ipc_msg_get_nth_arg_buf(msg, i);  \
         }                                               \
         int32_t _ret = IPC_DO_SERVE##argc(ipc_name);    \
-        ipc_msg_set_return(msg, &_ret);                 \
-        msg->header.done = 1;                           \
+        if (!is_cur_session_delayed()) {                \
+            ipc_msg_set_return(msg, &_ret);             \
+            msg->header.done = 1;                       \
+        }                                               \
         return 0;                                       \
     }
 

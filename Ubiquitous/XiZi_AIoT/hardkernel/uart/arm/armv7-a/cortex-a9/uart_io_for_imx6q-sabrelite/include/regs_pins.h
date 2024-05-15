@@ -21,14 +21,14 @@
 
 /**
  * @file regs_pins.h
- * @brief support imx6q pin map define, reference from u-boot-2009-08/include/asm-arm/arch-mx6/mx6_pins.h
+ * @brief support imx6q pin map define, reference from u-boot-2009-08/include/__asm__-arm/arch-mx6/mx6_pins.h
  * @version 3.0
  * @author AIIT XUOS Lab
  * @date 2023.09.08
  */
 /*************************************************
 File name: regs_pins.h
-Description: support imx6q pin map define, reference from u-boot-2009-08/include/asm-arm/arch-mx6/mx6_pins.h
+Description: support imx6q pin map define, reference from u-boot-2009-08/include/__asm__-arm/arch-mx6/mx6_pins.h
 Others:
 History:
 1. Date: 2023-09-08

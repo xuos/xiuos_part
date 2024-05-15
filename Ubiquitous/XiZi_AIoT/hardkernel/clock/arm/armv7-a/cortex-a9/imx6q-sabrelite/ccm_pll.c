@@ -85,12 +85,13 @@ void ccm_init(void)
 #endif
 
     // Ungate clocks that are not enabled in a driver - need to be updated
+
     HW_CCM_CCGR0_WR(0xffffffff);
     HW_CCM_CCGR1_WR(0xFFCF0FFF); // EPIT, ESAI, GPT enabled by driver
     HW_CCM_CCGR2_WR(0xFFFFF03F); // I2C enabled by driver
     HW_CCM_CCGR3_WR(0xffffffff);
     HW_CCM_CCGR4_WR(0x00FFFF03); // GPMI, Perfmon enabled by driver
-    HW_CCM_CCGR5_WR(0xF0FFFFCF); // UART, SATA enabled by driver
+    // HW_CCM_CCGR5_WR(0xF0FFFFCF); // UART, SATA enabled by driver
     HW_CCM_CCGR6_WR(0xffffffff);
 
     /*

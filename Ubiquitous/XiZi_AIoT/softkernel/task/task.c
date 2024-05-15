@@ -42,6 +42,26 @@ Modification:
 struct CPU global_cpus[NR_CPU];
 uint32_t ready_task_priority;
 
+static inline void task_node_leave_list(struct TaskMicroDescriptor* task)
+{
+    doubleListDel(&task->node);
+    if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[task->priority])) {
+        ready_task_priority &= ~((uint32_t)1 << task->priority);
+    }
+}
+
+static inline void task_node_add_to_ready_list_head(struct TaskMicroDescriptor* task)
+{
+    doubleListAddOnHead(&task->node, &xizi_task_manager.task_list_head[task->priority]);
+    ready_task_priority |= ((uint32_t)1 << task->priority);
+}
+
+static inline void task_node_add_to_ready_list_back(struct TaskMicroDescriptor* task)
+{
+    doubleListAddOnBack(&task->node, &xizi_task_manager.task_list_head[task->priority]);
+    ready_task_priority |= ((uint32_t)1 << task->priority);
+}
+
 static void _task_manager_init()
 {
     // init task list to NULL
@@ -49,6 +69,7 @@ static void _task_manager_init()
         doubleListNodeInit(&xizi_task_manager.task_list_head[i]);
     }
     doubleListNodeInit(&xizi_task_manager.task_blocked_list_head);
+    doubleListNodeInit(&xizi_task_manager.task_running_list_head);
     // init task (slab) allocator
     slab_init(&xizi_task_manager.task_allocator, sizeof(struct TaskMicroDescriptor));
     slab_init(&xizi_task_manager.task_buddy_allocator, sizeof(struct KBuddy));
@@ -81,37 +102,28 @@ int _task_retrieve_sys_resources(struct TaskMicroDescriptor* ptask)
     assert(ptask != NULL);
 
     /* handle sessions for condition 1, ref. delete_share_pages() */
+    struct session_backend* session_backend = NULL;
     // close all server_sessions
     struct server_session* server_session = NULL;
     while (!IS_DOUBLE_LIST_EMPTY(&ptask->svr_sess_listhead)) {
         server_session = CONTAINER_OF(ptask->svr_sess_listhead.next, struct server_session, node);
+        assert(server_session != NULL);
+        session_backend = SERVER_SESSION_BACKEND(server_session);
+        assert(session_backend->server == ptask);
         // cut the connection from task to session
-        if (!server_session->closed) {
-            xizi_share_page_manager.unmap_task_share_pages(ptask, server_session->buf_addr, CLIENT_SESSION_BACKEND(server_session)->nr_pages);
-            server_session->closed = true;
-        }
-        doubleListDel(&server_session->node);
-        SERVER_SESSION_BACKEND(server_session)->server = NULL;
-        // delete session (also cut connection from session to task)
-        if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
-            xizi_share_page_manager.delete_share_pages(SERVER_SESSION_BACKEND(server_session));
-        }
+        server_session->closed = true;
+        xizi_share_page_manager.delete_share_pages(session_backend);
     }
     // close all client_sessions
     struct client_session* client_session = NULL;
     while (!IS_DOUBLE_LIST_EMPTY(&ptask->cli_sess_listhead)) {
         client_session = CONTAINER_OF(ptask->cli_sess_listhead.next, struct client_session, node);
+        assert(client_session != NULL);
+        session_backend = CLIENT_SESSION_BACKEND(client_session);
+        assert(session_backend->client == ptask);
         // cut the connection from task to session
-        if (!client_session->closed) {
-            xizi_share_page_manager.unmap_task_share_pages(ptask, client_session->buf_addr, CLIENT_SESSION_BACKEND(client_session)->nr_pages);
-            client_session->closed = true;
-        }
-        doubleListDel(&client_session->node);
-        CLIENT_SESSION_BACKEND(client_session)->client = NULL;
-        // delete session (also cut connection from session to task)
-        if (CLIENT_SESSION_BACKEND(client_session)->server_side.closed) {
-            xizi_share_page_manager.delete_share_pages(CLIENT_SESSION_BACKEND(client_session));
-        }
+        client_session->closed = true;
+        xizi_share_page_manager.delete_share_pages(session_backend);
     }
 
     if (ptask->server_identifier.meta != NULL) {
@@ -148,9 +160,8 @@ static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
         kfree((char*)task->main_thread.stack_addr);
     }
 
-    struct double_list_node* cur_node = &task->node;
     // remove it from used task list
-    doubleListDel(cur_node);
+    task_node_leave_list(task);
 
     // free task back to allocator
     if (task->massive_ipc_allocator != NULL) {
@@ -158,16 +169,11 @@ static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
         slab_free(&xizi_task_manager.task_buddy_allocator, (void*)task->massive_ipc_allocator);
     }
     slab_free(&xizi_task_manager.task_allocator, (void*)task);
-
-    // remove priority
-    if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[task->priority])) {
-        ready_task_priority &= ~(1 << task->priority);
-    }
 }
 
 /* alloc a new task with init */
 extern void trap_return(void);
-void task_prepare_enter()
+__attribute__((optimize("O0"))) void task_prepare_enter()
 {
     xizi_leave_kernel();
     trap_return();
@@ -217,8 +223,15 @@ static void _task_set_default_schedule_attr(struct TaskMicroDescriptor* task)
     task->maxium_tick = TASK_CLOCK_TICK * 10;
     task->state = READY;
     task->priority = TASK_DEFAULT_PRIORITY;
-    doubleListAddOnHead(&task->node, &xizi_task_manager.task_list_head[task->priority]);
-    ready_task_priority |= (1 << task->priority);
+    task_node_add_to_ready_list_head(task);
+}
+
+static void task_state_set_running(struct TaskMicroDescriptor* task)
+{
+    assert(task != NULL && task->state == READY);
+    task->state = RUNNING;
+    task_node_leave_list(task);
+    doubleListAddOnHead(&task->node, &xizi_task_manager.task_running_list_head);
 }
 
 struct TaskMicroDescriptor* next_task_emergency = NULL;
@@ -227,40 +240,37 @@ static void _scheduler(struct SchedulerRightGroup right_group)
 {
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
     struct TaskMicroDescriptor* next_task;
+    struct CPU* cpu = cur_cpu();
 
     while (1) {
         next_task = NULL;
         /* find next runnable task */
         assert(cur_cpu()->task == NULL);
-        if (next_task_emergency != NULL && next_task->state == READY) {
+        if (next_task_emergency != NULL && next_task_emergency->state == READY) {
             next_task = next_task_emergency;
         } else {
             next_task = xizi_task_manager.next_runnable_task();
         }
         next_task_emergency = NULL;
-        if (next_task != NULL) {
-            assert(next_task->state == READY);
-        }
-        spinlock_unlock(&whole_kernel_lock);
 
-        /* not a runnable task */
-        if (UNLIKELY(next_task == NULL)) {
-            spinlock_lock(&whole_kernel_lock);
+        /* if there's not a runnable task, wait for one */
+        if (next_task == NULL) {
+            xizi_leave_kernel();
+            // there is no task to run, into low power mode
+            cpu_into_low_power();
+
+            /* leave kernel for other cores, so they may create a runnable task */
+            xizi_enter_kernel();
+            // activate cpu
+            cpu_leave_low_power();
             continue;
         }
 
-        /* a runnable task */
-        spinlock_lock(&whole_kernel_lock);
-        if (next_task->state == READY) {
-            next_task->state = RUNNING;
-        } else {
-            continue;
-        }
-        struct CPU* cpu = cur_cpu();
+        /* run the chosen task */
+        task_state_set_running(next_task);
         cpu->task = next_task;
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->pgdir.pd_addr));
         context_switch(&cpu->scheduler, next_task->main_thread.context);
-        assert(cur_cpu()->task == NULL);
         assert(next_task->state != RUNNING);
     }
 }
@@ -268,27 +278,24 @@ static void _scheduler(struct SchedulerRightGroup right_group)
 static void _task_yield_noschedule(struct TaskMicroDescriptor* task, bool blocking)
 {
     assert(task != NULL);
+    /// @warning only support current task yield now
+    assert(task == cur_cpu()->task && task->state == RUNNING);
 
     // rearrage current task position
-    doubleListDel(&task->node);
+    task_node_leave_list(task);
     if (task->state == RUNNING) {
         task->state = READY;
     }
     task->remain_tick = TASK_CLOCK_TICK;
-    if (task == cur_cpu()->task) {
-        cur_cpu()->task = NULL;
-    }
-    doubleListAddOnBack(&task->node, &xizi_task_manager.task_list_head[task->priority]);
+    cur_cpu()->task = NULL;
+    task_node_add_to_ready_list_back(task);
 }
 
 static void _task_block(struct TaskMicroDescriptor* task)
 {
     assert(task != NULL);
     assert(task->state != RUNNING);
-    doubleListDel(&task->node);
-    if (xizi_task_manager.task_list_head[task->priority].next == &xizi_task_manager.task_list_head[task->priority]) {
-        ready_task_priority &= ~(1 << task->priority);
-    }
+    task_node_leave_list(task);
     task->state = BLOCKED;
     doubleListAddOnHead(&task->node, &xizi_task_manager.task_blocked_list_head);
 }
@@ -297,12 +304,13 @@ static void _task_unblock(struct TaskMicroDescriptor* task)
 {
     assert(task != NULL);
     assert(task->state == BLOCKED);
-    doubleListDel(&task->node);
+    task_node_leave_list(task);
     task->state = READY;
-    doubleListAddOnHead(&task->node, &xizi_task_manager.task_list_head[task->priority]);
-    ready_task_priority |= (1 << task->priority);
+    task_node_add_to_ready_list_head(task);
 }
 
+/// @brief  @warning not tested function
+/// @param priority
 static void _set_cur_task_priority(int priority)
 {
     if (priority < 0 || priority >= TASK_MAX_PRIORITY) {
@@ -311,14 +319,13 @@ static void _set_cur_task_priority(int priority)
     }
 
     struct TaskMicroDescriptor* current_task = cur_cpu()->task;
-    assert(current_task != NULL);
+    assert(current_task != NULL && current_task->state == RUNNING);
+
+    task_node_leave_list(current_task);
 
     current_task->priority = priority;
 
-    doubleListDel(&current_task->node);
-    doubleListAddOnBack(&current_task->node, &xizi_task_manager.task_list_head[current_task->priority]);
-
-    ready_task_priority |= (1 << current_task->priority);
+    task_node_add_to_ready_list_back(current_task);
 
     return;
 }
