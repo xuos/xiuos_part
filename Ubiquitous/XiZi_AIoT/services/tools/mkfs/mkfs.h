@@ -48,6 +48,7 @@ Modification:
 
 #define ROOT_INUM 1 // root inode number
 #define BLOCK_SIZE 512 // block size
+#define BITMAP_SIZE 1024
 #define nr_blocks_total 8192 // total number of blocks (including used blocks and free blocks)
 #define nr_inodes 200 // total number of inodes
 
