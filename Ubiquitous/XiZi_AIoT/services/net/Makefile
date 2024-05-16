@@ -1,3 +1,3 @@
-SRC_DIR := net_server libnet
+SRC_DIR := libnet net_server
 
 include $(KERNEL_ROOT)/compiler.mk

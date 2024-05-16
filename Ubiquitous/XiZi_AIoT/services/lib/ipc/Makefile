@@ -23,7 +23,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/lib/ipc \
 			-I$(KERNEL_ROOT)/services/app
 
 all: libipc.o session.o
-	@mv $^ ../../app
+	@mv $^ $(KERNEL_ROOT)/services/app
 
 %.o: %.c
 	@echo "cc $^"

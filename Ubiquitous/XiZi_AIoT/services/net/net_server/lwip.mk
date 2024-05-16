@@ -7,6 +7,7 @@ ifeq ($(BOARD), zynq7000-zc702)
 toolchain ?= arm-xilinx-eabi-
 user_ldflags = --start-group,-lgcc,-lc,--end-group
 cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
+board_specs = stub.o
 #cflags = -Wall -g -std=c11 
 endif
 cc = ${toolchain}gcc

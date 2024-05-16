@@ -146,3 +146,6 @@ sys_msleep(u32_t ms)
 #endif /* sys_msleep */
 
 #endif /* !NO_SYS */
+u32_t sys_now(void){
+  return 1;
+}

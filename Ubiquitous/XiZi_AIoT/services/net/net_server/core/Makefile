@@ -15,14 +15,14 @@ objs += altcp_alloc.o \
 		stats.o \
 		sys.o \
 		tcp_in.o \
-		tcp_out.c \
+		tcp_out.o \
 		tcp.o \
 		timeouts.o \
 		udp.o
 
 core: ${objs} COMPILER
 	@echo "generate $^"
-	@mv $^ $(KERNEL_ROOT)/services/net/net_server
+	@mv ${objs} $(KERNEL_ROOT)/services/net/net_server
 	
 %.o: %.c
 	@echo "cc $^"
