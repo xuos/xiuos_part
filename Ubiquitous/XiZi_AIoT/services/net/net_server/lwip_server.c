@@ -56,9 +56,9 @@ IPC_SERVER_REGISTER_INTERFACES(IpcLWIPServer, 1, Ipc_LWIP_init);
 int main(int argc, char* argv[]){
     if (register_server("LWIPServer") < 0) {
         printf("register server name: %s failed.\n", "LWIPServer");
-        exit();
+        exit(0);
     }
     ipc_server_loop(&IpcLWIPServer);
     // never reached
-    exit();
+    exit(0);
 }
