@@ -1,7 +1,7 @@
 ifeq ($(BOARD), imx6q-sabrelite)
 toolchain ?= arm-none-eabi-
 user_ldflags = -N -Ttext 0
-cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
+cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -ffreestanding -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
 endif
 ifeq ($(BOARD), zynq7000-zc702)
 toolchain ?= arm-xilinx-eabi-
@@ -16,6 +16,8 @@ objdump = ${toolchain}objdump
 c_useropts = -O2
 
 INC_DIR = 	-I$(KERNEL_ROOT)/services/net/libnet \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/arch \
+			-I$(KERNEL_ROOT)/services/net/net_server/include \
 			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip \
 			-I$(KERNEL_ROOT)/services/net/net_server/include/netif \
 			-I$(KERNEL_ROOT)/services/net/net_server/include/compat \

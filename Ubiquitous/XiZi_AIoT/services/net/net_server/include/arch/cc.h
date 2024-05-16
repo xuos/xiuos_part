@@ -32,7 +32,8 @@
 #ifndef LWIP_ARCH_CC_H
 #define LWIP_ARCH_CC_H
 
-#include "stdio.h"
+// #include "stdio.h"
+
 
 //typedef unsigned   char    u8_t;
 //typedef signed     char    s8_t;
@@ -88,15 +89,4 @@
 
 #define LWIP_RAND() ((u32_t)rand())
 
-static inline u32_t sys_jiffies(void)
-{
-    // lwip_sys_now = CurrentTicksGain();
-    // return lwip_sys_now;
-}
-
-static inline u32_t sys_now(void)
-{
-    // lwip_sys_now = CurrentTicksGain();
-    // return CalculateTimeMsFromTick(lwip_sys_now);
-}
 #endif /* LWIP_ARCH_CC_H */

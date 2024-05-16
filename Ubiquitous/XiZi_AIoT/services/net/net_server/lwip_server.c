@@ -15,11 +15,12 @@
 #include "usyscall.h"
 #include "lwip_service.h"
 
+#include "lwip/init.h"
+#include "lwip/ip4_addr.h"
+#include "lwip/netif.h"
 
-#include "ethernet.h"
+static struct netif gnetif;
 
-
-struct netif gnetif;
 int IPC_DO_SERVE_FUNC(Ipc_LWIP_init)(char* ip, char* mask, char* gw){
 
     ip4_addr_t net_ipaddr, net_netmask, net_gw;
