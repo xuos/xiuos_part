@@ -53,11 +53,16 @@ arch_usyscall = $(KERNEL_ROOT)/services/app/arch_usyscall.o
 session = $(KERNEL_ROOT)/services/app/session.o
 libipc = $(KERNEL_ROOT)/services/app/libipc.o
 
-lwip: COMPILER lwip_server.o
+lwip: COMPILER lwip_server.o | bin
 	@${ld} ${user_ldflags} -e main -o $@ ${api} ${core} ${ipv4} ${netif} lwip_service.o lwip_server.o \
 		${board_specs} ${libserial} ${printf} ${libmem} ${usyscall} ${arch_usyscall} ${arch_usyscall} \
 		${session} ${libipc}
 	@${objdump} -S $@ > $@.asm
+	@mv *.o bin
+	@mv *.asm bin
+
+bin:
+	@mkdir -p bin
 
 %.o: %.c
 	@echo "cc $^"
