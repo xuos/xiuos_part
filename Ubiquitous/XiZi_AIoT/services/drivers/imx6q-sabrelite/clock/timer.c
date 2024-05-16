@@ -109,20 +109,21 @@ void system_time_init(void)
 
 int IPC_DO_SERVE_FUNC(Ipc_delay_us)(uint32_t* usecs)
 {
-    // uint32_t instance = g_system_timer_port;
-    // if (*usecs == 0) {
-    //     return 0;
-    // }
+    uint32_t instance = g_system_timer_port;
+    if (*usecs == 0) {
+        return 0;
+    }
 
-    // /* enable the counter first */
-    // epit_counter_enable(instance, *usecs, POLLING_MODE);
+    /* enable the counter first */
+    epit_counter_enable(instance, *usecs, POLLING_MODE);
 
-    // /* wait for the compare event */
-    // while (!epit_get_compare_event(instance))
-    //     ;
+    /* wait for the compare event */
+    while (!epit_get_compare_event(instance)) {
+        yield(SYS_TASK_YIELD_NO_REASON);
+    }
 
-    // /* disable the counter to save power */
-    // epit_counter_disable(instance);
+    /* disable the counter to save power */
+    epit_counter_disable(instance);
     return 0;
 }
 

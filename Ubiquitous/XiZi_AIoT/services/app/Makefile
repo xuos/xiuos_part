@@ -26,7 +26,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/app 
 
 ifeq ($(BOARD), imx6q-sabrelite)
-all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr test_irq_block test_irq_send eth_driver timer_server readme.txt | bin
+all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server readme.txt | bin
 else 
 all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr readme.txt | bin
 endif
@@ -47,7 +47,7 @@ eth_driver: enet_drv.o enet_test.o board_network.o enet_iomux_config.o imx6dq_gp
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
-timer_server: timer.o epit.o ccm_pll.o usyscall.o arch_usyscall.o libserial.o printf.o libipc.o session.o
+epit_server: timer.o epit.o ccm_pll.o usyscall.o arch_usyscall.o libserial.o printf.o libipc.o session.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 endif

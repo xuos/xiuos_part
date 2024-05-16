@@ -145,7 +145,6 @@ void print_hw_enet(const hw_enet_t* enet)
  */
 int enet_test()
 {
-
     imx_enet_priv_t* dev0 = &enet0;
     int pkt_len_send = 0, pkt_len_recv = 0, ret = 0, i;
     unsigned int enet_events = 0;
