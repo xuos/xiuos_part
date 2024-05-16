@@ -145,6 +145,7 @@ int ipc_session_wait(struct Session* session)
 }
 
 static int cur_sess_id = -1;
+static struct IpcMsg* ipc_server_loop_cur_msg = NULL;
 int cur_session_id(void)
 {
     return cur_sess_id;
@@ -159,6 +160,20 @@ void delay_session(void)
 bool is_cur_session_delayed(void)
 {
     return session_delayed;
+}
+
+bool is_cur_handler_been_delayed()
+{
+    if (ipc_server_loop_cur_msg == NULL) {
+        return false;
+    }
+    return ipc_server_loop_cur_msg->header.delayed == 1;
+}
+
+bool server_set_cycle_handler(struct IpcNode* ipc_node, void (*handler)())
+{
+    ipc_node->cycle_handler = handler;
+    return true;
 }
 
 void ipc_server_loop(struct IpcNode* ipc_node)
@@ -183,39 +198,43 @@ void ipc_server_loop(struct IpcNode* ipc_node)
                     break;
                 }
                 cur_sess_id = session_list[i].id;
-                struct IpcMsg* msg = IPCSESSION_MSG(&session_list[i]);
+                ipc_server_loop_cur_msg = IPCSESSION_MSG(&session_list[i]);
                 /* handle every message in current session
                     a session could be delay in case one of its message(current message) needs to wait for an interrupt message's arrival
                     interfaces[opcode] should explicitly call delay_session() and return to delay this session
                 */
-                while (msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1 && msg->header.done == 0) {
+                while (ipc_server_loop_cur_msg->header.magic == IPC_MSG_MAGIC && ipc_server_loop_cur_msg->header.valid == 1 && ipc_server_loop_cur_msg->header.done == 0) {
                     // printf("session %d [%d, %d]\n", session_list[i].id, session_list[i].head, session_list[i].tail);
-                    if (session_used_size(&session_list[i]) == 0 && session_forward_tail(&session_list[i], msg->header.len) < 0) {
+                    if (session_used_size(&session_list[i]) == 0 && session_forward_tail(&session_list[i], ipc_server_loop_cur_msg->header.len) < 0) {
                         break;
                     }
 
                     // this is a message needs to handle
-                    if (ipc_node->interfaces[msg->header.opcode]) {
-                        ipc_node->interfaces[msg->header.opcode](msg);
+                    if (ipc_node->interfaces[ipc_server_loop_cur_msg->header.opcode]) {
+                        ipc_node->interfaces[ipc_server_loop_cur_msg->header.opcode](ipc_server_loop_cur_msg);
                         // check if this session is delayed by op handler, all messages after the delayed message in current session is blocked.
                         if (is_cur_session_delayed()) {
-                            msg->header.delayed = 1;
+                            ipc_server_loop_cur_msg->header.delayed = 1;
                             has_delayed = true;
                             break;
                         }
                     } else {
-                        printf("Unsupport opcode(%d) for server: %s\n", msg->header.opcode, ipc_node->name);
+                        printf("Unsupport opcode(%d) for server: %s\n", ipc_server_loop_cur_msg->header.opcode, ipc_node->name);
                     }
                     // current msg is a message that needs to ignore
                     // finish this message in server's perspective
-                    if (session_forward_head(&session_list[i], msg->header.len) < 0) {
+                    if (session_forward_head(&session_list[i], ipc_server_loop_cur_msg->header.len) < 0) {
                         break;
                     }
-                    msg = IPCSESSION_MSG(&session_list[i]);
+                    ipc_server_loop_cur_msg = IPCSESSION_MSG(&session_list[i]);
                 }
                 // stop handle this session
                 cur_sess_id = -1;
+                ipc_server_loop_cur_msg = NULL;
             }
+        }
+        if (ipc_node->cycle_handler) {
+            ipc_node->cycle_handler();
         }
     }
 }

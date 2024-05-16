@@ -76,6 +76,7 @@ typedef int (*IpcInterface)(struct IpcMsg* msg);
 struct IpcNode {
     char* name;
     IpcInterface interfaces[UINT8_MAX];
+    void (*cycle_handler)();
 } __attribute__((packed));
 
 #define IPC_SERVER_LOOP(ipc_node_name) rpc_server_loop_##rpc_node_name
@@ -242,4 +243,6 @@ bool is_cur_session_delayed(void);
     }
 
 int cur_session_id(void);
+bool server_set_cycle_handler(struct IpcNode* ipc_node, void (*handler)());
 void delay_session(void);
+bool is_cur_handler_been_delayed();
