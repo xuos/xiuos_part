@@ -18,7 +18,7 @@ cflags = -std=c11 -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -g \
 # cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic \
 # 	-static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie 
 
-c_useropts = -O2
+c_useropts = -O0
 
 INC_DIR = 	-I$(KERNEL_ROOT)/services/app \
 		  	-I$(KERNEL_ROOT)/services/boards/$(BOARD) \

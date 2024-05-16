@@ -38,10 +38,10 @@ int main(int argc, char* argv[])
 {
     if (register_server("SimpleServer") < 0) {
         printf("register server name: %s failed.\n", "SimpleServer");
-        exit();
+        exit(1);
     }
     ipc_server_loop(&IpcSimpleServer);
 
     // never reached
-    exit();
+    exit(0);
 }

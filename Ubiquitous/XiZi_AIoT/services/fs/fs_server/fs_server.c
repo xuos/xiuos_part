@@ -358,10 +358,10 @@ int main(int argc, char* argv[])
 
     if (register_server("MemFS") < 0) {
         printf("register server name: %s failed.\n", "MemFs");
-        exit();
+        exit(1);
     }
     ipc_server_loop(&IpcFsServer);
 
     // never reached
-    exit();
+    exit(0);
 }

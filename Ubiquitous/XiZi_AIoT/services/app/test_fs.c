@@ -48,6 +48,6 @@ int main(int argc, char* argv[])
     printf("Test memry error %s.\n", 0x50000000);
     printf("After error computing.\n");
 
-    exit();
+    exit(0);
     return 0;
 }

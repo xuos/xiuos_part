@@ -145,7 +145,6 @@ void print_hw_enet(const hw_enet_t* enet)
  */
 int enet_test()
 {
-
     imx_enet_priv_t* dev0 = &enet0;
     int pkt_len_send = 0, pkt_len_recv = 0, ret = 0, i;
     unsigned int enet_events = 0;
@@ -251,23 +250,23 @@ int main(int argc, char** argv)
 {
     if (connect_session(&timer_session, timer_server_name, 4096) < 0) {
         printf("%s connect server: %s failed\n", enet_server_name, timer_server_name);
-        exit();
+        exit(1);
     }
 
     printf("%s: Mapping %08x(size: %x) to %08x\n", enet_server_name, AIPS1_ARB_PHY_BASE_ADDR, AIPS1_ARB_END_ADDR - AIPS1_ARB_BASE_ADDR, AIPS1_ARB_BASE_ADDR);
     if (!mmap(AIPS1_ARB_BASE_ADDR, AIPS1_ARB_PHY_BASE_ADDR, AIPS1_ARB_END_ADDR - AIPS1_ARB_BASE_ADDR, true)) {
         printf("%s: mmap AIPS1 ARB(%8x) failed\n", enet_server_name, AIPS1_ARB_PHY_BASE_ADDR);
-        exit();
+        exit(1);
     }
 
     printf("%s: Mapping %08x(size: %x) to %8x\n", enet_server_name, AIPS2_ARB_PHY_BASE_ADDR, AIPS2_ARB_END_ADDR - AIPS2_ARB_BASE_ADDR, AIPS2_ARB_BASE_ADDR);
     if (!mmap(AIPS2_ARB_BASE_ADDR, AIPS2_ARB_PHY_BASE_ADDR, AIPS2_ARB_END_ADDR - AIPS2_ARB_BASE_ADDR, true)) {
         printf("%s: mmap AIPS1 ARB(%08x) failed\n", enet_server_name, AIPS2_ARB_PHY_BASE_ADDR);
-        exit();
+        exit(1);
     }
 
     enet_test();
 
-    exit();
+    exit(0);
     return 0;
 }

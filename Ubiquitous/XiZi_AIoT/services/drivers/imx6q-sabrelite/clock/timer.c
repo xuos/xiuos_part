@@ -109,20 +109,21 @@ void system_time_init(void)
 
 int IPC_DO_SERVE_FUNC(Ipc_delay_us)(uint32_t* usecs)
 {
-    // uint32_t instance = g_system_timer_port;
-    // if (*usecs == 0) {
-    //     return 0;
-    // }
+    uint32_t instance = g_system_timer_port;
+    if (*usecs == 0) {
+        return 0;
+    }
 
-    // /* enable the counter first */
-    // epit_counter_enable(instance, *usecs, POLLING_MODE);
+    /* enable the counter first */
+    epit_counter_enable(instance, *usecs, POLLING_MODE);
 
-    // /* wait for the compare event */
-    // while (!epit_get_compare_event(instance))
-    //     ;
+    /* wait for the compare event */
+    while (!epit_get_compare_event(instance)) {
+        yield(SYS_TASK_YIELD_NO_REASON);
+    }
 
-    // /* disable the counter to save power */
-    // epit_counter_disable(instance);
+    /* disable the counter to save power */
+    epit_counter_disable(instance);
     return 0;
 }
 
@@ -177,7 +178,7 @@ int main(int argc, char** argv)
     static char server_name[] = "TimerServer";
     if (register_server(server_name) < 0) {
         printf("register server name %s failed\n", server_name);
-        exit();
+        exit(1);
     }
 
     static uint32_t epit_instance = HW_EPIT2;
@@ -187,7 +188,7 @@ int main(int argc, char** argv)
 
     ipc_server_loop(&IpcSabreliteTimer);
 
-    exit();
+    exit(0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
