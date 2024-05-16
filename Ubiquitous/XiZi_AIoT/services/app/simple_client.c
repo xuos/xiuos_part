@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "libfs_to_client.h"
 #include "libserial.h"
@@ -90,7 +91,7 @@ int main(int argc, char** argv)
     struct Session session_nowait;
     if (connect_session(&session_wait, "SimpleServer", 4096) < 0 || connect_session(&session_nowait, "SimpleServer", 4096) < 0) {
         printf("connect session failed\n");
-        exit();
+        exit(1);
     }
 
     char *buf1 = NULL, *buf2 = NULL;
@@ -138,5 +139,5 @@ int main(int argc, char** argv)
     free_session(&session_wait);
     free_session(&session_nowait);
 
-    exit();
+    exit(0);
 }

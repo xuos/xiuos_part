@@ -24,12 +24,12 @@ int main(int argc, char* argv[])
     struct Session session;
     if (connect_session(&session, "TestIRQ", 4096) < 0) {
         printf("connect session failed\n");
-        exit();
+        exit(1);
     }
 
     printf("%s start waiting for IRQ.\n", prog_name);
     wait_intr(&session);
     printf("%s return from waiting for IRQ.\n", prog_name);
 
-    exit();
+    exit(0);
 }

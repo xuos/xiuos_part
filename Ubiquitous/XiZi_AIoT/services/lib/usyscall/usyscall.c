@@ -26,9 +26,9 @@ int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ip
     return ret;
 }
 
-int exit()
+void exit(int status)
 {
-    return syscall(SYSCALL_EXIT, 0, 0, 0, 0);
+    syscall(SYSCALL_EXIT, (uintptr_t)status, 0, 0, 0);
 }
 
 int yield(task_yield_reason reason)

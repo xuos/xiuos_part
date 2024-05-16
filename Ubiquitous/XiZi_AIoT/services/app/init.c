@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     char* shell_task_param[2] = { "/shell", 0 };
     if ((fd = open(&session, shell_task_param[0])) < 0) {
         printf("Open %s failed\n", shell_task_param[0]);
-        exit();
+        exit(1);
     }
 
     if (spawn(&session, fd, read, fsize, shell_task_param[0], shell_task_param) < 0) {
@@ -37,6 +37,6 @@ int main(int argc, char* argv[])
 
     close(&session, fd);
 
-    exit();
+    exit(0);
     return 0;
 }

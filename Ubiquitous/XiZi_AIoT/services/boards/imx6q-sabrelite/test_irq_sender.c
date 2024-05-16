@@ -96,5 +96,5 @@ int main()
         printf("%s: Soft interrupt send 1 time\n", prog_name);
     }
     printf("%s: Soft interrupt send done\n", prog_name);
-    exit();
+    exit(0);
 }

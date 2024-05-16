@@ -178,7 +178,7 @@ int main(int argc, char** argv)
     static char server_name[] = "TimerServer";
     if (register_server(server_name) < 0) {
         printf("register server name %s failed\n", server_name);
-        exit();
+        exit(1);
     }
 
     static uint32_t epit_instance = HW_EPIT2;
@@ -188,7 +188,7 @@ int main(int argc, char** argv)
 
     ipc_server_loop(&IpcSabreliteTimer);
 
-    exit();
+    exit(0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

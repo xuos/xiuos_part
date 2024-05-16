@@ -40,16 +40,16 @@ int main()
 {
     if (register_irq(SW_INTERRUPT_3, Ipc_intr_3) < 0) {
         printf("TEST_SW_HDLR: bind failed");
-        exit();
+        exit(1);
     }
 
     static char prog_name[] = "TestIRQ";
     if (register_server("TestIRQ") < 0) {
         printf("register server name: %s failed.\n", prog_name);
-        exit();
+        exit(1);
     }
 
     ipc_server_loop(&IpcSwIntrHandler);
 
-    exit();
+    exit(0);
 }

@@ -39,6 +39,6 @@ int main(int argc, char* argv[])
     // test function
     count_down();
 
-    exit();
+    exit(0);
     return 0;
 }
