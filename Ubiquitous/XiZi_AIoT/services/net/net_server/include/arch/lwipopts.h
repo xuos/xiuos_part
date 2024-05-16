@@ -202,6 +202,5 @@ ing and verifying the IP, UDP, TCP and ICMP checksums by hardware:
    ---------- Lwip Debug options ----------
    ----------------------------------------
 */
-#define LWIP_DEBUG                      1
 
 #endif /* LWIP_LWIPOPTS_H */
