@@ -87,4 +87,16 @@
 #define LWIP_PLATFORM_ASSERT(x) do {printf(x);}while(0)
 
 #define LWIP_RAND() ((u32_t)rand())
+
+static inline u32_t sys_jiffies(void)
+{
+    // lwip_sys_now = CurrentTicksGain();
+    // return lwip_sys_now;
+}
+
+static inline u32_t sys_now(void)
+{
+    // lwip_sys_now = CurrentTicksGain();
+    // return CalculateTimeMsFromTick(lwip_sys_now);
+}
 #endif /* LWIP_ARCH_CC_H */

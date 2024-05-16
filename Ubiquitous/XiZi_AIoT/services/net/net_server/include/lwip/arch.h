@@ -78,7 +78,6 @@
  * systems, this should be defined to something less resource-consuming.
  */
 #ifndef LWIP_PLATFORM_DIAG
-#include "xs_base.h"
 #define LWIP_PLATFORM_DIAG(x) do {KPrintf x;} while(0)
 #include <stdio.h>
 #include <stdlib.h>

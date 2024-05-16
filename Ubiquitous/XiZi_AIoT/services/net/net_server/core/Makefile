@@ -1,25 +1,32 @@
-SRC_FILES += altcp_alloc.c \
-		     altcp_tcp.c \
-			 altcp.c \
-			 def.c \
-			 dns.c \
-			 inet_chksum.c \
-			 init.c \
-			 ip.c \
-			 mem.c \
-			 memp.c \
-			 netif.c \
-			 pbuf.c \
-			 raw.c \
-			 stats.c \
-			 sys.c \
-			 tcp_in.c \
-			 tcp_out.c \
-			 tcp.c \
-			 timeouts.c \
-			 udp.c
+include $(KERNEL_ROOT)/services/net/net_server/lwip.mk
+objs += altcp_alloc.o \
+		altcp_tcp.o \
+		altcp.o \
+		def.o \
+		dns.o \
+		inet_chksum.o \
+		init.o \
+		ip.o \
+		mem.o \
+		memp.o \
+		netif.o \
+		pbuf.o \
+		raw.o \
+		stats.o \
+		sys.o \
+		tcp_in.o \
+		tcp_out.c \
+		tcp.o \
+		timeouts.o \
+		udp.o
+
+core: ${objs}
+	@echo "generate $^"
+	
+%.o: %.c
+	@echo "cc $^"
+	@${cc} ${cflags} ${c_useropts} ${INC_DIR} -o $@ -c $^
+
 
 SRC_DIR += ipv4
-LWIP_DIR += ipv4
-
 include $(KERNEL_ROOT)/compiler.mk

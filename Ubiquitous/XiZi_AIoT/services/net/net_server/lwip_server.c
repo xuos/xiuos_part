@@ -14,7 +14,8 @@
 #include "libserial.h"
 #include "usyscall.h"
 #include "lwip_service.h"
-#include "ip4_addr.h"
+
+
 #include "ethernet.h"
 
 
