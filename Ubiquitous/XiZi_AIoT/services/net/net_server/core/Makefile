@@ -20,8 +20,9 @@ objs += altcp_alloc.o \
 		timeouts.o \
 		udp.o
 
-core: ${objs}
+core: ${objs} COMPILER
 	@echo "generate $^"
+	@mv $^ $(KERNEL_ROOT)/services/net/net_server
 	
 %.o: %.c
 	@echo "cc $^"

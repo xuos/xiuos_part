@@ -33,7 +33,7 @@
 #define LWIP_ARCH_CC_H
 
 // #include "stdio.h"
-
+#include "libserial.h"
 
 //typedef unsigned   char    u8_t;
 //typedef signed     char    s8_t;

@@ -1,6 +1,6 @@
 include $(KERNEL_ROOT)/services/net/net_server/lwip.mk
 
-net_server: lwip_server.o
+net_server: lwip_server.o COMPILER
 	@echo "generate $^"
 
 %.o: %.c
