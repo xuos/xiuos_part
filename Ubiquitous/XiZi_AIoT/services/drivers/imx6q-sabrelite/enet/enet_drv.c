@@ -555,8 +555,6 @@ void imx_enet_start(imx_enet_priv_t* dev, unsigned char* enaddr)
     dev->tx_busy = 0;
     dev->enet_reg->ECR.U |= ENET_ETHER_EN | ENET_ETHER_SPEED_1000M | ENET_ETHER_LITTLE_ENDIAN;
     dev->enet_reg->RDAR.U |= ENET_RX_TX_ACTIVE;
-    HW_ENET_RDAR_WR(ENET_RX_TX_ACTIVE);
-    printf("addr1: %x, addr2: %x\n", &dev->enet_reg->RDAR.U, HW_ENET_RDAR_ADDR);
     printf("EIR: %08x, ECR: %08x, TDAR.U: %08x, RDAR.U: %08x (%08x)\n", dev->enet_reg->EIR.U, dev->enet_reg->ECR.U, dev->enet_reg->TDAR.U, dev->enet_reg->RDAR.U, ENET_RX_TX_ACTIVE);
 }
 

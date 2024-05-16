@@ -77,6 +77,7 @@ struct SuperBlock {
     uint32_t size; // Number of total blocks of file system image
     uint32_t nblocks; // Number of data blocks
     uint32_t ninodes; // Number of inodes.
+    uint32_t nbitblocks;
 };
 
 // Inode structure

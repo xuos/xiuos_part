@@ -48,7 +48,9 @@ Modification:
 
 #define ROOT_INUM 1 // root inode number
 #define BLOCK_SIZE 512 // block size
-#define nr_blocks_total 8192 // total number of blocks (including used blocks and free blocks)
+#define NR_BIT_PER_BYTE 8
+#define NR_BIT_BLOCKS 2
+#define nr_blocks_total (BLOCK_SIZE * NR_BIT_PER_BYTE * NR_BIT_BLOCKS) // total number of blocks (including used blocks and free blocks)
 #define nr_inodes 200 // total number of inodes
 
 #define NR_DIRECT_BLOCKS 4
@@ -69,6 +71,7 @@ struct SuperBlock {
     uint size; // Size of file system image (blocks)
     uint nblocks; // Number of data blocks
     uint ninodes; // Number of inodes.
+    uint nbitblocks;
 };
 
 // Inode structure
