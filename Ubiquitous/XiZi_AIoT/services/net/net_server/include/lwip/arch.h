@@ -79,7 +79,7 @@
  */
 #ifndef LWIP_PLATFORM_DIAG
 #define LWIP_PLATFORM_DIAG(x) do {KPrintf x;} while(0)
-#include <stdio.h>
+// #include <stdio.h>
 #include <stdlib.h>
 #endif
 

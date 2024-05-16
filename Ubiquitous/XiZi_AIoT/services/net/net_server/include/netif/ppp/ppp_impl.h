@@ -41,7 +41,7 @@
 #include "ppp_settings.h"
 #endif
 
-#include <stdio.h> /* formats */
+// #include <stdio.h> /* formats */
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h> /* strtol() */
