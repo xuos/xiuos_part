@@ -56,8 +56,10 @@ libipc = $(KERNEL_ROOT)/services/app/libipc.o
 lwip: COMPILER lwip_server.o | bin
 	@${ld} ${user_ldflags} -e main -o $@ ${api} ${core} ${ipv4} ${netif} lwip_service.o lwip_server.o \
 		${board_specs} ${libserial} ${printf} ${libmem} ${usyscall} ${arch_usyscall} ${session} ${libipc}
+	@${objdump} -S $@ > $@.asm
 	@mv *.o bin
 	@mv $@ $(KERNEL_ROOT)/services/app
+	@mv $@.asm $(KERNEL_ROOT)/services/app
 
 bin:
 	@mkdir -p bin

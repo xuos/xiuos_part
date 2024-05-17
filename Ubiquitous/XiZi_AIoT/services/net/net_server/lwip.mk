@@ -1,7 +1,7 @@
 ifeq ($(BOARD), imx6q-sabrelite)
 toolchain ?= arm-none-eabi-
-user_ldflags = --specs=nosys.specs -Wl,-Map=user.map,-cref
-cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -ffreestanding -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
+user_ldflags = --specs=nosys.specs -Wl,-Map=user.map,-cref -N
+cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -ffreestanding -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -Waddress -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
 endif
 ifeq ($(BOARD), zynq7000-zc702)
 toolchain ?= arm-xilinx-eabi-
