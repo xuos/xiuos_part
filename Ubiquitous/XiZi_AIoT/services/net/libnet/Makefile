@@ -24,7 +24,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/net/libnet \
 			-I$(KERNEL_ROOT)/services/app
 
 net_server: lwip_service.o
-	@mv $^ $(KERNEL_ROOT)/services/net/net_server
+	@mv $^ $(KERNEL_ROOT)/services/app
 
 %.o: %.c
 	@echo "cc $^"

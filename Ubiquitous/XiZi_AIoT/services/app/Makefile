@@ -22,11 +22,12 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/lib/serial \
 			-I$(KERNEL_ROOT)/services/lib/usyscall \
 			-I$(KERNEL_ROOT)/services/fs/libfs \
+			-I$(KERNEL_ROOT)/services/net/libnet \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app 
 
 ifeq ($(BOARD), imx6q-sabrelite)
-all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server readme.txt lwip | bin
+all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server readme.txt test_net lwip | bin
 else 
 all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr readme.txt | bin
 endif
@@ -85,6 +86,10 @@ fs_server: fs_server.o libfs_to_client.o fs.o libserial.o printf.o libipc.o sess
 	@${objdump} -S $@ > $@.asm
 
 test_priority: test_priority.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
+
+test_net:test_fs.o lwip_service.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
