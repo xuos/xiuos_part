@@ -129,6 +129,8 @@ clean:
 	@rm -rf services/tools/mkfs/mkfs
 	@rm -rf services/app/fs.img
 	@rm -rf services/app/user.map
+	@rm -rf services/net/net_server/user.map
+	@rm -rf services/net/net_server/bin
 
 distclean:
 	@echo Clean all configuration

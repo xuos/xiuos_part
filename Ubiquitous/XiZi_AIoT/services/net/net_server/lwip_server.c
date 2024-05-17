@@ -18,6 +18,7 @@
 #include "lwip/init.h"
 #include "lwip/ip4_addr.h"
 #include "lwip/netif.h"
+#include "netif/ethernet.h"
 
 static struct netif gnetif;
 
@@ -30,8 +31,14 @@ int IPC_DO_SERVE_FUNC(Ipc_LWIP_init)(char* ip, char* mask, char* gw){
 
     lwip_init();
 
-    // netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, NULL,
-    //         &ethernetif_init, &ethernet_input);
+#ifndef NETIF_ENET_INIT_FUNC
+        printf("Not Netif driver for Eport 0\n");
+        return 0;
+#endif
+
+#ifdef NETIF_ENET_INIT_FUNC
+    netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, NULL,
+            NETIF_ENET_INIT_FUNC, &ethernet_input);
 
     /* Registers the default network interface */
     netif_set_default(&gnetif);
@@ -47,6 +54,7 @@ int IPC_DO_SERVE_FUNC(Ipc_LWIP_init)(char* ip, char* mask, char* gw){
         netif_set_down(&gnetif);
     }
     return 0;
+#endif
 }
 
 
