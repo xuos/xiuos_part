@@ -18,13 +18,13 @@
 
 // Block size
 #define BLOCK_SIZE 512
-#define NR_BIT_BLOCKS 4
+#define NR_BIT_BLOCKS 8
 
 // bits size
 #define BITS 8
 
 // Bitmap size of one block
-#define BITMAP_SIZE (BLOCK_SIZE * BITS * NR_BIT_BLOCKS)
+#define BITMAP_SIZE (BLOCK_SIZE * BITS)
 
 // Inode size of one block
 #define INODE_SIZE (BLOCK_SIZE / sizeof(struct Inode))

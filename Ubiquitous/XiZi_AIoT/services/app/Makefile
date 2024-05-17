@@ -89,7 +89,7 @@ test_priority: test_priority.o libserial.o printf.o usyscall.o arch_usyscall.o l
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
-test_net:test_fs.o lwip_service.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
+test_net: test_net.o lwip_service.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 

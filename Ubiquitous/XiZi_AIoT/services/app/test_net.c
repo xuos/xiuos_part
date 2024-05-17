@@ -12,10 +12,6 @@
 
 // test_net: Test the lwip network stack
 
-#include <assert.h>
-#include <stdbool.h>
-#include <string.h>
-
 #include "libserial.h"
 #include "lwip_service.h"
 #include "usyscall.h"
@@ -32,7 +28,7 @@ int main(int argc, char* argv[])
     char lwip_gwaddr[4] = { 192, 168, 130, 1 };
     LWIP_init(&sess, lwip_ipaddr, lwip_netmask, lwip_ipaddr);
     
-    free_session(&session);
+    free_session(&sess);
 
     exit(0);
     return 0;
