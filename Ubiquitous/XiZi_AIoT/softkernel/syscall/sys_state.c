@@ -41,11 +41,11 @@ Modification:
 extern uint8_t _binary_fs_img_start[], _binary_fs_img_end[];
 
 #define SHOWINFO_BORDER_LINE() LOG_PRINTF("******************************************************\n");
-#define SHOWTASK_TASK_BASE_INFO(task) LOG_PRINTF(" %-6d %-16s %-4d 0x%x(%-d)\n", task->pid, task->name, task->priority, task->mem_size >> 10, task->mem_size >> 10)
+#define SHOWTASK_TASK_BASE_INFO(task) LOG_PRINTF(" %-6d %-16s %-4d 0x%x(%-d)\n", task->tid, task->name, task->priority, task->memspace->mem_size >> 10, task->memspace->mem_size >> 10)
 
 void show_tasks(void)
 {
-    struct TaskMicroDescriptor* task = NULL;
+    struct Thread* task = NULL;
     SHOWINFO_BORDER_LINE();
     for (int i = 0; i < NR_CPU; i++) {
         LOG_PRINTF("CPU %-2d: %s\n", i, (global_cpus[i].task == NULL ? "NULL" : global_cpus[i].task->name));
@@ -128,7 +128,7 @@ void show_cpu(void)
 
     int cpu_id = 0;
 
-    struct TaskMicroDescriptor* current_task = cur_cpu()->task;
+    struct Thread* current_task = cur_cpu()->task;
     assert(current_task != NULL);
 
     LOG_PRINTF(" ID  COMMAND        USED_TICKS  FREE_TICKS \n");
@@ -144,7 +144,7 @@ int sys_state(sys_state_option option, sys_state_info* info)
         info->memblock_info.memblock_start = (uintptr_t)V2P(_binary_fs_img_start);
         info->memblock_info.memblock_end = (uintptr_t)V2P(_binary_fs_img_end);
     } else if (option == SYS_STATE_GET_HEAP_BASE) {
-        return cur_cpu()->task->heap_base;
+        return cur_cpu()->task->memspace->heap_base;
     } else if (option == SYS_STATE_SET_TASK_PRIORITY) {
         xizi_task_manager.set_cur_task_priority(info->priority);
     } else if (option == SYS_STATE_SHOW_TASKS) {

@@ -39,7 +39,7 @@ Modification:
 
 int sys_register_as_server(char* name)
 {
-    struct TaskMicroDescriptor* server = cur_cpu()->task;
+    struct Thread* server = cur_cpu()->task;
     struct TraceTag server_identifier_set_tag;
     if (!AchieveResourceTag(&server_identifier_set_tag, RequireRootTag(), "softkernel/server-identifier")) {
         panic("Server identifier not initialized.\b");

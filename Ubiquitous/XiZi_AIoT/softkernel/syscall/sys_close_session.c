@@ -38,7 +38,7 @@ Modification:
 /// @param cur_task
 /// @param session
 /// @return
-int sys_close_session(struct TaskMicroDescriptor* cur_task, struct Session* session)
+int sys_close_session(struct Thread* cur_task, struct Session* session)
 {
     assert(cur_task != NULL);
     /* check if session is available */

@@ -58,14 +58,14 @@ __attribute__((optimize("O0"))) void dabort_handler(struct trapframe* r)
         panic("data abort exception\n");
     }
 
-    struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
+    struct Thread* cur_task = cur_cpu()->task;
     ERROR("dabort in user space: %s\n", cur_task->name);
     dabort_reason(r);
 
     xizi_enter_kernel();
     sys_exit(cur_task);
     assert(cur_cpu()->task == NULL);
-    context_switch(&cur_task->main_thread.context, cur_cpu()->scheduler);
+    context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
     panic("dabort end should never be reashed.\n");
 }
 
@@ -78,13 +78,13 @@ __attribute__((optimize("O0"))) void iabort_handler(struct trapframe* r)
         panic("kernel prefetch abort exception\n");
     }
 
-    struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
+    struct Thread* cur_task = cur_cpu()->task;
     ERROR("iabort in user space: %s\n", cur_task->name);
     iabort_reason(r);
 
     xizi_enter_kernel();
     sys_exit(cur_task);
     assert(cur_cpu()->task == NULL);
-    context_switch(&cur_task->main_thread.context, cur_cpu()->scheduler);
+    context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
     panic("iabort end should never be reashed.\n");
 }

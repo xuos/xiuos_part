@@ -53,7 +53,7 @@ int xizi_clock_handler(int irq, void* tf, void* arg)
     if (p_clock_driver->is_timer_expired()) {
         p_clock_driver->clear_clock_intr();
         global_tick++;
-        struct TaskMicroDescriptor* current_task = cur_cpu()->task;
+        struct Thread* current_task = cur_cpu()->task;
         if (current_task) {
             current_task->remain_tick--;
             current_task->maxium_tick--;

@@ -31,6 +31,7 @@ Modification:
 
 #include "core.h"
 
+#include "bitmap64.h"
 #include "buddy.h"
 #include "list.h"
 #include "object_allocator.h"
@@ -52,41 +53,58 @@ enum ProcState {
     NEVER_RUN,
 };
 
+struct MemSpace {
+    /* task memory resources */
+    struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address
+    uintptr_t heap_base; // mem size of proc used(allocated by kernel)
+    uintptr_t mem_size;
+    /* task communication mem resources */
+    struct KBuddy* massive_ipc_allocator;
+
+    /* thread using this memspace */
+    struct bitmap64 thread_stack_idx_bitmap;
+    struct double_list_node thread_list_guard;
+};
+
 /* Thread Control Block */
-struct Thread {
-    struct TaskMicroDescriptor* task; // process of current thread
-    uintptr_t stack_addr; // [virt] stack base address
+struct ThreadContext {
+    struct Thread* task; // process of current thread
+
+    /* kernel stack of thread */
+    uintptr_t kern_stack_addr; // [virt] stack base address
+
+    /* user stack */
+    int user_stack_idx; // [virt] stack idx in user memspace
+    uintptr_t uspace_stack_addr; // [virt] user stack base address in memspace
+    uintptr_t ustack_kvaddr; // [virt] user stack memeory's kernel vaddr
+
+    /* kernel context of thread */
     struct context* context;
+    /* user context of thread */
     struct trapframe* trapframe;
 };
 
 /* Process Control Block */
-struct TaskMicroDescriptor {
-    /* task debug resources */
-    int pid;
-    bool bind_irq;
-    bool dead;
+struct Thread {
+    /* task name */
     char name[TASK_NAME_MAX_LEN];
 
-    /// @todo support return value
-    int ret; // state val that be returned to parent
-    /// @todo support parent
-    struct TaskMicroDescriptor* parent;
+    /* task debug resources */
+    int tid;
+    bool bind_irq;
+    bool dead;
 
     /* task context resources */
-    struct Thread main_thread; // will only access by task itself
+    struct ThreadContext thread_context; // will only access by task itself
 
-    /* task memory resources */
-    struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address
-    uintptr_t heap_base; // mem size of proc used(allocated by kernel)
-    /// @todo support heap_base
-    uintptr_t mem_size;
+    /* thread mem space */
+    struct MemSpace* memspace;
+    struct double_list_node memspace_list_node;
 
     /* task communication resources */
     struct double_list_node cli_sess_listhead;
     struct double_list_node svr_sess_listhead;
     bool current_ipc_handled;
-    struct KBuddy* massive_ipc_allocator;
     struct TraceTag server_identifier;
 
     /* task schedule attributes */
@@ -106,36 +124,39 @@ struct XiziTaskManager {
     struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
     struct double_list_node task_running_list_head;
     struct double_list_node task_blocked_list_head;
-    struct slab_allocator task_allocator;
-    struct slab_allocator task_buddy_allocator;
+
+    /* mem allocator */
+    struct slab_allocator memspace_allocator;
+    struct slab_allocator task_allocator; // allocate struct Tread
+    struct slab_allocator task_buddy_allocator; // allocate buddy for memspace
     uint32_t next_pid;
 
     /* init task manager */
     void (*init)();
     /* new a task control block, checkout #sys_spawn for usage */
-    struct TaskMicroDescriptor* (*new_task_cb)();
+    struct Thread* (*new_task_cb)(struct MemSpace* pmemspace);
     /* free a task control block, this calls #free_user_pgdir to free all vitual spaces */
-    void (*free_pcb)(struct TaskMicroDescriptor*);
+    void (*free_pcb)(struct Thread*);
     /* init a task control block, set name, remain_tick, state, cwd, priority, etc. */
-    void (*task_set_default_schedule_attr)(struct TaskMicroDescriptor*);
+    void (*task_set_default_schedule_attr)(struct Thread*);
 
     /* use by task_scheduler, find next READY task, should be in locked */
-    struct TaskMicroDescriptor* (*next_runnable_task)(void);
+    struct Thread* (*next_runnable_task)(void);
     /* function that's runing by kernel thread context, schedule use tasks */
     void (*task_scheduler)(struct SchedulerRightGroup);
 
     /* handle task state */
     /* call to yield current use task */
-    void (*task_yield_noschedule)(struct TaskMicroDescriptor* task, bool is_blocking);
+    void (*task_yield_noschedule)(struct Thread* task, bool is_blocking);
     /* block and unblock task */
-    void (*task_block)(struct TaskMicroDescriptor* task);
-    void (*task_unblock)(struct TaskMicroDescriptor* task);
+    void (*task_block)(struct Thread* task);
+    void (*task_unblock)(struct Thread* task);
     /* set task priority */
     void (*set_cur_task_priority)(int priority);
 };
 
 extern uint32_t ready_task_priority;
-extern struct TaskMicroDescriptor* next_task_emergency;
+extern struct Thread* next_task_emergency;
 extern struct XiziTaskManager xizi_task_manager;
 
 int spawn_embedded_task(char* img_start, char* name, char** argv);

@@ -30,15 +30,15 @@ Modification:
 #include <stdint.h>
 
 #include "assert.h"
-#include "multicores.h"
 #include "kalloc.h"
+#include "multicores.h"
 #include "share_page.h"
 #include "syscall.h"
 #include "task.h"
 
 int sys_mmap(uintptr_t vaddr, uintptr_t paddr, int len, int is_dev)
 {
-    struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
+    struct Thread* cur_task = cur_cpu()->task;
     assert(cur_task != NULL);
 
     int true_len = ALIGNUP(len, PAGE_SIZE);
@@ -64,6 +64,6 @@ int sys_mmap(uintptr_t vaddr, uintptr_t paddr, int len, int is_dev)
         }
     }
 
-    cur_task->mem_size += true_len;
+    cur_task->memspace->mem_size += true_len;
     return vaddr + true_len;
 }

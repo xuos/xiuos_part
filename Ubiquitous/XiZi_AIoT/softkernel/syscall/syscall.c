@@ -63,7 +63,8 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_close_session(cur_cpu()->task, (struct Session*)param1);
         break;
     case SYSCALL_EXEC:
-        ret = sys_exec((char*)param1, (char*)param2, (char**)param3);
+        // ret = sys_exec((char*)param1, (char*)param2, (char**)param3);
+        ret = -1;
         break;
     case SYSCALL_SYS_STATE:
         ret = sys_state(param1, (sys_state_info*)param2);

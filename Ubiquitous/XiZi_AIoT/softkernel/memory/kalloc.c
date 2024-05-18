@@ -54,6 +54,7 @@ char* kalloc(size_t size)
     if (mem_alloc == NULL) {
         return NULL;
     }
+    assert((uintptr_t)mem_alloc >= V2P(&kernel_data_end) && (uintptr_t)mem_alloc < PHY_USER_FREEMEM_BASE);
     mem_alloc = P2V(mem_alloc);
     if ((uintptr_t)mem_alloc < KERN_MEM_BASE) {
         DEBUG("Error Alloc: %x by size: %d (Caused by double free)\n", mem_alloc, size);
