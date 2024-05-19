@@ -47,9 +47,9 @@ static inline int bitmap64_alloc(struct bitmap64* bitmap)
 {
     int free_bit = -1;
     // free bit is the first 0 bit, from [1, 64]
-    free_bit = __builtin_ffsll(~(bitmap->map));
+    free_bit = __builtin_ffsl(~(uint64_t)(bitmap->map));
     // handle if bitmap is full (no using 64th bit here)
-    if (free_bit == 64) {
+    if (free_bit == 0) {
         return -1;
     }
     assert(free_bit < 64 && free_bit >= 1);
