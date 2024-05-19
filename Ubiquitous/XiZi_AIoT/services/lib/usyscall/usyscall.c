@@ -26,6 +26,11 @@ int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ip
     return ret;
 }
 
+int thread(void* entry, char* name, char** argv)
+{
+    return syscall(SYSCALL_THREAD, (uintptr_t)entry, (uintptr_t)name, (uintptr_t)argv, 0);
+}
+
 void exit(int status)
 {
     syscall(SYSCALL_EXIT, (uintptr_t)status, 0, 0, 0);

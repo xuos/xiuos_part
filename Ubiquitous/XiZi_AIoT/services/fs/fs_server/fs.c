@@ -57,7 +57,7 @@ static int InodeFreeRecursive(struct Inode* dp);
 static char* PathElementExtract(char* path, char* name);
 static uint32_t InodeBlockMapping(struct Inode* inode, uint32_t block_num);
 
-#define MAX_SUPPORT_FD 2048
+#define MAX_SUPPORT_FD 4096
 static struct FileDescriptor fd_table[MAX_SUPPORT_FD];
 
 struct MemFsRange MemFsRange;

@@ -153,6 +153,10 @@ bool CreateResourceTag(TraceTag* new_tag, TraceTag* owner, char* name, tracemeta
         return false;
     }
     assert(owner->meta->type == TRACER_OWNER);
+    if (tracer_find_node_onestep(owner->meta, name) != NULL) {
+        return false;
+    }
+
     TracerNode* new_node = (TracerNode*)slab_alloc(&sys_tracer.node_allocator);
     if (new_node == NULL) {
         ERROR("Tracer: No memory for new node\n");

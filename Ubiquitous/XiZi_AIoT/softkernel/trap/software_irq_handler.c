@@ -61,10 +61,7 @@ void software_irq_dispatch(struct trapframe* tf)
         // call syscall
 
         int ret = arch_syscall(cur_task->thread_context.trapframe, &syscall_num);
-
-        if (syscall_num != SYSCALL_EXEC) {
-            arch_set_return(tf, ret);
-        }
+        arch_set_return(tf, ret);
     }
 
     if ((cur_cpu()->task == NULL && cur_task != NULL) || cur_task->state != RUNNING) {

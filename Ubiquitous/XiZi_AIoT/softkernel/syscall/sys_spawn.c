@@ -34,7 +34,7 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-extern int task_exec(struct Thread* task, char* img_start, char* name, char** argv);
+extern int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintptr_t entry, char* name, char** argv);
 int sys_spawn(char* img_start, char* name, char** argv)
 {
     // alloc a new memspace
@@ -60,34 +60,5 @@ int sys_spawn(char* img_start, char* name, char** argv)
     }
     assert(!IS_DOUBLE_LIST_EMPTY(&pmemspace->thread_list_guard));
 
-    // init params
-    struct ThreadStackPointer loaded_sp = load_user_stack(pmemspace, argv);
-    if (loaded_sp.stack_idx == -1) {
-        ERROR("Uable to load params to memspace.\n");
-        /* memspace is freed alone with free_pcb() */
-        xizi_task_manager.free_pcb(new_task_cb);
-        return -1;
-    }
-
-    // init trapframe
-    new_task_cb->thread_context.user_stack_idx = loaded_sp.stack_idx;
-    new_task_cb->thread_context.uspace_stack_addr = USER_MEM_TOP - ((loaded_sp.stack_idx + 1) * USER_STACK_SIZE);
-    new_task_cb->thread_context.ustack_kvaddr = loaded_sp.user_stack_vaddr;
-    arch_init_trapframe(new_task_cb->thread_context.trapframe, 0, 0);
-    arch_trapframe_set_sp_pc(new_task_cb->thread_context.trapframe, loaded_sp.user_sp, (uintptr_t)entry);
-    arch_set_main_params(new_task_cb->thread_context.trapframe, loaded_sp.argc, loaded_sp.user_sp);
-
-    // init thread name
-    char* last = NULL;
-    for (last = name; *name; name++) {
-        if (*name == '/') {
-            last = name + 1;
-        }
-    }
-    strncpy(new_task_cb->name, last, sizeof(new_task_cb->name));
-
-    // init pcb schedule attributes
-    xizi_task_manager.task_set_default_schedule_attr(new_task_cb);
-
-    return 0;
+    return sys_new_thread(pmemspace, new_task_cb, (uintptr_t)entry, name, argv);
 }

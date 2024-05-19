@@ -204,27 +204,30 @@ static struct Thread* _new_task_cb(struct MemSpace* pmemspace)
     if (!task) {
         return NULL;
     }
-    // init vm
-    if (pmemspace != NULL) {
-        task->memspace = pmemspace;
-        task->thread_context.user_stack_idx = -1;
-        doubleListNodeInit(&task->memspace_list_node);
-        doubleListAddOnBack(&task->memspace_list_node, &pmemspace->thread_list_guard);
-    } else {
-        task->memspace = NULL;
-    }
 
     /* init basic task member */
     doubleListNodeInit(&task->cli_sess_listhead);
     doubleListNodeInit(&task->svr_sess_listhead);
 
+    /* when creating a new task, memspace will be freed outside during memory shortage */
+    task->memspace = NULL;
+
     /* init main thread of task */
     task->thread_context.task = task;
     // alloc stack page for task
     if ((void*)(task->thread_context.kern_stack_addr = (uintptr_t)kalloc(USER_STACK_SIZE)) == NULL) {
+        /* here inside, will no free memspace */
         _dealloc_task_cb(task);
         return NULL;
     }
+
+    /* from now on, _new_task_cb() will not generate error */
+    /* init vm */
+    assert(pmemspace != NULL);
+    task->memspace = pmemspace;
+    task->thread_context.user_stack_idx = -1;
+    doubleListNodeInit(&task->memspace_list_node);
+    doubleListAddOnBack(&task->memspace_list_node, &pmemspace->thread_list_guard);
 
     /* set context of main thread stack */
     /// stack bottom

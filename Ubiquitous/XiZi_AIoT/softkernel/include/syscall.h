@@ -41,7 +41,7 @@ Modification:
 #define SYSCALL_POLL_SESSION    7   // server poll for it's server sessions
 #define SYSCALL_CLOSE_SESSION   8   // client close it's client sessions
 
-#define SYSCALL_EXEC            9   // run elf using current task
+#define SYSCALL_THREAD          9   // generate a thread using old memspace
 #define SYSCALL_SYS_STATE       10  // run system state
 #define SYSCALL_REGISTER_IRQ    11  //
 
@@ -85,6 +85,7 @@ typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offs
 int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, uintptr_t param4);
 
 int sys_spawn(char* img_start, char* name, char** argv);
+int sys_thread(uintptr_t entry, char* name, char** argv);
 int sys_exit(struct Thread* ptask);
 int sys_yield(task_yield_reason reason);
 int sys_kill(int id);

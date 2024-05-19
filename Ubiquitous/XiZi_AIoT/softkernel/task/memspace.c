@@ -214,7 +214,7 @@ struct ThreadStackPointer load_user_stack(struct MemSpace* pmemspace, char** arg
 
     /* start loading main params into user stack */
     /// @warning supports only main style params
-    uintptr_t user_vspace_sp = USER_MEM_TOP;
+    uintptr_t user_vspace_sp = USER_MEM_TOP - (stack_idx * USER_STACK_SIZE);
     static uintptr_t user_stack_init[MAX_SUPPORT_PARAMS];
     memset(user_stack_init, 0, sizeof(user_stack_init));
     uintptr_t argc = 0;
