@@ -39,6 +39,7 @@ void sys_init(void)
 
 u32_t sys_jiffies(void)
 {
+    return 1;
 }
 
 u32_t sys_now(void)
@@ -49,7 +50,7 @@ u32_t sys_now(void)
 
 sys_prot_t sys_arch_protect(void)
 {
-    // return CriticalAreaLock();
+    return 1;
 }
 
 void sys_arch_unprotect(sys_prot_t pval)
@@ -79,6 +80,7 @@ err_t sys_sem_new(sys_sem_t* sem, u8_t count)
 //         KPrintf("[sys_arch]:new sem fail!\n");
 //         return ERR_MEM;
 //     }
+    return 1;
 }
 
 void sys_sem_free(sys_sem_t* sem)
@@ -93,6 +95,7 @@ void sys_sem_free(sys_sem_t* sem)
 int sys_sem_valid(sys_sem_t* sem)
 {
     // return (*sem > SYS_SEM_NULL);
+    return 1;
 }
 
 void sys_sem_set_invalid(sys_sem_t* sem)
@@ -118,6 +121,7 @@ u32_t sys_arch_sem_wait(sys_sem_t* sem, u32_t timeout)
     //     return CalculateTimeMsFromTick(CurrentTicksGain() - start_tick);
     // else
     //     return SYS_ARCH_TIMEOUT;
+    return 1;
 }
 
 void sys_sem_signal(sys_sem_t* sem)
@@ -135,6 +139,7 @@ err_t sys_mutex_new(sys_mutex_t* mutex)
     //     KPrintf("[sys_arch]:new mutex fail!\n");
     //     return ERR_MEM;
     // }
+    return 1;
 }
 
 void sys_mutex_free(sys_mutex_t* mutex)
@@ -171,6 +176,7 @@ sys_thread_t sys_thread_new(const char* name, lwip_thread_fn function, void* arg
     // }
     // lw_print("lw: [%s] create %s failed\n", __func__, name);
     // return -ERROR;
+    return 1;
 }
 
 err_t sys_mbox_new(sys_mbox_t* mbox, int size)
@@ -190,6 +196,7 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
 
 //     // lw_print("lw: [%s] alloc %d mbox %p ok!\n", __func__, size, mbox);
 //     return ERR_OK;
+    return 1;   
 }
 void sys_mbox_free(sys_mbox_t* mbox)
 {
@@ -202,6 +209,7 @@ int sys_mbox_valid(sys_mbox_t* mbox)
     //     return 0;
     // else
     //     return 1;
+    return 1;
 }
 
 void sys_mbox_set_invalid(sys_mbox_t* mbox)
@@ -221,11 +229,13 @@ err_t sys_mbox_trypost(sys_mbox_t* q, void* msg)
     //     return ERR_OK;
     // else
     //     return ERR_MEM;
+    return 1;
 }
 
 err_t sys_mbox_trypost_fromisr(sys_mbox_t* q, void* msg)
 {
     // return sys_mbox_trypost(q, msg);
+    return 1;
 }
 
 u32_t sys_arch_mbox_fetch(sys_mbox_t* q, void** msg, u32_t timeout)
@@ -245,6 +255,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t* q, void** msg, u32_t timeout)
     // } else {
     //     return SYS_ARCH_TIMEOUT;
     // }
+    return 1;
 }
 u32_t sys_arch_mbox_tryfetch(sys_mbox_t* q, void** msg)
 {
@@ -252,6 +263,7 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t* q, void** msg)
     //     return ERR_OK;
     // else
     //     return SYS_MBOX_EMPTY;
+    return 1;
 }
 
 #if LWIP_NETCONN_SEM_PER_THREAD
