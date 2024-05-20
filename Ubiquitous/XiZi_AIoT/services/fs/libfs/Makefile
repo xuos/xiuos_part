@@ -23,8 +23,8 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/fs/libfs \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app
 
-fs_server: libfs_to_client.o
-	@mv $^ ../../app
+fs_server: libfs.o
+	@mv $^ $(KERNEL_ROOT)/services/app
 
 %.o: %.c
 	@echo "cc $^"

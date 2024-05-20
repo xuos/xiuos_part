@@ -14,7 +14,7 @@
 
 #include "block_io.h"
 #include "fs.h"
-#include "libfs_to_client.h"
+#include "libfs.h"
 #include "libserial.h"
 #include "usyscall.h"
 

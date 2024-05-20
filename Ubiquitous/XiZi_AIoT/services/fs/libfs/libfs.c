@@ -9,7 +9,7 @@
  * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-#include "libfs_to_client.h"
+#include "libfs.h"
 
 IPC_INTERFACE(Ipc_ls, 1, path, strlen(path) + 1);
 int ls(struct Session* session, char* path)

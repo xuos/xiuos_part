@@ -23,11 +23,12 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/lib/usyscall \
 			-I$(KERNEL_ROOT)/services/fs/libfs \
 			-I$(KERNEL_ROOT)/services/net/libnet \
+			-I$(KERNEL_ROOT)/services/semaphore \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app 
 
 ifeq ($(BOARD), imx6q-sabrelite)
-all: init test_fs simple_client simple_server shell fs_server test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server readme.txt test_net lwip | bin
+all: init test_fs simple_client simple_server shell fs_server semaphore_server test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server test_net lwip readme.txt | bin
 else 
 all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr readme.txt | bin
 endif
@@ -53,7 +54,11 @@ epit_server: timer.o epit.o ccm_pll.o usyscall.o arch_usyscall.o libserial.o pri
 	@${objdump} -S $@ > $@.asm
 endif
 
-test_thread: test_thread.o libserial.o printf.o usyscall.o arch_usyscall.o
+semaphore_server: semaphore_server.o libserial.o printf.o usyscall.o arch_usyscall.o libipc.o session.o
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
+
+test_thread: test_thread.o libserial.o printf.o usyscall.o arch_usyscall.o libfs.o libsemaphore.o libipc.o session.o libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
@@ -65,19 +70,19 @@ test_irq_hdlr: test_irq_handler.o libserial.o printf.o libipc.o session.o usysca
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
-shell: shell_port.o libserial.o printf.o shell_cmd_list.o shell.o shell_ext.o libfs_to_client.o libipc.o session.o usyscall.o arch_usyscall.o libmem.o
+shell: shell_port.o libserial.o printf.o shell_cmd_list.o shell.o shell_ext.o libfs.o libipc.o session.o usyscall.o arch_usyscall.o libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 	
-init: init.o libfs_to_client.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
+init: init.o libfs.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
-test_fs: test_fs.o libfs_to_client.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
+test_fs: test_fs.o libfs.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
-simple_client: simple_client.o libserial.o printf.o libipc.o session.o simple_service.o libfs_to_client.o usyscall.o arch_usyscall.o  libmem.o
+simple_client: simple_client.o libserial.o printf.o libipc.o session.o simple_service.o libfs.o usyscall.o arch_usyscall.o  libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
@@ -85,7 +90,7 @@ simple_server: simple_server.o libserial.o printf.o libipc.o session.o simple_se
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
-fs_server: fs_server.o libfs_to_client.o fs.o libserial.o printf.o libipc.o session.o block_io.o usyscall.o arch_usyscall.o libmem.o
+fs_server: fs_server.o libfs.o fs.o libserial.o printf.o libipc.o session.o block_io.o usyscall.o arch_usyscall.o libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
