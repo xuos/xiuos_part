@@ -43,7 +43,7 @@ ipv4 = autoip.o \
 netif = bridgeif.o \
         ethernet.o \
 		zepif.o
-
+sys = sys_arch.o
 
 libserial = $(KERNEL_ROOT)/services/app/libserial.o
 printf = $(KERNEL_ROOT)/services/app/printf.o
@@ -54,7 +54,7 @@ session = $(KERNEL_ROOT)/services/app/session.o
 libipc = $(KERNEL_ROOT)/services/app/libipc.o
 
 lwip: COMPILER lwip_server.o | bin
-	@${ld} ${user_ldflags} -e main -o $@ ${api} ${core} ${ipv4} ${netif} lwip_server.o ${libserial} ${printf} ${libmem} ${usyscall} ${arch_usyscall} ${session} ${libipc} ${board_specs}
+	@${ld} ${user_ldflags} -e main -o $@ ${sys} ${api} ${core} ${ipv4} ${netif} lwip_server.o ${libserial} ${printf} ${libmem} ${usyscall} ${arch_usyscall} ${session} ${libipc} ${board_specs}
 	@${objdump} -S $@ > $@.asm
 	@mv *.o bin
 	@mv $@ $(KERNEL_ROOT)/services/app
@@ -68,7 +68,7 @@ bin:
 	@${cc} ${cflags} ${c_useropts} ${INC_DIR} -o $@ -c $^
 
 
-
+SRC_DIR += arch
 SRC_DIR += api
 SRC_DIR += core
 SRC_DIR += netif
