@@ -59,8 +59,8 @@ struct PagerRightGroup {
 struct XiziPageManager {
     bool (*new_pgdir)(struct TopLevelPageDirectory* pgdir);
     void (*free_user_pgdir)(struct TopLevelPageDirectory* pgdir);
-    bool (*map_pages)(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, uintptr_t len, bool is_dev);
-    bool (*unmap_pages)(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t len);
+    bool (*map_pages)(uintptr_t* pd_addr, uintptr_t vaddr, uintptr_t paddr, uintptr_t len, bool is_dev);
+    bool (*unmap_pages)(uintptr_t* pd_addr, uintptr_t vaddr, uintptr_t len);
 
     uintptr_t (*resize_user_pgdir)(struct TopLevelPageDirectory* pgdir, uintptr_t old_size, uintptr_t new_size);
     uintptr_t (*address_translate)(struct TopLevelPageDirectory* pgdir, uintptr_t vaddr);

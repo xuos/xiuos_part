@@ -1,6 +1,6 @@
 SRC_FILES := syscall.c \
 	sys_spawn.c \
-	sys_exec.c \
+	sys_thread.c \
 	sys_yield.c \
 	sys_register_as_server.c \
 	sys_connect_session.c \

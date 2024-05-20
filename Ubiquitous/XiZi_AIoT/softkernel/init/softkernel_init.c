@@ -30,7 +30,6 @@ Modification:
 #include "kern_init.h"
 
 #include "assert.h"
-#include "kalloc.h"
 #include "log.h"
 #include "task.h"
 

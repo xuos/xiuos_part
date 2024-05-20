@@ -44,7 +44,7 @@ static inline bool is_msg_needed(struct IpcMsg* msg)
 
 int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
 {
-    struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
+    struct Thread* cur_task = cur_cpu()->task;
     if (cur_task == NULL) {
         ERROR("%s by killed task\n");
         return -1;
@@ -66,7 +66,7 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         // update session_backend
         // if current session is handled
         if (server_session->head != userland_session_arr[i].head) {
-            struct TaskMicroDescriptor* client = SERVER_SESSION_BACKEND(server_session)->client;
+            struct Thread* client = SERVER_SESSION_BACKEND(server_session)->client;
             if (client->state == BLOCKED) {
                 xizi_task_manager.task_unblock(client);
             } else {

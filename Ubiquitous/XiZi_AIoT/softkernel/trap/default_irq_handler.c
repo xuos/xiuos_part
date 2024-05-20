@@ -65,9 +65,9 @@ void intr_irq_dispatch(struct trapframe* tf)
         goto intr_leave_interrupt;
     }
 
-    struct TaskMicroDescriptor* current_task = cur_cpu()->task;
+    struct Thread* current_task = cur_cpu()->task;
     assert(current_task != NULL);
-    current_task->main_thread.trapframe = tf;
+    current_task->thread_context.trapframe = tf;
 
     int cpu = cur_cpuid();
     assert(cpu >= 0 && cpu < NR_CPU);
@@ -86,7 +86,7 @@ void intr_irq_dispatch(struct trapframe* tf)
 
     if (cur_cpu()->task == NULL || current_task->state != RUNNING) {
         cur_cpu()->task = NULL;
-        context_switch(&current_task->main_thread.context, cur_cpu()->scheduler);
+        context_switch(&current_task->thread_context.context, cur_cpu()->scheduler);
     }
     assert(current_task == cur_cpu()->task);
 

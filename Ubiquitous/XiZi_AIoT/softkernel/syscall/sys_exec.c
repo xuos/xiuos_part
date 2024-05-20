@@ -66,7 +66,7 @@ Modification:
 /// @param path path to elf file
 /// @param argv arguments giving to main
 /// @return
-int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, char** argv)
+int task_exec(struct Thread* task, char* img_start, char* name, char** argv)
 {
     /* load img to task */
     if (img_start == NULL) {
@@ -163,8 +163,8 @@ int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, cha
     // init task trapframe, which stores in svc stack
     // do not go tp error_exec once we change trapframe!
     assert(copied_len == (argc + 1) * sizeof(uintptr_t));
-    arch_trapframe_set_sp_pc(task->main_thread.trapframe, user_vspace_sp, elf.entry);
-    arch_set_main_params(task->main_thread.trapframe, argc, user_vspace_sp);
+    arch_trapframe_set_sp_pc(task->thread_context.trapframe, user_vspace_sp, elf.entry);
+    arch_set_main_params(task->thread_context.trapframe, argc, user_vspace_sp);
 
     // save program name
     char* last = NULL;
@@ -202,7 +202,7 @@ int sys_exec(char* img_start, char* name, char** argv)
     }
 
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&mmu_driver_tag);
-    struct TaskMicroDescriptor* current_task = cur_cpu()->task;
+    struct Thread* current_task = cur_cpu()->task;
     int ret = task_exec(current_task, img_start, name, argv);
     if (ret >= 0) {
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(current_task->pgdir.pd_addr));

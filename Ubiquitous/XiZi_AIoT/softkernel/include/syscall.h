@@ -41,7 +41,7 @@ Modification:
 #define SYSCALL_POLL_SESSION    7   // server poll for it's server sessions
 #define SYSCALL_CLOSE_SESSION   8   // client close it's client sessions
 
-#define SYSCALL_EXEC            9   // run elf using current task
+#define SYSCALL_THREAD          9   // generate a thread using old memspace
 #define SYSCALL_SYS_STATE       10  // run system state
 #define SYSCALL_REGISTER_IRQ    11  //
 
@@ -85,20 +85,21 @@ typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offs
 int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, uintptr_t param4);
 
 int sys_spawn(char* img_start, char* name, char** argv);
-int sys_exit(struct TaskMicroDescriptor* ptask);
+int sys_thread(uintptr_t entry, char* name, char** argv);
+int sys_exit(struct Thread* ptask);
 int sys_yield(task_yield_reason reason);
 int sys_kill(int id);
 
 int sys_register_as_server(char* name);
 int sys_connect_session(char* path, int capacity, struct Session* user_session);
 int sys_poll_session(struct Session* userland_session_arr, int arr_capacity);
-int sys_close_session(struct TaskMicroDescriptor* task, struct Session* session);
+int sys_close_session(struct Thread* task, struct Session* session);
 
 int sys_exec(char* img_start, char* name, char** argv);
 int sys_state(sys_state_option option, sys_state_info* info);
 int sys_mmap(uintptr_t vaddr, uintptr_t paddr, int len, int is_dev);
 
 int sys_register_irq(int irq_num, int irq_opcode);
-int sys_unbind_irq_all(struct TaskMicroDescriptor* task);
-int sys_unbind_irq(struct TaskMicroDescriptor* task, int irq_num);
+int sys_unbind_irq_all(struct Thread* task);
+int sys_unbind_irq(struct Thread* task, int irq_num);
 #endif

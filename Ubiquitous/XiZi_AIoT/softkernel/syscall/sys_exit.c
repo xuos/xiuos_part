@@ -36,7 +36,7 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-int sys_exit(struct TaskMicroDescriptor* ptask)
+int sys_exit(struct Thread* ptask)
 {
     assert(ptask != NULL);
     ptask->dead = true;

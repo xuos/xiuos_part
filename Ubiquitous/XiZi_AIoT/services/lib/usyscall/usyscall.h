@@ -27,7 +27,7 @@
 #define SYSCALL_POLL_SESSION    7   // server poll for it's server sessions
 #define SYSCALL_CLOSE_SESSION   8   // client close it's client sessions
 
-#define SYSCALL_EXEC            9   // run elf using current task
+#define SYSCALL_THREAD          9   // generate a thread using old memspace
 #define SYSCALL_SYS_STATE       10  // run system state
 #define SYSCALL_REGISTER_IRQ    11  //
 
@@ -65,6 +65,7 @@ typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offs
 int syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4);
 
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv);
+int thread(void* entry, char* name, char** argv);
 void exit(int status);
 int yield(task_yield_reason reason);
 int kill(int pid);

@@ -35,7 +35,7 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-struct session_backend* create_session_inner(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, int capacity, struct Session* user_session)
+struct session_backend* create_session_inner(struct Thread* client, struct Thread* server, int capacity, struct Session* user_session)
 {
     // create share pages
     assert(server != NULL && client != NULL);
@@ -61,7 +61,7 @@ int sys_connect_session(char* path, int capacity, struct Session* user_session)
         return -1;
     }
 
-    struct TaskMicroDescriptor* client = cur_cpu()->task;
+    struct Thread* client = cur_cpu()->task;
     /// get server
     struct TraceTag server_identifier_owner;
     if (!AchieveResourceTag(&server_identifier_owner, RequireRootTag(), "softkernel/server-identifier")) {
@@ -75,7 +75,7 @@ int sys_connect_session(char* path, int capacity, struct Session* user_session)
         return -1;
     }
 
-    struct TaskMicroDescriptor* server = AchieveResource(&server_tag);
+    struct Thread* server = AchieveResource(&server_tag);
     assert(server != NULL);
     if (create_session_inner(client, server, capacity, user_session) == NULL) {
         return -1;

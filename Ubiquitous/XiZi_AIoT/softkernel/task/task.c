@@ -33,7 +33,7 @@ Modification:
 
 #include "assert.h"
 #include "kalloc.h"
-#include "log.h"
+#include "memspace.h"
 #include "multicores.h"
 #include "scheduler.h"
 #include "syscall.h"
@@ -42,7 +42,7 @@ Modification:
 struct CPU global_cpus[NR_CPU];
 uint32_t ready_task_priority;
 
-static inline void task_node_leave_list(struct TaskMicroDescriptor* task)
+static inline void task_node_leave_list(struct Thread* task)
 {
     doubleListDel(&task->node);
     if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[task->priority])) {
@@ -50,13 +50,13 @@ static inline void task_node_leave_list(struct TaskMicroDescriptor* task)
     }
 }
 
-static inline void task_node_add_to_ready_list_head(struct TaskMicroDescriptor* task)
+static inline void task_node_add_to_ready_list_head(struct Thread* task)
 {
     doubleListAddOnHead(&task->node, &xizi_task_manager.task_list_head[task->priority]);
     ready_task_priority |= ((uint32_t)1 << task->priority);
 }
 
-static inline void task_node_add_to_ready_list_back(struct TaskMicroDescriptor* task)
+static inline void task_node_add_to_ready_list_back(struct Thread* task)
 {
     doubleListAddOnBack(&task->node, &xizi_task_manager.task_list_head[task->priority]);
     ready_task_priority |= ((uint32_t)1 << task->priority);
@@ -71,10 +71,11 @@ static void _task_manager_init()
     doubleListNodeInit(&xizi_task_manager.task_blocked_list_head);
     doubleListNodeInit(&xizi_task_manager.task_running_list_head);
     // init task (slab) allocator
-    slab_init(&xizi_task_manager.task_allocator, sizeof(struct TaskMicroDescriptor));
+    slab_init(&xizi_task_manager.memspace_allocator, sizeof(struct MemSpace));
+    slab_init(&xizi_task_manager.task_allocator, sizeof(struct Thread));
     slab_init(&xizi_task_manager.task_buddy_allocator, sizeof(struct KBuddy));
 
-    // pid pool
+    // tid pool
     xizi_task_manager.next_pid = 0;
 
     // init priority bit map
@@ -82,22 +83,23 @@ static void _task_manager_init()
 }
 
 /// @brief alloc a new task without init
-static struct TaskMicroDescriptor* _alloc_task_cb()
+static struct Thread* _alloc_task_cb()
 {
     // alloc task and add it to used task list
-    struct TaskMicroDescriptor* task = (struct TaskMicroDescriptor*)slab_alloc(&xizi_task_manager.task_allocator);
+    struct Thread* task = (struct Thread*)slab_alloc(&xizi_task_manager.task_allocator);
     if (UNLIKELY(task == NULL)) {
         ERROR("Not enough memory\n");
         return NULL;
     }
-    // set pid once task is allocated
+    // set tid once task is allocated
     memset(task, 0, sizeof(*task));
-    task->pid = xizi_task_manager.next_pid++;
+    task->tid = xizi_task_manager.next_pid++;
+    task->thread_context.user_stack_idx = -1;
 
     return task;
 }
 
-int _task_retrieve_sys_resources(struct TaskMicroDescriptor* ptask)
+int _task_retrieve_sys_resources(struct Thread* ptask)
 {
     assert(ptask != NULL);
 
@@ -143,7 +145,7 @@ int _task_retrieve_sys_resources(struct TaskMicroDescriptor* ptask)
 
 /// @brief this function changes task list without locking, so it must be called inside a lock critical area
 /// @param task
-static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
+static void _dealloc_task_cb(struct Thread* task)
 {
     if (UNLIKELY(task == NULL)) {
         ERROR("deallocating a NULL task\n");
@@ -152,22 +154,38 @@ static void _dealloc_task_cb(struct TaskMicroDescriptor* task)
 
     _task_retrieve_sys_resources(task);
 
-    // stack is mapped in vspace, so it should be free by pgdir
-    if (task->pgdir.pd_addr) {
-        xizi_pager.free_user_pgdir(&task->pgdir);
-    }
-    if (task->main_thread.stack_addr) {
-        kfree((char*)task->main_thread.stack_addr);
+    /* free thread's user stack */
+    if (task->thread_context.user_stack_idx != -1) {
+        // stack is mapped in vspace, so it should be freed from pgdir
+        assert(task->thread_context.user_stack_idx >= 0 && task->thread_context.user_stack_idx < 64);
+        assert(task->memspace != NULL);
+
+        /* the stack must have be set in memspace if bitmap has been set */
+        assert(xizi_pager.unmap_pages(task->memspace->pgdir.pd_addr, task->thread_context.uspace_stack_addr, USER_STACK_SIZE));
+        bitmap64_free(&task->memspace->thread_stack_idx_bitmap, task->thread_context.user_stack_idx);
+        /* thread's user stack space is also allocated for kernel free space */
+        assert(kfree((char*)task->thread_context.ustack_kvaddr));
     }
 
-    // remove it from used task list
+    /* free thread's kernel stack */
+    if (task->thread_context.kern_stack_addr) {
+        kfree((char*)task->thread_context.kern_stack_addr);
+    }
+
+    /* free memspace if needed to */
+    if (task->memspace != NULL) {
+        doubleListDel(&task->memspace_list_node);
+        /* free memspace if thread is the last one using it */
+        if (IS_DOUBLE_LIST_EMPTY(&task->memspace->thread_list_guard)) {
+            // free memspace
+            free_memspace(task->memspace);
+        }
+    }
+
+    // remove thread from used task list
     task_node_leave_list(task);
 
     // free task back to allocator
-    if (task->massive_ipc_allocator != NULL) {
-        KBuddyDestory(task->massive_ipc_allocator);
-        slab_free(&xizi_task_manager.task_buddy_allocator, (void*)task->massive_ipc_allocator);
-    }
     slab_free(&xizi_task_manager.task_allocator, (void*)task);
 }
 
@@ -179,45 +197,56 @@ __attribute__((optimize("O0"))) void task_prepare_enter()
     trap_return();
 }
 
-static struct TaskMicroDescriptor* _new_task_cb()
+static struct Thread* _new_task_cb(struct MemSpace* pmemspace)
 {
     // alloc task space
-    struct TaskMicroDescriptor* task = _alloc_task_cb();
+    struct Thread* task = _alloc_task_cb();
     if (!task) {
         return NULL;
     }
-    // init vm
-    task->pgdir.pd_addr = NULL;
+
     /* init basic task member */
     doubleListNodeInit(&task->cli_sess_listhead);
     doubleListNodeInit(&task->svr_sess_listhead);
 
+    /* when creating a new task, memspace will be freed outside during memory shortage */
+    task->memspace = NULL;
+
     /* init main thread of task */
-    task->main_thread.task = task;
+    task->thread_context.task = task;
     // alloc stack page for task
-    if ((void*)(task->main_thread.stack_addr = (uintptr_t)kalloc(USER_STACK_SIZE)) == NULL) {
+    if ((void*)(task->thread_context.kern_stack_addr = (uintptr_t)kalloc(USER_STACK_SIZE)) == NULL) {
+        /* here inside, will no free memspace */
         _dealloc_task_cb(task);
         return NULL;
     }
 
+    /* from now on, _new_task_cb() will not generate error */
+    /* init vm */
+    assert(pmemspace != NULL);
+    task->memspace = pmemspace;
+    task->thread_context.user_stack_idx = -1;
+    doubleListNodeInit(&task->memspace_list_node);
+    doubleListAddOnBack(&task->memspace_list_node, &pmemspace->thread_list_guard);
+
     /* set context of main thread stack */
     /// stack bottom
-    memset((void*)task->main_thread.stack_addr, 0x00, USER_STACK_SIZE);
-    char* sp = (char*)task->main_thread.stack_addr + USER_STACK_SIZE - 4;
+    memset((void*)task->thread_context.kern_stack_addr, 0x00, USER_STACK_SIZE);
+    char* sp = (char*)task->thread_context.kern_stack_addr + USER_STACK_SIZE - 4;
 
     /// 1. trap frame into stack, for process to nomally return by trap_return
-    sp -= sizeof(*task->main_thread.trapframe);
-    task->main_thread.trapframe = (struct trapframe*)sp;
+    sp -= sizeof(*task->thread_context.trapframe);
+    task->thread_context.trapframe = (struct trapframe*)sp;
 
     /// 2. context into stack
-    sp -= sizeof(*task->main_thread.context);
-    task->main_thread.context = (struct context*)sp;
-    arch_init_context(task->main_thread.context);
+    sp -= sizeof(*task->thread_context.context);
+    task->thread_context.context = (struct context*)sp;
+    arch_init_context(task->thread_context.context);
 
     return task;
 }
 
-static void _task_set_default_schedule_attr(struct TaskMicroDescriptor* task)
+static void _task_set_default_schedule_attr(struct Thread* task)
 {
     task->remain_tick = TASK_CLOCK_TICK;
     task->maxium_tick = TASK_CLOCK_TICK * 10;
@@ -226,7 +255,7 @@ static void _task_set_default_schedule_attr(struct TaskMicroDescriptor* task)
     task_node_add_to_ready_list_head(task);
 }
 
-static void task_state_set_running(struct TaskMicroDescriptor* task)
+static void task_state_set_running(struct Thread* task)
 {
     assert(task != NULL && task->state == READY);
     task->state = RUNNING;
@@ -234,12 +263,12 @@ static void task_state_set_running(struct TaskMicroDescriptor* task)
     doubleListAddOnHead(&task->node, &xizi_task_manager.task_running_list_head);
 }
 
-struct TaskMicroDescriptor* next_task_emergency = NULL;
+struct Thread* next_task_emergency = NULL;
 extern void context_switch(struct context**, struct context*);
 static void _scheduler(struct SchedulerRightGroup right_group)
 {
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
-    struct TaskMicroDescriptor* next_task;
+    struct Thread* next_task;
     struct CPU* cpu = cur_cpu();
 
     while (1) {
@@ -269,13 +298,14 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         /* run the chosen task */
         task_state_set_running(next_task);
         cpu->task = next_task;
-        p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->pgdir.pd_addr));
-        context_switch(&cpu->scheduler, next_task->main_thread.context);
+        assert(next_task->memspace->pgdir.pd_addr != NULL);
+        p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->memspace->pgdir.pd_addr));
+        context_switch(&cpu->scheduler, next_task->thread_context.context);
         assert(next_task->state != RUNNING);
     }
 }
 
-static void _task_yield_noschedule(struct TaskMicroDescriptor* task, bool blocking)
+static void _task_yield_noschedule(struct Thread* task, bool blocking)
 {
     assert(task != NULL);
     /// @warning only support current task yield now
@@ -291,7 +321,7 @@ static void _task_yield_noschedule(struct TaskMicroDescriptor* task, bool blocki
     task_node_add_to_ready_list_back(task);
 }
 
-static void _task_block(struct TaskMicroDescriptor* task)
+static void _task_block(struct Thread* task)
 {
     assert(task != NULL);
     assert(task->state != RUNNING);
@@ -300,7 +330,7 @@ static void _task_block(struct TaskMicroDescriptor* task)
     doubleListAddOnHead(&task->node, &xizi_task_manager.task_blocked_list_head);
 }
 
-static void _task_unblock(struct TaskMicroDescriptor* task)
+static void _task_unblock(struct Thread* task)
 {
     assert(task != NULL);
     assert(task->state == BLOCKED);
@@ -318,7 +348,7 @@ static void _set_cur_task_priority(int priority)
         return;
     }
 
-    struct TaskMicroDescriptor* current_task = cur_cpu()->task;
+    struct Thread* current_task = cur_cpu()->task;
     assert(current_task != NULL && current_task->state == RUNNING);
 
     task_node_leave_list(current_task);

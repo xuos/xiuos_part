@@ -69,8 +69,8 @@ struct session_backend {
     struct client_session client_side;
     int session_id; // id of this session
     int nr_pages; // pages used by this pipe
-    struct TaskMicroDescriptor* client; // client of this pipe
-    struct TaskMicroDescriptor* server; // server of this pipe
+    struct Thread* client; // client of this pipe
+    struct Thread* server; // server of this pipe
 
     uintptr_t buf_kernel_addr;
 };
@@ -81,11 +81,11 @@ struct SharePageRightGroup {
 };
 
 struct XiziSharePageManager {
-    struct session_backend* (*create_share_pages)(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, const int capacity);
-    void (*unmap_task_share_pages)(struct TaskMicroDescriptor* task, const uintptr_t task_vaddr, const int nr_pages);
+    struct session_backend* (*create_share_pages)(struct Thread* client, struct Thread* server, const int capacity);
+    void (*unmap_task_share_pages)(struct Thread* task, const uintptr_t task_vaddr, const int nr_pages);
     int (*delete_share_pages)(struct session_backend* session_backend);
 
-    uintptr_t (*task_map_pages)(struct TaskMicroDescriptor* task, const uintptr_t vaddr, const uintptr_t paddr, const int nr_pages, const int is_dev);
+    uintptr_t (*task_map_pages)(struct Thread* task, const uintptr_t vaddr, const uintptr_t paddr, const int nr_pages, const int is_dev);
 };
 extern struct XiziSharePageManager xizi_share_page_manager;
 
