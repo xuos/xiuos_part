@@ -24,7 +24,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/app \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) 
 
 all: shell_cmd_list.o shell_ext.o shell.o
-	@mv $^ ../../app
+	@mv $^ $(KERNEL_ROOT)/services/app
 
 shell_cmd_list.o: shell_cmd_list.c
 	@echo "cc shell_cmd_list"

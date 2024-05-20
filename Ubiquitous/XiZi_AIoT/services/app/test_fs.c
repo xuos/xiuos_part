@@ -15,8 +15,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "libfs.h"
 #include "libserial.h"
-#include "libfs_to_client.h"
 #include "usyscall.h"
 
 #define BLOCK_SIZE 256

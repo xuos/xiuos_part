@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "libfs_to_client.h"
+#include "libfs.h"
 #include "libserial.h"
 #include "simple_service.h"
 #include "usyscall.h"
