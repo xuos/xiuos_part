@@ -58,7 +58,7 @@ static inline bool check_pages_unmapped(struct Thread* task, uintptr_t vaddr, in
 {
     static uintptr_t paddr = UINT32_MAX;
     for (uintptr_t i = 0; i < nr_pages; i++) {
-        if ((paddr = xizi_pager.address_translate(&task->memspace->pgdir, vaddr)) != 0) {
+        if ((paddr = xizi_pager.address_translate(&task->memspace->pgdir, vaddr)) != (uintptr_t)NULL) {
             return false;
         }
         vaddr += PAGE_SIZE;
@@ -75,13 +75,16 @@ static uintptr_t alloc_share_page_addr(struct Thread* task, const int nr_pages)
 {
     uintptr_t vaddr = USER_IPC_SPACE_BASE;
     while (!check_pages_unmapped(task, vaddr, nr_pages)) {
+        // vaddr is destinate to be (2 * PAGE_SIZE) aligned
         vaddr += 2 * PAGE_SIZE;
         assert(vaddr % PAGE_SIZE == 0);
     }
+
     // now that nr_pages size after vaddr is unmapped
     if (UNLIKELY(vaddr >= USER_IPC_SPACE_TOP)) {
         return (uintptr_t)NULL;
     }
+
     return vaddr;
 }
 
@@ -94,10 +97,20 @@ static uintptr_t map_task_share_page(struct Thread* task, const uintptr_t paddr,
     // map double vaddr page to support uniform ring buffer r/w
     uintptr_t vaddr = (uintptr_t)NULL;
     if (task->memspace->massive_ipc_allocator != NULL) {
+        // alloc from ipc area buddy
         vaddr = (uintptr_t)KBuddyAlloc(task->memspace->massive_ipc_allocator, PAGE_SIZE * nr_pages * 2);
+        if (vaddr == (uintptr_t)NULL) {
+            ERROR("Task %s drains all ipc area.\n", task->name);
+            return (uintptr_t)NULL;
+        }
+
+        // allocated ipc share vaddr must not been used
         assert(xizi_pager.address_translate(&task->memspace->pgdir, vaddr) == (uintptr_t)NULL);
     } else {
+        // simple allocation
         vaddr = alloc_share_page_addr(task, nr_pages * 2);
+
+        // time to use buddy
         if (vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
             task->memspace->massive_ipc_allocator = (struct KBuddy*)slab_alloc(&xizi_task_manager.task_buddy_allocator);
             KBuddyInit(task->memspace->massive_ipc_allocator, USER_IPC_USE_ALLOCATOR_WATERMARK, USER_IPC_SPACE_TOP);
@@ -112,19 +125,25 @@ static uintptr_t map_task_share_page(struct Thread* task, const uintptr_t paddr,
     if (UNLIKELY(vaddr == (uintptr_t)NULL)) {
         return (uintptr_t)NULL;
     }
+
+    // map first area
     if (!xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false)) {
         return (uintptr_t)NULL;
     }
+
+    // map second area
     if (!xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr + (nr_pages * PAGE_SIZE), paddr, nr_pages * PAGE_SIZE, false)) {
         xizi_pager.unmap_pages(task->memspace->pgdir.pd_addr, vaddr, nr_pages * PAGE_SIZE);
         return (uintptr_t)NULL;
     }
+
+    // flush tlb
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(vaddr, 2 * nr_pages * PAGE_SIZE);
-
         /// @todo clean range rather than all
         p_dcache_done->invalidateall();
     }
+
     return vaddr;
 }
 
@@ -140,12 +159,13 @@ uintptr_t task_map_pages(struct Thread* task, const uintptr_t vaddr, const uintp
     } else {
         ret = xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false);
     }
+
     if (!ret) {
         return (uintptr_t)NULL;
     }
+
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(vaddr, nr_pages * PAGE_SIZE);
-
         /// @todo clean range rather than all
         p_dcache_done->invalidateall();
     }
@@ -155,18 +175,24 @@ uintptr_t task_map_pages(struct Thread* task, const uintptr_t vaddr, const uintp
 
 void unmap_task_share_pages(struct Thread* task, const uintptr_t task_vaddr, const int nr_pages)
 {
+    // usages of unmap_task_share_pages must be correct
+    assert(task_vaddr >= USER_IPC_SPACE_BASE && task_vaddr < USER_IPC_SPACE_TOP);
+
     /* get driver codes */
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
 
-    xizi_pager.unmap_pages(task->memspace->pgdir.pd_addr, task_vaddr, nr_pages * PAGE_SIZE);
-    xizi_pager.unmap_pages(task->memspace->pgdir.pd_addr, task_vaddr + (nr_pages * PAGE_SIZE), nr_pages * PAGE_SIZE);
+    // unmap must be correct
+    assert(xizi_pager.unmap_pages(task->memspace->pgdir.pd_addr, task_vaddr, nr_pages * PAGE_SIZE));
+    assert(xizi_pager.unmap_pages(task->memspace->pgdir.pd_addr, task_vaddr + (nr_pages * PAGE_SIZE), nr_pages * PAGE_SIZE));
+
+    // retrieve virtual address
     if (task_vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
         KBuddyFree(task->memspace->massive_ipc_allocator, (void*)task_vaddr);
     }
+
     if (task == cur_cpu()->task) {
         p_mmu_driver->TlbFlush(task_vaddr, 2 * nr_pages * PAGE_SIZE);
-
         /// @todo clean range rather than all
         p_dcache_done->invalidateall();
     }
@@ -175,6 +201,7 @@ void unmap_task_share_pages(struct Thread* task, const uintptr_t task_vaddr, con
 static int next_session_id = 1;
 struct session_backend* create_share_pages(struct Thread* client, struct Thread* server, const int capacity)
 {
+    /* alloc session backend */
     struct session_backend* session_backend = (struct session_backend*)slab_alloc(SessionAllocator());
     if (UNLIKELY(session_backend == NULL)) {
         return NULL;
@@ -182,20 +209,26 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
 
     int true_capacity = ALIGNUP(capacity, PAGE_SIZE);
     int nr_pages = true_capacity / PAGE_SIZE;
+    /* alloc free memory as share memory */
     uintptr_t kern_vaddr = (uintptr_t)kalloc(true_capacity);
     if (UNLIKELY(kern_vaddr == (uintptr_t)NULL)) {
-        ERROR("No memory\n");
+        ERROR("No memory for session\n");
+        slab_free(SessionAllocator(), session_backend);
         return NULL;
     }
+
     assert(kern_vaddr % PAGE_SIZE == 0);
+    /* map client vspace */
     uintptr_t client_vaddr = map_task_share_page(client, V2P_WO(kern_vaddr), nr_pages);
-    if (UNLIKELY(client_vaddr == 0)) {
+    if (UNLIKELY(client_vaddr == (uintptr_t)NULL)) {
         kfree((char*)kern_vaddr);
         slab_free(SessionAllocator(), session_backend);
         return NULL;
     }
+
+    /* map server vspace */
     uintptr_t server_vaddr = map_task_share_page(server, V2P_WO(kern_vaddr), nr_pages);
-    if (UNLIKELY(server_vaddr == 0)) {
+    if (UNLIKELY(server_vaddr == (uintptr_t)NULL)) {
         unmap_task_share_pages(client, client_vaddr, nr_pages);
         kfree((char*)kern_vaddr);
         slab_free(SessionAllocator(), session_backend);

@@ -130,7 +130,9 @@ uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start)
             goto error_exec;
         }
         // 2. copy inode to space
-        assert(ph.vaddr % PAGE_SIZE == 0);
+        if (ph.vaddr % PAGE_SIZE != 0) {
+            LOG("Unsupported elf file, try use flag -N to compile.\n");
+        }
         for (int addr_offset = 0; addr_offset < ph.filesz; addr_offset += PAGE_SIZE) {
             uintptr_t page_paddr = xizi_pager.address_translate(&pgdir, ph.vaddr + addr_offset);
             if (page_paddr == 0) {
@@ -219,12 +221,11 @@ struct ThreadStackPointer load_user_stack(struct MemSpace* pmemspace, char** arg
     memset(user_stack_init, 0, sizeof(user_stack_init));
     uintptr_t argc = 0;
     uintptr_t copy_len = 0;
-    for (argc = 0; argv != NULL && argv[argc] != NULL; argc++) {
+    for (argc = 0; argv != NULL && argc < MAX_SUPPORT_PARAMS && argv[argc] != NULL; argc++) {
         /// @todo handle with large number of parameters (more than 32)
-
         // copy param to user stack
         copy_len = strlen(argv[argc]) + 1;
-        user_vspace_sp = (user_vspace_sp - copy_len) & ~3;
+        user_vspace_sp = ALIGNDOWN(user_vspace_sp - copy_len, sizeof(uintptr_t));
         uintptr_t copied_len = xizi_pager.cross_vspace_data_copy(&pmemspace->pgdir, user_vspace_sp, (uintptr_t)argv[argc], copy_len);
         if (UNLIKELY(copied_len != copy_len)) {
             ERROR("Something went wrong when copying params.\n");

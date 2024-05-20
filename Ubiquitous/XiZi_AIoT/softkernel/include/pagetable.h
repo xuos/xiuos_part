@@ -39,8 +39,8 @@ Modification:
 #include "mmu_common.h"
 
 // clang-format off
-#define ALIGNUP(sz, al)         (((uintptr_t)(sz) + (uintptr_t)(al) - 1) & ~((uintptr_t)(al) - 1))
-#define ALIGNDOWN(sz, al)       ((uintptr_t)(sz) & ~((uintptr_t)(al) - 1))
+#define ALIGNUP(size, align)         (((uintptr_t)(size) + (uintptr_t)(align) - 1) & ~((uintptr_t)(align) - 1))
+#define ALIGNDOWN(size, align)       ((uintptr_t)(size) & ~((uintptr_t)(align) - 1))
 
 #define LEVEL4_PTE_IDX(v)       (((uintptr_t)(v) >> LEVEL4_PTE_SHIFT) & (NUM_LEVEL4_PTE - 1))
 #define LEVEL4_PTE_ADDR(v)      ALIGNDOWN(v, LEVEL4_PTE_SIZE)
