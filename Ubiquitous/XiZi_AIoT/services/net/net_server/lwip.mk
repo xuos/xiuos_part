@@ -17,7 +17,8 @@ objdump = ${toolchain}objdump
 c_useropts = -O2
 
 INC_DIR = 	-I$(KERNEL_ROOT)/services/net/libnet \
-			-I$(KERNEL_ROOT)/services/net/net_server/include/arch \
+			-I$(KERNEL_ROOT)/services/net/net_server \
+			-I$(KERNEL_ROOT)/services/net/net_server/arch \
 			-I$(KERNEL_ROOT)/services/net/net_server/include \
 			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip \
 			-I$(KERNEL_ROOT)/services/net/net_server/include/netif \
