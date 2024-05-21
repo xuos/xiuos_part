@@ -12,6 +12,6 @@
 
 #include "libipc.h"
 
-IPC_SERVICES(IpcLWIPServer, Ipc_LWIP_init)
+IPC_SERVICES(IpcLWIPServer, Ipc_LWIP_test)
 
-void LWIP_init(struct Session* session, char* ip, char* mask, char* gw);
+void LWIP_test(struct Session* session);

@@ -65,7 +65,7 @@ typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offs
 int syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4);
 
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv);
-int thread(void* entry, char* name, char** argv);
+int thread(void* entry, const char* name, char** argv);
 void exit(int status);
 int yield(task_yield_reason reason);
 int kill(int pid);

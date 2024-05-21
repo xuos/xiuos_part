@@ -19,49 +19,24 @@
 #include "lwip/ip4_addr.h"
 #include "lwip/netif.h"
 #include "netif/ethernet.h"
+#include "sys_arch.h"
 
-static struct netif gnetif;
 
-int IPC_DO_SERVE_FUNC(Ipc_LWIP_init)(char* ip, char* mask, char* gw){
-
-    ip4_addr_t net_ipaddr, net_netmask, net_gw;
-    IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
-    IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
-    IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
-
-    lwip_init();
-
-#ifndef NETIF_ENET_INIT_FUNC
-        printf("Not Netif driver for Eport 0\n");
-        return 0;
-#endif
-
-#ifdef NETIF_ENET_INIT_FUNC
-    netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, NULL,
-            NETIF_ENET_INIT_FUNC, &ethernet_input);
-
-    /* Registers the default network interface */
-    netif_set_default(&gnetif);
-
-    if (netif_is_link_up(&gnetif))
-    {
-    /*When the netif is fully configured this function must be called */
-        netif_set_up(&gnetif);
-    }
-    else
-    {
-        /* When the netif link is down this function must be called */
-        netif_set_down(&gnetif);
-    }
-    return 0;
-#endif
+int IPC_DO_SERVE_FUNC(Ipc_LWIP_test)(struct Session* session){
+    printf("LWIP init success");
+    return 1;
 }
 
 
-IPC_SERVER_INTERFACE(Ipc_LWIP_init, 3);
-IPC_SERVER_REGISTER_INTERFACES(IpcLWIPServer, 1, Ipc_LWIP_init);
+IPC_SERVER_INTERFACE(Ipc_LWIP_test, 1);
+IPC_SERVER_REGISTER_INTERFACES(IpcLWIPServer, 1, Ipc_LWIP_test);
 
 int main(int argc, char* argv[]){
+    char lwip_ipaddr[4] = { 192, 168, 130, 77 };
+    char lwip_netmask[4] = { 255, 255, 254, 0 };
+    char lwip_gwaddr[4] = { 192, 168, 130, 1 };
+
+    lwip_config_tcp(lwip_ipaddr, lwip_netmask, lwip_gwaddr);
     if (register_server("LWIPServer") < 0) {
         printf("register server name: %s failed.\n", "LWIPServer");
         exit(0);

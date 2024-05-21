@@ -12,9 +12,9 @@
 #include "lwip_service.h"
 #include <string.h>
 
-IPC_INTERFACE(Ipc_LWIP_init, 3, ip, mask, gw, sizeof(char[4]), sizeof(char[4]), sizeof(char[4]))
-void LWIP_init(struct Session* session, char* ip, char* mask, char* gw){
-    IPC_CALL(Ipc_LWIP_init)(session, ip, mask, gw);
+IPC_INTERFACE(Ipc_LWIP_test, 1, ignore, sizeof(int))
+void LWIP_test(struct Session* session){
+    IPC_CALL(Ipc_LWIP_test)(session, NULL);
 }
 
  

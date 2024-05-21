@@ -124,10 +124,10 @@ again:
  * @param arg unused argument
  */
 static void
-tcpip_thread(void *arg)
+tcpip_thread(int argc, char **argv)
 {
   struct tcpip_msg *msg;
-  LWIP_UNUSED_ARG(arg);
+  LWIP_UNUSED_ARG(argv);
 
   LWIP_MARK_TCPIP_THREAD();
 

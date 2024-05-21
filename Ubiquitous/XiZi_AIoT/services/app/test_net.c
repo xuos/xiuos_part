@@ -23,10 +23,7 @@ int main(int argc, char* argv[])
     struct Session sess;
     connect_session(&sess, "LWIPServer", 4096);
 
-    char lwip_ipaddr[4] = { 192, 168, 130, 77 };
-    char lwip_netmask[4] = { 255, 255, 254, 0 };
-    char lwip_gwaddr[4] = { 192, 168, 130, 1 };
-    LWIP_init(&sess, lwip_ipaddr, lwip_netmask, lwip_ipaddr);
+    LWIP_test(&sess);
     
     free_session(&sess);
 

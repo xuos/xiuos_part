@@ -52,9 +52,9 @@ usyscall = $(KERNEL_ROOT)/services/app/usyscall.o
 arch_usyscall = $(KERNEL_ROOT)/services/app/arch_usyscall.o
 session = $(KERNEL_ROOT)/services/app/session.o
 libipc = $(KERNEL_ROOT)/services/app/libipc.o
-
+libsem = $(KERNEL_ROOT)/services/app/libsemaphore.o
 lwip: COMPILER lwip_server.o | bin
-	@${ld} ${user_ldflags} -e main -o $@ ${sys} ${api} ${core} ${ipv4} ${netif} lwip_server.o ${libserial} ${printf} ${libmem} ${usyscall} ${arch_usyscall} ${session} ${libipc} ${board_specs}
+	@${ld} ${user_ldflags} -e main -o $@ ${sys} ${api} ${core} ${ipv4} ${netif} lwip_server.o ${libserial} ${printf} ${libmem} ${usyscall} ${arch_usyscall} ${session} ${libipc} ${libsem} ${board_specs}
 	@${objdump} -S $@ > $@.asm
 	@mv *.o bin
 	@mv $@ $(KERNEL_ROOT)/services/app

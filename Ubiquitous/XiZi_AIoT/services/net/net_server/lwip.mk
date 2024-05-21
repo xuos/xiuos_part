@@ -26,6 +26,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/net/libnet \
 			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip/prot \
 			-I$(KERNEL_ROOT)/services/net/net_server/include/netif \
 			-I$(KERNEL_ROOT)/services/net/net_server/include/compat \
+			-I$(KERNEL_ROOT)/services//semaphore \
 			-I$(KERNEL_ROOT)/services/lib/ipc \
 		  	-I$(KERNEL_ROOT)/services/lib/memory \
 			-I$(KERNEL_ROOT)/services/lib/serial \
