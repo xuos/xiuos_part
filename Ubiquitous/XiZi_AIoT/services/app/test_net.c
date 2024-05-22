@@ -23,7 +23,6 @@ int main(int argc, char* argv[])
     struct Session sess;
     connect_session(&sess, "LWIPServer", 4096);
 
-    LWIP_test(&sess);
     
     free_session(&sess);
 
