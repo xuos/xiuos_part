@@ -11,13 +11,15 @@ FSP_HEADER
 
 /* ISR prototypes */
 void gtm_int_isr(void);
-void metal_irq_isr_wrapper(void);
+// void metal_irq_isr_wrapper(void);
 void scif_uart_eri_isr(void);
 void scif_uart_bri_isr(void);
 void scif_uart_rxi_isr(void);
 void scif_uart_txi_isr(void);
 void scif_uart_tei_isr(void);
 
+void msg_ch1_ns(void);
+void rsp_ch4_ns(void);
 /** Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
 FSP_FOOTER
 
