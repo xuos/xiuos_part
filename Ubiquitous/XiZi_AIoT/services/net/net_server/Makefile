@@ -43,7 +43,7 @@ ipv4 = autoip.o \
 netif = bridgeif.o \
         ethernet.o \
 		zepif.o
-sys = sys_arch.o
+sys = sys_arch.o ethernetif.o
 
 libserial = $(KERNEL_ROOT)/services/app/libserial.o
 printf = $(KERNEL_ROOT)/services/app/printf.o

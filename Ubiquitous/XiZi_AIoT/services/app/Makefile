@@ -23,6 +23,15 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/lib/usyscall \
 			-I$(KERNEL_ROOT)/services/fs/libfs \
 			-I$(KERNEL_ROOT)/services/net/libnet \
+			-I$(KERNEL_ROOT)/services/net/net_server \
+			-I$(KERNEL_ROOT)/services/net/net_server/arch \
+			-I$(KERNEL_ROOT)/services/net/net_server/include \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip/apps \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip/priv \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip/prot \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/netif \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/compat \
 			-I$(KERNEL_ROOT)/services/semaphore \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app 

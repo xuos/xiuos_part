@@ -31,15 +31,14 @@
  * @param netif the already initialized lwip network interface structure
  *        for this ethernetif
  */
-static void
-low_level_init(struct netif *netif)
+static void low_level_init(struct netif *netif)
 {
 #if LWIP_ARP || LWIP_ETHERNET
 
-     /* set MAC hardware address length */
-     netif->hwaddr_len = ETH_HWADDR_LEN;
+    /* set MAC hardware address length */
+    netif->hwaddr_len = ETH_HWADDR_LEN;
 
-     /* set MAC hardware address */
+    /* set MAC hardware address */
     netif->hwaddr[0] = 0x02;
     netif->hwaddr[1] = 0x12;
     netif->hwaddr[2] = 0x34;
@@ -77,8 +76,7 @@ low_level_init(struct netif *netif)
  *       dropped because of memory failure (except for the TCP timers).
  */
 
-static err_t
-low_level_output(struct netif *netif, struct pbuf *p)
+static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
   char buf[1518];
 #if ETH_PAD_SIZE
@@ -101,9 +99,7 @@ low_level_output(struct netif *netif, struct pbuf *p)
  */
 static struct pbuf* low_level_input(struct netif *netif)
 {
-  struct pbuf *p, *q;
-  
-
+  struct pbuf *p=NULL, *q=NULL;
   return p;
 }
 
@@ -116,8 +112,7 @@ static struct pbuf* low_level_input(struct netif *netif)
  *
  * @param netif the lwip network interface structure for this ethernetif
  */
-static void
-ethernetif_input(struct netif *netif)
+void ethernetif_input(struct netif *netif)
 {
   struct ethernetif *ethernetif;
   struct eth_hdr *ethhdr;
@@ -150,8 +145,7 @@ ethernetif_input(struct netif *netif)
  *         ERR_MEM if private data couldn't be allocated
  *         any other err_t on error
  */
-err_t
-ethernetif_init(struct netif *netif)
+err_t ethernetif_init(struct netif *netif)
 {
   LWIP_ASSERT("netif != NULL", (netif != NULL));
 

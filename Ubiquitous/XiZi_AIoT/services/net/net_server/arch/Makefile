@@ -1,5 +1,5 @@
 include $(KERNEL_ROOT)/services/net/net_server/lwip.mk
-objs += sys_arch.o
+objs += sys_arch.o ethernetif.o
 
 
 arch: ${objs}

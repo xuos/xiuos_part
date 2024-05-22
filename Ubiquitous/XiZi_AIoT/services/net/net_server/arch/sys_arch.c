@@ -30,6 +30,8 @@
 #include "usyscall.h"
 #endif
 
+#include "ethernetif.h"
+
 #define SYS_THREAD_MAX 4
 
 static char sem_server_name[] = "DefaultSemaphoreServer";

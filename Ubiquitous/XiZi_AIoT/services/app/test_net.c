@@ -16,13 +16,54 @@
 #include "lwip_service.h"
 #include "usyscall.h"
 
+static char udp_ip_str[128] = {0};
+static uint16_t udp_socket_port = 8888;
+#define UDP_DEMO_SEND_TIMES      20
+
 int main(int argc, char* argv[])
 {
     printf("lwip network stack test \n");
 
+    
+    int cnt = UDP_DEMO_SEND_TIMES;
+    char send_str[128];
+    int fd = -1;
+
+    memset(send_str, 0, sizeof(send_str));
     struct Session sess;
     connect_session(&sess, "LWIPServer", 4096);
 
+    fd = ipc_socket(&sess, AF_INET, SOCK_DGRAM, 0);
+    if(fd < 0) {
+        printf("Socket error\n");
+        return 0;
+    }
+
+    struct sockaddr_in udp_sock;
+    udp_sock.sin_family = AF_INET;
+    udp_sock.sin_port = htons(udp_socket_port);
+    udp_sock.sin_addr.s_addr = inet_addr(udp_ip_str);
+    memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
+
+
+    
+    if(ipc_connect(&sess, fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)) < 0) {
+        printf("Unable to connect %s:%d\n", udp_ip_str, udp_socket_port);
+        ipc_close(&sess,fd);
+        return 0;
+    }
+
+    printf("UDP connect %s:%d success, start to send.\n",
+        udp_ip_str,
+        udp_socket_port);
+
+    while(cnt --) {
+        snprintf(send_str, sizeof(send_str), "UDP test package times %d\r\n", cnt);
+        ipc_send(&sess, fd, send_str, strlen(send_str), 0);
+        printf("Send UDP msg: %s ", send_str);
+    }
+
+    ipc_close(&sess,fd);
     
     free_session(&sess);
 

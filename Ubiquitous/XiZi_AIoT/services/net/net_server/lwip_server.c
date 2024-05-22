@@ -36,6 +36,9 @@ int IPC_DO_SERVE_FUNC(Ipc_connect)(int* s, const struct sockaddr* name, socklen_
     return connect(*s, name, *namelen);
 }
 
+int IPC_DO_SERVE_FUNC(Ipc_listen)(int* s, int* backlog){
+    return listen(*s, *backlog);
+}
 // int serve_accept(struct Session* session, int *s, struct sockaddr *addr, socklen_t *addrlen) {
 //     session_finish_handle(session, accept(*s, addr, addrlen));
 //     exit(0);
