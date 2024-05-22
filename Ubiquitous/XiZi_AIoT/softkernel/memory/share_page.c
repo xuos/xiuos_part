@@ -56,8 +56,8 @@ static struct slab_allocator* SessionAllocator()
 /// @return true if mem range is free, false if at least one page inside [vaddr, vaddr + nr_pages * PAGE_SIZE) is mapped
 static inline bool check_pages_unmapped(struct Thread* task, uintptr_t vaddr, int nr_pages)
 {
-    static uintptr_t paddr = UINT32_MAX;
     for (uintptr_t i = 0; i < nr_pages; i++) {
+        uintptr_t paddr = UINT32_MAX;
         if ((paddr = xizi_pager.address_translate(&task->memspace->pgdir, vaddr)) != (uintptr_t)NULL) {
             return false;
         }

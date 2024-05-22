@@ -221,7 +221,7 @@ struct ThreadStackPointer load_user_stack(struct MemSpace* pmemspace, char** arg
     memset(user_stack_init, 0, sizeof(user_stack_init));
     uintptr_t argc = 0;
     uintptr_t copy_len = 0;
-    for (argc = 0; argv != NULL && argc < MAX_SUPPORT_PARAMS && argv[argc] != NULL; argc++) {
+    for (argc = 0; argv != NULL && argc < (MAX_SUPPORT_PARAMS - 1) && argv[argc] != NULL; argc++) {
         /// @todo handle with large number of parameters (more than 32)
         // copy param to user stack
         copy_len = strlen(argv[argc]) + 1;

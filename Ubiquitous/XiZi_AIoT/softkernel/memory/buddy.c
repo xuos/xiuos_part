@@ -110,12 +110,11 @@ static void KBuddyPagesFree(struct KBuddy* pbuddy, struct KPage* page)
 {
     struct KPage* buddy = NULL;
     uintptr_t order = (page->order >= MAX_BUDDY_ORDER) ? 0 : page->order;
-    uintptr_t buddy_idx = 0, new_buddy_idx = 0;
     uintptr_t page_idx = page - pbuddy->pages;
 
     for (; order < MAX_BUDDY_ORDER - 1; order++) {
         // find and delete buddy to combine
-        buddy_idx = BUDDY_PAGE_INDEX(page_idx, order);
+        uintptr_t buddy_idx = BUDDY_PAGE_INDEX(page_idx, order);
         if (buddy_idx > pbuddy->n_pages - 1) {
             break;
         }
@@ -128,7 +127,7 @@ static void KBuddyPagesFree(struct KBuddy* pbuddy, struct KPage* page)
         pbuddy->free_list[order].n_free_pages--;
         buddy->order = MAX_BUDDY_ORDER;
         // update page and page_idx after combined
-        new_buddy_idx = COMBINED_PAGE_INDEX(page_idx, order);
+        uintptr_t new_buddy_idx = COMBINED_PAGE_INDEX(page_idx, order);
         page = page + (new_buddy_idx - page_idx);
         page_idx = new_buddy_idx;
     }

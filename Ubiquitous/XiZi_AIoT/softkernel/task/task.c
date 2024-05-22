@@ -99,7 +99,7 @@ static struct Thread* _alloc_task_cb()
     return task;
 }
 
-int _task_retrieve_sys_resources(struct Thread* ptask)
+int _task_return_sys_resources(struct Thread* ptask)
 {
     assert(ptask != NULL);
 
@@ -152,7 +152,7 @@ static void _dealloc_task_cb(struct Thread* task)
         return;
     }
 
-    _task_retrieve_sys_resources(task);
+    _task_return_sys_resources(task);
 
     /* free thread's user stack */
     if (task->thread_context.user_stack_idx != -1) {

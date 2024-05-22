@@ -27,9 +27,9 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/app 
 
 ifeq ($(BOARD), imx6q-sabrelite)
-all: init test_fs simple_client simple_server shell fs_server semaphore_server test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server readme.txt | bin
+all: init test_fault simple_client simple_server shell fs_server semaphore_server test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server readme.txt | bin
 else 
-all: init test_fs simple_client simple_server shell fs_server test_irq_hdlr readme.txt | bin
+all: init test_fault simple_client simple_server shell fs_server test_irq_hdlr readme.txt | bin
 endif
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin
@@ -77,7 +77,7 @@ init: init.o libfs.o libipc.o session.o libserial.o printf.o usyscall.o arch_usy
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
-test_fs: test_fs.o libfs.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
+test_fault: test_fault.o libserial.o printf.o usyscall.o arch_usyscall.o 
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 

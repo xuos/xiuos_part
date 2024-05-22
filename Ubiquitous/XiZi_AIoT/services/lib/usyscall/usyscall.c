@@ -14,14 +14,19 @@
 
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv)
 {
+    /* read elf image */
     int file_size = ipc_fsize(session, fd);
     void* img = malloc(file_size);
-    int read_len = 0, cur_read_len = 0;
+    int read_len = 0;
     while (read_len < file_size) {
-        cur_read_len = file_size - read_len < 4096 ? file_size - read_len : 4096;
-        read_len += ipc_read(session, fd, img + read_len, read_len, cur_read_len);
+        int cur_read_len = file_size - read_len < 4096 ? file_size - read_len : 4096;
+        if (cur_read_len < 0) {
+            return -1;
+        }
+        read_len += ipc_read(session, fd, (char*)((uintptr_t)img + read_len), read_len, cur_read_len);
     }
-    int ret = syscall(SYSCALL_SPAWN, (intptr_t)img, (intptr_t)name, (intptr_t)argv, 0);
+    /* sys call */
+    int ret = syscall(SYSCALL_SPAWN, (uintptr_t)img, (uintptr_t)name, (uintptr_t)argv, 0);
     free(img);
     return ret;
 }

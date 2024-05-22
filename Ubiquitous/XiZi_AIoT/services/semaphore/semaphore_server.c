@@ -68,7 +68,8 @@ int IPC_DO_SERVE_FUNC(Ipc_sem_wait)(sem_t* sem, int* timeout)
         return SEMAPHORE_SUC;
     }
 
-    // block current session
+    // delay current session
+    // this handler will be invoke again later
     delay_session();
     return SEMAPHORE_ERR;
 }

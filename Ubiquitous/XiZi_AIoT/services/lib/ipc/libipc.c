@@ -79,12 +79,12 @@ struct IpcMsg* new_ipc_msg(struct Session* session, const int argc, const int* a
 bool ipc_msg_set_nth_arg(struct IpcMsg* msg, const int arg_num, const void* const data, const int len)
 {
     if (arg_num >= msg->header.nr_args) {
-        printf("[%s] IPC: arg_num out of msg range, arg_num: %d, nr_args: %d\n", __func__, arg_num, msg->header.nr_args);
+        printf("[%s] IPC: arg_num out of msg range, arg_num: %d, nr_args: %lu\n", __func__, arg_num, msg->header.nr_args);
         return false;
     }
     struct IpcArgInfo* nth_arg_info = IPCMSG_ARG_INFO(msg, arg_num);
     if (len > nth_arg_info->len) {
-        printf("[%s] IPC: size of arg out of buffer range, given len: %d, len %d\n", __func__, len, nth_arg_info->len);
+        printf("[%s] IPC: size of arg out of buffer range, given len: %d, len %u\n", __func__, len, nth_arg_info->len);
         return false;
     }
     void* buf = ipc_msg_get_nth_arg_buf(msg, arg_num);
@@ -170,12 +170,6 @@ bool is_cur_handler_been_delayed()
     return ipc_server_loop_cur_msg->header.delayed == 1;
 }
 
-bool server_set_cycle_handler(struct IpcNode* ipc_node, void (*handler)())
-{
-    ipc_node->cycle_handler = handler;
-    return true;
-}
-
 void ipc_server_loop(struct IpcNode* ipc_node)
 {
     struct Session session_list[NR_MAX_SESSION];
@@ -204,7 +198,6 @@ void ipc_server_loop(struct IpcNode* ipc_node)
                     interfaces[opcode] should explicitly call delay_session() and return to delay this session
                 */
                 while (ipc_server_loop_cur_msg->header.magic == IPC_MSG_MAGIC && ipc_server_loop_cur_msg->header.valid == 1 && ipc_server_loop_cur_msg->header.done == 0) {
-                    // printf("session %d [%d, %d]\n", session_list[i].id, session_list[i].head, session_list[i].tail);
                     if (session_used_size(&session_list[i]) == 0 && session_forward_tail(&session_list[i], ipc_server_loop_cur_msg->header.len) < 0) {
                         break;
                     }
@@ -219,7 +212,7 @@ void ipc_server_loop(struct IpcNode* ipc_node)
                             break;
                         }
                     } else {
-                        printf("Unsupport opcode(%d) for server: %s\n", ipc_server_loop_cur_msg->header.opcode, ipc_node->name);
+                        printf("Unsupport opcode(%u) for server: %s\n", ipc_server_loop_cur_msg->header.opcode, ipc_node->name);
                     }
                     // current msg is a message that needs to ignore
                     // finish this message in server's perspective
@@ -232,9 +225,6 @@ void ipc_server_loop(struct IpcNode* ipc_node)
                 cur_sess_id = -1;
                 ipc_server_loop_cur_msg = NULL;
             }
-        }
-        if (ipc_node->cycle_handler) {
-            ipc_node->cycle_handler();
         }
     }
 }

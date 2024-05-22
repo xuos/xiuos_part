@@ -49,7 +49,7 @@ void* session_alloc_buf(struct Session* session, int len)
     if (len > session_remain_capacity(session)) {
         return NULL;
     }
-    void* buf = session->buf + session->tail;
+    void* buf = (void*)((uintptr_t)session->buf + session->tail);
     // we mapped double size of page, so it's ok to write buffer directly
     memset(buf, 0, len);
     session_forward_tail(session, len);
