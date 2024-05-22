@@ -83,11 +83,22 @@ bool ipc_msg_set_nth_arg(struct IpcMsg* msg, const int arg_num, const void* cons
         return false;
     }
     struct IpcArgInfo* nth_arg_info = IPCMSG_ARG_INFO(msg, arg_num);
-    if (len > nth_arg_info->len) {
+    if (len < 0 || (uint32_t)len > (uint32_t)nth_arg_info->len) {
         printf("[%s] IPC: size of arg out of buffer range, given len: %d, len %u\n", __func__, len, nth_arg_info->len);
         return false;
     }
+
     void* buf = ipc_msg_get_nth_arg_buf(msg, arg_num);
+
+    // handle attributes of different params
+    if (data == NULL) {
+        nth_arg_info->null_ptr = 1;
+        memset(buf, 0x0, len);
+        return true;
+    } else {
+        nth_arg_info->null_ptr = 0;
+    }
+
     memmove(buf, data, len);
     return true;
 }
@@ -109,6 +120,12 @@ bool ipc_msg_get_nth_arg(struct IpcMsg* msg, const int arg_num, void* data, cons
         printf("[%s] IPC: size of arg out of buffer range", __func__);
         return false;
     }
+
+    // handle null ptr: do nothing
+    if (nth_arg_info->null_ptr == 1) {
+        return true;
+    }
+
     void* buf = ipc_msg_get_nth_arg_buf(msg, arg_num);
     memmove(data, buf, len);
     return true;

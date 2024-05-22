@@ -60,6 +60,13 @@ typedef struct {
 struct IpcArgInfo {
     uint16_t offset;
     uint16_t len;
+    union {
+        uint16_t attr;
+        struct {
+            uint16_t null_ptr : 1;
+            uint16_t reserved : 15;
+        };
+    };
 } __attribute__((packed));
 
 /* [header, ipc_arg_buffer_len[], ipc_arg_buffer[]] */
@@ -104,6 +111,10 @@ struct IpcNode {
 /// @return
 __attribute__((__always_inline__)) static inline void* ipc_msg_get_nth_arg_buf(struct IpcMsg* msg, int arg_num)
 {
+    if (IPCMSG_ARG_INFO(msg, arg_num)->null_ptr == 1) {
+        return NULL;
+    }
+
     return (void*)((char*)msg + IPCMSG_ARG_INFO(msg, arg_num)->offset);
 }
 
