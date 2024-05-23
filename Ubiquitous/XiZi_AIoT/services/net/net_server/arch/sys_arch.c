@@ -25,8 +25,8 @@
 #include <lwip/sys.h>
 
 #if !NO_SYS
-#include "libserial.h"
 #include "sys_arch.h"
+#include "libserial.h"
 #include "usyscall.h"
 #endif
 
@@ -47,9 +47,10 @@ u32_t sys_jiffies(void)
 }
 
 u32_t sys_now(void)
-{
-    return 1;
+{   
+  return 1;
 }
+
 
 sys_prot_t sys_arch_protect(void)
 {
@@ -64,11 +65,13 @@ void sys_arch_unprotect(sys_prot_t pval)
 
 err_t sys_sem_new(sys_sem_t* sem, u8_t count)
 {
+    struct  Session sem_session;
     sem_t semaphore;
-    connect_session(&sem->sess, sem_server_name, 4096);
-    sem_create(&sem->sess, &semaphore, (int)count);
+    connect_session(&sem_session, sem_server_name, 4096);
+    sem_create(&sem_session, &semaphore, (int)count);
     sem->sem = semaphore;
-#if SYS_STATS
+    sem->sess = sem_session;
+    #if SYS_STATS
     ++lwip_stats.sys.sem.used;
     if (lwip_stats.sys.sem.max < lwip_stats.sys.sem.used) {
         lwip_stats.sys.sem.max = lwip_stats.sys.sem.used;
@@ -91,7 +94,7 @@ void sys_sem_free(sys_sem_t* sem)
 #if SYS_STATS
     --lwip_stats.sys.sem.used;
 #endif /* SYS_STATS */
-    sem_delete(&sem->sess, &sem->sem);
+    sem_delete(&sem->sess, &sem->sem); 
     free_session(&sem->sess);
     free(sem);
     sem = SYS_SEM_NULL;
@@ -113,9 +116,8 @@ u32_t sys_arch_sem_wait(sys_sem_t* sem, u32_t timeout)
 
     if (sem->sem < 0)
         return SYS_ARCH_TIMEOUT;
-    printf("%s wait %d, %d\n", __func__, sem->sem, __LINE__);
+
     sem_wait(&sem->sess, &sem->sem, 0);
-    printf("%s, %d\n", __func__, __LINE__);
     return 0;
 }
 
@@ -138,19 +140,14 @@ void sys_mutex_set_invalid(sys_mutex_t* mutex)
 {
     sys_sem_set_invalid(mutex);
 }
-
 void sys_mutex_lock(sys_mutex_t* mutex)
 {
-    printf("%s(mtx: %d)\n", __func__, *mutex);
     sys_arch_sem_wait(mutex, 0);
-    printf("%s(mtx: %d), return\n", __func__, *mutex);
 }
 
 void sys_mutex_unlock(sys_mutex_t* mutex)
 {
-    printf("%s(mtx: %d)\n", __func__, *mutex);
     sys_sem_signal(mutex);
-    printf("%s(mtx: %d), return\n", __func__, *mutex);
 }
 
 sys_thread_t sys_thread_new(const char* name, lwip_thread_fn function, void* arg, int stacksize, int prio)
@@ -163,7 +160,7 @@ sys_thread_t sys_thread_new(const char* name, lwip_thread_fn function, void* arg
 
 err_t sys_mbox_new(sys_mbox_t* mbox, int size)
 {
-
+    
     mbox->first = mbox->last = 0;
 
     sys_sem_t not_empty;
@@ -177,7 +174,7 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
     sys_sem_t mutex;
     sys_sem_new(&mutex, 1);
     mbox->mutex = &mutex;
-
+    
     mbox->wait_send = 0;
 
 #if SYS_STATS
@@ -192,11 +189,11 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
     }
 
     printf("lw: [%s] alloc %d mbox %p ok!\n", __func__, size, mbox);
-    return ERR_OK;
+    return ERR_OK;  
 }
 void sys_mbox_free(sys_mbox_t* mbox)
 {
-    if (mbox != SYS_MBOX_NULL) {
+    if (mbox != SYS_MBOX_NULL){
         sys_arch_sem_wait(mbox->mutex, 0);
         sys_sem_free(mbox->not_empty);
         sys_sem_free(mbox->not_full);
@@ -222,11 +219,11 @@ void sys_mbox_post(sys_mbox_t* q, void* msg)
     u8_t first;
     if (q == NULL)
         printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
-
+    
     sys_arch_sem_wait(q->mutex, 0);
-
-    printf("sys_mbox_post: mbox %p msg %p\n", (void*)q, (void*)msg);
-
+    
+    printf("sys_mbox_post: mbox %p msg %p\n", (void *)q, (void *)msg);
+    
     while ((q->last + 1) >= (q->first + SYS_MBOX_SIZE)) {
         q->wait_send++;
         sys_sem_signal(q->mutex);
@@ -259,7 +256,7 @@ err_t sys_mbox_trypost(sys_mbox_t* q, void* msg)
 
     sys_arch_sem_wait(q->mutex, 0);
 
-    printf("sys_mbox_trypost: mbox %p msg %p\n", (void*)q, (void*)msg);
+    printf("sys_mbox_trypost: mbox %p msg %p\n",(void *)q, (void *)msg);
 
     if ((q->last + 1) >= (q->first + SYS_MBOX_SIZE)) {
         sys_sem_signal(q->mutex);
@@ -294,20 +291,21 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t* q, void** msg, u32_t timeout)
 {
     if (q == NULL)
         printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
-
+    
     sys_arch_sem_wait(q->mutex, 0);
 
     while (q->first == q->last) {
         sys_sem_signal(q->mutex);
         sys_arch_sem_wait(q->not_empty, 0);
         sys_arch_sem_wait(q->mutex, 0);
-    }
+  }
 
     if (msg != NULL) {
-        printf("sys_mbox_fetch: mbox %p msg %p\n", (void*)q, *msg);
+        printf("sys_mbox_fetch: mbox %p msg %p\n", (void *)q, *msg);
         *msg = q->msgs[q->first % SYS_MBOX_SIZE];
-    } else {
-        printf("sys_mbox_fetch: mbox %p, null msg\n", (void*)q);
+    }
+    else{
+        printf("sys_mbox_fetch: mbox %p, null msg\n", (void *)q);
     }
 
     q->first++;
@@ -324,7 +322,7 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t* q, void** msg)
 {
     if (q == NULL)
         printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
-
+    
     sys_arch_sem_wait(q->mutex, 0);
 
     if (q->first == q->last) {
@@ -333,10 +331,11 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t* q, void** msg)
     }
 
     if (msg != NULL) {
-        printf("sys_mbox_tryfetch: mbox %p msg %p\n", (void*)q, *msg);
+        printf("sys_mbox_tryfetch: mbox %p msg %p\n", (void *)q, *msg);
         *msg = q->msgs[q->first % SYS_MBOX_SIZE];
-    } else {
-        printf("sys_mbox_tryfetch: mbox %p, null msg\n", (void*)q);
+    }
+    else{
+        printf("sys_mbox_tryfetch: mbox %p, null msg\n", (void *)q);
     }
 
     q->first++;
@@ -372,21 +371,24 @@ int lwip_config_tcp(char* ip, char* mask, char* gw)
     tcpip_init(NULL, NULL);
 
 #ifndef NETIF_ENET_INIT_FUNC
-    printf("Not Netif driver for Eport 0\n");
-    return 0;
+        printf("Not Netif driver for Eport 0\n");
+        return 0;
 #endif
 
 #ifdef NETIF_ENET_INIT_FUNC
     netif_add(&gnetif, &net_ipaddr, &net_netmask, &net_gw, NULL,
-        NETIF_ENET_INIT_FUNC, &tcpip_input);
+            NETIF_ENET_INIT_FUNC, &tcpip_input);
 
     /* Registers the default network interface */
     netif_set_default(&gnetif);
 
-    if (netif_is_link_up(&gnetif)) {
-        /*When the netif is fully configured this function must be called */
+    if (netif_is_link_up(&gnetif))
+    {
+    /*When the netif is fully configured this function must be called */
         netif_set_up(&gnetif);
-    } else {
+    }
+    else
+    {
         /* When the netif link is down this function must be called */
         netif_set_down(&gnetif);
         return -1;
@@ -395,12 +397,15 @@ int lwip_config_tcp(char* ip, char* mask, char* gw)
     printf(" Network Configuration\r\n");
     printf("************************************************\r\n");
     printf(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&net_ipaddr)[0], ((u8_t*)&net_ipaddr)[1],
-        ((u8_t*)&net_ipaddr)[2], ((u8_t*)&net_ipaddr)[3]);
+            ((u8_t*)&net_ipaddr)[2], ((u8_t*)&net_ipaddr)[3]);
     printf(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&net_netmask)[0], ((u8_t*)&net_netmask)[1],
-        ((u8_t*)&net_netmask)[2], ((u8_t*)&net_netmask)[3]);
+            ((u8_t*)&net_netmask)[2], ((u8_t*)&net_netmask)[3]);
     printf(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&net_gw)[0], ((u8_t*)&net_gw)[1],
-        ((u8_t*)&net_gw)[2], ((u8_t*)&net_gw)[3]);
+            ((u8_t*)&net_gw)[2], ((u8_t*)&net_gw)[3]);
     printf("************************************************\r\n");
     return 0;
 #endif
 }
+
+
+
