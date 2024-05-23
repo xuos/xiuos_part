@@ -51,9 +51,9 @@ typedef struct sys_sem sys_mutex_t;
 struct sys_mbox{
     int first, last;
     void *msgs[SYS_MBOX_SIZE];
-    struct sys_sem *not_empty;
-    struct sys_sem *not_full;
-    struct sys_sem *mutex;
+    struct sys_sem not_empty;
+    struct sys_sem not_full;
+    struct sys_sem mutex;
     int wait_send;
 };
 typedef struct sys_mbox sys_mbox_t;

@@ -65,12 +65,9 @@ void sys_arch_unprotect(sys_prot_t pval)
 
 err_t sys_sem_new(sys_sem_t* sem, u8_t count)
 {
-    struct  Session sem_session;
-    sem_t semaphore;
-    connect_session(&sem_session, sem_server_name, 4096);
-    sem_create(&sem_session, &semaphore, (int)count);
-    sem->sem = semaphore;
-    sem->sess = sem_session;
+    connect_session(&sem->sess, sem_server_name, 4096);
+    sem_create(&sem->sess, &sem->sem, (int)count);
+
     #if SYS_STATS
     ++lwip_stats.sys.sem.used;
     if (lwip_stats.sys.sem.max < lwip_stats.sys.sem.used) {
@@ -162,19 +159,9 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
 {
     
     mbox->first = mbox->last = 0;
-
-    sys_sem_t not_empty;
-    sys_sem_new(&not_empty, 0);
-    mbox->not_empty = &not_empty;
-
-    sys_sem_t not_full;
-    sys_sem_new(&not_full, 0);
-    mbox->not_full = &not_full;
-
-    sys_sem_t mutex;
-    sys_sem_new(&mutex, 1);
-    mbox->mutex = &mutex;
-    
+    sys_sem_new(&mbox->not_empty, 0);
+    sys_sem_new(&mbox->not_full, 0);
+    sys_sem_new(&mbox->mutex, 1);
     mbox->wait_send = 0;
 
 #if SYS_STATS
@@ -194,11 +181,10 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
 void sys_mbox_free(sys_mbox_t* mbox)
 {
     if (mbox != SYS_MBOX_NULL){
-        sys_arch_sem_wait(mbox->mutex, 0);
-        sys_sem_free(mbox->not_empty);
-        sys_sem_free(mbox->not_full);
-        sys_sem_free(mbox->mutex);
-        mbox->not_empty = mbox->not_full = mbox->mutex = NULL;
+        // sys_arch_sem_wait(&mbox->mutex, 0);
+        // sys_sem_free(&mbox->not_empty);
+        // sys_sem_free(&mbox->not_full);
+        // sys_sem_free(&mbox->mutex);
         free(mbox);
         mbox = NULL;
     }
@@ -220,20 +206,22 @@ void sys_mbox_post(sys_mbox_t* q, void* msg)
     if (q == NULL)
         printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
     
-    sys_arch_sem_wait(q->mutex, 0);
+    sys_arch_sem_wait(&q->mutex, 0);
     
     printf("sys_mbox_post: mbox %p msg %p\n", (void *)q, (void *)msg);
     
+    // (q->last + 1) >= (q->first + SYS_MBOX_SIZE) means mbox is full
     while ((q->last + 1) >= (q->first + SYS_MBOX_SIZE)) {
         q->wait_send++;
-        sys_sem_signal(q->mutex);
-        sys_arch_sem_wait(q->not_full, 0);
-        sys_arch_sem_wait(q->mutex, 0);
+        sys_sem_signal(&q->mutex);
+        sys_arch_sem_wait(&q->not_full, 0);
+        sys_arch_sem_wait(&q->mutex, 0);
         q->wait_send--;
     }
 
     q->msgs[q->last % SYS_MBOX_SIZE] = msg;
 
+    // q->first == q->last means mbox is empty
     if (q->last == q->first) {
         first = 1;
     } else {
@@ -243,9 +231,9 @@ void sys_mbox_post(sys_mbox_t* q, void* msg)
     q->last++;
 
     if (first) {
-        sys_sem_signal(q->not_empty);
+        sys_sem_signal(&q->not_empty);
     }
-    sys_sem_signal(q->mutex);
+    sys_sem_signal(&q->mutex);
 }
 
 err_t sys_mbox_trypost(sys_mbox_t* q, void* msg)
@@ -254,12 +242,12 @@ err_t sys_mbox_trypost(sys_mbox_t* q, void* msg)
     if (q == NULL)
         printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
 
-    sys_arch_sem_wait(q->mutex, 0);
+    sys_arch_sem_wait(&q->mutex, 0);
 
     printf("sys_mbox_trypost: mbox %p msg %p\n",(void *)q, (void *)msg);
 
     if ((q->last + 1) >= (q->first + SYS_MBOX_SIZE)) {
-        sys_sem_signal(q->mutex);
+        sys_sem_signal(&q->mutex);
         return ERR_MEM;
     }
 
@@ -274,10 +262,10 @@ err_t sys_mbox_trypost(sys_mbox_t* q, void* msg)
     q->last++;
 
     if (first) {
-        sys_sem_signal(q->not_empty);
+        sys_sem_signal(&q->not_empty);
     }
 
-    sys_sem_signal(q->mutex);
+    sys_sem_signal(&q->mutex);
 
     return ERR_OK;
 }
@@ -292,12 +280,13 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t* q, void** msg, u32_t timeout)
     if (q == NULL)
         printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
     
-    sys_arch_sem_wait(q->mutex, 0);
+    sys_arch_sem_wait(&q->mutex, 0);
 
+    // q->first == q->last means mbox is empty
     while (q->first == q->last) {
-        sys_sem_signal(q->mutex);
-        sys_arch_sem_wait(q->not_empty, 0);
-        sys_arch_sem_wait(q->mutex, 0);
+        sys_sem_signal(&q->mutex);
+        sys_arch_sem_wait(&q->not_empty, 0);
+        sys_arch_sem_wait(&q->mutex, 0);
   }
 
     if (msg != NULL) {
@@ -311,10 +300,10 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t* q, void** msg, u32_t timeout)
     q->first++;
 
     if (q->wait_send) {
-        sys_sem_signal(q->not_full);
+        sys_sem_signal(&q->not_full);
     }
 
-    sys_sem_signal(q->mutex);
+    sys_sem_signal(&q->mutex);
 
     return 0;
 }
@@ -323,10 +312,10 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t* q, void** msg)
     if (q == NULL)
         printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
     
-    sys_arch_sem_wait(q->mutex, 0);
+    sys_arch_sem_wait(&q->mutex, 0);
 
     if (q->first == q->last) {
-        sys_sem_signal(q->mutex);
+        sys_sem_signal(&q->mutex);
         return SYS_MBOX_EMPTY;
     }
 
@@ -341,10 +330,10 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t* q, void** msg)
     q->first++;
 
     if (q->wait_send) {
-        sys_sem_signal(q->not_full);
+        sys_sem_signal(&q->not_full);
     }
 
-    sys_sem_signal(q->mutex);
+    sys_sem_signal(&q->mutex);
 
     return 0;
 }
