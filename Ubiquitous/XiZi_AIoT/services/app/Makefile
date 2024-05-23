@@ -108,7 +108,7 @@ test_priority: test_priority.o libserial.o printf.o usyscall.o arch_usyscall.o l
 	@${objdump} -S $@ > $@.asm
 
 test_net: test_net.o lwip_service.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
-	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs} -llwip -L$(KERNEL_ROOT)/services/net/net_server
 	@${objdump} -S $@ > $@.asm
 
 %.o: %.c

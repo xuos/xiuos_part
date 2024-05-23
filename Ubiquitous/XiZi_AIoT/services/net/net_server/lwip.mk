@@ -13,6 +13,7 @@ endif
 cc = ${toolchain}gcc
 ld = ${toolchain}g++
 objdump = ${toolchain}objdump
+ar = ${toolchain}ar
 
 c_useropts = -O2
 

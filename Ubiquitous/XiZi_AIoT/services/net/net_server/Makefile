@@ -56,6 +56,7 @@ libsem = $(KERNEL_ROOT)/services/app/libsemaphore.o
 lwip: COMPILER lwip_server.o | bin
 	@${ld} ${user_ldflags} -e main -o $@ ${sys} ${api} ${core} ${ipv4} ${netif} lwip_server.o ${libserial} ${printf} ${libmem} ${usyscall} ${arch_usyscall} ${session} ${libipc} ${libsem} ${board_specs}
 	@${objdump} -S $@ > $@.asm
+	@$(ar) -r liblwip.a ${sys} ${api} ${core} ${ipv4} ${netif}
 	@mv *.o bin
 	@mv $@ $(KERNEL_ROOT)/services/app
 	@mv $@.asm $(KERNEL_ROOT)/services/app

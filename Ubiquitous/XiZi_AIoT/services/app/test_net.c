@@ -33,11 +33,15 @@ int main(int argc, char* argv[])
     struct Session sess;
     connect_session(&sess, "LWIPServer", 4096);
 
+    printf("%s %d\n", __func__, __LINE__);
+
     fd = ipc_socket(&sess, AF_INET, SOCK_DGRAM, 0);
     if(fd < 0) {
         printf("Socket error\n");
         return 0;
     }
+
+    printf("%s %d\n", __func__, __LINE__);
 
     struct sockaddr_in udp_sock;
     udp_sock.sin_family = AF_INET;
@@ -45,13 +49,15 @@ int main(int argc, char* argv[])
     udp_sock.sin_addr.s_addr = inet_addr(udp_ip_str);
     memset(&(udp_sock.sin_zero), 0, sizeof(udp_sock.sin_zero));
 
-
+    printf("%s %d\n", __func__, __LINE__);
     
     if(ipc_connect(&sess, fd, (struct sockaddr *)&udp_sock, sizeof(struct sockaddr)) < 0) {
         printf("Unable to connect %s:%d\n", udp_ip_str, udp_socket_port);
         ipc_close(&sess,fd);
         return 0;
     }
+
+    printf("%s %d\n", __func__, __LINE__);
 
     printf("UDP connect %s:%d success, start to send.\n",
         udp_ip_str,

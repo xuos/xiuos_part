@@ -51,7 +51,7 @@ static void low_level_init(struct netif *netif)
      netif->mtu = 1500;
 
 #if LWIP_ARP
-     netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
+     netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP ;
 #else
      netif->flags |= NETIF_FLAG_BROADCAST;
 #endif /* LWIP_ARP */
@@ -60,6 +60,26 @@ static void low_level_init(struct netif *netif)
   
 }
 
+void print_packet_data(const char *packet_data, int length) {
+	printf("Packet Data:\n");
+	for (int i = 0; i < length; ++i) {
+		printf("%02X ", packet_data[i]); // 打印十六进制值，每个字节两位
+		if ((i + 1) % 16 == 0 || i == length - 1) { // 每16个字节一行
+			for (int j = 0; j < 15 - (i % 16); ++j) {
+				printf(" "); // 打印空格对齐
+			}
+			printf("| ");
+			for (int j = i - (i % 16); j <= i; ++j) {
+				if (packet_data[j] >= 32 && packet_data[j] <= 126) {
+					printf("%c", packet_data[j]); // 如果是可打印的ASCII字符，打印对应字符
+				} else {
+					printf("."); // 否则打印点表示不可打印字符
+				}
+			}
+			printf("\n");
+		}
+	}
+}
 /**
  * This function should do the actual transmission of the packet. The packet is
  * contained in the pbuf that is passed to the function. This pbuf
@@ -85,7 +105,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
 
   pbuf_copy_partial(p, buf, p->tot_len, 0);
   
-  printf("output %s\n", buf);
+  print_packet_data(buf, p->tot_len);
   return ERR_OK;
 }
 
@@ -114,11 +134,7 @@ static struct pbuf* low_level_input(struct netif *netif)
  */
 void ethernetif_input(struct netif *netif)
 {
-  struct ethernetif *ethernetif;
-  struct eth_hdr *ethhdr;
   struct pbuf *p;
-
-  ethernetif = netif->state;
 
   /* move received packet into a new pbuf */
   p = low_level_input(netif);

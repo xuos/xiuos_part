@@ -19,10 +19,9 @@ IPC_SERVICES(IpcLWIPServer, Ipc_socket, Ipc_bind,Ipc_connect,Ipc_listen,Ipc_acce
 int ipc_socket(struct Session* session,
              int domain, int type, int protocol);
 
-int ipc_bind(struct Session* session, int s, 
-            const struct sockaddr *name, socklen_t namelen);
+int ipc_bind(struct Session* session, int s, struct sockaddr *name, socklen_t namelen);
 
-int ipc_connect(struct Session* session, int s, const struct sockaddr *name, socklen_t namelen);
+int ipc_connect(struct Session* session, int s, struct sockaddr *name, socklen_t namelen);
 
 int ipc_listen(struct Session* session, int s, int backlog);
 
@@ -34,12 +33,12 @@ ssize_t ipc_recv(struct Session* session, int s, void *mem, size_t len, int flag
 
 ssize_t ipc_recvfrom(struct Session* session, int s, void *mem, size_t len, int flags, struct sockaddr *from, socklen_t *fromlen);
 
-ssize_t ipc_sendto(struct Session* session, int s, const void *data, size_t size, int flags, const struct sockaddr *to, socklen_t tolen);
+ssize_t ipc_sendto(struct Session* session, int s, void *data, size_t size, int flags, struct sockaddr *to, socklen_t tolen);
 
-ssize_t ipc_send(struct Session* session, int s, const void *data, size_t size, int flags);
+ssize_t ipc_send(struct Session* session, int s, void *data, size_t size, int flags);
 
-ssize_t ipc_write(struct Session* session, int s, const void *data, size_t size);
+ssize_t ipc_write(struct Session* session, int s, void *data, size_t size);
 
 int ipc_close(struct Session* session, int s);
 
-int ipc_setsockopt(struct Session* session, int s, int level, int optname, const void *optval, socklen_t optlen);
+int ipc_setsockopt(struct Session* session, int s, int level, int optname, void *optval, socklen_t optlen);

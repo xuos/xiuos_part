@@ -18,12 +18,12 @@ int ipc_socket(struct Session* session, int domain, int type, int protocol){
 }
 
 IPC_INTERFACE(Ipc_bind, 3, s, name, namelen, sizeof(int), sizeof(struct sockaddr), sizeof(socklen_t));
-int ipc_bind(struct Session* session, int s, const struct sockaddr *name, socklen_t namelen){
+int ipc_bind(struct Session* session, int s, struct sockaddr *name, socklen_t namelen){
     return IPC_CALL(Ipc_bind)(session, &s, name, &namelen);
 }
 
 IPC_INTERFACE(Ipc_connect, 3, s, name, namelen, sizeof(int), sizeof(struct sockaddr), sizeof(socklen_t));
-int ipc_connect(struct Session* session, int s, const struct sockaddr *name, socklen_t namelen){
+int ipc_connect(struct Session* session, int s, struct sockaddr *name, socklen_t namelen){
     return IPC_CALL(Ipc_connect)(session, &s, name, &namelen);
 }
 
@@ -53,17 +53,17 @@ ssize_t ipc_recvfrom(struct Session* session, int s, void *mem, size_t len, int 
 }
 
 IPC_INTERFACE(Ipc_sendto, 6, s, data, size, flags, to, tolen, sizeof(int), *(size_t *)size, sizeof(size_t), sizeof(int), sizeof(struct sockaddr), sizeof(socklen_t));
-ssize_t ipc_sendto(struct Session* session, int s, const void *data, size_t size, int flags, const struct sockaddr *to, socklen_t tolen){
+ssize_t ipc_sendto(struct Session* session, int s, void *data, size_t size, int flags, struct sockaddr *to, socklen_t tolen){
     return IPC_CALL(Ipc_sendto)(session, &s, data, &size, &flags, to, &tolen);
 }
 
 IPC_INTERFACE(Ipc_send, 4, s, data, size, flags, sizeof(int), *(size_t *)size, sizeof(size_t), sizeof(int));
-ssize_t ipc_send(struct Session* session, int s, const void *data, size_t size, int flags){
+ssize_t ipc_send(struct Session* session, int s, void *data, size_t size, int flags){
     return IPC_CALL(Ipc_send)(session, &s, data, &size, &flags);
 }
 
 IPC_INTERFACE(Ipc_write, 3, s, data, size, sizeof(int), *(size_t *)size, sizeof(size_t));
-ssize_t ipc_write(struct Session* session, int s, const void *data, size_t size){
+ssize_t ipc_write(struct Session* session, int s, void *data, size_t size){
     return IPC_CALL(Ipc_write)(session, &s, data, &size);
 }
 
@@ -73,6 +73,6 @@ int ipc_close(struct Session* session, int s){
 }
 
 IPC_INTERFACE(Ipc_setsockopt, 5, s, level, optname, optval, optlen, sizeof(int), sizeof(int), sizeof(int), *(socklen_t*)optlen, sizeof(socklen_t));
-int ipc_setsockopt(struct Session* session, int s, int level, int optname, const void *optval, socklen_t optlen){
+int ipc_setsockopt(struct Session* session, int s, int level, int optname, void *optval, socklen_t optlen){
     return IPC_CALL(Ipc_setsockopt)(session, &s, &level, &optname, optval, &optlen);
 }
