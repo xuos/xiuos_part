@@ -73,7 +73,7 @@ void syscall_arch_handler(struct trapframe* tf)
         xizi_enter_kernel();
         assert(cur_cpu()->task == NULL);
         sys_exit(cur_cpu()->task);
-        context_switch(&cur_cpu()->task->main_thread.context, cur_cpu()->scheduler);
+        context_switch(&cur_cpu()->task->thread_context.context, cur_cpu()->scheduler);
         panic("dabort end should never be reashed.\n");
     }
 }

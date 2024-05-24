@@ -48,7 +48,7 @@ Modification:
 
 static inline void invalidate_dcache(uintptr_t start, uintptr_t end)
 {
-    InvalidateL1Dcache(start, end);
+    // InvalidateL1Dcache(start, end);
     // InvalidateL2Cache(start, end);
 }
 
@@ -65,7 +65,7 @@ static inline void invalidate_dcache(uintptr_t start, uintptr_t end)
 
 static inline void invalidate_dcache_all(void)
 {
-    InvalidateL1DcacheAll();
+    // InvalidateL1DcacheAll();
     // InvalidateL2CacheAll();
 }
 
@@ -78,7 +78,7 @@ static inline void invalidate_dcache_all(void)
  ****************************************************************************/
 static inline void invalidate_icache(uintptr_t start, uintptr_t end)
 {
-    InvalidateL1Icache(start, end);
+    // InvalidateL1Icache(start, end);
 }
 
 /****************************************************************************
@@ -92,7 +92,7 @@ static inline void invalidate_icache(uintptr_t start, uintptr_t end)
 
 static inline void invalidate_icache_all(void)
 {
-    InvalidateL1IcacheAll();
+    // InvalidateL1IcacheAll();
 }
 
 /****************************************************************************
@@ -106,7 +106,7 @@ static inline void invalidate_icache_all(void)
 
 static inline void clean_dcache(uintptr_t start, uintptr_t end)
 {
-    CleanL1Dcache(start, end);
+    // CleanL1Dcache(start, end);
     // CleanL2Cache(start, end);
 }
 
@@ -121,7 +121,7 @@ static inline void clean_dcache(uintptr_t start, uintptr_t end)
 
 static inline void clean_dcache_all(void)
 {
-    CleanL1DcacheAll();
+    // CleanL1DcacheAll();
     // CleanL2CacheAll();
 }
 
@@ -137,7 +137,7 @@ static inline void clean_dcache_all(void)
 static inline void flush_dcache(uintptr_t start, uintptr_t end)
 {
 
-    FlushL1Dcache(start, end);
+    // FlushL1Dcache(start, end);
     // FlushL2Cache(start, end);
 }
 
@@ -151,7 +151,7 @@ static inline void flush_dcache(uintptr_t start, uintptr_t end)
 
 static inline void flush_dcache_all(void)
 {
-    FlushL1DcacheAll();
+    // FlushL1DcacheAll();
     // FlushL2CacheAll();
 }
 
@@ -165,7 +165,7 @@ static inline void flush_dcache_all(void)
 
 static inline void enable_icache(void)
 {
-    EnableL1Icache();
+    // EnableL1Icache();
 }
 
 /****************************************************************************
@@ -178,7 +178,7 @@ static inline void enable_icache(void)
 
 static inline void disable_icache(void)
 {
-    DisableL1Icache();
+    // DisableL1Icache();
 }
 
 /****************************************************************************
@@ -191,7 +191,7 @@ static inline void disable_icache(void)
 
 static inline void enable_dcache(void)
 {
-    EnableL1Dcache();
+    // EnableL1Dcache();
     // EnableL2Cache();
 }
 
@@ -205,9 +205,9 @@ static inline void enable_dcache(void)
 
 static inline void disable_dcache(void)
 {
-    FlushL1DcacheAll();
+    // FlushL1DcacheAll();
     // pl310_flush_all();
-    DisableL1Dcache();
+    // DisableL1Dcache();
     // DisableL2Cache();
 }
 

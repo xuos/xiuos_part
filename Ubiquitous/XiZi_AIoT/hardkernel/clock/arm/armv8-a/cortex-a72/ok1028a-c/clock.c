@@ -1,8 +1,6 @@
 #include "actracer.h"
 #include "core.h"
-#include "cortex_a72.h"
 #include "generic_timer.h"
-#include "memlayout.h"
 
 #include "clock_common_op.h"
 
@@ -11,10 +9,6 @@
 #define CNTV_CTL_ENABLE (1 << 0)
 #define CNTV_CTL_IMASK (1 << 1)
 #define CNTV_CTL_ISTATUS (1 << 2)
-
-static void enable_timer(void);
-static void disable_timer(void);
-static void reload_timer(void);
 
 static void enable_timer()
 {
@@ -32,24 +26,6 @@ static void disable_timer()
     w_cntv_ctl_el0(c);
 }
 
-static void arch_timer_interrupt_enable()
-{
-    uint64_t c = r_cntv_ctl_el0();
-    if (c &= CNTV_CTL_IMASK) {
-        c |= ~CNTV_CTL_IMASK;
-        w_cntv_ctl_el0(c);
-    }
-}
-
-static void arch_timer_interrupt_disable()
-{
-    uint64_t c = r_cntv_ctl_el0();
-    if (!(c &= CNTV_CTL_IMASK)) {
-        c |= CNTV_CTL_IMASK;
-        w_cntv_ctl_el0(c);
-    }
-}
-
 static void reload_timer()
 {
     // interval 100ms
@@ -59,26 +35,16 @@ static void reload_timer()
     w_cntv_tval_el0(interval_clk);
 }
 
-void delay(uint32_t cycles)
-{
-    uint64_t start = r_cntvct_el0();
-
-    while ((r_cntvct_el0() - start) < cycles)
-        __asm__ volatile("yield" ::: "memory");
-}
-
 void _sys_clock_init()
 {
-    arch_timer_interrupt_disable();
     disable_timer();
     reload_timer();
     enable_timer();
-    arch_timer_interrupt_enable();
 }
 
 static uint32_t _get_clock_int()
 {
-    return 0;
+    return 27;
 }
 
 static uint64_t _get_tick()

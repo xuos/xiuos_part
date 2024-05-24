@@ -44,7 +44,7 @@ uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc)
     uintptr_t pde_attr = 0;
     _p_pgtbl_mmu_access->MmuPdeAttr(&pde_attr);
 
-    uintptr_t* l2_pde_ptr = (uintptr_t*)&pgdir[vaddr >> LEVEL2_PDE_SHIFT];
+    uintptr_t* l2_pde_ptr = (uintptr_t*)&pgdir[(vaddr >> LEVEL2_PDE_SHIFT) & (NUM_LEVEL2_PDE - 1)];
 
     uintptr_t* l3_pde_vaddr;
     if (*l2_pde_ptr != 0) {
@@ -55,7 +55,7 @@ uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc)
             return NULL;
         }
 
-        memset(l3_pde_vaddr, 0, sizeof(uintptr_t) * NUM_LEVEL4_PTE);
+        memset(l3_pde_vaddr, 0, sizeof(uintptr_t) * NUM_LEVEL3_PDE);
         *l2_pde_ptr = V2P(l3_pde_vaddr) | pde_attr;
     }
 
@@ -79,38 +79,38 @@ uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc)
 
 void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
 {
-    uintptr_t low_bound = kern_virtmem_buddy.mem_start, high_bound = kern_virtmem_buddy.mem_end;
-    uintptr_t user_low_bound = user_phy_freemem_buddy.mem_start, user_high_bound = user_phy_freemem_buddy.mem_end;
-    uintptr_t end_idx = USER_MEM_TOP >> LEVEL2_PDE_SHIFT;
+    // uintptr_t low_bound = kern_virtmem_buddy.mem_start, high_bound = kern_virtmem_buddy.mem_end;
+    // uintptr_t user_low_bound = user_phy_freemem_buddy.mem_start, user_high_bound = user_phy_freemem_buddy.mem_end;
+    // uintptr_t end_idx = (USER_MEM_TOP >> LEVEL2_PDE_SHIFT) & (NUM_LEVEL2_PDE - 1);
 
-    for (uintptr_t l3_entry_idx = 0; l3_entry_idx < end_idx; l3_entry_idx++) {
-        // free each level3 page table
-        uintptr_t* l3_pde_paddr = (uintptr_t*)LEVEL3_PDE_ADDR(pgdir->pd_addr[l3_entry_idx]);
-        if (l3_pde_paddr != NULL) {
-            for (uintptr_t l4_entry_idx = 0; l4_entry_idx < NUM_LEVEL3_PDE; l4_entry_idx++) {
-                uintptr_t* l4_pte_paddr = (uintptr_t*)LEVEL4_PTE_ADDR(l3_pde_paddr[l4_entry_idx]);
-                if (l4_pte_paddr != NULL) {
-                    for (uintptr_t page_entry_idx = 0; page_entry_idx < NUM_LEVEL4_PTE; page_entry_idx++) {
-                        uintptr_t vaddr = (l3_entry_idx << LEVEL2_PDE_SHIFT) | (l4_entry_idx << LEVEL3_PDE_SHIFT) | (page_entry_idx << LEVEL4_PTE_SHIFT);
+    // for (uintptr_t l3_entry_idx = 0; l3_entry_idx < end_idx; l3_entry_idx++) {
+    //     // free each level3 page table
+    //     uintptr_t* l3_pde_paddr = (uintptr_t*)LEVEL3_PDE_ADDR(pgdir->pd_addr[l3_entry_idx]);
+    //     if (l3_pde_paddr != NULL) {
+    //         for (uintptr_t l4_entry_idx = 0; l4_entry_idx < NUM_LEVEL3_PDE; l4_entry_idx++) {
+    //             uintptr_t* l4_pte_paddr = (uintptr_t*)LEVEL4_PTE_ADDR(l3_pde_paddr[l4_entry_idx]);
+    //             if (l4_pte_paddr != NULL) {
+    //                 for (uintptr_t page_entry_idx = 0; page_entry_idx < NUM_LEVEL4_PTE; page_entry_idx++) {
+    //                     uintptr_t vaddr = (l3_entry_idx << LEVEL2_PDE_SHIFT) | (l4_entry_idx << LEVEL3_PDE_SHIFT) | (page_entry_idx << LEVEL4_PTE_SHIFT);
 
-                        // get page paddr
-                        uintptr_t* page_paddr = (uintptr_t*)ALIGNDOWN(((uintptr_t*)P2V(l4_pte_paddr))[page_entry_idx], PAGE_SIZE);
-                        if (page_paddr != NULL) {
-                            // Ensure the virtual address is not in the IPC address space
-                            assert(vaddr < USER_IPC_SPACE_BASE || vaddr >= USER_IPC_SPACE_TOP);
+    //                     // get page paddr
+    //                     uintptr_t* page_paddr = (uintptr_t*)ALIGNDOWN(((uintptr_t*)P2V(l4_pte_paddr))[page_entry_idx], PAGE_SIZE);
+    //                     if (page_paddr != NULL) {
+    //                         // Ensure the virtual address is not in the IPC address space
+    //                         assert(vaddr < USER_IPC_SPACE_BASE || vaddr >= USER_IPC_SPACE_TOP);
 
-                            if (LIKELY((uintptr_t)page_paddr >= low_bound && (uintptr_t)page_paddr < high_bound)) {
-                                kfree(P2V(page_paddr));
-                            } else if (LIKELY((uintptr_t)page_paddr >= user_low_bound && (uintptr_t)page_paddr < user_high_bound)) {
-                                raw_free((char*)page_paddr);
-                            }
-                        }
-                    }
-                    kfree(P2V(l4_pte_paddr));
-                }
-            }
-            kfree(P2V(l3_pde_paddr));
-        }
-    }
-    kfree((char*)pgdir->pd_addr);
+    //                         if (LIKELY((uintptr_t)page_paddr >= low_bound && (uintptr_t)page_paddr < high_bound)) {
+    //                             kfree(P2V(page_paddr));
+    //                         } else if (LIKELY((uintptr_t)page_paddr >= user_low_bound && (uintptr_t)page_paddr < user_high_bound)) {
+    //                             raw_free((char*)page_paddr);
+    //                         }
+    //                     }
+    //                 }
+    //                 kfree(P2V(l4_pte_paddr));
+    //             }
+    //         }
+    //         kfree(P2V(l3_pde_paddr));
+    //     }
+    // }
+    // kfree((char*)pgdir->pd_addr);
 }

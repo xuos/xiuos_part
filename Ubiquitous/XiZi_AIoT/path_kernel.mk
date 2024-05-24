@@ -45,6 +45,7 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/hardkernel/arch/arm/armv8-a/cortex-a72/ \
 	-I$(KERNEL_ROOT)/hardkernel/mmu/arm/armv8-a/cortex-a72/$(BOARD)  \
 	-I$(KERNEL_ROOT)/hardkernel/mmu/arm/armv8-a/cortex-a72/include  \
+	-I$(KERNEL_ROOT)/hardkernel/clock/arm/armv8-a/cortex-a72/include  \
 	-I$(KERNEL_ROOT)/hardkernel/intr/arm/armv8-a/cortex-a72/ \
 	-I$(KERNEL_ROOT)/hardkernel/intr/arm/armv8-a/cortex-a72/$(BOARD) \
 	-I$(KERNEL_ROOT)/hardkernel/intr/arm/armv8-a/cortex-a72/gicv3 \

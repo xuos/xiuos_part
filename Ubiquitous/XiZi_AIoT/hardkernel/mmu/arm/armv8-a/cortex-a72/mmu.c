@@ -41,13 +41,13 @@ static struct MmuDriverRightGroup right_group;
 void load_pgdir(uintptr_t pgdir_paddr)
 {
     /* get cache driver */
-    struct ICacheDone* p_icache_done = AchieveResource(&right_group.icache_driver_tag);
-    struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
+    // struct ICacheDone* p_icache_done = AchieveResource(&right_group.icache_driver_tag);
+    // struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
 
     TTBR0_W((uint64_t)pgdir_paddr);
     CLEARTLB(0);
-    p_icache_done->invalidateall();
-    p_dcache_done->flushall();
+    // p_icache_done->invalidateall();
+    // p_dcache_done->flushall();
 }
 
 __attribute__((always_inline)) inline static void _tlb_flush(uintptr_t va)
