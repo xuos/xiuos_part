@@ -46,7 +46,7 @@ int free_session(struct Session* session)
 
 void* session_alloc_buf(struct Session* session, int len)
 {
-    if (len > session_remain_capacity(session)) {
+    if (len < 0 || len > session_remain_capacity(session)) {
         return NULL;
     }
     void* buf = (void*)((uintptr_t)session->buf + session->tail);
@@ -58,7 +58,7 @@ void* session_alloc_buf(struct Session* session, int len)
 
 bool session_free_buf(struct Session* session, int len)
 {
-    if (len > session_used_size(session)) {
+    if (len < 0 || len > session_used_size(session)) {
         return false;
     }
     assert(session_forward_head(session, len) != -1);

@@ -223,7 +223,7 @@ void ipc_server_loop(struct IpcNode* ipc_node)
                     if (ipc_node->interfaces[ipc_server_loop_cur_msg->header.opcode]) {
                         ipc_node->interfaces[ipc_server_loop_cur_msg->header.opcode](ipc_server_loop_cur_msg);
                         // check if this session is delayed by op handler, all messages after the delayed message in current session is blocked.
-                        if (is_cur_session_delayed()) {
+                        if (ipc_server_loop_cur_msg->header.done == 0) {
                             ipc_server_loop_cur_msg->header.delayed = 1;
                             has_delayed = true;
                             break;
