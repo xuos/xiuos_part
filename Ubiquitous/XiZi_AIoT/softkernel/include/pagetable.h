@@ -44,6 +44,7 @@ Modification:
 
 #define LEVEL4_PTE_IDX(v)       (((uintptr_t)(v) >> LEVEL4_PTE_SHIFT) & (NUM_LEVEL4_PTE - 1))
 #define LEVEL4_PTE_ADDR(v)      ALIGNDOWN(v, LEVEL4_PTE_SIZE)
+#define LEVEL3_PDE_ADDR(v)      ALIGNDOWN(v, LEVEL3_PDE_SIZE)
 
 #define TOPLEVLE_PAGEDIR_SIZE   sizeof(uintptr_t) * NUM_TOPLEVEL_PDE
 // clang-format on
