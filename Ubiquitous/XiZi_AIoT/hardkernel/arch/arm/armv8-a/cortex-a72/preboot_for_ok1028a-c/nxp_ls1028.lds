@@ -39,7 +39,21 @@ BOOT_STACK_SIZE = 0x4000;
 
 OUTPUT_FORMAT("elf64-littleaarch64")
 OUTPUT_ARCH( "aarch64" )
-ENTRY( _entry )
+/**
+ENTRY( _ENTRY )
+ */ 
+ENTRY( _boot_start )
+
+MEMORY {
+  /**
+  phy_ddr3 (rwx)      : ORIGIN = 0x0000000040000000, LENGTH = 0x8000000
+  vir_ddr3 (rwx)      : ORIGIN = 0xffffff8040010000, LENGTH = 0x8000000
+ */ 
+  phy_ddr3 (rwx)      : ORIGIN = 0x0000000040000000, LENGTH = 1024M
+  vir_ddr3 (rwx)      : ORIGIN = 0x0000006040635000, LENGTH = 1024M
+  /* vir_ddr3 (rwx)      : ORIGIN = 0xffffffE040635000, LENGTH = 1024M */
+}
+
 
 SECTIONS
 {
@@ -48,23 +62,25 @@ SECTIONS
    * where qemu's -kernel jumps.
    * 0x40000000(PA) is 0xffffff8040000000(VA);
    */
-/*
-  . = 0x40000000;
-  */
-  . = 0xffffff0000000000;
 
-.start_sec : {
+  .start_sec : {
 		. = ALIGN(0x1000);
 		/* initialization start checkpoint. */
 
   boot.o(.text)
+  bootmmu.o(.text .text.*)
+
   boot.o(.rodata .rodata.*)
+  bootmmu.o(.rodata .rodata.*)
+
   boot.o(.data .data.*)
-    
+  bootmmu.o(.data .data.*)
+
 	PROVIDE(boot_start_addr = .);
 
   boot.o(.bss .bss.* COMMON)
-
+  bootmmu.o(.bss .bss.* COMMON)
+  
 		/* stack for booting code. */
 		. = ALIGN(0x1000);
 		PROVIDE(stacks_start = .);
@@ -74,39 +90,39 @@ SECTIONS
 
 		/* initialization end checkpoint. */
 		PROVIDE(boot_end_addr = .);
-	}
+	} > phy_ddr3
 
-  .text : AT(0x0000000) {
-    *(.text .text.*)
+  .text : AT(0x40635000) {
     . = ALIGN(0x1000);
-    PROVIDE(etext = .);
-  }
+    *(.text .text.* .gnu.linkonce.t.*)
+  } > vir_ddr3
 
-  .rodata : {
-    . = ALIGN(16);
-    *(.srodata .srodata.*) /* do not need to distinguish this from .rodata */
-    . = ALIGN(16);
-    *(.rodata .rodata.*)
-  }
+  . = ALIGN(0x1000);
 
   .data : {
-    . = ALIGN(16);
-    *(.sdata .sdata.*) /* do not need to distinguish this from .data */
-    . = ALIGN(16);
     *(.data .data.*)
-  }
 
+    . = ALIGN(1000);
+    PROVIDE(_binary_fs_img_start = .);
+    *(.rawdata_fs_img*)
+		PROVIDE(_binary_fs_img_end = .);
+		PROVIDE(_binary_init_start = .);
+		*(.rawdata_init*)
+		PROVIDE(_binary_init_end = .);
+		PROVIDE(_binary_default_fs_start = .);
+		*(.rawdata_memfs*)
+		PROVIDE(_binary_default_fs_end = .);
+  } > vir_ddr3
+
+  . = ALIGN(1000);
+  PROVIDE(kernel_data_begin = .);
+
+  _image_size = . - 0x0000006040000000;
   .bss : {
-    . = ALIGN(16);
-    PROVIDE(bss_start = .);
-    *(.sbss .sbss.*) /* do not need to distinguish this from .bss */
-    . = ALIGN(16);
-    *(.bss .bss.*)
-    . = ALIGN(16);
-    PROVIDE(bss_end = .);
-  }
-
-  PROVIDE(end = .);
+    PROVIDE(__bss_start__ = .);
+		*(.bss .bss.* COMMON)
+		PROVIDE(__bss_end__ = .);
+  } > vir_ddr3
+  . = ALIGN(0x1000);
+	PROVIDE(kernel_data_end = .);
 }
-
-bss_size = (bss_end - bss_start) >> 3;

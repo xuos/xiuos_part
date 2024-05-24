@@ -73,19 +73,7 @@ Modification:
 
 #include "cortex_a72.h"
 
-#define NR_CPU 4 // maximum number of CPUs
-#define NR_PROC 64 // maximum number of processes
-#define NOFILE 16 // open files per process
-#define NFILE 100 // open files per system
-#define NINODE 50 // maximum number of active i-nodes
-#define NDEV 10 // maximum major device number
-#define ROOTDEV 1 // device number of file system root disk
-#define MAXARG 32 // max exec arguments
-#define MAXOPBLOCKS 10 // max # of blocks any FS op writes
-#define LOGSIZE (MAXOPBLOCKS * 3) // max data blocks in on-disk log
-#define NBUF (MAXOPBLOCKS * 3) // size of disk block cache
-#define FSSIZE 1000 // size of file system in blocks
-#define MAXPATH 128 // maximum file path name
+#define NR_CPU 1 // maximum number of CPUs
 
 __attribute__((always_inline)) static inline uint64_t EL0_mode() // Set ARM mode to EL0
 {
@@ -103,8 +91,21 @@ __attribute__((always_inline)) static inline uint64_t EL0_mode() // Set ARM mode
     return val;
 }
 
+__attribute__((always_inline, optimize("O0"))) static inline void cpu_into_low_power()
+{
+    WFE();
+}
+
+__attribute__((always_inline, optimize("O0"))) static inline void cpu_leave_low_power()
+{
+    SEV();
+}
+
 struct context {
-    // callee-saved Registers
+    uint64_t sp;
+
+    /* callee register */
+    uint64_t x18;
     uint64_t x19;
     uint64_t x20;
     uint64_t x21;
@@ -121,24 +122,14 @@ struct context {
 
 /// @brief init task context, set return address to trap return
 /// @param  ctx
-extern void trap_return(void);
+extern void task_prepare_enter(void);
 __attribute__((__always_inline__)) static inline void arch_init_context(struct context* ctx)
 {
     memset(ctx, 0, sizeof(*ctx));
-    ctx->x30 = (uint64_t)(trap_return);
+    ctx->x30 = (uint64_t)(task_prepare_enter);
 }
 
 struct trapframe {
-    // Additional registers used to support musl
-    uint64_t _padding; // for 16-byte aligned
-    uint64_t tpidr_el0;
-    __uint128_t q0;
-    // Special Registers
-    uint64_t sp_el0; // stack pointer
-    uint64_t spsr_el1; // program status register
-    uint64_t elr_el1; // exception link register
-    uint64_t pc; // program counter
-    // general purpose registers
     uint64_t x0;
     uint64_t x1;
     uint64_t x2;
@@ -170,6 +161,9 @@ struct trapframe {
     uint64_t x28;
     uint64_t x29;
     uint64_t x30;
+    uint64_t pc;
+    uint64_t spsr;
+    uint64_t sp;
 };
 
 /// @brief init task trapframe
@@ -179,9 +173,8 @@ struct trapframe {
 __attribute__((__always_inline__)) static inline void arch_init_trapframe(struct trapframe* tf, uintptr_t sp, uintptr_t pc)
 {
     memset(tf, 0, sizeof(*tf));
-    tf->sp_el0 = sp;
-    tf->spsr_el1 = EL0_mode();
-    tf->elr_el1 = 0;
+    tf->sp = sp;
+    tf->spsr = EL0_mode();
     tf->pc = pc;
 }
 
@@ -191,7 +184,7 @@ __attribute__((__always_inline__)) static inline void arch_init_trapframe(struct
 /// @param pc
 __attribute__((__always_inline__)) static inline void arch_trapframe_set_sp_pc(struct trapframe* tf, uintptr_t sp, uintptr_t pc)
 {
-    tf->sp_el0 = sp;
+    tf->sp = sp;
     tf->pc = pc;
 }
 
@@ -217,7 +210,7 @@ extern int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t pa
 __attribute__((__always_inline__)) static inline int arch_syscall(struct trapframe* tf, int* syscall_num)
 {
     // call syscall
-    *syscall_num = tf->x8;
+    *syscall_num = tf->x0;
     return syscall(*syscall_num, tf->x1, tf->x2, tf->x3, tf->x4);
 }
 

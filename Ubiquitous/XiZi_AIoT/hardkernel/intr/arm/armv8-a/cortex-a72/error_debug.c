@@ -38,48 +38,21 @@ Modification:
 1. Take only armv8 abort reason part(_abort_reason).
 2. Modify iabort and dabort handler(in dabort_handler() and iabort_handler())
 *************************************************/
+#include <stddef.h>
 
+#include "assert.h"
+#include "core.h"
 #include "log.h"
 #include "multicores.h"
 #include "spinlock.h"
-// #include "syscall.h"
-
-__attribute__((always_inline)) static inline void _abort_reason(uint32_t fault_status)
-{
-    if ((fault_status & 0x3f) == 0x21) // Alignment failure
-        KPrintf("reason: alignment\n");
-    else if ((fault_status & 0x3f) == 0x4) // Translation fault, level 0
-        KPrintf("reason: sect. translation level 0\n");
-    else if ((fault_status & 0x3f) == 0x5) // Translation fault, level 1
-        KPrintf("reason: sect. translation level 1\n");
-    else if ((fault_status & 0x3f) == 0x6) // Translation fault, level 2
-        KPrintf("reason: sect. translation level 2\n");
-    else if ((fault_status & 0x3f) == 0x7) // Translation fault, level 3
-        KPrintf("reason: sect. translation level 3\n");
-    else if ((fault_status & 0x3f) == 0x3d) // Section Domain fault
-        KPrintf("reason: sect. domain\n");
-    else if ((fault_status & 0x3f) == 0x13) // Permission level 1
-        KPrintf("reason: sect. permission level 1\n");
-    else if ((fault_status & 0x3f) == 0x14) // Permission level 2
-        KPrintf("reason: sect. permission level 2\n");
-    else if ((fault_status & 0x3f) == 0x15) // Permission level 3
-        KPrintf("reason: sect. permission level 3\n");
-    else if ((fault_status & 0x3f) == 0x8) // External abort
-        KPrintf("reason: ext. abort\n");
-    else if ((fault_status & 0x3f) == 0x9) // Access flag fault, level 1
-        KPrintf("reason: sect. Access flag fault level 1\n");
-    else if ((fault_status & 0x3f) == 0xa) // Access flag fault, level 2
-        KPrintf("reason: sect. Access flag fault level 2\n");
-    else if ((fault_status & 0x3f) == 0xb) // Access flag fault, level 3
-        KPrintf("reason: sect. Access flag fault level 3\n");
-    else
-        KPrintf("reason: unknown???\n");
-}
+#include "task.h"
+#include "trap_common.h"
 
 void dump_tf(struct trapframe* tf)
 {
-    KPrintf("   elr_el1:  0x%x\n", tf->elr_el1);
-    KPrintf("   spsr_el1: 0x%x\n", tf->spsr_el1);
+    KPrintf("   sp:   0x%x\n", tf->sp);
+    KPrintf("   pc:  0x%x\n", tf->pc);
+    KPrintf("   spsr: 0x%x\n", tf->spsr);
     KPrintf("     x0: 0x%x\n", tf->x0);
     KPrintf("     x1: 0x%x\n", tf->x1);
     KPrintf("     x2: 0x%x\n", tf->x2);
@@ -110,12 +83,85 @@ void dump_tf(struct trapframe* tf)
     KPrintf("    x27: 0x%x\n", tf->x27);
     KPrintf("    x28: 0x%x\n", tf->x28);
     KPrintf("    x29: 0x%x\n", tf->x29);
-    KPrintf("     pc: 0x%x\n", tf->pc);
+    KPrintf("    x30: 0x%x\n", tf->x30);
 }
 
-void handle_undefined_instruction(struct trapframe* tf)
+void dabort_reason(struct trapframe* r)
 {
-    // unimplemented trap handler
-    KPrintf("undefined instruction at %x\n", tf->pc);
-    panic("");
+    uint32_t fault_status, fault_address;
+    __asm__ __volatile__("mrs %0, esr_el1" : "=r"(fault_status));
+    __asm__ __volatile__("mrs %0, far_el1" : "=r"(fault_address));
+    LOG("program counter: 0x%x caused\n", r->pc);
+    LOG("data abort at 0x%x, status 0x%x\n", fault_address, fault_status);
+    if ((fault_status & 0x3f) == 0x21) // Alignment failure
+        KPrintf("reason: alignment\n");
+    else if ((fault_status & 0x3f) == 0x4) // Translation fault, level 0
+        KPrintf("reason: sect. translation level 0\n");
+    else if ((fault_status & 0x3f) == 0x5) // Translation fault, level 1
+        KPrintf("reason: sect. translation level 1\n");
+    else if ((fault_status & 0x3f) == 0x6) // Translation fault, level 2
+        KPrintf("reason: sect. translation level 2\n");
+    else if ((fault_status & 0x3f) == 0x7) // Translation fault, level 3
+        KPrintf("reason: sect. translation level 3\n");
+    else if ((fault_status & 0x3f) == 0x3d) // Section Domain fault
+        KPrintf("reason: sect. domain\n");
+    else if ((fault_status & 0x3f) == 0xd) // Permission level 1
+        KPrintf("reason: sect. permission level 1\n");
+    else if ((fault_status & 0x3f) == 0xe) // Permission level 2
+        KPrintf("reason: sect. permission level 2\n");
+    else if ((fault_status & 0x3f) == 0xf) // Permission level 3
+        KPrintf("reason: sect. permission level 3\n");
+    else if ((fault_status & 0x3f) == 0x14) // External abort
+        KPrintf("reason: ext. abort\n");
+    else if ((fault_status & 0x3f) == 0x9) // Access flag fault, level 1
+        KPrintf("reason: sect. Access flag fault level 1\n");
+    else if ((fault_status & 0x3f) == 0xa) // Access flag fault, level 2
+        KPrintf("reason: sect. Access flag fault level 2\n");
+    else if ((fault_status & 0x3f) == 0xb) // Access flag fault, level 3
+        KPrintf("reason: sect. Access flag fault level 3\n");
+    else
+        KPrintf("reason: unknown???\n");
+
+    dump_tf(r);
+    return;
+}
+
+void iabort_reason(struct trapframe* r)
+{
+    uint32_t fault_status, fault_address;
+    __asm__ __volatile__("mrs %0, esr_el1" : "=r"(fault_status));
+    __asm__ __volatile__("mrs %0, far_el1" : "=r"(fault_address));
+    LOG("program counter: 0x%x caused\n", r->pc);
+    LOG("data abort at 0x%x, status 0x%x\n", fault_address, fault_status);
+    if ((fault_status & 0x3f) == 0x21) // Alignment failure
+        KPrintf("reason: alignment\n");
+    else if ((fault_status & 0x3f) == 0x4) // Translation fault, level 0
+        KPrintf("reason: sect. translation level 0\n");
+    else if ((fault_status & 0x3f) == 0x5) // Translation fault, level 1
+        KPrintf("reason: sect. translation level 1\n");
+    else if ((fault_status & 0x3f) == 0x6) // Translation fault, level 2
+        KPrintf("reason: sect. translation level 2\n");
+    else if ((fault_status & 0x3f) == 0x7) // Translation fault, level 3
+        KPrintf("reason: sect. translation level 3\n");
+    else if ((fault_status & 0x3f) == 0x3d) // Section Domain fault
+        KPrintf("reason: sect. domain\n");
+    else if ((fault_status & 0x3f) == 0xd) // Permission level 1
+        KPrintf("reason: sect. permission level 1\n");
+    else if ((fault_status & 0x3f) == 0xe) // Permission level 2
+        KPrintf("reason: sect. permission level 2\n");
+    else if ((fault_status & 0x3f) == 0xf) // Permission level 3
+        KPrintf("reason: sect. permission level 3\n");
+    else if ((fault_status & 0x3f) == 0x14) // External abort
+        KPrintf("reason: ext. abort\n");
+    else if ((fault_status & 0x3f) == 0x9) // Access flag fault, level 1
+        KPrintf("reason: sect. Access flag fault level 1\n");
+    else if ((fault_status & 0x3f) == 0xa) // Access flag fault, level 2
+        KPrintf("reason: sect. Access flag fault level 2\n");
+    else if ((fault_status & 0x3f) == 0xb) // Access flag fault, level 3
+        KPrintf("reason: sect. Access flag fault level 3\n");
+    else
+        KPrintf("reason: unknown???\n");
+
+    dump_tf(r);
+    return;
 }

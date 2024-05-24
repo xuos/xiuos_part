@@ -33,15 +33,18 @@ Modification:
 #include "memlayout.h"
 #include "page_table_entry.h"
 
-#define TCR_IPS (0 << 32)
+// #define TCR_SH1_INNER (0b11 << 28)
+// #define TCR_ORGN1_IRGN1_WRITEBACK_WRITEALLOC ((0b01 << 26) | (0b01 << 24))
+// #define TCR_SH0_INNER (0b11 << 12)
+// #define TCR_ORGN0_IRGN0_WRITEBACK_WRITEALLOC ((0b01 << 10) | (0b01 << 8))
+#define TCR_IPS (0 << 0)
 #define TCR_TG1_4K (0b10 << 30)
-#define TCR_SH1_INNER (0b11 << 28)
-#define TCR_ORGN1_IRGN1_WRITEBACK_WRITEALLOC ((0b01 << 26) | (0b01 << 24))
+#define TCR_TOSZ (0b11001 << 0)
+#define TCR_T1SZ (0b11001 << 16)
 #define TCR_TG0_4K (0 << 14)
-#define TCR_SH0_INNER (0b11 << 12)
-#define TCR_ORGN0_IRGN0_WRITEBACK_WRITEALLOC ((0b01 << 10) | (0b01 << 8))
+
 #define TCR_VALUE \
-    (TCR_IPS | TCR_TG1_4K | TCR_SH1_INNER | TCR_ORGN1_IRGN1_WRITEBACK_WRITEALLOC | TCR_TG0_4K | TCR_SH0_INNER | TCR_ORGN0_IRGN0_WRITEBACK_WRITEALLOC)
+    (TCR_IPS | TCR_TG1_4K | TCR_TG0_4K | TCR_TOSZ | TCR_T1SZ)
 
 enum AccessPermission {
     AccessPermission_NoAccess = 0,
@@ -75,18 +78,13 @@ Read and write mmu pagetable register base addr
 #define TTBR1_W(val) __asm__ volatile("msr ttbr1_el1, %0" ::"r"(val))
 
 /*
-TTBCR is used for choosing TTBR0 and TTBR1 as page table register.
-When TTBCR is set to 0, TTBR0 is selected by default.
+Translation Control Register（TCR）
 */
-// #define TTBCR_R(val) __asm__ volatile("mrs %0, ttbcr_el1" : "=r"(val))
-// #define TTBCR_W(val) __asm__ volatile("msr ttbcr_el1, %0" ::"r"(val))
+#define TCR_R(val) __asm__ volatile("mrs %0, tcr_el1" : "=r"(val))
+#define TCR_W(val) __asm__ volatile("msr tcr_el1, %0" ::"r"(val))
 
-/*
-DACR registers are used to control memory privilage.
-The domain value is usually 0x01. The memory privilage will be controled by pte AP/APX
-*/
-// #define DACR_R(val) __asm__ volatile("mrs %0, dacr_el1" : "=r"(val))
-// #define DACR_W(val) __asm__ volatile("msr dacr_el1, %0" :: "r"(val))
+#define MAIR_R(val) __asm__ volatile("mrs %0, mair_el1" : "=r"(val))
+#define MAIR_W(val) __asm__ volatile("msr mair_el1, %0" ::"r"(val))
 
 /*
 Flush TLB when loading a new page table.

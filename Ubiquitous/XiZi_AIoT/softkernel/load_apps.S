@@ -28,18 +28,18 @@ Modification:
 1. first version
 *************************************************/
 .section .rawdata_fs_img
-.globl user_apps
-user_apps:
-    .incbin "../services/app/fs.img"
+# .globl user_apps
+# user_apps:
+#     .incbin "../services/app/fs.img"
 
-.section .rawdata_init
-.globl initapp
-initapp:
-    .incbin "../services/app/bin/init"
+# .section .rawdata_init
+# .globl initapp
+# initapp:
+#     .incbin "../services/app/bin/init"
 
-.section .rawdata_memfs
-.globl memfs
-memfs:
-    .incbin "../services/app/bin/fs_server"
+# .section .rawdata_memfs
+# .globl memfs
+# memfs:
+#     .incbin "../services/app/bin/fs_server"
 .end
 

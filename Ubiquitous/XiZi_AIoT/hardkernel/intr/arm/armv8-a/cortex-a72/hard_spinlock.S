@@ -58,18 +58,21 @@ Modification:
     .func _spinlock_lock
 _spinlock_lock:
 
-ldxr      x1, [x0]                            // check if the spinlock is currently unlocked
+sevl
+wfe 
+                                          // wait for an event signal
+ldaxrb  w1, [x0]                            // check if the spinlock is currently unlocked
 cmp     x1, #UNLOCKED
 
-wfe                                           // wait for an event signal
-bne      _spinlock_lock
+// wfe                                           // wait for an event signal
+bne     _spinlock_lock
 
 mrs     x1, mpidr_el1                // get our CPU ID
 and     x1, x1, #3
-stxr     w2, x1, [x0]
-cbnz   x2, _spinlock_lock        // check if the write was successful, if the write failed, start over
+stxrb   w2, w1, [x0]
+cbnz    x2, _spinlock_lock        // check if the write was successful, if the write failed, start over
 
-dmb    ish                                              // Ensure that accesses to shared resource have completed
+dmb    ish                        // Ensure that accesses to shared resource have completed
 
 mov    x0, #0
 ret
@@ -85,17 +88,18 @@ _spinlock_unlock:
 mrs     x1, mpidr_el1                // get our CPU ID
 and     x1, x1, #3
 
-ldr       x2, [x0]
-cmp    x1, x2
-bne    1f                                       //doesn't match,jump to 1
+ldr     x2, [x0]
+cmp     x1, x2
+bne     1f                                       //doesn't match,jump to 1
 
-dmb    ish
+
+dmb     ish
 
 mov     x1, #UNLOCKED 
-str         x1, [x0]
+str     x1, [x0]
 
-dsb   ish                                              //Ensure that no instructions following the barrier execute until
-                                                         // all memory accesses prior to the barrier have completed.
+dsb     ish                                //Ensure that no instructions following the barrier execute until
+                                           // all memory accesses prior to the barrier have completed.
 
 
 sev                                                  // send event to wake up other cores waiting on spinlock
@@ -106,4 +110,8 @@ ret
 1:
 mov     x0, #1                              //doesn't match, so exit with failure
 ret
+
+.endfunc
+
+.end
 

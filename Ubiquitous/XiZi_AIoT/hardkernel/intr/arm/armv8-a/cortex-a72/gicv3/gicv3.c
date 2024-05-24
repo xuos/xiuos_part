@@ -15,13 +15,11 @@ Author: AIIT XUOS Lab
 Modification:
 *************************************************/
 #include "string.h"
+#include <stdio.h>
 
 #include "core.h"
 #include "gicv3_common_opa.h"
 #include "gicv3_registers.h"
-
-static void gic_setup_ppi(uint32_t cpuid, uint32_t intid) __attribute__((unused));
-static void gic_setup_spi(uint32_t intid);
 
 static struct {
     char* gicd;
@@ -56,16 +54,28 @@ w_icc_pmr_el1(uint32_t x)
     __asm__ volatile("msr S3_0_C4_C6_0, %0" : : "r"(x));
 }
 
-static inline uint32_t
-icc_iar1_el1()
+// static inline uint32_t
+// icc_iar1_el1()
+// {
+//     uint32_t x;
+//     __asm__ volatile("mrs %0, S3_0_C12_C12_0" : "=r"(x));
+//     return x;
+// }
+
+// static inline void
+// w_icc_eoir1_el1(uint32_t x)
+// {
+//     __asm__ volatile("msr S3_0_C12_C12_1, %0" : : "r"(x));
+// }
+inline uint32_t gic_read_irq_ack()
 {
     uint32_t x;
     __asm__ volatile("mrs %0, S3_0_C12_C12_0" : "=r"(x));
     return x;
 }
 
-static inline void
-w_icc_eoir1_el1(uint32_t x)
+inline void
+gic_write_end_of_irq(uint32_t x)
 {
     __asm__ volatile("msr S3_0_C12_C12_1, %0" : : "r"(x));
 }
@@ -82,12 +92,6 @@ static inline void
 w_icc_sre_el1(uint32_t x)
 {
     __asm__ volatile("msr S3_0_C12_C12_5, %0" : : "r"(x));
-}
-
-static inline gicc_t* gic_get_gicc(void)
-{
-    uint32_t base = get_arm_private_peripheral_base() + kGICCBaseOffset;
-    return (gicc_t*)base;
 }
 
 static void
@@ -129,8 +133,6 @@ gicdinit()
     uint32_t typer = gicd_read(D_TYPER);
     uint32_t lines = typer & 0x1f;
 
-    printf("lines %d\n", lines);
-
     for (int i = 0; i < lines; i++)
         gicd_write(D_IGROUPR(i), ~0);
 }
@@ -151,8 +153,7 @@ gicrinit(uint32_t cpuid)
         ;
 }
 
-static void
-gic_enable()
+void gic_enable()
 {
     gicd_write(D_CTLR, (1 << 1));
     w_icc_igrpen1_el1(1);
@@ -166,13 +167,9 @@ void gic_init()
     }
 
     gicdinit();
-
-    gic_setup_spi(UART0_IRQ);
-    gic_setup_spi(VIRTIO0_IRQ);
 }
 
-static inline uint64_t
-cpuid()
+static inline uint64_t cpuid()
 {
     uint64_t x;
     __asm__ volatile("mrs %0, mpidr_el1" : "=r"(x));
@@ -181,12 +178,10 @@ cpuid()
 
 void gicv3inithart()
 {
-    int cpu = cpuid();
+    uint32_t cpu = cpuid();
 
     giccinit();
     gicrinit(cpu);
-
-    gic_setup_ppi(cpu, TIMER0_IRQ);
 
     gic_enable();
 }
@@ -254,22 +249,18 @@ gicr_set_prio0(uint32_t cpuid, uint32_t intid)
     gicr_write(cpuid, R_IPRIORITYR(intid / 4), p);
 }
 
-static void
-gic_setup_ppi(uint32_t cpuid, uint32 intid)
+void gic_setup_ppi(uint32_t cpuid, uint32_t intid)
 {
     gicr_set_prio0(cpuid, intid);
     gicr_clear_pending(cpuid, intid);
     gicr_enable_int(cpuid, intid);
 }
 
-static void
-gic_setup_spi(uint32_t intid)
+void gic_setup_spi(uint32_t cpuid, uint32_t intid)
 {
     gic_set_prio0(intid);
-
     // all interrupts are handled by cpu0　
-    gic_set_target(intid, 0);
-
+    gic_set_target(intid, cpuid);
     gic_clear_pending(intid);
     gic_enable_int(intid);
 }
@@ -282,14 +273,13 @@ int gic_iar_irq(uint32_t iar)
 
 // interrupt acknowledge register:
 // ask GIC what interrupt we should serve.
-uint32_t
-gic_iar()
+uint32_t gic_iar()
 {
-    return icc_iar1_el1();
+    return gic_read_irq_ack();
 }
 
 // tell GIC we've served this IRQ.
 void gic_eoi(uint32_t iar)
 {
-    w_icc_eoir1_el1(iar);
+    gic_write_end_of_irq(iar);
 }

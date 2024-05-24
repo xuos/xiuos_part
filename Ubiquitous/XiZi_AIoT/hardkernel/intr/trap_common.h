@@ -32,11 +32,10 @@ Modification:
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "actracer.h"
 #include "core.h"
 #include "irq_numbers.h"
 #include "memlayout.h"
-
-#include "actracer.h"
 
 #define NR_IRQS HW_NR_IRQS
 #define NR_MODE_STACKS 4
@@ -65,7 +64,7 @@ struct XiziTrapDriver {
     void (*single_irq_enable)(int irq, int cpu, int prio);
     void (*single_irq_disable)(int irq, int cpu);
 
-    uint32_t* (*switch_hw_irqtbl)(uint32_t*);
+    uintptr_t* (*switch_hw_irqtbl)(uintptr_t*);
     void (*bind_irq_handler)(int, irq_handler_t);
 
     /* check if no if interruptable */

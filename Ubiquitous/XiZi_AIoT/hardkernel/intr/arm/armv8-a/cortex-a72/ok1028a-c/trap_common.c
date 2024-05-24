@@ -29,6 +29,8 @@ Modification:
 #include <string.h>
 
 #include "core.h"
+#include "cortex_a72.h"
+#include "exception_registers.h"
 #include "gicv3_common_opa.h"
 #include "trap_common.h"
 
@@ -46,8 +48,6 @@ static struct XiziTrapDriver xizi_trap_driver;
 
 void panic(char* s)
 {
-    xizi_trap_driver.cpu_irq_disable();
-    spinlock_unlock(&whole_kernel_lock);
     KPrintf("panic: %s\n", s);
     for (;;)
         ;
@@ -60,80 +60,55 @@ extern uint64_t _vector_jumper;
 extern uint64_t _vector_start;
 extern uint64_t _vector_end;
 
-void init_cpu_mode_stacks(int cpu_id)
-{
-    uint32_t modes[] = { ARM_MODE_EL0_t, ARM_MODE_EL1_t, ARM_MODE_EL2_t, ARM_MODE_EL3_t };
-    // initialize the stacks for different mode
-    for (int i = 0; i < sizeof(modes) / sizeof(uint64_t); i++) {
-        memset(mode_stack_pages[cpu_id][i], 0, MODE_STACK_SIZE);
-        init_stack(modes[i], (uint64_t)mode_stack_pages[cpu_id][i]);
-    }
-}
+// void init_cpu_mode_stacks(int cpu_id)
+// {
+//     uint32_t modes[] = { ARM_MODE_EL0_t, ARM_MODE_EL1_t, ARM_MODE_EL2_t, ARM_MODE_EL3_t };
+//     // initialize the stacks for different mode
+//     for (int i = 0; i < sizeof(modes) / sizeof(uint64_t); i++) {
+//         memset(mode_stack_pages[cpu_id][i], 0, MODE_STACK_SIZE);
+//         init_stack(modes[i], (uint64_t)mode_stack_pages[cpu_id][i]);
+//     }
+// }
 
-void handle_reserved(void)
-{
-    // unimplemented trap handler
-    LOG("Unimplemented Reserved\n");
-    panic("");
-}
-
-void handle_fiq(void)
-{
-    LOG("Unimplemented FIQ\n");
-    panic("");
-}
-
+extern void alltraps();
 static void _sys_irq_init(int cpu_id)
 {
-    /* load exception vectors */
-    init_cpu_mode_stacks(cpu_id);
-    if (cpu_id == 0) {
-        volatile uint64_t* vector_base = &_vector_start;
+    // primary core init intr
+    xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)alltraps);
 
-        // Set Interrupt handler start address
-        vector_base[1] = (uint64_t)trap_undefined_instruction; // Undefined Instruction
-        vector_base[2] = (uint64_t)user_trap_swi_enter; // Software Interrupt
-        vector_base[3] = (uint64_t)trap_iabort; // Prefetch Abort
-        vector_base[4] = (uint64_t)trap_dabort; // Data Abort
-        vector_base[5] = (uint64_t)handle_reserved; // Reserved
-        vector_base[6] = (uint64_t)trap_irq_enter; // IRQ
-        vector_base[7] = (uint64_t)handle_fiq; // FIQ
+    if (cpu_id == 0) {
+        xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)alltraps);
+        gic_init();
     }
-    /* active hardware irq responser */
-    gic_init();
-    xizi_trap_driver.switch_hw_irqtbl((uint32_t*)&_vector_jumper);
+    gicv3inithart();
 }
 
 static void _cpu_irq_enable(void)
 {
-    arm_set_interrupt_state(true);
+    // arm_set_interrupt_state(true);
+    intr_on();
 }
 
 static void _cpu_irq_disable(void)
 {
-    arm_set_interrupt_state(false);
+    intr_off();
 }
 
 static void _single_irq_enable(int irq, int cpu, int prio)
 {
-    gic_enable();
+    gic_setup_spi(cpu, irq);
 }
 
 static void _single_irq_disable(int irq, int cpu)
 {
+    return;
 }
 
-#define VBAR
-static inline uint32_t _switch_hw_irqtbl(uint32_t* new_tbl_base)
+static inline uintptr_t* _switch_hw_irqtbl(uintptr_t* new_tbl_base)
 {
-    uint32_t old_tbl_base = 0;
-    // get old irq table base addr
-    __asm__ volatile("mrs %0, vbar_el1" : "=r"(old_tbl_base));
+    w_vbar_el1((uint64_t)new_tbl_base);
 
-    // set new irq table base addr
-    __asm__ volatile("msr vbar_el1, %0" : : "r"(new_tbl_base));
-
-    return old_tbl_base;
+    return NULL;
 }
 
 static void _bind_irq_handler(int irq, irq_handler_t handler)
@@ -144,36 +119,18 @@ static void _bind_irq_handler(int irq, irq_handler_t handler)
 static uint32_t _hw_before_irq()
 {
 
-    uint32_t vectNum = gic_read_irq_ack();
-    if (vectNum & 0x200) {
-        gic_write_end_of_irq(vectNum);
-        return 0;
-    }
-    return vectNum;
+    uint32_t iar = gic_read_irq_ack();
+    return iar;
 }
 
 static uint32_t _hw_cur_int_num(uint32_t int_info)
 {
-    return int_info & 0x1FF;
-}
-
-static __attribute__((unused)) uint32_t _hw_cur_int_cpu(uint32_t int_info)
-{
-    return (int_info >> 10) & 0x7;
+    return int_info & 0x3FF;
 }
 
 static void _hw_after_irq(uint32_t int_info)
 {
     gic_write_end_of_irq(int_info);
-}
-
-static __attribute__((unused)) int _is_interruptable(void)
-{
-    uint32_t val;
-
-    asm volatile("mrs %0, spsr_el1" : "=r"(val));
-
-    return !(val & DIS_INT);
 }
 
 int _cur_cpu_id()
@@ -189,7 +146,7 @@ static struct XiziTrapDriver xizi_trap_driver = {
     .cpu_irq_disable = _cpu_irq_disable,
     .single_irq_enable = _single_irq_enable,
     .single_irq_disable = _single_irq_disable,
-    //.switch_hw_irqtbl = _switch_hw_irqtbl,
+    .switch_hw_irqtbl = _switch_hw_irqtbl,
 
     .bind_irq_handler = _bind_irq_handler,
 

@@ -2,7 +2,8 @@
 #include "cortex_a72.h"
 #include "memlayout.h"
 
-void _entry();
+// void _entry();
+void _boot_start();
 void main();
 extern char end[];
 
@@ -15,8 +16,3 @@ void start()
 {
     main();
 }
-
-__attribute__((aligned(PGSIZE))) uint64_t l1entrypgt[512];
-__attribute__((aligned(PGSIZE))) uint64_t l2entrypgt[512];
-__attribute__((aligned(PGSIZE))) uint64_t l1kpgt[512];
-__attribute__((aligned(PGSIZE))) uint64_t l2kpgt[512];

@@ -199,7 +199,7 @@ void InvalidateL1Icache(uintptr_t start, uintptr_t end)
         va = (uint64_t)((uint64_t)addr & (~(line_size - 1)));
 
         // Invalidate data cache line to PoC (Point of Coherence) by va.
-        __asm__ __volatile__("dc ivau, %0 " : : "r"(va));
+        __asm__ __volatile__("ic ivau, %0 " : : "r"(va));
         // increment addres to next line and decrement lenght
         addr = (uintptr_t)((uint64_t)addr + line_size);
     } while (addr < end_addr);

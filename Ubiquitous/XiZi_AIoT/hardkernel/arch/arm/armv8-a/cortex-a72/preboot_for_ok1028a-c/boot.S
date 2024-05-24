@@ -7,22 +7,25 @@
         // kernel.ld causes the following code to
         // be placed at 0x40000000.
 .section ".text"
-.global _entry
-_entry:
-        mrs x1, mpidr_el1
-        and x1, x1, #0x3
-        cbz x1, entry         // primary
+//.global _entry
+.global _boot_start
+.global primary_cpu_init
+
+//_entry:
+//        mrs x1, mpidr_el1
+//        and x1, x1, #0x3
+//        cbz x1, entry         // primary
         # b entryothers         // secondary
 
-entry:
+//entry:
         // clear .bss
-        adrp x1, bss_start
-        ldr w2, =bss_size
-1:
-//        cbz w2, 2f
-        str xzr, [x1], #8
-        sub w2, w2, #1
-        b 1b
+//         adrp x1, __bss_start__
+//         ldr  w2, =bss_size
+// 1:
+// //        cbz w2, 2f
+//         str xzr, [x1], #8
+//         sub w2, w2, #1
+//         b 1b
 // 2:
 //         // set up entry pagetable
 //         //
@@ -127,26 +130,80 @@ entry:
 
 //         br x1       // jump to higher address (0xffffff8000000000~)
 
-_start:
+_boot_start:
         // set up a stack for C.
         // stack0 is declared in start.c,
         // with a 4096-byte stack per CPU.
         // sp = stack0 + ((cpuid+1) * 4096)
         // cpuid = mpidr_el1 & 0xff
-        ldr x0, =stacks_start
-        mov x1, #MODE_STACK_SIZE
-        mrs x2, mpidr_el1
-        and x2, x2, #0x3
-        add x2, x2, #1
-        mul x1, x1, x2
-        add x0, x0, x1
-        mov sp, x0
+        // save r0 for cores 1-3, r0 arg field passed by ROM
+        // r0 is a function pointer for secondary cpus
+        mov x4, 	x0
+
+        mrs	x0, 	spsr_el1    /* Enter EL1 (Exception Level 1) */
+        bic	x0, 	x0, #0x1f
+        MOV     x1,     #0xC5
+        ORR     x0,     x0, x1
+        msr	spsr_el1,	x0                
+
+
+        /* set NSACR, both Secure and Non-secure access are allowed to NEON */
+        MRS     X1,     CPACR_EL1
+        ORR     X1,     X1, #(0X3 << 20)
+        MSR     CPACR_EL1, X1
+        ISB
+
+        /* Clear A bit of SCTLR */
+        MRS     x0,     SCTLR_EL1
+        BIC     x0,     x0, #0x2
+        MSR     SCTLR_EL1, x0
+
+        // clear some registers
+        msr     elr_el1, XZR
+
+        ldr     x0, =stacks_top
+        mov     x1, #MODE_STACK_SIZE
+
+         // get cpu id, and subtract the offset from the stacks base address
+        mrs     x2,     mpidr_el1
+        and     x2,     x2, #0x3
+        mov     x5,     x2
+        mul     x3,     x2, x1
+        sub     x0,     x0, x3
+        
+        MOV     X2, #ARM_MODE_EL1_h | DIS_INT  
+        MSR     SPSR_EL1, X2
+        mov     sp,     x0
+        SUB     x0,     x0,x1
+
+            // check cpu id - cpu0 is primary cpu
+        cmp     x5, 	#0
+        beq     primary_cpu_init
+        bl      bootmain     // for secondary cpus, jump to argument function pointer passed in by ROM
+
+        bl      .
+
+primary_cpu_init:
+   	/* init .bss */
+         /* clear the .bss section (zero init) */
+        ldr     x1,	=boot_start_addr
+        ldr     x2,	=boot_end_addr
+        mov     x3,	#0
+        1:  
+        cmp     x1,	x2
+        stp     x3,     x3, [x1], #16
+        b.lt     1b        
+
+        // branch to c library entry point 
+        mov     x0,		#0 // argc
+        mov     x1,		#0 // argv
+        mov     x2,		#0 // env
+
         // jump to main()
-        b main
+        //b main
 
-        b .   // spin
+        //b .   // spin
 
-.global psci_call
-psci_call:
-        hvc #0
-        ret
+	bl bootmain
+
+	.end

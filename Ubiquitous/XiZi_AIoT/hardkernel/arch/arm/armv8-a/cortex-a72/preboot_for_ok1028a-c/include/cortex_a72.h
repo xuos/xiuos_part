@@ -68,8 +68,8 @@ Modification:
 #define _ARM_MSR(coproc, opcode1, Rt, CRn, CRm, opcode2) \
     asm volatile("mcr p" #coproc ", " #opcode1 ", %[input], c" #CRn ", c" #CRm ", " #opcode2 "\n" ::[input] "r"(Rt))
 
-#define WriteReg(value, address) (*(volatile unsigned int*)(address) = (value))
-#define ReadReg(address) (*(volatile unsigned int*)(address))
+// #define WriteReg(value, address) (*(volatile unsigned int*)(address) = (value))
+// #define ReadReg(address) (*(volatile unsigned int*)(address))
 
 #if defined(__cplusplus)
 extern "C" {

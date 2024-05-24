@@ -29,21 +29,29 @@ Modification:
 #include "mmu.h"
 #include "mmu_common.h"
 
+// void GetUsrPteAttr(uintptr_t* attr)
+// {
+//     static char init = 0;
+//     static PageTblEntry usr_pte_attr;
+//     if (init == 0) {
+//         init = 1;
+
+//         usr_pte_attr.entry = 0;
+//         usr_pte_attr.desc_type = PAGE_4K;
+//         usr_pte_attr.B = 1;
+//         usr_pte_attr.C = 1;
+//         usr_pte_attr.S = 1;
+//         usr_pte_attr.AP1_0 = AccessPermission_KernelUser;
+//     }
+//     *attr = usr_pte_attr.entry;
+// }
+
 void GetUsrPteAttr(uintptr_t* attr)
 {
-    // static char init = 0;
-    // static PageTblEntry usr_pte_attr;
-    // if (init == 0) {
-    //     init = 1;
-
-    //     usr_pte_attr.entry = 0;
-    //     usr_pte_attr.desc_type = PAGE_4K;
-    //     usr_pte_attr.B = 1;
-    //     usr_pte_attr.C = 1;
-    //     usr_pte_attr.S = 1;
-    //     usr_pte_attr.AP1_0 = AccessPermission_KernelUser;
-    // }
-    // *attr = usr_pte_attr.entry;
+    static char init = 0;
+    if (init == 0) {
+        init = 1;
+        }
 }
 
 void GetUsrDevPteAttr(uintptr_t* attr)

@@ -59,7 +59,7 @@ __attribute__((optimize("O0"))) void spinlock_init(struct spinlock* lock, char* 
 }
 
 extern int _spinlock_lock(struct spinlock* lock, uint32_t timeout);
-void _spinlock_unlock(struct spinlock* lock);
+extern void _spinlock_unlock(struct spinlock* lock);
 
 __attribute__((optimize("O0"))) void spinlock_lock(struct spinlock* lock)
 {
