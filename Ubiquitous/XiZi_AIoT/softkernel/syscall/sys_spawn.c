@@ -45,7 +45,7 @@ int sys_spawn(char* img_start, char* name, char** argv)
 
     // load memspace
     uintptr_t* entry = load_memspace(pmemspace, img_start);
-    if (NULL == entry) {
+    if (pmemspace->pgdir.pd_addr == NULL) {
         ERROR("Loading memspace from %016x failed.\n", img_start);
         free_memspace(pmemspace);
         return -1;

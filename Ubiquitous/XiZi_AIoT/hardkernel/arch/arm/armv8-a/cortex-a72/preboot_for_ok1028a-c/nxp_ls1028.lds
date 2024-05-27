@@ -45,24 +45,13 @@ ENTRY( _ENTRY )
 ENTRY( _boot_start )
 
 MEMORY {
-  /**
-  phy_ddr3 (rwx)      : ORIGIN = 0x0000000040000000, LENGTH = 0x8000000
-  vir_ddr3 (rwx)      : ORIGIN = 0xffffff8040010000, LENGTH = 0x8000000
- */ 
   phy_ddr3 (rwx)      : ORIGIN = 0x0000000040000000, LENGTH = 1024M
   vir_ddr3 (rwx)      : ORIGIN = 0x0000006040635000, LENGTH = 1024M
-  /* vir_ddr3 (rwx)      : ORIGIN = 0xffffffE040635000, LENGTH = 1024M */
 }
 
 
 SECTIONS
 {
-  /*
-   * ensure that entry.S / _entry is at 0x40000000(physical address),
-   * where qemu's -kernel jumps.
-   * 0x40000000(PA) is 0xffffff8040000000(VA);
-   */
-
   .start_sec : {
 		. = ALIGN(0x1000);
 		/* initialization start checkpoint. */
@@ -102,19 +91,21 @@ SECTIONS
   .data : {
     *(.data .data.*)
 
-    . = ALIGN(1000);
+    . = ALIGN(0x1000);
     PROVIDE(_binary_fs_img_start = .);
     *(.rawdata_fs_img*)
 		PROVIDE(_binary_fs_img_end = .);
+    . = ALIGN(0x1000);
 		PROVIDE(_binary_init_start = .);
 		*(.rawdata_init*)
 		PROVIDE(_binary_init_end = .);
+    . = ALIGN(0x1000);
 		PROVIDE(_binary_default_fs_start = .);
 		*(.rawdata_memfs*)
 		PROVIDE(_binary_default_fs_end = .);
   } > vir_ddr3
 
-  . = ALIGN(1000);
+  . = ALIGN(0x1000);
   PROVIDE(kernel_data_begin = .);
 
   _image_size = . - 0x0000006040000000;

@@ -77,7 +77,7 @@ Modification:
 
 __attribute__((always_inline)) static inline uint64_t EL0_mode() // Set ARM mode to EL0
 {
-    uint64_t val;
+    uint64_t val = 0;
 
     __asm__ __volatile__(
         "mrs %0, spsr_el1"
@@ -126,7 +126,7 @@ extern void task_prepare_enter(void);
 __attribute__((__always_inline__)) static inline void arch_init_context(struct context* ctx)
 {
     memset(ctx, 0, sizeof(*ctx));
-    ctx->x30 = (uint64_t)(task_prepare_enter);
+    ctx->x30 = (uintptr_t)(task_prepare_enter + 4);
 }
 
 struct trapframe {

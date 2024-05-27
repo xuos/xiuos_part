@@ -24,7 +24,7 @@
 #define BITS 8
 
 // Bitmap size of one block
-#define BITMAP_SIZE (BLOCK_SIZE * BITS * NR_BIT_BLOCKS)
+#define BITMAP_SIZE (BLOCK_SIZE * BITS)
 
 // Inode size of one block
 #define INODE_SIZE (BLOCK_SIZE / sizeof(struct Inode))

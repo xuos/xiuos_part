@@ -27,6 +27,8 @@ Modification:
 #ifndef __LINUX_IRQCHIP_ARM_GIC_H
 #define __LINUX_IRQCHIP_ARM_GIC_H
 
+#include "memlayout.h"
+
 // clang-format off
 // interrupt controller GICv3
 #define GICV3               (DEV_VRTMEM_BASE + 0x08000000L)

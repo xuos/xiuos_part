@@ -60,16 +60,6 @@ extern uint64_t _vector_jumper;
 extern uint64_t _vector_start;
 extern uint64_t _vector_end;
 
-// void init_cpu_mode_stacks(int cpu_id)
-// {
-//     uint32_t modes[] = { ARM_MODE_EL0_t, ARM_MODE_EL1_t, ARM_MODE_EL2_t, ARM_MODE_EL3_t };
-//     // initialize the stacks for different mode
-//     for (int i = 0; i < sizeof(modes) / sizeof(uint64_t); i++) {
-//         memset(mode_stack_pages[cpu_id][i], 0, MODE_STACK_SIZE);
-//         init_stack(modes[i], (uint64_t)mode_stack_pages[cpu_id][i]);
-//     }
-// }
-
 extern void alltraps();
 static void _sys_irq_init(int cpu_id)
 {
@@ -77,15 +67,13 @@ static void _sys_irq_init(int cpu_id)
     xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)alltraps);
 
     if (cpu_id == 0) {
-        xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)alltraps);
         gic_init();
     }
-    gicv3inithart();
+    gicv3inithart(cpu_id);
 }
 
 static void _cpu_irq_enable(void)
 {
-    // arm_set_interrupt_state(true);
     intr_on();
 }
 

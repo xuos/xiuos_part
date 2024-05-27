@@ -1,15 +1,23 @@
 ifeq ($(BOARD), imx6q-sabrelite)
 toolchain ?= arm-none-eabi-
+cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie 
+user_ldflags = -N -Ttext 0
 endif
 ifeq ($(BOARD), zynq7000-zc702)
 toolchain ?= arm-xilinx-eabi-
+cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie 
+user_ldflags = -N -Ttext 0
 endif
+ifeq ($(BOARD), ok1028a-c)
+toolchain ?= aarch64-none-elf-
+user_ldflags = -N -Ttext 0
+cflags = -Wall -g -std=c11 -mtune=cortex-a72 -ffreestanding -fno-common -fno-stack-protector -fno-pie -no-pie -nostdlib -static -fno-builtin -nodefaultlibs -Wno-unused
+endif
+
 cc = ${toolchain}gcc
 ld = ${toolchain}g++
 objdump = ${toolchain}objdump
-user_ldflags = -N -Ttext 0
 
-cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie 
 c_useropts = -O2
 
 INC_DIR = 	-I$(KERNEL_ROOT)/services/app \

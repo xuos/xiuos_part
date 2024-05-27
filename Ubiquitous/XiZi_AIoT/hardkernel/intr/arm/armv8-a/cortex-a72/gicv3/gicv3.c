@@ -14,8 +14,7 @@ History:
 Author: AIIT XUOS Lab
 Modification:
 *************************************************/
-#include "string.h"
-#include <stdio.h>
+#include <string.h>
 
 #include "core.h"
 #include "gicv3_common_opa.h"
@@ -169,19 +168,10 @@ void gic_init()
     gicdinit();
 }
 
-static inline uint64_t cpuid()
+void gicv3inithart(uint32_t cpu_id)
 {
-    uint64_t x;
-    __asm__ volatile("mrs %0, mpidr_el1" : "=r"(x));
-    return x & 0xff;
-}
-
-void gicv3inithart()
-{
-    uint32_t cpu = cpuid();
-
     giccinit();
-    gicrinit(cpu);
+    gicrinit(cpu_id);
 
     gic_enable();
 }
@@ -259,7 +249,6 @@ void gic_setup_ppi(uint32_t cpuid, uint32_t intid)
 void gic_setup_spi(uint32_t cpuid, uint32_t intid)
 {
     gic_set_prio0(intid);
-    // all interrupts are handled by cpu0　
     gic_set_target(intid, cpuid);
     gic_clear_pending(intid);
     gic_enable_int(intid);

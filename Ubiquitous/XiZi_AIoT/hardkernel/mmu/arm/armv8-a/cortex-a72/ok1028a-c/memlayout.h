@@ -82,7 +82,4 @@ Modification:
 
 #define V2P_WO(x) ((x) - KERN_OFFSET)    // same as V2P, but without casts
 #define P2V_WO(x) ((x) + KERN_OFFSET)    // same as P2V, but without casts
-
-#define TIMER0_IRQ  27
-
 // clang-format on

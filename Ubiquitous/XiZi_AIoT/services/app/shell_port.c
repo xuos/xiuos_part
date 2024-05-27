@@ -56,10 +56,10 @@ int main(void)
         printf("session connect faield\n");
         return -1;
     }
-
     shellTask(&shell);
 
     free_session(&session_fs);
 
+    exit(0);
     return 0;
 }

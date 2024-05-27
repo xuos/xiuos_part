@@ -263,8 +263,8 @@ void balloc(int used)
     uchar buf[BLOCK_SIZE];
     int i;
     printf("balloc: first %d blocks have been allocated\n", used);
-    bzero(buf, BLOCK_SIZE);
     for (int bmsec = 0; bmsec < bitblocks; bmsec++) {
+        bzero(buf, BLOCK_SIZE);
         for (i = 0; i < ((used > NR_BIT_PER_BYTE * BLOCK_SIZE) ? NR_BIT_PER_BYTE * BLOCK_SIZE : used); i++) {
             buf[i / NR_BIT_PER_BYTE] = buf[i / NR_BIT_PER_BYTE] | (0x1 << (i % NR_BIT_PER_BYTE));
         }

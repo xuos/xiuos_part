@@ -41,7 +41,7 @@ extern void iabort_handler(struct trapframe* r);
 void kernel_abort_handler(struct trapframe* tf)
 {
     uint64_t esr = r_esr_el1();
-    switch ((esr & 0x3F) >> 26) {
+    switch ((esr >> 26) & 0x3F) {
     case 0b100100:
     case 0b100101:
         dabort_handler(tf);
@@ -49,6 +49,11 @@ void kernel_abort_handler(struct trapframe* tf)
     case 0b100001:
         iabort_handler(tf);
     default:
+        uint64_t ec = (esr >> 26) & 0x3f;
+        uint64_t iss = esr & 0x1ffffff;
+        ERROR("esr %p %p %p\n", esr, ec, iss);
+        ERROR("elr = %p far = %p\n", r_elr_el1(), r_far_el1());
+        ERROR("Current Task: %s.\n", cur_cpu()->task->name);
         panic("Unimplemented Error Occured.\n");
     }
     panic("Return from abort handler.\n");
@@ -63,17 +68,10 @@ extern void context_switch(struct context**, struct context*);
 void syscall_arch_handler(struct trapframe* tf)
 {
     uint64_t ec = (r_esr_el1() >> 0x1A) & 0x3F;
-    w_esr_el1(0);
     if (ec == 0b010101) {
+        w_esr_el1(0);
         software_irq_dispatch(tf);
     } else {
-        printf("USYSCALL: unexpected ec %p", r_esr_el1());
-        printf("          elr=%p far=%p\n", r_elr_el1(), r_far_el1());
-        // kill error task
-        xizi_enter_kernel();
-        assert(cur_cpu()->task == NULL);
-        sys_exit(cur_cpu()->task);
-        context_switch(&cur_cpu()->task->thread_context.context, cur_cpu()->scheduler);
-        panic("dabort end should never be reashed.\n");
+        kernel_abort_handler(tf);
     }
 }

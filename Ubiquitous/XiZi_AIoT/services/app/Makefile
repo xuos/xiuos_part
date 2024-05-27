@@ -10,6 +10,12 @@ cflags = -std=c11 -O2 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -
 board_specs = stub.o
 #cflags = -Wall -g -std=c11 
 endif
+ifeq ($(BOARD), ok1028a-c)
+toolchain ?= aarch64-none-elf-
+user_ldflags = -N -Ttext 0
+cflags = -Wall -g -std=c11 -mtune=cortex-a72 -ffreestanding -fno-common -fno-stack-protector -fno-pie -no-pie -nostdlib -static -fno-builtin -nodefaultlibs -Wno-unused
+board_specs = stub.o
+endif
 
 cc = ${toolchain}gcc
 ld = ${toolchain}g++
@@ -29,7 +35,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 ifeq ($(BOARD), imx6q-sabrelite)
 all: init test_fault simple_client simple_server shell fs_server semaphore_server test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server readme.txt | bin
 else 
-all: init test_fault simple_client simple_server shell fs_server test_irq_hdlr readme.txt | bin
+all: init test_fault simple_client simple_server shell fs_server readme.txt | bin
 endif
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin

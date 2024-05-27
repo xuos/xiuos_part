@@ -26,25 +26,31 @@ History:
 .global context_switch
 
 context_switch:
-    # Save  store original context to stack
-    stp x29, lr, [sp, #-16]!
-    stp x27, x28, [sp, #-16]!
-    stp x25, x26, [sp, #-16]!
-    stp x23, x24, [sp, #-16]!
-    stp x21, x22, [sp, #-16]!
-    stp x19, x20, [sp, #-16]!
 
-    # Switch stacks
-    mov x19, sp
-    str x19, [x0]
-    mov sp, x1
+    mov x9, sp
+    mov x10, sp
 
-    # restore context from stack
-    ldp x19, x20, [sp], #16
-    ldp x21, x22, [sp], #16
-    ldp x23, x24, [sp], #16
-    ldp x25, x26, [sp], #16
-    ldp x27, x28, [sp], #16
-    ldp x29, lr, [sp], #16
+    sub x9, x9, #16 * 7
+    stp x10/*sp*/, x18, [x9, #16 * 0]
+    stp x19, x20, [x9, #16 * 1]
+    stp x21, x22, [x9, #16 * 2]
+    stp x23, x24, [x9, #16 * 3]
+    stp x25, x26, [x9, #16 * 4]
+    stp x27, x28, [x9, #16 * 5]
+    stp x29, x30, [x9, #16 * 6]
 
+    str x9, [x0]
+    mov x9, x1
+
+    ldp x10/*sp*/, x18, [x9, #16 * 0]
+    ldp x19, x20, [x9, #16 * 1]
+    ldp x21, x22, [x9, #16 * 2]
+    ldp x23, x24, [x9, #16 * 3]
+    ldp x25, x26, [x9, #16 * 4]
+    ldp x27, x28, [x9, #16 * 5]
+    ldp x29, x30, [x9, #16 * 6]
+    add x9, x9, #16 * 7
+
+    mov sp, x9
+    
     ret

@@ -79,7 +79,7 @@ struct IpcMsg* new_ipc_msg(struct Session* session, const int argc, const int* a
 bool ipc_msg_set_nth_arg(struct IpcMsg* msg, const int arg_num, const void* const data, const int len)
 {
     if (arg_num >= msg->header.nr_args) {
-        printf("[%s] IPC: arg_num out of msg range, arg_num: %d, nr_args: %lu\n", __func__, arg_num, msg->header.nr_args);
+        printf("[%s] IPC: arg_num out of msg range, arg_num: %d, nr_args: %u\n", __func__, arg_num, msg->header.nr_args);
         return false;
     }
     struct IpcArgInfo* nth_arg_info = IPCMSG_ARG_INFO(msg, arg_num);

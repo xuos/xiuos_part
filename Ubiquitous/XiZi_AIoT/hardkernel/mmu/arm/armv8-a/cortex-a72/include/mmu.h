@@ -31,7 +31,6 @@ Modification:
 #include <stdint.h>
 
 #include "memlayout.h"
-#include "page_table_entry.h"
 
 // #define TCR_SH1_INNER (0b11 << 28)
 // #define TCR_ORGN1_IRGN1_WRITEBACK_WRITEALLOC ((0b01 << 26) | (0b01 << 24))

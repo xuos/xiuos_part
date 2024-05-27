@@ -51,7 +51,7 @@ Modification:
 void dump_tf(struct trapframe* tf)
 {
     KPrintf("   sp:   0x%x\n", tf->sp);
-    KPrintf("   pc:  0x%x\n", tf->pc);
+    KPrintf("   pc:   0x%x\n", tf->pc);
     KPrintf("   spsr: 0x%x\n", tf->spsr);
     KPrintf("     x0: 0x%x\n", tf->x0);
     KPrintf("     x1: 0x%x\n", tf->x1);

@@ -63,11 +63,12 @@ int IPC_DO_SERVE_FUNC(Ipc_ls)(char* path)
     }
 
     if (!(ip = InodeSeek(dp, path))) {
-        printf("ls: find target Inode failed, ip: %x(%d), dp: %x(%d)\n", ip, ip->inum, dp, dp->inum);
+        printf("ls: find target Inode failed, dp: %p(%d), path: %s\n", dp, dp->inum, path);
         return -1;
     }
+
     if (ip->type != FS_DIRECTORY) {
-        printf("ls: not a dir\n");
+        printf("ls: not a dir, ip: %d\n", ip->inum);
         return -1;
     }
 
@@ -364,4 +365,5 @@ int main(int argc, char* argv[])
 
     // never reached
     exit(0);
+    return 0;
 }

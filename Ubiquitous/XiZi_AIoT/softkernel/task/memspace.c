@@ -127,6 +127,7 @@ uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start)
         // 1. alloc space
         if ((load_size = xizi_pager.resize_user_pgdir(&pgdir, load_size, ph.vaddr + ph.memsz))
             != ph.vaddr + ph.memsz) {
+            ERROR("Add uspace size failed.\n");
             goto error_exec;
         }
         // 2. copy inode to space

@@ -129,6 +129,7 @@ clean:
 	@rm -rf build
 	@rm -rf temp.txt
 	@rm -rf services/app/bin
+	@rm -f services/app/*.o
 	@rm -rf services/tools/mkfs/mkfs
 	@rm -rf services/app/fs.img
 	@rm -rf services/app/user.map

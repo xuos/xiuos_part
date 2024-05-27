@@ -32,117 +32,6 @@ Modification:
 
 #include "core.h"
 
-.global trap_irq_enter
-.global trap_return
-.global usertrapret
-.global init_stack
-
-trap_return:
-    // Restore registers
-    ldp x1, x2, [sp], #16
-    ldp x3, x0, [sp], #16
-    msr sp_el0, x1
-    msr spsr_el1, x2
-    msr elr_el1, x3
-
-    ldp x1, x2, [sp], #16
-    ldp x3, x4, [sp], #16
-    ldp x5, x6, [sp], #16
-    ldp x7, x8, [sp], #16
-    ldp x9, x10, [sp], #16
-    ldp x11, x12, [sp], #16
-    ldp x13, x14, [sp], #16
-    ldp x15, x16, [sp], #16
-    ldp x17, x18, [sp], #16
-    ldp x19, x20, [sp], #16
-    ldp x21, x22, [sp], #16
-    ldp x23, x24, [sp], #16
-    ldp x25, x26, [sp], #16
-    ldp x27, x28, [sp], #16
-    ldp x29, x30, [sp], #16
-
-    eret
-
-user_trap_swi_enter:
-    // Save trapframe to swi stack
-    stp x29, x30, [sp, #-16]!
-    stp x27, x28, [sp, #-16]!
-    stp x25, x26, [sp, #-16]!
-    stp x23, x24, [sp, #-16]!
-    stp x21, x22, [sp, #-16]!
-    stp x19, x20, [sp, #-16]!
-    stp x17, x18, [sp, #-16]!
-    stp x15, x16, [sp, #-16]!
-    stp x13, x14, [sp, #-16]!
-    stp x11, x12, [sp, #-16]!
-    stp x9, x10, [sp, #-16]!
-    stp x7, x8, [sp, #-16]!
-    stp x5, x6, [sp, #-16]!
-    stp x3, x4, [sp, #-16]!
-    stp x1, x2, [sp, #-16]!
-
-    // mrs  x2,    spsr_el1
-    //str     x2, [sp, #-8]       
-    //str     x30, [sp, #-8]
-    //stp sp, elr_el1, [sp, #-16]!         	
-    //str     sp, [sp, #-8] 
-
-    // Call syscall handler
-    mov 	x0, sp
-    bl		software_irq_dispatch
-    b		trap_return
-
-trap_irq_enter:
-    // Build trapframe. 
-    stp x29, x30, [sp, #-16]!
-    stp x27, x28, [sp, #-16]!
-    stp x25, x26, [sp, #-16]!
-    stp x23, x24, [sp, #-16]!
-    stp x21, x22, [sp, #-16]!
-    stp x19, x20, [sp, #-16]!
-    stp x17, x18, [sp, #-16]!
-    stp x15, x16, [sp, #-16]!
-    stp x13, x14, [sp, #-16]!
-    stp x11, x12, [sp, #-16]!
-    stp x9, x10, [sp, #-16]!
-    stp x7, x8, [sp, #-16]!
-    stp x5, x6, [sp, #-16]!
-    stp x3, x4, [sp, #-16]!
-    stp x1, x2, [sp, #-16]!
-
-    mrs x3, elr_el1
-    mrs x2, spsr_el1
-    mrs x1, sp_el0
-    stp x3, x0, [sp, #-16]!
-    stp x1, x2, [sp, #-16]!
-
-    //Call trap(struct trapframe*)
-    mov x0, sp
-    bl      intr_irq_dispatch
-    b  trap_return
-
-
-
-// Help forkret to call trap_return in an expected way
-//usertrapret:
-    // Overlay stack pointer in trap_return
-//    mov sp, x0
-//    b   trap_return
-
-
-init_stack:
-    mrs     x2,  spsr_el1
-    bic     x2,  x2, #SPSR_MODE_MASK
-    orr     x2,  x2, x0
-    msr     spsr_el1, x2
-    mov     sp,  x1
-    bic     x2,  x2, #SPSR_MODE_MASK
-    orr     x2,  x2, #ARM_MODE_EL1_t
-    msr     spsr_el1, x2
-    ret
-
-.section ".text"
-
 .macro savereg
         msr daifset, #0xf
         // make room to save registers.
@@ -197,7 +86,6 @@ init_stack:
 .endm
 
 .macro usavereg
-        msr daifset, #0xf
         sub sp, sp, #272
 
         stp x0, x1, [sp, #16 * 0]
@@ -298,43 +186,39 @@ el1sync:
         savereg
         
         mov x0, sp
-        bl kernel_abort_handler 
+        bl  kernel_abort_handler 
+        b   .
       
-        restorereg
-      
-        eret
 el1irq:
         savereg
         
         mov x0, sp
         # this should never happen by design
-        bl kernel_intr_handler
-      
-        restorereg
-      
-        eret
+        bl  kernel_intr_handler
+        b   .
       
 el0sync:
+        msr daifset, #0xf
         usavereg
       
         mov x0, sp
         bl syscall_arch_handler
       
         urestorereg
+        msr daifclr, #0xf
       
         eret
+
 el0irq:
+        msr daifset, #0xf
         usavereg
       
         mov x0, sp
         bl intr_irq_dispatch
       
-trapret:
+.global trap_return
+trap_return:
         urestorereg
+        msr daifclr, #0xf
 
         eret
-
-.global usertrapret
-usertrapret:
-        mov sp, x0
-        b trapret

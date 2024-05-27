@@ -113,11 +113,17 @@ static uintptr_t map_task_share_page(struct Thread* task, const uintptr_t paddr,
         // time to use buddy
         if (vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
             task->memspace->massive_ipc_allocator = (struct KBuddy*)slab_alloc(&xizi_task_manager.task_buddy_allocator);
-            KBuddyInit(task->memspace->massive_ipc_allocator, USER_IPC_USE_ALLOCATOR_WATERMARK, USER_IPC_SPACE_TOP);
             if (!task->memspace->massive_ipc_allocator) {
                 ERROR("Alloc task buddy failed.\n");
                 return (uintptr_t)NULL;
             }
+            if (!KBuddyInit(task->memspace->massive_ipc_allocator, USER_IPC_USE_ALLOCATOR_WATERMARK, USER_IPC_SPACE_TOP)) {
+                ERROR("Alloc task buddy failed.\n");
+                slab_free(&xizi_task_manager.task_buddy_allocator, task->memspace->massive_ipc_allocator);
+                task->memspace->massive_ipc_allocator = NULL;
+                return (uintptr_t)NULL;
+            }
+
             return map_task_share_page(task, paddr, nr_pages);
         }
     }

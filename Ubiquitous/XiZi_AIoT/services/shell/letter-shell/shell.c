@@ -1735,7 +1735,7 @@ void shellKill(int pid)
  */
 void shellLs(const char* path, ...)
 {
-    if (*path == '\0') {
+    if ((uintptr_t*)path == (uintptr_t*)shellLs || *path == '\0') {
         path = ".";
     }
     ls(&session_fs, (char*)path);
