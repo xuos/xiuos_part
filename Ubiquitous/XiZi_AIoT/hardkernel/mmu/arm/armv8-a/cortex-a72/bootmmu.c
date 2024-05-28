@@ -30,6 +30,7 @@ Modification:
 #include "memlayout.h"
 #include "mmio_access.h"
 #include "mmu.h"
+#include "pagetable.h"
 #include "registers.h"
 
 #include <stdint.h>
@@ -38,20 +39,20 @@ Modification:
 extern uint64_t kernel_data_end[];
 extern uint64_t kernel_data_begin[];
 
-#define NR_PDE_ENTRIES (1 << 9)
+// clang-format off
+#define L2_TYPE_TAB         2
+#define L2_PTE_VALID        1
 
-#define L2_TYPE_TAB 2
-#define L2_PTE_VALID 1
+#define L3_TYPE_TAB         2
+#define L3_PTE_VALID        1
 
-#define L3_TYPE_TAB 2
-#define L3_PTE_VALID 1
+#define L4_TYPE_PAGE        (3 << 0)
+#define L4_PTE_DEV          ((0b00) << 2) // Device memory
+#define L4_PTE_AF           (1 << 10) // Data Access Permissions
 
-#define L4_TYPE_PAGE (3 << 0)
-#define L4_PTE_DEV ((0b00) << 2) // Device memory
-#define L4_PTE_AF (1 << 10) // Data Access Permissions
-
-#define IDX_MASK (0b111111111)
-#define L3_PDE_INDEX(idx) ((idx << LEVEL3_PDE_SHIFT) & L3_IDX_MASK)
+#define IDX_MASK            (0b111111111)
+#define L3_PDE_INDEX(idx)   ((idx << LEVEL3_PDE_SHIFT) & L3_IDX_MASK)
+// clang-format on
 
 uint64_t boot_l2pgdir[NUM_LEVEL2_PDE] __attribute__((aligned(0x1000))) = { 0 };
 
@@ -70,7 +71,7 @@ static void build_boot_pgdir()
     boot_l2pgdir[(dev_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
     boot_l2pgdir[(MMIO_P2V_WO(dev_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
 
-    uint64_t cur_mem_paddr = (uint64_t)DEV_PHYMEM_BASE & ((uint64_t)IDX_MASK << (uint64_t)LEVEL2_PDE_SHIFT);
+    uint64_t cur_mem_paddr = ALIGNDOWN((uint64_t)DEV_PHYMEM_BASE, PAGE_SIZE);
     for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
         boot_dev_l3pgdir[i] = (uint64_t)boot_dev_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
 
@@ -85,7 +86,7 @@ static void build_boot_pgdir()
     boot_l2pgdir[(PHY_MEM_BASE >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_kern_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
     boot_l2pgdir[(P2V_WO(PHY_MEM_BASE) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_kern_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
 
-    cur_mem_paddr = (uint64_t)PHY_MEM_BASE & ((uint64_t)IDX_MASK << (uint64_t)LEVEL2_PDE_SHIFT);
+    cur_mem_paddr = ALIGNDOWN((uint64_t)PHY_MEM_BASE, PAGE_SIZE);
     for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
         boot_kern_l3pgdir[i] = (uint64_t)boot_kern_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
 

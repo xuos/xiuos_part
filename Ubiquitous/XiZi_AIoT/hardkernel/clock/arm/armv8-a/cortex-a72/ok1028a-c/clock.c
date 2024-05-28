@@ -9,12 +9,13 @@
  * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-
 #include "actracer.h"
 #include "core.h"
 #include "generic_timer.h"
 
 #include "clock_common_op.h"
+
+#include "log.h"
 
 // armv8 generic timer driver
 
@@ -24,26 +25,23 @@
 
 static void enable_timer()
 {
-    uint64_t c = r_cntv_ctl_el0();
-    c |= CNTV_CTL_ENABLE;
-    c &= ~CNTV_CTL_IMASK;
+    uint32_t c = r_cntv_ctl_el0();
+    c = CNTV_CTL_ENABLE;
     w_cntv_ctl_el0(c);
 }
 
 static void disable_timer()
 {
-    uint64_t c = r_cntv_ctl_el0();
-    c &= ~CNTV_CTL_ENABLE;
-    c |= CNTV_CTL_IMASK;
+    uint32_t c = r_cntv_ctl_el0();
+    c = CNTV_CTL_IMASK;
     w_cntv_ctl_el0(c);
 }
 
 static void reload_timer()
 {
     // interval 100ms
-    uint64_t interval = 100000;
-    uint64_t interval_clk = interval * (r_cntfrq_el0() / 1000000);
-
+    uint32_t interval = 100000;
+    uint32_t interval_clk = interval * (r_cntfrq_el0() / 1000000);
     w_cntv_tval_el0(interval_clk);
 }
 
@@ -61,7 +59,7 @@ static uint32_t _get_clock_int()
 
 static uint64_t _get_tick()
 {
-    return 0;
+    return r_cntvct_el0();
 }
 
 static uint64_t _get_second()

@@ -1,11 +1,7 @@
 export CROSS_COMPILE ?= aarch64-none-elf-
-# export DEVICE = -march=armv8-a -mtune=cortex-a72 -ffreestanding -fno-common -nostdlib
 export DEVICE = -mtune=cortex-a72 -ffreestanding -fno-common -fno-stack-protector -fno-pie -no-pie
-# export CFLAGS := $(DEVICE) -Wall -Werror -O0 -g -fno-omit-frame-pointer -fPIC 
-export CFLAGS := $(DEVICE) -O0 -g -fno-omit-frame-pointer -fPIC 
+export CFLAGS := $(DEVICE) -Wall -Werror -O0 -g -fno-omit-frame-pointer -fPIC 
 # export AFLAGS := -c $(DEVICE) -x assembler-with-cpp -D__ASSEMBLY__ -gdwarf-2
-# export LFLAGS := $(DEVICE) -Wl,-Map=XiZi-imx6q-sabrelite.map,-cref,-u,_boot_start -T $(KERNEL_ROOT)/hardkernel/arch/arm/armv7-a/cortex-a9/preboot_for_imx6q-sabrelite/nxp_imx6q_sabrelite.lds
-# export LFLAGS := $(DEVICE) -mcmodel=large -Wl,-Map=XiZi-ok1028a-c.map,-cref,-u,_start -T $(KERNEL_ROOT)/hardkernel/arch/arm/armv8-a/cortex-a72/preboot_for_ok1028a-c/nxp_ls1028.lds -Wl,--start-group,-lgcc,-lc,--end-group
 export LFLAGS := $(DEVICE) -Wl,-T -Wl,$(KERNEL_ROOT)/hardkernel/arch/arm/armv8-a/cortex-a72/preboot_for_ok1028a-c/nxp_ls1028.lds -Wl,--start-group,-lgcc,-lc,--end-group
 export CXXFLAGS := 
 

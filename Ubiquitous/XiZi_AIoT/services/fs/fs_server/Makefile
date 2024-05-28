@@ -12,7 +12,7 @@ endif
 ifeq ($(BOARD), ok1028a-c)
 toolchain ?= aarch64-none-elf-
 user_ldflags = -N 
-cflags = -Wall -g -std=c11 -mtune=cortex-a72 -ffreestanding -fno-common -fno-stack-protector -fno-pie -no-pie -nostdlib -static -fno-builtin -nodefaultlibs -Wno-unused
+cflags = -Wall -g -std=c11 -mtune=cortex-a72 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie  
 endif
 
 cc = ${toolchain}gcc

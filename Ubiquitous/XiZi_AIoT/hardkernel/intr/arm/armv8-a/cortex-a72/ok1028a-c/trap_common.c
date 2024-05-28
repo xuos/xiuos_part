@@ -37,13 +37,6 @@ Modification:
 #include "log.h"
 #include "multicores.h"
 
-extern void init_stack(uint64_t, uint64_t);
-extern void user_trap_swi_enter(void);
-extern void trap_iabort(void);
-extern void trap_dabort(void);
-extern void trap_irq_enter(void);
-extern void trap_undefined_instruction(void);
-
 static struct XiziTrapDriver xizi_trap_driver;
 
 void panic(char* s)
@@ -52,13 +45,6 @@ void panic(char* s)
     for (;;)
         ;
 }
-
-/* stack for different mode*/
-static char mode_stack_pages[NR_CPU][NR_MODE_STACKS][MODE_STACK_SIZE];
-
-extern uint64_t _vector_jumper;
-extern uint64_t _vector_start;
-extern uint64_t _vector_end;
 
 extern void alltraps();
 static void _sys_irq_init(int cpu_id)
@@ -84,7 +70,7 @@ static void _cpu_irq_disable(void)
 
 static void _single_irq_enable(int irq, int cpu, int prio)
 {
-    gic_setup_spi(cpu, irq);
+    gic_setup_spi((uint32_t)cpu, (uint32_t)irq);
 }
 
 static void _single_irq_disable(int irq, int cpu)

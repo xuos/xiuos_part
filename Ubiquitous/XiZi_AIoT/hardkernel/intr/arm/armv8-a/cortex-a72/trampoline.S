@@ -33,7 +33,6 @@ Modification:
 #include "core.h"
 
 .macro savereg
-        msr daifset, #0xf
         // make room to save registers.
         sub sp, sp, #272
 
@@ -183,6 +182,7 @@ alltraps:
   b .
 
 el1sync:
+        msr daifset, #0xf
         savereg
         
         mov x0, sp
@@ -190,12 +190,16 @@ el1sync:
         b   .
       
 el1irq:
-        savereg
-        
+        msr daifset, #0xf
+        usavereg
+      
         mov x0, sp
-        # this should never happen by design
-        bl  kernel_intr_handler
-        b   .
+        bl intr_irq_dispatch
+
+        urestorereg
+        msr daifclr, #0xf
+      
+        eret
       
 el0sync:
         msr daifset, #0xf

@@ -32,59 +32,6 @@ Modification:
 
 #include <mmio_access.h>
 
-//! @addtogroup gic
-//! @{
-
-////////////////////////////////////////////////////////////////////////////////
-// Definitions
-////////////////////////////////////////////////////////////////////////////////
-
-//! @brief Options for sending a software generated interrupt.
-//!
-//! These options are used for the @a filter_list parameter of the gic_send_sgi()
-//! function. They control how to select which CPUs that the interrupt is
-//! sent to.
-enum _gicd_sgi_filter {
-    //! Forward the interrupt to the CPU interfaces specified in the @a target_list parameter.
-    kGicSgiFilter_UseTargetList = 0,
-
-    //! Forward the interrupt to all CPU interfaces except that of the processor that requested
-    //! the interrupt.
-    kGicSgiFilter_AllOtherCPUs = 1,
-
-    //! Forward the interrupt only to the CPU interface of the processor that requested the
-    //! interrupt.
-    kGicSgiFilter_OnlyThisCPU = 2
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// API
-////////////////////////////////////////////////////////////////////////////////
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-__attribute__((__always_inline__)) static inline uint32_t get_arm_private_peripheral_base()
-{
-    return MMIO_P2V(0x00A00000);
-}
-
-__attribute__((__always_inline__)) static inline uint32_t irq_get_register_offset(uint32_t irqID)
-{
-    return irqID / 32;
-}
-
-__attribute__((__always_inline__)) static inline uint32_t irq_get_bit_offset(uint32_t irqID)
-{
-    return irqID & 0x1f;
-}
-
-__attribute__((__always_inline__)) static inline uint32_t irq_get_bit_mask(uint32_t irqID)
-{
-    return 1 << irq_get_bit_offset(irqID);
-}
-
 //! @name Initialization
 //@{
 //! @brief Init interrupt handling.
@@ -97,13 +44,6 @@ __attribute__((__always_inline__)) static inline uint32_t irq_get_bit_mask(uint3
 //! @post The interrupt distributor and the current CPU interface are enabled. All interrupts
 //!     that were pending are cleared, and all interrupts are made secure (group 0).
 void gic_init(void);
-
-//! @brief Init the current CPU's GIC interface.
-//!
-//! @post Enables the CPU interface and sets the priority mask to 255. Interrupt preemption
-//!     is disabled by setting the Binary Point to a value of 7.
-void gic_init_cpu(void);
-//@}
 
 //! @name GIC Interrupt Distributor Functions
 //@{
@@ -191,10 +131,6 @@ uint32_t gic_read_irq_ack(void);
 //! @param irq_id The number of the interrupt for which handling has finished.
 void gic_write_end_of_irq(uint32_t irq_id);
 //@}
-
-#if defined(__cplusplus)
-}
-#endif
 
 //! @}
 

@@ -41,18 +41,20 @@ extern void iabort_handler(struct trapframe* r);
 void kernel_abort_handler(struct trapframe* tf)
 {
     uint64_t esr = r_esr_el1();
-    switch ((esr >> 26) & 0x3F) {
+    switch ((esr >> 0x1A) & 0x3F) {
     case 0b100100:
     case 0b100101:
         dabort_handler(tf);
+        break;
     case 0b100000:
     case 0b100001:
         iabort_handler(tf);
+        break;
     default:
         uint64_t ec = (esr >> 26) & 0x3f;
         uint64_t iss = esr & 0x1ffffff;
-        ERROR("esr %p %p %p\n", esr, ec, iss);
-        ERROR("elr = %p far = %p\n", r_elr_el1(), r_far_el1());
+        ERROR("esr:  %016lx %016lx %016lx\n", esr, ec, iss);
+        ERROR("elr = %016lx far = %016lx\n", r_elr_el1(), r_far_el1());
         ERROR("Current Task: %s.\n", cur_cpu()->task->name);
         panic("Unimplemented Error Occured.\n");
     }
@@ -67,11 +69,30 @@ void kernel_intr_handler(struct trapframe* tf)
 extern void context_switch(struct context**, struct context*);
 void syscall_arch_handler(struct trapframe* tf)
 {
-    uint64_t ec = (r_esr_el1() >> 0x1A) & 0x3F;
-    if (ec == 0b010101) {
-        w_esr_el1(0);
+
+    uint64_t esr = r_esr_el1();
+    uint64_t ec = (esr >> 0x1A) & 0x3F;
+    w_esr_el1(0);
+    switch (ec) {
+    case 0B010101:
         software_irq_dispatch(tf);
-    } else {
-        kernel_abort_handler(tf);
+        break;
+    case 0b100100:
+    case 0b100101:
+        dabort_handler(tf);
+        break;
+    case 0b100000:
+    case 0b100001:
+        iabort_handler(tf);
+        break;
+    default:
+        printf("USYSCALL: unexpected ec: %016lx", esr);
+        printf("          elr = %016lx far = %016lx\n", r_elr_el1(), r_far_el1());
+        // kill error task
+        xizi_enter_kernel();
+        assert(cur_cpu()->task != NULL);
+        sys_exit(cur_cpu()->task);
+        context_switch(&cur_cpu()->task->thread_context.context, cur_cpu()->scheduler);
+        panic("dabort end should never be reashed.\n");
     }
 }
