@@ -45,12 +45,15 @@ Author: AIIT XUOS Lab
 Modification:
 1. No modifications
 *************************************************/
-#include "cortex_a72.h"
+#include <stdint.h>
+
+#define PSCI_CPUON 0xc4000003
 
 extern void _boot_start();
+void psci_call(uint64_t fn, uint8_t cpuid, uint64_t entry, uint64_t ctxid);
 void cpu_start_secondary(uint8_t cpu_id)
 {
-    return;
+    psci_call(PSCI_CPUON, cpu_id, (uintptr_t)&_boot_start, 0);
 }
 
 void start_smp_cache_broadcast(int cpu_id)

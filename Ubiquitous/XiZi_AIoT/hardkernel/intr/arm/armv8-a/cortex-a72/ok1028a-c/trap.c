@@ -26,9 +26,9 @@ Author: AIIT XUOS Lab
 Modification:
 1. first version
 *************************************************/
-#include <assert.h>
-#include <stdio.h>
+#include <stdint.h>
 
+#include "assert.h"
 #include "core.h"
 #include "exception_registers.h"
 #include "multicores.h"
@@ -50,13 +50,14 @@ void kernel_abort_handler(struct trapframe* tf)
     case 0b100001:
         iabort_handler(tf);
         break;
-    default:
+    default: {
         uint64_t ec = (esr >> 26) & 0x3f;
         uint64_t iss = esr & 0x1ffffff;
         ERROR("esr:  %016lx %016lx %016lx\n", esr, ec, iss);
         ERROR("elr = %016lx far = %016lx\n", r_elr_el1(), r_far_el1());
         ERROR("Current Task: %s.\n", cur_cpu()->task->name);
         panic("Unimplemented Error Occured.\n");
+    }
     }
     panic("Return from abort handler.\n");
 }
@@ -85,14 +86,15 @@ void syscall_arch_handler(struct trapframe* tf)
     case 0b100001:
         iabort_handler(tf);
         break;
-    default:
-        printf("USYSCALL: unexpected ec: %016lx", esr);
-        printf("          elr = %016lx far = %016lx\n", r_elr_el1(), r_far_el1());
+    default: {
+        ERROR("USYSCALL: unexpected ec: %016lx", esr);
+        ERROR("          elr = %016lx far = %016lx\n", r_elr_el1(), r_far_el1());
         // kill error task
         xizi_enter_kernel();
         assert(cur_cpu()->task != NULL);
         sys_exit(cur_cpu()->task);
         context_switch(&cur_cpu()->task->thread_context.context, cur_cpu()->scheduler);
         panic("dabort end should never be reashed.\n");
+    }
     }
 }

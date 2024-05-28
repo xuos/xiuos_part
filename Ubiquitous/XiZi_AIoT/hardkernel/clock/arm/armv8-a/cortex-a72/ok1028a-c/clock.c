@@ -15,10 +15,7 @@
 
 #include "clock_common_op.h"
 
-#include "log.h"
-
 // armv8 generic timer driver
-
 #define CNTV_CTL_ENABLE (1 << 0)
 #define CNTV_CTL_IMASK (1 << 1)
 #define CNTV_CTL_ISTATUS (1 << 2)
@@ -26,14 +23,16 @@
 static void enable_timer()
 {
     uint32_t c = r_cntv_ctl_el0();
-    c = CNTV_CTL_ENABLE;
+    c |= CNTV_CTL_ENABLE;
+    c &= ~CNTV_CTL_IMASK;
     w_cntv_ctl_el0(c);
 }
 
 static void disable_timer()
 {
     uint32_t c = r_cntv_ctl_el0();
-    c = CNTV_CTL_IMASK;
+    c |= CNTV_CTL_IMASK;
+    c &= ~CNTV_CTL_ENABLE;
     w_cntv_ctl_el0(c);
 }
 
