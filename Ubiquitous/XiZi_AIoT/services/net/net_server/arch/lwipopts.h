@@ -213,7 +213,7 @@
  #define DEFAULT_ACCEPTMBOX_SIZE         10
  #define DEFAULT_THREAD_STACKSIZE        1024
 
- #define TCPIP_THREAD_NAME              "lwip"
+ #define TCPIP_THREAD_NAME              "tcpip"
  #define TCPIP_THREAD_STACKSIZE          512
  #define TCPIP_MBOX_SIZE                 8
  #define TCPIP_THREAD_PRIO               3
