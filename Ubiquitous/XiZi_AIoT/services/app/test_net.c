@@ -18,7 +18,7 @@
 
 static char udp_ip_str[128] = {0};
 static uint16_t udp_socket_port = 8888;
-#define UDP_DEMO_SEND_TIMES      20
+#define UDP_DEMO_SEND_TIMES      3
 
 int main(int argc, char* argv[])
 {

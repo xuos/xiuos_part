@@ -35,10 +35,10 @@ static inline struct ksemaphore* ksemaphore_get_by_id(struct XiziSemaphorePool* 
     DOUBLE_LIST_FOR_EACH_ENTRY(sem, &sem_pool->sem_list_guard, sem_list_node)
     {
         if (sem->id == sem_id) {
-            break;
+            return sem;
         }
     }
-    return sem;
+    return NULL;
 }
 
 int ksemaphore_alloc(struct XiziSemaphorePool* sem_pool, int val)
@@ -102,8 +102,9 @@ bool ksemaphore_signal(struct XiziSemaphorePool* sem_pool, uint32_t sem_id)
 
     if (sem->val < 0) {
         if (!IS_DOUBLE_LIST_EMPTY(&sem->wait_list_guard)) {
-            assert(sem->wait_list_guard.next != NULL);
-            xizi_task_manager.task_unblock(CONTAINER_OF(sem->wait_list_guard.next, struct Thread, node));
+            struct Thread* thd = CONTAINER_OF(sem->wait_list_guard.next, struct Thread, node);
+            assert(thd != NULL && thd->state == BLOCKED);
+            xizi_task_manager.task_unblock(thd);
         }
     }
 

@@ -43,7 +43,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/app 
 
 ifeq ($(BOARD), imx6q-sabrelite)
-all: init test_fault simple_client simple_server shell fs_server semaphore_server test_semaphore test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server readme.txt | bin
+all: init test_fault simple_client simple_server shell fs_server semaphore_server test_semaphore test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server test_net lwip readme.txt | bin
 else 
 all: init test_fault simple_client simple_server shell fs_server test_ipc_null test_thread test_semaphore readme.txt | bin
 endif

@@ -39,22 +39,19 @@
 #define SYS_MRTEX_NULL SYS_SEM_NULL
 #define SYS_MBOX_SIZE 128
 
-struct sys_sem
-{
-    sem_t sem;
-    struct Session sess;
-};
-typedef struct sys_sem sys_sem_t;
-typedef struct sys_sem sys_mutex_t;
+
+typedef int sys_sem_t;
+typedef int sys_mutex_t;
 
 
 struct sys_mbox{
     int first, last;
     void *msgs[SYS_MBOX_SIZE];
-    struct sys_sem not_empty;
-    struct sys_sem not_full;
-    struct sys_sem mutex;
+    int not_empty;
+    int not_full;
+    int mutex;
     int wait_send;
+    int valid;
 };
 typedef struct sys_mbox sys_mbox_t;
 

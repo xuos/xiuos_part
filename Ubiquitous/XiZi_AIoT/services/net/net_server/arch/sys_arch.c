@@ -34,8 +34,6 @@
 
 #define SYS_THREAD_MAX 4
 
-static char sem_server_name[] = "DefaultSemaphoreServer";
-
 void sys_init(void)
 {
     // do nothing
@@ -65,9 +63,8 @@ void sys_arch_unprotect(sys_prot_t pval)
 
 err_t sys_sem_new(sys_sem_t* sem, u8_t count)
 {
-    connect_session(&sem->sess, sem_server_name, 4096);
-    sem_create(&sem->sess, &sem->sem, (int)count);
-
+    
+    *sem = semaphore_new(count);
     #if SYS_STATS
     ++lwip_stats.sys.sem.used;
     if (lwip_stats.sys.sem.max < lwip_stats.sys.sem.used) {
@@ -75,7 +72,7 @@ err_t sys_sem_new(sys_sem_t* sem, u8_t count)
     }
 #endif /* SYS_STATS */
 
-    if (sem->sem >= 0)
+    if (*sem > 0)
         return ERR_OK;
     else {
 #if SYS_STATS
@@ -91,36 +88,33 @@ void sys_sem_free(sys_sem_t* sem)
 #if SYS_STATS
     --lwip_stats.sys.sem.used;
 #endif /* SYS_STATS */
-    sem_delete(&sem->sess, &sem->sem); 
-    free_session(&sem->sess);
-    free(sem);
-    sem = SYS_SEM_NULL;
+    semaphore_free(*sem);
 }
 
 int sys_sem_valid(sys_sem_t* sem)
 {
-    return (sem->sem >= 0);
+    return (*sem > 0);
 }
 
 void sys_sem_set_invalid(sys_sem_t* sem)
 {
-    sem->sem = -1;
+    *sem = -1;
 }
 
 u32_t sys_arch_sem_wait(sys_sem_t* sem, u32_t timeout)
 {
     s32_t wait_time = 0;
 
-    if (sem->sem < 0)
+    if (*sem <= 0)
         return SYS_ARCH_TIMEOUT;
 
-    sem_wait(&sem->sess, &sem->sem, 0);
+    semaphore_wait(*sem);
     return 0;
 }
 
 void sys_sem_signal(sys_sem_t* sem)
 {
-    sem_signal(&sem->sess, &sem->sem);
+    semaphore_signal(*sem);
 }
 
 err_t sys_mutex_new(sys_mutex_t* mutex)
@@ -163,6 +157,7 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
     sys_sem_new(&mbox->not_full, 0);
     sys_sem_new(&mbox->mutex, 1);
     mbox->wait_send = 0;
+    mbox->valid = 1;
 
 #if SYS_STATS
     ++lwip_stats.sys.mbox.used;
@@ -181,23 +176,22 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
 void sys_mbox_free(sys_mbox_t* mbox)
 {
     if (mbox != SYS_MBOX_NULL){
-        // sys_arch_sem_wait(&mbox->mutex, 0);
-        // sys_sem_free(&mbox->not_empty);
-        // sys_sem_free(&mbox->not_full);
-        // sys_sem_free(&mbox->mutex);
+        sys_arch_sem_wait(&mbox->mutex, 0);
+        sys_sem_free(&mbox->not_empty);
+        sys_sem_free(&mbox->not_full);
+        sys_sem_free(&mbox->mutex);
         free(mbox);
-        mbox = NULL;
     }
 }
 
 int sys_mbox_valid(sys_mbox_t* mbox)
 {
-    return (mbox != SYS_MBOX_NULL);
+    return (mbox->valid == 1);
 }
 
 void sys_mbox_set_invalid(sys_mbox_t* mbox)
 {
-    mbox = SYS_MBOX_NULL;
+    mbox->valid = 0;
 }
 
 void sys_mbox_post(sys_mbox_t* q, void* msg)
