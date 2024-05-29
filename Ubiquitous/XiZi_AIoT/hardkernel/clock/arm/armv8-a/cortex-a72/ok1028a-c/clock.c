@@ -39,7 +39,8 @@ static void disable_timer()
 static void reload_timer()
 {
     // interval 100ms
-    uint32_t interval = 100000;
+    static uint32_t ms = 10;
+    uint32_t interval = ms * 1000;
     uint32_t interval_clk = interval * (r_cntfrq_el0() / 1000000);
     w_cntv_tval_el0(interval_clk);
 }

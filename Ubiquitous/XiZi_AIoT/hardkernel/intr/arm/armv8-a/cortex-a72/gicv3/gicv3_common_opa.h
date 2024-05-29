@@ -83,6 +83,7 @@ void gic_set_cpu_target(uint32_t irqID, unsigned cpuNumber, bool enableIt);
 void gic_set_irq_priority(uint32_t irq_id, uint32_t priority);
 
 void gic_setup_spi(uint32_t cpuid, uint32_t intid);
+void gic_setup_ppi(uint32_t cpuid, uint32_t intid);
 
 void gicv3inithart(uint32_t cpu_id);
 //! @brief Send a software generated interrupt to a specific CPU.

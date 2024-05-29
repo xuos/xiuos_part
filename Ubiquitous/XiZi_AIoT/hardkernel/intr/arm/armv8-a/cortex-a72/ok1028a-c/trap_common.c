@@ -70,7 +70,7 @@ static void _cpu_irq_disable(void)
 
 static void _single_irq_enable(int irq, int cpu, int prio)
 {
-    gic_setup_spi((uint32_t)cpu, (uint32_t)irq);
+    gic_setup_ppi((uint32_t)cpu, (uint32_t)irq);
 }
 
 static void _single_irq_disable(int irq, int cpu)

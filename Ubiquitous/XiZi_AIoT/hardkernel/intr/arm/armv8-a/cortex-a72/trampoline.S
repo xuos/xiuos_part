@@ -197,7 +197,6 @@ el1irq:
         bl intr_irq_dispatch
 
         urestorereg
-        msr daifclr, #0xf
       
         eret
       
@@ -209,7 +208,6 @@ el0sync:
         bl syscall_arch_handler
       
         urestorereg
-        msr daifclr, #0xf
       
         eret
 
@@ -223,6 +221,5 @@ el0irq:
 .global trap_return
 trap_return:
         urestorereg
-        msr daifclr, #0xf
 
         eret

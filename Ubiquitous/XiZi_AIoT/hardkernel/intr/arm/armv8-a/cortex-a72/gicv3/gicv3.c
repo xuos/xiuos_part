@@ -192,8 +192,7 @@ gic_set_prio0(uint32_t intid)
     gicd_write(D_IPRIORITYR(intid / 4), p);
 }
 
-static void
-gic_set_target(uint32_t intid, uint32_t cpuid)
+static void gic_set_target(uint32_t intid, uint32_t cpuid)
 {
     uint32_t itargetsr = gicd_read(D_ITARGETSR(intid / 4));
     itargetsr &= ~((uint32_t)0xff << (intid % 4 * 8));

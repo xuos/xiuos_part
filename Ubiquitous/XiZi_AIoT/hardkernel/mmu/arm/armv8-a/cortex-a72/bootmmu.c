@@ -48,7 +48,12 @@ extern uint64_t kernel_data_begin[];
 
 #define L4_TYPE_PAGE        (3 << 0)
 #define L4_PTE_DEV          ((0b00) << 2) // Device memory
+#define L4_PTE_NORMAL       ((0b01) << 2) // Device memory
 #define L4_PTE_AF           (1 << 10) // Data Access Permissions
+
+#define L4_PTE_PXN             (1UL << 53)   // Privileged eXecute Never
+#define L4_PTE_UXN             (1UL << 54)   // Unprivileged(user) eXecute Never
+#define L4_PTE_XN              (PTE_PXN|PTE_UXN)  // eXecute Never
 
 #define IDX_MASK            (0b111111111)
 #define L3_PDE_INDEX(idx)   ((idx << LEVEL3_PDE_SHIFT) & L3_IDX_MASK)
@@ -76,7 +81,7 @@ static void build_boot_pgdir()
         boot_dev_l3pgdir[i] = (uint64_t)boot_dev_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
 
         for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-            boot_dev_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_DEV | L4_PTE_AF;
+            boot_dev_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_DEV | L4_PTE_AF | L4_PTE_XN;
 
             cur_mem_paddr += PAGE_SIZE;
         }
@@ -91,7 +96,7 @@ static void build_boot_pgdir()
         boot_kern_l3pgdir[i] = (uint64_t)boot_kern_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
 
         for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-            boot_kern_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_AF;
+            boot_kern_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_NORMAL | L4_PTE_AF;
 
             cur_mem_paddr += PAGE_SIZE;
         }
@@ -111,7 +116,6 @@ static void load_boot_pgdir()
     // Enable paging using read/modify/write
     SCTLR_R(val);
     val |= (1 << 0); // EL1 and EL0 stage 1 address translation enabled.
-
     SCTLR_W(val);
 
     // flush all TLB
