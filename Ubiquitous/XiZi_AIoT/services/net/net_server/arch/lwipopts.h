@@ -235,6 +235,7 @@
 #define LWIP_NETIF_DEBUG
 #define LWIP_ETHARP_DEBUG
 #define LWIP_API_MSG_DEBUG
+#define LWIP_SYS_DEBUG
 #endif
 
 #ifdef LWIP_DEBUG

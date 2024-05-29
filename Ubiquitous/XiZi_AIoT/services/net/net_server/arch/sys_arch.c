@@ -9,7 +9,6 @@
  * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-#include "debug.h"
 
 #include <lwip/arch.h>
 #include <lwip/opt.h>
@@ -85,6 +84,7 @@ err_t sys_sem_new(sys_sem_t* sem, u8_t count)
 
 void sys_sem_free(sys_sem_t* sem)
 {
+    LWIP_ASSERT("invalid sem", sem != NULL);
 #if SYS_STATS
     --lwip_stats.sys.sem.used;
 #endif /* SYS_STATS */
@@ -93,17 +93,19 @@ void sys_sem_free(sys_sem_t* sem)
 
 int sys_sem_valid(sys_sem_t* sem)
 {
+    LWIP_ASSERT("invalid sem", sem != NULL);
     return (*sem > 0);
 }
 
 void sys_sem_set_invalid(sys_sem_t* sem)
 {
+    LWIP_ASSERT("invalid sem", sem != NULL);
     *sem = -1;
 }
 
 u32_t sys_arch_sem_wait(sys_sem_t* sem, u32_t timeout)
 {
-    s32_t wait_time = 0;
+    LWIP_ASSERT("invalid sem", sem != NULL);
 
     if (*sem <= 0)
         return SYS_ARCH_TIMEOUT;
@@ -114,6 +116,7 @@ u32_t sys_arch_sem_wait(sys_sem_t* sem, u32_t timeout)
 
 void sys_sem_signal(sys_sem_t* sem)
 {
+    LWIP_ASSERT("invalid sem", sem != NULL);
     semaphore_signal(*sem);
 }
 
@@ -151,7 +154,12 @@ sys_thread_t sys_thread_new(const char* name, lwip_thread_fn function, void* arg
 
 err_t sys_mbox_new(sys_mbox_t* mbox, int size)
 {
-    
+    // if (mbox == SYS_MBOX_NULL) {
+    //     printf("lw: [%s] alloc %d mbox %p failed\n", __func__, size, mbox);
+    //     return ERR_MEM;
+    // }
+
+    LWIP_UNUSED_ARG(size);
     mbox->first = mbox->last = 0;
     sys_sem_new(&mbox->not_empty, 0);
     sys_sem_new(&mbox->not_full, 0);
@@ -159,50 +167,40 @@ err_t sys_mbox_new(sys_mbox_t* mbox, int size)
     mbox->wait_send = 0;
     mbox->valid = 1;
 
-#if SYS_STATS
-    ++lwip_stats.sys.mbox.used;
-    if (lwip_stats.sys.mbox.max < lwip_stats.sys.mbox.used) {
-        lwip_stats.sys.mbox.max = lwip_stats.sys.mbox.used;
-    }
-#endif /* SYS_STATS */
-    if (mbox == SYS_MBOX_NULL) {
-        printf("lw: [%s] alloc %d mbox %p failed\n", __func__, size, mbox);
-        return ERR_MEM;
-    }
-
     printf("lw: [%s] alloc %d mbox %p ok!\n", __func__, size, mbox);
     return ERR_OK;  
 }
 void sys_mbox_free(sys_mbox_t* mbox)
 {
-    if (mbox != SYS_MBOX_NULL){
-        sys_arch_sem_wait(&mbox->mutex, 0);
-        sys_sem_free(&mbox->not_empty);
-        sys_sem_free(&mbox->not_full);
-        sys_sem_free(&mbox->mutex);
-        free(mbox);
-    }
+    LWIP_ASSERT("invalid mbox", mbox != NULL);
+    sys_arch_sem_wait(&mbox->mutex, 0);
+    sys_sem_free(&mbox->not_empty);
+    sys_sem_free(&mbox->not_full);
+    sys_sem_free(&mbox->mutex);
+    free(mbox);
+    
 }
 
 int sys_mbox_valid(sys_mbox_t* mbox)
 {
+    LWIP_ASSERT("invalid mbox", mbox != NULL);
     return (mbox->valid == 1);
 }
 
 void sys_mbox_set_invalid(sys_mbox_t* mbox)
 {
+    LWIP_ASSERT("invalid mbox", mbox != NULL);
     mbox->valid = 0;
 }
 
 void sys_mbox_post(sys_mbox_t* q, void* msg)
 {
     u8_t first;
-    if (q == NULL)
-        printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
+    LWIP_ASSERT("invalid mbox", q != NULL);
     
     sys_arch_sem_wait(&q->mutex, 0);
     
-    printf("sys_mbox_post: mbox %p msg %p\n", (void *)q, (void *)msg);
+    LWIP_DEBUGF(SYS_DEBUG, ("sys_mbox_post: mbox %p msg %p\n", (void *)q, (void *)msg));
     
     // (q->last + 1) >= (q->first + SYS_MBOX_SIZE) means mbox is full
     while ((q->last + 1) >= (q->first + SYS_MBOX_SIZE)) {
@@ -233,12 +231,12 @@ void sys_mbox_post(sys_mbox_t* q, void* msg)
 err_t sys_mbox_trypost(sys_mbox_t* q, void* msg)
 {
     u8_t first;
-    if (q == NULL)
-        printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
+    LWIP_ASSERT("invalid mbox", q != NULL);
 
     sys_arch_sem_wait(&q->mutex, 0);
 
-    printf("sys_mbox_trypost: mbox %p msg %p\n",(void *)q, (void *)msg);
+    LWIP_DEBUGF(SYS_DEBUG, ("sys_mbox_trypost: mbox %p msg %p\n",
+                          (void *)q, (void *)msg));
 
     if ((q->last + 1) >= (q->first + SYS_MBOX_SIZE)) {
         sys_sem_signal(&q->mutex);
@@ -271,8 +269,7 @@ err_t sys_mbox_trypost_fromisr(sys_mbox_t* q, void* msg)
 
 u32_t sys_arch_mbox_fetch(sys_mbox_t* q, void** msg, u32_t timeout)
 {
-    if (q == NULL)
-        printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
+    LWIP_ASSERT("invalid mbox", q != NULL);
     
     sys_arch_sem_wait(&q->mutex, 0);
 
@@ -284,11 +281,11 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t* q, void** msg, u32_t timeout)
   }
 
     if (msg != NULL) {
-        printf("sys_mbox_fetch: mbox %p msg %p\n", (void *)q, *msg);
+        LWIP_DEBUGF(SYS_DEBUG,("sys_mbox_fetch: mbox %p msg %p\n", (void *)q, *msg));
         *msg = q->msgs[q->first % SYS_MBOX_SIZE];
     }
     else{
-        printf("sys_mbox_fetch: mbox %p, null msg\n", (void *)q);
+        LWIP_DEBUGF(SYS_DEBUG,("sys_mbox_fetch: mbox %p, null msg\n", (void *)q));
     }
 
     q->first++;
@@ -303,9 +300,8 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t* q, void** msg, u32_t timeout)
 }
 u32_t sys_arch_mbox_tryfetch(sys_mbox_t* q, void** msg)
 {
-    if (q == NULL)
-        printf("lw: [%s] alloc %d mbox %p failed\n", __func__, q);
-    
+    LWIP_ASSERT("invalid mbox", q != NULL);
+
     sys_arch_sem_wait(&q->mutex, 0);
 
     if (q->first == q->last) {
@@ -314,11 +310,11 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t* q, void** msg)
     }
 
     if (msg != NULL) {
-        printf("sys_mbox_tryfetch: mbox %p msg %p\n", (void *)q, *msg);
+        LWIP_DEBUGF(SYS_DEBUG,("sys_mbox_tryfetch: mbox %p msg %p\n", (void *)q, *msg));
         *msg = q->msgs[q->first % SYS_MBOX_SIZE];
     }
     else{
-        printf("sys_mbox_tryfetch: mbox %p, null msg\n", (void *)q);
+        LWIP_DEBUGF(SYS_DEBUG,("sys_mbox_tryfetch: mbox %p, null msg\n", (void *)q));
     }
 
     q->first++;
@@ -346,7 +342,7 @@ struct netif gnetif;
 
 int lwip_config_tcp(char* ip, char* mask, char* gw)
 {
-    printf("lw: [%s] start ...\n", __func__);
+    LWIP_DEBUGF(SYS_DEBUG,("lw: [%s] start ...\n", __func__));
     IP4_ADDR(&net_ipaddr, ip[0], ip[1], ip[2], ip[3]);
     IP4_ADDR(&net_netmask, mask[0], mask[1], mask[2], mask[3]);
     IP4_ADDR(&net_gw, gw[0], gw[1], gw[2], gw[3]);
@@ -354,7 +350,7 @@ int lwip_config_tcp(char* ip, char* mask, char* gw)
     tcpip_init(NULL, NULL);
 
 #ifndef NETIF_ENET_INIT_FUNC
-        printf("Not Netif driver for Eport 0\n");
+        LWIP_DEBUGF(SYS_DEBUG,("Not Netif driver for Eport 0\n"));
         return 0;
 #endif
 
@@ -376,16 +372,16 @@ int lwip_config_tcp(char* ip, char* mask, char* gw)
         netif_set_down(&gnetif);
         return -1;
     }
-    printf("\r\n************************************************\r\n");
-    printf(" Network Configuration\r\n");
-    printf("************************************************\r\n");
-    printf(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&net_ipaddr)[0], ((u8_t*)&net_ipaddr)[1],
-            ((u8_t*)&net_ipaddr)[2], ((u8_t*)&net_ipaddr)[3]);
-    printf(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&net_netmask)[0], ((u8_t*)&net_netmask)[1],
-            ((u8_t*)&net_netmask)[2], ((u8_t*)&net_netmask)[3]);
-    printf(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&net_gw)[0], ((u8_t*)&net_gw)[1],
-            ((u8_t*)&net_gw)[2], ((u8_t*)&net_gw)[3]);
-    printf("************************************************\r\n");
+    LWIP_DEBUGF(SYS_DEBUG,("\r\n************************************************\r\n"));
+    LWIP_DEBUGF(SYS_DEBUG,(" Network Configuration\r\n"));
+    LWIP_DEBUGF(SYS_DEBUG,("************************************************\r\n"));
+    LWIP_DEBUGF(SYS_DEBUG,(" IPv4 Address   : %u.%u.%u.%u\r\n", ((u8_t*)&net_ipaddr)[0], ((u8_t*)&net_ipaddr)[1],
+            ((u8_t*)&net_ipaddr)[2], ((u8_t*)&net_ipaddr)[3]));
+    LWIP_DEBUGF(SYS_DEBUG,(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t*)&net_netmask)[0], ((u8_t*)&net_netmask)[1],
+            ((u8_t*)&net_netmask)[2], ((u8_t*)&net_netmask)[3]));
+    LWIP_DEBUGF(SYS_DEBUG,(" IPv4 Gateway   : %u.%u.%u.%u\r\n", ((u8_t*)&net_gw)[0], ((u8_t*)&net_gw)[1],
+            ((u8_t*)&net_gw)[2], ((u8_t*)&net_gw)[3]));
+    LWIP_DEBUGF(SYS_DEBUG,("************************************************\r\n"));
     return 0;
 #endif
 }
