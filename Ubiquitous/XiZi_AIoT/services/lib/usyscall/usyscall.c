@@ -110,3 +110,23 @@ int register_irq(int irq, int opcode)
 {
     return syscall(SYSCALL_REGISTER_IRQ, (intptr_t)irq, (intptr_t)opcode, 0, 0);
 }
+
+int semaphore_new(int val)
+{
+    return syscall(SYSCALL_SEMAPHORE, (intptr_t)SYS_SEM_NEW, (intptr_t)val, 0, 0);
+}
+
+bool semaphore_free(int sem_id)
+{
+    return syscall(SYSCALL_SEMAPHORE, (intptr_t)SYS_SEM_FREE, (intptr_t)sem_id, 0, 0);
+}
+
+bool semaphore_wait(int sem_id)
+{
+    return syscall(SYSCALL_SEMAPHORE, (intptr_t)SYS_SEM_WAIT, (intptr_t)sem_id, 0, 0);
+}
+
+bool semaphore_signal(int sem_id)
+{
+    return syscall(SYSCALL_SEMAPHORE, (intptr_t)SYS_SEM_SIGNAL, (intptr_t)sem_id, 0, 0);
+}

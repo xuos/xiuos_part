@@ -121,7 +121,7 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         userland_session_arr[session_idx].buf = NULL;
         if (!has_middle_delete && nr_sessions_need_to_handle == 0) {
             xizi_task_manager.task_yield_noschedule(cur_task, false);
-            xizi_task_manager.task_block(cur_task);
+            xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
         }
     }
 

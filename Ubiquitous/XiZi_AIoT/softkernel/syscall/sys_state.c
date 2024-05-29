@@ -91,6 +91,17 @@ void show_tasks(void)
         SHOWTASK_TASK_BASE_INFO(task);
     }
 
+    struct ksemaphore* sem = NULL;
+    DOUBLE_LIST_FOR_EACH_ENTRY(sem, &xizi_task_manager.semaphore_pool.sem_list_guard, sem_list_node)
+    {
+        task = NULL;
+        DOUBLE_LIST_FOR_EACH_ENTRY(task, &sem->wait_list_guard, node)
+        {
+            LOG_PRINTF("%-8s", "BLOCK");
+            SHOWTASK_TASK_BASE_INFO(task);
+        }
+    }
+
     SHOWINFO_BORDER_LINE();
     return;
 }

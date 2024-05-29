@@ -18,7 +18,6 @@
 #include "libserial.h"
 #include "usyscall.h"
 
-#define BLOCK_SIZE 256
 int main(int argc, char* argv[])
 {
     printf("Test memry error %s.\n", 0x50000000);
