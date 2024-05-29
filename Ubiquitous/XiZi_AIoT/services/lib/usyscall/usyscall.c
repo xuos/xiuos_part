@@ -14,14 +14,19 @@
 
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv)
 {
+    /* read elf image */
     int file_size = ipc_fsize(session, fd);
     void* img = malloc(file_size);
-    int read_len = 0, cur_read_len = 0;
+    int read_len = 0;
     while (read_len < file_size) {
-        cur_read_len = file_size - read_len < 4096 ? file_size - read_len : 4096;
-        read_len += ipc_read(session, fd, img + read_len, read_len, cur_read_len);
+        int cur_read_len = file_size - read_len < 4096 ? file_size - read_len : 4096;
+        if (cur_read_len < 0) {
+            return -1;
+        }
+        read_len += ipc_read(session, fd, (char*)((uintptr_t)img + read_len), read_len, cur_read_len);
     }
-    int ret = syscall(SYSCALL_SPAWN, (intptr_t)img, (intptr_t)name, (intptr_t)argv, 0);
+    /* sys call */
+    int ret = syscall(SYSCALL_SPAWN, (uintptr_t)img, (uintptr_t)name, (uintptr_t)argv, 0);
     free(img);
     return ret;
 }
@@ -104,4 +109,24 @@ int mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 int register_irq(int irq, int opcode)
 {
     return syscall(SYSCALL_REGISTER_IRQ, (intptr_t)irq, (intptr_t)opcode, 0, 0);
+}
+
+int semaphore_new(int val)
+{
+    return syscall(SYSCALL_SEMAPHORE, (intptr_t)SYS_SEM_NEW, (intptr_t)val, 0, 0);
+}
+
+bool semaphore_free(int sem_id)
+{
+    return syscall(SYSCALL_SEMAPHORE, (intptr_t)SYS_SEM_FREE, (intptr_t)sem_id, 0, 0);
+}
+
+bool semaphore_wait(int sem_id)
+{
+    return syscall(SYSCALL_SEMAPHORE, (intptr_t)SYS_SEM_WAIT, (intptr_t)sem_id, 0, 0);
+}
+
+bool semaphore_signal(int sem_id)
+{
+    return syscall(SYSCALL_SEMAPHORE, (intptr_t)SYS_SEM_SIGNAL, (intptr_t)sem_id, 0, 0);
 }

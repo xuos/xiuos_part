@@ -39,13 +39,18 @@ Modification:
 
 int sys_register_as_server(char* name)
 {
+    // get server thread
     struct Thread* server = cur_cpu()->task;
+    assert(server != NULL);
+
+    // get server tag owner
     struct TraceTag server_identifier_set_tag;
     if (!AchieveResourceTag(&server_identifier_set_tag, RequireRootTag(), "softkernel/server-identifier")) {
         panic("Server identifier not initialized.\b");
     }
     assert(server_identifier_set_tag.meta != NULL);
 
+    // create server tag under server tag owner
     if (!CreateResourceTag(&server->server_identifier, &server_identifier_set_tag, name, TRACER_SERVER_IDENTITY_AC_RESOURCE, server)) {
         return -1;
     }

@@ -51,17 +51,15 @@ static bool _new_pgdir(struct TopLevelPageDirectory* pgdir)
     return true;
 }
 
-static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, uintptr_t len, uintptr_t attr)
+static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, int len, uintptr_t attr)
 {
-    if (len <= 0) {
-        return false;
-    }
+    assert(len >= 0);
     vaddr = ALIGNDOWN(vaddr, LEVEL4_PTE_SIZE);
     paddr = ALIGNDOWN(paddr, LEVEL4_PTE_SIZE);
     uintptr_t vaddr_last = ALIGNDOWN(vaddr + len - 1, LEVEL4_PTE_SIZE);
 
-    uintptr_t* pte;
     while (true) {
+        uintptr_t* pte = NULL;
         if ((pte = _page_walk(pgdir, vaddr, true)) == NULL) {
             ERROR("pte not found for vaddr %x.\n", vaddr);
             return false;
@@ -86,16 +84,14 @@ static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, uintp
     return true;
 }
 
-static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t len)
+static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, int len)
 {
-    if (len <= 0) {
-        return false;
-    }
+    assert(len >= 0);
     vaddr = ALIGNDOWN(vaddr, LEVEL4_PTE_SIZE);
     uintptr_t vaddr_last = ALIGNDOWN(vaddr + len - 1, LEVEL4_PTE_SIZE);
 
-    uintptr_t* pte;
     while (true) {
+        uintptr_t* pte = NULL;
         if ((pte = _page_walk(pgdir, vaddr, false)) == NULL) {
             ERROR("pte not found for vaddr %x.\n", vaddr);
             return false;
@@ -126,8 +122,11 @@ static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t len)
 /// @param len
 /// @param is_dev
 /// @return
-static bool _map_user_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, uintptr_t len, bool is_dev)
+static bool _map_user_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 {
+    if (len < 0) {
+        return false;
+    }
 
     if (UNLIKELY(vaddr >= USER_MEM_TOP)) {
         ERROR("mapping kernel space.\n");

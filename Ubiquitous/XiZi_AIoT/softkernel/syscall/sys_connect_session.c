@@ -62,6 +62,8 @@ int sys_connect_session(char* path, int capacity, struct Session* user_session)
     }
 
     struct Thread* client = cur_cpu()->task;
+    assert(client != NULL);
+
     /// get server
     struct TraceTag server_identifier_owner;
     if (!AchieveResourceTag(&server_identifier_owner, RequireRootTag(), "softkernel/server-identifier")) {
@@ -74,11 +76,12 @@ int sys_connect_session(char* path, int capacity, struct Session* user_session)
         DEBUG("Not server: %s\n", path);
         return -1;
     }
-
     struct Thread* server = AchieveResource(&server_tag);
     assert(server != NULL);
+
     if (create_session_inner(client, server, capacity, user_session) == NULL) {
         return -1;
     }
+
     return 0;
 }

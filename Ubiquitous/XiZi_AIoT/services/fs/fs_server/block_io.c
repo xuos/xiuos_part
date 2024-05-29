@@ -63,7 +63,8 @@ uint32_t BlockAlloc()
         }
     }
 
-    Error("BlockAlloc: out of blocks");
+    printf("BlockAlloc: out of blocks, bit idx: %d, total size: %d\n", bit_index, sb.size);
+    Error("");
     return 0;
 }
 

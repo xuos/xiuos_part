@@ -43,7 +43,7 @@ int sys_yield(task_yield_reason reason)
         if (cur_task->current_ipc_handled) {
             cur_task->current_ipc_handled = false;
         } else {
-            xizi_task_manager.task_block(cur_task);
+            xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
         }
     }
 

@@ -32,6 +32,8 @@
 #define SYSCALL_REGISTER_IRQ    11  //
 
 #define SYSCALL_KILL            12  // kill the task by id
+
+#define SYSCALL_SEMAPHORE       13  // semaphore related operations
 // clang-format on
 
 typedef enum {
@@ -58,6 +60,13 @@ typedef union {
     int priority;
 } sys_state_info;
 
+typedef enum {
+    SYS_SEM_NEW = 0,
+    SYS_SEM_FREE,
+    SYS_SEM_SIGNAL,
+    SYS_SEM_WAIT,
+} sys_sem_option;
+
 typedef int (*ipc_read_fn)(struct Session* session, int fd, char* dst, int offset, int len);
 typedef int (*ipc_fsize_fn)(struct Session* session, int fd);
 typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offset, int len);
@@ -69,15 +78,23 @@ int thread(void* entry, const char* name, char** argv);
 void exit(int status);
 int yield(task_yield_reason reason);
 int kill(int pid);
+
 int register_server(char* name);
 int session(char* path, int capacity, struct Session* user_session);
 int poll_session(struct Session* userland_session_arr, int arr_capacity);
 int close_session(struct Session* session);
+int register_irq(int irq, int opcode);
+
+int mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev);
+
 int task_heap_base();
 int get_memblock_info(sys_state_info* info);
 int set_priority(sys_state_info* info);
 int show_task();
 int show_mem();
 int show_cpu();
-int mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev);
-int register_irq(int irq, int opcode);
+
+int semaphore_new(int val);
+bool semaphore_free(int sem_id);
+bool semaphore_wait(int sem_id);
+bool semaphore_signal(int sem_id);

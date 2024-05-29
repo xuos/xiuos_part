@@ -41,7 +41,7 @@
 #define PUT_NOTAG(p, val) (*(unsigned int*)(p) = (val))
 
 // Store predecessor or successor pointer for free blocks
-#define SET_PTR(p, ptr) (*(unsigned int*)(p) = (unsigned int)(ptr))
+#define SET_PTR(p, ptr) (*(uintptr_t*)(p) = (uintptr_t)(ptr))
 
 // Read the size and allocation bit from address p
 #define GET_SIZE(p) (GET(p) & ~0x7)

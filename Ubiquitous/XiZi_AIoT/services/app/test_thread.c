@@ -25,6 +25,8 @@ int sub_thread_entry(int argc, char** argv)
         global_value++;
     }
 
+    /// @warning session is single threaded, so that each thread cannot share a common session.
+    // sub thread connect to semaphore server
     struct Session sem_session;
     while (connect_session(&sem_session, sem_server_name, 4096) < 0) {
         yield(SYS_TASK_YIELD_NO_REASON);

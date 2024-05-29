@@ -61,6 +61,7 @@ int sys_close_session(struct Thread* cur_task, struct Session* session)
             break;
         }
     }
+
     if (UNLIKELY(session_backend == NULL)) {
         struct server_session* server_session = NULL;
         DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)

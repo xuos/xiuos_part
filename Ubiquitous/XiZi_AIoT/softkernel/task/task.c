@@ -74,6 +74,7 @@ static void _task_manager_init()
     slab_init(&xizi_task_manager.memspace_allocator, sizeof(struct MemSpace));
     slab_init(&xizi_task_manager.task_allocator, sizeof(struct Thread));
     slab_init(&xizi_task_manager.task_buddy_allocator, sizeof(struct KBuddy));
+    semaphore_pool_init(&xizi_task_manager.semaphore_pool);
 
     // tid pool
     xizi_task_manager.next_pid = 0;
@@ -99,7 +100,7 @@ static struct Thread* _alloc_task_cb()
     return task;
 }
 
-int _task_retrieve_sys_resources(struct Thread* ptask)
+int _task_return_sys_resources(struct Thread* ptask)
 {
     assert(ptask != NULL);
 
@@ -152,7 +153,7 @@ static void _dealloc_task_cb(struct Thread* task)
         return;
     }
 
-    _task_retrieve_sys_resources(task);
+    _task_return_sys_resources(task);
 
     /* free thread's user stack */
     if (task->thread_context.user_stack_idx != -1) {
@@ -321,13 +322,14 @@ static void _task_yield_noschedule(struct Thread* task, bool blocking)
     task_node_add_to_ready_list_back(task);
 }
 
-static void _task_block(struct Thread* task)
+static void _task_block(struct double_list_node* head, struct Thread* task)
 {
+    assert(head != NULL);
     assert(task != NULL);
     assert(task->state != RUNNING);
     task_node_leave_list(task);
     task->state = BLOCKED;
-    doubleListAddOnHead(&task->node, &xizi_task_manager.task_blocked_list_head);
+    doubleListAddOnHead(&task->node, head);
 }
 
 static void _task_unblock(struct Thread* task)

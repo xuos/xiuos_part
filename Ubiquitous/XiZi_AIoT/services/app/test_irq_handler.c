@@ -52,4 +52,5 @@ int main()
     ipc_server_loop(&IpcSwIntrHandler);
 
     exit(0);
+    return 0;
 }

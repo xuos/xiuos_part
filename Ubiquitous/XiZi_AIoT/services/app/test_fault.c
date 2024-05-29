@@ -10,34 +10,18 @@
  * See the Mulan PSL v2 for more details.
  */
 
-// test_priority: Test the priority scheduler of task
+// test_fs: Test the file io control of fs
 #include <assert.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "libserial.h"
 #include "usyscall.h"
 
-static void count_down()
-{
-    int time = 500000000;
-    while (time >= 0) {
-        if (time % 10000000 == 0) {
-            printf("Priority-based preempting, time remained %d\n", time);
-        }
-        time--;
-    }
-    return;
-}
-
 int main(int argc, char* argv[])
 {
-    // set priority
-    sys_state_info info;
-    info.priority = 0;
-    set_priority(&info);
-
-    // test function
-    count_down();
+    printf("Test memry error %s.\n", 0x50000000);
+    printf("After error computing.\n");
 
     exit(0);
     return 0;

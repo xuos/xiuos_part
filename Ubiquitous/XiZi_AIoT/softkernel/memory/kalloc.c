@@ -39,7 +39,7 @@ struct KBuddy user_phy_freemem_buddy;
 extern uintptr_t kernel_data_end[];
 bool module_phymem_init()
 {
-    uintptr_t kern_freemem_start = V2P(&kernel_data_end);
+    uintptr_t kern_freemem_start = V2P(kernel_data_end);
     uintptr_t kern_freemem_end = PHY_USER_FREEMEM_BASE;
     uintptr_t user_freemem_start = PHY_USER_FREEMEM_BASE;
     uintptr_t user_freemem_end = PHY_MEM_STOP;

@@ -8,6 +8,8 @@
  * @copyright (c) 2019 Letter
  *
  */
+#include <stddef.h>
+#include <stdint.h>
 
 #include "shell_ext.h"
 #include "shell.h"
@@ -251,7 +253,7 @@ unsigned int shellExtParsePara(Shell* shell, char* string)
  */
 int shellExtRun(Shell* shell, ShellCommand* command, int argc, char* argv[])
 {
-    unsigned int params[8] = { 0 };
+    uintptr_t params[8] = { 0 };
     int paramNum = command->attr.attrs.paramNum > (argc - 1) ? command->attr.attrs.paramNum : (argc - 1);
     for (int i = 0; i < argc - 1; i++) {
         params[i] = shellExtParsePara(shell, argv[i + 1]);

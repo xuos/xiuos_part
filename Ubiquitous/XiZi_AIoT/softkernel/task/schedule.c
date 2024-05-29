@@ -42,6 +42,7 @@ struct Thread* max_priority_runnable_task(void)
 
     DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[priority], node)
     {
+        assert(task != NULL);
         if (task->state == READY && !task->dead) {
             // found a runnable task, stop this look up
             return task;

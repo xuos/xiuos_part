@@ -60,6 +60,13 @@ typedef struct {
 struct IpcArgInfo {
     uint16_t offset;
     uint16_t len;
+    union {
+        uint16_t attr;
+        struct {
+            uint16_t null_ptr : 1;
+            uint16_t reserved : 15;
+        };
+    };
 } __attribute__((packed));
 
 /* [header, ipc_arg_buffer_len[], ipc_arg_buffer[]] */
@@ -76,7 +83,6 @@ typedef int (*IpcInterface)(struct IpcMsg* msg);
 struct IpcNode {
     char* name;
     IpcInterface interfaces[UINT8_MAX];
-    void (*cycle_handler)();
 } __attribute__((packed));
 
 #define IPC_SERVER_LOOP(ipc_node_name) rpc_server_loop_##rpc_node_name
@@ -105,6 +111,10 @@ struct IpcNode {
 /// @return
 __attribute__((__always_inline__)) static inline void* ipc_msg_get_nth_arg_buf(struct IpcMsg* msg, int arg_num)
 {
+    if (IPCMSG_ARG_INFO(msg, arg_num)->null_ptr == 1) {
+        return NULL;
+    }
+
     return (void*)((char*)msg + IPCMSG_ARG_INFO(msg, arg_num)->offset);
 }
 
@@ -243,6 +253,8 @@ bool is_cur_session_delayed(void);
     }
 
 int cur_session_id(void);
-bool server_set_cycle_handler(struct IpcNode* ipc_node, void (*handler)());
+/// @brief delay the session(message, or a inter-process-call)
+///         the delayed call will be handled again later from begining, not from the position where delay_session() is called.
+/// @param
 void delay_session(void);
 bool is_cur_handler_been_delayed();

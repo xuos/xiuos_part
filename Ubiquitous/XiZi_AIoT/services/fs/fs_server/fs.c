@@ -119,9 +119,7 @@ struct Inode* InodeCreate(struct Inode* parent_inode, char* name, int type)
 /// @brief Delete a file Inode or a dir Inode
 int InodeDelete(struct Inode* parent_inode, char* name)
 {
-    uint32_t offset;
     struct Inode* inode;
-    struct DirectEntry de;
 
     if ((inode = DirInodeLookup(parent_inode, name)) == 0) {
         printf("Inode delete failed, file not exsit");

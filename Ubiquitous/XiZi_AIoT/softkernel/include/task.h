@@ -33,6 +33,7 @@ Modification:
 
 #include "bitmap64.h"
 #include "buddy.h"
+#include "ksemaphore.h"
 #include "list.h"
 #include "object_allocator.h"
 #include "pagetable.h"
@@ -121,9 +122,11 @@ struct SchedulerRightGroup {
 };
 
 struct XiziTaskManager {
+    /* thead schedule lists */
     struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
     struct double_list_node task_running_list_head;
     struct double_list_node task_blocked_list_head;
+    struct XiziSemaphorePool semaphore_pool;
 
     /* mem allocator */
     struct slab_allocator memspace_allocator;
@@ -149,7 +152,7 @@ struct XiziTaskManager {
     /* call to yield current use task */
     void (*task_yield_noschedule)(struct Thread* task, bool is_blocking);
     /* block and unblock task */
-    void (*task_block)(struct Thread* task);
+    void (*task_block)(struct double_list_node* head, struct Thread* task);
     void (*task_unblock)(struct Thread* task);
     /* set task priority */
     void (*set_cur_task_priority)(int priority);

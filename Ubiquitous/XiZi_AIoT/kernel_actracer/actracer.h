@@ -70,6 +70,6 @@ struct SysTracer {
 void sys_tracer_init();
 TraceTag* const RequireRootTag();
 bool AchieveResourceTag(struct TraceTag* target, struct TraceTag* owner, char* name);
-void* AchieveResource(struct TraceTag* target);
+void* AchieveResource(struct TraceTag* tag);
 bool CreateResourceTag(struct TraceTag* new_tag, struct TraceTag* owner, char* name, tracemeta_ac_type type, void* p_resource);
 bool DeleteResource(struct TraceTag* target, struct TraceTag* owner);

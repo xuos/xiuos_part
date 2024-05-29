@@ -38,6 +38,22 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/hardkernel/cache/L2/pl310/ 
 endif
 
+ifeq ($(BOARD), ok1028a-c)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/hardkernel/clock/arm/armv8-a/cortex-a72/$(BOARD)/include \
+	-I$(KERNEL_ROOT)/hardkernel/arch/arm/armv8-a/cortex-a72/preboot_for_$(BOARD)/include \
+	-I$(KERNEL_ROOT)/hardkernel/arch/arm/armv8-a/cortex-a72/ \
+	-I$(KERNEL_ROOT)/hardkernel/mmu/arm/armv8-a/cortex-a72/$(BOARD)  \
+	-I$(KERNEL_ROOT)/hardkernel/mmu/arm/armv8-a/cortex-a72/include  \
+	-I$(KERNEL_ROOT)/hardkernel/clock/arm/armv8-a/cortex-a72/include  \
+	-I$(KERNEL_ROOT)/hardkernel/intr/arm/armv8-a/cortex-a72/ \
+	-I$(KERNEL_ROOT)/hardkernel/intr/arm/armv8-a/cortex-a72/$(BOARD) \
+	-I$(KERNEL_ROOT)/hardkernel/intr/arm/armv8-a/cortex-a72/gicv3 \
+	-I$(KERNEL_ROOT)/hardkernel/uart/arm/armv8-a/cortex-a72/uart_io_for_$(BOARD)/include \
+	-I$(KERNEL_ROOT)/hardkernel/uart/arm/armv8-a/cortex-a72/ \
+	-I$(KERNEL_ROOT)/hardkernel/cache/L1/arm/cortex-a72/ 
+endif
+
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/hardkernel \
 	-I$(KERNEL_ROOT)/hardkernel/clock/  \

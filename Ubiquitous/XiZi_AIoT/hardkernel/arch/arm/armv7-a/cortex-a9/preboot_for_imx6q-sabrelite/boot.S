@@ -32,8 +32,8 @@ Modification:
 
 .global _boot_start
 .global CpuInitCrit
+.global primary_cpu_init
 
-	.global primary_cpu_init
 _boot_start:
     @ save r0 for cores 1-3, r0 arg field passed by ROM
     @ r0 is a function pointer for secondary cpus

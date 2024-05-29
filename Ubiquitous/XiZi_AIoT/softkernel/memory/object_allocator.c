@@ -52,7 +52,7 @@ void slab_init(struct slab_allocator* const allocator, const size_t element_size
     if (allocator == NULL) {
         panic("init a NULL slab_allocator\n");
     }
-    if (element_size <= 0 || element_size > ARENA_SIZE_PER_INCREASE) {
+    if (element_size > ARENA_SIZE_PER_INCREASE) {
         panic("Not supported slab element size\n");
     }
 

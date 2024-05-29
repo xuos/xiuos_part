@@ -44,4 +44,5 @@ int main(int argc, char* argv[])
 
     // never reached
     exit(0);
+    return 0;
 }

@@ -89,7 +89,7 @@ static void _sys_irq_init(int cpu_id)
         gic_init();
     }
     /* active hardware irq responser */
-    xizi_trap_driver.switch_hw_irqtbl((uint32_t*)&_vector_jumper);
+    xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)&_vector_jumper);
 }
 
 static void _cpu_irq_enable(void)
@@ -117,7 +117,7 @@ static void _single_irq_disable(int irq, int cpu)
 }
 
 #define VBAR
-static inline uint32_t* _switch_hw_irqtbl(uint32_t* new_tbl_base)
+static inline uintptr_t* _switch_hw_irqtbl(uintptr_t* new_tbl_base)
 {
     // get old irq table base addr
     uint32_t old_tbl_base = 0;
@@ -132,7 +132,7 @@ static inline uint32_t* _switch_hw_irqtbl(uint32_t* new_tbl_base)
     sctlr &= ~(1 << 13);
     _ARM_MCR(15, 0, sctlr, 1, 0, 0);
 
-    return (uint32_t*)old_tbl_base;
+    return (uintptr_t*)old_tbl_base;
 }
 
 static void _bind_irq_handler(int irq, irq_handler_t handler)

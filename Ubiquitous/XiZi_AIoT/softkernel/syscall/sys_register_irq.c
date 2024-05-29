@@ -57,7 +57,7 @@ static void send_irq_to_user(int irq_num)
 
         /* get message space and add session tail */
         void* session_kern_vaddr = P2V(xizi_pager.address_translate(&kernel_irq_proxy->memspace->pgdir, (uintptr_t)session->buf));
-        struct IpcMsg* buf = session_kern_vaddr + session->tail;
+        struct IpcMsg* buf = (struct IpcMsg*)((uintptr_t)session_kern_vaddr + session->tail);
 
         /* check if server session is full */
         if (buf->header.magic == IPC_MSG_MAGIC && buf->header.done == 0) {
