@@ -66,6 +66,7 @@ int main(int argc, char** argv)
 
     printf("test thread sum after %d signal: 0x%x\n", NR_THREADS, sum);
 
+    semaphore_free(sem_id);
     exit(0);
     return 0;
 }
