@@ -168,25 +168,6 @@ int cur_session_id(void)
     return cur_sess_id;
 }
 
-static bool session_delayed = false;
-void delay_session(void)
-{
-    session_delayed = true;
-}
-
-bool is_cur_session_delayed(void)
-{
-    return session_delayed;
-}
-
-bool is_cur_handler_been_delayed()
-{
-    if (ipc_server_loop_cur_msg == NULL) {
-        return false;
-    }
-    return ipc_server_loop_cur_msg->header.delayed == 1;
-}
-
 void ipc_server_loop(struct IpcNode* ipc_node)
 {
     struct Session session_list[NR_MAX_SESSION];
@@ -199,49 +180,82 @@ void ipc_server_loop(struct IpcNode* ipc_node)
         */
         poll_session(session_list, NR_MAX_SESSION);
         /* handle each session */
-        bool has_delayed = true;
-        for (int repeat = 0; repeat <= 1 && has_delayed; repeat++) {
-            has_delayed = false;
-            for (int i = 0; i < NR_MAX_SESSION; i++) {
-                session_delayed = false;
-                if (session_list[i].buf == NULL) {
-                    yield(SYS_TASK_YIELD_NO_REASON);
+        for (int i = 0; i < NR_MAX_SESSION; i++) {
+            if (session_list[i].buf == NULL) {
+                yield(SYS_TASK_YIELD_NO_REASON);
+                break;
+            }
+            cur_sess_id = session_list[i].id;
+            ipc_server_loop_cur_msg = IPCSESSION_MSG(&session_list[i]);
+            if (ipc_server_loop_cur_msg->header.magic == IPC_MSG_MAGIC && ipc_server_loop_cur_msg->header.valid == 1 && //
+                ipc_server_loop_cur_msg->header.done == 1) {
+                session_forward_head(&session_list[i], ipc_server_loop_cur_msg->header.len);
+                ipc_server_loop_cur_msg = IPCSESSION_MSG(&session_list[i]);
+            }
+            /* handle every message in current session
+                a session could be delay in case one of its message(current message) needs to wait for an interrupt message's arrival
+                interfaces[opcode] should explicitly call delay_session() and return to delay this session
+            */
+            while (ipc_server_loop_cur_msg->header.magic == IPC_MSG_MAGIC && ipc_server_loop_cur_msg->header.valid == 1 && //
+                ipc_server_loop_cur_msg->header.handling == 0 && ipc_server_loop_cur_msg->header.done == 0) {
+                if (session_used_size(&session_list[i]) == 0 && session_forward_tail(&session_list[i], ipc_server_loop_cur_msg->header.len) < 0) {
                     break;
                 }
-                cur_sess_id = session_list[i].id;
-                ipc_server_loop_cur_msg = IPCSESSION_MSG(&session_list[i]);
-                /* handle every message in current session
-                    a session could be delay in case one of its message(current message) needs to wait for an interrupt message's arrival
-                    interfaces[opcode] should explicitly call delay_session() and return to delay this session
-                */
-                while (ipc_server_loop_cur_msg->header.magic == IPC_MSG_MAGIC && ipc_server_loop_cur_msg->header.valid == 1 && ipc_server_loop_cur_msg->header.done == 0) {
-                    if (session_used_size(&session_list[i]) == 0 && session_forward_tail(&session_list[i], ipc_server_loop_cur_msg->header.len) < 0) {
-                        break;
-                    }
 
-                    // this is a message needs to handle
-                    if (ipc_node->interfaces[ipc_server_loop_cur_msg->header.opcode]) {
-                        ipc_node->interfaces[ipc_server_loop_cur_msg->header.opcode](ipc_server_loop_cur_msg);
-                        // check if this session is delayed by op handler, all messages after the delayed message in current session is blocked.
-                        if (ipc_server_loop_cur_msg->header.done == 0) {
-                            ipc_server_loop_cur_msg->header.delayed = 1;
-                            has_delayed = true;
-                            break;
-                        }
-                    } else {
-                        printf("Unsupport opcode(%u) for server: %s\n", ipc_server_loop_cur_msg->header.opcode, ipc_node->name);
-                    }
-                    // current msg is a message that needs to ignore
-                    // finish this message in server's perspective
-                    if (session_forward_head(&session_list[i], ipc_server_loop_cur_msg->header.len) < 0) {
-                        break;
-                    }
-                    ipc_server_loop_cur_msg = IPCSESSION_MSG(&session_list[i]);
+                // this is a message needs to handle
+                if (ipc_node->interfaces[ipc_server_loop_cur_msg->header.opcode]) {
+                    ipc_node->interfaces[ipc_server_loop_cur_msg->header.opcode](ipc_server_loop_cur_msg);
+                } else {
+                    printf("Unsupport opcode(%u) for server: %s\n", ipc_server_loop_cur_msg->header.opcode, ipc_node->name);
                 }
-                // stop handle this session
-                cur_sess_id = -1;
-                ipc_server_loop_cur_msg = NULL;
+                // current msg is a message that needs to ignore
+                // finish this message in server's perspective
+                if (ipc_server_loop_cur_msg->header.done == 0) {
+                    break;
+                }
+                session_forward_head(&session_list[i], ipc_server_loop_cur_msg->header.len);
+                ipc_server_loop_cur_msg = IPCSESSION_MSG(&session_list[i]);
             }
+            // stop handle this session
+            cur_sess_id = -1;
+            ipc_server_loop_cur_msg = NULL;
         }
     }
+}
+
+// utils
+void _ipc_addr_to_buf(uintptr_t addr, char buf[17])
+{
+    int buf_idx = 0;
+    while (addr != 0) {
+        int x = addr % 16;
+        if (x < 10) {
+            buf[buf_idx] = x + '0';
+        } else {
+            buf[buf_idx] = x - 10 + 'A';
+        }
+        buf_idx++;
+        addr /= 16;
+    }
+    buf[buf_idx] = '\0';
+}
+
+uintptr_t _ipc_buf_to_addr(char* buf)
+{
+    uintptr_t addr = 0;
+    int buf_idx = 0;
+    uintptr_t multiplier = 1;
+    while (buf_idx < 17 && buf[buf_idx] != '\0') {
+        uint8_t x = (uint8_t)buf[buf_idx];
+        if (x >= '0' && x <= '9') {
+            x -= '0';
+        } else if (x >= 'A' && x <= 'F') {
+            x -= 'A';
+            x += 10;
+        }
+        addr += (uintptr_t)x * multiplier;
+        multiplier *= 16;
+        buf_idx++;
+    }
+    return addr;
 }

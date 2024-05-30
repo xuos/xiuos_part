@@ -63,15 +63,11 @@ int IPC_DO_SERVE_FUNC(Ipc_sem_wait)(sem_t* sem, int* timeout)
 
     /// @todo support timeout
     // return if sem is freed(no valid) or sem count is sufficient
-    if (!sem_pool[*sem].valid || sem_pool[*sem].count > 0) {
-        sem_pool[*sem].count--;
-        return SEMAPHORE_SUC;
-    }
+    while (sem_pool[*sem].valid && sem_pool[*sem].count <= 0)
+        ;
 
-    // delay current session
-    // this handler will be invoke again later
-    delay_session();
-    return SEMAPHORE_ERR;
+    sem_pool[*sem].count--;
+    return SEMAPHORE_SUC;
 }
 
 int IPC_DO_SERVE_FUNC(Ipc_sem_signal)(sem_t* sem)
@@ -91,7 +87,7 @@ int IPC_DO_SERVE_FUNC(Ipc_sem_signal)(sem_t* sem)
 IPC_SERVER_INTERFACE(Ipc_sem_create, 2);
 IPC_SERVER_INTERFACE(Ipc_sem_delete, 1);
 IPC_SERVER_INTERFACE(Ipc_sem_signal, 1);
-IPC_SERVER_INTERFACE(Ipc_sem_wait, 2);
+IPC_SERVER_THREAD_INTERFACE(Ipc_sem_wait, 2);
 IPC_SERVER_REGISTER_INTERFACES(IpcSemaphoreServer, 4, //
     Ipc_sem_create, Ipc_sem_delete, Ipc_sem_signal, Ipc_sem_wait);
 

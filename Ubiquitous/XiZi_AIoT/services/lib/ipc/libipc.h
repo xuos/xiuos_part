@@ -33,6 +33,7 @@ Modification:
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "ipcargs.h"
 #include "session.h"
@@ -47,7 +48,7 @@ typedef struct {
             uint64_t valid : 1; // for server to peek new msg
             uint64_t done : 1; // for client to check request done
             uint64_t init : 1; // for client to check request done
-            uint64_t delayed : 1;
+            uint64_t handling : 1;
             uint64_t nr_args : 4;
             uint64_t opcode : 8;
             uint64_t len : 16;
@@ -191,6 +192,7 @@ void ipc_server_loop(struct IpcNode* ipc_node);
 #define IPC_CALL(ipc_name) ipc_call_copy_args_##ipc_name
 
 #define IPC_SERVE(ipc_name) ipc_serve_##ipc_name
+#define IPC_THREAD_SERVE(ipc_name) ipc_thread_serve_##ipc_name
 #define IPC_DO_SERVE_FUNC(ipc_name) ipc_do_serve_##ipc_name
 
 /// when defining a ipc server:
@@ -236,7 +238,6 @@ void ipc_server_loop(struct IpcNode* ipc_node);
         return res;                                                                                                                            \
     }
 
-bool is_cur_session_delayed(void);
 #define IPC_SERVER_INTERFACE(ipc_name, argc)            \
     static int IPC_SERVE(ipc_name)(struct IpcMsg * msg) \
     {                                                   \
@@ -245,16 +246,43 @@ bool is_cur_session_delayed(void);
             argv[i] = ipc_msg_get_nth_arg_buf(msg, i);  \
         }                                               \
         int32_t _ret = IPC_DO_SERVE##argc(ipc_name);    \
-        if (!is_cur_session_delayed()) {                \
-            ipc_msg_set_return(msg, &_ret);             \
-            msg->header.done = 1;                       \
-        }                                               \
+        ipc_msg_set_return(msg, &_ret);                 \
+        msg->header.done = 1;                           \
         return 0;                                       \
     }
 
+void _ipc_addr_to_buf(uintptr_t addr, char buf[17]);
+uintptr_t _ipc_buf_to_addr(char* buf);
+
+#define IPC_SERVER_THREAD_INTERFACE(ipc_name, argc)                         \
+    static int IPC_THREAD_SERVE(ipc_name)(int ipc_argc, char** ipc_argv)    \
+    {                                                                       \
+        if (ipc_argc != 2) {                                                \
+            printf("[%s] Error server thread creation.\n", __func__);       \
+            exit(1);                                                        \
+            return -1;                                                      \
+        }                                                                   \
+        struct IpcMsg* msg = (struct IpcMsg*)_ipc_buf_to_addr(ipc_argv[1]); \
+        void* argv[argc];                                                   \
+        for (int i = 0; i < argc; i++) {                                    \
+            argv[i] = ipc_msg_get_nth_arg_buf(msg, i);                      \
+        }                                                                   \
+        int32_t _ret = IPC_DO_SERVE##argc(ipc_name);                        \
+        ipc_msg_set_return(msg, &_ret);                                     \
+        msg->header.done = 1;                                               \
+        exit(0);                                                            \
+        return 0;                                                           \
+    }                                                                       \
+    static int IPC_SERVE(ipc_name)(struct IpcMsg * msg)                     \
+    {                                                                       \
+        char addr_buf[17];                                                  \
+        _ipc_addr_to_buf((uintptr_t)msg, addr_buf);                         \
+        char* param[] = { #ipc_name, addr_buf, NULL };                      \
+        int tid = thread(IPC_THREAD_SERVE(ipc_name), #ipc_name, param);     \
+        if (tid > 0) {                                                      \
+            msg->header.handling = 1;                                       \
+        }                                                                   \
+        return 0;                                                           \
+    }
+
 int cur_session_id(void);
-/// @brief delay the session(message, or a inter-process-call)
-///         the delayed call will be handled again later from begining, not from the position where delay_session() is called.
-/// @param
-void delay_session(void);
-bool is_cur_handler_been_delayed();
