@@ -166,6 +166,10 @@ static void _dealloc_task_cb(struct Thread* task)
         bitmap64_free(&task->memspace->thread_stack_idx_bitmap, task->thread_context.user_stack_idx);
         /* thread's user stack space is also allocated for kernel free space */
         assert(kfree((char*)task->thread_context.ustack_kvaddr));
+
+        if (task->memspace != NULL) {
+            task->memspace->mem_size -= USER_STACK_SIZE;
+        }
     }
 
     /* free thread's kernel stack */

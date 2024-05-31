@@ -39,7 +39,7 @@ Modification:
 static inline bool is_msg_needed(struct IpcMsg* msg)
 {
     assert(msg != NULL);
-    return msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1 && msg->header.done == 0 && msg->header.delayed == 0;
+    return msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1 && msg->header.done == 0 && msg->header.handling == 0;
 }
 
 int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)

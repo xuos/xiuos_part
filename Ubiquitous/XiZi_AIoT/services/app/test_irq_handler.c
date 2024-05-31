@@ -23,18 +23,18 @@ int IPC_DO_SERVE_FUNC(Ipc_intr_3)(void* ignore)
 int IPC_DO_SERVE_FUNC(Ipc_wait_intr_3)(void* ignore)
 {
     // delay the this handle
-    if (!has_one_interrupt) {
-        delay_session();
-        return -1;
+    while (!has_one_interrupt) {
+        yield(SYS_TASK_YIELD_NO_REASON);
     }
 
     // serve can be done by now
     has_one_interrupt = false;
+
     return 0;
 }
 
 IPC_SERVER_INTERFACE(Ipc_intr_3, 1);
-IPC_SERVER_INTERFACE(Ipc_wait_intr_3, 1);
+IPC_SERVER_THREAD_INTERFACE(Ipc_wait_intr_3, 1);
 IPC_SERVER_REGISTER_INTERFACES(IpcSwIntrHandler, 2, Ipc_intr_3, Ipc_wait_intr_3);
 int main()
 {
