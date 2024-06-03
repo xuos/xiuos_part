@@ -52,10 +52,10 @@ static void _sys_irq_init(int cpu_id)
     // primary core init intr
     xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)alltraps);
 
-    if (cpu_id == 0) {
-        gic_init();
-    }
-    gicv3inithart(cpu_id);
+    // if (cpu_id == 0) {
+    //     gic_init();
+    // }
+    // gicv3inithart(cpu_id);
 }
 
 static void _cpu_irq_enable(void)

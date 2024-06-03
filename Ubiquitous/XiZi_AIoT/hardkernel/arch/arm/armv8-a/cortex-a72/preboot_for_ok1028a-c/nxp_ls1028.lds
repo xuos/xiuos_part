@@ -45,8 +45,8 @@ ENTRY( _ENTRY )
 ENTRY( _boot_start )
 
 MEMORY {
-  phy_ddr3 (rwx)      : ORIGIN = 0x0000000040000000, LENGTH = 1024M
-  vir_ddr3 (rwx)      : ORIGIN = 0x0000006040635000, LENGTH = 1024M
+  phy_ddr3 (rwx)      : ORIGIN = 0x0000000000A00000, LENGTH = 1024M
+  vir_ddr3 (rwx)      : ORIGIN = 0x0000006041035000, LENGTH = 1024M
 }
 
 
@@ -81,7 +81,7 @@ SECTIONS
 		PROVIDE(boot_end_addr = .);
 	} > phy_ddr3
 
-  .text : AT(0x40635000) {
+  .text : AT(0x1035000) {
     . = ALIGN(0x1000);
     *(.text .text.* .gnu.linkonce.t.*)
   } > vir_ddr3
