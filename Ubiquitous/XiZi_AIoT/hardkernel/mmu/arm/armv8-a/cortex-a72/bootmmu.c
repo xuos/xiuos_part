@@ -33,6 +33,8 @@ Modification:
 #include "pagetable.h"
 #include "registers.h"
 
+#include "ns16550.h"
+
 #include <stdint.h>
 #include <string.h>
 
@@ -69,23 +71,39 @@ uint64_t boot_virt_kern_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000)))
 uint64_t boot_dev_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
 uint64_t boot_kern_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
 
+static inline int cpu_id()
+{
+    int x = -1;
+    __asm__ volatile("mrs %0, mpidr_el1" : "=r"(x));
+    return x & 0x3;
+}
+
+extern int debug_printf_(const char* format, ...);
 static void build_boot_pgdir()
 {
     uint64_t dev_phy_mem_base = DEV_PHYMEM_BASE;
+    debug_printf_("l2 table addr %016x\r\n", boot_l2pgdir);
+    debug_printf_("l3 table addr %016x\r\n", boot_dev_l3pgdir);
+    debug_printf_("l4 table addr %016x\r\n", boot_dev_l4pgdirs);
+
     // dev mem
     boot_l2pgdir[(dev_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
     boot_l2pgdir[(MMIO_P2V_WO(dev_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
 
-    uint64_t cur_mem_paddr = ALIGNDOWN((uint64_t)DEV_PHYMEM_BASE, PAGE_SIZE);
+    uint64_t cur_mem_paddr = ALIGNDOWN((uint64_t)DEV_PHYMEM_BASE, LEVEL2_PDE_SIZE);
     for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
+        // debug_printf_("Loading (%d)(%016x) -> %p\r\n", cpu_id(), &boot_dev_l3pgdir[i], cur_mem_paddr);
         boot_dev_l3pgdir[i] = (uint64_t)boot_dev_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
 
         for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
+            // debug_printf_("Loading (%d)%016x -> %p\r\n", cpu_id(), (uintptr_t*)&boot_dev_l4pgdirs[i][j], cur_mem_paddr);
             boot_dev_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_DEV | L4_PTE_AF | L4_PTE_XN;
 
             cur_mem_paddr += PAGE_SIZE;
         }
     }
+
+    // debug_printf_("Dev Table loading done.\n");
 
     // identical mem
     boot_l2pgdir[(PHY_MEM_BASE >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_kern_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
@@ -97,6 +115,7 @@ static void build_boot_pgdir()
 
         for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
             boot_kern_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_NORMAL | L4_PTE_AF;
+            debug_printf_("Loading %p\r\n", cur_mem_paddr);
 
             cur_mem_paddr += PAGE_SIZE;
         }
@@ -128,7 +147,9 @@ extern void main(void);
 static bool _bss_inited = false;
 void bootmain()
 {
-    build_boot_pgdir();
+    if (!_bss_inited) {
+        build_boot_pgdir();
+    }
     load_boot_pgdir();
     __asm__ __volatile__("add sp, sp, %0" ::"r"(KERN_MEM_BASE - PHY_MEM_BASE));
     if (!_bss_inited) {

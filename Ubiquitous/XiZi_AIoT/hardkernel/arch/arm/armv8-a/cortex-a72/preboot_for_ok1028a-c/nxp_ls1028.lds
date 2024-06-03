@@ -45,8 +45,8 @@ ENTRY( _ENTRY )
 ENTRY( _boot_start )
 
 MEMORY {
-  phy_ddr3 (rwx)      : ORIGIN = 0x0000000000A00000, LENGTH = 1024M
-  vir_ddr3 (rwx)      : ORIGIN = 0x0000006041035000, LENGTH = 1024M
+  phy_ddr3 (rwx)      : ORIGIN = 0x0000000010000000, LENGTH = 1024M
+  vir_ddr3 (rwx)      : ORIGIN = 0x000000604040D000, LENGTH = 1024M
 }
 
 
@@ -58,17 +58,21 @@ SECTIONS
 
   boot.o(.text)
   bootmmu.o(.text .text.*)
+  ns16550.o(.text .text.*)
 
   boot.o(.rodata .rodata.*)
   bootmmu.o(.rodata .rodata.*)
+  ns16550.o(.rodata .rodata.*)
 
   boot.o(.data .data.*)
   bootmmu.o(.data .data.*)
+  ns16550.o(.data .data.*)
 
 	PROVIDE(boot_start_addr = .);
 
   boot.o(.bss .bss.* COMMON)
   bootmmu.o(.bss .bss.* COMMON)
+  ns16550.o(.bss .bss.* COMMON)
   
 		/* stack for booting code. */
 		. = ALIGN(0x1000);
@@ -81,7 +85,7 @@ SECTIONS
 		PROVIDE(boot_end_addr = .);
 	} > phy_ddr3
 
-  .text : AT(0x1035000) {
+  .text : AT(0x1040D000) {
     . = ALIGN(0x1000);
     *(.text .text.* .gnu.linkonce.t.*)
   } > vir_ddr3

@@ -35,6 +35,12 @@ _boot_start:
         MSR     CPACR_EL1, X1
         ISB
 
+        mrs     x0, sctlr_el1
+        and     x0, x0, #~(1 << 0)
+        and     x0, x0, #~(1 << 2)
+        and     x0, x0, #~(1 << 12)
+        msr     sctlr_el1, x0
+
         // clear some registers
         msr     elr_el1, XZR
 
