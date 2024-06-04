@@ -39,7 +39,6 @@
  @} */
 
 #include "hal_base.h"
-#include "hal_debug.h"
 
 /** @defgroup DEBUG_Private_Definition Private Definition
  *  @{
@@ -68,7 +67,7 @@
   * @param  file: pointer to the source file name
   * @param  line: HAL_ASSERT error line source number
   */
- __attribute__((weak)) void HAL_AssertFailed(const char *file, uint32_t line)
+__WEAK void HAL_AssertFailed(const char *file, uint32_t line)
 {
     HAL_DBG_ERR("assert failed at %s %lu\n", file, line);
     while (1) {
@@ -139,7 +138,7 @@ extern int _write(int fd, char *ptr, int len);
  * @param  format: format printf param. only support: \%d, \%s, \%ld, \%lld
  * @return int32_t.
  */
- __attribute__((weak)) int32_t HAL_DBG_Printf(const char *format, ...)
+__WEAK int32_t HAL_DBG_Printf(const char *format, ...)
 {
     static char g_printf_buf[HAL_PRINTF_BUF_SIZE];
     char *str = g_printf_buf;
@@ -215,7 +214,7 @@ extern int _write(int fd, char *ptr, int len);
  * @param  format: format printf param.
  * @return int32_t.
  */
- __attribute__((weak)) int32_t HAL_DBG_Printf(const char *format, ...)
+__WEAK int32_t HAL_DBG_Printf(const char *format, ...)
 {
     return 0;
 }

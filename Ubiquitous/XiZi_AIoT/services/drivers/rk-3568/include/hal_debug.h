@@ -6,8 +6,6 @@
 #ifndef _HAL_DEBUG_H_
 #define _HAL_DEBUG_H_
 
-#include "hal_def.h"
-#include "libserial.h"
 /** @addtogroup RK_HAL_Driver
  *  @{
  */
@@ -22,8 +20,19 @@
 //#define HAL_DBG_USING_RTT_SERIAL
 //#define HAL_DBG_USING_LIBC_PRINTF
 //#define HAL_DBG_USING_HAL_PRINTF
+#ifdef HAL_DBG_USING_RTT_SERIAL
+#include <rthw.h>
+#include <rtthread.h>
 
+#define HAL_SYSLOG rt_kprintf
+#elif defined(HAL_DBG_USING_LIBC_PRINTF)
 #define HAL_SYSLOG printf
+#elif defined(HAL_DBG_USING_HAL_PRINTF)
+#define HAL_SYSLOG HAL_DBG_Printf
+#ifndef HAL_PRINTF_BUF_SIZE
+#define HAL_PRINTF_BUF_SIZE 128
+#endif
+#endif
 
 /** @defgroup DEBUG_Exported_Definition_Group1 Basic Definition
  *  @{

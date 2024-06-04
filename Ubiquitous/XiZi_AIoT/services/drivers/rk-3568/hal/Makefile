@@ -9,7 +9,7 @@ ld = ${toolchain}g++
 objdump = ${toolchain}objdump
 user_ldflags = -N -Ttext 0
 
-cflags = -std=c11  -g \
+cflags = -std=c11  -g -march=armv7-a -mtune=cortex-a9 \
 	-Wno-unused -Wno-format -fno-common -ffreestanding -fno-builtin -static \
 	-Wno-unaligned-access -fdce -Wall -Werror -Wno-uninitialized -Wno-strict-aliasing -fdiagnostics-show-option \
 	-mapcs -marm -mfpu=neon -ftree-vectorize -fno-math-errno -funsafe-math-optimizations -fno-signed-zeros -mfloat-abi=softfp \
@@ -29,7 +29,21 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/app \
 		  	-I$(KERNEL_ROOT)/services/lib/memory 
 
 
-all: gmac.o gmac_3568.o test_gmac.o hal_base.o hal_bsp.o hal_pinctrl_v2.o hal_cru.o hal_cache.o hal_gpio.o hal_timer.o hal_cru_rk3568.o
+objs =  hal_gmac.o \
+		hal_gmac_3568.o \
+		test_gmac.o \
+		hal_base.o \
+		hal_bsp.o \
+		hal_pinctrl_v2.o \
+		hal_cru.o \
+		hal_cache.o \
+		hal_gpio.o \
+		hal_timer.o \
+		hal_cru_rk3568.o \
+		hal_debug.o \
+		system_rk3568.o
+
+all: ${objs}
 	@mv $^ $(KERNEL_ROOT)/services/app
 
 %.o: %.c

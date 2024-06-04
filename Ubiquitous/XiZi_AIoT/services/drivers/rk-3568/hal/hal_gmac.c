@@ -4,10 +4,8 @@
  */
 
 #include "hal_base.h"
-#include "hal_def.h"
-#include "hal_gmac.h"
-#include "hal_debug.h"
 
+#ifdef HAL_GMAC_MODULE_ENABLED
 
 /** @addtogroup RK_HAL_Driver
  *  @{
@@ -2206,3 +2204,10 @@ HAL_Status HAL_GMAC_DeInit(struct GMAC_HANDLE *pGMAC)
     return HAL_OK;
 }
 
+/** @} */
+
+/** @} */
+
+/** @} */
+
+#endif /* HAL_GMAC_MODULE_ENABLED */

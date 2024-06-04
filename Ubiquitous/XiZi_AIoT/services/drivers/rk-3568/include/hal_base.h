@@ -14,8 +14,8 @@
 #ifndef _HAL_BASE_H_
 #define _HAL_BASE_H_
 
-#include "stdint.h"
-#include "hal_def.h"
+#include "hal_conf.h"
+#include "hal_driver.h"
 #include "hal_debug.h"
 
 /***************************** MACRO Definition ******************************/
@@ -46,7 +46,8 @@ typedef enum {
  *  @{
  */
 
-
+HAL_Status HAL_Init(void);
+HAL_Status HAL_DeInit(void);
 HAL_Status HAL_InitTick(uint32_t tickPriority);
 HAL_Status HAL_IncTick(void);
 uint32_t HAL_GetTick(void);
@@ -61,6 +62,10 @@ HAL_Status HAL_SystemCoreClockUpdate(uint32_t hz, eHAL_systickClkSource clkSourc
 uint64_t HAL_DivU64Rem(uint64_t numerator, uint32_t denominator, uint32_t *pRemainder);
 uint64_t HAL_GetSysTimerCount(void);
 
+void HAL_CPU_EnterIdle(void);
+#if defined(HAL_CPU_USAGE_ENABLED)
+uint32_t HAL_GetCPUUsage(void);
+#endif
 
 /** @} */
 
@@ -75,7 +80,7 @@ uint64_t HAL_GetSysTimerCount(void);
  * @param  denominator
  * @return uint64_t result
  */
-static inline uint64_t HAL_DivU64(uint64_t numerator, uint32_t denominator)
+__STATIC_INLINE uint64_t HAL_DivU64(uint64_t numerator, uint32_t denominator)
 {
     return HAL_DivU64Rem(numerator, denominator, NULL);
 }
@@ -86,7 +91,7 @@ static inline uint64_t HAL_DivU64(uint64_t numerator, uint32_t denominator)
  * @param  denominator
  * @return uint32_t result rounded to nearest integer
  */
-static inline uint32_t HAL_DivRoundClosest(uint32_t numerator, uint32_t denominator)
+__STATIC_INLINE uint32_t HAL_DivRoundClosest(uint32_t numerator, uint32_t denominator)
 {
     return (numerator + (denominator / 2)) / denominator;
 }

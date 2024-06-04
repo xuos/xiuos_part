@@ -6,15 +6,8 @@
 #include "hal_bsp.h"
 #include "hal_base.h"
 #include "hal_gmac.h"
-#include "hal_pinctrl.h"
-#include "hal_debug.h"
-#include "hal_timer.h"
-#include "hal_cache.h"
-#include "hal_gpio.h"
-#include "hal_cru.h"
-#include "libserial.h"
-#include "stdlib.h"
 
+#if (defined(HAL_GMAC_MODULE_ENABLED) || defined(HAL_GMAC1000_MODULE_ENABLED))
 
 /*************************** GMAC DRIVER ****************************/
 
@@ -109,9 +102,10 @@ static unsigned int m_nocachemem_inited = 0;
 
 static uint8_t dstAddr[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
+#if defined(HAL_GMAC_MODULE_ENABLED) && defined(SOC_RK3568)
 static struct GMAC_ETH_CONFIG ethConfigTable[] =
 {
-
+#ifdef HAL_GMAC0
     {
         .halDev = &g_gmac0Dev,
         .mode = PHY_INTERFACE_MODE_RGMII,
@@ -127,25 +121,69 @@ static struct GMAC_ETH_CONFIG ethConfigTable[] =
         .txDelay = 0x3C,
         .rxDelay = 0x2f,
     },
+#endif
 
-    // {
-    //     .halDev = &g_gmac1Dev,
-    //     .mode = PHY_INTERFACE_MODE_RGMII,
-    //     .maxSpeed = 1000,
-    //     .phyAddr = 1,
+#ifdef HAL_GMAC1
+    {
+        .halDev = &g_gmac1Dev,
+        .mode = PHY_INTERFACE_MODE_RGMII,
+        .maxSpeed = 1000,
+        .phyAddr = 1,
 
-    //     .extClk = false,
+        .extClk = false,
 
-    //     .resetGpioBank = GPIO2,
-    //     .resetGpioNum = GPIO_PIN_D1,
-    //     .resetDelayMs = { 0, 20, 100 },
+        .resetGpioBank = GPIO2,
+        .resetGpioNum = GPIO_PIN_D1,
+        .resetDelayMs = { 0, 20, 100 },
 
-    //     .txDelay = 0x4f,
-    //     .rxDelay = 0x26,
-    // },
+        .txDelay = 0x4f,
+        .rxDelay = 0x26,
+    },
+#endif
 };
+#endif
 
+#if defined(HAL_GMAC1000_MODULE_ENABLED) && defined(SOC_RK3358)
+static struct GMAC_ETH_CONFIG ethConfigTable[] =
+{
+#ifdef HAL_GMAC0
+    {
+        .halDev = &g_gmacDev,
+        .mode = PHY_INTERFACE_MODE_RMII,
+        .maxSpeed = 100,
+        .speed = 100,
+        .phyAddr = 0,
 
+        .extClk = false,
+
+        .resetGpioBank = GPIO2,
+        .resetGpioNum = GPIO_PIN_B5,
+        .resetDelayMs = { 0, 50, 50 },
+    },
+#endif
+};
+#endif
+
+#if defined(HAL_GMAC1000_MODULE_ENABLED) && defined(SOC_RK3308)
+static struct GMAC_ETH_CONFIG ethConfigTable[] =
+{
+#ifdef HAL_GMAC0
+    {
+        .halDev = &g_gmac0Dev,
+        .mode = PHY_INTERFACE_MODE_RMII,
+        .maxSpeed = 100,
+        .speed = 100,
+        .phyAddr = 0,
+
+        .extClk = true,
+
+        .resetGpioBank = GPIO4,
+        .resetGpioNum = GPIO_PIN_C0,
+        .resetDelayMs = { 0, 50, 50 },
+    },
+#endif
+};
+#endif
 
 /********************* Private Function Definition ***************************/
 
@@ -299,7 +337,7 @@ static inline void NET_Random_ETHAddr(uint8_t *addr)
     uint8_t i;
 
     for (i = 0; i < 6; i++) {
-        addr[i] = 0xae;
+        addr[i] = rand();
     }
 
     addr[0] &= 0xfe;    /* clear multicast bit */
@@ -312,7 +350,7 @@ static inline void NET_Random_Package(uint8_t *addr, uint16_t len)
     uint16_t i;
 
     for (i = 0; i < len; i++) {
-        addr[i] = 0xae;
+        addr[i] = rand();
     }
 }
 
@@ -622,8 +660,7 @@ static HAL_Status GMAC_Init(uint8_t id)
 /*************************** GMAC TEST ****************************/
 #define GMAC_MAX_DEVICES 2
 
-
-
+#ifdef SOC_RK3568
 /**
  * @brief  Config iomux for GMAC0
  */
@@ -671,55 +708,7 @@ static void GMAC0_Iomux_Config(void)
 	                  (0 << GRF_IO_VSEL1_POC_VCCIO4_SEL33_SHIFT));
 #endif
 }
-
-
-
-/**
- * @brief  Config iomux for GMAC1
- */
-// static void GMAC1_M1_Iomux_Config(void)
-// {
-//     /* GMAC1 M1 iomux */
-//     HAL_PINCTRL_SetIOMUX(GPIO_BANK4,
-//                          GPIO_PIN_B6 | /* gmac1_mdcm1 */
-//                          GPIO_PIN_B7 | /* gmac1_mdiom1 */
-//                          GPIO_PIN_B1 | /* gmac1_rxdvcrsm1 */
-//                          GPIO_PIN_A7 | /* gmac1_rxd0m1 */
-//                          GPIO_PIN_B0 | /* gmac1_rxd1m1 */
-//                          GPIO_PIN_A1 | /* gmac1_rxd2m1 */
-//                          GPIO_PIN_A2 | /* gmac1_rxd3m1 */
-//                          GPIO_PIN_A6 | /* gmac1_txenm1 */
-//                          GPIO_PIN_A3,  /* gmac1_rxclkm1 */
-//                          PIN_CONFIG_MUX_FUNC3);
-
-//     HAL_PINCTRL_SetIOMUX(GPIO_BANK4,
-//                          GPIO_PIN_A0,  /* gmac1_txd1m1 */
-//                          PIN_CONFIG_MUX_FUNC3 | PIN_CONFIG_DRV_LEVEL3);
-
-//     HAL_PINCTRL_SetIOMUX(GPIO_BANK4,
-//                          GPIO_PIN_A4 | /* gmac1_txd0m1 */
-//                          GPIO_PIN_A5,  /* gmac1_txd1m1 */
-//                          PIN_CONFIG_MUX_FUNC3 | PIN_CONFIG_DRV_LEVEL2);
-
-//     /* GMAC1 M1 iomux */
-//     HAL_PINCTRL_SetIOMUX(GPIO_BANK3,
-//                          GPIO_PIN_D6 | /* gmac1_txd2m1 */
-//                          GPIO_PIN_D7,  /* gmac1_txd3m1 */
-//                          PIN_CONFIG_MUX_FUNC3 | PIN_CONFIG_DRV_LEVEL2);
-
-//     HAL_PINCTRL_IOFuncSelForGMAC1(IOFUNC_SEL_M1);
-
-// #if 0
-//     /* io-domian: 1.8v or 3.3v for vccio6 */
-//     WRITE_REG_MASK_WE(GRF->IO_VSEL0,
-// 	              GRF_IO_VSEL0_POC_VCCIO6_SEL18_MASK,
-// 	              (1 << GRF_IO_VSEL0_POC_VCCIO6_SEL18_SHIFT));
-
-//     WRITE_REG_MASK_WE(GRF->IO_VSEL1,
-// 	              GRF_IO_VSEL1_POC_VCCIO6_SEL33_MASK,
-// 	              (0 << GRF_IO_VSEL1_POC_VCCIO6_SEL33_SHIFT));
-// #endif
-// }
+#endif
 
 
 static void GMAC_Iomux_Config(uint8_t id)
@@ -730,11 +719,15 @@ static void GMAC_Iomux_Config(uint8_t id)
         GMAC0_Iomux_Config();
     // }
 }
+#endif
+
+
+
 
 
 /*************************** GMAC TEST MAIN ****************************/
 
-void main(){
+void main() {
     struct GMAC_ETH_CONFIG *eth;
     struct GMAC_HANDLE *pGMAC;
     int32_t bus, num = 0, i;
@@ -798,3 +791,4 @@ void main(){
         free_align(eth->rxBuff);
     }
 }
+

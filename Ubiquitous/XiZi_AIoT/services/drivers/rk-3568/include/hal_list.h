@@ -45,7 +45,7 @@ typedef struct HAL_LIST_NODE HAL_LIST;
  * @brief initialize a list
  * @param l: list to be initialized
  */
-static inline void HAL_LIST_Init(HAL_LIST *l)
+__STATIC_INLINE void HAL_LIST_Init(HAL_LIST *l)
 {
     l->next = l->prev = l;
 }
@@ -55,7 +55,7 @@ static inline void HAL_LIST_Init(HAL_LIST *l)
  * @param l: list to insert it
  * @param n: new node to be inserted
  */
-static inline void HAL_LIST_InsertAfter(HAL_LIST *l, HAL_LIST *n)
+__STATIC_INLINE void HAL_LIST_InsertAfter(HAL_LIST *l, HAL_LIST *n)
 {
     l->next->prev = n;
     n->next = l->next;
@@ -69,7 +69,7 @@ static inline void HAL_LIST_InsertAfter(HAL_LIST *l, HAL_LIST *n)
  * @param n: new node to be inserted
  * @param l: list to insert it
  */
-static inline void HAL_LIST_InsertBefore(HAL_LIST *l, HAL_LIST *n)
+__STATIC_INLINE void HAL_LIST_InsertBefore(HAL_LIST *l, HAL_LIST *n)
 {
     l->prev->next = n;
     n->prev = l->prev;
@@ -82,7 +82,7 @@ static inline void HAL_LIST_InsertBefore(HAL_LIST *l, HAL_LIST *n)
  * @brief remove node from list.
  * @param n: the node to remove from the list.
  */
-static inline void HAL_LIST_Remove(HAL_LIST *n)
+__STATIC_INLINE void HAL_LIST_Remove(HAL_LIST *n)
 {
     n->next->prev = n->prev;
     n->prev->next = n->next;
@@ -94,7 +94,7 @@ static inline void HAL_LIST_Remove(HAL_LIST *n)
  * @brief tests whether a list is empty
  * @param l: the list to test.
  */
-static inline int HAL_LIST_IsEmpty(const HAL_LIST *l)
+__STATIC_INLINE int HAL_LIST_IsEmpty(const HAL_LIST *l)
 {
     return l->next == l;
 }
@@ -103,7 +103,7 @@ static inline int HAL_LIST_IsEmpty(const HAL_LIST *l)
  * @brief get the list length
  * @param l: the list to get.
  */
-static inline uint32_t HAL_LIST_Len(const HAL_LIST *l)
+__STATIC_INLINE uint32_t HAL_LIST_Len(const HAL_LIST *l)
 {
     uint32_t len = 0;
     const HAL_LIST *p = l;

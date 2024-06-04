@@ -12,7 +12,6 @@
  */
 #include "hal_base.h"
 #include "hal_cache.h"
-#include "hal_def.h"
 
 /** @defgroup CACHE_Exported_Definition_Group1 Basic Definition
  *  @{
@@ -30,7 +29,7 @@
 /********************* Private Function Definition ***************************/
 
 #if defined(__CORTEX_M)
-static inline unsigned long HAL_SYS_EnterCriticalSection(void)
+__STATIC_INLINE unsigned long HAL_SYS_EnterCriticalSection(void)
 {
     unsigned long flags;
 
@@ -40,12 +39,12 @@ static inline unsigned long HAL_SYS_EnterCriticalSection(void)
     return flags;
 }
 
-static inline void HAL_SYS_ExitCriticalSection(unsigned long flags)
+__STATIC_INLINE void HAL_SYS_ExitCriticalSection(unsigned long flags)
 {
     __set_PRIMASK(flags);
 }
 #elif defined(__RISC_V)
-static inline unsigned long HAL_SYS_EnterCriticalSection(void)
+__STATIC_INLINE unsigned long HAL_SYS_EnterCriticalSection(void)
 {
     unsigned long flags;
 
@@ -57,7 +56,7 @@ static inline unsigned long HAL_SYS_EnterCriticalSection(void)
     return flags;
 }
 
-static inline void HAL_SYS_ExitCriticalSection(unsigned long flags)
+__STATIC_INLINE void HAL_SYS_ExitCriticalSection(unsigned long flags)
 {
     __asm volatile ("csrw mstatus, %0"
                     :
@@ -65,12 +64,12 @@ static inline void HAL_SYS_ExitCriticalSection(unsigned long flags)
                     : "memory");
 }
 #else
-static inline unsigned long HAL_SYS_EnterCriticalSection(void)
+__STATIC_INLINE unsigned long HAL_SYS_EnterCriticalSection(void)
 {
     return 0;
 }
 
-static inline void HAL_SYS_ExitCriticalSection(unsigned long flags)
+__STATIC_INLINE void HAL_SYS_ExitCriticalSection(unsigned long flags)
 {
 }
 #endif
@@ -126,7 +125,7 @@ uint32_t HAL_CpuAddrToDmaAddr(uint32_t cpuAddr)
  * @brief  check mpu is enable.
  * @return HAL_ENABLE if mpu enable.
  */
-static inline HAL_FuncStatus HAL_MPU_IsEnable(void)
+__STATIC_INLINE HAL_FuncStatus HAL_MPU_IsEnable(void)
 {
     HAL_FuncStatus ret = HAL_DISABLE;
 

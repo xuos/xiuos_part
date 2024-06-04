@@ -4,9 +4,7 @@
  */
 
 #include "hal_base.h"
-#include "hal_def.h"
-#include "hal_bsp.h"
-#include "hal_timer.h"
+
 /** @addtogroup RK_HAL_Driver
  *  @{
  */
@@ -51,20 +49,7 @@
 /********************* Private MACRO Definition ******************************/
 
 #define HAL_TICK_FREQ_DEFAULT HAL_TICK_FREQ_1KHZ
-#define  SYSTEM_CLOCK  816000000U
 
-/*----------------------------------------------------------------------------
-  System Core Clock Variable
- *----------------------------------------------------------------------------*/
-uint32_t SystemCoreClock = SYSTEM_CLOCK;
-
-/*----------------------------------------------------------------------------
-  System Core Clock update function
- *----------------------------------------------------------------------------*/
-void SystemCoreClockUpdate (void)
-{
-    SystemCoreClock = SYSTEM_CLOCK;
-}
 /********************* Private Structure Definition **************************/
 
 /********************* Private Variable Definition ***************************/
@@ -73,10 +58,25 @@ static __IO uint32_t uwTick;
 static eHAL_tickFreq uwTickFreq = HAL_TICK_FREQ_DEFAULT;
 
 /********************* Private Function Definition ***************************/
-
+#if defined(__CORTEX_A) || defined(__CORTEX_M)
+#if __CORTEX_M == 0U || !defined(__GNUC__)
 static void CPUCycleLoop(uint32_t cycles)
 {
-    __asm volatile (
+    uint32_t count;
+
+    if (cycles < 100U) {
+        return;
+    }
+
+    count = cycles / 3;
+    while (count-- > 0) {
+        __asm volatile ("nop");
+    }
+}
+#else
+static void CPUCycleLoop(uint32_t cycles)
+{
+    __ASM volatile (
         "mov  r0, %0\n\t"
         "adds r0, r0, #2\n\t"   //    1    2    Round to the nearest multiple of 4.
         "lsrs r0, r0, #2\n\t"   //    1    2    Divide by 4 and set flags.
@@ -91,8 +91,32 @@ static void CPUCycleLoop(uint32_t cycles)
         : : "r" (cycles)
         );
 }
+#endif
+#elif defined(__RISC_V)
+static void CPUCycleLoop(uint32_t cycles)
+{
+    asm volatile (
+        "mv   a0, %0\n\t"
+        "addi a0, a0, 2\n\t"   //    1    2    Round to the nearest multiple of 4.
+        "li   a1, 4\n\t"
+        "div  a0, a0, a1\n\t"  //    1    2    Divide by 4 and set flags.
+        "li   a1, 2\n\t"
+        "bnez a0, 1f\n\t"      //    2    2    Skip if 0.
+        "j    2f\n\t"
+        ".align 6\n\t"
+        "1:\n\t"
+        "addi a0, a0, 1\n\t"   //    1    2    Increment the counter.
+        "sub  a0, a0, a1\n\t"  //    1    2    Decrement the counter by 2.
+        "bnez a0, 1b\n\t"      //   (1)2  2    2 CPU cycles (if branch is taken).
+        "nop\n\t"              //    1    2    Loop alignment padding.
+        "2:"
+        : : "r" (cycles)
+        );
+}
+#endif
 
-static inline HAL_Status TimerDelayUs(uint32_t us)
+#if defined(SYS_TIMER) && defined(HAL_TIMER_MODULE_ENABLED)
+__STATIC_FORCEINLINE HAL_Status TimerDelayUs(uint32_t us)
 {
     uint64_t count, from, now, pass;
 
@@ -106,7 +130,7 @@ static inline HAL_Status TimerDelayUs(uint32_t us)
 
     return HAL_OK;
 }
-
+#endif
 
 /** @} */
 /********************* Public Function Definition ***************************/
@@ -121,6 +145,28 @@ static inline HAL_Status TimerDelayUs(uint32_t us)
  * @brief  Init HAL driver basic code.
  * @return HAL_OK.
  */
+HAL_Status HAL_Init(void)
+{
+#ifdef __CORTEX_M
+#ifdef HAL_NVIC_MODULE_ENABLED
+    /* Set Interrupt Group Priority */
+    HAL_NVIC_Init();
+
+    /* Set Interrupt Group Priority */
+    HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_DEFAULT);
+#endif
+#endif
+
+#if defined(SYS_TIMER) && defined(HAL_TIMER_MODULE_ENABLED)
+    HAL_TIMER_SysTimerInit(SYS_TIMER);
+#endif
+
+#ifdef HAL_PINCTRL_MODULE_ENABLED
+    HAL_PINCTRL_Init();
+#endif
+
+    return HAL_OK;
+}
 
 /**
  * @brief  HAL system update with new core clock and systick clock source.
@@ -149,7 +195,16 @@ HAL_Status HAL_SystemCoreClockUpdate(uint32_t hz, eHAL_systickClkSource clkSourc
     return ret;
 }
 
+/**
+ * @brief  HAL deinit.
+ * @return HAL_Status: HAL_OK.
+ */
+HAL_Status HAL_DeInit(void)
+{
+    /* TO-DO */
 
+    return HAL_OK;
+}
 
 /** @} */
 
@@ -175,7 +230,7 @@ HAL_Status HAL_IncTick(void)
  */
 uint32_t HAL_GetTick(void)
 {
-
+#if defined(SYS_TIMER) && defined(HAL_TIMER_MODULE_ENABLED)
     uint64_t tick = HAL_TIMER_GetCount(SYS_TIMER);
     uint32_t base = PLL_INPUT_OSC_RATE / 1000;
 
@@ -184,8 +239,10 @@ uint32_t HAL_GetTick(void)
     }
 
     return (uint32_t)HAL_DivU64(tick, base);
+#else
 
-
+    return uwTick;
+#endif
 }
 
 /**
@@ -195,15 +252,17 @@ uint32_t HAL_GetTick(void)
  */
 uint64_t HAL_GetSysTimerCount(void)
 {
-
+#if defined(SYS_TIMER) && defined(HAL_TIMER_MODULE_ENABLED)
     uint64_t count = HAL_TIMER_GetCount(SYS_TIMER);
     if (count >> 62) {
         count = ~count;
     }
 
     return count;
+#else
 
-
+    return 0LLU;
+#endif
 }
 
 /**
@@ -212,7 +271,7 @@ uint64_t HAL_GetSysTimerCount(void)
   */
 HAL_Status HAL_SetTickFreq(eHAL_tickFreq freq)
 {
-    // HAL_ASSERT(IS_TICKFREQ(freq));
+    HAL_ASSERT(IS_TICKFREQ(freq));
 
     uwTickFreq = freq;
 
@@ -237,7 +296,7 @@ eHAL_tickFreq HAL_GetTickFreq(void)
  *  certain period of time to continuously query HW status, use HAL_GetTick
  *  to do timeout, that will be more accurate.
  */
-__attribute__((weak)) HAL_Status HAL_DelayMs(uint32_t ms)
+__WEAK HAL_Status HAL_DelayMs(uint32_t ms)
 {
     for (uint32_t i = 0; i < ms; i++) {
         HAL_DelayUs(1000);
@@ -290,6 +349,77 @@ HAL_Status HAL_CPUDelayUs(uint32_t us)
     return HAL_OK;
 }
 
+#if defined(HAL_CPU_USAGE_ENABLED)
+static uint64_t g_last_enter_idle_time = 0;               /* Last time current CPU entered the idle state. */
+static uint64_t g_total_idle_time = 0;                    /* Total time for current CPU to enter idle state. */
+static uint64_t g_last_elapsed_time = 0;                  /* Last elapsed time for current CPU. */
+
+/**
+ * @brief  Get current CPU usage.
+ * @return 0-100
+ * @attention The cpu usage function depends on HAL_CPUEnterIdle function.
+ */
+uint32_t HAL_GetCPUUsage(void)
+{
+    uint64_t elapsed_time, active_time, current_time;
+    uint32_t usage;
+
+    current_time = HAL_GetSysTimerCount();
+    elapsed_time = current_time - g_last_elapsed_time;
+
+    /* Prevent the risk of dividing by 0 caused by repeated calls for a short time. */
+    if (!elapsed_time) {
+        return 0;
+    }
+
+    HAL_ASSERT(elapsed_time > g_total_idle_time);
+    active_time = elapsed_time - g_total_idle_time;
+    usage = (active_time * 100) / elapsed_time;
+    g_total_idle_time = 0;
+    g_last_elapsed_time = current_time;
+
+    return usage;
+}
+#endif
+
+/**
+ * @brief  CPU enter idle.
+ */
+void HAL_CPU_EnterIdle(void)
+{
+#if defined(HAL_CPU_USAGE_ENABLED)
+    uint64_t idle_time;
+
+    __disable_irq();
+    g_last_enter_idle_time = HAL_GetSysTimerCount();
+#endif
+
+    // __asm__ volatile ("wfi");
+
+#if defined(HAL_CPU_USAGE_ENABLED)
+    idle_time = HAL_GetSysTimerCount() - g_last_enter_idle_time;
+    g_total_idle_time += idle_time;
+    __enable_irq();
+#endif
+}
+
+/** @} */
+
+/** @} */
+
+/** @} */
+/********************* Public Function Definition ***************************/
+/** @defgroup HAL_BASE_EX_Exported_Functions_Group5 Other Functions
+ *  @{
+ */
+
+/**
+ * @brief  uint64_t numerator / uint32_t denominator with remainder
+ * @param  numerator
+ * @param  denominator
+ * @param  pRemainder [out] pointer to unsigned 32bit remainder
+ * @return uint64_t result. sets *pRemainder if pRemainder is not null
+ */
 uint64_t HAL_DivU64Rem(uint64_t numerator, uint32_t denominator, uint32_t *pRemainder)
 {
     uint64_t remainder = numerator;
@@ -325,9 +455,3 @@ uint64_t HAL_DivU64Rem(uint64_t numerator, uint32_t denominator, uint32_t *pRema
 
     return result;
 }
-
-/** @} */
-
-/** @} */
-
-/** @} */

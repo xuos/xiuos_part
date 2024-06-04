@@ -3,6 +3,9 @@
  * Copyright (c) 2020-2021 Rockchip Electronics Co., Ltd.
  */
 
+#include "hal_conf.h"
+
+#ifdef HAL_CRU_MODULE_ENABLED
 
 /** @addtogroup RK_HAL_Driver
  *  @{
@@ -471,4 +474,4 @@ void HAL_CRU_AsEnable(uint8_t ch, uint8_t en);
 
 /** @} */
 
-
+#endif /* HAL_CRU_MODULE_ENABLED */

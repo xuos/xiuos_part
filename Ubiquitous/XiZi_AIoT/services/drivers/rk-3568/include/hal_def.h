@@ -14,7 +14,7 @@
 #ifndef _HAL_DEF_H_
 #define _HAL_DEF_H_
 
-// #include <stdio.h>
+#include "libserial.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>

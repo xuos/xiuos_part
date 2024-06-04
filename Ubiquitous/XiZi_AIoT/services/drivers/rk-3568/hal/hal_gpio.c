@@ -4,8 +4,8 @@
  */
 
 #include "hal_base.h"
-#include "hal_pinctrl.h"
-#include "hal_gpio.h"
+
+#ifdef HAL_GPIO_MODULE_ENABLED
 
 /** @addtogroup RK_HAL_Driver
  *  @{
@@ -462,7 +462,7 @@ void HAL_GPIO_DisableIRQ(struct GPIO_REG *pGPIO, ePINCTRL_GPIO_PINS pin)
  * NOTE: This function Should not be modified, when the callback is needed,
  *       the HAL_GPIO_IRQDispatch could be implemented in the user file.
  */
-__attribute__((weak)) void HAL_GPIO_IRQDispatch(eGPIO_bankId bank, uint32_t pin)
+__WEAK void HAL_GPIO_IRQDispatch(eGPIO_bankId bank, uint32_t pin)
 {
     UNUSED(bank);
     UNUSED(pin);
@@ -574,4 +574,4 @@ HAL_Status HAL_GPIO_SetVirtualModel(struct GPIO_REG *pGPIO, ePINCTRL_GPIO_PINS p
 
 /** @} */
 
-
+#endif /* HAL_GPIO_MODULE_ENABLED */

@@ -3,6 +3,7 @@
  * Copyright (c) 2020-2021 Rockchip Electronics Co., Ltd.
  */
 
+#include "hal_conf.h"
 
 /** @addtogroup RK_HAL_Driver
   * @{

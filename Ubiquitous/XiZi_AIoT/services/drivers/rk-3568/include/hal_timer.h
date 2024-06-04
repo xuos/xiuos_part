@@ -3,8 +3,9 @@
  * Copyright (c) 2020-2021 Rockchip Electronics Co., Ltd.
  */
 
+#include "hal_conf.h"
 
-
+#ifdef HAL_TIMER_MODULE_ENABLED
 
 /** @addtogroup RK_HAL_Driver
  *  @{
@@ -60,3 +61,4 @@ HAL_Status HAL_TIMER_ClrInt(struct TIMER_REG *pReg);
 
 /** @} */
 
+#endif /* HAL_TIMER_MODULE_ENABLED */

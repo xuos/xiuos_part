@@ -4,8 +4,8 @@
  */
 
 #include "hal_base.h"
-#include "hal_def.h"
-#include "hal_pinctrl.h"
+
+#if defined(HAL_PINCTRL_MODULE_ENABLED) && (defined(SOC_RV1126) || defined(SOC_SWALLOW) || defined(SOC_RK3568) || defined(RKMCU_RK2106))
 
 /** @addtogroup RK_HAL_Driver
  *  @{
@@ -562,4 +562,4 @@ HAL_Status HAL_PINCTRL_SetIOMUX(eGPIO_bankId bank, uint32_t mPins, ePINCTRL_conf
 
 /** @} */
 
-
+#endif /* HAL_PINCTRL_MODULE_ENABLED */

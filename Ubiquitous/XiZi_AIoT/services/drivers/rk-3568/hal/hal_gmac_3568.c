@@ -4,9 +4,8 @@
  */
 
 #include "hal_base.h"
-#include "hal_gmac.h"
-#include "hal_debug.h"
-#include "hal_cru.h"
+
+#if defined(SOC_RK3568) && defined(HAL_GMAC_MODULE_ENABLED)
 
 /** @addtogroup RK_HAL_Driver
  *  @{
@@ -197,3 +196,10 @@ void HAL_GMAC_SetRMIISpeed(struct GMAC_HANDLE *pGMAC, int32_t speed)
     HAL_GMAC_SetRGMIISpeed(pGMAC, speed);
 }
 
+/** @} */
+
+/** @} */
+
+/** @} */
+
+#endif /* SOC_RK3568 && HAL_GMAC_MODULE_ENABLED */

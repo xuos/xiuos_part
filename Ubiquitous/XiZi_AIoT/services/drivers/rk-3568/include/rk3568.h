@@ -14,7 +14,6 @@
 /*                                                                                      */
 /****************************************************************************************/
 #ifndef __ASSEMBLY__
-#include "soc.h"
 /* GRF Register Structure Define */
 struct GRF_REG {
     __IO uint32_t GPIO0A_IOMUX_L;                     /* Address Offset: 0x0000 */

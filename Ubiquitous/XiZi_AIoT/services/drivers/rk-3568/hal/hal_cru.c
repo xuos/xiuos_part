@@ -4,8 +4,8 @@
  */
 
 #include "hal_base.h"
-#include "hal_def.h"
-#include "hal_cru.h"
+
+#ifdef HAL_CRU_MODULE_ENABLED
 
 /** @addtogroup RK_HAL_Driver
  *  @{
@@ -42,7 +42,40 @@
  *  @{
  */
 /********************* Private MACRO Definition ******************************/
+#if defined(SOC_RV1108)
+#define PWRDOWN_SHIFT      0
+#define PWRDOWN_MASK       1 << PWRDOWN_SHIFT
+#define PLL_POSTDIV1_SHIFT 8
+#define PLL_POSTDIV1_MASK  0x7 << PLL_POSTDIV1_SHIFT
+#define PLL_FBDIV_SHIFT    0
+#define PLL_FBDIV_MASK     0xfff << PLL_FBDIV_SHIFT
+#define PLL_POSTDIV2_SHIFT 12
+#define PLL_POSTDIV2_MASK  0x7 << PLL_POSTDIV2_SHIFT
+#define PLL_REFDIV_SHIFT   0
+#define PLL_REFDIV_MASK    0x3f << PLL_REFDIV_SHIFT
+#define PLL_DSMPD_SHIFT    3
+#define PLL_DSMPD_MASK     1 << PLL_DSMPD_SHIFT
+#define PLL_FRAC_SHIFT     0
+#define PLL_FRAC_MASK      0xffffff << PLL_FRAC_SHIFT
+#elif defined(SOC_RK3588)
+#define PLLCON0_M_SHIFT     0
+#define PLLCON0_M_MASK      0x3ff << PLLCON0_M_SHIFT
+#define PLLCON1_P_SHIFT     0
+#define PLLCON1_P_MASK      0x3f << PLLCON1_P_SHIFT
+#define PLLCON1_S_SHIFT     6
+#define PLLCON1_S_MASK      0x7 << PLLCON1_S_SHIFT
+#define PLLCON2_K_SHIFT     0
+#define PLLCON2_K_MASK      0xffff << PLLCON2_K_SHIFT
+#define PLLCON1_PWRDOWN     BIT(13)
+#define PLLCON6_LOCK_STATUS BIT(15)
 
+#define BYPASS_SHIFT 15
+#define BYPASS_MASK  (1 << BYPASS_SHIFT)
+
+#define PWRDOWN_SHIFT 13
+#define PWRDOWN_MASK  (1 << PWRDOWN_SHIFT)
+
+#else
 #define PWRDOWN_SHIFT      13
 #define PWRDOWN_MASK       1 << PWRDOWN_SHIFT
 #define PLL_POSTDIV1_SHIFT 12
@@ -57,7 +90,7 @@
 #define PLL_DSMPD_MASK     1 << PLL_DSMPD_SHIFT
 #define PLL_FRAC_SHIFT     0
 #define PLL_FRAC_MASK      0xffffff << PLL_FRAC_SHIFT
-
+#endif
 
 #define MIN_FOUTVCO_FREQ (800 * MHZ)
 #define MAX_FOUTVCO_FREQ (2000 * MHZ)
@@ -87,7 +120,7 @@
 
 /********************* Private Structure Definition **************************/
 static struct PLL_CONFIG g_rockchipAutoTable;
-__attribute__((weak)) const struct HAL_CRU_DEV g_cruDev;
+__WEAK const struct HAL_CRU_DEV g_cruDev;
 
 /********************* Private Variable Definition ***************************/
 /********************* Private Function Definition ***************************/
@@ -224,8 +257,81 @@ int HAL_CRU_RoundFreqGetMux2(uint32_t freq, uint32_t pFreq0, uint32_t pFreq1, ui
     return HAL_CRU_RoundFreqGetMux4(freq, pFreq0, pFreq1, 0, 0, pFreqOut);
 }
 
+#if defined(SOC_RK3588)
+/**
+ * @brief Get pll parameter by auto.
+ * @param  finHz: pll intput freq
+ * @param  foutHz: pll output freq
+ * @return struct PLL_CONFIG.
+ * How to calculate the PLL:
+ *     FFVCO = ((m + k / 65536) * FFIN) / p
+ *     FFOUT = ((m + k / 65536) * FFIN) / (p * 2^s)
+ */
+static const struct PLL_CONFIG *CRU_PllSetByAuto(uint32_t finHz, uint32_t foutHz)
+{
+    struct PLL_CONFIG *rateTable = &g_rockchipAutoTable;
+    uint64_t fvcoMin = 2250ULL * MHZ, fvcoMax = 4500ULL * MHZ;
+    uint64_t foutMin = 37ULL * MHZ, foutMax = 4500ULL * MHZ;
+    uint64_t fvco, fref, fout, ffrac;
+    uint32_t p, m, s;
 
+    if (finHz == 0 || foutHz == 0 || foutHz == finHz) {
+        return NULL;
+    }
 
+    if (foutHz > foutMax || foutHz < foutMin) {
+        return NULL;
+    }
+
+    if (finHz / MHZ * MHZ == finHz && foutHz / MHZ * MHZ == foutHz) {
+        for (s = 0; s <= 6; s++) {
+            fvco = (uint64_t)foutHz << s;
+            if (fvco < fvcoMin || fvco > fvcoMax) {
+                continue;
+            }
+
+            for (p = 2; p <= 4; p++) {
+                for (m = 64; m <= 1023; m++) {
+                    if (fvco == m * finHz / p) {
+                        rateTable->p = p;
+                        rateTable->m = m;
+                        rateTable->s = s;
+                        rateTable->k = 0;
+
+                        return rateTable;
+                    }
+                }
+            }
+        }
+    } else {
+        for (s = 0; s <= 6; s++) {
+            fvco = (uint64_t)foutHz << s;
+            if (fvco < fvcoMin || fvco > fvcoMax) {
+                continue;
+            }
+
+            for (p = 1; p <= 4; p++) {
+                for (m = 64; m <= 1023; m++) {
+                    if ((fvco >= m * finHz / p) && (fvco < (m + 1) * finHz / p)) {
+                        rateTable->p = p;
+                        rateTable->m = m;
+                        rateTable->s = s;
+                        fref = finHz / p;
+                        ffrac = fvco - (m * fref);
+                        fout = ffrac * 65536;
+                        rateTable->k = fout / fref;
+
+                        return rateTable;
+                    }
+                }
+            }
+        }
+    }
+
+    return NULL;
+}
+
+#else
 /**
  * @brief Rockchip pll clk set postdiv.
  * @param  foutHz: output freq
@@ -351,7 +457,7 @@ static const struct PLL_CONFIG *CRU_PllSetByAuto(uint32_t finHz,
 
     return rateTable;
 }
-
+#endif
 
 /**
  * @brief Get pll parameter by rateTable.
@@ -390,7 +496,309 @@ static const struct PLL_CONFIG *CRU_PllGetSettings(struct PLL_SETUP *pSetup,
  *  @{
  */
 
+#if defined(SOC_RV1108)
+/*
+ * Formulas also embedded within the fractional PLL Verilog model:
+ * If DSMPD = 1 (DSM is disabled, "integer mode")
+ * FOUTVCO = FREF / REFDIV * FBDIV
+ * FOUT = FOUTVCO / POSTDIV1 / POSTDIV2
+ * If DSMPD = 0 (DSM is enabled, "fractional mode")
+ * FOUTVCO = (FREF / REFDIV) * (FBDIV + FRAC / (2^24))
+ * FOUTPOSTDIV = FOUTVCO / (POSTDIV1*POSTDIV2)
+ * FOUT = FOUTVCO / POSTDIV1 / POSTDIV2
+ */
+uint32_t HAL_CRU_GetPllFreq(struct PLL_SETUP *pSetup)
+{
+    uint32_t refDiv, fbDiv, postdDv1, postDiv2, frac, dsmpd;
+    uint32_t mode = 0, rate = PLL_INPUT_OSC_RATE;
 
+    mode = PLL_GET_PLLMODE(READ_REG(*(pSetup->modeOffset)), pSetup->modeShift,
+                           pSetup->modeMask);
+
+    switch (mode) {
+    case RK_PLL_MODE_SLOW:
+        rate = PLL_INPUT_OSC_RATE;
+        break;
+    case RK_PLL_MODE_NORMAL:
+        fbDiv = PLL_GET_FBDIV(READ_REG(*(pSetup->conOffset0)));
+        postdDv1 = PLL_GET_POSTDIV1(READ_REG(*(pSetup->conOffset1)));
+        postDiv2 = PLL_GET_POSTDIV2(READ_REG(*(pSetup->conOffset1)));
+        refDiv = PLL_GET_REFDIV(READ_REG(*(pSetup->conOffset1)));
+        dsmpd = PLL_GET_DSMPD(READ_REG(*(pSetup->conOffset3)));
+        frac = PLL_GET_FRAC(READ_REG(*(pSetup->conOffset2)));
+        rate = (rate / refDiv) * fbDiv;
+        if (dsmpd == 0) {
+            uint64_t fracRate = PLL_INPUT_OSC_RATE;
+
+            fracRate *= frac;
+            fracRate = fracRate >> EXPONENT_OF_FRAC_PLL;
+            fracRate = fracRate / refDiv;
+            rate += fracRate;
+        }
+        rate = rate / (postdDv1 * postDiv2);
+        rate = CRU_PLL_ROUND_UP_TO_KHZ(rate);
+        break;
+    case RK_PLL_MODE_DEEP:
+    default:
+        rate = 32768;
+        break;
+    }
+
+    return rate;
+}
+
+/*
+ * Force PLL into slow mode
+ * Pll Power down
+ * Pll Config fbDiv, refDiv, postdDv1, postDiv2, dsmpd, frac
+ * Pll Power up
+ * Waiting for pll lock
+ * Force PLL into normal mode
+ */
+HAL_Status HAL_CRU_SetPllFreq(struct PLL_SETUP *pSetup, uint32_t rate)
+{
+    const struct PLL_CONFIG *pConfig;
+    int delay = 2400;
+
+    if (rate == HAL_CRU_GetPllFreq(pSetup)) {
+        return HAL_OK;
+    } else if (rate < MIN_FOUT_FREQ) {
+        return HAL_INVAL;
+    } else if (rate > MAX_FOUT_FREQ) {
+        return HAL_INVAL;
+    }
+
+    pConfig = CRU_PllGetSettings(pSetup, rate);
+    if (!pConfig) {
+        return HAL_ERROR;
+    }
+
+    /* Force PLL into slow mode to ensure output stable clock */
+    WRITE_REG_MASK_WE(*(pSetup->modeOffset), pSetup->modeMask, RK_PLL_MODE_SLOW << pSetup->modeShift);
+
+    /* Pll Power down */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset3), PWRDOWN_MASK, 1 << PWRDOWN_SHIFT);
+
+    /* Pll Config */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset1), PLL_POSTDIV2_MASK, pConfig->postDiv2 << PLL_POSTDIV2_SHIFT);
+    WRITE_REG_MASK_WE(*(pSetup->conOffset1), PLL_REFDIV_MASK, pConfig->refDiv << PLL_REFDIV_SHIFT);
+    WRITE_REG_MASK_WE(*(pSetup->conOffset1), PLL_POSTDIV1_MASK, pConfig->postDiv1 << PLL_POSTDIV1_SHIFT);
+    WRITE_REG_MASK_WE(*(pSetup->conOffset0), PLL_FBDIV_MASK, pConfig->fbDiv << PLL_FBDIV_SHIFT);
+    WRITE_REG_MASK_WE(*(pSetup->conOffset3), PLL_DSMPD_MASK, pConfig->dsmpd << PLL_DSMPD_SHIFT);
+
+    if (pConfig->frac) {
+        WRITE_REG(*(pSetup->conOffset2), (READ_REG(*(pSetup->conOffset2)) & 0xff000000) | pConfig->frac);
+    }
+
+    WRITE_REG_MASK_WE(*(pSetup->conOffset3), PWRDOWN_MASK, 0 << PWRDOWN_SHIFT);
+
+    /* Waiting for pll lock */
+    while (delay > 0) {
+        if (READ_REG(*(pSetup->conOffset2)) & (1 << pSetup->lockShift)) {
+            break;
+        }
+        HAL_CPUDelayUs(1000);
+        delay--;
+    }
+    if (delay == 0) {
+        return HAL_TIMEOUT;
+    }
+
+    /* Force PLL into normal mode */
+    WRITE_REG_MASK_WE(*(pSetup->modeOffset), pSetup->modeMask, RK_PLL_MODE_NORMAL << pSetup->modeShift);
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_SetPllPowerUp(struct PLL_SETUP *pSetup)
+{
+    int delay = 2400;
+
+    /* Pll Power up */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset3), PWRDOWN_MASK, 0 << PWRDOWN_SHIFT);
+
+    /* Waiting for pll lock */
+    while (delay > 0) {
+        if (READ_REG(*(pSetup->conOffset2)) & (1 << pSetup->lockShift)) {
+            break;
+        }
+        HAL_CPUDelayUs(1000);
+        delay--;
+    }
+    if (delay == 0) {
+        return HAL_TIMEOUT;
+    }
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_SetPllPowerDown(struct PLL_SETUP *pSetup)
+{
+    /* Pll Power down */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset3), PWRDOWN_MASK, 1 << PWRDOWN_SHIFT);
+
+    return HAL_OK;
+}
+
+#elif defined(SOC_RK3588)
+/*
+ * Formulas also embedded within the fractional PLL Verilog model:
+ * If K = 0 (DSM is disabled, "integer mode")
+ * FOUTVCO = FREF / P * M
+ * FOUT = FOUTVCO / 2^S
+ * If K > 0 (DSM is enabled, "fractional mode")
+ * FOUTVCO = (FREF / P) * (M + K / 65536)
+ * FOUT = FOUTVCO / 2^S
+ */
+uint32_t HAL_CRU_GetPllFreq(struct PLL_SETUP *pSetup)
+{
+    uint32_t m, p, s, k;
+    uint64_t rate = PLL_INPUT_OSC_RATE;
+    uint32_t mode = 0;
+
+    if (pSetup->modeMask) {
+        mode = PLL_GET_PLLMODE(READ_REG(*(pSetup->modeOffset)), pSetup->modeShift,
+                               pSetup->modeMask);
+    } else {
+        mode = RK_PLL_MODE_NORMAL;
+    }
+
+    switch (mode) {
+    case RK_PLL_MODE_SLOW:
+        rate = PLL_INPUT_OSC_RATE;
+        break;
+
+    case RK_PLL_MODE_NORMAL:
+        m = (READ_REG(*(pSetup->conOffset0)) & PLLCON0_M_MASK) >> PLLCON0_M_SHIFT;
+        p = (READ_REG(*(pSetup->conOffset1)) & PLLCON1_P_MASK) >> PLLCON1_P_SHIFT;
+        s = (READ_REG(*(pSetup->conOffset1)) & PLLCON1_S_MASK) >> PLLCON1_S_SHIFT;
+        k = (READ_REG(*(pSetup->conOffset2)) & PLLCON2_K_MASK) >> PLLCON2_K_SHIFT;
+
+        rate *= m;
+        rate = rate / p;
+        if (k) {
+            /* fractional mode */
+            uint64_t frac = PLL_INPUT_OSC_RATE / p;
+
+            frac *= k;
+            frac = frac / 65536;
+            rate += frac;
+        }
+        rate = rate >> s;
+        break;
+
+    case RK_PLL_MODE_DEEP:
+    default:
+        rate = 32768;
+        break;
+    }
+
+    return rate;
+}
+
+/*
+ * Force PLL into slow mode
+ * Pll Power down
+ * Pll Config M, P, S, K
+ * Pll Power up
+ * Waiting for pll lock
+ * Force PLL into normal mode
+ */
+HAL_Status HAL_CRU_SetPllFreq(struct PLL_SETUP *pSetup, uint32_t rate)
+{
+    const struct PLL_CONFIG *pConfig;
+    int delay = 24000000;
+
+    if (rate == HAL_CRU_GetPllFreq(pSetup)) {
+        return HAL_OK;
+    } else if (rate < MIN_FOUT_FREQ) {
+        return HAL_INVAL;
+    } else if (rate > MAX_FOUT_FREQ) {
+        return HAL_INVAL;
+    }
+
+    pConfig = CRU_PllGetSettings(pSetup, rate);
+    if (!pConfig) {
+        return HAL_ERROR;
+    }
+
+    /* Force PLL into slow mode to ensure output stable clock */
+    if (pSetup->modeMask) {
+        WRITE_REG_MASK_WE(*(pSetup->modeOffset), pSetup->modeMask, RK_PLL_MODE_SLOW << pSetup->modeShift);
+    }
+
+    /* Pll Power down */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset1), PWRDOWN_MASK, 1 << PWRDOWN_SHIFT);
+
+    /* Pll Config */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset0), PLLCON0_M_MASK, pConfig->m << PLLCON0_M_SHIFT);
+    WRITE_REG_MASK_WE(*(pSetup->conOffset1), PLLCON1_P_MASK, pConfig->p << PLLCON1_P_SHIFT);
+    WRITE_REG_MASK_WE(*(pSetup->conOffset1), PLLCON1_S_MASK, pConfig->s << PLLCON1_S_SHIFT);
+    if (pConfig->k) {
+        WRITE_REG_MASK_WE(*(pSetup->conOffset2), PLLCON2_K_MASK, pConfig->k << PLLCON2_K_SHIFT);
+    }
+
+    /* Pll Power up */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset1), PWRDOWN_MASK, 0 << PWRDOWN_SHIFT);
+
+    /* Waiting for pll lock */
+    while (delay > 0) {
+        if (READ_REG(*(pSetup->conOffset6)) & (1 << pSetup->lockShift)) {
+            break;
+        }
+        delay--;
+    }
+    if (delay == 0) {
+        return HAL_TIMEOUT;
+    }
+
+    /* Force PLL into normal mode */
+    if (pSetup->modeMask) {
+        WRITE_REG_MASK_WE(*(pSetup->modeOffset), pSetup->modeMask, RK_PLL_MODE_NORMAL << pSetup->modeShift);
+    }
+
+    /*
+     * PLL operates normally.
+     *
+     * ATF system suspend requires memory repair operation which would
+     * bypass the pll, let's ensure it's on normal mode.
+     */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset0), BYPASS_MASK, 0 << BYPASS_SHIFT);
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_SetPllPowerUp(struct PLL_SETUP *pSetup)
+{
+    int delay = 2400;
+
+    /* Pll Power up */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset1), PWRDOWN_MASK, 0 << PWRDOWN_SHIFT);
+
+    /* Waiting for pll lock */
+    while (delay > 0) {
+        if (READ_REG(*(pSetup->conOffset6)) & (1 << pSetup->lockShift)) {
+            break;
+        }
+        HAL_CPUDelayUs(1000);
+        delay--;
+    }
+    if (delay == 0) {
+        return HAL_TIMEOUT;
+    }
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_SetPllPowerDown(struct PLL_SETUP *pSetup)
+{
+    /* Pll Power down */
+    WRITE_REG_MASK_WE(*(pSetup->conOffset1), PWRDOWN_MASK, 1 << PWRDOWN_SHIFT);
+
+    return HAL_OK;
+}
+
+#else
 /*
  * Formulas also embedded within the fractional PLL Verilog model:
  * If DSMPD = 1 (DSM is disabled, "integer mode")
@@ -546,7 +954,7 @@ HAL_Status HAL_CRU_SetPllPowerDown(struct PLL_SETUP *pSetup)
 
     return HAL_OK;
 }
-
+#endif
 
 #ifdef CRU_CLK_USE_CON_BANK
 static const struct HAL_CRU_DEV *CRU_GetInfo(void)
@@ -1211,14 +1619,14 @@ HAL_Status HAL_CRU_ClkNp5BestDiv(eCLOCK_Name clockName, uint32_t rate, uint32_t 
     return HAL_ERROR;
 }
 
-__attribute__((weak)) HAL_Status HAL_CRU_VopDclkEnable(uint32_t gateId)
+__WEAK HAL_Status HAL_CRU_VopDclkEnable(uint32_t gateId)
 {
     HAL_CRU_ClkEnable(gateId);
 
     return HAL_OK;
 }
 
-__attribute__((weak)) HAL_Status HAL_CRU_VopDclkDisable(uint32_t gateId)
+__WEAK HAL_Status HAL_CRU_VopDclkDisable(uint32_t gateId)
 {
     HAL_CRU_ClkDisable(gateId);
 
@@ -1247,4 +1655,4 @@ HAL_Status HAL_CRU_SetGlbSrst(eCRU_GlbSrstType type)
 
 /** @} */
 
-
+#endif /* HAL_CRU_MODULE_ENABLED */

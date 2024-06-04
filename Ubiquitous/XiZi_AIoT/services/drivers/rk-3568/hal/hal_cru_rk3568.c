@@ -4,8 +4,8 @@
  */
 
 #include "hal_base.h"
-#include "hal_cru.h"
 
+#if defined(SOC_RK3568) && defined(HAL_CRU_MODULE_ENABLED)
 
 /** @addtogroup RK_HAL_Driver
  *  @{
@@ -1077,4 +1077,4 @@ HAL_Status HAL_CRU_WdtGlbRstEnable(eCRU_WdtRstType wdtType)
 
 /** @} */
 
-
+#endif /* SOC_RK3568 && HAL_CRU_MODULE_ENABLED */

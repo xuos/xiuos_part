@@ -4,8 +4,8 @@
  */
 
 #include "hal_base.h"
-#include "hal_def.h"
-#include "hal_timer.h"
+
+#ifdef HAL_TIMER_MODULE_ENABLED
 
 /** @addtogroup RK_HAL_Driver
  *  @{
@@ -279,7 +279,7 @@ HAL_Status HAL_TIMER_ClrInt(struct TIMER_REG *pReg)
  * @return HAL_Status: HAL_OK.
  * Clear interrupt status.
  */
-__attribute__((weak)) HAL_Status HAL_TIMER0_Handler(void)
+__WEAK HAL_Status HAL_TIMER0_Handler(void)
 {
     HAL_TIMER_ClrInt(TIMER0);
 
@@ -291,7 +291,7 @@ __attribute__((weak)) HAL_Status HAL_TIMER0_Handler(void)
  * @return HAL_Status: HAL_OK.
  * Clear interrupt status.
  */
-__attribute__((weak)) HAL_Status HAL_TIMER1_Handler(void)
+__WEAK HAL_Status HAL_TIMER1_Handler(void)
 {
     HAL_TIMER_ClrInt(TIMER1);
 
@@ -304,3 +304,4 @@ __attribute__((weak)) HAL_Status HAL_TIMER1_Handler(void)
 
 /** @} */
 
+#endif /* HAL_TIMER_MODULE_ENABLED */
