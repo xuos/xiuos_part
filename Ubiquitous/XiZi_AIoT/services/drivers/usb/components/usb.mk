@@ -22,3 +22,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/drivers/usb/components \
 		-I$(KERNEL_ROOT)/services/drivers/usb/components/class/hub \
 		-I$(KERNEL_ROOT)/services/drivers/usb/components/class/wireless \
 		-I$(KERNEL_ROOT)/services/drivers/usb/components/common \
+		-I$(KERNEL_ROOT)/services/drivers/usb/components/core \
+		-I$(KERNEL_ROOT)/services/drivers/usb/components/osal \
+		-I$(KERNEL_ROOT)/services/drivers/usb/components/port \
+		-I$(KERNEL_ROOT)/services/drivers/usb/components/port/xhci \
