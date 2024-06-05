@@ -24,5 +24,10 @@ libipc = $(KERNEL_ROOT)/services/app/libipc.o
 libsem = $(KERNEL_ROOT)/services/app/libsemaphore.o
 
 
+SRC_DIR += common
+SRC_DIR += class class/cdc class/hub class/wireless
+SRC_DIR += core
+SRC_DIR += osal
+SRC_DIR += port port/xhci
 
 
