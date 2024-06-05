@@ -15,14 +15,14 @@ endif
 ifeq ($(BOARD), ok1028a-c)
 toolchain ?= aarch64-none-elf-
 user_ldflags = -N -Ttext 0
-cflags =  -g -std=c11 -mtune=cortex-a72 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused  -fno-omit-frame-pointer -fno-stack-protector -fno-pie  
+cflags =  -g -std=c11 -mtune=cortex-a72 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall  -Werror -ggdb -Wno-unused  -fno-omit-frame-pointer -fno-stack-protector -fno-pie  
 board_specs = stub.o
 endif
 
 cc = ${toolchain}gcc
 ld = ${toolchain}g++
 objdump = ${toolchain}objdump
-c_useropts = -O2
+# c_useropts = -O2
 c_useropts = -O0
 
 INC_DIR = 	-I$(KERNEL_ROOT)/services/app \

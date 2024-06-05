@@ -64,10 +64,6 @@ eth_driver: enet_drv.o enet_test.o board_network.o enet_iomux_config.o imx6dq_gp
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 
-# ethernet: test_gmac.o hal_gmac.o hal_gmac_3568.o hal_base.o hal_bsp.o hal_pinctrl_v2.o hal_cru.o hal_cache.o hal_gpio.o hal_timer.o hal_cru_rk3568.o system_rk3568.o hal_debug.o libserial.o printf.o libmem.o usyscall.o arch_usyscall.o session.o libipc.o 
-# 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
-# 	@${objdump} -S $@ > $@.asm
-
 epit_server: timer.o epit.o ccm_pll.o usyscall.o arch_usyscall.o libserial.o printf.o libipc.o session.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm

@@ -1,4 +1,4 @@
 
-SRC_DIR := ethernet
+SRC_DIR := 
 
 include $(KERNEL_ROOT)/compiler.mk
