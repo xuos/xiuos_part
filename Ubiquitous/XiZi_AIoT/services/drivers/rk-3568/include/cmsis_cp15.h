@@ -52,20 +52,12 @@ __STATIC_FORCEINLINE void __set_ACTLR(uint32_t actlr)
 /** \brief  Get CPACR
     \return               Coprocessor Access Control register value
  */
-__STATIC_FORCEINLINE uint32_t __get_CPACR(void)
-{
-  uint32_t result;
-  __get_CP(15, 0, result, 1, 0, 2);
-  return result;
-}
+
 
 /** \brief  Set CPACR
     \param [in]    cpacr  Coprocessor Access Control value to set
  */
-__STATIC_FORCEINLINE void __set_CPACR(uint32_t cpacr)
-{
-  __set_CP(15, 0, cpacr, 1, 0, 2);
-}
+
 
 /** \brief  Get DFSR
     \return               Data Fault Status Register value

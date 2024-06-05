@@ -1577,7 +1577,7 @@ HAL_Status HAL_GMAC_DMARxDescInit(struct GMAC_HANDLE *pGMAC,
         /* Get the pointer on the ith member of the Rx Desc list */
         desc = rxDescs + i;
 
-        desc->des0 = (uint32_t)(rxBuff + i * HAL_GMAC_MAX_PACKET_SIZE);
+        desc->des0 = (uint64_t)(rxBuff + i * HAL_GMAC_MAX_PACKET_SIZE);
         desc->des1 = 0;
         desc->des2 = 0;
         desc->des3 = GMAC_DESC3_OWN | GMAC_DESC3_BUF1V | GMAC_DESC3_IOC;
@@ -1787,9 +1787,9 @@ HAL_Status HAL_GMAC_Start(struct GMAC_HANDLE *pGMAC, uint8_t *addr)
     value |= (rxFifosz << DMA_CH0_RX_CONTROL_RBSZ_SHIFT) & DMA_CH0_RX_CONTROL_RBSZ_MASK;
     value = value | (8 << DMA_CH0_RX_CONTROL_RXPBL_SHIFT);
     WRITE_REG(pGMAC->pReg->DMA_CH0_RX_CONTROL, value);
-    WRITE_REG(pGMAC->pReg->DMA_CH0_RXDESC_LIST_ADDRESS, (uint32_t)pGMAC->rxDescs);
+    WRITE_REG(pGMAC->pReg->DMA_CH0_RXDESC_LIST_ADDRESS, (uint64_t)pGMAC->rxDescs);
     WRITE_REG(pGMAC->pReg->DMA_CH0_RXDESC_TAIL_POINTER,
-              (uint32_t)(pGMAC->rxDescs + pGMAC->rxSize));
+              (uint64_t)(pGMAC->rxDescs + pGMAC->rxSize));
 
     /* init tx chan */
     value = READ_REG(pGMAC->pReg->DMA_CH0_TX_CONTROL);
@@ -1797,8 +1797,8 @@ HAL_Status HAL_GMAC_Start(struct GMAC_HANDLE *pGMAC, uint8_t *addr)
     value |= DMA_CH0_TX_CONTROL_OSF;
     WRITE_REG(pGMAC->pReg->DMA_CH0_TX_CONTROL, value);
 
-    WRITE_REG(pGMAC->pReg->DMA_CH0_TXDESC_LIST_ADDRESS, (uint32_t)pGMAC->txDescs);
-    WRITE_REG(pGMAC->pReg->DMA_CH0_TXDESC_TAIL_POINTER, (uint32_t)pGMAC->txDescs);
+    WRITE_REG(pGMAC->pReg->DMA_CH0_TXDESC_LIST_ADDRESS, (uint64_t)pGMAC->txDescs);
+    WRITE_REG(pGMAC->pReg->DMA_CH0_TXDESC_TAIL_POINTER, (uint64_t)pGMAC->txDescs);
 
     HAL_GMAC_WriteHWAddr(pGMAC, addr);
 
@@ -1978,7 +1978,7 @@ HAL_Status HAL_GMAC_Send(struct GMAC_HANDLE *pGMAC, void *packet,
     pGMAC->txDescIdx++;
     pGMAC->txDescIdx %= pGMAC->txSize;
 
-    desc->des0 = (uint32_t)packet;
+    desc->des0 = (uint64_t)packet;
     desc->des1 = 0;
     desc->des2 = length;
     /*
@@ -1988,7 +1988,7 @@ HAL_Status HAL_GMAC_Send(struct GMAC_HANDLE *pGMAC, void *packet,
     desc->des3 = GMAC_DESC3_OWN | GMAC_DESC3_FD | GMAC_DESC3_LD;
 
     WRITE_REG(pGMAC->pReg->DMA_CH0_TXDESC_TAIL_POINTER,
-              (uint32_t)(pGMAC->txDescs + pGMAC->txDescIdx));
+              (uint64_t)(pGMAC->txDescs + pGMAC->txDescIdx));
 
     for (i = 0; i < 1000000; i++) {
         if (!(desc->des3 & GMAC_DESC3_OWN)) {
@@ -2078,12 +2078,12 @@ void HAL_GMAC_CleanRX(struct GMAC_HANDLE *pGMAC)
     /* Get the pointer on the ith member of the Tx Desc list */
     desc = pGMAC->rxDescs + pGMAC->rxDescIdx;
 
-    desc->des0 = (uint32_t)(pGMAC->rxBuf + (pGMAC->rxDescIdx *
+    desc->des0 = (uint64_t)(pGMAC->rxBuf + (pGMAC->rxDescIdx *
                                             HAL_GMAC_MAX_PACKET_SIZE));
     desc->des1 = 0;
     desc->des2 = 0;
     desc->des3 = GMAC_DESC3_OWN | GMAC_DESC3_BUF1V | GMAC_DESC3_IOC;
-    WRITE_REG(pGMAC->pReg->DMA_CH0_RXDESC_TAIL_POINTER, (uint32_t)desc);
+    WRITE_REG(pGMAC->pReg->DMA_CH0_RXDESC_TAIL_POINTER, (uint64_t)desc);
 
     pGMAC->rxDescIdx++;
     pGMAC->rxDescIdx %= pGMAC->rxSize;

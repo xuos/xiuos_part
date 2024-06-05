@@ -10,6 +10,14 @@ cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mflo
 board_specs = stub.o
 #cflags = -Wall -g -std=c11 
 endif
+
+ifeq ($(BOARD), ok1028a-c)
+toolchain ?= aarch64-none-elf-
+user_ldflags = -N -Ttext 0
+cflags = -Wall -g -std=c11 -mtune=cortex-a72 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie  
+board_specs = $(KERNEL_ROOT)/services/app/stub.o
+endif
+
 cc = ${toolchain}gcc
 ld = ${toolchain}g++
 objdump = ${toolchain}objdump

@@ -105,7 +105,6 @@ static uint8_t dstAddr[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 #if defined(HAL_GMAC_MODULE_ENABLED) && defined(SOC_RK3568)
 static struct GMAC_ETH_CONFIG ethConfigTable[] =
 {
-#ifdef HAL_GMAC0
     {
         .halDev = &g_gmac0Dev,
         .mode = PHY_INTERFACE_MODE_RGMII,
@@ -121,7 +120,6 @@ static struct GMAC_ETH_CONFIG ethConfigTable[] =
         .txDelay = 0x3C,
         .rxDelay = 0x2f,
     },
-#endif
 
 #ifdef HAL_GMAC1
     {
@@ -143,46 +141,9 @@ static struct GMAC_ETH_CONFIG ethConfigTable[] =
 };
 #endif
 
-#if defined(HAL_GMAC1000_MODULE_ENABLED) && defined(SOC_RK3358)
-static struct GMAC_ETH_CONFIG ethConfigTable[] =
-{
-#ifdef HAL_GMAC0
-    {
-        .halDev = &g_gmacDev,
-        .mode = PHY_INTERFACE_MODE_RMII,
-        .maxSpeed = 100,
-        .speed = 100,
-        .phyAddr = 0,
 
-        .extClk = false,
 
-        .resetGpioBank = GPIO2,
-        .resetGpioNum = GPIO_PIN_B5,
-        .resetDelayMs = { 0, 50, 50 },
-    },
-#endif
-};
-#endif
 
-#if defined(HAL_GMAC1000_MODULE_ENABLED) && defined(SOC_RK3308)
-static struct GMAC_ETH_CONFIG ethConfigTable[] =
-{
-#ifdef HAL_GMAC0
-    {
-        .halDev = &g_gmac0Dev,
-        .mode = PHY_INTERFACE_MODE_RMII,
-        .maxSpeed = 100,
-        .speed = 100,
-        .phyAddr = 0,
-
-        .extClk = true,
-
-        .resetGpioBank = GPIO4,
-        .resetGpioNum = GPIO_PIN_C0,
-        .resetDelayMs = { 0, 50, 50 },
-    },
-#endif
-};
 #endif
 
 /********************* Private Function Definition ***************************/
@@ -226,7 +187,7 @@ static void print_desc(struct GMAC_HANDLE *pGMAC)
         for (nIndex = 0; nIndex < pGMAC->rxSize; nIndex++) {
             desc = pGMAC->rxDescs + nIndex;
             printf("rx_desc[%d]@0x%08lx={0x%lx, 0x%lx, 0x%lx, 0x%lx};\n",
-                   nIndex, (uint32_t)desc, desc->des0, desc->des1, desc->des2, desc->des3);
+                   nIndex, (uint64_t)desc, desc->des0, desc->des1, desc->des2, desc->des3);
         }
     }
 
@@ -235,7 +196,7 @@ static void print_desc(struct GMAC_HANDLE *pGMAC)
         for (nIndex = 0; nIndex < pGMAC->txSize; nIndex++) {
             desc = pGMAC->txDescs + nIndex;
             printf("tx_desc[%d]@0x%08lx={0x%lx, 0x%lx, 0x%lx, 0x%lx};\n",
-                   nIndex, (uint32_t)desc, desc->des0, desc->des1, desc->des2, desc->des3);
+                   nIndex, (uint64_t)desc, desc->des0, desc->des1, desc->des2, desc->des3);
         }
     }
 }
@@ -274,9 +235,9 @@ static void PHY_Read(struct GMAC_HANDLE *pGMAC, uint32_t phyReg)
     }
 }
 
-static void PHY_Write(uint32_t phyReg, uint32_t data)
+static void PHY_Write(struct GMAC_HANDLE *pGMAC, uint32_t phyReg, uint32_t data)
 {
-    struct GMAC_HANDLE *pGMAC;
+    // struct GMAC_HANDLE *pGMAC;
     int status;
 
     status = HAL_GMAC_MDIOWrite(pGMAC, pGMAC->phyConfig.phyAddress, phyReg, data);
@@ -477,14 +438,14 @@ static void *malloc_align(size_t size, size_t align)
     ptr = malloc(align_size);
     if (ptr != NULL) {
         /* the allocated memory block is aligned */
-        if (((uint32_t)ptr & (align - 1)) == 0) {
-            align_ptr = (void *)((uint32_t)ptr + align);
+        if (((uint64_t)ptr & (align - 1)) == 0) {
+            align_ptr = (void *)((uint64_t)ptr + align);
         } else {
-            align_ptr = (void *)(((uint32_t)ptr + (align - 1)) & ~(align - 1));
+            align_ptr = (void *)(((uint64_t)ptr + (align - 1)) & ~(align - 1));
         }
 
         /* set the pointer before alignment pointer to the real pointer */
-        *((uint32_t *)((uint32_t)align_ptr - sizeof(void *))) = (uint32_t)ptr;
+        *((uint64_t *)((uint64_t)align_ptr - sizeof(void *))) = (uint64_t)ptr;
 
         ptr = align_ptr;
     }
@@ -496,7 +457,7 @@ static void free_align(void *ptr)
 {
     void *real_ptr;
 
-    real_ptr = (void *)*(uint32_t *)((uint32_t)ptr - sizeof(void *));
+    real_ptr = (void *)*(uint64_t *)((uint64_t)ptr - sizeof(void *));
     free(real_ptr);
 }
 
@@ -534,7 +495,7 @@ static HAL_Status GMAC_Send_Test(struct GMAC_ETH_CONFIG *eth, struct GMAC_HANDLE
     /* dump packages */
     Dump_Hex("Tx", ptr, len);
 
-    HAL_DCACHE_CleanByRange((uint32_t)ptr, len);
+    HAL_DCACHE_CleanByRange((uint64_t)ptr, len);
     status = HAL_GMAC_Send(pGMAC, ptr, len);
     if (status) {
         printf("GMAC send failed: %d\n", status);
@@ -559,7 +520,7 @@ static uint16_t GMAC_Recv_Test(struct GMAC_HANDLE *pGMAC)
         if (size > 0 && ptr) {
             /* dump packages */
             Dump_Hex("Rx", ptr, size);
-            HAL_DCACHE_InvalidateByRange((uint32_t)ptr, size);
+            HAL_DCACHE_InvalidateByRange((uint64_t)ptr, size);
             HAL_GMAC_CleanRX(pGMAC);
         } else {
             printf("GMAC recv failed: %ld\n", size);
@@ -590,10 +551,10 @@ static HAL_Status GMAC_Memory_Init(struct GMAC_ETH_CONFIG *eth, struct GMAC_HAND
     memset(eth->txDescs, 0, GMAC_DESC_TX_SIZE);
 
     memset(eth->rxBuff, 0, GMAC_RX_BUFFER_SIZE);
-    HAL_DCACHE_InvalidateByRange((uint32_t)eth->rxBuff, GMAC_RX_BUFFER_SIZE);
+    HAL_DCACHE_InvalidateByRange((uint64_t)eth->rxBuff, GMAC_RX_BUFFER_SIZE);
 
     memset(eth->txBuff, 0, GMAC_TX_BUFFER_SIZE);
-    HAL_DCACHE_CleanByRange((uint32_t)eth->txBuff, GMAC_TX_BUFFER_SIZE);
+    HAL_DCACHE_CleanByRange((uint64_t)eth->txBuff, GMAC_TX_BUFFER_SIZE);
 
     HAL_GMAC_DMARxDescInit(pGMAC, eth->rxDescs, eth->rxBuff, GMAC_DESCRIPTORS_RX);
     HAL_GMAC_DMATxDescInit(pGMAC, eth->txDescs, eth->txBuff, GMAC_DESCRIPTORS_TX);
@@ -719,7 +680,7 @@ static void GMAC_Iomux_Config(uint8_t id)
         GMAC0_Iomux_Config();
     // }
 }
-#endif
+
 
 
 
@@ -727,7 +688,7 @@ static void GMAC_Iomux_Config(uint8_t id)
 
 /*************************** GMAC TEST MAIN ****************************/
 
-void main() {
+int main() {
     struct GMAC_ETH_CONFIG *eth;
     struct GMAC_HANDLE *pGMAC;
     int32_t bus, num = 0, i;
@@ -743,7 +704,7 @@ void main() {
         if (eth) {
             pGMAC = &eth->instance;
         } else {
-            return;
+            return -1;
         }
 
         /* ionmux */
@@ -790,5 +751,6 @@ void main() {
         free_align(eth->txBuff);
         free_align(eth->rxBuff);
     }
+    return 0;
 }
 
