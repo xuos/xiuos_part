@@ -13,7 +13,7 @@ cc = ${toolchain}gcc
 ld = ${toolchain}g++
 objdump = ${toolchain}objdump
 
-c_useropts = -O2
+c_useropts = -O0
 
 
 INC_DIR = 	-I$(KERNEL_ROOT)/services/drivers/usb/components \
@@ -33,3 +33,6 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/drivers/usb/components \
 		-I$(KERNEL_ROOT)/services/lib/usyscall \
 		-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 		-I$(KERNEL_ROOT)/services/app
+
+
+# include $(KERNEL_ROOT)/compiler.mk
