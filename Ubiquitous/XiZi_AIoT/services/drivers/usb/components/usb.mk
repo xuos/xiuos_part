@@ -26,3 +26,10 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/drivers/usb/components \
 		-I$(KERNEL_ROOT)/services/drivers/usb/components/osal \
 		-I$(KERNEL_ROOT)/services/drivers/usb/components/port \
 		-I$(KERNEL_ROOT)/services/drivers/usb/components/port/xhci \
+		-I$(KERNEL_ROOT)/services//semaphore \
+		-I$(KERNEL_ROOT)/services/lib/ipc \
+		-I$(KERNEL_ROOT)/services/lib/memory \
+		-I$(KERNEL_ROOT)/services/lib/serial \
+		-I$(KERNEL_ROOT)/services/lib/usyscall \
+		-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
+		-I$(KERNEL_ROOT)/services/app
