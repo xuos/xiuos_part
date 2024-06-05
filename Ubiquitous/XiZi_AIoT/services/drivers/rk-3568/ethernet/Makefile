@@ -34,19 +34,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/app \
 		  	-I$(KERNEL_ROOT)/services/lib/memory 
 
 
-objs =  hal_gmac.o \
-		hal_gmac_3568.o \
-		test_gmac.o \
-		hal_base.o \
-		hal_bsp.o \
-		hal_pinctrl_v2.o \
-		hal_cru.o \
-		hal_cache.o \
-		hal_gpio.o \
-		hal_timer.o \
-		hal_cru_rk3568.o \
-		hal_debug.o \
-		system_rk3568.o
+objs =  
 
 all: ${objs}
 	@mv $^ $(KERNEL_ROOT)/services/app
