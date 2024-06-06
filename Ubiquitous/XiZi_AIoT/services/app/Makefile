@@ -45,7 +45,7 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 ifeq ($(BOARD), imx6q-sabrelite)
 all: init test_fault simple_client simple_server shell fs_server semaphore_server test_semaphore test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server test_net lwip  readme.txt | bin
 else 
-all: init test_fault simple_client simple_server shell fs_server semaphore_server test_ipc_null test_thread test_semaphore test_net lwip readme.txt | bin
+all: init test_fault simple_client simple_server shell fs_server semaphore_server test_ipc_null test_thread test_semaphore test_net lwip readme.txt eth_hal | bin
 endif
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin
@@ -130,3 +130,7 @@ test_net: test_net.o lwip_service.o libipc.o session.o libserial.o printf.o usys
 
 %.o: %.S
 	@${cc} ${cflags} ${c_useropts} -o $@ -c $< 
+
+eth_hal: test_gmac.o hal_gmac.o hal_gmac_3568.o hal_base.o hal_bsp.o hal_pinctrl_v2.o hal_cru.o hal_gpio.o hal_timer.o hal_cru_rk3568.o system_rk3568.o hal_debug.o libserial.o printf.o libmem.o usyscall.o arch_usyscall.o session.o libipc.o 
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
