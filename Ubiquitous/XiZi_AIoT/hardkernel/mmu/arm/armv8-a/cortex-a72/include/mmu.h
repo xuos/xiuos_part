@@ -61,35 +61,36 @@ void GetPdeAttr(uintptr_t* attr);
 /*
 Enable MMU, cache, write buffer, etc.
 */
-#define SCTLR_R(val) __asm__ volatile("mrs %0, sctlr_el1" : "=r"(val))
-#define SCTLR_W(val) __asm__ volatile("msr sctlr_el1, %0" ::"r"(val))
+#define SCTLR_R(val) __asm__ volatile("mrs %0, sctlr_el1" : "=r"(val)::"memory")
+#define SCTLR_W(val) __asm__ volatile("msr sctlr_el1, %0" ::"r"(val) : "memory")
 
 /*
 Read and write mmu pagetable register base addr
 */
-#define TTBR0_R(val) __asm__ volatile("mrs %0, ttbr0_el1" : "=r"(val))
-#define TTBR0_W(val) __asm__ volatile("msr ttbr0_el1, %0" ::"r"(val))
+#define TTBR0_R(val) __asm__ volatile("mrs %0, ttbr0_el1" : "=r"(val)::"memory")
+#define TTBR0_W(val) __asm__ volatile("msr ttbr0_el1, %0" ::"r"(val) : "memory")
 
 /*
 Read and write mmu pagetable register base addr
 */
-#define TTBR1_R(val) __asm__ volatile("mrs %0, ttbr1_el1" : "=r"(val))
-#define TTBR1_W(val) __asm__ volatile("msr ttbr1_el1, %0" ::"r"(val))
+#define TTBR1_R(val) __asm__ volatile("mrs %0, ttbr1_el1" : "=r"(val)::"memory")
+#define TTBR1_W(val) __asm__ volatile("msr ttbr1_el1, %0" ::"r"(val) : "memory")
 
 /*
 Translation Control Register（TCR）
 */
-#define TCR_R(val) __asm__ volatile("mrs %0, tcr_el1" : "=r"(val))
-#define TCR_W(val) __asm__ volatile("msr tcr_el1, %0" ::"r"(val))
+#define TCR_R(val) __asm__ volatile("mrs %0, tcr_el1" : "=r"(val)::"memory")
+#define TCR_W(val) __asm__ volatile("msr tcr_el1, %0" ::"r"(val) : "memory")
 
-#define MAIR_R(val) __asm__ volatile("mrs %0, mair_el1" : "=r"(val))
-#define MAIR_W(val) __asm__ volatile("msr mair_el1, %0" ::"r"(val))
+#define MAIR_R(val) __asm__ volatile("mrs %0, mair_el1" : "=r"(val)::"memory")
+#define MAIR_W(val) __asm__ volatile("msr mair_el1, %0" ::"r"(val) : "memory")
 
 /*
 Flush TLB when loading a new page table.
 @note If nG is not set in the pte attribute, process switching need flush tlb.
 */
-#define CLEARTLB(val) __asm__ volatile("tlbi vmalle1")
+// #define CLEARTLB(val) __asm__ volatile("tlbi vmalle1" ::: "memory")
+#define CLEARTLB(val) __asm__ volatile("tlbi vmalle1is" ::: "memory")
 
 /*
 When nG is set in the pte attribute, the process is assigned an ASID, which is stored in the lower 8 bits of the CONTEXTIDR register.

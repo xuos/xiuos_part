@@ -46,33 +46,35 @@ ENTRY( _boot_start )
 
 MEMORY {
   phy_ddr3 (rwx)      : ORIGIN = 0x0000000010000000, LENGTH = 1024M
-  vir_ddr3 (rwx)      : ORIGIN = 0x000000604040D000, LENGTH = 1024M
+  vir_ddr3 (rwx)      : ORIGIN = 0x000000601040E000, LENGTH = 1024M
 }
 
 
 SECTIONS
 {
   .start_sec : {
-		. = ALIGN(0x1000);
+		. = ORIGIN(phy_ddr3);
 		/* initialization start checkpoint. */
 
-  boot.o(.text)
-  bootmmu.o(.text .text.*)
-  ns16550.o(.text .text.*)
+    _start_image_addr = .;
 
-  boot.o(.rodata .rodata.*)
-  bootmmu.o(.rodata .rodata.*)
-  ns16550.o(.rodata .rodata.*)
+    boot.o(.text)
+    bootmmu.o(.text .text.*)
+    /* ns16550.o(.text .text.*) */
 
-  boot.o(.data .data.*)
-  bootmmu.o(.data .data.*)
-  ns16550.o(.data .data.*)
+    boot.o(.rodata .rodata.*)
+    bootmmu.o(.rodata .rodata.*)
+    /* ns16550.o(.rodata .rodata.*) */
 
-	PROVIDE(boot_start_addr = .);
+    boot.o(.data .data.*)
+    bootmmu.o(.data .data.*)
+    /* ns16550.o(.data .data.*) */
 
-  boot.o(.bss .bss.* COMMON)
-  bootmmu.o(.bss .bss.* COMMON)
-  ns16550.o(.bss .bss.* COMMON)
+	  PROVIDE(boot_start_addr = .);
+
+    boot.o(.bss .bss.* COMMON)
+    bootmmu.o(.bss .bss.* COMMON)
+    /* ns16550.o(.bss .bss.* COMMON) */
   
 		/* stack for booting code. */
 		. = ALIGN(0x1000);
@@ -85,7 +87,7 @@ SECTIONS
 		PROVIDE(boot_end_addr = .);
 	} > phy_ddr3
 
-  .text : AT(0x1040D000) {
+  .text : AT(0x1040E000) {
     . = ALIGN(0x1000);
     *(.text .text.* .gnu.linkonce.t.*)
   } > vir_ddr3
@@ -107,12 +109,14 @@ SECTIONS
 		PROVIDE(_binary_default_fs_start = .);
 		*(.rawdata_memfs*)
 		PROVIDE(_binary_default_fs_end = .);
+    PROVIDE(__init_array_start = .);
+    PROVIDE(__init_array_end = .);
   } > vir_ddr3
 
   . = ALIGN(0x1000);
   PROVIDE(kernel_data_begin = .);
 
-  _image_size = . - 0x0000006040000000;
+  _image_size = . - 0x0000006010000000;
   .bss : {
     PROVIDE(__bss_start__ = .);
 		*(.bss .bss.* COMMON)

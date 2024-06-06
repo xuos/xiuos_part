@@ -43,6 +43,7 @@ bool module_phymem_init()
     uintptr_t kern_freemem_end = PHY_USER_FREEMEM_BASE;
     uintptr_t user_freemem_start = PHY_USER_FREEMEM_BASE;
     uintptr_t user_freemem_end = PHY_MEM_STOP;
+    user_phy_freemem_buddy.pages = NULL;
     KBuddySysInit(&kern_virtmem_buddy, kern_freemem_start, kern_freemem_end);
     KBuddyInit(&user_phy_freemem_buddy, user_freemem_start, user_freemem_end);
     return true;

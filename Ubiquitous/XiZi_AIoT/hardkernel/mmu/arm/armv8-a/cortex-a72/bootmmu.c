@@ -64,9 +64,7 @@ extern uint64_t kernel_data_begin[];
 uint64_t boot_l2pgdir[NUM_LEVEL2_PDE] __attribute__((aligned(0x1000))) = { 0 };
 
 uint64_t boot_dev_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 0 };
-uint64_t boot_virt_dev_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 0 };
 uint64_t boot_kern_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 0 };
-uint64_t boot_virt_kern_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 0 };
 
 uint64_t boot_dev_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
 uint64_t boot_kern_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
@@ -79,82 +77,142 @@ static inline int cpu_id()
 }
 
 extern int debug_printf_(const char* format, ...);
+
 static void build_boot_pgdir()
 {
-    uint64_t dev_phy_mem_base = DEV_PHYMEM_BASE;
-    debug_printf_("l2 table addr %016x\r\n", boot_l2pgdir);
-    debug_printf_("l3 table addr %016x\r\n", boot_dev_l3pgdir);
-    debug_printf_("l4 table addr %016x\r\n", boot_dev_l4pgdirs);
+    static bool built = false;
+    if (!built) {
+        uint64_t dev_phy_mem_base = DEV_PHYMEM_BASE;
 
-    // dev mem
-    boot_l2pgdir[(dev_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
-    boot_l2pgdir[(MMIO_P2V_WO(dev_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
+        // dev mem
+        boot_l2pgdir[(dev_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
+        // boot_l2pgdir[(dev_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)0xEFFF1000ULL | L2_TYPE_TAB | L2_PTE_VALID;
+        boot_l2pgdir[(MMIO_P2V_WO(dev_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
+        // boot_l2pgdir[(MMIO_P2V_WO(dev_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)0xEFFF1000ULL | L2_TYPE_TAB | L2_PTE_VALID;
 
-    uint64_t cur_mem_paddr = ALIGNDOWN((uint64_t)DEV_PHYMEM_BASE, LEVEL2_PDE_SIZE);
-    for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
-        // debug_printf_("Loading (%d)(%016x) -> %p\r\n", cpu_id(), &boot_dev_l3pgdir[i], cur_mem_paddr);
-        boot_dev_l3pgdir[i] = (uint64_t)boot_dev_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
+        uint64_t cur_mem_paddr = ALIGNDOWN((uint64_t)DEV_PHYMEM_BASE, LEVEL2_PDE_SIZE);
+        for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
+            boot_dev_l3pgdir[i] = (uint64_t)boot_dev_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
 
-        for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-            // debug_printf_("Loading (%d)%016x -> %p\r\n", cpu_id(), (uintptr_t*)&boot_dev_l4pgdirs[i][j], cur_mem_paddr);
-            boot_dev_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_DEV | L4_PTE_AF | L4_PTE_XN;
+            for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
+                boot_dev_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_DEV | L4_PTE_AF | L4_PTE_XN;
+                if (cur_mem_paddr >= DEV_PHYMEM_BASE && cur_mem_paddr < DEV_PHYMEM_BASE + DEV_MEM_SIZE) {
+                    boot_dev_l4pgdirs[i][j] = cur_mem_paddr | 0x403;
+                } else {
+                    // boot_dev_l4pgdirs[i][j] = cur_mem_paddr | 0x713;
+                    boot_dev_l4pgdirs[i][j] = cur_mem_paddr | 0x403;
+                }
 
-            cur_mem_paddr += PAGE_SIZE;
+                cur_mem_paddr += PAGE_SIZE;
+            }
+
+            // if (cur_mem_paddr >= DEV_PHYMEM_BASE && cur_mem_paddr < DEV_PHYMEM_BASE + DEV_MEM_SIZE) {
+            //     boot_dev_l3pgdir[i] = cur_mem_paddr | 0x401;
+            // } else {
+            //     boot_dev_l3pgdir[i] = cur_mem_paddr | 0x711;
+            // }
+            // cur_mem_paddr += PAGE_SIZE * 0x200;
         }
-    }
 
-    // debug_printf_("Dev Table loading done.\n");
+        // identical mem
+        boot_l2pgdir[(PHY_MEM_BASE >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_kern_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
+        boot_l2pgdir[(P2V_WO(PHY_MEM_BASE) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_kern_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
 
-    // identical mem
-    boot_l2pgdir[(PHY_MEM_BASE >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_kern_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
-    boot_l2pgdir[(P2V_WO(PHY_MEM_BASE) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_kern_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
+        cur_mem_paddr = ALIGNDOWN((uint64_t)0x00000000ULL, PAGE_SIZE);
+        for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
+            boot_kern_l3pgdir[i] = (uint64_t)boot_kern_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
 
-    cur_mem_paddr = ALIGNDOWN((uint64_t)PHY_MEM_BASE, PAGE_SIZE);
-    for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
-        boot_kern_l3pgdir[i] = (uint64_t)boot_kern_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
+            for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
+                // boot_kern_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_NORMAL | L4_PTE_AF;
+                boot_kern_l4pgdirs[i][j] = cur_mem_paddr | 0x713;
 
-        for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-            boot_kern_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_NORMAL | L4_PTE_AF;
-            debug_printf_("Loading %p\r\n", cur_mem_paddr);
-
-            cur_mem_paddr += PAGE_SIZE;
+                cur_mem_paddr += PAGE_SIZE;
+            }
         }
+
+        built = true;
     }
 }
 
+extern void el2_setup(void);
+
 static void load_boot_pgdir()
 {
-    uint64_t val;
 
+    // debug_printf_("Loading TTBR0 %x.\r\n", boot_l2pgdir);
     TTBR0_W((uintptr_t)boot_l2pgdir);
-    TTBR1_W(0);
+    // TTBR0_W((uintptr_t)0xEFFF0000);
+    // TTBR1_W(0);
 
-    TCR_W(TCR_VALUE);
-    MAIR_W((MT_DEVICE_nGnRnE << (8 * AI_DEVICE_nGnRnE_IDX)) | (MT_NORMAL_NC << (8 * AI_NORMAL_NC_IDX)));
+#define TCR_TRUE_VALUE (0x0000000080813519ULL)
+    uint64_t tcr = 0;
+    TCR_W(TCR_TRUE_VALUE);
+    TCR_R(tcr);
+    uint64_t mair = 0;
+    MAIR_R(mair);
+    // MAIR_W((MT_DEVICE_nGnRnE << (8 * AI_DEVICE_nGnRnE_IDX)) | (MT_NORMAL_NC << (8 * AI_NORMAL_NC_IDX)));
+    // debug_printf_("TCR: %016lx(0x%016lx)\r\n", tcr, TCR_VALUE);
+    // debug_printf_("MAIR: %016lx\r\n", mair);
 
     // Enable paging using read/modify/write
-    SCTLR_R(val);
-    val |= (1 << 0); // EL1 and EL0 stage 1 address translation enabled.
-    SCTLR_W(val);
+    // debug_printf_("Loading SCTLR.\r\n");
+    // uint32_t val = 0;
+    // SCTLR_R(val);
+    // debug_printf_("Old SCTLR: %016lx\r\n", val);
+    // val |= (1 << 0); // EL1 and EL0 stage 1 address translation enabled.
+    // debug_printf_("New SCTLR: %08x\r\n", val);
+    // val &= (uint32_t) ~(0x1 << 2);
+    // debug_printf_("New SCTLR: %08x\r\n", val);
+    // SCTLR_W(val);
+    // debug_printf_("l2[0]: %p\r\n", boot_l2pgdir[0]);
+    // debug_printf_("l2[1]: %p\r\n", boot_l2pgdir[1]);
+    // debug_printf_("l2[2]: %p\r\n", boot_l2pgdir[2]);
+    // debug_printf_("l2[3]: %p\r\n", boot_l2pgdir[3]);
+    // debug_printf_("test upper address: %x\r\n", *(uintptr_t*)boot_l2pgdir);
+    // debug_printf_("pgdir[%d] = %p\r\n", 384, boot_l2pgdir[384]);
+    // debug_printf_("test upper address: %x\r\n", *(uintptr_t*)P2V(boot_l2pgdir));
 
     // flush all TLB
+    // debug_printf_("Flushing TLB.\r\n");
     DSB();
     CLEARTLB(0);
     ISB();
+
+    // debug_printf_("Alive after TLB.\r\n");
+}
+
+static inline unsigned int current_el(void)
+{
+    unsigned int el;
+    asm volatile("mrs %0, CurrentEL" : "=r"(el) : : "cc");
+    return el >> 2;
 }
 
 extern void main(void);
 static bool _bss_inited = false;
 void bootmain()
 {
-    if (!_bss_inited) {
-        build_boot_pgdir();
-    }
+    // debug_printf_("building pgdir.\r\n");
+    build_boot_pgdir();
+    // debug_printf_("l2[0]: %p\r\n", boot_l2pgdir[0]);
+    // debug_printf_("l2[1]: %p\r\n", boot_l2pgdir[1]);
+    // debug_printf_("l2[2]: %p\r\n", boot_l2pgdir[2]);
+    // debug_printf_("l2[3]: %p\r\n", boot_l2pgdir[3]);
+    // debug_printf_("loading pgdir, current el: %d\r\n", current_el());
     load_boot_pgdir();
-    __asm__ __volatile__("add sp, sp, %0" ::"r"(KERN_MEM_BASE - PHY_MEM_BASE));
+    // debug_printf_("loading pgdir, current el: %d\r\n", current_el());
+    // debug_printf_("test upper address: %x\r\n", *(uintptr_t*)P2V(boot_l2pgdir));
+    // el2_setup();
+    // unsigned int el = current_el();
+    // debug_printf_("loading pgdir, current el: %d\r\n", el);
+    // debug_printf_("Fix stack.\r\n");
+    __asm__ __volatile__("add sp, sp, %0" ::"r"(KERN_OFFSET));
+    // debug_printf_("Alive after fix stack.\r\n");
     if (!_bss_inited) {
+        // debug_printf_("Clear bss.\r\n");
         memset(&kernel_data_begin, 0x00, (size_t)((uint64_t)kernel_data_end - (uint64_t)kernel_data_begin));
         _bss_inited = true;
     }
+    // debug_printf_("Going main.\r\n");
     main();
 }

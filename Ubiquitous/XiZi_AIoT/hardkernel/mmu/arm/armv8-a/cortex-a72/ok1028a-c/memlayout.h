@@ -35,9 +35,9 @@ Modification:
 
 /* A72 physical memory layout */
 #define PHY_MEM_BASE            (0x0000000010000000ULL)
-#define PHY_USER_FREEMEM_BASE   (0x0000000020000000ULL)
-#define PHY_USER_FREEMEM_TOP    (0x00000000E0000000ULL)
-#define PHY_MEM_STOP            (0x00000000E0000000ULL)
+#define PHY_USER_FREEMEM_BASE   (0x0000000030000000ULL)
+#define PHY_USER_FREEMEM_TOP    (0x0000000040000000ULL)
+#define PHY_MEM_STOP            (0x0000000040000000ULL)
 
 /* PTE-PAGE_SIZE */
 #define LEVEL4_PTE_SHIFT    12
@@ -61,9 +61,9 @@ Modification:
 #define MAX_NR_FREE_PAGES   ((PHY_MEM_STOP - PHY_MEM_BASE) >> LEVEL4_PTE_SHIFT)
 
 /* Deivce memory layout */
-#define DEV_PHYMEM_BASE     (0x00000000F0000000ULL)
-#define DEV_VRTMEM_BASE     (0x0000004000000000ULL)
-#define DEV_MEM_SZ          (0x0000000010000000ULL)
+#define DEV_PHYMEM_BASE     (0x00000000C0000000ULL)
+#define DEV_VRTMEM_BASE     (0x00000040C0000000ULL)
+#define DEV_MEM_SIZE        (0x0000000040000000ULL)
 
 /* User memory layout */
 #define USER_STACK_SIZE     PAGE_SIZE
@@ -74,7 +74,7 @@ Modification:
 #define USER_IPC_SPACE_TOP  (USER_IPC_SPACE_BASE + 0x10000000ULL) 
 
 /* Kernel memory layout */
-#define KERN_MEM_BASE       (0x0000006040000000ULL) // First kernel virtual address
+#define KERN_MEM_BASE       (0x0000006010000000ULL) // First kernel virtual address
 #define KERN_OFFSET         (KERN_MEM_BASE - PHY_MEM_BASE)
 
 #define V2P(a) (((uint64_t)(a)) - KERN_OFFSET)

@@ -87,7 +87,7 @@ void syscall_arch_handler(struct trapframe* tf)
         iabort_handler(tf);
         break;
     default: {
-        ERROR("USYSCALL: unexpected ec: %016lx", esr);
+        ERROR("USYSCALL: unexpected ec: %016lx\n", esr);
         ERROR("          elr = %016lx far = %016lx\n", r_elr_el1(), r_far_el1());
         // kill error task
         xizi_enter_kernel();

@@ -73,7 +73,7 @@ Modification:
 
 #include "cortex_a72.h"
 
-#define NR_CPU 4 // maximum number of CPUs
+#define NR_CPU 1 // maximum number of CPUs
 
 __attribute__((always_inline)) static inline uint64_t EL0_mode() // Set ARM mode to EL0
 {

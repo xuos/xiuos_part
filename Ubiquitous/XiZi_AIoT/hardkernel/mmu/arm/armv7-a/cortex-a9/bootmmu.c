@@ -48,7 +48,7 @@ uint32_t boot_pgdir[NR_PDE_ENTRIES] __attribute__((aligned(0x4000))) = { 0 };
 static void build_boot_pgdir()
 {
     // dev mem
-    uint32_t dev_mem_end_idx = (DEV_PHYMEM_BASE + DEV_MEM_SZ) >> LEVEL3_PDE_SHIFT;
+    uint32_t dev_mem_end_idx = (DEV_PHYMEM_BASE + DEV_MEM_SIZE) >> LEVEL3_PDE_SHIFT;
     for (uint32_t i = DEV_PHYMEM_BASE >> LEVEL3_PDE_SHIFT; i < dev_mem_end_idx; i++) {
         boot_pgdir[i] = (i << LEVEL3_PDE_SHIFT) | L1_TYPE_SEC | L1_SECT_DEV | L1_SECT_AP0;
         boot_pgdir[MMIO_P2V_WO(i << LEVEL3_PDE_SHIFT) >> LEVEL3_PDE_SHIFT] = (i << LEVEL3_PDE_SHIFT) | L1_TYPE_SEC | L1_SECT_DEV | L1_SECT_AP0;

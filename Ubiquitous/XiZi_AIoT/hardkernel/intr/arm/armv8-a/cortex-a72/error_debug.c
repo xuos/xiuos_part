@@ -50,40 +50,40 @@ Modification:
 
 void dump_tf(struct trapframe* tf)
 {
-    KPrintf("   sp:   0x%x\n", tf->sp);
-    KPrintf("   pc:   0x%x\n", tf->pc);
-    KPrintf("   spsr: 0x%x\n", tf->spsr);
-    KPrintf("     x0: 0x%x\n", tf->x0);
-    KPrintf("     x1: 0x%x\n", tf->x1);
-    KPrintf("     x2: 0x%x\n", tf->x2);
-    KPrintf("     x3: 0x%x\n", tf->x3);
-    KPrintf("     x4: 0x%x\n", tf->x4);
-    KPrintf("     x5: 0x%x\n", tf->x5);
-    KPrintf("     x6: 0x%x\n", tf->x6);
-    KPrintf("     x7: 0x%x\n", tf->x7);
-    KPrintf("     x8: 0x%x\n", tf->x8);
-    KPrintf("     x9: 0x%x\n", tf->x9);
-    KPrintf("    x10: 0x%x\n", tf->x10);
-    KPrintf("    x11: 0x%x\n", tf->x11);
-    KPrintf("    x12: 0x%x\n", tf->x12);
-    KPrintf("    x13: 0x%x\n", tf->x13);
-    KPrintf("    x14: 0x%x\n", tf->x14);
-    KPrintf("    x15: 0x%x\n", tf->x15);
-    KPrintf("    x16: 0x%x\n", tf->x16);
-    KPrintf("    x17: 0x%x\n", tf->x17);
-    KPrintf("    x18: 0x%x\n", tf->x18);
-    KPrintf("    x19: 0x%x\n", tf->x19);
-    KPrintf("    x20: 0x%x\n", tf->x20);
-    KPrintf("    x21: 0x%x\n", tf->x21);
-    KPrintf("    x22: 0x%x\n", tf->x22);
-    KPrintf("    x23: 0x%x\n", tf->x23);
-    KPrintf("    x24: 0x%x\n", tf->x24);
-    KPrintf("    x25: 0x%x\n", tf->x25);
-    KPrintf("    x26: 0x%x\n", tf->x26);
-    KPrintf("    x27: 0x%x\n", tf->x27);
-    KPrintf("    x28: 0x%x\n", tf->x28);
-    KPrintf("    x29: 0x%x\n", tf->x29);
-    KPrintf("    x30: 0x%x\n", tf->x30);
+    KPrintf("   sp:   0x%016lx\n", tf->sp);
+    KPrintf("   pc:   0x%016lx\n", tf->pc);
+    KPrintf("   spsr: 0x%016lx\n", tf->spsr);
+    KPrintf("     x0: 0x%016lx\n", tf->x0);
+    KPrintf("     x1: 0x%016lx\n", tf->x1);
+    KPrintf("     x2: 0x%016lx\n", tf->x2);
+    KPrintf("     x3: 0x%016lx\n", tf->x3);
+    KPrintf("     x4: 0x%016lx\n", tf->x4);
+    KPrintf("     x5: 0x%016lx\n", tf->x5);
+    KPrintf("     x6: 0x%016lx\n", tf->x6);
+    KPrintf("     x7: 0x%016lx\n", tf->x7);
+    KPrintf("     x8: 0x%016lx\n", tf->x8);
+    KPrintf("     x9: 0x%016lx\n", tf->x9);
+    KPrintf("    x10: 0x%016lx\n", tf->x10);
+    KPrintf("    x11: 0x%016lx\n", tf->x11);
+    KPrintf("    x12: 0x%016lx\n", tf->x12);
+    KPrintf("    x13: 0x%016lx\n", tf->x13);
+    KPrintf("    x14: 0x%016lx\n", tf->x14);
+    KPrintf("    x15: 0x%016lx\n", tf->x15);
+    KPrintf("    x16: 0x%016lx\n", tf->x16);
+    KPrintf("    x17: 0x%016lx\n", tf->x17);
+    KPrintf("    x18: 0x%016lx\n", tf->x18);
+    KPrintf("    x19: 0x%016lx\n", tf->x19);
+    KPrintf("    x20: 0x%016lx\n", tf->x20);
+    KPrintf("    x21: 0x%016lx\n", tf->x21);
+    KPrintf("    x22: 0x%016lx\n", tf->x22);
+    KPrintf("    x23: 0x%016lx\n", tf->x23);
+    KPrintf("    x24: 0x%016lx\n", tf->x24);
+    KPrintf("    x25: 0x%016lx\n", tf->x25);
+    KPrintf("    x26: 0x%016lx\n", tf->x26);
+    KPrintf("    x27: 0x%016lx\n", tf->x27);
+    KPrintf("    x28: 0x%016lx\n", tf->x28);
+    KPrintf("    x29: 0x%016lx\n", tf->x29);
+    KPrintf("    x30: 0x%016lx\n", tf->x30);
 }
 
 void dabort_reason(struct trapframe* r)
@@ -91,8 +91,8 @@ void dabort_reason(struct trapframe* r)
     uint32_t fault_status, fault_address;
     __asm__ __volatile__("mrs %0, esr_el1" : "=r"(fault_status));
     __asm__ __volatile__("mrs %0, far_el1" : "=r"(fault_address));
-    LOG("program counter: 0x%x caused\n", r->pc);
-    LOG("data abort at 0x%x, status 0x%x\n", fault_address, fault_status);
+    LOG("program counter: 0x%016lx caused\n", r->pc);
+    LOG("data abort at 0x%016lx, status 0x%016lx\n", fault_address, fault_status);
     if ((fault_status & 0x3f) == 0x21) // Alignment failure
         KPrintf("reason: alignment\n");
     else if ((fault_status & 0x3f) == 0x4) // Translation fault, level 0
@@ -131,8 +131,8 @@ void iabort_reason(struct trapframe* r)
     uint32_t fault_status, fault_address;
     __asm__ __volatile__("mrs %0, esr_el1" : "=r"(fault_status));
     __asm__ __volatile__("mrs %0, far_el1" : "=r"(fault_address));
-    LOG("program counter: 0x%x caused\n", r->pc);
-    LOG("data abort at 0x%x, status 0x%x\n", fault_address, fault_status);
+    LOG("program counter: 0x%016lx caused\n", r->pc);
+    LOG("data abort at 0x%016lx, status 0x%016lx\n", fault_address, fault_status);
     if ((fault_status & 0x3f) == 0x21) // Alignment failure
         KPrintf("reason: alignment\n");
     else if ((fault_status & 0x3f) == 0x4) // Translation fault, level 0
