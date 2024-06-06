@@ -3,6 +3,7 @@
 
 
 
+int usb_wait_until(int msec);
 
 
 #endif
