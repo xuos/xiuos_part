@@ -11,7 +11,7 @@
 # libipc = $(KERNEL_ROOT)/services/app/libipc.o
 # libsem = $(KERNEL_ROOT)/services/app/libsemaphore.o
 
-SRC_DIR := core osal
+SRC_DIR := class core osal
 
 
 include $(KERNEL_ROOT)/compiler.mk
