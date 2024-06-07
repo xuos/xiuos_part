@@ -39,12 +39,14 @@ Modification:
 2. Modify iabort and dabort handler(in dabort_handler() and iabort_handler())
 *************************************************/
 #include <stddef.h>
+#include <stdint.h>
+
+#include "exception_registers.h"
 
 #include "assert.h"
 #include "core.h"
 #include "log.h"
 #include "multicores.h"
-#include "spinlock.h"
 #include "task.h"
 #include "trap_common.h"
 
@@ -91,6 +93,7 @@ void dabort_reason(struct trapframe* r)
     uint32_t fault_status, fault_address;
     __asm__ __volatile__("mrs %0, esr_el1" : "=r"(fault_status));
     __asm__ __volatile__("mrs %0, far_el1" : "=r"(fault_address));
+    w_esr_el1(0);
     LOG("program counter: 0x%016lx caused\n", r->pc);
     LOG("data abort at 0x%016lx, status 0x%016lx\n", fault_address, fault_status);
     if ((fault_status & 0x3f) == 0x21) // Alignment failure
@@ -133,6 +136,7 @@ void iabort_reason(struct trapframe* r)
     __asm__ __volatile__("mrs %0, far_el1" : "=r"(fault_address));
     LOG("program counter: 0x%016lx caused\n", r->pc);
     LOG("data abort at 0x%016lx, status 0x%016lx\n", fault_address, fault_status);
+    w_esr_el1(0);
     if ((fault_status & 0x3f) == 0x21) // Alignment failure
         KPrintf("reason: alignment\n");
     else if ((fault_status & 0x3f) == 0x4) // Translation fault, level 0

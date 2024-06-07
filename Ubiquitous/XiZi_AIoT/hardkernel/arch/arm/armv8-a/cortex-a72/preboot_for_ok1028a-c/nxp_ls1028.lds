@@ -114,14 +114,14 @@ SECTIONS
   } > vir_ddr3
 
   . = ALIGN(0x1000);
-  PROVIDE(kernel_data_begin = .);
-
   _image_size = . - 0x0000006010000000;
+
   .bss : {
+    PROVIDE(kernel_data_begin = .);
     PROVIDE(__bss_start__ = .);
 		*(.bss .bss.* COMMON)
+    . = ALIGN(0x1000);
 		PROVIDE(__bss_end__ = .);
+	  PROVIDE(kernel_data_end = .);
   } > vir_ddr3
-  . = ALIGN(0x1000);
-	PROVIDE(kernel_data_end = .);
 }

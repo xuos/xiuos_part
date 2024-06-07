@@ -40,10 +40,10 @@ _boot_start:
     mov     x5,     x2
     mul     x3,     x2, x1
     sub     x0,     x0, x3
+    mov     sp,     x0
 
     mov     x2,         #ARM_MODE_EL1_h | DIS_INT  
     msr     spsr_el1,   x2
-    mov     sp,         x0
 
     // bl el2_setup
 
@@ -106,6 +106,7 @@ el2_setup:
 
     mrs     x0, sctlr_el1
     orr     x0, x0, #(1 << 0)
+    bic     x0, x0, #(1 << 1)
     orr     x0, x0, #(1 << 2)
     msr     sctlr_el1, x0
 

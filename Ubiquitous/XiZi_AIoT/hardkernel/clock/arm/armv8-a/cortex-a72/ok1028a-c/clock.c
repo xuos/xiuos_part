@@ -22,27 +22,27 @@
 
 static void enable_timer()
 {
-    uint32_t c = r_cntv_ctl_el0();
+    uint32_t c = r_cntp_ctl_el0();
     c |= CNTV_CTL_ENABLE;
     c &= ~CNTV_CTL_IMASK;
-    w_cntv_ctl_el0(c);
+    w_cntp_ctl_el0(c);
 }
 
 static void disable_timer()
 {
-    uint32_t c = r_cntv_ctl_el0();
+    uint32_t c = r_cntp_ctl_el0();
     c |= CNTV_CTL_IMASK;
     c &= ~CNTV_CTL_ENABLE;
-    w_cntv_ctl_el0(c);
+    w_cntp_ctl_el0(c);
 }
 
 static void reload_timer()
 {
-    // interval 100ms
-    static uint32_t ms = 10;
+    // interval 1ms
+    static uint32_t ms = 1;
     uint32_t interval = ms * 1000;
     uint32_t interval_clk = interval * (r_cntfrq_el0() / 1000000);
-    w_cntv_tval_el0(interval_clk);
+    w_cntp_tval_el0(interval_clk);
 }
 
 void _sys_clock_init()
@@ -54,7 +54,7 @@ void _sys_clock_init()
 
 static uint32_t _get_clock_int()
 {
-    return 27;
+    return 30;
 }
 
 static uint64_t _get_tick()

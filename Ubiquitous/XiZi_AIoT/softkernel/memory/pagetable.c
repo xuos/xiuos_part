@@ -61,12 +61,12 @@ static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, int l
     while (true) {
         uintptr_t* pte = NULL;
         if ((pte = _page_walk(pgdir, vaddr, true)) == NULL) {
-            ERROR("pte not found for vaddr %x.\n", vaddr);
+            ERROR("pte not found for vaddr %p.\n", vaddr);
             return false;
         }
 
         if (UNLIKELY(*pte != 0)) {
-            ERROR("remapping: vaddr: %x | paddr: %x | pte: %x |\n", vaddr, paddr, *pte);
+            ERROR("remapping: vaddr: %p | paddr: %p | pte: %p |\n", vaddr, paddr, *pte);
             return false;
         }
 
@@ -93,12 +93,12 @@ static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, int len)
     while (true) {
         uintptr_t* pte = NULL;
         if ((pte = _page_walk(pgdir, vaddr, false)) == NULL) {
-            ERROR("pte not found for vaddr %x.\n", vaddr);
+            ERROR("pte not found for vaddr %p.\n", vaddr);
             return false;
         }
 
         if (*pte == 0) {
-            ERROR("unmap a unmapped page, vaddr: %x, pte: %x\n", vaddr, *pte);
+            ERROR("unmap a unmapped page, vaddr: %p, pte: %p\n", vaddr, *pte);
             return false;
         }
 

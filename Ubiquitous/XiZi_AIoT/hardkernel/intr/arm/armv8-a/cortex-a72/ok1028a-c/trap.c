@@ -28,12 +28,15 @@ Modification:
 *************************************************/
 #include <stdint.h>
 
+#include "exception_registers.h"
+
 #include "assert.h"
 #include "core.h"
-#include "exception_registers.h"
 #include "multicores.h"
 #include "syscall.h"
 #include "task.h"
+
+#include "mmu.h"
 
 extern void dabort_handler(struct trapframe* r);
 extern void iabort_handler(struct trapframe* r);
@@ -73,7 +76,6 @@ void syscall_arch_handler(struct trapframe* tf)
 
     uint64_t esr = r_esr_el1();
     uint64_t ec = (esr >> 0x1A) & 0x3F;
-    w_esr_el1(0);
     switch (ec) {
     case 0B010101:
         software_irq_dispatch(tf);
@@ -87,11 +89,30 @@ void syscall_arch_handler(struct trapframe* tf)
         iabort_handler(tf);
         break;
     default: {
-        ERROR("USYSCALL: unexpected ec: %016lx\n", esr);
+        ERROR("USYSCALL: unexpected\n");
+        ERROR("          esr: %016lx\n", esr);
         ERROR("          elr = %016lx far = %016lx\n", r_elr_el1(), r_far_el1());
+        w_esr_el1(0);
+        extern void dump_tf(struct trapframe * tf);
+        dump_tf(tf);
+
+        uint32_t sctlr = 0;
+        SCTLR_R(sctlr);
+        DEBUG("SCTLR: %x\n", sctlr);
+        uint32_t spsr = 0;
+        __asm__ volatile("mrs %0, spsr_el1" : "=r"(spsr)::"memory");
+        DEBUG("SPSR: %x\n", spsr);
+        uint64_t tcr = 0;
+        __asm__ volatile("mrs %0, tcr_el1" : "=r"(tcr)::"memory");
+        DEBUG("TCR: %x\n", tcr);
+        uint64_t mair = 0;
+        __asm__ volatile("mrs %0, mair_el1" : "=r"(mair)::"memory");
+        DEBUG("MAIR: %x\n", mair);
+
         // kill error task
         xizi_enter_kernel();
         assert(cur_cpu()->task != NULL);
+        ERROR("Error Task: %s\n", cur_cpu()->task->name);
         sys_exit(cur_cpu()->task);
         context_switch(&cur_cpu()->task->thread_context.context, cur_cpu()->scheduler);
         panic("dabort end should never be reashed.\n");

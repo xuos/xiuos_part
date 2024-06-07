@@ -79,15 +79,6 @@ __attribute__((always_inline)) static inline uint64_t EL0_mode() // Set ARM mode
 {
     uint64_t val = 0;
 
-    __asm__ __volatile__(
-        "mrs %0, spsr_el1"
-        : "=r"(val)
-        :
-        :);
-    val &= ~DIS_INT;
-    val &= ~SPSR_MODE_MASK;
-    val |= ARM_MODE_EL0_t;
-
     return val;
 }
 

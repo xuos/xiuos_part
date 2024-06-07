@@ -18,7 +18,7 @@
 
 // Block size
 #define BLOCK_SIZE 512
-#define NR_BIT_BLOCKS 2
+#define NR_BIT_BLOCKS 8
 
 // bits size
 #define BITS 8

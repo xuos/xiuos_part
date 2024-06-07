@@ -53,20 +53,19 @@ Modification:
 void GetUsrPteAttr(uintptr_t* attr)
 {
     // *attr = ARMV8_PTE_AP_U | ARMV8_PTE_AP_RW | ARMV8_PTE_AF | ARMV8_PTE_NORMAL | ARMV8_PTE_VALID;
-    *attr = 0x753;
+    *attr = 0x713 | ARMV8_PTE_AP_U;
 }
 
 void GetUsrDevPteAttr(uintptr_t* attr)
 {
     // *attr = ARMV8_PTE_AP_U | ARMV8_PTE_AP_RW | ARMV8_PTE_AF | ARMV8_PTE_DEVICE | ARMV8_PTE_XN | ARMV8_PTE_VALID;
-    *attr = 0x443;
+    *attr = 0x403 | ARMV8_PTE_AP_U;
 }
 
 void GetDevPteAttr(uintptr_t* attr)
 {
     // *attr = ARMV8_PTE_AP_K | ARMV8_PTE_AP_RW | ARMV8_PTE_AF | ARMV8_PTE_DEVICE | ARMV8_PTE_XN | ARMV8_PTE_VALID;
     *attr = 0x403ULL;
-    // *attr = 0x711;
 }
 
 void GetKernPteAttr(uintptr_t* attr)

@@ -34,8 +34,6 @@ Modification:
 #include "multicores.h"
 #include "task.h"
 
-#include "log.h"
-
 static struct TraceTag clock_driver_tag;
 static struct XiziClockDriver* p_clock_driver = NULL;
 

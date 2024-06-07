@@ -143,13 +143,13 @@ Modification:
 .balign 0x800
 alltraps:
 // Current EL with sp0
-  b .
+  b badtrap
 .balign 0x80
-  b .
+  b badtrap
 .balign 0x80
-  b .
+  b badtrap
 .balign 0x80
-  b .
+  b badtrap
 
 // Current EL with spx
 .balign 0x80
@@ -157,9 +157,9 @@ alltraps:
 .balign 0x80
   b el1irq
 .balign 0x80
-  b .
+  b badtrap
 .balign 0x80
-  b .
+  b badtrap
 
 // Lower EL using aarch64
 .balign 0x80
@@ -167,19 +167,27 @@ alltraps:
 .balign 0x80
   b el0irq
 .balign 0x80
-  b .
+  b badtrap
 .balign 0x80
-  b .
+  b badtrap
 
 // Lower EL using aarch32
 .balign 0x80
-  b .
+  b badtrap
 .balign 0x80
-  b .
+  b badtrap
 .balign 0x80
-  b .
+  b badtrap
 .balign 0x80
-  b .
+  b badtrap
+
+badtrap:
+        msr daifset, #0xf
+        savereg
+        
+        mov x0, sp
+        bl  kernel_intr_handler 
+        b   .
 
 el1sync:
         msr daifset, #0xf

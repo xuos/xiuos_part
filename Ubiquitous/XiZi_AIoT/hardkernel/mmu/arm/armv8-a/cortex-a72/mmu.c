@@ -35,8 +35,6 @@ Modification:
 #include "mmu_common.h"
 #include "trap_common.h"
 
-#include "log.h"
-
 // extern struct MmuCommonDone mmu_common_done;
 static struct MmuDriverRightGroup right_group;
 
