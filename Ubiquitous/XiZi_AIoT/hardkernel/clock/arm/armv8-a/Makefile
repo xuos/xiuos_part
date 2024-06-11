@@ -1,5 +1,5 @@
-ifneq ($(findstring $(BOARD), ok1028a-c), )
-SRC_DIR := cortex-a72
+ifneq ($(findstring $(BOARD), 3568), )
+SRC_DIR := cortex-a55
 endif
 
 

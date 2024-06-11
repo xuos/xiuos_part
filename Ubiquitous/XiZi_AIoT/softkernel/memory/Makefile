@@ -2,7 +2,7 @@
 
 #include $(KERNEL_ROOT)/compiler.mk
 
-ifneq ($(findstring $(BOARD), ok1028a-c), )
+ifneq ($(findstring $(BOARD), 3568), )
 SRC_FILES := kalloc.c pagetable.c pagetable_level3.c buddy.c object_allocator.c share_page.c
 endif
 ifneq ($(findstring $(BOARD), imx6q-sabrelite zynq7000-zc702), )

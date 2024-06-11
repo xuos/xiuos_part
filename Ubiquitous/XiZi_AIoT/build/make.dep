@@ -1,0 +1,936 @@
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/hardkernel_init.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/hardkernel_init.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kern_init.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/cache_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/clock/clock_common_op.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/core.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/context_switch.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/context_switch.S
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/smp.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/smp.c
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/boot.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/boot.S \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/cortexA55.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/cortexA55.S
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/clock.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/clock/arm/armv8-a/cortex-a55/3568/clock.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/clock/arm/armv8-a/cortex-a55/3568/include/generic_timer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/clock/clock_common_op.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/bootmmu.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/bootmmu.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/mmio_access.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/registers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/mmu.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/mmu.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/cache_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/pagetable_attr.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/pagetable_attr.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/spinlock.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/trap_common.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/trap_common.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/exception_registers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/gicv3/gicv3_common_opa.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/mmio_access.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/trap.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/trap.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/exception_registers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/error_debug.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/error_debug.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/exception_registers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/trampoline.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/trampoline.S \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/hard_spinlock.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/hard_spinlock.S
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/gicv3.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/gicv3/gicv3.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/gicv3/gicv3_common_opa.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/mmio_access.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/gicv3/gicv3_registers.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/uart_common_ope.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/uart.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/arm/armv8-a/cortex-a55/uart_io_for_3568/uart.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/arm/armv8-a/cortex-a55/uart_io_for_3568/include/uart.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/mmio_access.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/arm/armv8-a/cortex-a55/uart_io_for_3568/include/ns16550.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/ns16550.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/arm/armv8-a/cortex-a55/uart_io_for_3568/ns16550.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/mmio_access.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/arm/armv8-a/cortex-a55/uart_io_for_3568/include/ns16550.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/cache_common_ope.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/cache_common_ope.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/cache_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/L1/arm/cortex-a55/l1_cache.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/l1_cache.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/L1/arm/cortex-a55/l1_cache.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/L1/arm/cortex-a55/l1_cache.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/l2_cache.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/L2/pl310/l2_cache.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/L2/pl310/l2_cache.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/L2/pl310/l2cc_pl310.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/mmio_access.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/actracer.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/main.o: /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/main.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kern_init.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/load_apps.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/load_apps.S
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/softkernel_init.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/init/softkernel_init.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kern_init.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/kalloc.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/memory/kalloc.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/pagetable.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/memory/pagetable.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/pagetable_level3.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/memory/pagetable_level3.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/buddy.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/memory/buddy.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/object_allocator.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/memory/object_allocator.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/share_page.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/memory/share_page.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/cache/cache_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/default_irq_handler.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/trap/default_irq_handler.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/clock_irq_handler.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/trap/clock_irq_handler.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/clock/clock_common_op.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/software_irq_handler.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/trap/software_irq_handler.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/abort_handler.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/trap/abort_handler.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/task.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/task/task.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/memspace.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/scheduler.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/schedule.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/task/schedule.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/scheduler.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/memspace.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/task/memspace.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/execelf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/memspace.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/semaphore.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/task/semaphore.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/syscall.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/syscall.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_spawn.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_spawn.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/memspace.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_thread.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_thread.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/memspace.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_yield.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_yield.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_register_as_server.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_register_as_server.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_connect_session.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_connect_session.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_poll_session.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_poll_session.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ipc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_close_session.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_close_session.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_register_irq.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_register_irq.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ipc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/memspace.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_exit.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_exit.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_state.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_state.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_mmap.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_mmap.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/kalloc.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_kill.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_kill.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h
+/home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/build/sys_semaphore.o: \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/syscall/sys_semaphore.c \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/ksemaphore.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/list.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/object_allocator.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/multicores.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/core.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_3568/include/cortex_a55.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/spinlock.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/trap_common.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/kernel_actracer/actracer.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/intr/arm/armv8-a/cortex-a55/3568/irq_numbers.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/3568/memlayout.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/syscall.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/share_page.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/task.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/bitmap64.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/assert.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/log.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/uart_common_ope.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/uart/printf.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/buddy.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/softkernel/include/pagetable.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/arm/armv8-a/cortex-a55/include/mmu.h \
+ /home/xiuos/Desktop/xiuos/Ubiquitous/XiZi_AIoT/hardkernel/mmu/mmu_common.h
