@@ -323,7 +323,7 @@ const struct HAL_CANFD_DEV g_can2Dev =
 #ifdef HAL_GMAC_MODULE_ENABLED
 const struct HAL_GMAC_DEV g_gmac0Dev =
 {
-    .pReg = GMAC0,
+    .pReg = GMAC0_VADDR,
     .clkID = CLK_MAC0_2TOP,
     .clkGateID = CLK_MAC0_2TOP_GATE,
     .pclkID = PCLK_PHP,

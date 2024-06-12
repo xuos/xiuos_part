@@ -18,6 +18,8 @@
 #include "hal_driver.h"
 #include "hal_debug.h"
 
+#define GMAC0_VADDR ((struct GMAC_REG *)(0x1000000000U + GMAC0_BASE))
+#define GPIO2_VADDR ((struct GPIO_REG *)(0x2000000000U + GPIO2_BASE))
 /***************************** MACRO Definition ******************************/
 
 /** @defgroup HAL_BASE_Exported_Definition_Group1 Basic Definition

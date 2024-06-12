@@ -84,11 +84,9 @@ struct GMAC_ETH_CONFIG {
 };
 
 /********************* Private Variable Definition ***************************/
-#ifdef NC_MEM_BASE
-static const unsigned long os_no_cache_start = (unsigned long)NC_MEM_BASE;
-#else
+
 static const unsigned long os_no_cache_start = 0;
-#endif
+
 
 /*
  * Reserve one MMU section worth of address space below the malloc() area that
@@ -113,7 +111,7 @@ static struct GMAC_ETH_CONFIG ethConfigTable[] =
 
         .extClk = false,
 
-        .resetGpioBank = GPIO2,
+        .resetGpioBank = GPIO2_VADDR,
         .resetGpioNum = GPIO_PIN_D3,
         .resetDelayMs = { 0, 20, 100 },
 
@@ -220,31 +218,6 @@ static void Dump_Regs(struct GMAC_HANDLE *pGMAC)
         printf("offset_0x%08x: %08lx %08lx %08lx %08lx\n", i * 0x10 + 0x1000,
                *((volatile const uint32_t *)(reg + 0x4 * i)), *((volatile const uint32_t *)(reg + 0x4 * i + 1)),
                *((volatile const uint32_t *)(reg + 0x4 * i + 2)), *((volatile const uint32_t *)(reg + 0x4 * i + 3)));
-    }
-}
-
-static void PHY_Read(struct GMAC_HANDLE *pGMAC, uint32_t phyReg)
-{
-    int data;
-
-    data = HAL_GMAC_MDIORead(pGMAC, pGMAC->phyConfig.phyAddress, phyReg);
-    if (data >= 0) {
-        printf("PHY_Read: %02lX --> %08X\n", phyReg, data);
-    } else {
-        printf("PHY_Read: %02lX --> faild\n", phyReg);
-    }
-}
-
-static void PHY_Write(struct GMAC_HANDLE *pGMAC, uint32_t phyReg, uint32_t data)
-{
-    // struct GMAC_HANDLE *pGMAC;
-    int status;
-
-    status = HAL_GMAC_MDIOWrite(pGMAC, pGMAC->phyConfig.phyAddress, phyReg, data);
-    if (!status) {
-        printf("PHY_Write: %02lX --> %08lX\n", phyReg, data);
-    } else {
-        printf("PHY_Write: %02lX --> faild\n", phyReg);
     }
 }
 
@@ -682,11 +655,13 @@ static void GMAC_Iomux_Config(uint8_t id)
 }
 
 
-
-
-
-
 /*************************** GMAC TEST MAIN ****************************/
+
+#include "usyscall.h"
+
+
+// IPC_SERVER_INTERFACE(Ipc_intr, 1);
+// IPC_SERVER_REGISTER_INTERFACES(IpIntrHandler, 1, Ipc_intr);
 
 int main() {
     struct GMAC_ETH_CONFIG *eth;
@@ -707,6 +682,16 @@ int main() {
             return -1;
         }
 
+        if (!mmap(0x1000000000U + GMAC0_BASE, GMAC0_BASE, 4096, true)) {
+            printf("eth_hal: mmap GMAC0(%8x) failed\n", GMAC0);
+            exit(1);
+        }
+
+        if (!mmap(0x2000000000U + GPIO2_BASE, GPIO2_BASE, 4096, true)) {
+            printf("eth_hal: mmap GPIO2(%8x) failed\n", GPIO2);
+            exit(1);
+        }
+
         /* ionmux */
         GMAC_Iomux_Config(bus);
 
@@ -714,7 +699,7 @@ int main() {
         HAL_CRU_ClkEnable(eth->halDev->clkGateID);
 
         /* Register irq */
-
+        // register_irq(eth->halDev->irqNum, );
         /* PHY reset */
         GMAC_PHY_Reset(eth);
 
@@ -753,4 +738,17 @@ int main() {
     }
     return 0;
 }
+
+// typedef void (*isr_handler_t)(int vector, void *param);
+// typedef void (*NVIC_IRQHandler)(void);
+
+// isr_handler_t interrupt_install(int              vector,
+//         isr_handler_t handler,
+//         void            *param,
+//         const char      *name)
+// {
+
+//     HAL_NVIC_SetIRQHandler(vector, (NVIC_IRQHandler)handler);
+//     return handler;
+// }
 

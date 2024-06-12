@@ -207,10 +207,10 @@ struct GMAC_Link {
   * @brief  GMAC DMA Descriptors Data Structure Definition
   */
 struct GMAC_Desc {
-    uint32_t des0; /**< DMA Descriptors first word */
-    uint32_t des1; /**< DMA Descriptors second word */
-    uint32_t des2; /**< DMA Descriptors third word */
-    uint32_t des3; /**< DMA Descriptors four word */
+    uint64_t des0; /**< DMA Descriptors first word */
+    uint64_t des1; /**< DMA Descriptors second word */
+    uint64_t des2; /**< DMA Descriptors third word */
+    uint64_t des3; /**< DMA Descriptors four word */
 };
 
 /**
