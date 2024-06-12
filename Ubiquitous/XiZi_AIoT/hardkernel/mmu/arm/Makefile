@@ -1,4 +1,4 @@
-ifneq ($(findstring $(BOARD), ok1028a-c), )
+ifneq ($(findstring $(BOARD), 3568), )
 SRC_DIR := armv8-a
 endif
 ifneq ($(findstring $(BOARD), imx6q-sabrelite zynq7000-zc702), )

@@ -67,7 +67,7 @@ Modification:
 /* Deivce memory layout */
 #define DEV_PHYMEM_BASE     (0x00000000)
 #define DEV_VRTMEM_BASE     (0x80000000)
-#define DEV_MEM_SZ          (0x10000000)
+#define DEV_MEM_SIZE          (0x10000000)
 
 /* Kernel memory layout */
 #define KERN_MEM_BASE       (0x90000000) // First kernel virtual address

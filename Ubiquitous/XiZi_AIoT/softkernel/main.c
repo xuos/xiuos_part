@@ -89,7 +89,6 @@ int main(void)
         char* fs_server_task_param[2] = { "/app/fs_server", 0 };
         sys_spawn((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
     }
-
     /* start scheduler */
     struct SchedulerRightGroup scheduler_rights;
     assert(AchieveResourceTag(&scheduler_rights.mmu_driver_tag, &hardkernel_tag, "mmu-ac-resource"));

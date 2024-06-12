@@ -61,12 +61,12 @@ static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, int l
     while (true) {
         uintptr_t* pte = NULL;
         if ((pte = _page_walk(pgdir, vaddr, true)) == NULL) {
-            ERROR("pte not found for vaddr %x.\n", vaddr);
+            ERROR("pte not found for vaddr %p.\n", vaddr);
             return false;
         }
 
         if (UNLIKELY(*pte != 0)) {
-            ERROR("remapping: vaddr: %x | paddr: %x | pte: %x |\n", vaddr, paddr, *pte);
+            ERROR("remapping: vaddr: %p | paddr: %p | pte: %p |\n", vaddr, paddr, *pte);
             return false;
         }
 
@@ -93,12 +93,12 @@ static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, int len)
     while (true) {
         uintptr_t* pte = NULL;
         if ((pte = _page_walk(pgdir, vaddr, false)) == NULL) {
-            ERROR("pte not found for vaddr %x.\n", vaddr);
+            ERROR("pte not found for vaddr %p.\n", vaddr);
             return false;
         }
 
         if (*pte == 0) {
-            ERROR("unmap a unmapped page, vaddr: %x, pte: %x\n", vaddr, *pte);
+            ERROR("unmap a unmapped page, vaddr: %p, pte: %p\n", vaddr, *pte);
             return false;
         }
 
@@ -269,7 +269,7 @@ void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driv
     // kern mem
     _map_pages((uintptr_t*)kern_pgdir.pd_addr, KERN_MEM_BASE, PHY_MEM_BASE, (PHY_MEM_STOP - PHY_MEM_BASE), kern_attr);
     // dev mem
-    _map_pages((uintptr_t*)kern_pgdir.pd_addr, DEV_VRTMEM_BASE, DEV_PHYMEM_BASE, DEV_MEM_SZ, dev_attr);
+    _map_pages((uintptr_t*)kern_pgdir.pd_addr, DEV_VRTMEM_BASE, DEV_PHYMEM_BASE, DEV_MEM_SIZE, dev_attr);
 
     _p_pgtbl_mmu_access->LoadPgdir((uintptr_t)V2P(kern_pgdir.pd_addr));
 }

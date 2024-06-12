@@ -48,7 +48,7 @@ uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc)
 
     uintptr_t* l3_pde_vaddr;
     if (*l2_pde_ptr != 0) {
-        uintptr_t l3_table_paddr = (*l2_pde_ptr) & ~pde_attr;
+        uintptr_t l3_table_paddr = ALIGNDOWN(*l2_pde_ptr, PAGE_SIZE);
         l3_pde_vaddr = (uintptr_t*)P2V(l3_table_paddr);
     } else {
         if (!alloc || !(l3_pde_vaddr = (uintptr_t*)kalloc(sizeof(uintptr_t) * NUM_LEVEL3_PDE))) {
@@ -63,7 +63,7 @@ uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc)
 
     uintptr_t* l4_pte_vaddr;
     if (*l3_pde_ptr != 0) {
-        uintptr_t l4_table_paddr = (*l3_pde_ptr) & ~pde_attr;
+        uintptr_t l4_table_paddr = ALIGNDOWN(*l3_pde_ptr, PAGE_SIZE);
         l4_pte_vaddr = (uintptr_t*)P2V(l4_table_paddr);
     } else {
         if (!alloc || !(l4_pte_vaddr = (uintptr_t*)kalloc(sizeof(uintptr_t) * NUM_LEVEL4_PTE))) {

@@ -20,8 +20,9 @@ int main(int argc, char* argv[])
 {
     struct Session session;
     printf("init: connecting MemFS\n");
-    while (connect_session(&session, "MemFS", 8092) < 0)
-        ;
+    while (connect_session(&session, "MemFS", 8092) < 0) {
+        yield(SYS_TASK_YIELD_NO_REASON);
+    }
     printf("init: connect MemFS success\n");
 
     int fd;
