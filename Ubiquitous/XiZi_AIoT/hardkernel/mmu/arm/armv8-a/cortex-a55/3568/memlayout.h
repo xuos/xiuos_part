@@ -33,7 +33,7 @@ Modification:
 
 #define ARCH_BIT        64
 
-/* A72 physical memory layout */
+/* A55 physical memory layout */
 #define PHY_MEM_BASE            (0x0000000010000000ULL)
 #define PHY_USER_FREEMEM_BASE   (0x0000000030000000ULL)
 #define PHY_USER_FREEMEM_TOP    (0x0000000040000000ULL)

@@ -29,7 +29,7 @@
  */
 /**
  * @file cortex_a55.h
- * @brief some cortex A72 core functions
+ * @brief some cortex A55 core functions
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2024.04.24
@@ -37,7 +37,7 @@
 
 /*************************************************
 File name: cortex_a55.h
-Description: some cortex A72 core functions
+Description: some cortex A55 core functions
 Others:
 History:
 Author: AIIT XUOS Lab
@@ -45,8 +45,8 @@ Modification:
 1. No modifications
 *************************************************/
 
-#if !defined(__CORTEX_A72_H__)
-#define __CORTEX_A72_H__
+#if !defined(__CORTEX_A55_H__)
+#define __CORTEX_A55_H__
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -231,4 +231,4 @@ void scu_secure_invalidate(unsigned int cpu, unsigned int ways);
 }
 #endif
 
-#endif //__CORTEX_A72_H__
+#endif //__CORTEX_A55_H__

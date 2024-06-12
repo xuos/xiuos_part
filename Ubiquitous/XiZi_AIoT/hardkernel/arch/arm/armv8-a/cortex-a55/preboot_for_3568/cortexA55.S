@@ -8,7 +8,7 @@ File name: cortexA55.S
 Description: This file contains cortexA9 functions
 Others: 
 History:
-1. Date: 202-05-08
+1. Date: 2024-05-08
 Author: AIIT XUOS Lab
 Modification:
 1. No modifications
@@ -32,6 +32,6 @@ psci_call:
 
 
 # ------------------------------------------------------------
-# End of cortexA72.s
+# End of cortexA55.s
 # ------------------------------------------------------------
     .end
