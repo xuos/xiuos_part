@@ -92,7 +92,7 @@ static inline void invalidate_icache(uintptr_t start, uintptr_t end)
 
 static inline void invalidate_icache_all(void)
 {
-    InvalidateL1IcacheAll();
+    // InvalidateL1IcacheAll();
 }
 
 /****************************************************************************
@@ -151,7 +151,7 @@ static inline void flush_dcache(uintptr_t start, uintptr_t end)
 
 static inline void flush_dcache_all(void)
 {
-    FlushL1DcacheAll();
+    // FlushL1DcacheAll();
     // FlushL2CacheAll();
 }
 
