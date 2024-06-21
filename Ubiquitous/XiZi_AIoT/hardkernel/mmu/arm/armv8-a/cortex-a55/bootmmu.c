@@ -122,50 +122,6 @@ static void build_boot_pgdir()
 }
 
 #include "log.h"
-
-static void load_boot_pgdir()
-{
-
-    TTBR0_W((uintptr_t)boot_l2pgdir);
-    TTBR1_W(0);
-
-#define TCR_TRUE_VALUE (0x0000000080813519ULL)
-    uint64_t tcr = 0;
-    TCR_R(tcr);
-    tcr &= (uint64_t)~0xFF;
-    tcr |= 0x19;
-    TCR_W(tcr);
-
-    // Enable paging using read/modify/write
-    // uint32_t val = 0;
-    // SCTLR_R(val);
-    // debug_printf_("Old SCTLR: %016lx\r\n", val);
-    // val |= (1 << 0); // EL1 and EL0 stage 1 address translation enabled.
-    // debug_printf_("New SCTLR: %08x\r\n", val);
-    // val &= (uint32_t) ~(0x1 << 2);
-    // debug_printf_("New SCTLR: %08x\r\n", val);
-    // SCTLR_W(val);
-    // debug_printf_("l2[0]: %p\r\n", boot_l2pgdir[0]);
-    // debug_printf_("l2[1]: %p\r\n", boot_l2pgdir[1]);
-    // debug_printf_("l2[2]: %p\r\n", boot_l2pgdir[2]);
-    // debug_printf_("l2[3]: %p\r\n", boot_l2pgdir[3]);
-    // debug_printf_("test upper address: %x\r\n", *(uintptr_t*)boot_l2pgdir);
-    // debug_printf_("pgdir[%d] = %p\r\n", 384, boot_l2pgdir[384]);
-    // debug_printf_("test upper address: %x\r\n", *(uintptr_t*)P2V(boot_l2pgdir));
-
-    // flush all TLB
-    // debug_printf_("Flushing TLB.\r\n");
-    DSB();
-    CLEARTLB(0);
-    ISB();
-}
-
-static inline unsigned int current_el(void)
-{
-    unsigned int el;
-    asm volatile("mrs %0, CurrentEL" : "=r"(el) : : "cc");
-    return el >> 2;
-}
 #include "ns16550.h"
 #define UART_LCRVAL UART_LCR_8N1 /* 8 data, 1 stop, no parity */
 #define UART_MCRVAL (UART_MCR_DTR | UART_MCR_RTS) /* RTS/DTR */
@@ -249,10 +205,55 @@ void __print(){
     }
 }
 
+static void load_boot_pgdir()
+{
+
+    TTBR0_W((uintptr_t)boot_l2pgdir);
+    TTBR1_W(0);
+
+#define TCR_TRUE_VALUE (0x0000000080813519ULL)
+    uint64_t tcr = 0;
+    TCR_R(tcr);
+    tcr &= (uint64_t)~0xFF;
+    tcr |= 0x19;
+    TCR_W(tcr);
+
+    // Enable paging using read/modify/write
+    // uint32_t val = 0;
+    // SCTLR_R(val);
+    // debug_printf_("Old SCTLR: %016lx\r\n", val);
+    // val |= (1 << 0); // EL1 and EL0 stage 1 address translation enabled.
+    // debug_printf_("New SCTLR: %08x\r\n", val);
+    // val &= (uint32_t) ~(0x1 << 2);
+    // debug_printf_("New SCTLR: %08x\r\n", val);
+    // SCTLR_W(val);
+    // debug_printf_("l2[0]: %p\r\n", boot_l2pgdir[0]);
+    // debug_printf_("l2[1]: %p\r\n", boot_l2pgdir[1]);
+    // debug_printf_("l2[2]: %p\r\n", boot_l2pgdir[2]);
+    // debug_printf_("l2[3]: %p\r\n", boot_l2pgdir[3]);
+    // debug_printf_("test upper address: %x\r\n", *(uintptr_t*)boot_l2pgdir);
+    // debug_printf_("pgdir[%d] = %p\r\n", 384, boot_l2pgdir[384]);
+    // debug_printf_("test upper address: %x\r\n", *(uintptr_t*)P2V(boot_l2pgdir));
+
+    // flush all TLB
+    // debug_printf_("Flushing TLB.\r\n");
+    DSB();
+    CLEARTLB(0);
+    ISB();
+}
+
+static inline unsigned int current_el(void)
+{
+    unsigned int el;
+    asm volatile("mrs %0, CurrentEL" : "=r"(el) : : "cc");
+    return el >> 2;
+}
+
 extern void main(void);
 static bool _bss_inited = false;
 void bootmain()
 {
+    // __print();
     build_boot_pgdir();
     load_boot_pgdir();
     __asm__ __volatile__("add sp, sp, %0" ::"r"(KERN_OFFSET));

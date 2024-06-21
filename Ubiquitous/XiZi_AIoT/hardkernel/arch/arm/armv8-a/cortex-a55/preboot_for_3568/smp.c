@@ -71,10 +71,11 @@ static struct arm_smccc_res __invoke_sip_fn_smc(unsigned long function_id,
 	__arm_smccc_smc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
 	return res;
 }
+
 void cpu_start_secondary(uint8_t cpu_id)
 {
     //psci_call(PSCI_CPUON, cpu_id, (uintptr_t)&_boot_start, 0);
-    __invoke_sip_fn_smc(PSCI_CPUON, cpu_id, (uintptr_t)__print, 0);
+    __invoke_sip_fn_smc(PSCI_CPUON, cpu_id, (uintptr_t)&__print, 0);
 }
 
 
