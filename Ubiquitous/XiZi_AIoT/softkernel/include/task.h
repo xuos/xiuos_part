@@ -31,10 +31,10 @@ Modification:
 
 #include "core.h"
 
-#include "bitmap64.h"
 #include "buddy.h"
 #include "ksemaphore.h"
 #include "list.h"
+#include "memspace.h"
 #include "object_allocator.h"
 #include "pagetable.h"
 #include "share_page.h"
@@ -52,19 +52,6 @@ enum ProcState {
     DEAD,
     BLOCKED,
     NEVER_RUN,
-};
-
-struct MemSpace {
-    /* task memory resources */
-    struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address
-    uintptr_t heap_base; // mem size of proc used(allocated by kernel)
-    uintptr_t mem_size;
-    /* task communication mem resources */
-    struct KBuddy* massive_ipc_allocator;
-
-    /* thread using this memspace */
-    struct bitmap64 thread_stack_idx_bitmap;
-    struct double_list_node thread_list_guard;
 };
 
 /* Thread Control Block */
@@ -105,8 +92,8 @@ struct Thread {
     /* task communication resources */
     struct double_list_node cli_sess_listhead;
     struct double_list_node svr_sess_listhead;
-    bool current_ipc_handled;
     struct TraceTag server_identifier;
+    bool advance_unblock;
 
     /* task schedule attributes */
     struct double_list_node node;

@@ -70,7 +70,7 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
             if (client->state == BLOCKED) {
                 xizi_task_manager.task_unblock(client);
             } else {
-                client->current_ipc_handled = true;
+                client->advance_unblock = true;
             }
         }
         server_session->head = userland_session_arr[i].head;
@@ -120,8 +120,12 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
     if (session_idx < arr_capacity) {
         userland_session_arr[session_idx].buf = NULL;
         if (!has_middle_delete && nr_sessions_need_to_handle == 0) {
-            xizi_task_manager.task_yield_noschedule(cur_task, false);
-            xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
+            if (cur_task->advance_unblock) {
+                cur_task->advance_unblock = false;
+            } else {
+                xizi_task_manager.task_yield_noschedule(cur_task, false);
+                xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
+            }
         }
     }
 

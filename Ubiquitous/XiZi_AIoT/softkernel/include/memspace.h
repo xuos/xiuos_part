@@ -27,14 +27,34 @@ Author: AIIT XUOS Lab
 Modification:
 1. first version
 *************************************************/
+#pragma once
 
-#include "task.h"
+#include "bitmap64.h"
+#include "buddy.h"
+#include "list.h"
+#include "share_page.h"
 
 struct ThreadStackPointer {
     int argc;
     int stack_idx;
     uintptr_t user_sp;
     uintptr_t user_stack_vaddr;
+};
+
+struct MemSpace {
+    /* task memory resources */
+    struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address
+    uintptr_t heap_base; // mem size of proc used(allocated by kernel)
+    uintptr_t mem_size;
+    /* task communication mem resources */
+    struct KBuddy* massive_ipc_allocator;
+
+    /* thread using this memspace */
+    struct bitmap64 thread_stack_idx_bitmap;
+    struct double_list_node thread_list_guard;
+
+    // thread to notify when sub-thread exit
+    struct Thread* thread_to_notify;
 };
 
 struct MemSpace* alloc_memspace();
