@@ -122,12 +122,10 @@ __attribute__((always_inline)) static inline HAL_Status TimerDelayUs(uint32_t us
 
     from = HAL_TIMER_GetCount(SYS_TIMER);
     count = PLL_INPUT_OSC_RATE / 1000000 * us;
-
     do {
         now = HAL_TIMER_GetCount(SYS_TIMER);
         pass = now > from ? now - from : from - now;
     } while (pass < count);
-
     return HAL_OK;
 }
 #endif
@@ -314,13 +312,13 @@ __attribute__((weak)) HAL_Status HAL_DelayMs(uint32_t ms)
  */
 HAL_Status HAL_DelayUs(uint32_t us)
 {
-#if defined(SYS_TIMER) && defined(HAL_TIMER_MODULE_ENABLED)
+// #if defined(SYS_TIMER) && defined(HAL_TIMER_MODULE_ENABLED)
 
-    return TimerDelayUs(us);
-#else
+//     return TimerDelayUs(us);
+// #else
 
     return HAL_CPUDelayUs(us);
-#endif
+// #endif
 }
 
 /**
