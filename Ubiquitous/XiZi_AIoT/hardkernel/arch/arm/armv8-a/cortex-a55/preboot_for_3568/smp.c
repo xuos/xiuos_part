@@ -48,13 +48,42 @@ Modification:
 #include <stdint.h>
 
 #define PSCI_CPUON 0xc4000003
+struct arm_smccc_res {
+	unsigned long a0;
+	unsigned long a1;
+	unsigned long a2;
+	unsigned long a3;
+};
 
 extern void _boot_start();
-void psci_call(uint64_t fn, uint8_t cpuid, uint64_t entry, uint64_t ctxid);
+extern void __print();
+extern void __arm_smccc_smc(unsigned long a0, unsigned long a1, unsigned long a2,
+		  unsigned long a3, unsigned long a4, unsigned long a5,
+		  unsigned long a6, unsigned long a7, struct arm_smccc_res *res);
+
+static struct arm_smccc_res __invoke_sip_fn_smc(unsigned long function_id,
+						unsigned long arg0,
+						unsigned long arg1,
+						unsigned long arg2)
+{
+	struct arm_smccc_res res;
+
+	__arm_smccc_smc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
+	return res;
+}
+
 void cpu_start_secondary(uint8_t cpu_id)
 {
-    psci_call(PSCI_CPUON, cpu_id, (uintptr_t)&_boot_start, 0);
+    //psci_call(PSCI_CPUON, cpu_id, (uintptr_t)&_boot_start, 0);
+    __invoke_sip_fn_smc(PSCI_CPUON, cpu_id, (uintptr_t)&__print, 0);
 }
+
+
+//void psci_call(uint64_t fn, uint8_t cpuid, uint64_t entry, uint64_t ctxid);
+// int psci_cpu_on(unsigned long cpuid, unsigned long entry_point)
+// {
+//     __invoke_sip_fn_smc(PSCI_CPUON, cpuid, entry_point, 0);
+// }
 
 void start_smp_cache_broadcast(int cpu_id)
 {
