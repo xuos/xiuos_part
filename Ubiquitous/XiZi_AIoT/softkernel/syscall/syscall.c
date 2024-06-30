@@ -69,7 +69,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_state(param1, (sys_state_info*)param2);
         break;
     case SYSCALL_MMAP:
-        ret = sys_mmap(param1, param2, (int)param3, (int)param4);
+        ret = sys_mmap((uintptr_t*)param1, (uintptr_t*)param2, (int)param3, (int)param4);
         break;
     case SYSCALL_REGISTER_IRQ:
         ret = sys_register_irq((int)param1, (int)param2);

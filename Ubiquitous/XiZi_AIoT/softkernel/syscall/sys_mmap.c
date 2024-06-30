@@ -36,34 +36,36 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-int sys_mmap(uintptr_t vaddr, uintptr_t paddr, int len, int is_dev)
+int sys_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, int is_dev)
 {
     struct Thread* cur_task = cur_cpu()->task;
     assert(cur_task != NULL);
 
     int true_len = ALIGNUP(len, PAGE_SIZE);
 
-    if (paddr != (uintptr_t)NULL) {
-        if (xizi_share_page_manager.task_map_pages(cur_task, vaddr, paddr, true_len / PAGE_SIZE, is_dev) == (uintptr_t)NULL) {
+    if (*paddr != (uintptr_t)NULL) {
+        if (xizi_share_page_manager.task_map_pages(cur_task, *vaddr, *paddr, true_len / PAGE_SIZE, is_dev) == (uintptr_t)NULL) {
             return -1;
         }
     } else {
         int load_len = 0;
-        uintptr_t load_vaddr = vaddr;
+        uintptr_t load_vaddr = *vaddr;
         while (load_len < true_len) {
-            char* paddr = raw_alloc(PAGE_SIZE);
-            if (paddr == NULL) {
+            char* new_paddr = raw_alloc(PAGE_SIZE);
+            if (new_paddr == NULL) {
                 return -1;
             }
-            if (xizi_share_page_manager.task_map_pages(cur_task, load_vaddr, (uintptr_t)paddr, 1, false) == (uintptr_t)NULL) {
-                raw_free(paddr);
+            if (xizi_share_page_manager.task_map_pages(cur_task, load_vaddr, (uintptr_t)new_paddr, 1, false) == (uintptr_t)NULL) {
+                raw_free(new_paddr);
                 return -1;
             }
             load_vaddr += PAGE_SIZE;
             load_len += PAGE_SIZE;
+            *paddr = (uintptr_t)new_paddr;
         }
     }
 
     cur_task->memspace->mem_size += true_len;
-    return vaddr + true_len;
+    *vaddr = *vaddr + true_len;
+    return 0;
 }

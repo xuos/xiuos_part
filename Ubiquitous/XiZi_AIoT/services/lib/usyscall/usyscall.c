@@ -101,9 +101,18 @@ int show_cpu()
     return syscall(SYSCALL_SYS_STATE, SYS_STATE_SHOW_CPU_INFO, 0, 0, 0);
 }
 
-int mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
+uintptr_t mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 {
-    return syscall(SYSCALL_MMAP, vaddr, paddr, (intptr_t)len, (intptr_t)is_dev);
+    uintptr_t vaddr_inner = vaddr, paddr_inner = paddr;
+    if (syscall(SYSCALL_MMAP, (intptr_t)&vaddr_inner, (intptr_t)&paddr_inner, (intptr_t)len, (intptr_t)is_dev) < 0) {
+        return (uintptr_t)NULL;
+    }
+    return vaddr_inner;
+}
+
+int naive_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, bool is_dev)
+{
+    return syscall(SYSCALL_MMAP, (uintptr_t)vaddr, (intptr_t)paddr, (intptr_t)len, (intptr_t)is_dev);
 }
 
 int register_irq(int irq, int opcode)

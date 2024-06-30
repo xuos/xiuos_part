@@ -44,6 +44,24 @@ bool clock_intr_handler_init(struct TraceTag* p_clock_driver_tag)
     return p_clock_driver != NULL;
 }
 
+void hw_current_tick(uintptr_t* tick)
+{
+    if (p_clock_driver == NULL) {
+        *tick = 0;
+        return;
+    }
+    *tick = p_clock_driver->get_tick();
+}
+
+void hw_current_second(uintptr_t* second)
+{
+    if (p_clock_driver == NULL) {
+        *second = 0;
+        return;
+    }
+    *second = p_clock_driver->get_second();
+}
+
 uint64_t global_tick = 0;
 int xizi_clock_handler(int irq, void* tf, void* arg)
 {
