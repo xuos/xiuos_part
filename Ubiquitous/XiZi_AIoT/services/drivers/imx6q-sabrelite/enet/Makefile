@@ -9,14 +9,8 @@ ld = ${toolchain}g++
 objdump = ${toolchain}objdump
 user_ldflags = -N -Ttext 0
 
-cflags = -std=c11 -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -g \
-	-Wno-unused -Wno-format -fno-common -ffreestanding -fno-builtin -static \
-	-Wno-unaligned-access -fdce -Wall -Werror -Wno-uninitialized -Wno-strict-aliasing -fdiagnostics-show-option \
-	-mapcs -marm -mfpu=neon -ftree-vectorize -fno-math-errno -funsafe-math-optimizations -fno-signed-zeros -mfloat-abi=softfp \
-	-fno-omit-frame-pointer -fno-stack-protector -fno-pie 
-
-# cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic \
-# 	-static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie 
+cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic \
+	-static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie 
 
 c_useropts = -O0
 

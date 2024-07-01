@@ -55,6 +55,7 @@ struct MemSpace* alloc_memspace()
     pmemspace->heap_base = 0;
     pmemspace->mem_size = 0;
     pmemspace->pgdir.pd_addr = 0;
+    pmemspace->thread_to_notify = NULL;
     return pmemspace;
 }
 

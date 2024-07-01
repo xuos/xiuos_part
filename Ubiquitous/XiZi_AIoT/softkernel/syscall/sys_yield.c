@@ -40,8 +40,8 @@ int sys_yield(task_yield_reason reason)
 
     // handle ipc block
     if ((reason & SYS_TASK_YIELD_BLOCK_IPC) != 0) {
-        if (cur_task->current_ipc_handled) {
-            cur_task->current_ipc_handled = false;
+        if (cur_task->advance_unblock) {
+            cur_task->advance_unblock = false;
         } else {
             xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
         }

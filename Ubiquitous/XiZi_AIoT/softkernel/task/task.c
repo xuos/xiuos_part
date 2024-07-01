@@ -179,6 +179,19 @@ static void _dealloc_task_cb(struct Thread* task)
 
     /* free memspace if needed to */
     if (task->memspace != NULL) {
+        // awake deamon in this memspace
+        if (task->memspace->thread_to_notify != NULL) {
+            if (task->memspace->thread_to_notify != task) {
+                if (task->memspace->thread_to_notify->state == BLOCKED) {
+                    xizi_task_manager.task_unblock(task->memspace->thread_to_notify);
+                } else {
+                    task->memspace->thread_to_notify->advance_unblock = true;
+                }
+            } else if (task->memspace->thread_to_notify == task) {
+                task->memspace->thread_to_notify = NULL;
+            }
+        }
+
         doubleListDel(&task->memspace_list_node);
         /* free memspace if thread is the last one using it */
         if (IS_DOUBLE_LIST_EMPTY(&task->memspace->thread_list_guard)) {

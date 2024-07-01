@@ -64,6 +64,8 @@ typedef enum {
     SYS_STATE_SHOW_TASKS,
     SYS_STATE_SHOW_MEM_INFO,
     SYS_STATE_SHOW_CPU_INFO,
+    SYS_STATE_GET_CURRENT_TICK,
+    SYS_STATE_GET_CURRENT_SECOND,
 } sys_state_option;
 
 typedef enum {
@@ -78,6 +80,8 @@ typedef union {
         uintptr_t memblock_end;
     } memblock_info;
     int priority;
+    uintptr_t current_tick;
+    uintptr_t current_second;
 } sys_state_info;
 
 typedef enum {
@@ -102,7 +106,7 @@ int sys_close_session(struct Thread* task, struct Session* session);
 
 int sys_exec(char* img_start, char* name, char** argv);
 int sys_state(sys_state_option option, sys_state_info* info);
-int sys_mmap(uintptr_t vaddr, uintptr_t paddr, int len, int is_dev);
+int sys_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, int is_dev);
 
 int sys_register_irq(int irq_num, int irq_opcode);
 int sys_unbind_irq_all(struct Thread* task);

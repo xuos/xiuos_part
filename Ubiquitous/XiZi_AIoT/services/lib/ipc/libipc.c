@@ -182,7 +182,6 @@ void ipc_server_loop(struct IpcNode* ipc_node)
         /* handle each session */
         for (int i = 0; i < NR_MAX_SESSION; i++) {
             if (session_list[i].buf == NULL) {
-                yield(SYS_TASK_YIELD_NO_REASON);
                 break;
             }
             cur_sess_id = session_list[i].id;

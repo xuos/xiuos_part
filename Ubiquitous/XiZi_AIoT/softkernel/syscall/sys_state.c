@@ -151,19 +151,39 @@ void show_cpu(void)
 
 int sys_state(sys_state_option option, sys_state_info* info)
 {
-    if (option == SYS_STATE_MEMBLOCK_INFO) {
+    switch (option) {
+    case SYS_STATE_MEMBLOCK_INFO: {
         info->memblock_info.memblock_start = (uintptr_t)V2P(_binary_fs_img_start);
         info->memblock_info.memblock_end = (uintptr_t)V2P(_binary_fs_img_end);
-    } else if (option == SYS_STATE_GET_HEAP_BASE) {
+        break;
+    }
+    case SYS_STATE_GET_HEAP_BASE:
         return cur_cpu()->task->memspace->heap_base;
-    } else if (option == SYS_STATE_SET_TASK_PRIORITY) {
+    case SYS_STATE_SET_TASK_PRIORITY:
         xizi_task_manager.set_cur_task_priority(info->priority);
-    } else if (option == SYS_STATE_SHOW_TASKS) {
+        break;
+    case SYS_STATE_SHOW_TASKS:
         show_tasks();
-    } else if (option == SYS_STATE_SHOW_MEM_INFO) {
+        break;
+    case SYS_STATE_SHOW_MEM_INFO:
         show_mem();
-    } else if (option == SYS_STATE_SHOW_CPU_INFO) {
+        break;
+    case SYS_STATE_SHOW_CPU_INFO:
         show_cpu();
+        break;
+    case SYS_STATE_GET_CURRENT_TICK: {
+        extern void hw_current_tick(uintptr_t * tick);
+        hw_current_tick(&info->current_tick);
+        break;
+    }
+    case SYS_STATE_GET_CURRENT_SECOND: {
+        extern void hw_current_second(uintptr_t * tick);
+        hw_current_second(&info->current_second);
+        break;
+    }
+    case SYS_STATE_TEST:
+    default:
+        break;
     }
 
     return 0;

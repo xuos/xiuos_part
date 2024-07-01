@@ -65,6 +65,11 @@ int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintptr_t en
     // init pcb schedule attributes
     xizi_task_manager.task_set_default_schedule_attr(task);
 
+    // thread init done by here
+    if (pmemspace->thread_to_notify == NULL) {
+        pmemspace->thread_to_notify = task;
+    }
+
     return task->tid;
 }
 
