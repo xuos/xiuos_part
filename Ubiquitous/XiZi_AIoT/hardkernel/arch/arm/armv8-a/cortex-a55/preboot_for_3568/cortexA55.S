@@ -21,7 +21,8 @@ Modification:
     .func cpu_get_current
 cpu_get_current:
     mrs   x0, mpidr_el1
-    and   x0, x0, #3
+    and   x0, x0, #0xFFF
+    lsr   x0, x0, #8
     ret
     .endfunc
 

@@ -67,7 +67,8 @@ cmp     w1, #UNLOCKED
 bne     _spinlock_lock
 
 mrs     x1, mpidr_el1                // get our CPU ID
-and     x1, x1, #3
+and     x1, x1, #0xFFF
+lsr     x1, x1, #8
 stxrb   w2, w1, [x0]
 cmp     x2, #0
 bne     _spinlock_lock        // check if the write was successful, if the write failed, start over
@@ -86,7 +87,8 @@ ret
 _spinlock_unlock:
 
 mrs     x1, mpidr_el1                // get our CPU ID
-and     x1, x1, #3
+and     x1, x1, #0xFFF
+lsr     x1, x1, #8
 
 ldr     w2, [x0]
 cmp     w1, w2
