@@ -35,7 +35,7 @@ c_useropts = -O2
 INC_DIR = 	-I$(KERNEL_ROOT)/services/app \
 		  	-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/lib/serial \
-			-I$(KERNEL_ROOT)/services/drivers/rk-3568/include \
+			-I$(KERNEL_ROOT)/services/drivers/3568/include \
 			-I$(KERNEL_ROOT)/services/lib/usyscall \
 		  	-I$(KERNEL_ROOT)/services/lib/ipc \
 		  	-I$(KERNEL_ROOT)/services/lib/memory 
