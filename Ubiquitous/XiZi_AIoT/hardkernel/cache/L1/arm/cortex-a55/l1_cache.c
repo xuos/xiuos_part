@@ -157,38 +157,14 @@ void FlushL1Dcache(uintptr_t start, uintptr_t end)
 
 void FlushL1DcacheAll(void)
 {
-    // uint64_t ccsidr_el1; // Cache Size ID
-    // int num_sets; // number of sets
-    // int num_ways; // number of ways
-    // uint32_t wayset; // wayset parameter
-
-    // __asm__ __volatile__("mrs %0, ccsidr_el1" : "=r"(ccsidr_el1)); // Read Cache Size ID
-
-    // // Fill number of sets  and number of ways from ccsidr_el1 register  This walues are decremented by 1
-    // num_sets = ((ccsidr_el1 >> 32) & 0x7FFF) + 1;
-    // num_ways = ((ccsidr_el1 >> 0) & 0x7FFF) + 1;
-
-    // // clean and invalidate all lines (all Sets in all ways)
-    // for (int way = 0; way < num_ways; way++) {
-    //     for (int set = 0; set < num_sets; set++) {
-    //         wayset = (way << 30) | (set << 5);
-    //         __asm__ __volatile__("dc cisw, %0" : : "r"(wayset));
-    //     }
-    // }
-
-    // // All Cache, Branch predictor and TLB maintenance operations before followed instruction complete
-    // DSB();
     __asm_flush_dcache_all();
     __asm_flush_l3_dcache();
 }
 
 void InvalidateL1IcacheAll()
 {
-    // __asm__ __volatile__("ic iallu\n\t");
-    // // synchronize context on this processor
-    // ISB();
     __asm_invalidate_icache_all();
-	__asm_invalidate_l3_icache();
+    __asm_invalidate_l3_icache();
 }
 
 void InvalidateL1Icache(uintptr_t start, uintptr_t end)

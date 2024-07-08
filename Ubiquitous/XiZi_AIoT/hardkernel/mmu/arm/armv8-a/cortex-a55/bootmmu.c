@@ -51,9 +51,9 @@ extern uint64_t kernel_data_begin[];
 #define L4_PTE_NORMAL       ((0b01) << 2) // Device memory
 #define L4_PTE_AF           (1 << 10) // Data Access Permissions
 
-#define L4_PTE_PXN             (1UL << 53)   // Privileged eXecute Never
-#define L4_PTE_UXN             (1UL << 54)   // Unprivileged(user) eXecute Never
-#define L4_PTE_XN              (PTE_PXN|PTE_UXN)  // eXecute Never
+#define L4_PTE_PXN          (1UL << 53)   // Privileged eXecute Never
+#define L4_PTE_UXN          (1UL << 54)   // Unprivileged(user) eXecute Never
+#define L4_PTE_XN           (PTE_PXN|PTE_UXN)  // eXecute Never
 
 #define IDX_MASK            (0b111111111)
 #define L3_PDE_INDEX(idx)   ((idx << LEVEL3_PDE_SHIFT) & L3_IDX_MASK)
@@ -86,19 +86,11 @@ static void build_boot_pgdir()
                 if (cur_mem_paddr >= DEV_PHYMEM_BASE && cur_mem_paddr < DEV_PHYMEM_BASE + DEV_MEM_SIZE) {
                     boot_dev_l4pgdirs[i][j] = cur_mem_paddr | 0x403;
                 } else {
-                    // boot_dev_l4pgdirs[i][j] = cur_mem_paddr | 0x713;
                     boot_dev_l4pgdirs[i][j] = cur_mem_paddr | 0x403;
                 }
 
                 cur_mem_paddr += PAGE_SIZE;
             }
-
-            // if (cur_mem_paddr >= DEV_PHYMEM_BASE && cur_mem_paddr < DEV_PHYMEM_BASE + DEV_MEM_SIZE) {
-            //     boot_dev_l3pgdir[i] = cur_mem_paddr | 0x401;
-            // } else {
-            //     boot_dev_l3pgdir[i] = cur_mem_paddr | 0x711;
-            // }
-            // cur_mem_paddr += PAGE_SIZE * 0x200;
         }
 
         // identical mem
@@ -110,7 +102,6 @@ static void build_boot_pgdir()
             boot_kern_l3pgdir[i] = (uint64_t)boot_kern_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
 
             for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-                // boot_kern_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_NORMAL | L4_PTE_AF;
                 boot_kern_l4pgdirs[i][j] = cur_mem_paddr | 0x713;
 
                 cur_mem_paddr += PAGE_SIZE;
@@ -121,7 +112,6 @@ static void build_boot_pgdir()
     }
 }
 
-#include "log.h"
 static void load_boot_pgdir()
 {
 
@@ -135,35 +125,8 @@ static void load_boot_pgdir()
     tcr |= 0x19;
     TCR_W(tcr);
 
-    // Enable paging using read/modify/write
-    // uint32_t val = 0;
-    // SCTLR_R(val);
-    // debug_printf_("Old SCTLR: %016lx\r\n", val);
-    // val |= (1 << 0); // EL1 and EL0 stage 1 address translation enabled.
-    // debug_printf_("New SCTLR: %08x\r\n", val);
-    // val &= (uint32_t) ~(0x1 << 2);
-    // debug_printf_("New SCTLR: %08x\r\n", val);
-    // SCTLR_W(val);
-    // debug_printf_("l2[0]: %p\r\n", boot_l2pgdir[0]);
-    // debug_printf_("l2[1]: %p\r\n", boot_l2pgdir[1]);
-    // debug_printf_("l2[2]: %p\r\n", boot_l2pgdir[2]);
-    // debug_printf_("l2[3]: %p\r\n", boot_l2pgdir[3]);
-    // debug_printf_("test upper address: %x\r\n", *(uintptr_t*)boot_l2pgdir);
-    // debug_printf_("pgdir[%d] = %p\r\n", 384, boot_l2pgdir[384]);
-    // debug_printf_("test upper address: %x\r\n", *(uintptr_t*)P2V(boot_l2pgdir));
-
-    // flush all TLB
-    // debug_printf_("Flushing TLB.\r\n");
-    DSB();
     CLEARTLB(0);
     ISB();
-}
-
-static inline unsigned int current_el(void)
-{
-    unsigned int el;
-    asm volatile("mrs %0, CurrentEL" : "=r"(el) : : "cc");
-    return el >> 2;
 }
 
 extern void main(void);

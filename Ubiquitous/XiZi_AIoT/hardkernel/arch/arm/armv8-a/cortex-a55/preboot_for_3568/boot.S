@@ -31,27 +31,27 @@ _boot_start:
     // clear some registers
     msr     elr_el1,    XZR
 
-    ldr     x0,     =stacks_top
-    mov     x1,     #MODE_STACK_SIZE
+    ldr     x0, =stacks_top
+    mov     x1, #MODE_STACK_SIZE
 
     // get cpu id, and subtract the offset from the stacks base address
-    mrs     x2,     mpidr_el1
-    and     x2,     x2, #0xFFF
-    lsr     x2,     x2, #8
-    mov     x5,     x2
-    mul     x3,     x2, x1
-    sub     x0,     x0, x3
-    mov     sp,     x0
+    mrs     x2, mpidr_el1
+    and     x2, x2, #0xFFF
+    lsr     x2, x2, #8
+    mov     x5, x2
+    mul     x3, x2, x1
+    sub     x0, x0, x3
+    mov     sp, x0
 
     mov     x2,         #ARM_MODE_EL1_h | DIS_INT  
     msr     spsr_el1,   x2
 
     // check cpu id - cpu0 is primary cpu
-    mrs     x2,     mpidr_el1
-    and     x2,     x2, #0xFFF
-    lsr     x2,     x2, #8
-    mov     x5,     x2
-    cmp     x5, 	#0
+    mrs     x2, mpidr_el1
+    and     x2, x2, #0xFFF
+    lsr     x2, x2, #8
+    mov     x5, x2
+    cmp     x5, #0
     beq     primary_cpu_init
     bl      bootmain     // for secondary cpus, jump to argument function pointer passed in by ROM
 
@@ -60,13 +60,13 @@ _boot_start:
 primary_cpu_init:
    	/* init .bss */
      /* clear the .bss section (zero init) */
-    ldr     x1,	=boot_start_addr
-    ldr     x2,	=boot_end_addr
-    mov     x3,	#0
+    ldr x1,	=boot_start_addr
+    ldr x2,	=boot_end_addr
+    mov x3,	#0
 1:  
-    cmp     x1,	x2
-    stp     x3,     x3, [x1], #16
-    b.lt     1b  
+    cmp x1,	x2
+    stp x3, x3, [x1], #16
+    b.lt    1b  
 
 	bl bootmain
 
@@ -92,7 +92,7 @@ el2_setup:
     /* Populate ID registers. */
     mrs  x0,    midr_el1
     mrs  x1,    mpidr_el1
-    msr  vpidr_el2, x0
+    msr  vpidr_el2,  x0
     msr  vmpidr_el2, x1
 
     /* Disable Coprocessor traps. */
@@ -104,16 +104,16 @@ el2_setup:
     mov x0, sp
     msr sp_el1, x0
 
-    mrs     x0, sctlr_el1
-    orr     x0, x0, #(1 << 0)
-    bic     x0, x0, #(1 << 1)
-    orr     x0, x0, #(1 << 2)
-    msr     sctlr_el1, x0
+    mrs x0, sctlr_el1
+    orr x0, x0, #(1 << 0)
+    bic x0, x0, #(1 << 1)
+    orr x0, x0, #(1 << 2)
+    msr sctlr_el1, x0
 
     /* spsr */
     mov x0, #SPSR_EL2_VALUE
-    msr  spsr_el2, x0
-    msr  elr_el2, lr
+    msr spsr_el2, x0
+    msr elr_el2, lr
     eret
     .endfunc
 
