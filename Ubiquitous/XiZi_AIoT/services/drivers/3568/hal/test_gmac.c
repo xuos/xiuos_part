@@ -85,16 +85,16 @@ struct GMAC_ETH_CONFIG {
 
 /********************* Private Variable Definition ***************************/
 
-static const unsigned long os_no_cache_start = 0;
+static const unsigned long long os_no_cache_start = 0x2a00000000ULL;
 
 
 /*
  * Reserve one MMU section worth of address space below the malloc() area that
  * will be mapped uncached.
  */
-static unsigned long noncached_start;
-static unsigned long noncached_end;
-static unsigned long noncached_next;
+static volatile unsigned long long noncached_start = 0x2a00000000ULL;
+static volatile unsigned long long noncached_end = 0x2a00400000ULL;
+static volatile unsigned long long noncached_next = 0x2a00000000ULL;
 
 static unsigned int m_nocachemem_inited = 0;
 
@@ -111,7 +111,7 @@ static struct GMAC_ETH_CONFIG ethConfigTable[] =
 
         .extClk = false,
 
-        .resetGpioBank = GPIO2_VADDR,
+        .resetGpioBank = GPIO2,
         .resetGpioNum = GPIO_PIN_D3,
         .resetDelayMs = { 0, 20, 100 },
 
@@ -250,14 +250,11 @@ static void GMAC_PHY_Reset(struct GMAC_ETH_CONFIG *config)
         HAL_GPIO_SetPinLevel(config->resetGpioBank,
                              config->resetGpioNum,
                              GPIO_HIGH);
-
         HAL_DelayMs(config->resetDelayMs[0]);
-
         HAL_GPIO_SetPinLevel(config->resetGpioBank,
                              config->resetGpioNum,
                              GPIO_LOW);
         HAL_DelayMs(config->resetDelayMs[1]);
-
         HAL_GPIO_SetPinLevel(config->resetGpioBank,
                              config->resetGpioNum,
                              GPIO_HIGH);
@@ -358,23 +355,26 @@ static HAL_Status GMAC_ETH_IRQ(struct GMAC_HANDLE *pGMAC)
 
 static HAL_Status noncached_init(void)
 {
-    unsigned long start, end;
+    unsigned long long start, end;
     size_t size;
-
+    printf("noncached_start %#llX \n", os_no_cache_start);
     if (os_no_cache_start <= 0) {
-	printf("Noncached_init failed, plase defined no cached memort\n");
-	return -1;
+	    printf("Noncached_init failed, plase defined no cached memort\n");
+	    return -1;
     }
 
     start = HAL_GMAC_ALIGN(os_no_cache_start, 64);
+    printf("start %#llX \n", start);
     size = HAL_GMAC_ALIGN(CONFIG_SYS_NONCACHED_MEMORY, MMU_SECTION_SIZE);
     end = start + size;
+    printf("end %#llX \n", end);
 
     noncached_start = start;
+    printf("noncached_start %#X\n", noncached_start);
     noncached_end = end;
     noncached_next = start;
     m_nocachemem_inited = 1;
-
+    printf("noncached_start %#X, noncached_end %#X, noncached_next %#X\n", noncached_start, noncached_end, noncached_next);
     return 0;
 }
 
@@ -382,7 +382,7 @@ static unsigned long noncached_alloc(size_t size, size_t align)
 {
     if (!m_nocachemem_inited) {
         if (noncached_init())
-	    return (unsigned long)NULL;
+	        return (unsigned long)NULL;
     }
 
     unsigned long next = HAL_GMAC_ALIGN(noncached_next, align);
@@ -390,9 +390,9 @@ static unsigned long noncached_alloc(size_t size, size_t align)
     if (next >= noncached_end || (noncached_end - next) < size) {
         return 0;
     }
-
+    printf("noncached_start %#X, noncached_end %#X, noncached_next %#X\n", noncached_start, noncached_end, noncached_next);
     noncached_next = next + size;
-
+    printf("noncached_start %#X, noncached_end %#X, noncached_next %#X\n", noncached_start, noncached_end, noncached_next);
     return next;
 }
 
@@ -513,19 +513,21 @@ static HAL_Status GMAC_Memory_Init(struct GMAC_ETH_CONFIG *eth, struct GMAC_HAND
 
     if (!eth->rxDescs || !eth->txDescs)
         return -1;
-
+    printf("%x\n",eth->rxDescs);
+    printf("%x\n",eth->txDescs);
     eth->rxBuff = malloc_align(GMAC_RX_BUFFER_SIZE, ARCH_DMA_MINALIGN);
     eth->txBuff = malloc_align(GMAC_TX_BUFFER_SIZE, ARCH_DMA_MINALIGN);
 
     if (!eth->rxBuff || !eth->txBuff)
         return -1;
-
+    printf("1\n");
     memset(eth->rxDescs, 0, GMAC_DESC_RX_SIZE);
+    printf("2\n");
     memset(eth->txDescs, 0, GMAC_DESC_TX_SIZE);
-
+    printf("3\n");
     memset(eth->rxBuff, 0, GMAC_RX_BUFFER_SIZE);
     // HAL_DCACHE_InvalidateByRange((uint64_t)eth->rxBuff, GMAC_RX_BUFFER_SIZE);
-
+    printf("4\n");
     memset(eth->txBuff, 0, GMAC_TX_BUFFER_SIZE);
     // HAL_DCACHE_CleanByRange((uint64_t)eth->txBuff, GMAC_TX_BUFFER_SIZE);
 
@@ -592,7 +594,6 @@ static HAL_Status GMAC_Init(uint8_t id)
 }
 
 /*************************** GMAC TEST ****************************/
-#define GMAC_MAX_DEVICES 2
 
 #ifdef SOC_RK3568
 /**
@@ -604,7 +605,6 @@ static void GMAC0_Iomux_Config(void)
     HAL_PINCTRL_SetIOMUX(GPIO_BANK2,
                          GPIO_PIN_B6, /* gmac0_rxd0 */
                          PIN_CONFIG_MUX_FUNC1);
-
     HAL_PINCTRL_SetIOMUX(GPIO_BANK2,
                          GPIO_PIN_C3 | /* gmac0_mdc */
                          GPIO_PIN_C4 | /* gmac0_mdio */
@@ -616,7 +616,6 @@ static void GMAC0_Iomux_Config(void)
                          GPIO_PIN_A7 | /* gmac0_txd3 */
                          GPIO_PIN_A5,  /* gmac0_rxclk */
                          PIN_CONFIG_MUX_FUNC2);
-
     HAL_PINCTRL_SetIOMUX(GPIO_BANK2,
                          GPIO_PIN_B3 | /* gmac0_txd0 */
                          GPIO_PIN_B4 | /* gmac0_txd1 */
@@ -668,52 +667,73 @@ int main() {
     struct GMAC_HANDLE *pGMAC;
     int32_t bus, num = 0, i;
 
-    HAL_DBG("\n");
-    HAL_DBG("%s\n", __func__);
-    HAL_DBG("    GMAC Test:\n");
+    HAL_DBG("GMAC Test:\n");
 
     num = sizeof(ethConfigTable) / sizeof(struct GMAC_ETH_CONFIG);
-    HAL_DBG("    GMAC Num: %ld\n", num);
+    HAL_DBG("GMAC Num: %ld\n", num);
     for (bus = 0; bus < num; bus++) {
         eth = &ethConfigTable[bus];
+        HAL_DBG("new pGmac\n");
         if (eth) {
             pGMAC = &eth->instance;
         } else {
             return -1;
         }
-
-        if (!mmap(0x1000000000U + GMAC0_BASE, GMAC0_BASE, 4096, true)) {
+        HAL_DBG("map GMAC0\n");
+        if (!mmap(0x2000000000ULL+ GMAC0_BASE, GMAC0_BASE, 65536, true)) {
             printf("eth_hal: mmap GMAC0(%8x) failed\n", GMAC0);
             exit(1);
         }
-
-        if (!mmap(0x2000000000U + GPIO2_BASE, GPIO2_BASE, 4096, true)) {
+        HAL_DBG("map GPIO2\n");
+        if (!mmap(0x2000000000ULL + GPIO2_BASE, GPIO2_BASE, 65536, true)) {
             printf("eth_hal: mmap GPIO2(%8x) failed\n", GPIO2);
             exit(1);
         }
 
+        if (!mmap(0x2000000000ULL + GRF_BASE, GRF_BASE, 327680, true)) {
+            printf("eth_hal: mmap GRF(%8x) failed\n", GRF);
+            exit(1);
+        }
+        
+        if (!mmap(0x2000000000ULL + CRU_BASE, CRU_BASE, 65535, true)) {
+            printf("eth_hal: mmap GRF(%8x) failed\n", GRF);
+            exit(1);
+        }
+        if (!mmap(0x2000000000ULL + TIMER5_BASE, CRU_BASE, 32, true)) {
+            printf("eth_hal: mmap GRF(%8x) failed\n", GRF);
+            exit(1);
+        }
+        if (!mmap(0x2000000000ULL + PMUCRU_BASE, PMUCRU_BASE, 65535, true)) {
+            printf("eth_hal: mmap GRF(%8x) failed\n", GRF);
+            exit(1);
+        }
+        HAL_DBG("config iomux\n");
         /* ionmux */
         GMAC_Iomux_Config(bus);
-
+        HAL_DBG("config cru\n");
         HAL_CRU_ClkEnable(eth->halDev->pclkGateID);
         HAL_CRU_ClkEnable(eth->halDev->clkGateID);
-
+        
         /* Register irq */
         // register_irq(eth->halDev->irqNum, );
         /* PHY reset */
+        HAL_DBG("reset phy\n");
         GMAC_PHY_Reset(eth);
-
+        
         /* GMAC Init */
+        HAL_DBG("init gmac\n");
         GMAC_Init(bus);
 
+        HAL_DBG("init memory\n");
         GMAC_Memory_Init(eth, pGMAC);
-
+        
         /* Enable GMAC and DMA transmission and reception */
+        HAL_DBG("start gmac\n");
         HAL_GMAC_Start(pGMAC, eth->macAddr);
-
+        
         /* Update links information */
+        HAL_DBG("phy update link\n");
         PHY_Update_Links(eth, pGMAC, bus);
-
         /* Dump MAC Regs */
         Dump_Regs(pGMAC);
         /* Dump PHY Regs */
