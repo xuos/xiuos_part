@@ -70,6 +70,7 @@ int main(void)
         spinlock_unlock(&whole_kernel_lock);
     }
 
+    core_init_done |= (1 << cpu_id);
     spinlock_lock(&whole_kernel_lock);
     if (cpu_id == 0) {
         /* init softkernel */
@@ -80,7 +81,9 @@ int main(void)
 
         for (int i = 1; i < NR_CPU; i++) {
             // start secondary cpus
-            cpu_start_secondary(i);
+            if (core_init_done & (1 << (i - 1)) != 0) {
+                cpu_start_secondary(i);
+            }
         }
 
         /* start first task */
@@ -93,7 +96,6 @@ int main(void)
     struct SchedulerRightGroup scheduler_rights;
     assert(AchieveResourceTag(&scheduler_rights.mmu_driver_tag, &hardkernel_tag, "mmu-ac-resource"));
     assert(AchieveResourceTag(&scheduler_rights.intr_driver_tag, &hardkernel_tag, "intr-ac-resource"));
-    core_init_done |= (1 << cpu_id);
     LOG_PRINTF("CPU %d init done\n", cpu_id);
     spinlock_unlock(&whole_kernel_lock);
 
