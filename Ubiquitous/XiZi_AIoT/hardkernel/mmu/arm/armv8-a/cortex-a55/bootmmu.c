@@ -253,7 +253,11 @@ extern void main(void);
 static bool _bss_inited = false;
 void bootmain()
 {
-    // __print();
+    __print();
+    // if(_bss_inited){
+    //     unsigned int* p = (unsigned int*)0xffffffff;
+    //     *p = 0;
+    // }
     build_boot_pgdir();
     load_boot_pgdir();
     __asm__ __volatile__("add sp, sp, %0" ::"r"(KERN_OFFSET));

@@ -36,7 +36,8 @@ _boot_start:
 
     // get cpu id, and subtract the offset from the stacks base address
     mrs     x2,     mpidr_el1
-    and     x2,     x2, #0x3
+    and     x2,     x2, #0xFFF
+    lsr     x2,     x2, #8
     mov     x5,     x2
     mul     x3,     x2, x1
     sub     x0,     x0, x3
@@ -45,11 +46,10 @@ _boot_start:
     mov     x2,         #ARM_MODE_EL1_h | DIS_INT  
     msr     spsr_el1,   x2
 
-    // bl el2_setup
-
     // check cpu id - cpu0 is primary cpu
     mrs     x2,     mpidr_el1
-    and     x2,     x2, #0x3
+    and     x2,     x2, #0xFFF
+    lsr     x2,     x2, #8
     mov     x5,     x2
     cmp     x5, 	#0
     beq     primary_cpu_init
@@ -66,7 +66,7 @@ primary_cpu_init:
 1:  
     cmp     x1,	x2
     stp     x3,     x3, [x1], #16
-    b.lt     1b    
+    b.lt     1b  
 
 	bl bootmain
 
@@ -117,4 +117,4 @@ el2_setup:
     eret
     .endfunc
 
-    .end
+    .end  
