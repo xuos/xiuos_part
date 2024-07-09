@@ -43,6 +43,12 @@ extern int sys_spawn(char* img_start, char* name, char** argv);
 
 static struct TraceTag hardkernel_tag, softkernel_tag;
 static volatile int core_para_init = 0;
+
+static void sync_cores() {
+    while (core_para_init != 0xF) ;
+    return;
+}
+
 int main(void)
 {
     /* init tracer */
@@ -100,6 +106,7 @@ int main(void)
 
     // sync memory
     __sync_synchronize();
+    sync_cores();
     start_smp_cache_broadcast(cpu_id);
     // enter kernel seriously
     xizi_enter_kernel();
