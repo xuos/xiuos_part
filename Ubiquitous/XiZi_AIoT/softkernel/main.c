@@ -42,11 +42,12 @@ extern uintptr_t _binary_init_start[], _binary_default_fs_start[];
 extern int sys_spawn(char* img_start, char* name, char** argv);
 
 static struct TraceTag hardkernel_tag, softkernel_tag;
-static volatile int core_init_done = 0;
+static volatile int core_para_init = 0;
 int main(void)
 {
     /* init tracer */
     uint32_t cpu_id = cur_cpuid();
+    core_para_init |= (1 << cpu_id);
 
     if (cpu_id == 0) {
         /* init memory management first */
@@ -70,7 +71,6 @@ int main(void)
         spinlock_unlock(&whole_kernel_lock);
     }
 
-    core_init_done |= (1 << cpu_id);
     spinlock_lock(&whole_kernel_lock);
     if (cpu_id == 0) {
         /* init softkernel */
@@ -81,9 +81,8 @@ int main(void)
 
         for (int i = 1; i < NR_CPU; i++) {
             // start secondary cpus
-            if (core_init_done & (1 << (i - 1)) != 0) {
-                cpu_start_secondary(i);
-            }
+            while ((core_para_init & (1 << (i - 1))) == 0);
+            cpu_start_secondary(i);
         }
 
         /* start first task */
