@@ -303,13 +303,11 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         /* if there's not a runnable task, wait for one */
         if (next_task == NULL) {
             xizi_leave_kernel();
-            // there is no task to run, into low power mode
-            cpu_into_low_power();
+           
 
             /* leave kernel for other cores, so they may create a runnable task */
             xizi_enter_kernel();
-            // activate cpu
-            cpu_leave_low_power();
+           
             continue;
         }
 

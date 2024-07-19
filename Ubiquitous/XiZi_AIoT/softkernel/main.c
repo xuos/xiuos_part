@@ -45,7 +45,7 @@ static struct TraceTag hardkernel_tag, softkernel_tag;
 static volatile int core_para_init = 0;
 
 static void sync_cores() {
-    while (core_para_init != 0xF) ;
+    while (core_para_init != ((1 << NR_CPU) - 1)) ;
     return;
 }
 
@@ -92,8 +92,8 @@ int main(void)
         }
 
         /* start first task */
-        char* init_task_param[2] = { "/app/init", 0 };
-        sys_spawn((char*)_binary_init_start, "init", init_task_param);
+        char* init_task_param[2] = { "/app/shell", 0 };
+        sys_spawn((char*)_binary_init_start, "shell", init_task_param);
         char* fs_server_task_param[2] = { "/app/fs_server", 0 };
         sys_spawn((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
     }

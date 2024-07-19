@@ -49,7 +49,7 @@ bool module_phymem_init()
     return true;
 }
 
-char* kalloc(size_t size)
+char* kalloc(uintptr_t size)
 {
     char* mem_alloc = KBuddyAlloc(&kern_virtmem_buddy, size);
     if (mem_alloc == NULL) {

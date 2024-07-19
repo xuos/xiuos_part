@@ -55,64 +55,56 @@ Modification:
 #define UNLOCKED 0xFF
 // int spinlock_lock(spinlock_t * lock, uint64_t timeout)
     .global _spinlock_lock
-    .func _spinlock_lock
+.func _spinlock_lock
 _spinlock_lock:
-mov     w2, #1
+    mov     w2, #1
+    sevl
+1: 
+    wfe
 
-sevl
-wfe
+2: 
+    ldaxrb  w1, [x0]                     // check if the spinlock is currently unlocked
+    cmp     w1, #UNLOCKED
+    bne     1b
 
-ldaxrb  w1, [x0]                     // check if the spinlock is currently unlocked
-cmp     w1, #UNLOCKED
-bne     _spinlock_lock
+    mrs     x1, mpidr_el1                // get our CPU ID
+    and     x1, x1, #0xFFF
+    lsr     x1, x1, #8
+    stxrb   w2, w1, [x0]
+    cmp     x2, #0
+    bne     2b        // check if the write was successful, if the write failed, start over
 
-mrs     x1, mpidr_el1                // get our CPU ID
-and     x1, x1, #0xFFF
-lsr     x1, x1, #8
-stxrb   w2, w1, [x0]
-cmp     x2, #0
-bne     _spinlock_lock        // check if the write was successful, if the write failed, start over
+    dmb    ish                        // Ensure that accesses to shared resource have completed
 
-dmb    ish                        // Ensure that accesses to shared resource have completed
-
-mov    x0, #0
-ret
-
-    .endfunc 
+    mov    x0, #0
+    ret
+.endfunc 
 
 
 // void spinlock_unlock(spinlock_t * lock)
     .global _spinlock_unlock
     .func _spinlock_unlock
 _spinlock_unlock:
+    mrs     x1, mpidr_el1                // get our CPU ID
+    and     x1, x1, #0xFFF
+    lsr     x1, x1, #8
 
-mrs     x1, mpidr_el1                // get our CPU ID
-and     x1, x1, #0xFFF
-lsr     x1, x1, #8
+    ldr     w2, [x0]
+    cmp     w1, w2
+    bne     1f                                       //doesn't match,jump to 1
 
-ldr     w2, [x0]
-cmp     w1, w2
-bne     1f                                       //doesn't match,jump to 1
+    dmb     ish
+    mov     w1, #UNLOCKED 
+    str     w1, [x0]
+    dsb     ish                                 //Ensure that no instructions following the barrier execute until
+                                                // all memory accesses prior to the barrier have completed.
+    sevl                                          // send event to wake up other cores waiting on spinlock
 
-
-dmb     ish
-
-mov     w1, #UNLOCKED 
-str     w1, [x0]
-
-dsb     ish                                //Ensure that no instructions following the barrier execute until
-                                           // all memory accesses prior to the barrier have completed.
-
-
-sevl                                          // send event to wake up other cores waiting on spinlock
-
-mov     x0, #0                               // return success
-ret
-
+    mov     x0, #0                               // return success
+    ret
 1:
-mov     x0, #1                              //doesn't match, so exit with failure
-ret
-
+    mov     x0, #1                              //doesn't match, so exit with failure
+    ret
 .endfunc
 
 .end

@@ -349,7 +349,6 @@ IPC_SERVER_REGISTER_INTERFACES(IpcFsServer, 10,
 
 int main(int argc, char* argv[])
 {
-    printf("MemFS Start\n");
     sys_state_info info;
     get_memblock_info(&info);
 

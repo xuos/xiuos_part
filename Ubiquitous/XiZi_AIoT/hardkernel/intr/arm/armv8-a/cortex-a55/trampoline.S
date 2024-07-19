@@ -182,25 +182,19 @@ alltraps:
   b badtrap
 
 badtrap:
-        msr daifset, #0xf
         savereg
-        
         mov x0, sp
         bl  kernel_intr_handler 
         b   .
 
 el1sync:
-        msr daifset, #0xf
         savereg
-        
         mov x0, sp
         bl  kernel_abort_handler 
         b   .
       
 el1irq:
-        msr daifset, #0xf
         usavereg
-      
         mov x0, sp
         bl intr_irq_dispatch
 
@@ -209,9 +203,7 @@ el1irq:
         eret
       
 el0sync:
-        msr daifset, #0xf
         usavereg
-      
         mov x0, sp
         bl syscall_arch_handler
       
@@ -220,9 +212,7 @@ el0sync:
         eret
 
 el0irq:
-        msr daifset, #0xf
         usavereg
-      
         mov x0, sp
         bl intr_irq_dispatch
       

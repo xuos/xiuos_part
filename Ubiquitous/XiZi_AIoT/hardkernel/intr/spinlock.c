@@ -59,7 +59,7 @@ __attribute__((optimize("O0"))) void spinlock_init(struct spinlock* lock, char* 
 }
 
 extern int _spinlock_lock(struct spinlock* lock, uint32_t timeout);
-extern void _spinlock_unlock(struct spinlock* lock);
+extern int _spinlock_unlock(struct spinlock* lock);
 
 __attribute__((optimize("O0"))) void spinlock_lock(struct spinlock* lock)
 {
@@ -88,7 +88,9 @@ __attribute__((optimize("O0"))) void spinlock_unlock(struct spinlock* lock)
     _double_list_del(p_lock_node->prev, p_lock_node->next);
     _spinlock_unlock(&request_lock);
 
-    _spinlock_unlock(lock);
+    if (_spinlock_unlock(lock) != 0) {
+        ERROR("Core %d trying to unlock a lock belongs to %d.\n", cur_cpuid(), lock->owner_cpu);
+    }
 }
 
 __attribute__((optimize("O0"))) bool spinlock_try_lock(struct spinlock* lock)

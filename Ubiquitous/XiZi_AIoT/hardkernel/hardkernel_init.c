@@ -220,6 +220,7 @@ bool secondary_cpu_hardkernel_init(int cpu_id, struct TraceTag* _hardkernel_tag)
     p_icache_driver->enable();
     p_dcache_driver->enable();
     // clock
+    p_clock_driver->sys_clock_init();
     p_intr_driver->single_irq_enable(p_clock_driver->get_clock_int(), cpu_id, 0);
     // mmu
     secondary_cpu_load_kern_pgdir(&init_mmu_tag, &init_intr_tag);
