@@ -51,7 +51,7 @@ static bool _new_pgdir(struct TopLevelPageDirectory* pgdir)
     return true;
 }
 
-static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, int len, uintptr_t attr)
+static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, intptr_t len, uintptr_t attr)
 {
     assert(len >= 0);
     vaddr = ALIGNDOWN(vaddr, LEVEL4_PTE_SIZE);
@@ -140,7 +140,7 @@ static bool _map_user_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, 
         _p_pgtbl_mmu_access->MmuUsrDevPteAttr(&mem_attr);
     }
 
-    return _map_pages(pgdir, vaddr, paddr, len, mem_attr);
+    return _map_pages(pgdir, vaddr, paddr, (intptr_t)len, mem_attr);
 }
 
 /// assume that a user pagedir is allocated from [0, size)
