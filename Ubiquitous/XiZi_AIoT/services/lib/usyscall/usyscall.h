@@ -99,6 +99,9 @@ int show_task();
 int show_mem();
 int show_cpu();
 
+uintptr_t get_second();
+uintptr_t get_tick();
+
 int semaphore_new(int val);
 bool semaphore_free(int sem_id);
 bool semaphore_wait(int sem_id);

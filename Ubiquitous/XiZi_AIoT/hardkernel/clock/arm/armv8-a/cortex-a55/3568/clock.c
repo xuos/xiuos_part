@@ -64,7 +64,7 @@ static uint64_t _get_tick()
 
 static uint64_t _get_second()
 {
-    return 0;
+    return _get_tick() / r_cntfrq_el0();
 }
 
 static bool _is_timer_expired()

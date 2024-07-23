@@ -101,6 +101,20 @@ int show_cpu()
     return syscall(SYSCALL_SYS_STATE, SYS_STATE_SHOW_CPU_INFO, 0, 0, 0);
 }
 
+uintptr_t get_second()
+{
+    sys_state_info info;
+    syscall(SYSCALL_SYS_STATE, SYS_STATE_GET_CURRENT_SECOND, (intptr_t)&info, 0, 0);
+    return info.current_second;
+}
+
+uintptr_t get_tick()
+{
+    sys_state_info info;
+    syscall(SYSCALL_SYS_STATE, SYS_STATE_GET_CURRENT_TICK, (intptr_t)&info, 0, 0);
+    return info.current_tick;
+}
+
 uintptr_t mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 {
     uintptr_t vaddr_inner = vaddr, paddr_inner = paddr;
