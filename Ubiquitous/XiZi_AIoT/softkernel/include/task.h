@@ -109,6 +109,7 @@ struct SchedulerRightGroup {
 };
 
 struct XiziTaskManager {
+    TraceTag tag;
     /* thead schedule lists */
     struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
     struct double_list_node task_running_list_head;
@@ -149,5 +150,4 @@ extern uint32_t ready_task_priority;
 extern struct Thread* next_task_emergency;
 extern struct XiziTaskManager xizi_task_manager;
 
-int spawn_embedded_task(char* img_start, char* name, char** argv);
-bool module_task_manager_init(void);
+bool module_task_manager_init(TraceTag* softkernel_tag);

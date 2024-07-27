@@ -48,7 +48,7 @@ bool softkernel_init(struct TraceTag* _hardkernel_tag, struct TraceTag* _softker
     AchieveResourceTag(&intr_driver_tag, _hardkernel_tag, "intr-ac-resource");
     load_kern_pgdir(&mmu_driver_tag, &intr_driver_tag); // enter kernel virtmem space
 
-    module_task_manager_init(); // init task
+    module_task_manager_init(_softkernel_tag); // init task
 
     struct SharePageRightGroup sp_rights;
     AchieveResourceTag(&sp_rights.dcache_driver_tag, _hardkernel_tag, "dcache-ac-resource");

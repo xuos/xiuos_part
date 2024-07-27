@@ -147,7 +147,7 @@ void* AchieveResource(TraceTag* tag)
 
 bool CreateResourceTag(TraceTag* new_tag, TraceTag* owner, char* name, tracemeta_ac_type type, void* p_resource)
 {
-    assert(new_tag != NULL && owner != NULL);
+    assert(owner != NULL);
     if (owner->meta == NULL) {
         ERROR("Tracer: Empty owner\n");
         return false;
@@ -168,7 +168,9 @@ bool CreateResourceTag(TraceTag* new_tag, TraceTag* owner, char* name, tracemeta
     doubleListAddOnHead(&new_node->list_node, &owner->meta->children_guard);
     new_node->parent = owner->meta;
 
-    new_tag->meta = new_node;
+    if (new_tag != NULL) {
+        new_tag->meta = new_node;
+    }
     return true;
 }
 
@@ -187,12 +189,42 @@ bool DeleteResource(TraceTag* target, TraceTag* owner)
     if (target->meta->name != NULL) {
         slab_free(&sys_tracer.node_name_allocator, target->meta->name);
     }
+
     // delete all children
-    /// @attention currently donot allow multilevel resource deletion
     if (target->meta->type == TRACER_OWNER) {
-        assert(IS_DOUBLE_LIST_EMPTY(&target->meta->children_guard));
+        while (!IS_DOUBLE_LIST_EMPTY(&target->meta->children_guard)) {
+            TraceTag tmp_node = {
+                .meta = DOUBLE_LIST_ENTRY(target->meta->children_guard.next, TracerNode, list_node),
+            };
+            DeleteResource(&tmp_node, target);
+        }
     }
     slab_free(&sys_tracer.node_allocator, target->meta);
     target->meta = NULL;
     return true;
+}
+
+void debug_list_tracetree_inner(TracerNode* cur_node)
+{
+    DEBUG("[%s] ", cur_node->name);
+    TracerNode* tmp = NULL;
+    DOUBLE_LIST_FOR_EACH_ENTRY(tmp, &cur_node->children_guard, list_node)
+    {
+        if (tmp->name != NULL) {
+            DEBUG("%s ", tmp->name);
+        } else {
+            DEBUG("ANON ");
+        }
+    }
+    DEBUG("\n");
+    DOUBLE_LIST_FOR_EACH_ENTRY(tmp, &cur_node->children_guard, list_node)
+    {
+        debug_list_tracetree_inner(tmp);
+    }
+}
+
+void debug_list_tracetree()
+{
+    TracerNode* ref_root = RequireRootTag()->meta;
+    debug_list_tracetree_inner(ref_root);
 }

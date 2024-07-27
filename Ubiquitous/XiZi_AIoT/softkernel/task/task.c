@@ -303,11 +303,8 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         /* if there's not a runnable task, wait for one */
         if (next_task == NULL) {
             xizi_leave_kernel();
-           
-
             /* leave kernel for other cores, so they may create a runnable task */
             xizi_enter_kernel();
-           
             continue;
         }
 
@@ -392,8 +389,9 @@ struct XiziTaskManager xizi_task_manager = {
     .set_cur_task_priority = _set_cur_task_priority
 };
 
-bool module_task_manager_init(void)
+bool module_task_manager_init(TraceTag* softkernel_tag)
 {
+    CreateResourceTag(&xizi_task_manager.tag, softkernel_tag, "KTaskManager", TRACER_OWNER, &xizi_task_manager);
     xizi_task_manager.init();
     return true;
 }

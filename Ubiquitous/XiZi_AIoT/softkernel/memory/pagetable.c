@@ -122,7 +122,7 @@ static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, int len)
 /// @param len
 /// @param is_dev
 /// @return
-static bool _map_user_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
+static bool _map_user_pages(struct MemSpace* pmemspace, uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 {
     if (len < 0) {
         return false;
@@ -140,13 +140,13 @@ static bool _map_user_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, 
         _p_pgtbl_mmu_access->MmuUsrDevPteAttr(&mem_attr);
     }
 
-    return _map_pages(pgdir, vaddr, paddr, (intptr_t)len, mem_attr);
+    return _map_pages(pmemspace->pgdir.pd_addr, vaddr, paddr, (intptr_t)len, mem_attr);
 }
 
 /// assume that a user pagedir is allocated from [0, size)
 /// if new_size > old_size, allocate more space,
 /// if old_size > new_size, free extra space, to avoid unnecessary alloc/free.
-static uintptr_t _resize_user_pgdir(struct TopLevelPageDirectory* pgdir, uintptr_t old_size, uintptr_t new_size)
+static uintptr_t _resize_user_pgdir(struct MemSpace* pmemspace, uintptr_t old_size, uintptr_t new_size)
 {
     if (UNLIKELY(new_size > USER_MEM_TOP)) {
         ERROR("user size out of range.\n");
@@ -167,9 +167,10 @@ static uintptr_t _resize_user_pgdir(struct TopLevelPageDirectory* pgdir, uintptr
         }
         memset(new_page, 0, PAGE_SIZE);
 
-        if (!xizi_pager.map_pages(pgdir->pd_addr, cur_size, V2P(new_page), PAGE_SIZE, false)) {
+        if (!xizi_pager.map_pages(pmemspace, cur_size, V2P(new_page), PAGE_SIZE, false)) {
             return cur_size;
         }
+        CreateResourceTag(NULL, &pmemspace->tag, NULL, TRACER_MEM_FROM_BUDDY_AC_RESOURCE, V2P(new_page));
         cur_size += PAGE_SIZE;
     }
 

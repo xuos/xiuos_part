@@ -44,6 +44,11 @@ int sys_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, int is_dev)
     int true_len = ALIGNUP(len, PAGE_SIZE);
 
     if (*paddr != (uintptr_t)NULL) {
+        if (*paddr >= PHY_MEM_BASE && *paddr < PHY_MEM_STOP && cur_task->tid > 1) {
+            ERROR("mapping invalid memory: 0x%p\n", *paddr);
+            return -1;
+        }
+
         if (xizi_share_page_manager.task_map_pages(cur_task, *vaddr, *paddr, true_len / PAGE_SIZE, is_dev) == (uintptr_t)NULL) {
             return -1;
         }
@@ -52,6 +57,7 @@ int sys_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, int is_dev)
         uintptr_t load_vaddr = *vaddr;
         while (load_len < true_len) {
             char* new_paddr = raw_alloc(PAGE_SIZE);
+            CreateResourceTag(NULL, &cur_task->memspace->tag, NULL, TRACER_MEM_FROM_BUDDY_AC_RESOURCE, new_paddr);
             if (new_paddr == NULL) {
                 return -1;
             }

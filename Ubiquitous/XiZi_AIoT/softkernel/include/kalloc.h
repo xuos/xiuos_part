@@ -34,6 +34,7 @@ Modification:
 bool module_phymem_init();
 char* kalloc(size_t size);
 bool kfree(char* vaddr);
+bool raw_kfree(char* paddr);
 
 char* raw_alloc(size_t size);
 bool raw_free(char* paddr);

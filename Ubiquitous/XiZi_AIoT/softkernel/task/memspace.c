@@ -32,11 +32,11 @@ Modification:
 #include <stddef.h>
 #include <stdint.h>
 
+#include "assert.h"
 #include "bitmap64.h"
 #include "execelf.h"
 #include "kalloc.h"
 #include "memspace.h"
-#include "pagetable.h"
 #include "task.h"
 
 #define MAX_SUPPORT_PARAMS 32
@@ -56,6 +56,7 @@ struct MemSpace* alloc_memspace()
     pmemspace->mem_size = 0;
     pmemspace->pgdir.pd_addr = 0;
     pmemspace->thread_to_notify = NULL;
+    CreateResourceTag(&pmemspace->tag, &xizi_task_manager.tag, NULL, TRACER_OWNER, (void*)pmemspace);
     return pmemspace;
 }
 
@@ -68,12 +69,24 @@ void free_memspace(struct MemSpace* pmemspace)
         xizi_pager.free_user_pgdir(&pmemspace->pgdir);
     }
 
+    TracerNode* tmp_node = NULL;
+    DOUBLE_LIST_FOR_EACH_ENTRY(tmp_node, &pmemspace->tag.meta->children_guard, list_node)
+    {
+        assert((uintptr_t)tmp_node->p_resource >= PHY_MEM_BASE && (uintptr_t)tmp_node->p_resource < PHY_MEM_STOP);
+        if ((uintptr_t)tmp_node->p_resource < PHY_USER_FREEMEM_BASE) {
+            kfree(P2V(tmp_node->p_resource));
+        } else {
+            raw_free(tmp_node->p_resource);
+        }
+    }
+
     /* free ipc virt address allocator */
     if (pmemspace->massive_ipc_allocator != NULL) {
         KBuddyDestory(pmemspace->massive_ipc_allocator);
         slab_free(&xizi_task_manager.task_buddy_allocator, (void*)pmemspace->massive_ipc_allocator);
     }
 
+    DeleteResource(&pmemspace->tag, &xizi_task_manager.tag);
     slab_free(&xizi_task_manager.memspace_allocator, (void*)pmemspace);
 }
 
@@ -101,14 +114,12 @@ uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start)
     /* allocate a pgdir */
     /* only supports first inited memspace */
     assert(pmemspace->pgdir.pd_addr == NULL);
-    struct TopLevelPageDirectory pgdir;
-    pgdir.pd_addr = NULL;
-    if (UNLIKELY(!xizi_pager.new_pgdir(&pgdir))) {
+    if (UNLIKELY(!xizi_pager.new_pgdir(&pmemspace->pgdir))) {
         ERROR("Create new pgdir failed.\n");
         goto error_exec;
     }
     /* copy kernel pagetable so that interrupt and syscall wont corrupt */
-    memcpy(pgdir.pd_addr, kern_pgdir.pd_addr, TOPLEVLE_PAGEDIR_SIZE);
+    memcpy(pmemspace->pgdir.pd_addr, kern_pgdir.pd_addr, TOPLEVLE_PAGEDIR_SIZE);
 
     // read elf file by (header, section)
     uintptr_t load_size = 0;
@@ -126,7 +137,7 @@ uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start)
 
         // read section
         // 1. alloc space
-        if ((load_size = xizi_pager.resize_user_pgdir(&pgdir, load_size, ph.vaddr + ph.memsz))
+        if ((load_size = xizi_pager.resize_user_pgdir(pmemspace, load_size, ph.vaddr + ph.memsz))
             != ph.vaddr + ph.memsz) {
             ERROR("Add uspace size failed.\n");
             goto error_exec;
@@ -136,9 +147,9 @@ uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start)
             LOG("Unsupported elf file, try use flag -N to compile.\n");
         }
         for (int addr_offset = 0; addr_offset < ph.filesz; addr_offset += PAGE_SIZE) {
-            uintptr_t page_paddr = xizi_pager.address_translate(&pgdir, ph.vaddr + addr_offset);
+            uintptr_t page_paddr = xizi_pager.address_translate(&pmemspace->pgdir, ph.vaddr + addr_offset);
             if (page_paddr == 0) {
-                ERROR("copy elf file to unmapped addr: %x(pgdir: %x)\n", ph.vaddr + addr_offset, pgdir.pd_addr);
+                ERROR("copy elf file to unmapped addr: %x(pgdir: %x)\n", ph.vaddr + addr_offset, pmemspace->pgdir.pd_addr);
                 goto error_exec;
             }
             uintptr_t read_size = (ph.filesz - addr_offset < PAGE_SIZE ? ph.filesz - addr_offset : PAGE_SIZE);
@@ -148,15 +159,14 @@ uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start)
 
     /// elf file content now in memory
     // memspace will use this page dir
-    pmemspace->pgdir = pgdir;
     pmemspace->heap_base = ALIGNUP(load_size, PAGE_SIZE);
     pmemspace->mem_size = pmemspace->heap_base;
 
     return (uintptr_t*)elf.entry;
 
 error_exec:
-    if (pgdir.pd_addr != NULL) {
-        xizi_pager.free_user_pgdir(&pgdir);
+    if (pmemspace->pgdir.pd_addr != NULL) {
+        xizi_pager.free_user_pgdir(&pmemspace->pgdir);
     }
     ERROR("Error loading memspace.\n");
     return NULL;
@@ -209,7 +219,7 @@ struct ThreadStackPointer load_user_stack(struct MemSpace* pmemspace, char** arg
     }
 
     /* map memory to user stack space in memspace*/
-    if (!xizi_pager.map_pages(pmemspace->pgdir.pd_addr, USER_MEM_TOP - ((stack_idx + 1) * USER_STACK_SIZE), V2P(stack_bottom), USER_STACK_SIZE, false)) {
+    if (!xizi_pager.map_pages(pmemspace, USER_MEM_TOP - ((stack_idx + 1) * USER_STACK_SIZE), V2P(stack_bottom), USER_STACK_SIZE, false)) {
         /* this could only fail due to inner page directory's allocation failure */
         ERROR("User stack map failed\n");
         handle_error_stack_loading(pmemspace, stack_idx, stack_bottom, false);

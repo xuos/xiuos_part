@@ -69,6 +69,11 @@ bool kfree(char* vaddr)
     return KBuddyFree(&kern_virtmem_buddy, V2P_WO(vaddr));
 }
 
+bool raw_kfree(char* paddr)
+{
+    return KBuddyFree(&kern_virtmem_buddy, paddr);
+}
+
 char* raw_alloc(size_t size)
 {
     char* mem_alloc = KBuddyAlloc(&user_phy_freemem_buddy, size);

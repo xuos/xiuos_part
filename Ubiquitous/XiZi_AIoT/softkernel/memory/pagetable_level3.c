@@ -96,22 +96,6 @@ void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
                 uintptr_t* l4_table_paddr = (uintptr_t*)LEVEL4_PTE_ADDR(l3_table_vaddr[l3_entry_idx]);
                 if (l4_table_paddr != NULL) {
                     uintptr_t* l4_table_vaddr = P2V(l4_table_paddr);
-                    for (uintptr_t page_entry_idx = 0; page_entry_idx < NUM_LEVEL4_PTE; page_entry_idx++) {
-                        uintptr_t vaddr = (l2_entry_idx << LEVEL2_PDE_SHIFT) | (l3_entry_idx << LEVEL3_PDE_SHIFT) | (page_entry_idx << LEVEL4_PTE_SHIFT);
-
-                        // get page paddr
-                        uintptr_t* page_paddr = (uintptr_t*)ALIGNDOWN((l4_table_vaddr)[page_entry_idx], PAGE_SIZE);
-                        if (page_paddr != NULL) {
-                            // Ensure the virtual address is not in the IPC address space
-                            assert(vaddr < USER_IPC_SPACE_BASE || vaddr >= USER_IPC_SPACE_TOP);
-
-                            if (LIKELY((uintptr_t)page_paddr >= low_bound && (uintptr_t)page_paddr < high_bound)) {
-                                kfree(P2V(page_paddr));
-                            } else if (LIKELY((uintptr_t)page_paddr >= user_low_bound && (uintptr_t)page_paddr < user_high_bound)) {
-                                raw_free((char*)page_paddr);
-                            }
-                        }
-                    }
                     kfree(P2V(l4_table_paddr));
                 }
             }

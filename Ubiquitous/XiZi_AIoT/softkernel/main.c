@@ -44,8 +44,10 @@ extern int sys_spawn(char* img_start, char* name, char** argv);
 static struct TraceTag hardkernel_tag, softkernel_tag;
 static volatile int core_para_init = 0;
 
-static void sync_cores() {
-    while (core_para_init != ((1 << NR_CPU) - 1)) ;
+static void main_sync_cores()
+{
+    while (core_para_init != ((1 << NR_CPU) - 1))
+        ;
     return;
 }
 
@@ -87,7 +89,8 @@ int main(void)
 
         for (int i = 1; i < NR_CPU; i++) {
             // start secondary cpus
-            while ((core_para_init & (1 << (i - 1))) == 0);
+            while ((core_para_init & (1 << (i - 1))) == 0)
+                ;
             cpu_start_secondary(i);
         }
 
@@ -106,7 +109,7 @@ int main(void)
 
     // sync memory
     __sync_synchronize();
-    sync_cores();
+    main_sync_cores();
     start_smp_cache_broadcast(cpu_id);
     // enter kernel seriously
     xizi_enter_kernel();

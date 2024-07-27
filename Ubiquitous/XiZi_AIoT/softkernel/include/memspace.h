@@ -29,10 +29,14 @@ Modification:
 *************************************************/
 #pragma once
 
+#include "actracer.h"
 #include "bitmap64.h"
 #include "buddy.h"
 #include "list.h"
-#include "share_page.h"
+
+struct TopLevelPageDirectory {
+    uintptr_t* pd_addr;
+};
 
 struct ThreadStackPointer {
     int argc;
@@ -42,6 +46,8 @@ struct ThreadStackPointer {
 };
 
 struct MemSpace {
+    /* trace node */
+    TraceTag tag;
     /* task memory resources */
     struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address
     uintptr_t heap_base; // mem size of proc used(allocated by kernel)

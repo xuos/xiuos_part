@@ -133,12 +133,12 @@ static uintptr_t map_task_share_page(struct Thread* task, const uintptr_t paddr,
     }
 
     // map first area
-    if (!xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false)) {
+    if (!xizi_pager.map_pages(task->memspace, vaddr, paddr, nr_pages * PAGE_SIZE, false)) {
         return (uintptr_t)NULL;
     }
 
     // map second area
-    if (!xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr + (nr_pages * PAGE_SIZE), paddr, nr_pages * PAGE_SIZE, false)) {
+    if (!xizi_pager.map_pages(task->memspace, vaddr + (nr_pages * PAGE_SIZE), paddr, nr_pages * PAGE_SIZE, false)) {
         xizi_pager.unmap_pages(task->memspace->pgdir.pd_addr, vaddr, nr_pages * PAGE_SIZE);
         return (uintptr_t)NULL;
     }
@@ -161,9 +161,9 @@ uintptr_t task_map_pages(struct Thread* task, const uintptr_t vaddr, const uintp
 
     bool ret = false;
     if (is_dev) {
-        ret = xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, true);
+        ret = xizi_pager.map_pages(task->memspace, vaddr, paddr, nr_pages * PAGE_SIZE, true);
     } else {
-        ret = xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false);
+        ret = xizi_pager.map_pages(task->memspace, vaddr, paddr, nr_pages * PAGE_SIZE, false);
     }
 
     if (!ret) {

@@ -32,7 +32,6 @@ Modification:
 #include "list.h"
 #include "memlayout.h"
 #include "spinlock.h"
-#include "pagetable.h"
 
 #include <stdbool.h>
 #include <stdint.h>
