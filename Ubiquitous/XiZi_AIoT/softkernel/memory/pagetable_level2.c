@@ -65,8 +65,6 @@ uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc)
 
 void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
 {
-    uintptr_t low_bound = kern_virtmem_buddy.mem_start, high_bound = kern_virtmem_buddy.mem_end;
-    uintptr_t user_low_bound = user_phy_freemem_buddy.mem_start, user_high_bound = user_phy_freemem_buddy.mem_end;
     uintptr_t end_idx = USER_MEM_TOP >> LEVEL3_PDE_SHIFT;
 
     for (uintptr_t level4_entry_idx = 0; level4_entry_idx < end_idx; level4_entry_idx++) {

@@ -83,8 +83,6 @@ void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
         return;
     }
 
-    uintptr_t low_bound = kern_virtmem_buddy.mem_start, high_bound = kern_virtmem_buddy.mem_end;
-    uintptr_t user_low_bound = user_phy_freemem_buddy.mem_start, user_high_bound = user_phy_freemem_buddy.mem_end;
     uintptr_t end_idx = (USER_MEM_TOP >> LEVEL2_PDE_SHIFT) & (NUM_LEVEL2_PDE - 1);
 
     for (uintptr_t l2_entry_idx = 0; l2_entry_idx < end_idx; l2_entry_idx++) {

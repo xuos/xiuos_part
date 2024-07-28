@@ -350,7 +350,7 @@ static void _task_unblock(struct Thread* task)
     assert(task->state == BLOCKED);
     task_node_leave_list(task);
     task->state = READY;
-    task_node_add_to_ready_list_head(task);
+    task_node_add_to_ready_list_back(task);
 }
 
 /// @brief  @warning not tested function

@@ -52,6 +52,7 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
 
     struct double_list_node* cur_node = NULL;
     struct server_session* server_session = NULL;
+
     /* update old sessions */
     for (int i = 0; i < arr_capacity; i++) {
         if (UNLIKELY(userland_session_arr[i].buf == NULL)) {
@@ -111,12 +112,13 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         };
 
         struct IpcMsg* msg = IPCSESSION_MSG(&userland_session_arr[session_idx]);
-        if (is_msg_needed(msg)) {
+        if (msg != NULL && is_msg_needed(msg)) {
             nr_sessions_need_to_handle++;
         }
 
         session_idx++;
     }
+
     if (session_idx < arr_capacity) {
         userland_session_arr[session_idx].buf = NULL;
         if (!has_middle_delete && nr_sessions_need_to_handle == 0) {

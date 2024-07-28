@@ -53,22 +53,17 @@ int sys_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, int is_dev)
             return -1;
         }
     } else {
-        int load_len = 0;
         uintptr_t load_vaddr = *vaddr;
-        while (load_len < true_len) {
-            char* new_paddr = raw_alloc(PAGE_SIZE);
-            CreateResourceTag(NULL, &cur_task->memspace->tag, NULL, TRACER_MEM_FROM_BUDDY_AC_RESOURCE, new_paddr);
-            if (new_paddr == NULL) {
-                return -1;
-            }
-            if (xizi_share_page_manager.task_map_pages(cur_task, load_vaddr, (uintptr_t)new_paddr, 1, false) == (uintptr_t)NULL) {
-                raw_free(new_paddr);
-                return -1;
-            }
-            load_vaddr += PAGE_SIZE;
-            load_len += PAGE_SIZE;
-            *paddr = (uintptr_t)new_paddr;
+        char* new_paddr = raw_alloc(true_len);
+        if (new_paddr == NULL) {
+            return -1;
         }
+        if (xizi_share_page_manager.task_map_pages(cur_task, load_vaddr, (uintptr_t)new_paddr, true_len / PAGE_SIZE, false) == (uintptr_t)NULL) {
+            raw_free(new_paddr);
+            return -1;
+        }
+        CreateResourceTag(NULL, &cur_task->memspace->tag, NULL, TRACER_MEM_FROM_BUDDY_AC_RESOURCE, new_paddr);
+        *paddr = (uintptr_t)new_paddr;
     }
 
     cur_task->memspace->mem_size += true_len;

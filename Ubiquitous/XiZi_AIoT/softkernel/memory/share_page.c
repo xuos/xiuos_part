@@ -111,7 +111,7 @@ static uintptr_t map_task_share_page(struct Thread* task, const uintptr_t paddr,
         vaddr = alloc_share_page_addr(task, nr_pages * 2);
 
         // time to use buddy
-        if (vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
+        if (vaddr + (2 * nr_pages * PAGE_SIZE) >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
             task->memspace->massive_ipc_allocator = (struct KBuddy*)slab_alloc(&xizi_task_manager.task_buddy_allocator);
             if (!task->memspace->massive_ipc_allocator) {
                 ERROR("Alloc task buddy failed.\n");

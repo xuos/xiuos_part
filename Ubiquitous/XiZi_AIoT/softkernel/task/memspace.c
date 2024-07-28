@@ -146,6 +146,7 @@ uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start)
         if (ph.vaddr % PAGE_SIZE != 0) {
             LOG("Unsupported elf file, try use flag -N to compile.\n");
         }
+
         for (int addr_offset = 0; addr_offset < ph.filesz; addr_offset += PAGE_SIZE) {
             uintptr_t page_paddr = xizi_pager.address_translate(&pmemspace->pgdir, ph.vaddr + addr_offset);
             if (page_paddr == 0) {
@@ -257,8 +258,8 @@ struct ThreadStackPointer load_user_stack(struct MemSpace* pmemspace, char** arg
     pmemspace->mem_size += USER_STACK_SIZE;
 
     loaded_sp.argc = argc;
-    loaded_sp.stack_idx = stack_idx;
     loaded_sp.user_sp = user_vspace_sp;
     loaded_sp.user_stack_vaddr = (uintptr_t)stack_bottom;
+    loaded_sp.stack_idx = stack_idx;
     return loaded_sp;
 }

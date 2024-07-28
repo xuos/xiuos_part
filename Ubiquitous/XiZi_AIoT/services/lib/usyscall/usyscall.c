@@ -15,11 +15,12 @@
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv)
 {
     /* read elf image */
+    int max_communicate_size = session->capacity - 0x1000;
     int file_size = ipc_fsize(session, fd);
     void* img = malloc(file_size);
     int read_len = 0;
     while (read_len < file_size) {
-        int cur_read_len = file_size - read_len < 4096 ? file_size - read_len : 4096;
+        int cur_read_len = file_size - read_len < max_communicate_size ? file_size - read_len : max_communicate_size;
         if (cur_read_len < 0) {
             return -1;
         }
