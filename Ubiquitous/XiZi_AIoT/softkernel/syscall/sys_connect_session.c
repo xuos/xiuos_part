@@ -35,12 +35,13 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-struct session_backend* create_session_inner(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, int capacity, struct Session* user_session)
+struct session_backend* create_session_inner(struct Thread* client, struct Thread* server, int capacity, struct Session* user_session)
 {
     // create share pages
+    assert(server != NULL && client != NULL);
     struct session_backend* session_backend = xizi_share_page_manager.create_share_pages(client, server, capacity);
     if (UNLIKELY(session_backend == NULL)) {
-        DEBUG("create_share_pages failed\n");
+        DEBUG("create_share_pages to server: %s failed\n", server->name);
         return NULL;
     }
 
@@ -60,24 +61,27 @@ int sys_connect_session(char* path, int capacity, struct Session* user_session)
         return -1;
     }
 
-    struct TaskMicroDescriptor* client = cur_cpu()->task;
+    struct Thread* client = cur_cpu()->task;
+    assert(client != NULL);
+
     /// get server
     struct TraceTag server_identifier_owner;
     if (!AchieveResourceTag(&server_identifier_owner, RequireRootTag(), "softkernel/server-identifier")) {
         panic("Server identifier not initialized.\b");
     }
-    assert(server_identifier_owner.meta != NULL || server_identifier_owner.type == TRACER_OWNER);
+    assert(server_identifier_owner.meta != NULL);
 
     struct TraceTag server_tag;
     if (!AchieveResourceTag(&server_tag, &server_identifier_owner, path)) {
         DEBUG("Not server: %s\n", path);
         return -1;
     }
-
-    struct TaskMicroDescriptor* server = AchieveResource(&server_tag);
+    struct Thread* server = AchieveResource(&server_tag);
     assert(server != NULL);
+
     if (create_session_inner(client, server, capacity, user_session) == NULL) {
         return -1;
     }
+
     return 0;
 }

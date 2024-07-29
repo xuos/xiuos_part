@@ -12,8 +12,9 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
-#include "libfs_to_client.h"
+#include "libfs.h"
 #include "libserial.h"
 #include "simple_service.h"
 #include "usyscall.h"
@@ -84,46 +85,47 @@ int main(int argc, char** argv)
     if (argc >= 2) {
         id = string_to_integer(argv[1]);
     }
-    printf("This is Simple Client %d, size is 0x%x\n", id, task_heap_base());
 
     struct Session session_wait;
     struct Session session_nowait;
     if (connect_session(&session_wait, "SimpleServer", 4096) < 0 || connect_session(&session_nowait, "SimpleServer", 4096) < 0) {
         printf("connect session failed\n");
-        exit();
+        exit(1);
     }
 
+    // test no wait ipc
     char *buf1 = NULL, *buf2 = NULL;
     struct IpcMsg* msg1 = hello_string_nowait(&session_nowait, &buf1, 32);
     struct IpcMsg* msg2 = hello_string_nowait(&session_nowait, &buf2, 128);
 
-    int ret = add(&session_wait, 17, 22);
+    // test ipc add(wait version)
+    int ret = 0;
+    ret = add(&session_wait, 17, 22);
     printf("ipc_add 17 + 22 = %d\n", ret);
-    char buf[32];
     ret = add(&session_wait, 9, 9);
     printf("ipc_add 9 + 9 = %d\n", ret);
 
-    struct Session session;
+    struct Session fs_session;
     static char id_buf[33] = { 0 };
     if (id > 1) {
-        if (connect_session(&session, "MemFS", 8092) < 0) {
-            printf("connect session failed\n");
+        if (connect_session(&fs_session, "MemFS", 8192) < 0) {
+            printf("connect fs_session failed\n");
         } else {
             int fd;
             itoa(id - 1, id_buf, 10);
             char* shell_task_param[3] = { "/simple_client", id_buf, 0 };
-            if ((fd = open(&session, shell_task_param[0])) >= 0) {
-                if (spawn(&session, fd, read, fsize, shell_task_param[0], shell_task_param) < 0) {
+            if ((fd = open(&fs_session, shell_task_param[0])) >= 0) {
+                if (spawn(&fs_session, fd, read, fsize, shell_task_param[0], shell_task_param) < 0) {
                     printf("Syscall Spawn simple_client failed\n");
                 }
-                if (spawn(&session, fd, read, fsize, shell_task_param[0], shell_task_param) < 0) {
+                if (spawn(&fs_session, fd, read, fsize, shell_task_param[0], shell_task_param) < 0) {
                     printf("Syscall Spawn simple_client failed\n");
                 }
-                close(&session, fd);
+                close(&fs_session, fd);
             } else {
                 printf("Open %s failed\n", shell_task_param[0]);
             }
-            free_session(&session);
+            free_session(&fs_session);
         }
     }
 
@@ -138,5 +140,5 @@ int main(int argc, char** argv)
     free_session(&session_wait);
     free_session(&session_nowait);
 
-    exit();
+    exit(0);
 }

@@ -31,15 +31,33 @@ Modification:
 
 #include "task.h"
 
-extern int sys_exit(struct TaskMicroDescriptor* task);
+extern int sys_exit(struct Thread* task);
 int sys_kill(int id)
 {
-    struct TaskMicroDescriptor* task = NULL;
+    struct Thread* task = NULL;
+    // check if task is a running one
+    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_running_list_head, node)
+    {
+        if (task->tid == id) {
+            sys_exit(task);
+            return 0;
+        }
+    }
 
+    // check if task is a blocking one
+    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_blocked_list_head, node)
+    {
+        if (task->tid == id) {
+            sys_exit(task);
+            return 0;
+        }
+    }
+
+    // check if task is a ready one
     for (int prio = 0; prio < TASK_MAX_PRIORITY; prio++) {
         DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[prio], node)
         {
-            if (task->pid == id) {
+            if (task->tid == id) {
                 sys_exit(task);
                 return 0;
             }

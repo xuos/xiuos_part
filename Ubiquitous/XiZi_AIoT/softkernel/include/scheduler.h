@@ -31,6 +31,6 @@ Modification:
 
 #include "task.h"
 
-struct TaskMicroDescriptor* max_priority_runnable_task(void);
-struct TaskMicroDescriptor* round_robin_runnable_task(uint32_t priority);
+struct Thread* max_priority_runnable_task(void);
+struct Thread* round_robin_runnable_task(uint32_t priority);
 void recover_priority(void);

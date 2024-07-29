@@ -29,6 +29,7 @@ Modification:
 *************************************************/
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 
 struct slab_state {

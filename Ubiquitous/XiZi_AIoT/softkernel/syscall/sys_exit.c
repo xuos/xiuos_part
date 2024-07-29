@@ -36,10 +36,15 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-int sys_exit(struct TaskMicroDescriptor* ptask)
+int sys_exit(struct Thread* ptask)
 {
     assert(ptask != NULL);
     ptask->dead = true;
+    // free that task straightly if it's a blocked task
+    if (ptask->state == BLOCKED) {
+        xizi_task_manager.free_pcb(ptask);
+    }
+    // yield current task in case it wants to exit itself
     xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
     return 0;
 }

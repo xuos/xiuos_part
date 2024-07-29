@@ -51,8 +51,8 @@ Modification:
 // [ block 0 ]  [  block 1  ]  [block 2] [...]  [  block 28  ]   [ ... ]
 // [ unused  ]  [super block]  [Inode bit map]  [block bit map]  [data blocks]
 
-#define NR_DIRECT_BLOCKS 5 // direct block number
-#define NR_INDIRECT_BLOCKS 8 // indirect block number
+#define NR_DIRECT_BLOCKS 4 // direct block number
+#define NR_INDIRECT_BLOCKS 25 // indirect block number
 #define ROOT_INUM 1 // root inode number
 
 #define MAX_INDIRECT_BLOCKS (BLOCK_SIZE / sizeof(uint32_t)) // Mmaximum number of indirect blocks mapped per block
@@ -77,6 +77,7 @@ struct SuperBlock {
     uint32_t size; // Number of total blocks of file system image
     uint32_t nblocks; // Number of data blocks
     uint32_t ninodes; // Number of inodes.
+    uint32_t nbitblocks;
 };
 
 // Inode structure
@@ -88,7 +89,7 @@ struct Inode {
 };
 
 // directory entry
-#define DIR_NAME_SIZE 14
+#define DIR_NAME_SIZE 30
 struct DirectEntry {
     uint16_t inum;
     char name[DIR_NAME_SIZE];

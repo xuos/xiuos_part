@@ -30,7 +30,8 @@ int IPC_DO_SERVE_FUNC(Ipc_hello_string)(char* buf, int* len)
     return 0;
 }
 
-IPC_SERVER_INTERFACE(Ipc_add, 2);
+// IPC_SERVER_INTERFACE(Ipc_add, 2);
+IPC_SERVER_THREAD_INTERFACE(Ipc_add, 2);
 IPC_SERVER_INTERFACE(Ipc_hello_string, 2);
 IPC_SERVER_REGISTER_INTERFACES(IpcSimpleServer, 2, Ipc_hello_string, Ipc_add);
 
@@ -38,10 +39,11 @@ int main(int argc, char* argv[])
 {
     if (register_server("SimpleServer") < 0) {
         printf("register server name: %s failed.\n", "SimpleServer");
-        exit();
+        exit(1);
     }
     ipc_server_loop(&IpcSimpleServer);
 
     // never reached
-    exit();
+    exit(0);
+    return 0;
 }

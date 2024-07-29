@@ -41,7 +41,7 @@ typedef struct {
             uint64_t valid : 1; // for server to peek new msg
             uint64_t done : 1; // for client to check request done
             uint64_t init : 1; // for client to check request done
-            uint64_t reserved : 1;
+            uint64_t handling : 1;
             uint64_t nr_args : 4;
             uint64_t opcode : 8;
             uint64_t len : 16;

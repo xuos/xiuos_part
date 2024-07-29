@@ -27,17 +27,22 @@ Author: AIIT XUOS Lab
 Modification:
 1. first version
 *************************************************/
+#include "log.h"
 #include "scheduler.h"
 
-struct TaskMicroDescriptor* max_priority_runnable_task(void)
+struct Thread* max_priority_runnable_task(void)
 {
-    struct TaskMicroDescriptor* task = NULL;
-    uint32_t priority = 0;
+    static struct Thread* task = NULL;
+    static int priority = 0;
 
     priority = __builtin_ffs(ready_task_priority) - 1;
+    if (priority > 31 || priority < 0) {
+        return NULL;
+    }
 
     DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[priority], node)
     {
+        assert(task != NULL);
         if (task->state == READY && !task->dead) {
             // found a runnable task, stop this look up
             return task;
@@ -49,9 +54,9 @@ struct TaskMicroDescriptor* max_priority_runnable_task(void)
     return NULL;
 }
 
-struct TaskMicroDescriptor* round_robin_runnable_task(uint32_t priority)
+struct Thread* round_robin_runnable_task(uint32_t priority)
 {
-    struct TaskMicroDescriptor* task = NULL;
+    struct Thread* task = NULL;
 
     DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[priority], node)
     {
@@ -70,7 +75,7 @@ struct TaskMicroDescriptor* round_robin_runnable_task(uint32_t priority)
 /* recover task priority */
 void recover_priority(void)
 {
-    struct TaskMicroDescriptor* task = NULL;
+    struct Thread* task = NULL;
     for (int i = 1; i < TASK_MAX_PRIORITY; i++) {
         if (i == TASK_DEFAULT_PRIORITY)
             continue;

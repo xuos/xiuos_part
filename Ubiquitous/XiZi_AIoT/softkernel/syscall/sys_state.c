@@ -40,81 +40,92 @@ Modification:
 
 extern uint8_t _binary_fs_img_start[], _binary_fs_img_end[];
 
-/// @brief Padding task name length to TASK_NAME_MAX_LEN
-static inline void _padding(char* name)
-{
-    int i;
-    size_t length = strlen(name);
-    for (i = length; i < TASK_NAME_MAX_LEN - 1; i++) {
-        name[i] = ' ';
-    }
-    name[i] = '\0';
-    return;
-}
+#define SHOWINFO_BORDER_LINE() LOG_PRINTF("******************************************************\n");
+#define SHOWTASK_TASK_BASE_INFO(task) LOG_PRINTF(" %-6d %-16s %-4d 0x%x(%-d)\n", task->tid, task->name, task->priority, task->memspace->mem_size >> 10, task->memspace->mem_size >> 10)
 
 void show_tasks(void)
 {
-    struct TaskMicroDescriptor* task = NULL;
-    LOG_PRINTF("******************************************************\n");
+    struct Thread* task = NULL;
+    SHOWINFO_BORDER_LINE();
     for (int i = 0; i < NR_CPU; i++) {
-        LOG_PRINTF("CPU %d: ", i);
-        if (global_cpus[i].task != NULL) {
-            LOG_PRINTF("%s\n", global_cpus[i].task->name);
-        } else {
-            LOG_PRINTF("NULL\n");
-        }
+        LOG_PRINTF("CPU %-2d: %s\n", i, (global_cpus[i].task == NULL ? "NULL" : global_cpus[i].task->name));
     }
-    LOG_PRINTF("******************************************************\n");
-    LOG_PRINTF("STAT     ID   TASK            PRI   MEM(KB)\n");
+    SHOWINFO_BORDER_LINE();
+    LOG_PRINTF("%-8s %-6s %-16s %-4s %-8s\n", "STAT", "ID", "TASK", "PRI", "MEM(KB)");
+    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_running_list_head, node)
+    {
+        LOG_PRINTF("%-8s", "RUNNING");
+        SHOWTASK_TASK_BASE_INFO(task);
+    }
+
     for (int i = 0; i < TASK_MAX_PRIORITY; i++) {
         if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[i])) {
             continue;
         }
         DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[i], node)
         {
-            if (task->state == INIT)
-                LOG_PRINTF("   INIT ");
-            else if (task->state == READY)
-                LOG_PRINTF("  READY ");
-            else if (task->state == RUNNING)
-                LOG_PRINTF("RUNNING ");
-            else if (task->state == DEAD)
-                LOG_PRINTF("   DEAD ");
+            switch (task->state) {
+            case INIT:
+                LOG_PRINTF("%-8s", "INIT");
+                break;
+            case READY:
+                LOG_PRINTF("%-8s", "READY");
+                break;
+            case RUNNING:
+                LOG_PRINTF("%-8s", "RUNNING");
+                break;
+            case DEAD:
+                LOG_PRINTF("%-8s", "DEAD");
+                break;
+            default:
+                break;
+            }
 
-            _padding(task->name);
-            LOG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->mem_size >> 10);
+            SHOWTASK_TASK_BASE_INFO(task);
         }
     }
 
     DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_blocked_list_head, node)
     {
-        LOG_PRINTF("  BLOCK ");
-        _padding(task->name);
-        LOG_PRINTF("  %d   %s  %d       %d\n", task->pid, task->name, task->priority, task->mem_size >> 10);
+        LOG_PRINTF("%-8s", "BLOCK");
+        SHOWTASK_TASK_BASE_INFO(task);
     }
 
-    LOG_PRINTF("******************************************************\n");
+    struct ksemaphore* sem = NULL;
+    DOUBLE_LIST_FOR_EACH_ENTRY(sem, &xizi_task_manager.semaphore_pool.sem_list_guard, sem_list_node)
+    {
+        task = NULL;
+        DOUBLE_LIST_FOR_EACH_ENTRY(task, &sem->wait_list_guard, node)
+        {
+            LOG_PRINTF("%-8s", "BLOCK");
+            SHOWTASK_TASK_BASE_INFO(task);
+        }
+    }
+
+    SHOWINFO_BORDER_LINE();
     return;
 }
 
 extern struct KBuddy user_phy_freemem_buddy;
 extern struct KBuddy kern_virtmem_buddy;
-extern uint32_t kernel_data_end[];
+extern uintptr_t kernel_data_end[];
 void show_mem(void)
 {
-    LOG_PRINTF("*********************************************************\n");
-    LOG_PRINTF(" TOTAL(KB)        USED(KB)        FREE(KB) \n");
+    SHOWINFO_BORDER_LINE();
 
-    uint32_t total = (PHY_MEM_STOP - V2P(kernel_data_end)) >> 10;
-    uint32_t used = 0;
+    uint64_t total = (PHY_MEM_STOP - V2P(kernel_data_end));
+    uint64_t user_dynamic_free = 0;
+    uint64_t kernel_free = 0;
     for (int j = 0; j < MAX_BUDDY_ORDER; j++) {
-        used += user_phy_freemem_buddy.free_list[j].n_free_pages * (1 << j) * PAGE_SIZE;
-        used += kern_virtmem_buddy.free_list[j].n_free_pages * (1 << j) * PAGE_SIZE;
+        user_dynamic_free += user_phy_freemem_buddy.free_list[j].n_free_pages * (1 << j) * PAGE_SIZE;
+        kernel_free += kern_virtmem_buddy.free_list[j].n_free_pages * (1 << j) * PAGE_SIZE;
     }
-    used = used >> 10;
+    LOG_PRINTF("%-16s 0x%016lx\n", "TOTAL(B)", total);
+    LOG_PRINTF("%-16s 0x%016lx\n", "KERNEL USED(B)", (kern_virtmem_buddy.mem_end - kern_virtmem_buddy.mem_start - kernel_free));
+    LOG_PRINTF("%-16s 0x%016lx\n", "LIBMEM USED(B)", (user_phy_freemem_buddy.mem_end - user_phy_freemem_buddy.mem_start - user_dynamic_free));
+    LOG_PRINTF("%-16s 0x%016lx\n", "FREE(B)", user_dynamic_free + kernel_free);
 
-    LOG_PRINTF(" %d           %d           %d\n", total, total - used, used);
-    LOG_PRINTF("*********************************************************\n");
+    SHOWINFO_BORDER_LINE();
     return;
 }
 
@@ -128,10 +139,8 @@ void show_cpu(void)
 
     int cpu_id = 0;
 
-    struct TaskMicroDescriptor* current_task = cur_cpu()->task;
+    struct Thread* current_task = cur_cpu()->task;
     assert(current_task != NULL);
-
-    _padding(current_task->name);
 
     LOG_PRINTF(" ID  COMMAND        USED_TICKS  FREE_TICKS \n");
     LOG_PRINTF(" %d   %s   %d          %d\n", cpu_id, current_task->name, TASK_CLOCK_TICK - current_task->remain_tick, current_task->remain_tick);
@@ -146,7 +155,7 @@ int sys_state(sys_state_option option, sys_state_info* info)
         info->memblock_info.memblock_start = (uintptr_t)V2P(_binary_fs_img_start);
         info->memblock_info.memblock_end = (uintptr_t)V2P(_binary_fs_img_end);
     } else if (option == SYS_STATE_GET_HEAP_BASE) {
-        return cur_cpu()->task->heap_base;
+        return cur_cpu()->task->memspace->heap_base;
     } else if (option == SYS_STATE_SET_TASK_PRIORITY) {
         xizi_task_manager.set_cur_task_priority(info->priority);
     } else if (option == SYS_STATE_SHOW_TASKS) {

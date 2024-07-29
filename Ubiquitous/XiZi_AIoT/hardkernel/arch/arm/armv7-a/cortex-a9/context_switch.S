@@ -31,32 +31,14 @@ Modification:
 
 context_switch:
 	# store original context to stack
-	str lr, [r13, #-4]!
-	str r12, [r13, #-4]!
-	str r11, [r13, #-4]!
-	str r10, [r13, #-4]!
-	str r9, [r13, #-4]!
-	str r8, [r13, #-4]!
-	str r7, [r13, #-4]!
-	str r6, [r13, #-4]!
-	str r5, [r13, #-4]!
-	str r4, [r13, #-4]!
+	stmfd   r13!, 	{r4-r12, lr}
 
 	# switch the stack
 	str     r13, 	[r0]          	// save current sp to the old PCB (**old)
 	mov     r13, 	r1            	// load the next stack
 
 	# restore context from stack
-	ldr r4, [r13], #4
-	ldr r5, [r13], #4
-	ldr r6, [r13], #4
-	ldr r7, [r13], #4
-	ldr r8, [r13], #4
-	ldr r9, [r13], #4
-	ldr r10, [r13], #4
-	ldr r11, [r13], #4
-	ldr r12, [r13], #4
-	ldr lr, [r13], #4
+	ldmfd   r13!, 	{r4-r12, lr} 
 
 	# return to the caller
 	bx      lr

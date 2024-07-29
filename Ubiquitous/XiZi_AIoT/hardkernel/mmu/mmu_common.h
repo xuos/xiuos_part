@@ -19,15 +19,13 @@ struct MmuDriverRightGroup {
     struct TraceTag intr_driver_tag;
 };
 
-struct MmuCommonDone
-{
+struct MmuCommonDone {
     void (*MmuDevPteAttr)(uintptr_t* attr);
     void (*MmuPdeAttr)(uintptr_t* attr);
     void (*MmuUsrPteAttr)(uintptr_t* attr);
     void (*MmuUsrDevPteAttr)(uintptr_t* attr);
     void (*MmuKernPteAttr)(uintptr_t* attr);
 
-    void (*LoadPgdirCrit)(uintptr_t pgdir_paddr, struct TraceTag*);
     void (*LoadPgdir)(uintptr_t pgdir_paddr);
     void (*TlbFlushAll)();
     void (*TlbFlush)(uintptr_t vaddr, int len);

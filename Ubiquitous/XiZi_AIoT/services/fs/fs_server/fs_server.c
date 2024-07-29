@@ -14,7 +14,7 @@
 
 #include "block_io.h"
 #include "fs.h"
-#include "libfs_to_client.h"
+#include "libfs.h"
 #include "libserial.h"
 #include "usyscall.h"
 
@@ -23,7 +23,7 @@ struct CwdPair {
     struct Inode* Inode;
 };
 
-#define MAX_SUPPORT_SESSION 1024
+#define MAX_SUPPORT_SESSION 4096
 static struct CwdPair session_cwd[MAX_SUPPORT_SESSION];
 
 static struct CwdPair* get_session_cwd(void)
@@ -63,11 +63,12 @@ int IPC_DO_SERVE_FUNC(Ipc_ls)(char* path)
     }
 
     if (!(ip = InodeSeek(dp, path))) {
-        printf("ls: find target Inode failed, ip: %x(%d), dp: %x(%d)\n", ip, ip->inum, dp, dp->inum);
+        printf("ls: find target Inode failed, dp: %p(%d), path: %s\n", dp, dp->inum, path);
         return -1;
     }
+
     if (ip->type != FS_DIRECTORY) {
-        printf("ls: not a dir\n");
+        printf("ls: not a dir, ip: %d\n", ip->inum);
         return -1;
     }
 
@@ -357,11 +358,12 @@ int main(int argc, char* argv[])
     MemFsInit((uintptr_t)FS_IMG_ADDR, (uint32_t)len);
 
     if (register_server("MemFS") < 0) {
-        printf("register server name: %s failed.\n", "SimpleServer");
-        exit();
+        printf("register server name: %s failed.\n", "MemFs");
+        exit(1);
     }
     ipc_server_loop(&IpcFsServer);
 
     // never reached
-    exit();
+    exit(0);
+    return 0;
 }

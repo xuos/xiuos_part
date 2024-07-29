@@ -52,7 +52,7 @@ Modification:
 
 int fsfd;
 struct SuperBlock sb;
-char zeroes[512];
+char zeroes[BLOCK_SIZE];
 uint freeblock;
 uint usedblocks;
 uint bitblocks;
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     int i, cc, fd;
     uint rootino, inum, off;
     struct DirEntry de;
-    char buf[512];
+    char buf[BLOCK_SIZE];
     struct Inode din;
     int size, nblocks;
 
@@ -104,8 +104,8 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    assert((512 % sizeof(struct Inode)) == 0);
-    assert((512 % sizeof(struct DirEntry)) == 0);
+    assert((BLOCK_SIZE % sizeof(struct Inode)) == 0);
+    assert((BLOCK_SIZE % sizeof(struct DirEntry)) == 0);
 
     fsfd = open(argv[1], O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (fsfd < 0) {
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     }
 
     size = nr_blocks_total;
-    bitblocks = size / (512 * 8) + 1;
+    bitblocks = NR_BIT_BLOCKS;
     usedblocks = 2 + (nr_inodes / INODE_SIZE + 1) + bitblocks;
     nblocks = nr_blocks_total - usedblocks;
     freeblock = usedblocks;
@@ -122,6 +122,7 @@ int main(int argc, char* argv[])
     sb.size = xint(size);
     sb.nblocks = xint(nblocks);
     sb.ninodes = xint(nr_inodes);
+    sb.nbitblocks = xint(NR_BIT_BLOCKS);
 
     printf("block 0 is unused, block 1 is for super block, used %d (bit %d ninode %zu) free %u total %d\n", usedblocks,
         bitblocks, nr_inodes / INODE_SIZE + 1, size - usedblocks, nblocks + usedblocks);
@@ -192,11 +193,11 @@ int main(int argc, char* argv[])
 
 void wsect(uint sec, void* buf)
 {
-    if (lseek(fsfd, sec * 512L, 0) != sec * 512L) {
+    if (lseek(fsfd, sec * BLOCK_SIZE, 0) != sec * BLOCK_SIZE) {
         perror("lseek");
         exit(1);
     }
-    if (write(fsfd, buf, 512) != 512) {
+    if (write(fsfd, buf, BLOCK_SIZE) != BLOCK_SIZE) {
         perror("write");
         exit(1);
     }
@@ -209,7 +210,7 @@ uint i2b(uint inum)
 
 void winode(uint inum, struct Inode* ip)
 {
-    char buf[512];
+    char buf[BLOCK_SIZE];
     uint bn;
     struct Inode* dip;
 
@@ -222,7 +223,7 @@ void winode(uint inum, struct Inode* ip)
 
 void rinode(uint inum, struct Inode* ip)
 {
-    char buf[512];
+    char buf[BLOCK_SIZE];
     uint bn;
     struct Inode* dip;
 
@@ -234,11 +235,11 @@ void rinode(uint inum, struct Inode* ip)
 
 void rsect(uint sec, void* buf)
 {
-    if (lseek(fsfd, sec * 512L, 0) != sec * 512L) {
+    if (lseek(fsfd, sec * BLOCK_SIZE, 0) != sec * BLOCK_SIZE) {
         perror("lseek");
         exit(1);
     }
-    if (read(fsfd, buf, 512) != 512) {
+    if (read(fsfd, buf, BLOCK_SIZE) != BLOCK_SIZE) {
         perror("read");
         exit(1);
     }
@@ -259,17 +260,18 @@ uint ialloc(ushort type)
 
 void balloc(int used)
 {
-    uchar buf[512];
+    uchar buf[BLOCK_SIZE];
     int i;
-
     printf("balloc: first %d blocks have been allocated\n", used);
-    assert(used < 512 * 8);
-    bzero(buf, 512);
-    for (i = 0; i < used; i++) {
-        buf[i / 8] = buf[i / 8] | (0x1 << (i % 8));
+    for (int bmsec = 0; bmsec < bitblocks; bmsec++) {
+        bzero(buf, BLOCK_SIZE);
+        for (i = 0; i < ((used > NR_BIT_PER_BYTE * BLOCK_SIZE) ? NR_BIT_PER_BYTE * BLOCK_SIZE : used); i++) {
+            buf[i / NR_BIT_PER_BYTE] = buf[i / NR_BIT_PER_BYTE] | (0x1 << (i % NR_BIT_PER_BYTE));
+        }
+        printf("balloc: write bitmap block at sector %zu\n", nr_inodes / INODE_SIZE + 3 + bmsec);
+        wsect(nr_inodes / INODE_SIZE + 3 + bmsec, buf);
+        used -= NR_BIT_PER_BYTE * BLOCK_SIZE;
     }
-    printf("balloc: write bitmap block at sector %zu\n", nr_inodes / INODE_SIZE + 3);
-    wsect(nr_inodes / INODE_SIZE + 3, buf);
 }
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -279,7 +281,7 @@ void iappend(uint inum, void* xp, int n)
     char* p = (char*)xp;
     uint fbn, off, n1;
     struct Inode din;
-    char buf[512];
+    char buf[BLOCK_SIZE];
     uint indirect[NR_INDIRECT_BLOCKS * MAX_INDIRECT_BLOCKS];
     uint x;
 
@@ -287,7 +289,7 @@ void iappend(uint inum, void* xp, int n)
 
     off = xint(din.size);
     while (n > 0) {
-        fbn = off / 512;
+        fbn = off / BLOCK_SIZE;
         assert(fbn < MAX_FILE_SIZE);
         assert(usedblocks < nr_blocks_total);
         if (fbn < NR_DIRECT_BLOCKS) {
@@ -315,9 +317,9 @@ void iappend(uint inum, void* xp, int n)
                 x = xint(indirect[idx]);
             }
         }
-        n1 = min(n, (fbn + 1) * 512 - off);
+        n1 = min(n, (fbn + 1) * BLOCK_SIZE - off);
         rsect(x, buf);
-        bcopy(p, buf + off - (fbn * 512), n1);
+        bcopy(p, buf + off - (fbn * BLOCK_SIZE), n1);
         wsect(x, buf);
         n -= n1;
         off += n1;

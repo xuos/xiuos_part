@@ -163,27 +163,9 @@ static uint32_t _hw_cur_int_num(uint32_t int_info)
     return int_info & XSCUGIC_ACK_INTID_MASK;
 }
 
-static uint32_t _hw_cur_int_cpu(uint32_t int_info)
-{
-    return (int_info >> 5) & 0x3;
-}
-
 static void _hw_after_irq(uint32_t int_info)
 {
     XScuGic_CPUWriteReg(&IntcInstance, XSCUGIC_EOI_OFFSET, int_info);
-}
-
-static int _is_interruptable(void)
-{
-    uint32_t val;
-
-    __asm__ __volatile__(
-        "mrs %0, cpsr"
-        : "=r"(val)
-        :
-        :);
-
-    return !(val & DIS_INT);
 }
 
 int _cur_cpu_id()
@@ -203,10 +185,8 @@ static struct XiziTrapDriver xizi_trap_driver = {
 
     .bind_irq_handler = _bind_irq_handler,
 
-    .is_interruptable = _is_interruptable,
     .hw_before_irq = _hw_before_irq,
     .hw_cur_int_num = _hw_cur_int_num,
-    .hw_cur_int_cpu = _hw_cur_int_cpu,
     .hw_after_irq = _hw_after_irq,
 };
 

@@ -12,6 +12,8 @@
 #ifndef __SHELL_H__
 #define __SHELL_H__
 
+#include <stdint.h>
+
 #include "shell_cfg.h"
 
 #define SHELL_VERSION "3.2.3" /**< 版本号 */
@@ -125,10 +127,10 @@
  * @param _func 被代理的函数
  * @param ... 代理参数
  */
-#define SHELL_AGENCY_FUNC(_func, ...)                                                          \
-    void SHELL_AGENCY_FUNC_NAME(_func)(int p1, int p2, int p3, int p4, int p5, int p6, int p7) \
-    {                                                                                          \
-        _func(__VA_ARGS__);                                                                    \
+#define SHELL_AGENCY_FUNC(_func, ...)                                                                                             \
+    void SHELL_AGENCY_FUNC_NAME(_func)(intptr_t p1, intptr_t p2, intptr_t p3, intptr_t p4, intptr_t p5, intptr_t p6, intptr_t p7) \
+    {                                                                                                                             \
+        _func(__VA_ARGS__);                                                                                                       \
     }
 
 #if SHELL_USING_CMD_EXPORT == 1

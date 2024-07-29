@@ -33,6 +33,7 @@ Modification:
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "ipcargs.h"
 #include "session.h"
@@ -47,7 +48,7 @@ typedef struct {
             uint64_t valid : 1; // for server to peek new msg
             uint64_t done : 1; // for client to check request done
             uint64_t init : 1; // for client to check request done
-            uint64_t reserved : 1;
+            uint64_t handling : 1;
             uint64_t nr_args : 4;
             uint64_t opcode : 8;
             uint64_t len : 16;
@@ -60,13 +61,20 @@ typedef struct {
 struct IpcArgInfo {
     uint16_t offset;
     uint16_t len;
-};
+    union {
+        uint16_t attr;
+        struct {
+            uint16_t null_ptr : 1;
+            uint16_t reserved : 15;
+        };
+    };
+} __attribute__((packed));
 
 /* [header, ipc_arg_buffer_len[], ipc_arg_buffer[]] */
 struct IpcMsg {
     ipc_msg_header header;
     uintptr_t buf[];
-};
+} __attribute__((packed));
 enum {
     IPC_ARG_INFO_BASE_OFFSET = sizeof(ipc_msg_header),
 };
@@ -76,7 +84,7 @@ typedef int (*IpcInterface)(struct IpcMsg* msg);
 struct IpcNode {
     char* name;
     IpcInterface interfaces[UINT8_MAX];
-};
+} __attribute__((packed));
 
 #define IPC_SERVER_LOOP(ipc_node_name) rpc_server_loop_##rpc_node_name
 #define IPC_SERVICES(ipc_node_name, ...)         \
@@ -104,6 +112,10 @@ struct IpcNode {
 /// @return
 __attribute__((__always_inline__)) static inline void* ipc_msg_get_nth_arg_buf(struct IpcMsg* msg, int arg_num)
 {
+    if (IPCMSG_ARG_INFO(msg, arg_num)->null_ptr == 1) {
+        return NULL;
+    }
+
     return (void*)((char*)msg + IPCMSG_ARG_INFO(msg, arg_num)->offset);
 }
 
@@ -180,6 +192,7 @@ void ipc_server_loop(struct IpcNode* ipc_node);
 #define IPC_CALL(ipc_name) ipc_call_copy_args_##ipc_name
 
 #define IPC_SERVE(ipc_name) ipc_serve_##ipc_name
+#define IPC_THREAD_SERVE(ipc_name) ipc_thread_serve_##ipc_name
 #define IPC_DO_SERVE_FUNC(ipc_name) ipc_do_serve_##ipc_name
 
 /// when defining a ipc server:
@@ -238,5 +251,38 @@ void ipc_server_loop(struct IpcNode* ipc_node);
         return 0;                                       \
     }
 
+void _ipc_addr_to_buf(uintptr_t addr, char buf[17]);
+uintptr_t _ipc_buf_to_addr(char* buf);
+
+#define IPC_SERVER_THREAD_INTERFACE(ipc_name, argc)                         \
+    static int IPC_THREAD_SERVE(ipc_name)(int ipc_argc, char** ipc_argv)    \
+    {                                                                       \
+        if (ipc_argc != 2) {                                                \
+            printf("[%s] Error server thread creation.\n", __func__);       \
+            exit(1);                                                        \
+            return -1;                                                      \
+        }                                                                   \
+        struct IpcMsg* msg = (struct IpcMsg*)_ipc_buf_to_addr(ipc_argv[1]); \
+        void* argv[argc];                                                   \
+        for (int i = 0; i < argc; i++) {                                    \
+            argv[i] = ipc_msg_get_nth_arg_buf(msg, i);                      \
+        }                                                                   \
+        int32_t _ret = IPC_DO_SERVE##argc(ipc_name);                        \
+        ipc_msg_set_return(msg, &_ret);                                     \
+        msg->header.done = 1;                                               \
+        exit(0);                                                            \
+        return 0;                                                           \
+    }                                                                       \
+    static int IPC_SERVE(ipc_name)(struct IpcMsg * msg)                     \
+    {                                                                       \
+        char addr_buf[17];                                                  \
+        _ipc_addr_to_buf((uintptr_t)msg, addr_buf);                         \
+        char* param[] = { #ipc_name, addr_buf, NULL };                      \
+        int tid = thread(IPC_THREAD_SERVE(ipc_name), #ipc_name, param);     \
+        if (tid > 0) {                                                      \
+            msg->header.handling = 1;                                       \
+        }                                                                   \
+        return 0;                                                           \
+    }
+
 int cur_session_id(void);
-void delay_session(void);

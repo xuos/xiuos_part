@@ -34,16 +34,15 @@ Modification:
 #include "actracer.h"
 #include "assert.h"
 #include "ipc.h"
-#include "kalloc.h"
-#include "mmu_common.h"
+#include "memspace.h"
 #include "multicores.h"
 #include "share_page.h"
 #include "syscall.h"
 #include "task.h"
 
-static struct TaskMicroDescriptor* kernel_irq_proxy;
+static struct Thread* kernel_irq_proxy;
 static struct {
-    struct TaskMicroDescriptor* handle_task;
+    struct Thread* handle_task;
     struct Session session;
     struct session_backend* p_kernel_session;
     int opcode;
@@ -51,33 +50,39 @@ static struct {
 
 static void send_irq_to_user(int irq_num)
 {
-    struct Session* session = &irq_forward_table[irq_num].session;
-    int len = IPC_ARG_INFO_BASE_OFFSET;
-    len += sizeof(struct IpcArgInfo);
+    if (irq_forward_table[irq_num].handle_task != NULL) {
+        struct Session* session = &irq_forward_table[irq_num].session;
+        int len = IPC_ARG_INFO_BASE_OFFSET;
+        len += sizeof(struct IpcArgInfo);
 
-    /* get message space and add session tail */
-    void* session_kern_vaddr = P2V(xizi_pager.address_translate(&kernel_irq_proxy->pgdir, (uintptr_t)session->buf));
-    struct IpcMsg* buf = session_kern_vaddr + session->tail;
+        /* get message space and add session tail */
+        void* session_kern_vaddr = P2V(xizi_pager.address_translate(&kernel_irq_proxy->memspace->pgdir, (uintptr_t)session->buf));
+        struct IpcMsg* buf = (struct IpcMsg*)((uintptr_t)session_kern_vaddr + session->tail);
 
-    /* check if server session is full */
-    if (buf->header.magic == IPC_MSG_MAGIC && buf->header.done == 0) {
-        DEBUG("irq server cannot handle new interrupt by now.\n");
-        return;
+        /* check if server session is full */
+        if (buf->header.magic == IPC_MSG_MAGIC && buf->header.done == 0) {
+            DEBUG("irq server cannot handle new interrupt by now.\n");
+            return;
+        }
+        memset((void*)buf, 0, len);
+        session->tail = (session->tail + len) % session->capacity;
+
+        /* construct message */
+        buf->header.len = len;
+        buf->header.nr_args = 1;
+        buf->header.init = 1;
+        buf->header.opcode = irq_forward_table[irq_num].opcode;
+        buf->header.done = 0;
+        buf->header.magic = IPC_MSG_MAGIC;
+        buf->header.valid = 1;
+
+        if (irq_forward_table[irq_num].handle_task->state == BLOCKED) {
+            xizi_task_manager.task_unblock(irq_forward_table[irq_num].handle_task);
+        }
+
+        /* add session head */
+        session->head = (session->head + len) % session->capacity;
     }
-    memset((void*)buf, 0, len);
-    session->tail = (session->tail + len) % session->capacity;
-
-    /* construct message */
-    buf->header.len = len;
-    buf->header.nr_args = 1;
-    buf->header.init = 1;
-    buf->header.opcode = irq_forward_table[irq_num].opcode;
-    buf->header.done = 0;
-    buf->header.magic = IPC_MSG_MAGIC;
-    buf->header.valid = 1;
-
-    /* add session head */
-    session->head = (session->head + len) % session->capacity;
 }
 
 int user_irq_handler(int irq, void* tf, void* arg)
@@ -93,7 +98,7 @@ int user_irq_handler(int irq, void* tf, void* arg)
     return 0;
 }
 
-extern struct session_backend* create_session_inner(struct TaskMicroDescriptor* client, struct TaskMicroDescriptor* server, int capacity, struct Session* user_session);
+extern struct session_backend* create_session_inner(struct Thread* client, struct Thread* server, int capacity, struct Session* user_session);
 /// @warning no tested.
 
 static struct XiziTrapDriver* p_intr_driver = NULL;
@@ -111,18 +116,24 @@ int sys_register_irq(int irq_num, int irq_opcode)
 
     // init kerenl sender proxy
     if (kernel_irq_proxy == NULL) {
-        kernel_irq_proxy = xizi_task_manager.new_task_cb();
+        /// @todo handle corner cases
+        struct MemSpace* pmemspace = alloc_memspace();
+        if (pmemspace == NULL) {
+            return -1;
+        }
+        xizi_pager.new_pgdir(&pmemspace->pgdir);
+        memcpy(pmemspace->pgdir.pd_addr, kern_pgdir.pd_addr, TOPLEVLE_PAGEDIR_SIZE);
+
+        kernel_irq_proxy = xizi_task_manager.new_task_cb(pmemspace);
         kernel_irq_proxy->state = NEVER_RUN;
-        xizi_pager.new_pgdir(&kernel_irq_proxy->pgdir);
-        memcpy(kernel_irq_proxy->pgdir.pd_addr, kern_pgdir.pd_addr, TOPLEVLE_PAGEDIR_SIZE);
     }
 
     // bind irq to session
-    if (p_intr_driver->sw_irqtbl[irq_num].handler != NULL) {
+    if (irq_forward_table[irq_num].handle_task != NULL) {
         ERROR("irq %d is occupied.\n", irq_num);
         return -1;
     }
-    struct TaskMicroDescriptor* cur_task = cur_cpu()->task;
+    struct Thread* cur_task = cur_cpu()->task;
     irq_forward_table[irq_num].handle_task = cur_task;
     irq_forward_table[irq_num].opcode = irq_opcode;
     irq_forward_table[irq_num].p_kernel_session = create_session_inner(kernel_irq_proxy, cur_task, PAGE_SIZE, &irq_forward_table[irq_num].session);
@@ -132,19 +143,17 @@ int sys_register_irq(int irq_num, int irq_opcode)
     return 0;
 }
 
-int sys_unbind_irq(struct TaskMicroDescriptor* task, int irq_num)
+int sys_unbind_irq(struct Thread* task, int irq_num)
 {
     if (irq_forward_table[irq_num].handle_task != task) {
         return -1;
     }
 
     irq_forward_table[irq_num].handle_task = NULL;
-    sys_close_session(&irq_forward_table[irq_num].session);
-    DEBUG("Unbind: %s to irq %d", task->name, irq_num);
     return 0;
 }
 
-int sys_unbind_irq_all(struct TaskMicroDescriptor* task)
+int sys_unbind_irq_all(struct Thread* task)
 {
     for (int idx = 0; idx < NR_IRQS; idx++) {
         if (irq_forward_table[idx].handle_task == task) {

@@ -63,7 +63,7 @@ static void build_boot_pgdir()
 
     // kern mem
     uint32_t kern_mem_start_idx = KERN_MEM_BASE >> LEVEL3_PDE_SHIFT;
-    uint32_t kern_mem_end_idx = (KERN_MEM_BASE + (PHY_MEM_STOP - PHY_MEM_BASE)) >> LEVEL3_PDE_SHIFT;
+    uint32_t kern_mem_end_idx = (KERN_MEM_BASE + (PHY_USER_FREEMEM_BASE - PHY_MEM_BASE)) >> LEVEL3_PDE_SHIFT;
     for (uint32_t i = kern_mem_start_idx; i < kern_mem_end_idx; i++) {
         boot_pgdir[i] = V2P(i << LEVEL3_PDE_SHIFT) | L1_TYPE_SEC | L1_SECT_AP0;
     }

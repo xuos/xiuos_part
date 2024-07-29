@@ -42,8 +42,11 @@ Modification:
 
 #include <stdint.h>
 
+#include "memlayout.h"
+
 #define ELF_MAGIC 0x464C457FU // "\x7FELF" in little endian
 
+#if (ARCH_BIT == 32)
 // File header
 struct elfhdr {
     uint32_t magic; // must equal ELF_MAGIC
@@ -51,9 +54,9 @@ struct elfhdr {
     uint16_t type;
     uint16_t machine;
     uint32_t version;
-    uint32_t entry;
-    uint32_t phoff;
-    uint32_t shoff;
+    uintptr_t entry;
+    uintptr_t phoff;
+    uintptr_t shoff;
     uint32_t flags;
     uint16_t ehsize;
     uint16_t phentsize;
@@ -74,6 +77,37 @@ struct proghdr {
     uint32_t flags;
     uint32_t align;
 };
+#elif (ARCH_BIT == 64)
+struct elfhdr {
+    uint32_t magic; // must equal ELF_MAGIC
+    uint8_t elf[12];
+    uint16_t type;
+    uint16_t machine;
+    uint32_t version;
+    uint64_t entry;
+    uint64_t phoff;
+    uint64_t shoff;
+    uint32_t flags;
+    uint16_t ehsize;
+    uint16_t phentsize;
+    uint16_t phnum;
+    uint16_t shentsize;
+    uint16_t shnum;
+    uint16_t shstrndx;
+};
+
+// Program section header
+struct proghdr {
+    uint32_t type;
+    uint32_t flags;
+    uint64_t off;
+    uint64_t vaddr;
+    uint64_t paddr;
+    uint64_t filesz;
+    uint64_t memsz;
+    uint64_t align;
+};
+#endif
 
 // Values for Proghdr type
 #define ELF_PROG_LOAD 1

@@ -17,7 +17,7 @@
 #include "shell_cfg.h"
 #include "shell_ext.h"
 
-#include "libfs_to_client.h"
+#include "libfs.h"
 #include "libipc.h"
 
 #if SHELL_USING_CMD_EXPORT == 1
@@ -1735,7 +1735,7 @@ void shellKill(int pid)
  */
 void shellLs(const char* path, ...)
 {
-    if (*path == '\0') {
+    if ((uintptr_t*)path == (uintptr_t*)shellLs || *path == '\0') {
         path = ".";
     }
     ls(&session_fs, (char*)path);

@@ -30,7 +30,6 @@ Modification:
 #include "kern_init.h"
 
 #include "assert.h"
-#include "kalloc.h"
 #include "log.h"
 #include "task.h"
 
@@ -40,8 +39,6 @@ bool softkernel_init(struct TraceTag* _hardkernel_tag, struct TraceTag* _softker
     CreateResourceTag(&server_identifier_owner, _softkernel_tag, "server-identifier", TRACER_OWNER, NULL);
 
     /* init soft kernel */
-    module_phymem_init(); // init buddy management system
-
     struct PagerRightGroup pager_rights;
     AchieveResourceTag(&pager_rights.mmu_driver_tag, _hardkernel_tag, "mmu-ac-resource");
     module_pager_init(&pager_rights);

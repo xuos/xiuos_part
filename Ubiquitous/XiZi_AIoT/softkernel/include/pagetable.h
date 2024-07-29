@@ -39,11 +39,12 @@ Modification:
 #include "mmu_common.h"
 
 // clang-format off
-#define ALIGNUP(sz, al)         (((uint32_t)(sz) + (uint32_t)(al) - 1) & ~((uint32_t)(al) - 1))
-#define ALIGNDOWN(sz, al)       ((uint32_t)(sz) & ~((uint32_t)(al) - 1))
+#define ALIGNUP(size, align)         (((uintptr_t)(size) + (uintptr_t)(align) - 1) & ~((uintptr_t)(align) - 1))
+#define ALIGNDOWN(size, align)       ((uintptr_t)(size) & ~((uintptr_t)(align) - 1))
 
 #define LEVEL4_PTE_IDX(v)       (((uintptr_t)(v) >> LEVEL4_PTE_SHIFT) & (NUM_LEVEL4_PTE - 1))
 #define LEVEL4_PTE_ADDR(v)      ALIGNDOWN(v, LEVEL4_PTE_SIZE)
+#define LEVEL3_PDE_ADDR(v)      ALIGNDOWN(v, LEVEL3_PDE_SIZE)
 
 #define TOPLEVLE_PAGEDIR_SIZE   sizeof(uintptr_t) * NUM_TOPLEVEL_PDE
 // clang-format on
@@ -59,8 +60,8 @@ struct PagerRightGroup {
 struct XiziPageManager {
     bool (*new_pgdir)(struct TopLevelPageDirectory* pgdir);
     void (*free_user_pgdir)(struct TopLevelPageDirectory* pgdir);
-    bool (*map_pages)(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, uintptr_t len, bool is_dev);
-    bool (*unmap_pages)(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t len);
+    bool (*map_pages)(uintptr_t* pd_addr, uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev);
+    bool (*unmap_pages)(uintptr_t* pd_addr, uintptr_t vaddr, int len);
 
     uintptr_t (*resize_user_pgdir)(struct TopLevelPageDirectory* pgdir, uintptr_t old_size, uintptr_t new_size);
     uintptr_t (*address_translate)(struct TopLevelPageDirectory* pgdir, uintptr_t vaddr);
@@ -69,6 +70,7 @@ struct XiziPageManager {
 
 extern struct MmuCommonDone* _p_pgtbl_mmu_access;
 uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc);
+void _free_user_pgdir(struct TopLevelPageDirectory* pgdir);
 
 extern struct TopLevelPageDirectory kern_pgdir;
 void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driver_tag);

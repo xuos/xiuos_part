@@ -89,7 +89,7 @@ static void _sys_irq_init(int cpu_id)
         gic_init();
     }
     /* active hardware irq responser */
-    xizi_trap_driver.switch_hw_irqtbl((uint32_t*)&_vector_jumper);
+    xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)&_vector_jumper);
 }
 
 static void _cpu_irq_enable(void)
@@ -117,7 +117,7 @@ static void _single_irq_disable(int irq, int cpu)
 }
 
 #define VBAR
-static inline uint32_t* _switch_hw_irqtbl(uint32_t* new_tbl_base)
+static inline uintptr_t* _switch_hw_irqtbl(uintptr_t* new_tbl_base)
 {
     // get old irq table base addr
     uint32_t old_tbl_base = 0;
@@ -132,7 +132,7 @@ static inline uint32_t* _switch_hw_irqtbl(uint32_t* new_tbl_base)
     sctlr &= ~(1 << 13);
     _ARM_MCR(15, 0, sctlr, 1, 0, 0);
 
-    return (uint32_t*)old_tbl_base;
+    return (uintptr_t*)old_tbl_base;
 }
 
 static void _bind_irq_handler(int irq, irq_handler_t handler)
@@ -156,27 +156,9 @@ static uint32_t _hw_cur_int_num(uint32_t int_info)
     return int_info & 0x1FF;
 }
 
-static uint32_t _hw_cur_int_cpu(uint32_t int_info)
-{
-    return (int_info >> 10) & 0x7;
-}
-
 static void _hw_after_irq(uint32_t int_info)
 {
     gic_write_end_of_irq(int_info);
-}
-
-static int _is_interruptable(void)
-{
-    uint32_t val;
-
-    __asm__ __volatile__(
-        "mrs %0, cpsr"
-        : "=r"(val)
-        :
-        :);
-
-    return !(val & DIS_INT);
 }
 
 int _cur_cpu_id()
@@ -196,10 +178,8 @@ static struct XiziTrapDriver xizi_trap_driver = {
 
     .bind_irq_handler = _bind_irq_handler,
 
-    .is_interruptable = _is_interruptable,
     .hw_before_irq = _hw_before_irq,
     .hw_cur_int_num = _hw_cur_int_num,
-    .hw_cur_int_cpu = _hw_cur_int_cpu,
     .hw_after_irq = _hw_after_irq,
 };
 

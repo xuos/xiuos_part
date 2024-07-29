@@ -44,6 +44,9 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
     case SYSCALL_SPAWN:
         ret = sys_spawn((char*)param1, (char*)param2, (char**)param3);
         break;
+    case SYSCALL_THREAD:
+        ret = sys_thread((uintptr_t)param1, (char*)param2, (char**)param3);
+        break;
     case SYSCALL_EXIT:
         ret = sys_exit(cur_cpu()->task);
         break;
@@ -60,10 +63,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_poll_session((struct Session*)param1, (int)param2);
         break;
     case SYSCALL_CLOSE_SESSION:
-        ret = sys_close_session((struct Session*)param1);
-        break;
-    case SYSCALL_EXEC:
-        ret = sys_exec((char*)param1, (char*)param2, (char**)param3);
+        ret = sys_close_session(cur_cpu()->task, (struct Session*)param1);
         break;
     case SYSCALL_SYS_STATE:
         ret = sys_state(param1, (sys_state_info*)param2);
@@ -77,7 +77,9 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
     case SYSCALL_KILL:
         ret = sys_kill((int)param1);
         break;
-
+    case SYSCALL_SEMAPHORE:
+        ret = sys_semaphore((sys_sem_option)param1, (int)param2);
+        break;
     default:
         ERROR("Unsurport syscall(%d) right now\n", sys_num);
         ret = -1;

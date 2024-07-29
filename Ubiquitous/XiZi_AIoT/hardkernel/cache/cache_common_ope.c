@@ -1,37 +1,37 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
-* XiUOS is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*        http://license.coscl.org.cn/MulanPSL2
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-* See the Mulan PSL v2 for more details.
-*/
+ * Copyright (c) 2020 AIIT XUOS Lab
+ * XiUOS is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *        http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 
 /**
-* @file:    cache_common_ope.c
-* @brief:   the general management of cache
-* @version: 3.0
-* @author:  AIIT XUOS Lab
-* @date:    2023/11/06
-*
-*/
+ * @file:    cache_common_ope.c
+ * @brief:   the general management of cache
+ * @version: 3.0
+ * @author:  AIIT XUOS Lab
+ * @date:    2023/11/06
+ *
+ */
 
 /*************************************************
 File name: cache_common_ope.c
 Description: the general management of cache
-Others: 
-History: 
+Others:
+History:
 1. Date: 2023-11-06
 Author: AIIT XUOS Lab
-Modification: 
+Modification:
 1、implement xiuos cache operations
 *************************************************/
 #include "cache_common_ope.h"
 #include "l1_cache.h"
-#include "l2_cache.h"
+// #include "l2_cache.h"
 
 /****************************************************************************
  * Public Functions
@@ -48,7 +48,7 @@ Modification:
 
 static inline void invalidate_dcache(uintptr_t start, uintptr_t end)
 {
-    InvalidateL1Dcache(start, end);
+    // InvalidateL1Dcache(start, end);
     // InvalidateL2Cache(start, end);
 }
 
@@ -65,7 +65,7 @@ static inline void invalidate_dcache(uintptr_t start, uintptr_t end)
 
 static inline void invalidate_dcache_all(void)
 {
-    InvalidateL1DcacheAll();
+    // InvalidateL1DcacheAll();
     // InvalidateL2CacheAll();
 }
 
@@ -78,7 +78,7 @@ static inline void invalidate_dcache_all(void)
  ****************************************************************************/
 static inline void invalidate_icache(uintptr_t start, uintptr_t end)
 {
-    InvalidateL1Icache(start, end);
+    // InvalidateL1Icache(start, end);
 }
 
 /****************************************************************************
@@ -92,7 +92,7 @@ static inline void invalidate_icache(uintptr_t start, uintptr_t end)
 
 static inline void invalidate_icache_all(void)
 {
-    InvalidateL1IcacheAll();
+    // InvalidateL1IcacheAll();
 }
 
 /****************************************************************************
@@ -106,7 +106,7 @@ static inline void invalidate_icache_all(void)
 
 static inline void clean_dcache(uintptr_t start, uintptr_t end)
 {
-    CleanL1Dcache(start, end);
+    // CleanL1Dcache(start, end);
     // CleanL2Cache(start, end);
 }
 
@@ -121,7 +121,7 @@ static inline void clean_dcache(uintptr_t start, uintptr_t end)
 
 static inline void clean_dcache_all(void)
 {
-    CleanL1DcacheAll();
+    // CleanL1DcacheAll();
     // CleanL2CacheAll();
 }
 
@@ -137,7 +137,7 @@ static inline void clean_dcache_all(void)
 static inline void flush_dcache(uintptr_t start, uintptr_t end)
 {
 
-    FlushL1Dcache(start, end);
+    // FlushL1Dcache(start, end);
     // FlushL2Cache(start, end);
 }
 
@@ -151,7 +151,7 @@ static inline void flush_dcache(uintptr_t start, uintptr_t end)
 
 static inline void flush_dcache_all(void)
 {
-    FlushL1DcacheAll();
+    // FlushL1DcacheAll();
     // FlushL2CacheAll();
 }
 
@@ -165,7 +165,7 @@ static inline void flush_dcache_all(void)
 
 static inline void enable_icache(void)
 {
-    EnableL1Icache();
+    // EnableL1Icache();
 }
 
 /****************************************************************************
@@ -178,7 +178,7 @@ static inline void enable_icache(void)
 
 static inline void disable_icache(void)
 {
-    DisableL1Icache();
+    // DisableL1Icache();
 }
 
 /****************************************************************************
@@ -191,7 +191,7 @@ static inline void disable_icache(void)
 
 static inline void enable_dcache(void)
 {
-    EnableL1Dcache();
+    // EnableL1Dcache();
     // EnableL2Cache();
 }
 
@@ -205,9 +205,9 @@ static inline void enable_dcache(void)
 
 static inline void disable_dcache(void)
 {
-    FlushL1DcacheAll();
+    // FlushL1DcacheAll();
     // pl310_flush_all();
-    DisableL1Dcache();
+    // DisableL1Dcache();
     // DisableL2Cache();
 }
 

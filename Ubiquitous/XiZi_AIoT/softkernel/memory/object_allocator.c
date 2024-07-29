@@ -52,7 +52,7 @@ void slab_init(struct slab_allocator* const allocator, const size_t element_size
     if (allocator == NULL) {
         panic("init a NULL slab_allocator\n");
     }
-    if (element_size <= 0 || element_size > ARENA_SIZE_PER_INCREASE) {
+    if (element_size > ARENA_SIZE_PER_INCREASE) {
         panic("Not supported slab element size\n");
     }
 
@@ -84,9 +84,14 @@ void* slab_alloc(struct slab_allocator* const allocator)
                 allocator->full->prev = full_head;
             }
             allocator->full = full_head;
-            return allocator->full->data + slot * allocator->element_size;
+
+            void* return_addr = allocator->full->data + slot * allocator->element_size;
+            memset(return_addr, 0, allocator->element_size);
+            return return_addr;
         } else {
-            return allocator->partial->data + slot * allocator->element_size;
+            void* return_addr = allocator->partial->data + slot * allocator->element_size;
+            memset(return_addr, 0, allocator->element_size);
+            return return_addr;
         }
     }
 
@@ -109,6 +114,8 @@ void* slab_alloc(struct slab_allocator* const allocator)
         allocator->partial->refcount = 1;
     }
     allocator->partial->bitmap = allocator->bitmap_empty ^ BITMAP_FIRST_BIT;
+    assert(allocator->partial->data != NULL);
+    memset(allocator->partial->data, 0, allocator->element_size);
     return allocator->partial->data;
 }
 

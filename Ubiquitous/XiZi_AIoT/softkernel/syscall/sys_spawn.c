@@ -29,27 +29,36 @@ Modification:
 *************************************************/
 #include "actracer.h"
 #include "assert.h"
+#include "memspace.h"
 #include "share_page.h"
 #include "syscall.h"
 #include "task.h"
 
-extern int task_exec(struct TaskMicroDescriptor* task, char* img_start, char* name, char** argv);
+extern int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintptr_t entry, char* name, char** argv);
 int sys_spawn(char* img_start, char* name, char** argv)
 {
+    // alloc a new memspace
+    struct MemSpace* pmemspace = alloc_memspace();
+    if (pmemspace == NULL) {
+        return -1;
+    }
+
+    // load memspace
+    uintptr_t* entry = load_memspace(pmemspace, img_start);
+    if (pmemspace->pgdir.pd_addr == NULL) {
+        ERROR("Loading memspace from %016x failed.\n", img_start);
+        free_memspace(pmemspace);
+        return -1;
+    }
+
     // alloc a new pcb
-    struct TaskMicroDescriptor* new_task_cb = xizi_task_manager.new_task_cb();
+    struct Thread* new_task_cb = xizi_task_manager.new_task_cb(pmemspace);
     if (UNLIKELY(!new_task_cb)) {
         ERROR("Unable to new task control block.\n");
+        free_memspace(pmemspace);
         return -1;
     }
-    // init trapframe
-    arch_init_trapframe(new_task_cb->main_thread.trapframe, 0, 0);
-    if (UNLIKELY(task_exec(new_task_cb, img_start, name, argv)) < 0) {
-        xizi_task_manager.free_pcb(new_task_cb);
-        return -1;
-    }
-    // init pcb
-    xizi_task_manager.task_set_default_schedule_attr(new_task_cb);
+    assert(!IS_DOUBLE_LIST_EMPTY(&pmemspace->thread_list_guard));
 
-    return 0;
+    return sys_new_thread(pmemspace, new_task_cb, (uintptr_t)entry, name, argv);
 }
