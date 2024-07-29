@@ -42,6 +42,10 @@ endif
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rzg2ul-m33)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m33 \
+	-I$(BSP_ROOT)/amp/include \
+	-I$(BSP_ROOT)/amp/include/config \
+	-I$(BSP_ROOT)/amp/include/config/ipi \
+	-I$(BSP_ROOT)/amp/include/config/service \
 	-I$(BSP_ROOT)/rzg/arm/CMSIS_5/CMSIS/Core/Include \
 	-I$(BSP_ROOT)/rzg/board/rzg2ul_smarc \
 	-I$(BSP_ROOT)/rzg/fsp/inc \

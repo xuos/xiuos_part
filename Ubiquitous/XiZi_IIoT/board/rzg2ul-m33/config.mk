@@ -9,7 +9,7 @@ export CROSS_COMPILE ?=/usr/local/arm/gcc-arm-none-eabi-10.3-2021.10/bin/arm-non
 # RELEASE
 CFLAGS := -mthumb -mcpu=cortex-m33+nodsp+nofp -fdiagnostics-parseable-fixits -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections
 CFLAGS += -Wunused -Wuninitialized -Wall -Wextra -Wmissing-declarations -Wconversion -Wpointer-arith -Wshadow -Wlogical-op
-CFLAGS += -Waggregate-return -Wfloat-equal -Wnull-dereference -g -std=c99 -mcmse
+CFLAGS += -Waggregate-return -Wfloat-equal -Wnull-dereference -g -std=c11 -mcmse
 
 export CFLAGS
 

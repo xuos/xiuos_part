@@ -74,7 +74,8 @@ BSP_DONT_REMOVE fsp_vector_t g_vector_table[BSP_ICU_VECTOR_MAX_ENTRIES] BSP_PLAC
     Default_Handler,       /* IRQ:66  */
     Default_Handler,       /* IRQ:67  */
     Default_Handler,       /* IRQ:68  */
-    metal_irq_isr_wrapper, /* IRQ:69 MHU1 MSG_INT_NS (Non-Secure Message Interrupt ch1) */
+    // metal_irq_isr_wrapper, /* IRQ:69 MHU1 MSG_INT_NS (Non-Secure Message Interrupt ch1) */
+    msg_ch1_ns,            /* IRQ:69  */
     Default_Handler,       /* IRQ:70  */
     Default_Handler,       /* IRQ:71  */
     Default_Handler,       /* IRQ:72  */
@@ -83,7 +84,8 @@ BSP_DONT_REMOVE fsp_vector_t g_vector_table[BSP_ICU_VECTOR_MAX_ENTRIES] BSP_PLAC
     Default_Handler,       /* IRQ:75  */
     Default_Handler,       /* IRQ:76  */
     Default_Handler,       /* IRQ:77  */
-    Default_Handler,       /* IRQ:78  */
+    // Default_Handler,       /* IRQ:78  */
+    rsp_ch4_ns,            /* IRQ:78  */
     Default_Handler,       /* IRQ:79  */
     Default_Handler,       /* IRQ:80  */
     Default_Handler,       /* IRQ:81  */
