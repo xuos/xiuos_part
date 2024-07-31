@@ -48,7 +48,7 @@ Modification:
 #include <stdint.h>
 
 #define PSCI_CPUON 0xc4000003
-struct arm_smccc_res {
+struct xizi_smccc_res {
     unsigned long a0;
     unsigned long a1;
     unsigned long a2;
@@ -57,18 +57,19 @@ struct arm_smccc_res {
 
 extern void _boot_start();
 extern void __print();
-extern void __arm_smccc_smc(unsigned long a0, unsigned long a1, unsigned long a2,
-    unsigned long a3, unsigned long a4, unsigned long a5,
-    unsigned long a6, unsigned long a7, struct arm_smccc_res* res);
 
-static struct arm_smccc_res __invoke_sip_fn_smc(unsigned long function_id,
+extern void __xizi_smccc_smc(unsigned long a0, unsigned long a1, unsigned long a2,
+    unsigned long a3, unsigned long a4, unsigned long a5,
+    unsigned long a6, unsigned long a7, struct xizi_smccc_res* res);
+
+static struct xizi_smccc_res __invoke_sip_fn_smc(unsigned long function_id,
     unsigned long arg0,
     unsigned long arg1,
     unsigned long arg2)
 {
-    struct arm_smccc_res res;
+    struct xizi_smccc_res res;
 
-    __arm_smccc_smc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
+    __xizi_smccc_smc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
     return res;
 }
 
