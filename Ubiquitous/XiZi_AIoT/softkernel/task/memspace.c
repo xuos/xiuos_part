@@ -168,6 +168,7 @@ uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start)
 error_exec:
     if (pmemspace->pgdir.pd_addr != NULL) {
         xizi_pager.free_user_pgdir(&pmemspace->pgdir);
+        pmemspace->pgdir.pd_addr = NULL;
     }
     ERROR("Error loading memspace.\n");
     return NULL;
