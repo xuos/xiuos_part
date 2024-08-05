@@ -93,7 +93,6 @@ void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
             for (uintptr_t l3_entry_idx = 0; l3_entry_idx < NUM_LEVEL3_PDE; l3_entry_idx++) {
                 uintptr_t* l4_table_paddr = (uintptr_t*)LEVEL4_PTE_ADDR(l3_table_vaddr[l3_entry_idx]);
                 if (l4_table_paddr != NULL) {
-                    uintptr_t* l4_table_vaddr = P2V(l4_table_paddr);
                     kfree(P2V(l4_table_paddr));
                 }
             }
