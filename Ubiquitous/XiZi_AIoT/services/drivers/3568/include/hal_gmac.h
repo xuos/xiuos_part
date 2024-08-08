@@ -207,10 +207,10 @@ struct GMAC_Link {
   * @brief  GMAC DMA Descriptors Data Structure Definition
   */
 struct GMAC_Desc {
-    uint64_t des0; /**< DMA Descriptors first word */
-    uint64_t des1; /**< DMA Descriptors second word */
-    uint64_t des2; /**< DMA Descriptors third word */
-    uint64_t des3; /**< DMA Descriptors four word */
+    uint32_t des0; /**< DMA Descriptors first word */
+    uint32_t des1; /**< DMA Descriptors second word */
+    uint32_t des2; /**< DMA Descriptors third word */
+    uint32_t des3; /**< DMA Descriptors four word */
 };
 
 /**
@@ -269,9 +269,13 @@ struct GMAC_HANDLE {
     struct GMAC_DMAStats extraStatus;     /**< GMAC DMA transfer status */
 
     struct GMAC_Desc *rxDescs;            /**< First Rx descriptor pointer */
+    struct GMAC_Desc *rxDescs_dma;
     struct GMAC_Desc *txDescs;            /**< First Tx descriptor pointer */
+    struct GMAC_Desc *txDescs_dma;
     uint8_t *txBuf;                       /**< First Tx buffer pointer */
+    uint8_t *txBuf_dma;
     uint8_t *rxBuf;                       /**< First Tx buffer pointer */
+    uint8_t *rxBuf_dma;
     uint32_t txDescIdx;                   /**< Current Tx descriptor index */
     uint32_t rxDescIdx;                   /**< Current Rx descriptor pointer */
     uint32_t txSize;                      /**< Tx descriptor size*/
@@ -307,17 +311,21 @@ void HAL_GMAC_EnableDmaIRQ(struct GMAC_HANDLE *pGMAC);
 void HAL_GMAC_DisableDmaIRQ(struct GMAC_HANDLE *pGMAC);
 HAL_Status HAL_GMAC_DMATxDescInit(struct GMAC_HANDLE *pGMAC,
                                   struct GMAC_Desc *txDescs,
-                                  uint8_t *txBuff, uint32_t txBuffCount);
+                                  struct GMAC_Desc *txDescs_dma,
+                                  uint8_t *txBuff, uint8_t *txBuff_dma, uint32_t txBuffCount);
 HAL_Status HAL_GMAC_DMARxDescInit(struct GMAC_HANDLE *pGMAC,
                                   struct GMAC_Desc *rxDescs,
-                                  uint8_t *rxBuff, uint32_t rxBuffCount);
+                                  struct GMAC_Desc *rxDescs_dma,
+                                  uint8_t *rxBuff, uint8_t *rxBuff_dma, uint32_t rxBuffCount);
 eGMAC_IRQ_Status HAL_GMAC_IRQHandler(struct GMAC_HANDLE *pGMAC);
 HAL_Status HAL_GMAC_AdjustLink(struct GMAC_HANDLE *pGMAC, int32_t txDelay,
                                int32_t rxDelay);
 uint32_t HAL_GMAC_GetTXIndex(struct GMAC_HANDLE *pGMAC);
 uint32_t HAL_GMAC_GetRXIndex(struct GMAC_HANDLE *pGMAC);
 uint8_t *HAL_GMAC_GetTXBuffer(struct GMAC_HANDLE *pGMAC);
+uint8_t *HAL_GMAC_GetTXBufferDMA(struct GMAC_HANDLE *pGMAC);
 uint8_t *HAL_GMAC_GetRXBuffer(struct GMAC_HANDLE *pGMAC);
+uint8_t *HAL_GMAC_GetRXBufferDMA(struct GMAC_HANDLE *pGMAC);
 HAL_Status HAL_GMAC_Send(struct GMAC_HANDLE *pGMAC,
                          void *packet, uint32_t length);
 uint8_t *HAL_GMAC_Recv(struct GMAC_HANDLE *pGMAC, int32_t *length);
