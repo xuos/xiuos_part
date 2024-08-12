@@ -1287,7 +1287,7 @@ struct INTMUX_REG {
 #define SARADC              ((struct SARADC_REG *) SARADC_BASE)
 #define GPIO1               ((struct GPIO_REG *) GPIO1_BASE)
 #define GPIO2               ((struct GPIO_REG *) (GPIO2_BASE + 0x2000000000ULL))
-#define GPIO3               ((struct GPIO_REG *) GPIO3_BASE)
+#define GPIO3               ((struct GPIO_REG *) (GPIO3_BASE + 0x2000000000ULL))
 #define GPIO4               ((struct GPIO_REG *) GPIO4_BASE)
 #define MBOX0               ((struct MBOX_REG *) MBOX0_BASE)
 #define INTMUX              ((struct INTMUX_REG *) INTMUX_BASE)
