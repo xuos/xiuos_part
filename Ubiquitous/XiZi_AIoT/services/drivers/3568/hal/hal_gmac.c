@@ -283,7 +283,9 @@
 #define GMAC_DESC3_FD    (0x1 << 29)
 #define GMAC_DESC3_LD    (0x1 << 28)
 #define GMAC_DESC3_BUF1V (0x1 << 24)
+#define GMAC_DESC3_CIC   (0x3 << 16)
 
+#define DES3_ERROR_SUMMARY (1 << 15)
 #define DES3_ERROR_SUMMARY (1 << 15)
 
 /* Generic MII registers. */
@@ -1123,7 +1125,7 @@ int32_t HAL_GMAC_MDIORead(struct GMAC_HANDLE *pGMAC, int32_t mdioAddr,
 
     HAL_ASSERT(pGMAC != NULL);
 
-    HAL_DBG("Mdio Read addr=%ld, reg=%ld\n", mdioAddr, mdioReg);
+    // HAL_DBG("Mdio Read addr=%ld, reg=%ld\n", mdioAddr, mdioReg);
     status = Mdio_WaitIdle(pGMAC);
     if (status) {
         HAL_DBG("MDIO not idle at entry");
@@ -1173,8 +1175,8 @@ HAL_Status HAL_GMAC_MDIOWrite(struct GMAC_HANDLE *pGMAC, int32_t mdioAddr,
 
     HAL_ASSERT(pGMAC != NULL);
 
-    HAL_DBG("%s(addr=%lx, reg=%ld, val=%x):\n", __func__,
-            mdioAddr, mdioReg, mdioVal);
+    // HAL_DBG("%s(addr=%lx, reg=%ld, val=%x):\n", __func__,
+    //         mdioAddr, mdioReg, mdioVal);
     status = Mdio_WaitIdle(pGMAC);
     if (status) {
         HAL_DBG("MDIO not idle at entry");
@@ -1347,7 +1349,6 @@ HAL_Status HAL_GMAC_PHYParseLink(struct GMAC_HANDLE *pGMAC)
     if (pGMAC->phyStatus.neg == PHY_AUTONEG_ENABLE) {
         uint32_t lpa = 0, estatus = 0;
         int32_t gblpa = 0;
-
         /* Check for gigabit capability */
         if (pGMAC->phyStatus.supported & (HAL_GMAC_PHY_SUPPORTED_1000baseT_Full |
                                           HAL_GMAC_PHY_SUPPORTED_1000baseT_Half)) {
@@ -1746,6 +1747,13 @@ HAL_Status HAL_GMAC_AdjustLink(struct GMAC_HANDLE *pGMAC, int32_t txDelay,
   *
   * @return HAL status
   */
+#define GENMASK(h, l)		(((1U << ((h) - (l) + 1)) - 1) << (l))
+#define DMA_AXI_WR_OSR_LMT		GENMASK(27, 24)
+#define DMA_AXI_WR_OSR_LMT_SHIFT	24
+#define DMA_AXI_RD_OSR_LMT		GENMASK(19, 16)
+#define DMA_AXI_RD_OSR_LMT_SHIFT	16
+#define DMA_AXI_OSR_MAX			0xf
+
 HAL_Status HAL_GMAC_Start(struct GMAC_HANDLE *pGMAC, uint8_t *addr)
 {
     uint32_t mmc_mode = MMC_CNTRL_RESET_ON_READ | MMC_CNTRL_COUNTER_RESET |
@@ -1764,6 +1772,7 @@ HAL_Status HAL_GMAC_Start(struct GMAC_HANDLE *pGMAC, uint8_t *addr)
     value = READ_REG(pGMAC->pReg->DMA_MODE);
     WRITE_REG(pGMAC->pReg->DMA_MODE, value | DMA_MODE_SWR);
     /* Wait for software Reset */
+    HAL_DelayMs(100);
     while (limit--) {
         if (!(READ_REG(pGMAC->pReg->DMA_MODE) & DMA_MODE_SWR)) {
             break;
@@ -1777,10 +1786,16 @@ HAL_Status HAL_GMAC_Start(struct GMAC_HANDLE *pGMAC, uint8_t *addr)
     }
 
     HAL_DelayMs(100);
+    value = READ_REG(pGMAC->pReg->DMA_SYSBUS_MODE);
+    value &= ~DMA_AXI_WR_OSR_LMT;
+	value |= (0x0 & DMA_AXI_OSR_MAX) << DMA_AXI_WR_OSR_LMT_SHIFT;
+
+	value &= ~DMA_AXI_RD_OSR_LMT;
+	value |= (0x2 & DMA_AXI_OSR_MAX) << DMA_AXI_RD_OSR_LMT_SHIFT;
 
     /* DMA init */
-    WRITE_REG(pGMAC->pReg->DMA_SYSBUS_MODE, DMA_SYSBUS_MODE_BLEN16 |
-              DMA_SYSBUS_MODE_BLEN8 | DMA_SYSBUS_MODE_BLEN4 | 1 << 12 | 1 << 14);
+    WRITE_REG(pGMAC->pReg->DMA_SYSBUS_MODE, value | DMA_SYSBUS_MODE_BLEN16 |
+              DMA_SYSBUS_MODE_BLEN8 | DMA_SYSBUS_MODE_BLEN4);
 
     /* Mask interrupts by writing to CSR7 */
     WRITE_REG(pGMAC->pReg->DMA_CH0_INTERRUPT_ENABLE, DMA_CHAN_INTR_DEFAULT_MASK);
@@ -1789,6 +1804,7 @@ HAL_Status HAL_GMAC_Start(struct GMAC_HANDLE *pGMAC, uint8_t *addr)
     /* Set the HW DMA mode and the COE */
     txFifosz = 128 << ((hwCap & GMAC_HW_TXFIFOSIZE) >> GMAC_HW_TXFIFOSIZE_SHIFT);
     rxFifosz = 128 << ((hwCap & GMAC_HW_RXFIFOSIZE) >> GMAC_HW_RXFIFOSIZE_SHIFT);
+    
 
     /* init rx chan */
     value = READ_REG(pGMAC->pReg->DMA_CH0_RX_CONTROL);
@@ -1800,9 +1816,13 @@ HAL_Status HAL_GMAC_Start(struct GMAC_HANDLE *pGMAC, uint8_t *addr)
     WRITE_REG(pGMAC->pReg->DMA_CH0_RXDESC_TAIL_POINTER,
               (uint32_t)(uint64_t)(pGMAC->rxDescs_dma + pGMAC->rxSize));
 
+    value = READ_REG(pGMAC->pReg->DMA_CH0_CONTROL);
+    value = value | 1 << 16;
+    WRITE_REG(pGMAC->pReg->DMA_CH0_CONTROL, value);
+
     /* init tx chan */
     value = READ_REG(pGMAC->pReg->DMA_CH0_TX_CONTROL);
-    value = value | (8 << DMA_CH0_TX_CONTROL_TXPBL_SHIFT);
+    value = value | (32 << DMA_CH0_TX_CONTROL_TXPBL_SHIFT);
     value |= DMA_CH0_TX_CONTROL_OSF;
     WRITE_REG(pGMAC->pReg->DMA_CH0_TX_CONTROL, value);
 
@@ -2002,7 +2022,7 @@ HAL_Status HAL_GMAC_Send(struct GMAC_HANDLE *pGMAC, void *packet,
     
     desc->des0 = (uint32_t)(uint64_t)packet;
     desc->des1 = 0;
-    desc->des2 = length;
+    desc->des2 = length | 1<<31;
     /*
      * Make sure that if HW sees the _OWN write below, it will see all the
      * writes to the rest of the descriptor too.
@@ -2046,10 +2066,9 @@ uint8_t *HAL_GMAC_Recv(struct GMAC_HANDLE *pGMAC, int32_t *length)
 
     *length = 0;
     desc = pGMAC->rxDescs + pGMAC->rxDescIdx;
-    HAL_DBG("Rx at %p\n", desc->des0);
     des3 = desc->des3;
     if (des3 & GMAC_DESC3_OWN) {
-        HAL_DBG("%s: RX packet not available\n", __func__);
+        HAL_DBG("%p: RX packet not available\n", desc->des0);
 
         return NULL;
     }
@@ -2106,10 +2125,9 @@ void HAL_GMAC_CleanRX(struct GMAC_HANDLE *pGMAC)
     desc->des1 = 0;
     desc->des2 = 0;
     desc->des3 = GMAC_DESC3_OWN | GMAC_DESC3_BUF1V | GMAC_DESC3_IOC;
-    HAL_DBG("Clean buff  %p\n", desc->des0);
-    desc_dma = pGMAC->rxDescs_dma + pGMAC->rxDescIdx;
-    HAL_DBG("Clean desc %p\n", desc_dma);
-    WRITE_REG(pGMAC->pReg->DMA_CH0_RXDESC_TAIL_POINTER, (uint32_t)(uint64_t)desc_dma);
+
+    WRITE_REG(pGMAC->pReg->DMA_CH0_RXDESC_TAIL_POINTER, 
+                (uint32_t)(uint64_t)(pGMAC->rxDescs_dma + pGMAC->rxDescIdx));
 
     pGMAC->rxDescIdx++;
     pGMAC->rxDescIdx %= pGMAC->rxSize;
@@ -2172,7 +2190,6 @@ HAL_Status HAL_GMAC_Init(struct GMAC_HANDLE *pGMAC, struct GMAC_REG *pReg,
 
     pGMAC->txDescIdx = 0;
     pGMAC->rxDescIdx = 0;
-
     /* Get CR bits depending on hclk value */
     if ((freq >= 20000000) && (freq < 35000000)) {
         /* CSR Clock Range between 20-35 MHz */

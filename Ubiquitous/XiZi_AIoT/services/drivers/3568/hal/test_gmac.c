@@ -85,7 +85,7 @@ struct GMAC_ETH_CONFIG {
 /********************* Private Variable Definition ***************************/
 
 
-static uint8_t dstAddr[6] = { 0x00, 0x0C, 0x29, 0xf8, 0x7a, 0x6b };
+static uint8_t dstAddr[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  };
 
 #if defined(HAL_GMAC_MODULE_ENABLED) && defined(SOC_RK3568)
 static struct GMAC_ETH_CONFIG ethConfigTable[] =
@@ -349,7 +349,6 @@ static void *malloc_align(size_t size, size_t align, uintptr_t va, uintptr_t *pa
     /* get total aligned size */
     align_size = ((size + 0x03) & ~0x03);
     /* allocate memory block from heap */
-    HAL_DBG("size: %d, align:%d\n",align_size, align);
     // ptr = malloc(align_size);
 
     if (naive_mmap(&va, pa, align_size, true) < 0){
@@ -417,7 +416,7 @@ static HAL_Status GMAC_Send_Test(struct GMAC_ETH_CONFIG *eth, struct GMAC_HANDLE
     }
 
     /* dump packages */
-    // Dump_Hex("Tx", ptr, len);
+    Dump_Hex("Tx", ptr, len);
 
     // HAL_DCACHE_CleanByRange((uint64_t)ptr, len);
     uint8_t * ptr_dma = (uint8_t *)HAL_GMAC_GetTXBufferDMA(pGMAC);
@@ -426,7 +425,6 @@ static HAL_Status GMAC_Send_Test(struct GMAC_ETH_CONFIG *eth, struct GMAC_HANDLE
         printf("GMAC send failed: %d\n", status);
     }
     
-    print_desc(pGMAC);
     return status;
 }
 
@@ -444,7 +442,6 @@ static uint16_t GMAC_Recv_Test(struct GMAC_HANDLE *pGMAC)
     status = GMAC_ETH_IRQ(pGMAC);
     ptr = HAL_GMAC_Recv(pGMAC, &size);
     while (status && ptr) {
-        print_desc(pGMAC);
         if (size > 0 && ptr) {
             /* dump packages */
             Dump_Hex("Rx", ptr, size);
@@ -462,19 +459,20 @@ static uint16_t GMAC_Recv_Test(struct GMAC_HANDLE *pGMAC)
 
 static HAL_Status GMAC_Memory_Init(struct GMAC_ETH_CONFIG *eth, struct GMAC_HANDLE *pGMAC)
 {   
-    uintptr_t rx_va = 0x1000000000, rx_pa = 0;
-    if (naive_mmap(&rx_va, &rx_pa, GMAC_DESC_RX_SIZE, true) < 0){
-        HAL_DBG("RX Desc alloc failed\n");
-    }
-    eth->rxDescs = (struct GMAC_Desc *)0x1000000000;
-    eth->rxDescs_dma = (struct GMAC_Desc *)rx_pa;
 
-    uintptr_t tx_va = 0x1000400000, tx_pa = 0;
+    uintptr_t tx_va = 0x1000000000, tx_pa = 0;
     if (naive_mmap(&tx_va, &tx_pa, GMAC_DESC_TX_SIZE, true) < 0){
         HAL_DBG("TX Desc alloc failed\n");
     }
-    eth->txDescs = (struct GMAC_Desc *)0x1000400000;
+    eth->txDescs = (struct GMAC_Desc *)0x1000000000;
     eth->txDescs_dma = (struct GMAC_Desc *)tx_pa;
+
+    uintptr_t rx_va = 0x1000400000, rx_pa = 0;
+    if (naive_mmap(&rx_va, &rx_pa, GMAC_DESC_RX_SIZE, true) < 0){
+        HAL_DBG("RX Desc alloc failed\n");
+    }
+    eth->rxDescs = (struct GMAC_Desc *)0x1000400000;
+    eth->rxDescs_dma = (struct GMAC_Desc *)rx_pa;
 
     if (!eth->rxDescs || !eth->txDescs_dma ||
         !eth->txDescs || !eth->txDescs_dma){
@@ -484,14 +482,16 @@ static HAL_Status GMAC_Memory_Init(struct GMAC_ETH_CONFIG *eth, struct GMAC_HAND
     HAL_DBG("rx:%p, %p\n",eth->rxDescs, eth->rxDescs_dma);
     HAL_DBG("tx:%p, %p\n",eth->txDescs, eth->txDescs_dma);
 
-    uintptr_t rxbuf_va = 0x1000800000, rxbuf_pa = 0;
-    uintptr_t txbuf_va = 0x1000C00000, txbuf_pa = 0;
-    eth->rxBuff = malloc_align(GMAC_RX_BUFFER_SIZE, ARCH_DMA_MINALIGN, rxbuf_va, &rxbuf_pa);
-    eth->rxBuff = (void *)0x1000800000;
-    eth->rxBuff_dma = (void *)rxbuf_pa;
+    
+    uintptr_t txbuf_va = 0x1000800000, txbuf_pa = 0;
     eth->txBuff = malloc_align(GMAC_TX_BUFFER_SIZE, ARCH_DMA_MINALIGN, txbuf_va, &txbuf_pa);
-    eth->txBuff = (void *)0x1000C00000;
+    eth->txBuff = (void *)0x1000800000;
     eth->txBuff_dma = (void *)txbuf_pa;
+
+    uintptr_t rxbuf_va = 0x1000c00000, rxbuf_pa = 0;
+    eth->rxBuff = malloc_align(GMAC_RX_BUFFER_SIZE, ARCH_DMA_MINALIGN, rxbuf_va, &rxbuf_pa);
+    eth->rxBuff = (void *)0x1000c00000;
+    eth->rxBuff_dma = (void *)rxbuf_pa;
     
     if (!eth->rxBuff || !eth->txBuff ||
         !eth->rxBuff_dma || !eth->txBuff_dma){   
@@ -499,8 +499,6 @@ static HAL_Status GMAC_Memory_Init(struct GMAC_ETH_CONFIG *eth, struct GMAC_HAND
     }
     HAL_DBG("rx_buff:%p,%p\n",eth->rxBuff, eth->rxBuff_dma);
     HAL_DBG("tx_buff:%p,%p,\n",eth->txBuff, eth->txBuff_dma);
-    HAL_DBG("GMAC_DESC_RX_SIZE:%d\n", GMAC_DESC_RX_SIZE);
-    HAL_DBG("GMAC_RX_BUFFER_SIZE:%d\n", GMAC_RX_BUFFER_SIZE);
     memset(eth->rxDescs, 0, GMAC_DESC_RX_SIZE);
     memset(eth->txDescs, 0, GMAC_DESC_TX_SIZE);
     memset(eth->rxBuff, 0, GMAC_RX_BUFFER_SIZE);
@@ -540,9 +538,9 @@ static HAL_Status GMAC_Init(uint8_t id)
     interface = eth->mode;
 
     if (interface == PHY_INTERFACE_MODE_RGMII) {
-        HAL_CRU_ClkSetFreq(gmacDev->clkID, 125000000);
+        HAL_CRU_ClkSetFreq(gmacDev->clkID125M, 125000000);
     } else {
-        HAL_CRU_ClkSetFreq(gmacDev->clkID, 50000000);
+        HAL_CRU_ClkSetFreq(gmacDev->clkID50M, 50000000);
     }
 
     freq = HAL_CRU_ClkGetFreq(gmacDev->pclkID);
@@ -583,7 +581,6 @@ static void GMAC0_Iomux_Config(void)
                          GPIO_PIN_B6, /* gmac0_rxd0 */
                          PIN_CONFIG_MUX_FUNC1);
     HAL_PINCTRL_SetIOMUX(GPIO_BANK2,
-                         GPIO_PIN_C0 | ///* eth0_refclko25m */
                          GPIO_PIN_C3 | /* gmac0_mdc */
                          GPIO_PIN_C4 | /* gmac0_mdio */
                          GPIO_PIN_C0 | /* gmac0_rxdvcrs */
@@ -646,19 +643,19 @@ int main() {
         } else {
             return -1;
         }
-        HAL_DBG("map GMAC0\n");
+
         if (!mmap(0x2000000000ULL+ GMAC0_BASE, GMAC0_BASE, 0x10000, true)) {
             printf("eth_hal: mmap GMAC0(%8x) failed\n", GMAC0);
             exit(1);
         }
-        HAL_DBG("map GPIO2\n");
+        
         if (!mmap(0x2000000000ULL + GPIO2_BASE, GPIO2_BASE, 0x10000, true)) {
             printf("eth_hal: mmap GPIO2(%8x) failed\n", GPIO2);
             exit(1);
         }
-        HAL_DBG("map GPIO3\n");
+        
         if (!mmap(0x2000000000ULL + GPIO3_BASE, GPIO3_BASE, 0x10000, true)) {
-            printf("eth_hal: mmap GPIO2(%8x) failed\n", GPIO2);
+            printf("eth_hal: mmap GPIO3(%8x) failed\n", GPIO3);
             exit(1);
         }
 
@@ -668,65 +665,69 @@ int main() {
         }
         
         if (!mmap(0x2000000000ULL + CRU_BASE, CRU_BASE, 0x10000, true)) {
-            printf("eth_hal: mmap GRF(%8x) failed\n", GRF);
+            printf("eth_hal: mmap CRU(%8x) failed\n", CRU);
             exit(1);
         }
-        if (!mmap(0x2000000000ULL + TIMER5_BASE, CRU_BASE, 32, true)) {
-            printf("eth_hal: mmap GRF(%8x) failed\n", GRF);
+        if (!mmap(0x2000000000ULL + TIMER5_BASE, TIMER5_BASE, 32, true)) {
+            printf("eth_hal: mmap TIMER5(%8x) failed\n", TIMER5);
             exit(1);
         }
         if (!mmap(0x2000000000ULL + PMUCRU_BASE, PMUCRU_BASE, 0x10000, true)) {
-            printf("eth_hal: mmap GRF(%8x) failed\n", GRF);
+            printf("eth_hal: mmap PMUCRU(%8x) failed\n", PMUCRU);
             exit(1);
         }
 
-        HAL_DBG("config iomux\n");
+        HAL_TIMER_SysTimerInit(TIMER5);
+
         /* ionmux */
         GMAC_Iomux_Config(bus);
-        HAL_DBG("config cru\n");
         HAL_CRU_ClkEnable(eth->halDev->pclkGateID);
-        HAL_CRU_ClkEnable(eth->halDev->clkGateID);
+        HAL_CRU_ClkEnable(eth->halDev->clkGateID125M);
+        HAL_CRU_ClkEnable(eth->halDev->clkGateID50M);
         
         /* Register irq */
         // register_irq(eth->halDev->irqNum, );
         /* PHY reset */
-        HAL_DBG("reset phy\n");
         GMAC_PHY_Reset(eth);
         
         /* GMAC Init */
-        HAL_DBG("init gmac\n");
         GMAC_Init(bus);
 
-        HAL_DBG("init memory\n");
         GMAC_Memory_Init(eth, pGMAC);
         
         /* Enable GMAC and DMA transmission and reception */
-        HAL_DBG("start gmac\n");
         HAL_GMAC_Start(pGMAC, eth->macAddr);
-        // print_desc(pGMAC);
+
         /* Update links information */
-        HAL_DBG("phy update link\n");
         PHY_Update_Links(eth, pGMAC, bus);
-        // print_desc(pGMAC);
+    
         /* Dump MAC Regs */
         Dump_Regs(pGMAC);
+
         /* Dump PHY Regs */
         // PHY_Dump(eth, pGMAC);
-        HAL_DBG("Init Down\n");
         for (i = 0; i < GMAC_TEST_TIMES; i++) {
-            HAL_DBG("TEST Send %d\n", i);
+            HAL_DBG("TEST %d\n", i);
+
             /* GMAC Send 64 bytes */
-            // GMAC_Send_Test(eth, pGMAC, 64);
-            /* GMAC Send 1500 bytes */
-            GMAC_Send_Test(eth, pGMAC, 1500);
+            HAL_DBG("--------------GMAC_Send_Test  START!--------------\n");	
+            GMAC_Send_Test(eth, pGMAC, 64);
+	        HAL_DBG("--------------GMAC_Send_Test  END!--------------\n");	
+           
             HAL_DelayMs(1000);
-            HAL_DBG("TEST Recv %d\n", i);
+            print_desc(pGMAC);
+            
             /* GMAC Recv */
+            HAL_DBG("--------------GMAC_Recv_Test  START! -------------- \n");
             GMAC_Recv_Test(pGMAC);
+            HAL_DBG("--------------GMAC_Recv_Test  END!!-------------- \n");
+
+            HAL_DelayMs(1000);
+            Dump_Regs(pGMAC);
         }
-        Dump_Regs(pGMAC);
         HAL_CRU_ClkDisable(eth->halDev->pclkGateID);
-        HAL_CRU_ClkDisable(eth->halDev->clkGateID);
+        HAL_CRU_ClkDisable(eth->halDev->clkGateID125M);
+        HAL_CRU_ClkDisable(eth->halDev->clkGateID50M);
 
         // free_align(eth->txBuff);
         // free_align(eth->rxBuff);

@@ -312,13 +312,12 @@ __attribute__((weak)) HAL_Status HAL_DelayMs(uint32_t ms)
  */
 HAL_Status HAL_DelayUs(uint32_t us)
 {
-// #if defined(SYS_TIMER) && defined(HAL_TIMER_MODULE_ENABLED)
+#if defined(SYS_TIMER) && defined(HAL_TIMER_MODULE_ENABLED)
 
-//     return TimerDelayUs(us);
-// #else
-
+    return TimerDelayUs(us);
+#else
     return HAL_CPUDelayUs(us);
-// #endif
+#endif
 }
 
 /**

@@ -415,6 +415,7 @@ typedef enum CLOCK_Name {
     ACLK_USB               = CLK(ACLK_USB_SEL, 0U),
     HCLK_USB               = CLK(HCLK_USB_SEL, 0U),
     PCLK_USB               = CLK(0U, PCLK_USB_DIV),
+    CLK_SDMMC0             = CLK(CLK_SDMMC0_SEL, 0U),
 } eCLOCK_Name;
 #endif
 /****************************************MBOX********************************************/
@@ -425,10 +426,10 @@ typedef enum CLOCK_Name {
 #define GRF_DS_BIT_PER_PIN	(8)
 #define GRF_PULL_BIT_PER_PIN	(2)
 /****************************************GPIO********************************************/
-#ifdef GPIO_VER_ID
-#undef GPIO_VER_ID
-#define GPIO_VER_ID             (0x01000C2BU)
-#endif
+// #ifdef GPIO_VER_ID
+// #undef GPIO_VER_ID
+// #define GPIO_VER_ID             (0x01000C2BU)
+// #endif
 /****************************************PMU*********************************************/
 #ifndef __ASSEMBLY__
 typedef enum PD_Id {
@@ -437,6 +438,10 @@ typedef enum PD_Id {
 #endif
 /****************************************FSPI********************************************/
 #define FSPI_CHIP_CNT                            (2)
+
+/****************************************WDT*********************************************/
+#define GLB_RST_SND_WDT GLB_RST_SND_WDT0
+#define GLB_RST_FST_WDT GLB_RST_FST_WDT0
 
 #ifdef __cplusplus
 }

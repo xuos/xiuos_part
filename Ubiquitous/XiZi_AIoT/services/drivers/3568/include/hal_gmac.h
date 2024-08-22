@@ -207,10 +207,10 @@ struct GMAC_Link {
   * @brief  GMAC DMA Descriptors Data Structure Definition
   */
 struct GMAC_Desc {
-    uint32_t des0; /**< DMA Descriptors first word */
-    uint32_t des1; /**< DMA Descriptors second word */
-    uint32_t des2; /**< DMA Descriptors third word */
-    uint32_t des3; /**< DMA Descriptors four word */
+    volatile uint32_t des0; /**< DMA Descriptors first word */
+    volatile uint32_t des1; /**< DMA Descriptors second word */
+    volatile uint32_t des2; /**< DMA Descriptors third word */
+    volatile uint32_t des3; /**< DMA Descriptors four word */
 };
 
 /**
@@ -287,8 +287,10 @@ struct GMAC_HANDLE {
   */
 struct HAL_GMAC_DEV {
     struct GMAC_REG *pReg;
-    eCLOCK_Name clkID;
-    uint32_t clkGateID;
+    eCLOCK_Name clkID125M;
+    eCLOCK_Name clkID50M;
+    uint32_t clkGateID125M;
+    uint32_t clkGateID50M;
     eCLOCK_Name pclkID;
     uint32_t pclkGateID;
     IRQn_Type irqNum;

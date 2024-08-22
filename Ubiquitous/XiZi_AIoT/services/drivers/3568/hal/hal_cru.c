@@ -115,8 +115,8 @@
 
 #define CRU_PLL_ROUND_UP_TO_KHZ(x) (HAL_DIV_ROUND_UP((x), KHZ) * KHZ)
 
-#define CRU_READ(r)           (*(volatile uint32_t *)(r))
-#define CRU_WRITE(r, b, w, v) (*(volatile uint32_t *)(r) = ((w) << (16) | (v) << (b)))
+#define CRU_READ(r)           (*(volatile uint32_t *)((uintptr_t)(r)))
+#define CRU_WRITE(r, b, w, v) (*(volatile uint32_t *)((uintptr_t)(r)) = ((w) << (16) | (v) << (b)))
 
 /********************* Private Structure Definition **************************/
 static struct PLL_CONFIG g_rockchipAutoTable;
@@ -145,6 +145,22 @@ static uint32_t CRU_Gcd(uint32_t m, uint32_t n)
 static int isBetterFreq(uint32_t now, uint32_t new, uint32_t best)
 {
     return (new <= now && new > best);
+}
+
+int HAL_CRU_FreqGetMuxArray(uint32_t freq, uint32_t *table, int num)
+{
+    uint32_t best = 0, mux = 0;
+    int i;
+
+    for (i = 0; i < num; i++) {
+        if (isBetterFreq(freq, table[i], best)) {
+            best = table[i];
+            mux = i;
+            break;
+        }
+    }
+
+    return mux;
 }
 
 int HAL_CRU_FreqGetMux4(uint32_t freq, uint32_t freq0, uint32_t freq1,
@@ -191,6 +207,17 @@ int HAL_CRU_FreqGetMux2(uint32_t freq, uint32_t freq0, uint32_t freq1)
     return HAL_CRU_FreqGetMux4(freq, freq0, freq1, freq1, freq1);
 }
 
+uint32_t HAL_CRU_MuxGetFreqArray(uint32_t muxName, uint32_t *table, int num)
+{
+    uint32_t mux = HAL_CRU_ClkGetMux(muxName);
+
+    if (mux <= (uint32_t)num) {
+        return table[mux];
+    } else {
+        return HAL_INVAL;
+    }
+}
+
 uint32_t HAL_CRU_MuxGetFreq4(uint32_t muxName, uint32_t freq0, uint32_t freq1,
                              uint32_t freq2, uint32_t freq3)
 {
@@ -221,6 +248,30 @@ uint32_t HAL_CRU_MuxGetFreq3(uint32_t muxName, uint32_t freq0,
 uint32_t HAL_CRU_MuxGetFreq2(uint32_t muxName, uint32_t freq0, uint32_t freq1)
 {
     return HAL_CRU_MuxGetFreq4(muxName, freq0, freq1, freq1, freq1);
+}
+
+int HAL_CRU_RoundFreqGetMuxArray(uint32_t freq, uint32_t *table, int num, uint32_t *pFreqOut, bool is_div)
+{
+    uint32_t mux = 0;
+    int i = 0;
+
+    for (i = 0; i < num; i++) {
+        if (is_div) {
+            if (table[i] && (table[i] % freq == 0)) {
+                mux = i;
+                break;
+            }
+        } else {
+            if (table[i] && (table[i] == freq)) {
+                mux = i;
+                break;
+            }
+        }
+    }
+
+    *pFreqOut = table[mux];
+
+    return mux;
 }
 
 int HAL_CRU_RoundFreqGetMux4(uint32_t freq, uint32_t pFreq0,
@@ -811,7 +862,7 @@ HAL_Status HAL_CRU_SetPllPowerDown(struct PLL_SETUP *pSetup)
  */
 uint32_t HAL_CRU_GetPllFreq(struct PLL_SETUP *pSetup)
 {
-    uint32_t refDiv, fbDiv, postdDv1, postDiv2, frac, dsmpd;
+    uint64_t refDiv, fbDiv, postdDv1, postDiv2, frac, dsmpd;
     uint32_t mode = 0, rate = PLL_INPUT_OSC_RATE;
 
     mode = PLL_GET_PLLMODE(READ_REG(*(pSetup->modeOffset)), pSetup->modeShift,
@@ -955,6 +1006,271 @@ HAL_Status HAL_CRU_SetPllPowerDown(struct PLL_SETUP *pSetup)
     return HAL_OK;
 }
 #endif
+
+#ifdef CRU_CLK_USE_CON_BANK
+static const struct HAL_CRU_DEV *CRU_GetInfo(void)
+{
+    return &g_cruDev;
+}
+
+HAL_Check HAL_CRU_ClkIsEnabled(uint32_t clk)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t index = CLK_GATE_GET_REG_OFFSET(clk);
+    uint32_t shift = CLK_GATE_GET_BITS_SHIFT(clk);
+    uint32_t bank = CLK_GATE_GET_REG_BANK(clk);
+    uint32_t reg;
+    HAL_Check ret;
+
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].gateOffset + index * 4;
+    ret = (HAL_Check)(!((CRU_READ(reg) & (1 << shift)) >> shift));
+
+    return ret;
+}
+
+HAL_SECTION_SRAM_CODE
+HAL_Status HAL_CRU_ClkEnable(uint32_t clk)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t index = CLK_GATE_GET_REG_OFFSET(clk);
+    uint32_t shift = CLK_GATE_GET_BITS_SHIFT(clk);
+    uint32_t bank = CLK_GATE_GET_REG_BANK(clk);
+    uint32_t reg;
+
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].gateOffset + index * 4;
+    CRU_WRITE(reg, shift, 1U << shift, 0U);
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_ClkDisable(uint32_t clk)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t index = CLK_GATE_GET_REG_OFFSET(clk);
+    uint32_t shift = CLK_GATE_GET_BITS_SHIFT(clk);
+    uint32_t bank = CLK_GATE_GET_REG_BANK(clk);
+    uint32_t reg;
+
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].gateOffset + index * 4;
+    CRU_WRITE(reg, shift, 1U << shift, 1U);
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_ClkDisableUnused(uint32_t bank, uint32_t index, uint32_t val)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t reg;
+
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].gateOffset + index * 4;
+    CRU_WRITE(reg, 0, 0, val);
+
+    return HAL_OK;
+}
+
+HAL_Check HAL_CRU_ClkIsReset(uint32_t clk)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t index = CLK_GATE_GET_REG_OFFSET(clk);
+    uint32_t shift = CLK_GATE_GET_BITS_SHIFT(clk);
+    uint32_t bank = CLK_GATE_GET_REG_BANK(clk);
+    uint32_t reg;
+    HAL_Check ret;
+
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].softOffset + index * 4;
+    ret = (HAL_Check)((CRU_READ(reg) & (1 << shift)) >> shift);
+
+    return ret;
+}
+
+HAL_Status HAL_CRU_ClkResetAssert(uint32_t clk)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t index = CLK_RESET_GET_REG_OFFSET(clk);
+    uint32_t shift = CLK_RESET_GET_BITS_SHIFT(clk);
+    uint32_t bank = CLK_GATE_GET_REG_BANK(clk);
+    uint32_t reg;
+
+    HAL_ASSERT(shift < 16);
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].softOffset + index * 4;
+    CRU_WRITE(reg, shift, 1U << shift, 1U);
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_ClkResetDeassert(uint32_t clk)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t index = CLK_RESET_GET_REG_OFFSET(clk);
+    uint32_t shift = CLK_RESET_GET_BITS_SHIFT(clk);
+    uint32_t bank = CLK_GATE_GET_REG_BANK(clk);
+    uint32_t reg;
+
+    HAL_ASSERT(shift < 16);
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].softOffset + index * 4;
+    CRU_WRITE(reg, shift, 1U << shift, 0U);
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_ClkResetSyncAssert(int numClks, uint32_t *clks)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t index = CLK_RESET_GET_REG_OFFSET(clks[0]);
+    uint32_t bank = CLK_GATE_GET_REG_BANK(clks[0]);
+    uint32_t val = 0;
+    uint32_t reg;
+    int i;
+
+    for (i = 0; i < numClks; i++) {
+        val |= HAL_BIT(CLK_RESET_GET_BITS_SHIFT(clks[i]));
+        if (index != CLK_RESET_GET_REG_OFFSET(clks[i])) {
+            return HAL_ERROR;
+        }
+    }
+
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].softOffset + index * 4;
+    CRU_WRITE(reg, 0, val, val);
+    HAL_DBG("%s: index: 0x%lx, val: 0x%lx\n", __func__, index, val);
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_ClkResetSyncDeassert(int numClks, uint32_t *clks)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t index = CLK_RESET_GET_REG_OFFSET(clks[0]);
+    uint32_t bank = CLK_GATE_GET_REG_BANK(clks[0]);
+    uint32_t val = 0;
+    uint32_t reg;
+    int i;
+
+    for (i = 0; i < numClks; i++) {
+        val |= HAL_BIT(CLK_RESET_GET_BITS_SHIFT(clks[i]));
+        if (index != CLK_RESET_GET_REG_OFFSET(clks[i])) {
+            return HAL_ERROR;
+        }
+    }
+
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].softOffset + index * 4;
+    CRU_WRITE(reg, 0, val, 0);
+    HAL_DBG("%s: index: 0x%lx, val: 0x%lx\n", __func__, index, val);
+
+    return HAL_OK;
+}
+
+HAL_SECTION_SRAM_CODE
+HAL_Status HAL_CRU_ClkSetDiv(uint32_t divName, uint32_t divValue)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t shift, mask, index;
+    uint32_t reg, bank, maxDiv;
+
+    index = CLK_DIV_GET_REG_OFFSET(divName);
+    shift = CLK_DIV_GET_BITS_SHIFT(divName);
+    HAL_ASSERT(shift < 16);
+    mask = CLK_DIV_GET_MASK(divName);
+    maxDiv = CLK_DIV_GET_MAXDIV(divName) + 1;
+    if (divValue > maxDiv) {
+        divValue = maxDiv;
+    }
+
+    bank = CLK_DIV_GET_BANK(divName);
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].selOffset + index * 4;
+    CRU_WRITE(reg, shift, mask, (divValue - 1U));
+
+    return HAL_OK;
+}
+
+uint32_t HAL_CRU_ClkGetDiv(uint32_t divName)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t shift, mask, index, divValue;
+    uint32_t reg, bank;
+
+    index = CLK_DIV_GET_REG_OFFSET(divName);
+    shift = CLK_DIV_GET_BITS_SHIFT(divName);
+    HAL_ASSERT(shift < 16);
+    mask = CLK_DIV_GET_MASK(divName);
+    bank = CLK_DIV_GET_BANK(divName);
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].selOffset + index * 4;
+    divValue = ((CRU_READ(reg) & mask) >> shift) + 1;
+
+    return divValue;
+}
+
+HAL_SECTION_SRAM_CODE
+HAL_Status HAL_CRU_ClkSetMux(uint32_t muxName, uint32_t muxValue)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t shift, mask, index;
+    uint32_t reg, bank;
+
+    index = CLK_MUX_GET_REG_OFFSET(muxName);
+    shift = CLK_MUX_GET_BITS_SHIFT(muxName);
+    HAL_ASSERT(shift < 16);
+    mask = CLK_MUX_GET_MASK(muxName);
+    bank = CLK_MUX_GET_BANK(muxName);
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].selOffset + index * 4;
+    CRU_WRITE(reg, shift, mask, muxValue);
+
+    return HAL_OK;
+}
+
+HAL_SECTION_SRAM_CODE
+uint32_t HAL_CRU_ClkGetMux(uint32_t muxName)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t shift, mask, index, muxValue;
+    uint32_t reg, bank;
+
+    index = CLK_MUX_GET_REG_OFFSET(muxName);
+    shift = CLK_MUX_GET_BITS_SHIFT(muxName);
+    HAL_ASSERT(shift < 16);
+    mask = CLK_MUX_GET_MASK(muxName);
+    bank = CLK_MUX_GET_BANK(muxName);
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].selOffset + index * 4;
+    muxValue = ((CRU_READ(reg) & mask) >> shift);
+
+    return muxValue;
+}
+
+HAL_Status HAL_CRU_ClkSetFracDiv(uint32_t fracDivName,
+                                 uint32_t numerator,
+                                 uint32_t denominator)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t reg, bank;
+    uint32_t index;
+
+    index = CLK_DIV_GET_REG_OFFSET(fracDivName);
+    bank = CLK_DIV_GET_BANK(fracDivName);
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].selOffset + index * 4;
+    CRU_WRITE(reg, 0, 0, ((numerator << 16) | denominator));
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_ClkGetFracDiv(uint32_t fracDivName,
+                                 uint32_t *numerator,
+                                 uint32_t *denominator)
+{
+    const struct HAL_CRU_DEV *ctrl = CRU_GetInfo();
+    uint32_t reg, bank;
+    uint32_t index;
+    uint32_t val;
+
+    index = CLK_DIV_GET_REG_OFFSET(fracDivName);
+    bank = CLK_DIV_GET_BANK(fracDivName);
+    reg = ctrl->banks[bank].cruBase + ctrl->banks[bank].selOffset + index * 4;
+    val = CRU_READ(reg);
+
+    *numerator = (val & 0xffff0000) >> 16;
+    *denominator = (val & 0x0000ffff);
+
+    return HAL_OK;
+}
+#else /* CRU_CLK_USE_CON_BANK */
 
 HAL_Check HAL_CRU_ClkIsEnabled(uint32_t clk)
 {
@@ -1153,16 +1469,18 @@ HAL_Status HAL_CRU_ClkResetSyncDeassert(int numClks, uint32_t *clks)
     return HAL_OK;
 }
 
+HAL_SECTION_SRAM_CODE
 HAL_Status HAL_CRU_ClkSetDiv(uint32_t divName, uint32_t divValue)
 {
-    uint32_t shift, mask, index;
+    uint32_t shift, mask, index, maxDiv;
 
     index = CLK_DIV_GET_REG_OFFSET(divName);
     shift = CLK_DIV_GET_BITS_SHIFT(divName);
     HAL_ASSERT(shift < 16);
     mask = CLK_DIV_GET_MASK(divName);
-    if (divValue > mask) {
-        divValue = mask;
+    maxDiv = CLK_DIV_GET_MAXDIV(divName) + 1;
+    if (divValue > maxDiv) {
+        divValue = maxDiv;
     }
 
 #ifdef CRU_CLK_DIV_CON_CNT
@@ -1313,7 +1631,7 @@ HAL_Status HAL_CRU_ClkGetFracDiv(uint32_t fracDivName,
 
     return HAL_OK;
 }
-
+#endif /* CRU_CLK_USE_CON_BANK */
 
 HAL_Status HAL_CRU_FracdivGetConfig(uint32_t rateOut, uint32_t rate,
                                     uint32_t *numerator,
@@ -1334,6 +1652,31 @@ HAL_Status HAL_CRU_FracdivGetConfig(uint32_t rateOut, uint32_t rate,
         *denominator *= 4;
     }
     if (*numerator > 0xffff || *denominator > 0xffff) {
+        return HAL_INVAL;
+    }
+
+    return HAL_OK;
+}
+
+HAL_Status HAL_CRU_FracdivGetConfigV2(uint32_t rateOut, uint32_t rate,
+                                      uint32_t *numerator,
+                                      uint32_t *denominator)
+{
+    uint32_t gcdVal;
+
+    gcdVal = CRU_Gcd(rate, rateOut);
+    if (!gcdVal) {
+        return HAL_ERROR;
+    }
+
+    *numerator = rateOut / gcdVal;
+    *denominator = rate / gcdVal;
+
+    if (*numerator < 4) {
+        *numerator *= 4;
+        *denominator *= 4;
+    }
+    if (*numerator > 0xffffff || *denominator > 0xffffff) {
         return HAL_INVAL;
     }
 
