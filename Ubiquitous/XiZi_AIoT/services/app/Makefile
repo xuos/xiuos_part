@@ -43,9 +43,9 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/app 
 
 ifeq ($(BOARD), imx6q-sabrelite)
-all: test_fault simple_client simple_server shell fs_server semaphore_server test_semaphore test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server test_net lwip  readme.txt | bin
+all: test_fault simple_client simple_server shell fs_server semaphore_server test_sleep test_semaphore test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server test_net lwip  readme.txt | bin
 else 
-all: test_fault simple_client simple_server shell fs_server semaphore_server test_ipc_null test_thread test_semaphore test_net lwip readme.txt eth_hal | bin
+all: test_fault simple_client simple_server shell fs_server semaphore_server test_sleep test_ipc_null test_thread test_semaphore test_net lwip readme.txt eth_hal | bin
 endif
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin
@@ -68,6 +68,10 @@ epit_server: timer.o epit.o ccm_pll.o usyscall.o arch_usyscall.o libserial.o pri
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 endif
+
+test_sleep: test_sleep.o libserial.o printf.o usyscall.o arch_usyscall.o
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
 
 test_semaphore: test_semaphore.o libserial.o printf.o usyscall.o arch_usyscall.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}

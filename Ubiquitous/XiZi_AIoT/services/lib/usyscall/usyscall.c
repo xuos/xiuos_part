@@ -154,3 +154,8 @@ bool semaphore_signal(int sem_id)
 {
     return syscall(SYSCALL_SEMAPHORE, (intptr_t)SYS_SEM_SIGNAL, (intptr_t)sem_id, 0, 0);
 }
+
+int sleep(intptr_t ms)
+{
+    return syscall(SYSCALL_SLEEP, (intptr_t)ms, 0, 0, 0);
+}

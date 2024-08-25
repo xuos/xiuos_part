@@ -44,6 +44,7 @@ Modification:
 #define TASK_MAX_PRIORITY 32
 #define TASK_DEFAULT_PRIORITY 2
 #define TASK_NAME_MAX_LEN 16
+#define SLEEP_MONITOR_CORE 0
 
 enum ProcState {
     INIT = 0,
@@ -51,6 +52,7 @@ enum ProcState {
     RUNNING,
     DEAD,
     BLOCKED,
+    SLEEPING,
     NEVER_RUN,
 };
 
@@ -70,6 +72,10 @@ struct ThreadContext {
     struct context* context;
     /* user context of thread */
     struct trapframe* trapframe;
+};
+
+struct TaskSleepContext {
+    int64_t remain_ms;
 };
 
 /* Process Control Block */
@@ -97,6 +103,7 @@ struct Thread {
 
     /* task schedule attributes */
     struct double_list_node node;
+    struct TaskSleepContext sleep_context;
     enum ProcState state;
     int priority; // priority
     int remain_tick;
@@ -114,6 +121,7 @@ struct XiziTaskManager {
     struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
     struct double_list_node task_running_list_head;
     struct double_list_node task_blocked_list_head;
+    struct double_list_node task_sleep_list_head;
     struct XiziSemaphorePool semaphore_pool;
 
     /* mem allocator */

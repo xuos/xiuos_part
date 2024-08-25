@@ -69,12 +69,26 @@ int xizi_clock_handler(int irq, void* tf, void* arg)
     if (p_clock_driver->is_timer_expired()) {
         p_clock_driver->clear_clock_intr();
         global_tick++;
+
+        // handle current thread
         struct Thread* current_task = cur_cpu()->task;
         if (current_task) {
             current_task->remain_tick--;
             current_task->maxium_tick--;
             if (current_task->remain_tick == 0) {
                 xizi_task_manager.task_yield_noschedule(current_task, false);
+            }
+        }
+
+        // todo: cpu 0 will handle sleeping thread
+        struct Thread* thread = NULL;
+        DOUBLE_LIST_FOR_EACH_ENTRY(thread, &xizi_task_manager.task_sleep_list_head, node)
+        {
+            assert(thread->state == SLEEPING);
+            thread->sleep_context.remain_ms--;
+            if (thread->sleep_context.remain_ms <= 0) {
+                xizi_task_manager.task_unblock(thread);
+                break;
             }
         }
     }

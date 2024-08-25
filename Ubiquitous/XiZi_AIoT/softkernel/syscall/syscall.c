@@ -80,6 +80,9 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
     case SYSCALL_SEMAPHORE:
         ret = sys_semaphore((sys_sem_option)param1, (int)param2);
         break;
+    case SYSCALL_SLEEP:
+        ret = sys_sleep((intptr_t)param1);
+        break;
     default:
         ERROR("Unsurport syscall(%d) right now\n", sys_num);
         ret = -1;

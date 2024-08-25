@@ -34,6 +34,7 @@
 #define SYSCALL_KILL            12  // kill the task by id
 
 #define SYSCALL_SEMAPHORE       13  // semaphore related operations
+#define SYSCALL_SLEEP           14  // sleep
 // clang-format on
 
 typedef enum {
@@ -106,3 +107,5 @@ int semaphore_new(int val);
 bool semaphore_free(int sem_id);
 bool semaphore_wait(int sem_id);
 bool semaphore_signal(int sem_id);
+
+int sleep(intptr_t ms);

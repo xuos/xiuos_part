@@ -38,6 +38,7 @@ Modification:
 #include "scheduler.h"
 #include "syscall.h"
 #include "task.h"
+#include "trap_common.h"
 
 struct CPU global_cpus[NR_CPU];
 uint32_t ready_task_priority;
@@ -70,6 +71,7 @@ static void _task_manager_init()
     }
     doubleListNodeInit(&xizi_task_manager.task_blocked_list_head);
     doubleListNodeInit(&xizi_task_manager.task_running_list_head);
+    doubleListNodeInit(&xizi_task_manager.task_sleep_list_head);
     // init task (slab) allocator
     slab_init(&xizi_task_manager.memspace_allocator, sizeof(struct MemSpace));
     slab_init(&xizi_task_manager.task_allocator, sizeof(struct Thread));
@@ -286,6 +288,7 @@ extern void context_switch(struct context**, struct context*);
 static void _scheduler(struct SchedulerRightGroup right_group)
 {
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
+    struct XiziTrapDriver* p_intr_driver = AchieveResource(&right_group.intr_driver_tag);
     struct Thread* next_task;
     struct CPU* cpu = cur_cpu();
 
@@ -347,7 +350,7 @@ static void _task_block(struct double_list_node* head, struct Thread* task)
 static void _task_unblock(struct Thread* task)
 {
     assert(task != NULL);
-    assert(task->state == BLOCKED);
+    assert(task->state == BLOCKED || task->state == SLEEPING);
     task_node_leave_list(task);
     task->state = READY;
     task_node_add_to_ready_list_back(task);

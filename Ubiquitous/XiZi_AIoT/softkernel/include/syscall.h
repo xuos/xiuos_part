@@ -48,6 +48,7 @@ Modification:
 #define SYSCALL_KILL            12  // kill the task by id
 
 #define SYSCALL_SEMAPHORE       13  // semaphore related operations
+#define SYSCALL_SLEEP           14  // sleep
 // clang-format on
 
 #ifndef __ASSEMBLER__
@@ -113,4 +114,5 @@ int sys_unbind_irq_all(struct Thread* task);
 int sys_unbind_irq(struct Thread* task, int irq_num);
 
 int sys_semaphore(sys_sem_option op, int sem_id);
+int sys_sleep(intptr_t ms);
 #endif

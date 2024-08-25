@@ -91,6 +91,12 @@ void show_tasks(void)
         SHOWTASK_TASK_BASE_INFO(task);
     }
 
+    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_sleep_list_head, node)
+    {
+        LOG_PRINTF("%-8s", "SLEEP");
+        SHOWTASK_TASK_BASE_INFO(task);
+    }
+
     struct ksemaphore* sem = NULL;
     DOUBLE_LIST_FOR_EACH_ENTRY(sem, &xizi_task_manager.semaphore_pool.sem_list_guard, sem_list_node)
     {
