@@ -231,6 +231,19 @@ void ethernetif_input(void *netif_arg)
     }
 }
 
+/**
+ * This function should be called when a packet is ready to be read
+ * from the interface. It uses the function ethernetif_linkinput() that
+ * should handle the actual reception of bytes from the network
+ * interface. Then the type of the received packet is determined and
+ * the appropriate input function is called.
+ *
+ * @param netif the lwip network interface structure for this ethernetif
+ */
+void ethernetif_input2(void *netif_arg){
+    ethernetif_input(netif_arg);
+}
+
 void *ethernetif_get_enet_base(const uint8_t enetIdx)
 {
     ENET_Type *enets[] = ENET_BASE_PTRS;

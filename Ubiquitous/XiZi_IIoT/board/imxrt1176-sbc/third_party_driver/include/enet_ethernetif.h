@@ -160,6 +160,7 @@ err_t ethernetif1_init(struct netif *netif);
  * @param netif the lwip network interface structure for this ethernetif
  */
 void ethernetif_input( void *netif_arg);
+void ethernetif_input2( void *netif_arg);
 
 int ETH_BSP_Config(void);
 void *ethernetif_config_enet_set(uint8_t enet_port);
