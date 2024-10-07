@@ -49,6 +49,15 @@ static void ZombieKTaskEntry(void *parameter)
         lock = CriticalAreaLock();
         if (JudgeZombieKTaskIsNotEmpty()) {
             task = SYS_DOUBLE_LINKLIST_ENTRY(KTaskZombie.node_next, struct TaskDescriptor, task_dync_sched_member.sched_link);
+            if(0 == strcmp("main", task->task_base_info.name))
+            {
+                // KPrintf("Zombie KTask Is main\n");
+                SuspendKTask(zombie_recycle);
+                CriticalAreaUnLock(lock);
+                DO_KTASK_ASSIGN;
+            }
+            else
+            {
             DoubleLinkListRmNode(&(task->task_dync_sched_member.sched_link));
             CriticalAreaUnLock(lock);
 #ifdef SEPARATE_COMPILE
@@ -72,6 +81,7 @@ static void ZombieKTaskEntry(void *parameter)
                 KERNEL_FREE(task->task_dync_sched_member.delay);
             }
             KERNEL_FREE(task);
+            }
         } else {
             SuspendKTask(zombie_recycle);
             CriticalAreaUnLock(lock);

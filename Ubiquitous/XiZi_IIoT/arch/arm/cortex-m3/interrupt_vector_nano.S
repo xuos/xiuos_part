@@ -114,8 +114,8 @@ InterruptVectors:
   .word IsrEntry
   .word IsrEntry
   .word IsrEntry
-  .word UartIsr1
-  .word IsrEntry              //UartIsr2
+  .word IsrEntry              //UartIsr1
+  .word UartIsr2              //UartIsr2
   .word IsrEntry
   .word IsrEntry
   .word IsrEntry

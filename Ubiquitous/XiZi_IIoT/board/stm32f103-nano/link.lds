@@ -5,7 +5,7 @@
 /* Program Entry, set to mark it as "used" and avoid gc */
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 128k /* 128KB flash */
+    flash (rx) : ORIGIN = 0x08004000, LENGTH = 112k /* 128KB flash */
     sram (rw) : ORIGIN = 0x20000000, LENGTH =  20k /* 20K sram */
 }
 OUTPUT_ARCH(arm)

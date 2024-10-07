@@ -252,6 +252,7 @@ extern int InitUserspace(void);
 #endif
 
 	StartupOsAssign();
+	ymodem_fun();
     return 0;
 }
 

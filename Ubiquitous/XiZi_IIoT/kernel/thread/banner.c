@@ -44,7 +44,7 @@ void ShowBanner(void)
 	KPrintf("A:::::A       A:::::A     i::::::i   II:::::::::II       II:::::::::II   T:::::::::::::::TT  \n");
 	KPrintf("AAAAAAA       AAAAAAA     iiiiiiii     IIIIIIIII           IIIIIIIII      TTTTTTTTTTTTTTT    \n");                                                
 	KPrintf("*********************************************************************************************\n");
-	KPrintf("*********************-----X Industrial Ubiquitous Operating System-----**********************\n");
+	KPrintf("*********************-----X Industrial Ubiquitous Operating System-APP-**********************\n");
 	KPrintf("***************************2021 Copyright AIIT Ubiquitous-OS Team****************************\n");
 	KPrintf("*********************************************************************************************\n");
 }
