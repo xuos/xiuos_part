@@ -16,6 +16,11 @@ ifeq ($(CONFIG_KERNEL_TEST_MSG),y)
 	SRC_FILES += test_mq.c
 endif
 
+ifeq ($(CONFIG_KERNEL_TEST_CAPABILITY),y)
+	SRC_FILES += test_capability.c
+endif
+
+
 ifeq ($(CONFIG_KERNEL_TEST_AVLTREE),y)
 	SRC_FILES += test_avltree.c
 endif

@@ -11,6 +11,10 @@ menuconfig KERNEL_TEST
             bool "Config test Circular area"
             default n
             select KERNEL_CIRCULAR_AREA
+        config KERNEL_TEST_CAPABILITY
+            bool "Config test capability"
+            default n
+            select KERNEL_AVL_TREE
         config KERNEL_TEST_MEM
             bool "Config test mem"
             default n
