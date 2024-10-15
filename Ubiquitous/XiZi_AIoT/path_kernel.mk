@@ -54,6 +54,21 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/hardkernel/cache/L1/arm/cortex-a55/ 
 endif
 
+ifeq ($(BOARD), jh7110)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/hardkernel/arch/riscv/rv64gc/preboot_for_$(BOARD)/include \
+	-I$(KERNEL_ROOT)/hardkernel/arch/riscv/rv64gc/ \
+	-I$(KERNEL_ROOT)/hardkernel/cache/L1/riscv/rv64gc/ \
+	-I$(KERNEL_ROOT)/hardkernel/clock/riscv/rv64gc/$(BOARD)/include \
+	-I$(KERNEL_ROOT)/hardkernel/intr/riscv/rv64gc/ \
+	-I$(KERNEL_ROOT)/hardkernel/intr/riscv/rv64gc/$(BOARD) \
+	-I$(KERNEL_ROOT)/hardkernel/intr/riscv/rv64gc/gicv3 \
+	-I$(KERNEL_ROOT)/hardkernel/mmu/riscv/rv64gc/include  \
+	-I$(KERNEL_ROOT)/hardkernel/mmu/riscv/rv64gc/$(BOARD)  \
+	-I$(KERNEL_ROOT)/hardkernel/uart/riscv/rv64gc/uart_io_for_$(BOARD)/include \
+	-I$(KERNEL_ROOT)/hardkernel/uart/riscv/rv64gc/
+endif
+
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/hardkernel \
 	-I$(KERNEL_ROOT)/hardkernel/clock/  \
