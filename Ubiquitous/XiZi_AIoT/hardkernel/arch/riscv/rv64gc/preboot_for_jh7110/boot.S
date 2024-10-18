@@ -9,6 +9,8 @@
  * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
+
+/* #include <asm/csr.h> */
 #include "core.h"
 
 #define HCR_VALUE (1 << 31)
@@ -21,14 +23,19 @@
 
 
 _boot_start:
-
-    j     primary_cpu_init
-
-    j      .
+    j primary_cpu_init
+    j .
 
 primary_cpu_init:
-
+    la t0, boot_start_addr
+    la t1, boot_end_addr
+    li t2, 0
+  
+clear_loop:
+    bge t0, t1, clear_done
+    sb t2, 0(t0)
+    addi t0, t0, 4
+    j clear_loop
+  
+clear_done:
     j bootmain
-
-
-

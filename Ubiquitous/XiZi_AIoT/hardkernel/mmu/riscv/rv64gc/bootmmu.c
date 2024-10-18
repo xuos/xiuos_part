@@ -32,6 +32,7 @@ Modification:
 #include "mmu.h"
 #include "pagetable.h"
 #include "registers.h"
+#include "ns16550.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -134,6 +135,7 @@ extern void main(void);
 static bool _bss_inited = false;
 void bootmain()
 {
+    _debug_uart_init();
 #if 0
     build_boot_pgdir();
     load_boot_pgdir();
@@ -142,7 +144,8 @@ void bootmain()
         memset(&kernel_data_begin, 0x00, (size_t)((uint64_t)kernel_data_end - (uint64_t)kernel_data_begin));
         _bss_inited = true;
     }
-#endif
+
     main();
+#endif
 }
 
