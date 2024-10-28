@@ -32,6 +32,7 @@
 // assume the number of capability types is limited to 8*MAX_NUM_TA
 typedef enum {
     XS_CAP = 0,
+    XS_CAP_ROOT,
     XS_CAP_TASK,
     XS_CAP_MEM,
     XS_CAP_RESOURCES,
@@ -71,6 +72,12 @@ void AddTaskCapability(int32 pid, xs_capability *cap);
 // remove_task_capability is used to manipulate task capabilities
 void RemoveTaskCapability(int32 pid);
 
+// add_root_task_capability is used to manipulate task capabilities
+void AddRootTaskCapability(int32 pid);
+
+// Capability_Copy is used to deep copy capabilitie 
+void CapabilityCopy(xs_capability *cap, xs_capability *cap_copy_from);
+
 // check_task_capability is used to check if a task has a certain capability
 x_bool CheckTaskCapability(int32 pid, xs_capability_type type);
 
@@ -79,6 +86,25 @@ void SetTaskCapability(int32 pid, xs_capability_type type);
 
 // clear_task_capability is used to manipulate task capabilities
 void ClearTaskCapability(int32 pid, xs_capability_type type);
+
+// test
+void PrintTaskCapability();
+
+typedef struct CapsOps
+{
+    int (*CheckCap) (xs_capability *cap, xs_capability_type type);
+    void (*SetCap) (xs_capability *cap, xs_capability_type type);
+    void (*ClearCap) (xs_capability *cap, xs_capability_type type);
+    xs_capability* (*GetTaskCaps) (int32 pid);
+    void (*AddTaskCaps) (int32 pid, xs_capability *cap);
+    void (*RemoveTaskCaps) (int32 pid);
+    void (*AddRootTaskCaps) (int32 pid);
+    void (*Copy)(xs_capability *cap, xs_capability *cap_copy_from);
+    x_bool (*CheckTaskCap)(int32 pid, xs_capability_type type);
+    void (*SetTaskCap) (int32 pid, xs_capability_type type);
+    void (*ClearTaskCap) (int32 pid, xs_capability_type type);
+    void (*Print) ();
+} CapsOps;
 
 #endif /* XS_CAPABILITY_H */ 
 
