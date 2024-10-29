@@ -32,6 +32,7 @@ Modification:
 #include "actracer.h"
 #include "bitmap64.h"
 #include "buddy.h"
+#include "kalloc.h"
 #include "list.h"
 
 struct TopLevelPageDirectory {
@@ -48,6 +49,9 @@ struct ThreadStackPointer {
 struct MemSpace {
     /* trace node */
     TraceTag tag;
+    /* mem usage info */
+    struct MemUsage mem_usage;
+
     /* task memory resources */
     struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address
     uintptr_t heap_base; // mem size of proc used(allocated by kernel)
@@ -63,7 +67,7 @@ struct MemSpace {
     struct Thread* thread_to_notify;
 };
 
-struct MemSpace* alloc_memspace();
+struct MemSpace* alloc_memspace(char* name);
 void free_memspace(struct MemSpace* pmemspace);
 uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start);
 struct ThreadStackPointer load_user_stack(struct MemSpace* pmemspace, char** argv);

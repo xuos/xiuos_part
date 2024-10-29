@@ -10,16 +10,16 @@
  * See the Mulan PSL v2 for more details.
  */
 /**
- * @file object_allocator.h
- * @brief slab algorithm declaration
+ * @file scheduler.h
+ * @brief scheduler algorithm declaration
  * @version 3.0
  * @author AIIT XUOS Lab
  * @date 2023.08.25
  */
 
 /*************************************************
-File name: object_allocator.h
-Description: slab algorithm declaration
+File name: scheduler.h
+Description: scheduler algorithm declaration
 Others:
 History:
 1. Date: 2023-08-28
@@ -29,29 +29,8 @@ Modification:
 *************************************************/
 #pragma once
 
-#include "actracer_tag.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "task.h"
 
-struct slab_state {
-    TraceTag owner_tag;
-    struct slab_state *prev, *next;
-    uint64_t bitmap;
-    uintptr_t refcount;
-    uint8_t data[] __attribute__((aligned(sizeof(void*))));
-};
-
-struct slab_allocator {
-
-    size_t element_size;
-    size_t nr_elements;
-    size_t slabsize;
-    uint64_t bitmap_empty;
-    struct slab_state *partial, *empty, *full;
-};
-
-void slab_init(struct slab_allocator*, size_t);
-void slab_destroy(const struct slab_allocator*);
-
-void* slab_alloc(struct slab_allocator*);
-void slab_free(struct slab_allocator*, const void*);
+struct Thread* max_priority_runnable_task(void);
+struct Thread* round_robin_runnable_task(uint32_t priority);
+void recover_priority(void);

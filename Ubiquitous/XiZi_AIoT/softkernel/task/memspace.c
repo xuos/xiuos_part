@@ -41,7 +41,7 @@ Modification:
 
 #define MAX_SUPPORT_PARAMS 32
 
-struct MemSpace* alloc_memspace()
+struct MemSpace* alloc_memspace(char* name)
 {
     struct MemSpace* pmemspace = slab_alloc(&xizi_task_manager.memspace_allocator);
     if (pmemspace == NULL) {
@@ -56,7 +56,18 @@ struct MemSpace* alloc_memspace()
     pmemspace->mem_size = 0;
     pmemspace->pgdir.pd_addr = 0;
     pmemspace->thread_to_notify = NULL;
-    CreateResourceTag(&pmemspace->tag, &xizi_task_manager.tag, NULL, TRACER_OWNER, (void*)pmemspace);
+    if (!CreateResourceTag(&pmemspace->tag, &xizi_task_manager.tag, name, TRACER_OWNER, (void*)pmemspace)) {
+        DEBUG("Register MemSpace %s failed\n", name);
+        slab_free(&xizi_task_manager.memspace_allocator, (void*)pmemspace);
+        return NULL;
+    }
+
+    pmemspace->mem_usage.mem_block_root = NULL;
+    if (!CreateResourceTag(&pmemspace->mem_usage.tag, &pmemspace->tag, "MemUsage", TRACER_SYSOBJECT, (void*)&pmemspace->mem_usage)) {
+        DEBUG("Register MemUsage %s failed\n", name);
+        slab_free(&xizi_task_manager.memspace_allocator, (void*)pmemspace);
+        return NULL;
+    }
     return pmemspace;
 }
 
@@ -69,15 +80,23 @@ void free_memspace(struct MemSpace* pmemspace)
         xizi_pager.free_user_pgdir(&pmemspace->pgdir);
     }
 
-    TracerNode* tmp_node = NULL;
-    DOUBLE_LIST_FOR_EACH_ENTRY(tmp_node, &pmemspace->tag.meta->children_guard, list_node)
-    {
-        assert((uintptr_t)tmp_node->p_resource >= PHY_MEM_BASE && (uintptr_t)tmp_node->p_resource < PHY_MEM_STOP);
-        if ((uintptr_t)tmp_node->p_resource < PHY_USER_FREEMEM_BASE) {
-            kfree(P2V(tmp_node->p_resource));
-        } else {
-            raw_free(tmp_node->p_resource);
-        }
+    // TracerNode* tmp_node = NULL;
+    // DOUBLE_LIST_FOR_EACH_ENTRY(tmp_node, &pmemspace->tag.meta->children_guard, list_node)
+    // {
+    //     assert((uintptr_t)tmp_node->p_resource >= PHY_MEM_BASE && (uintptr_t)tmp_node->p_resource < PHY_MEM_STOP);
+    //     if ((uintptr_t)tmp_node->p_resource < PHY_USER_FREEMEM_BASE) {
+    //         kfree(P2V(tmp_node->p_resource));
+    //     } else {
+    //         raw_free(tmp_node->p_resource);
+    //     }
+    // }
+
+    // delete space
+    RbtNode* rbt_node = pmemspace->mem_usage.mem_block_root;
+    while (rbt_node != NULL) {
+        assert((uintptr_t)V2P(rbt_node->key) >= PHY_MEM_BASE && (uintptr_t)V2P(rbt_node->key) < PHY_MEM_STOP);
+        kfree_by_ownership(pmemspace->mem_usage.tag, (void*)rbt_node->key);
+        rbt_node = pmemspace->mem_usage.mem_block_root;
     }
 
     /* free ipc virt address allocator */

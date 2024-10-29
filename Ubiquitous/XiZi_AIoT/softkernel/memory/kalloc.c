@@ -30,6 +30,9 @@ Modification:
 #include "kalloc.h"
 #include "assert.h"
 
+#include "memlayout.h"
+#include "pagetable.h"
+
 #include "actracer.h"
 #include "buddy.h"
 
@@ -64,9 +67,33 @@ char* kalloc(uintptr_t size)
     return mem_alloc;
 }
 
+void* kalloc_by_ownership(TraceTag owner, uintptr_t size)
+{
+    void* new_mem = kalloc(size);
+    if (!new_mem) {
+        return NULL;
+    }
+
+    struct MemUsage* usage = GetSysObject(struct MemUsage, &owner);
+    usage->mem_block_root = rbt_insert(usage->mem_block_root, (uintptr_t)new_mem, NULL);
+    // DEBUG("%p %p %p %p\n", usage, usage->mem_block_root, usage->tag, new_mem);
+    return new_mem;
+}
+
 bool kfree(char* vaddr)
 {
     return KBuddyFree(&kern_virtmem_buddy, V2P_WO(vaddr));
+}
+
+bool kfree_by_ownership(TraceTag owner, void* vaddr)
+{
+    struct MemUsage* usage = GetSysObject(struct MemUsage, &owner);
+    // DEBUG("%p %p %p %p\n", usage, usage->mem_block_root, usage->tag, vaddr);
+    RbtNode* node = rbt_search(usage->mem_block_root, (uintptr_t)vaddr);
+    assert(NULL != node);
+    usage->mem_block_root = rbt_delete(usage->mem_block_root, node);
+
+    return kfree(vaddr);
 }
 
 bool raw_kfree(char* paddr)

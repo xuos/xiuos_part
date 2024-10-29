@@ -31,10 +31,13 @@ Modification:
 
 #include "assert.h"
 #include "log.h"
+#include "rbtree.h"
 #include "task.h"
 
-bool softkernel_init(struct TraceTag* _hardkernel_tag, struct TraceTag* _softkernel_tag)
+bool softkernel_init(TraceTag* _hardkernel_tag, struct TraceTag* _softkernel_tag)
 {
+    module_rbt_factory_init(_softkernel_tag);
+
     struct TraceTag server_identifier_owner;
     CreateResourceTag(&server_identifier_owner, _softkernel_tag, "server-identifier", TRACER_OWNER, NULL);
 

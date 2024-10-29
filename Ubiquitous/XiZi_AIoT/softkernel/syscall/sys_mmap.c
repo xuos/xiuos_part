@@ -62,7 +62,7 @@ int sys_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, int is_dev)
             raw_free(new_paddr);
             return -1;
         }
-        CreateResourceTag(NULL, &cur_task->memspace->tag, NULL, TRACER_MEM_FROM_BUDDY_AC_RESOURCE, new_paddr);
+        CreateResourceTag(NULL, &cur_task->memspace->tag, "ANON_MEMORY", TRACER_MEM_FROM_BUDDY_AC_RESOURCE, new_paddr);
         *paddr = (uintptr_t)new_paddr;
     }
 

@@ -29,12 +29,21 @@ Modification:
 *************************************************/
 #pragma once
 
-#include "pagetable.h"
+#include "actracer.h"
+#include "rbtree.h"
+
+struct MemUsage {
+    TraceTag tag;
+    RbtNode* mem_block_root;
+};
 
 bool module_phymem_init();
 char* kalloc(size_t size);
 bool kfree(char* vaddr);
 bool raw_kfree(char* paddr);
+
+void* kalloc_by_ownership(TraceTag owner, uintptr_t size);
+bool kfree_by_ownership(TraceTag owner, void* vaddr);
 
 char* raw_alloc(size_t size);
 bool raw_free(char* paddr);

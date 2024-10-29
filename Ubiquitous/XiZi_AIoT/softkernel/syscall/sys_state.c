@@ -30,6 +30,7 @@ Modification:
 #include <stdint.h>
 #include <string.h>
 
+#include "actracer.h"
 #include "assert.h"
 #include "buddy.h"
 #include "log.h"
@@ -185,6 +186,10 @@ int sys_state(sys_state_option option, sys_state_info* info)
     case SYS_STATE_GET_CURRENT_SECOND: {
         extern void hw_current_second(uintptr_t * tick);
         hw_current_second(&info->current_second);
+        break;
+    }
+    case SYS_STATE_SHOW_ACTREE: {
+        debug_list_tracetree();
         break;
     }
     case SYS_STATE_TEST:

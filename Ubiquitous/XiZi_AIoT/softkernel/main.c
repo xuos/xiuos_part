@@ -59,6 +59,7 @@ int main(void)
 
     if (cpu_id == 0) {
         /* init memory management first */
+
         module_phymem_init(); // init buddy management system
         /* init tracer system */
         sys_tracer_init();

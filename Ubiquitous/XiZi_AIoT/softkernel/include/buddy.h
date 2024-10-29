@@ -31,7 +31,6 @@ Modification:
 
 #include "list.h"
 #include "memlayout.h"
-#include "spinlock.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -70,7 +69,6 @@ struct KFreeList {
 struct KBuddy {
     uintptr_t n_pages;
     uintptr_t use_lock;
-    struct spinlock lock;
     struct KFreeList free_list[MAX_BUDDY_ORDER];
     struct KPage* first_page;
     uintptr_t mem_start;

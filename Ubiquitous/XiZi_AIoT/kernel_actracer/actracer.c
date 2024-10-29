@@ -45,11 +45,8 @@ static void tracer_init_node(TracerNode* node, char* name, tracemeta_ac_type typ
         p_name[TRACER_NODE_NAME_LEN - 1] = '\0';
         node->name = p_name;
     }
-    if (node->type == TRACER_OWNER) {
-        doubleListNodeInit(&node->children_guard);
-    } else {
-        node->p_resource = p_resource;
-    }
+    doubleListNodeInit(&node->children_guard);
+    node->p_resource = p_resource;
     doubleListNodeInit(&node->list_node);
 }
 
@@ -149,13 +146,10 @@ bool CreateResourceTag(TraceTag* new_tag, TraceTag* owner, char* name, tracemeta
 {
     assert(owner != NULL);
     if (owner->meta == NULL) {
-        ERROR("Tracer: Empty owner\n");
+        ERROR("Tracer: Empty owner, node name: %s\n", name);
         return false;
     }
-    assert(owner->meta->type == TRACER_OWNER);
-    if (tracer_find_node_onestep(owner->meta, name) != NULL) {
-        return false;
-    }
+    // assert(owner->meta->type == TRACER_OWNER);
 
     TracerNode* new_node = (TracerNode*)slab_alloc(&sys_tracer.node_allocator);
     if (new_node == NULL) {
@@ -204,27 +198,37 @@ bool DeleteResource(TraceTag* target, TraceTag* owner)
     return true;
 }
 
-void debug_list_tracetree_inner(TracerNode* cur_node)
+#define debug_print_blanks(n)           \
+    for (int __i = 0; __i < n; __i++) { \
+        DEBUG_PRINTF("  ");             \
+    }
+
+void debug_list_tracetree_inner(TracerNode* cur_node, int nr_blanks)
 {
-    DEBUG("[%s] ", cur_node->name);
+    debug_print_blanks(nr_blanks);
+    if (cur_node->name == NULL) {
+        DEBUG_PRINTF("[ANON %d] ", cur_node->type);
+    } else {
+        DEBUG_PRINTF("[%s %d] ", cur_node->name, cur_node->type);
+    }
     TracerNode* tmp = NULL;
     DOUBLE_LIST_FOR_EACH_ENTRY(tmp, &cur_node->children_guard, list_node)
     {
         if (tmp->name != NULL) {
-            DEBUG("%s ", tmp->name);
+            DEBUG_PRINTF("%s ", tmp->name);
         } else {
-            DEBUG("ANON ");
+            DEBUG_PRINTF("ANON ");
         }
     }
-    DEBUG("\n");
+    DEBUG_PRINTF("\n");
     DOUBLE_LIST_FOR_EACH_ENTRY(tmp, &cur_node->children_guard, list_node)
     {
-        debug_list_tracetree_inner(tmp);
+        debug_list_tracetree_inner(tmp, nr_blanks + 1);
     }
 }
 
 void debug_list_tracetree()
 {
     TracerNode* ref_root = RequireRootTag()->meta;
-    debug_list_tracetree_inner(ref_root);
+    debug_list_tracetree_inner(ref_root, 0);
 }

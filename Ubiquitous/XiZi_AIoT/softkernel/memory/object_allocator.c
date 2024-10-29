@@ -32,6 +32,7 @@ Modification:
 #include "assert.h"
 #include "kalloc.h"
 #include "object_allocator.h"
+#include "pagetable.h"
 
 #define BITMAP_BITS_EMPTY_FULL ((uint64_t)0)
 #define BITMAP_FIRST_BIT ((uint64_t)1)

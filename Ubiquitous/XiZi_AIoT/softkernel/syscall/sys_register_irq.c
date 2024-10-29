@@ -117,7 +117,7 @@ int sys_register_irq(int irq_num, int irq_opcode)
     // init kerenl sender proxy
     if (kernel_irq_proxy == NULL) {
         /// @todo handle corner cases
-        struct MemSpace* pmemspace = alloc_memspace();
+        struct MemSpace* pmemspace = alloc_memspace("KernelIrqProxy");
         if (pmemspace == NULL) {
             return -1;
         }

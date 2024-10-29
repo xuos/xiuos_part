@@ -1797,6 +1797,11 @@ void shellShowCpusInfo()
     show_cpu();
 }
 
+void shellShowActree()
+{
+    show_actree();
+}
+
 #if SHELL_EXEC_UNDEF_FUNC == 1
 /**
  * @brief shell执行未定义函数

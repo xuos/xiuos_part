@@ -40,6 +40,7 @@ extern void shellKill(int pid);
 extern void shellShowTasks();
 extern void shellShowMemInfo();
 extern void shellShowCpusInfo();
+extern void shellShowActree();
 
 #if SHELL_EXEC_UNDEF_FUNC == 1
 extern int shellExecute(int argc, char* argv[]);
@@ -118,6 +119,8 @@ const ShellCommand shellCommandList[] = {
         showMemInfo, shellShowMemInfo, display memory info),
     SHELL_CMD_ITEM(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_DISABLE_RETURN,
         showCpusInfo, shellShowCpusInfo, display cpus info),
+    SHELL_CMD_ITEM(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC) | SHELL_CMD_DISABLE_RETURN,
+        showActree, shellShowActree, display actracer tree),
 
 #if SHELL_EXEC_UNDEF_FUNC == 1
     SHELL_CMD_ITEM(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN) | SHELL_CMD_DISABLE_RETURN,

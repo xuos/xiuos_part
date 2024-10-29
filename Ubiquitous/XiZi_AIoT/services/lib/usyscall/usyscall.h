@@ -47,6 +47,7 @@ typedef enum {
     SYS_STATE_SHOW_CPU_INFO,
     SYS_STATE_GET_CURRENT_TICK,
     SYS_STATE_GET_CURRENT_SECOND,
+    SYS_STATE_SHOW_ACTREE,
 } sys_state_option;
 
 typedef enum {
@@ -99,6 +100,7 @@ int set_priority(sys_state_info* info);
 int show_task();
 int show_mem();
 int show_cpu();
+int show_actree();
 
 uintptr_t get_second();
 uintptr_t get_tick();

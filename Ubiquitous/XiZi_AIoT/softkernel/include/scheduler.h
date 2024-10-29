@@ -1,36 +1,21 @@
-/*
- * Copyright (c) 2020 AIIT XUOS Lab
- * XiUOS is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- *        http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
-/**
- * @file scheduler.h
- * @brief scheduler algorithm declaration
- * @version 3.0
- * @author AIIT XUOS Lab
- * @date 2023.08.25
- */
 
-/*************************************************
-File name: scheduler.h
-Description: scheduler algorithm declaration
-Others:
-History:
-1. Date: 2023-08-28
-Author: AIIT XUOS Lab
-Modification:
-1. first version
-*************************************************/
 #pragma once
+#include "actracer.h"
+#include "ksemaphore.h"
 
-#include "task.h"
+#define TASK_MAX_PRIORITY 32
 
-struct Thread* max_priority_runnable_task(void);
-struct Thread* round_robin_runnable_task(uint32_t priority);
-void recover_priority(void);
+struct ScheduleNode {
+    TraceTag task_ref;
+    struct double_list_node list_node;
+};
+
+struct Scheduler {
+    TraceTag tag;
+
+    struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
+    struct double_list_node task_running_list_head;
+    struct double_list_node task_blocked_list_head;
+    struct double_list_node task_sleep_list_head;
+    struct XiziSemaphorePool semaphore_pool;
+};

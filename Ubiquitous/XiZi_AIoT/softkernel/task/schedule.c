@@ -28,7 +28,7 @@ Modification:
 1. first version
 *************************************************/
 #include "log.h"
-#include "scheduler.h"
+#include "schedule_algo.h"
 
 struct Thread* max_priority_runnable_task(void)
 {

@@ -67,6 +67,7 @@ typedef enum {
     SYS_STATE_SHOW_CPU_INFO,
     SYS_STATE_GET_CURRENT_TICK,
     SYS_STATE_GET_CURRENT_SECOND,
+    SYS_STATE_SHOW_ACTREE,
 } sys_state_option;
 
 typedef enum {

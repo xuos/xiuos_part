@@ -38,7 +38,7 @@ extern int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintp
 int sys_spawn(char* img_start, char* name, char** argv)
 {
     // alloc a new memspace
-    struct MemSpace* pmemspace = alloc_memspace();
+    struct MemSpace* pmemspace = alloc_memspace(name);
     if (pmemspace == NULL) {
         return -1;
     }

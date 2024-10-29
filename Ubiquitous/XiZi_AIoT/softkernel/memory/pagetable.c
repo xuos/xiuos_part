@@ -160,7 +160,8 @@ static uintptr_t _resize_user_pgdir(struct MemSpace* pmemspace, uintptr_t old_si
     uintptr_t cur_size = ALIGNUP(old_size, PAGE_SIZE);
     uintptr_t size_needed = ALIGNUP(new_size, PAGE_SIZE) - cur_size;
 
-    char* new_page = kalloc(size_needed);
+    // char* new_page = kalloc(size_needed);
+    char* new_page = kalloc_by_ownership(pmemspace->mem_usage.tag, size_needed);
     if (new_page == NULL) {
         ERROR("No memory\n");
         return cur_size;
@@ -169,7 +170,6 @@ static uintptr_t _resize_user_pgdir(struct MemSpace* pmemspace, uintptr_t old_si
     if (!xizi_pager.map_pages(pmemspace, cur_size, V2P(new_page), size_needed, false)) {
         return cur_size;
     }
-    CreateResourceTag(NULL, &pmemspace->tag, NULL, TRACER_MEM_FROM_BUDDY_AC_RESOURCE, V2P_WO(new_page));
 
     return new_size;
 }

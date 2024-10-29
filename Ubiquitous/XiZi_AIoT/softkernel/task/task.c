@@ -35,7 +35,7 @@ Modification:
 #include "kalloc.h"
 #include "memspace.h"
 #include "multicores.h"
-#include "scheduler.h"
+#include "schedule_algo.h"
 #include "syscall.h"
 #include "task.h"
 #include "trap_common.h"
@@ -176,7 +176,7 @@ static void _dealloc_task_cb(struct Thread* task)
 
     /* free thread's kernel stack */
     if (task->thread_context.kern_stack_addr) {
-        kfree((char*)task->thread_context.kern_stack_addr);
+        kfree_by_ownership(task->memspace->mem_usage.tag, (char*)task->thread_context.kern_stack_addr);
     }
 
     /* free memspace if needed to */
@@ -235,7 +235,7 @@ static struct Thread* _new_task_cb(struct MemSpace* pmemspace)
     /* init main thread of task */
     task->thread_context.task = task;
     // alloc stack page for task
-    if ((void*)(task->thread_context.kern_stack_addr = (uintptr_t)kalloc(USER_STACK_SIZE)) == NULL) {
+    if ((void*)(task->thread_context.kern_stack_addr = (uintptr_t)kalloc_by_ownership(pmemspace->mem_usage.tag, USER_STACK_SIZE)) == NULL) {
         /* here inside, will no free memspace */
         _dealloc_task_cb(task);
         return NULL;
@@ -288,7 +288,6 @@ extern void context_switch(struct context**, struct context*);
 static void _scheduler(struct SchedulerRightGroup right_group)
 {
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
-    struct XiziTrapDriver* p_intr_driver = AchieveResource(&right_group.intr_driver_tag);
     struct Thread* next_task;
     struct CPU* cpu = cur_cpu();
 

@@ -73,4 +73,11 @@ Modification:
 #define KERN_MEM_BASE       (0x90000000) // First kernel virtual address
 #define KERN_OFFSET         (KERN_MEM_BASE - PHY_MEM_BASE)
 
+/* virtual and physical addr translate */
+#define V2P(a) ((uint32_t)((uint32_t)(a)-KERN_OFFSET))
+#define P2V(a) ((void*)((void*)(a) + KERN_OFFSET))
+
+#define V2P_WO(x) ((x)-KERN_OFFSET) // same as V2P, but without casts
+#define P2V_WO(x) ((x) + KERN_OFFSET) // same as V2P, but without casts
+
 // clang-format on

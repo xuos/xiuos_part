@@ -102,6 +102,11 @@ int show_cpu()
     return syscall(SYSCALL_SYS_STATE, SYS_STATE_SHOW_CPU_INFO, 0, 0, 0);
 }
 
+int show_actree()
+{
+    return syscall(SYSCALL_SYS_STATE, SYS_STATE_SHOW_ACTREE, 0, 0, 0);
+}
+
 uintptr_t get_second()
 {
     sys_state_info info;
