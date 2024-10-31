@@ -54,15 +54,15 @@ int sys_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, int is_dev)
         }
     } else {
         uintptr_t load_vaddr = *vaddr;
-        char* new_paddr = raw_alloc(true_len);
+        char* new_paddr = raw_alloc_by_ownership(cur_task->memspace->userspace_mem_usage.tag, true_len);
         if (new_paddr == NULL) {
             return -1;
         }
         if (xizi_share_page_manager.task_map_pages(cur_task, load_vaddr, (uintptr_t)new_paddr, true_len / PAGE_SIZE, false) == (uintptr_t)NULL) {
-            raw_free(new_paddr);
+            raw_free_by_ownership(cur_task->memspace->userspace_mem_usage.tag, new_paddr);
             return -1;
         }
-        CreateResourceTag(NULL, &cur_task->memspace->tag, "ANON_MEMORY", TRACER_MEM_FROM_BUDDY_AC_RESOURCE, new_paddr);
+        CreateResourceTag(NULL, &cur_task->memspace->tag, "USER_MEMORY", TRACER_MEM_FROM_BUDDY_AC_RESOURCE, new_paddr);
         *paddr = (uintptr_t)new_paddr;
     }
 

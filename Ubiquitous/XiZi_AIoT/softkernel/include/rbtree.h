@@ -21,11 +21,13 @@ typedef struct RbtNode {
     enum rbt_type color;
 } RbtNode;
 
-struct RbtNode* rbt_insert(struct RbtNode* T, uintptr_t key, void* data);
-struct RbtNode* rbt_delete(struct RbtNode* T, struct RbtNode* z);
-struct RbtNode* rbt_search(struct RbtNode* root, int x);
+typedef struct RbtTree {
+    RbtNode* root;
+} RbtTree;
 
-void preorder(struct RbtNode* root);
-void levelorder(struct RbtNode* root);
+void rbtree_init(RbtTree* tree);
+int rbt_insert(RbtTree* tree, uintptr_t key, void* data);
+RbtNode* rbt_search(RbtTree* tree, uintptr_t key);
+int rbt_delete(RbtTree* tree, uintptr_t key);
 
 void module_rbt_factory_init(TraceTag* _softkernel_tag);

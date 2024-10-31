@@ -34,14 +34,7 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-#define IPCSESSION_MSG(session) ((struct IpcMsg*)((char*)((session)->buf) + (session)->head))
-
-static inline bool is_msg_needed(struct IpcMsg* msg)
-{
-    assert(msg != NULL);
-    return msg->header.magic == IPC_MSG_MAGIC && msg->header.valid == 1 && msg->header.done == 0 && msg->header.handling == 0;
-}
-
+extern bool ksemaphore_wait(struct XiziSemaphorePool* sem_pool, struct Thread* thd, sem_id_t sem_id);
 int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
 {
     struct Thread* cur_task = cur_cpu()->task;
@@ -50,45 +43,39 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         return -1;
     }
 
-    struct double_list_node* cur_node = NULL;
-    struct server_session* server_session = NULL;
-
     /* update old sessions */
-    for (int i = 0; i < arr_capacity; i++) {
-        if (UNLIKELY(userland_session_arr[i].buf == NULL)) {
-            break;
-        }
-        cur_node = cur_task->svr_sess_listhead.next;
-        server_session = CONTAINER_OF(cur_node, struct server_session, node);
-        if (UNLIKELY(server_session->buf_addr != (uintptr_t)userland_session_arr[i].buf)) {
-            ERROR("mismatched old session addr, user buf: %x, server buf: %x\n", userland_session_arr[i].buf, server_session->buf_addr);
+    int cur_userland_idx = 0;
+    while (!queue_is_empty(&cur_task->sessions_in_handle)) {
+        struct server_session* server_session = (struct server_session*)queue_front(&cur_task->sessions_in_handle)->data;
+
+        // wrong session info
+        if (userland_session_arr[cur_userland_idx].id != SERVER_SESSION_BACKEND(server_session)->session_id || //
+            (uintptr_t)userland_session_arr[cur_userland_idx].buf != server_session->buf_addr) {
+            ERROR("mismatched old session from %s, user buf: %x, server buf: %x\n", cur_task->name, userland_session_arr[cur_userland_idx].buf, server_session->buf_addr);
             return -1;
         }
+
         // update session_backend
-        // if current session is handled
-        if (server_session->head != userland_session_arr[i].head) {
-            struct Thread* client = SERVER_SESSION_BACKEND(server_session)->client;
-            if (client->state == BLOCKED) {
-                xizi_task_manager.task_unblock(client);
-            } else {
-                client->advance_unblock = true;
-            }
-        }
-        server_session->head = userland_session_arr[i].head;
-        server_session->tail = userland_session_arr[i].tail;
-        doubleListDel(cur_node);
-        doubleListAddOnBack(cur_node, &cur_task->svr_sess_listhead);
+        ksemaphore_signal(&xizi_task_manager.semaphore_pool, SERVER_SESSION_BACKEND(server_session)->client_sem_to_wait);
+
+        server_session->head = userland_session_arr[cur_userland_idx].head;
+        server_session->tail = userland_session_arr[cur_userland_idx].tail;
+        userland_session_arr[cur_userland_idx].buf = NULL;
+        userland_session_arr[cur_userland_idx].id = -1;
+
+        dequeue(&cur_task->sessions_in_handle);
+        cur_userland_idx++;
     }
+    int nr_handled_calls = cur_userland_idx;
 
     /* poll with new sessions */
-    int nr_sessions_need_to_handle = 0;
-    bool has_middle_delete = false;
-    int session_idx = 0;
-    DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
-    {
-        if (session_idx >= arr_capacity) {
+    cur_userland_idx = 0;
+    while (!queue_is_empty(&cur_task->sessions_to_be_handle)) {
+        if (cur_userland_idx == arr_capacity) {
             break;
         }
+
+        struct server_session* server_session = (struct server_session*)queue_front(&cur_task->sessions_to_be_handle)->data;
 
         if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
             // client had closed it, then server will close it too
@@ -98,12 +85,11 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
             assert(server_session->closed == false);
             server_session->closed = true;
             xizi_share_page_manager.delete_share_pages(session_backend);
-            // signal that there is a middle deletion of session
-            has_middle_delete = true;
-            break;
+            dequeue(&cur_task->sessions_to_be_handle);
+            continue;
         }
 
-        userland_session_arr[session_idx] = (struct Session) {
+        userland_session_arr[cur_userland_idx++] = (struct Session) {
             .buf = (void*)server_session->buf_addr,
             .capacity = server_session->capacity,
             .head = server_session->head,
@@ -111,25 +97,18 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
             .id = SERVER_SESSION_BACKEND(server_session)->session_id,
         };
 
-        struct IpcMsg* msg = IPCSESSION_MSG(&userland_session_arr[session_idx]);
-        if (msg != NULL && is_msg_needed(msg)) {
-            nr_sessions_need_to_handle++;
-        }
-
-        session_idx++;
+        enqueue(&cur_task->sessions_in_handle, 0, (void*)server_session);
+        dequeue(&cur_task->sessions_to_be_handle);
     }
 
-    if (session_idx < arr_capacity) {
-        userland_session_arr[session_idx].buf = NULL;
-        if (!has_middle_delete && nr_sessions_need_to_handle == 0) {
-            if (cur_task->advance_unblock) {
-                cur_task->advance_unblock = false;
-            } else {
-                xizi_task_manager.task_yield_noschedule(cur_task, false);
-                xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
-            }
-        }
+    // end of userland copy
+    if (cur_userland_idx < arr_capacity) {
+        userland_session_arr[cur_userland_idx].buf = NULL;
     }
 
+    if (queue_is_empty(&cur_task->sessions_in_handle) && queue_is_empty(&cur_task->sessions_to_be_handle)) {
+        xizi_task_manager.task_yield_noschedule(cur_task, false);
+        xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
+    }
     return 0;
 }

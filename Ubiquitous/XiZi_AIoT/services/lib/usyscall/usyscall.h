@@ -35,6 +35,8 @@
 
 #define SYSCALL_SEMAPHORE       13  // semaphore related operations
 #define SYSCALL_SLEEP           14  // sleep
+
+#define SYSCALL_WAIT_SESSION    15
 // clang-format on
 
 typedef enum {
@@ -87,7 +89,8 @@ int kill(int pid);
 
 int register_server(char* name);
 int session(char* path, int capacity, struct Session* user_session);
-int poll_session(struct Session* userland_session_arr, int arr_capacity);
+int poll_session(struct Session* userland_session, int arr_capacity);
+int wait_session_call(struct Session* userland_session);
 int close_session(struct Session* session);
 int register_irq(int irq, int opcode);
 

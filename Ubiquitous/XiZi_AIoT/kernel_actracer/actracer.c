@@ -150,6 +150,10 @@ bool CreateResourceTag(TraceTag* new_tag, TraceTag* owner, char* name, tracemeta
         return false;
     }
     // assert(owner->meta->type == TRACER_OWNER);
+    if (type == TRACER_SERVER_IDENTITY_AC_RESOURCE && //
+        tracer_find_node_onestep(owner->meta, name) != NULL) {
+        return false;
+    }
 
     TracerNode* new_node = (TracerNode*)slab_alloc(&sys_tracer.node_allocator);
     if (new_node == NULL) {

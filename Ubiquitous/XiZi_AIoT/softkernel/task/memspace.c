@@ -62,10 +62,12 @@ struct MemSpace* alloc_memspace(char* name)
         return NULL;
     }
 
-    pmemspace->mem_usage.mem_block_root = NULL;
-    if (!CreateResourceTag(&pmemspace->mem_usage.tag, &pmemspace->tag, "MemUsage", TRACER_SYSOBJECT, (void*)&pmemspace->mem_usage)) {
+    rbtree_init(&pmemspace->kernspace_mem_usage.mem_block_map);
+    if (!CreateResourceTag(&pmemspace->kernspace_mem_usage.tag, &pmemspace->tag, "MemUsage", TRACER_SYSOBJECT, (void*)&pmemspace->kernspace_mem_usage) || //
+        !CreateResourceTag(&pmemspace->userspace_mem_usage.tag, &pmemspace->tag, "UserMemUsage", TRACER_SYSOBJECT, (void*)&pmemspace->userspace_mem_usage)) {
         DEBUG("Register MemUsage %s failed\n", name);
         slab_free(&xizi_task_manager.memspace_allocator, (void*)pmemspace);
+        DeleteResource(&pmemspace->tag, &xizi_task_manager.tag);
         return NULL;
     }
     return pmemspace;
@@ -74,29 +76,26 @@ struct MemSpace* alloc_memspace(char* name)
 void free_memspace(struct MemSpace* pmemspace)
 {
     assert(pmemspace != NULL);
+    assert(IS_DOUBLE_LIST_EMPTY(&pmemspace->thread_list_guard));
 
     /* free page table and all its allocated memories */
     if (pmemspace->pgdir.pd_addr != NULL) {
         xizi_pager.free_user_pgdir(&pmemspace->pgdir);
     }
 
-    // TracerNode* tmp_node = NULL;
-    // DOUBLE_LIST_FOR_EACH_ENTRY(tmp_node, &pmemspace->tag.meta->children_guard, list_node)
-    // {
-    //     assert((uintptr_t)tmp_node->p_resource >= PHY_MEM_BASE && (uintptr_t)tmp_node->p_resource < PHY_MEM_STOP);
-    //     if ((uintptr_t)tmp_node->p_resource < PHY_USER_FREEMEM_BASE) {
-    //         kfree(P2V(tmp_node->p_resource));
-    //     } else {
-    //         raw_free(tmp_node->p_resource);
-    //     }
-    // }
-
     // delete space
-    RbtNode* rbt_node = pmemspace->mem_usage.mem_block_root;
+    RbtNode* rbt_node = pmemspace->kernspace_mem_usage.mem_block_map.root;
     while (rbt_node != NULL) {
         assert((uintptr_t)V2P(rbt_node->key) >= PHY_MEM_BASE && (uintptr_t)V2P(rbt_node->key) < PHY_MEM_STOP);
-        kfree_by_ownership(pmemspace->mem_usage.tag, (void*)rbt_node->key);
-        rbt_node = pmemspace->mem_usage.mem_block_root;
+        kfree_by_ownership(pmemspace->kernspace_mem_usage.tag, (void*)rbt_node->key);
+        rbt_node = pmemspace->kernspace_mem_usage.mem_block_map.root;
+    }
+
+    rbt_node = pmemspace->userspace_mem_usage.mem_block_map.root;
+    while (rbt_node != NULL) {
+        assert((uintptr_t)rbt_node->key >= PHY_MEM_BASE && (uintptr_t)rbt_node->key < PHY_MEM_STOP);
+        raw_free_by_ownership(pmemspace->userspace_mem_usage.tag, (void*)rbt_node->key);
+        rbt_node = pmemspace->userspace_mem_usage.mem_block_map.root;
     }
 
     /* free ipc virt address allocator */

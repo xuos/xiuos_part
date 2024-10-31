@@ -213,6 +213,14 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
         return NULL;
     }
 
+    sem_id_t new_sem_id = ksemaphore_alloc(&xizi_task_manager.semaphore_pool, 0);
+    if (new_sem_id == INVALID_SEM_ID) {
+        ERROR("No memory to alloc sem\n");
+        slab_free(SessionAllocator(), session_backend);
+        return NULL;
+    }
+    session_backend->client_sem_to_wait = new_sem_id;
+
     int true_capacity = ALIGNUP(capacity, PAGE_SIZE);
     int nr_pages = true_capacity / PAGE_SIZE;
     /* alloc free memory as share memory */
@@ -220,6 +228,7 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
     if (UNLIKELY(kern_vaddr == (uintptr_t)NULL)) {
         ERROR("No memory for session\n");
         slab_free(SessionAllocator(), session_backend);
+        ksemaphore_free(&xizi_task_manager.semaphore_pool, new_sem_id);
         return NULL;
     }
 
@@ -229,6 +238,7 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
     if (UNLIKELY(client_vaddr == (uintptr_t)NULL)) {
         kfree((char*)kern_vaddr);
         slab_free(SessionAllocator(), session_backend);
+        ksemaphore_free(&xizi_task_manager.semaphore_pool, new_sem_id);
         return NULL;
     }
 
@@ -238,6 +248,7 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
         unmap_task_share_pages(client, client_vaddr, nr_pages);
         kfree((char*)kern_vaddr);
         slab_free(SessionAllocator(), session_backend);
+        ksemaphore_free(&xizi_task_manager.semaphore_pool, new_sem_id);
         return NULL;
     }
 
@@ -253,6 +264,7 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
     session_backend->client_side.closed = false;
     doubleListNodeInit(&session_backend->client_side.node);
     doubleListAddOnBack(&session_backend->client_side.node, &client->cli_sess_listhead);
+    rbt_insert(&client->cli_sess_map, session_backend->session_id, &session_backend->client_side);
     // init server side session struct
     session_backend->server_side.buf_addr = server_vaddr;
     session_backend->server_side.capacity = true_capacity;
@@ -261,6 +273,7 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
     session_backend->server_side.closed = false;
     doubleListNodeInit(&session_backend->server_side.node);
     doubleListAddOnBack(&session_backend->server_side.node, &server->svr_sess_listhead);
+    rbt_insert(&server->svr_sess_map, session_backend->session_id, &session_backend->server_side);
 
     server->memspace->mem_size += true_capacity;
     client->memspace->mem_size += true_capacity;
@@ -305,6 +318,8 @@ int delete_share_pages(struct session_backend* session_backend)
         kfree((void*)session_backend->buf_kernel_addr);
         slab_free(SessionAllocator(), (void*)session_backend);
     }
+
+    ksemaphore_free(&xizi_task_manager.semaphore_pool, session_backend->client_sem_to_wait);
 
     return 0;
 }

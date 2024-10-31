@@ -32,12 +32,13 @@ Modification:
 #include <stdint.h>
 
 #include "actracer.h"
+#include "ksemaphore.h"
 #include "list.h"
 #include "task.h"
 
 /// @brief userland session info copy
 struct Session {
-    int id;
+    uintptr_t id;
     int capacity;
     int head;
     int tail;
@@ -48,7 +49,7 @@ struct Session {
 #define CLIENT_SESSION_BACKEND(session) CONTAINER_OF(session, struct session_backend, client_side)
 
 struct server_session {
-    struct double_list_node node; // list_head of server task's ipc pipes
+    struct double_list_node node; // list node of server task's ipc pipes
     uintptr_t buf_addr;
     int capacity;
     int head;
@@ -57,7 +58,7 @@ struct server_session {
 };
 
 struct client_session {
-    struct double_list_node node; // list_head of client task's ipc pipes
+    struct double_list_node node; // list node of client task's ipc pipes
     uintptr_t buf_addr;
     int capacity;
     bool closed;
@@ -72,6 +73,7 @@ struct session_backend {
     struct Thread* client; // client of this pipe
     struct Thread* server; // server of this pipe
 
+    sem_id_t client_sem_to_wait;
     uintptr_t buf_kernel_addr;
 };
 

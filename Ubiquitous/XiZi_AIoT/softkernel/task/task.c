@@ -117,8 +117,10 @@ int _task_return_sys_resources(struct Thread* ptask)
         assert(session_backend->server == ptask);
         // cut the connection from task to session
         server_session->closed = true;
+        rbt_delete(&ptask->svr_sess_map, session_backend->session_id);
         xizi_share_page_manager.delete_share_pages(session_backend);
     }
+
     // close all client_sessions
     struct client_session* client_session = NULL;
     while (!IS_DOUBLE_LIST_EMPTY(&ptask->cli_sess_listhead)) {
@@ -128,6 +130,7 @@ int _task_return_sys_resources(struct Thread* ptask)
         assert(session_backend->client == ptask);
         // cut the connection from task to session
         client_session->closed = true;
+        rbt_delete(&ptask->cli_sess_map, session_backend->session_id);
         xizi_share_page_manager.delete_share_pages(session_backend);
     }
 
@@ -174,13 +177,16 @@ static void _dealloc_task_cb(struct Thread* task)
         }
     }
 
-    /* free thread's kernel stack */
-    if (task->thread_context.kern_stack_addr) {
-        kfree_by_ownership(task->memspace->mem_usage.tag, (char*)task->thread_context.kern_stack_addr);
-    }
+    // remove thread from used task list
+    task_node_leave_list(task);
 
     /* free memspace if needed to */
     if (task->memspace != NULL) {
+        /* free thread's kernel stack */
+        if (task->thread_context.kern_stack_addr) {
+            // kfree_by_ownership(task->memspace->kernspace_mem_usage.tag, (char*)task->thread_context.kern_stack_addr);
+        }
+
         // awake deamon in this memspace
         if (task->memspace->thread_to_notify != NULL) {
             if (task->memspace->thread_to_notify != task) {
@@ -195,15 +201,13 @@ static void _dealloc_task_cb(struct Thread* task)
         }
 
         doubleListDel(&task->memspace_list_node);
+
         /* free memspace if thread is the last one using it */
         if (IS_DOUBLE_LIST_EMPTY(&task->memspace->thread_list_guard)) {
             // free memspace
             free_memspace(task->memspace);
         }
     }
-
-    // remove thread from used task list
-    task_node_leave_list(task);
 
     // free task back to allocator
     slab_free(&xizi_task_manager.task_allocator, (void*)task);
@@ -227,15 +231,20 @@ static struct Thread* _new_task_cb(struct MemSpace* pmemspace)
 
     /* init basic task member */
     doubleListNodeInit(&task->cli_sess_listhead);
+    rbtree_init(&task->cli_sess_map);
     doubleListNodeInit(&task->svr_sess_listhead);
+    rbtree_init(&task->svr_sess_map);
+    queue_init(&task->sessions_in_handle);
+    queue_init(&task->sessions_to_be_handle);
 
     /* when creating a new task, memspace will be freed outside during memory shortage */
-    task->memspace = NULL;
+    assert(pmemspace != NULL);
+    task->memspace = pmemspace;
 
     /* init main thread of task */
     task->thread_context.task = task;
     // alloc stack page for task
-    if ((void*)(task->thread_context.kern_stack_addr = (uintptr_t)kalloc_by_ownership(pmemspace->mem_usage.tag, USER_STACK_SIZE)) == NULL) {
+    if ((void*)(task->thread_context.kern_stack_addr = (uintptr_t)kalloc_by_ownership(pmemspace->kernspace_mem_usage.tag, USER_STACK_SIZE)) == NULL) {
         /* here inside, will no free memspace */
         _dealloc_task_cb(task);
         return NULL;
@@ -243,8 +252,6 @@ static struct Thread* _new_task_cb(struct MemSpace* pmemspace)
 
     /* from now on, _new_task_cb() will not generate error */
     /* init vm */
-    assert(pmemspace != NULL);
-    task->memspace = pmemspace;
     task->thread_context.user_stack_idx = -1;
     doubleListNodeInit(&task->memspace_list_node);
     doubleListAddOnBack(&task->memspace_list_node, &pmemspace->thread_list_guard);

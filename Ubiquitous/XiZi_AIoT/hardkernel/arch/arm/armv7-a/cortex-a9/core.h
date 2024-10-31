@@ -74,7 +74,7 @@ Modification:
 
 #include "cortex_a9.h"
 
-#define NR_CPU 4
+#define NR_CPU 3
 
 __attribute__((always_inline, optimize("O0"))) static inline uint32_t user_mode()
 {

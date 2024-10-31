@@ -37,6 +37,7 @@ Modification:
 #include "memspace.h"
 #include "object_allocator.h"
 #include "pagetable.h"
+#include "queue.h"
 #include "share_page.h"
 #include "spinlock.h"
 
@@ -98,6 +99,10 @@ struct Thread {
     /* task communication resources */
     struct double_list_node cli_sess_listhead;
     struct double_list_node svr_sess_listhead;
+    RbtTree cli_sess_map;
+    RbtTree svr_sess_map;
+    Queue sessions_to_be_handle;
+    Queue sessions_in_handle;
     struct TraceTag server_identifier;
     bool advance_unblock;
 

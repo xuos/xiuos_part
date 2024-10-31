@@ -23,6 +23,14 @@
 
 #include "list.h"
 #include "object_allocator.h"
+#include "rbtree.h"
+
+typedef uintptr_t sem_id_t;
+typedef int32_t sem_val_t;
+
+enum {
+    INVALID_SEM_ID = 0,
+};
 
 /// @warning this is no in use
 enum {
@@ -30,8 +38,8 @@ enum {
 };
 
 struct ksemaphore {
-    uint32_t id;
-    int val;
+    sem_id_t id;
+    sem_val_t val;
     /* list of waiting threads */
     struct double_list_node wait_list_guard;
     /* list to manage semaphores */
@@ -40,12 +48,17 @@ struct ksemaphore {
 };
 
 struct XiziSemaphorePool {
-    uint32_t next_sem_id;
+    sem_id_t next_sem_id;
     struct slab_allocator allocator;
     struct double_list_node sem_list_guard;
+    RbtTree sem_pool_map;
+    sem_val_t nr_sem;
 };
 
 void semaphore_pool_init(struct XiziSemaphorePool* sem_pool);
-int ksemaphore_alloc(struct XiziSemaphorePool* sem_pool, int val);
-bool ksemaphore_free(struct XiziSemaphorePool* sem_pool, uint32_t sem_id);
-bool ksemaphore_signal(struct XiziSemaphorePool* sem_pool, uint32_t sem_id);
+sem_id_t ksemaphore_alloc(struct XiziSemaphorePool* sem_pool, sem_val_t val);
+bool ksemaphore_free(struct XiziSemaphorePool* sem_pool, sem_id_t sem_id);
+bool ksemaphore_signal(struct XiziSemaphorePool* sem_pool, sem_id_t sem_id);
+bool ksemaphore_signal_no_wake(struct XiziSemaphorePool* sem_pool, sem_id_t sem_id);
+
+bool ksemaphore_consume(struct XiziSemaphorePool* sem_pool, sem_id_t sem_id, sem_val_t decre);

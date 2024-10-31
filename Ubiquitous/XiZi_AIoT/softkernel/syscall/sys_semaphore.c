@@ -22,7 +22,7 @@
 #include "syscall.h"
 #include "task.h"
 
-extern bool ksemaphore_wait(struct XiziSemaphorePool* sem_pool, struct Thread* thd, uint32_t sem_id);
+extern bool ksemaphore_wait(struct XiziSemaphorePool* sem_pool, struct Thread* thd, sem_id_t sem_id);
 int sys_semaphore(sys_sem_option op, int param)
 {
     bool ret = false;

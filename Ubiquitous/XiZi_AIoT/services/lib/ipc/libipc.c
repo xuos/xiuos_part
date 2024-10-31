@@ -131,14 +131,14 @@ bool ipc_msg_get_nth_arg(struct IpcMsg* msg, const int arg_num, void* data, cons
     return true;
 }
 
-void ipc_msg_send_wait(struct IpcMsg* msg)
+void ipc_msg_send_wait(struct Session* session, struct IpcMsg* msg)
 {
     msg->header.magic = IPC_MSG_MAGIC;
     msg->header.valid = 1;
     msg->header.done = 0;
     while (msg->header.done == 0) {
         /// @todo syscall yield with prio decrease
-        yield(SYS_TASK_YIELD_BLOCK_IPC);
+        wait_session_call(session);
     }
     assert(msg->header.done == 1);
 }
@@ -155,7 +155,7 @@ int ipc_session_wait(struct Session* session)
     struct IpcMsg* msg = IPCSESSION_MSG(session);
     while (msg->header.done == 0) {
         /// @todo syscall yield with prio decrease
-        yield(SYS_TASK_YIELD_BLOCK_IPC);
+        wait_session_call(session);
     }
     assert(msg->header.done == 1);
     return msg->header.ret_val;

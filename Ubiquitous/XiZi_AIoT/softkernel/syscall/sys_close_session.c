@@ -46,35 +46,42 @@ int sys_close_session(struct Thread* cur_task, struct Session* session)
         return -1;
     }
 
-    /* check if session is a client one or a server one */
     struct session_backend* session_backend = NULL;
 
-    struct client_session* client_session = NULL;
-    DOUBLE_LIST_FOR_EACH_ENTRY(client_session, &cur_task->cli_sess_listhead, node)
-    {
-        if ((uintptr_t)session->buf == client_session->buf_addr) {
-            session_backend = CLIENT_SESSION_BACKEND(client_session);
-            assert(session_backend->client == cur_task);
-            assert(client_session->closed == false);
-            client_session->closed = true;
-            xizi_share_page_manager.delete_share_pages(session_backend);
-            break;
+    /* check if session is a client one or a server one */
+    RbtNode* client_session_node = rbt_search(&cur_task->cli_sess_map, session->id);
+    if (client_session_node != NULL) {
+        struct client_session* client_session = (struct client_session*)client_session_node->data;
+        if (CLIENT_SESSION_BACKEND(client_session)->session_id != session->id || //
+            client_session->buf_addr != (uintptr_t)session->buf) {
+            ERROR("Error closing session from %s: Invalid session\n", cur_task->name);
+            return -1;
         }
+
+        /* close client session */
+        session_backend = CLIENT_SESSION_BACKEND(client_session);
+        assert(session_backend->client == cur_task);
+        assert(client_session->closed == false);
+        client_session->closed = true;
+        rbt_delete(&cur_task->cli_sess_map, client_session_node->key);
+        xizi_share_page_manager.delete_share_pages(session_backend);
     }
 
-    if (UNLIKELY(session_backend == NULL)) {
-        struct server_session* server_session = NULL;
-        DOUBLE_LIST_FOR_EACH_ENTRY(server_session, &cur_task->svr_sess_listhead, node)
-        {
-            if ((uintptr_t)session->buf == server_session->buf_addr) {
-                session_backend = SERVER_SESSION_BACKEND(server_session);
-                assert(session_backend->server == cur_task);
-                assert(server_session->closed == false);
-                server_session->closed = true;
-                xizi_share_page_manager.delete_share_pages(session_backend);
-                break;
-            }
+    RbtNode* server_session_node = rbt_search(&cur_task->svr_sess_map, session->id);
+    if (server_session_node != NULL) {
+        struct server_session* server_session = (struct server_session*)server_session_node->data;
+        if (SERVER_SESSION_BACKEND(server_session)->session_id != session->id || //
+            server_session->buf_addr != (uintptr_t)session->buf) {
+            ERROR("Error closing session from %s: Invalid session\n", cur_task->name);
+            return -1;
         }
+
+        session_backend = SERVER_SESSION_BACKEND(server_session);
+        assert(session_backend->server == cur_task);
+        assert(server_session->closed == false);
+        server_session->closed = true;
+        rbt_delete(&cur_task->cli_sess_map, server_session_node->key);
+        xizi_share_page_manager.delete_share_pages(session_backend);
     }
 
     /* close this session */

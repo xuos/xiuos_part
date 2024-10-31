@@ -70,12 +70,12 @@ char* kalloc(uintptr_t size)
 void* kalloc_by_ownership(TraceTag owner, uintptr_t size)
 {
     void* new_mem = kalloc(size);
-    if (!new_mem) {
+    if (NULL == new_mem) {
         return NULL;
     }
 
     struct MemUsage* usage = GetSysObject(struct MemUsage, &owner);
-    usage->mem_block_root = rbt_insert(usage->mem_block_root, (uintptr_t)new_mem, NULL);
+    assert(0 == rbt_insert(&usage->mem_block_map, (uintptr_t)new_mem, NULL));
     // DEBUG("%p %p %p %p\n", usage, usage->mem_block_root, usage->tag, new_mem);
     return new_mem;
 }
@@ -89,9 +89,9 @@ bool kfree_by_ownership(TraceTag owner, void* vaddr)
 {
     struct MemUsage* usage = GetSysObject(struct MemUsage, &owner);
     // DEBUG("%p %p %p %p\n", usage, usage->mem_block_root, usage->tag, vaddr);
-    RbtNode* node = rbt_search(usage->mem_block_root, (uintptr_t)vaddr);
+    RbtNode* node = rbt_search(&usage->mem_block_map, (uintptr_t)vaddr);
     assert(NULL != node);
-    usage->mem_block_root = rbt_delete(usage->mem_block_root, node);
+    assert(0 == rbt_delete(&usage->mem_block_map, node->key));
 
     return kfree(vaddr);
 }
@@ -110,9 +110,31 @@ char* raw_alloc(size_t size)
     return mem_alloc;
 }
 
+void* raw_alloc_by_ownership(TraceTag owner, uintptr_t size)
+{
+    void* new_mem = raw_alloc(size);
+    if (!new_mem) {
+        return NULL;
+    }
+
+    struct MemUsage* usage = GetSysObject(struct MemUsage, &owner);
+    assert(0 == rbt_insert(&usage->mem_block_map, (uintptr_t)new_mem, NULL));
+    return new_mem;
+}
+
 bool raw_free(char* paddr)
 {
     return KBuddyFree(&user_phy_freemem_buddy, paddr);
+}
+
+bool raw_free_by_ownership(TraceTag owner, void* vaddr)
+{
+    struct MemUsage* usage = GetSysObject(struct MemUsage, &owner);
+    RbtNode* node = rbt_search(&usage->mem_block_map, (uintptr_t)vaddr);
+    assert(NULL != node);
+    assert(0 == rbt_delete(&usage->mem_block_map, node->key));
+
+    return raw_free(vaddr);
 }
 
 void show_phymem_info()

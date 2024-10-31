@@ -34,7 +34,7 @@ Modification:
 
 struct MemUsage {
     TraceTag tag;
-    RbtNode* mem_block_root;
+    RbtTree mem_block_map;
 };
 
 bool module_phymem_init();
@@ -47,6 +47,8 @@ bool kfree_by_ownership(TraceTag owner, void* vaddr);
 
 char* raw_alloc(size_t size);
 bool raw_free(char* paddr);
+void* raw_alloc_by_ownership(TraceTag owner, uintptr_t size);
+bool raw_free_by_ownership(TraceTag owner, void* vaddr);
 
 void show_phymem_info();
 

@@ -50,7 +50,8 @@ struct MemSpace {
     /* trace node */
     TraceTag tag;
     /* mem usage info */
-    struct MemUsage mem_usage;
+    struct MemUsage kernspace_mem_usage;
+    struct MemUsage userspace_mem_usage;
 
     /* task memory resources */
     struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address

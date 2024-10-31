@@ -35,8 +35,6 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
-#define SERVER_DIR_NAME_SIZE 14
-
 int sys_register_as_server(char* name)
 {
     // get server thread

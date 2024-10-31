@@ -37,6 +37,7 @@ Modification:
 bool softkernel_init(TraceTag* _hardkernel_tag, struct TraceTag* _softkernel_tag)
 {
     module_rbt_factory_init(_softkernel_tag);
+    module_queue_factory_init(_softkernel_tag);
 
     struct TraceTag server_identifier_owner;
     CreateResourceTag(&server_identifier_owner, _softkernel_tag, "server-identifier", TRACER_OWNER, NULL);

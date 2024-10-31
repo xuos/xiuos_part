@@ -180,7 +180,7 @@ __attribute__((__always_inline__)) static inline bool ipc_session_forward(struct
 struct IpcMsg* new_ipc_msg(struct Session* session, const int argc, const int* arg_size);
 bool ipc_msg_set_nth_arg(struct IpcMsg* msg, const int arg_num, const void* const data, const int len);
 bool ipc_msg_get_nth_arg(struct IpcMsg* msg, const int arg_num, void* data, const int len);
-void ipc_msg_send_wait(struct IpcMsg* msg);
+void ipc_msg_send_wait(struct Session* session, struct IpcMsg* msg);
 void ipc_msg_send_nowait(struct IpcMsg* msg);
 int ipc_session_wait(struct Session* session);
 
@@ -230,7 +230,7 @@ void ipc_server_loop(struct IpcNode* ipc_node);
         struct IpcMsg* msg = IPC_CREATE_MSG_FUNC(ipc_name)(session, _VA_FRONT_ARG##argc(__VA_ARGS__));                                         \
         int ret = IPC_MSG_ARGS_COPY_SET_FUNC(ipc_name)(msg, _VA_FRONT_ARG##argc(__VA_ARGS__));                                                 \
         ret = ipc_msg_set_opcode(msg, ipc_name);                                                                                               \
-        ipc_msg_send_wait(msg);                                                                                                                \
+        ipc_msg_send_wait(session, msg);                                                                                                       \
         ret = IPC_MSG_ARGS_COPY_GET_FUNC(ipc_name)(msg, _VA_FRONT_ARG##argc(__VA_ARGS__));                                                     \
         int32_t res = 0;                                                                                                                       \
         ipc_msg_get_return(msg, &res);                                                                                                         \
@@ -278,9 +278,10 @@ uintptr_t _ipc_buf_to_addr(char* buf);
         char addr_buf[17];                                                  \
         _ipc_addr_to_buf((uintptr_t)msg, addr_buf);                         \
         char* param[] = { #ipc_name, addr_buf, NULL };                      \
+        msg->header.handling = 1;                                           \
         int tid = thread(IPC_THREAD_SERVE(ipc_name), #ipc_name, param);     \
-        if (tid > 0) {                                                      \
-            msg->header.handling = 1;                                       \
+        if (tid <= 0) {                                                     \
+            msg->header.handling = 0;                                       \
         }                                                                   \
         return 0;                                                           \
     }

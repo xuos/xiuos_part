@@ -72,6 +72,11 @@ int close_session(struct Session* session)
     return syscall(SYSCALL_CLOSE_SESSION, (intptr_t)session, 0, 0, 0);
 }
 
+int wait_session_call(struct Session* userland_session)
+{
+    return syscall(SYSCALL_WAIT_SESSION, (intptr_t)userland_session, 0, 0, 0);
+}
+
 int get_memblock_info(sys_state_info* info)
 {
     return syscall(SYSCALL_SYS_STATE, SYS_STATE_MEMBLOCK_INFO, (intptr_t)info, 0, 0);
