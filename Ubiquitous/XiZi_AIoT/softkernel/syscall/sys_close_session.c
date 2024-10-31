@@ -63,8 +63,17 @@ int sys_close_session(struct Thread* cur_task, struct Session* session)
         assert(session_backend->client == cur_task);
         assert(client_session->closed == false);
         client_session->closed = true;
-        rbt_delete(&cur_task->cli_sess_map, client_session_node->key);
         xizi_share_page_manager.delete_share_pages(session_backend);
+
+        struct Thread* server_to_info = session_backend->server;
+        if (!enqueue(&server_to_info->sessions_to_be_handle, 0, (void*)&session_backend->server_side)) {
+            // @todo fix memory leak
+        } else {
+            assert(!queue_is_empty(&server_to_info->sessions_to_be_handle));
+            if (server_to_info->state == BLOCKED) {
+                xizi_task_manager.task_unblock(session_backend->server);
+            }
+        }
     }
 
     RbtNode* server_session_node = rbt_search(&cur_task->svr_sess_map, session->id);
@@ -80,7 +89,6 @@ int sys_close_session(struct Thread* cur_task, struct Session* session)
         assert(session_backend->server == cur_task);
         assert(server_session->closed == false);
         server_session->closed = true;
-        rbt_delete(&cur_task->cli_sess_map, server_session_node->key);
         xizi_share_page_manager.delete_share_pages(session_backend);
     }
 

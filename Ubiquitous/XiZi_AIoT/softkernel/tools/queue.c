@@ -14,7 +14,7 @@ static struct QueueFactory queue_factory;
 void module_queue_factory_init(TraceTag* _softkernel_tag)
 {
     CreateResourceTag(&queue_factory.tag, _softkernel_tag, "GlobalQueueFactory", TRACER_SYSOBJECT, &queue_factory);
-    slab_init(&queue_factory.queue_ele_allocator, sizeof(struct QueueNode));
+    slab_init(&queue_factory.queue_ele_allocator, sizeof(struct QueueNode), "QueueNodeAllocator");
 }
 
 void queue_init(Queue* queue)
@@ -39,12 +39,12 @@ bool queue_is_empty(Queue* queue)
     return false;
 }
 
-void dequeue(Queue* queue)
+bool dequeue(Queue* queue)
 {
     struct QueueNode* temp = queue->front;
 
     if (queue->front == NULL) {
-        return;
+        return false;
     }
 
     if (queue->front == queue->rear)
@@ -54,22 +54,26 @@ void dequeue(Queue* queue)
 
     queue->nr_ele--;
     slab_free(&queue_factory.queue_ele_allocator, (void*)temp);
+    return true;
 }
 
-void enqueue(Queue* queue, uintptr_t key, void* data)
+bool enqueue(Queue* queue, uintptr_t key, void* data)
 {
     QueueNode* temp = (struct QueueNode*)slab_alloc(&queue_factory.queue_ele_allocator);
+    if (temp == NULL) {
+        return false;
+    }
     temp->key = key;
     temp->data = data;
     temp->next = NULL;
 
     if (queue->front == NULL && queue->rear == NULL) {
         queue->front = queue->rear = temp;
-        queue->nr_ele++;
-        return;
+    } else {
+        queue->rear->next = temp;
+        queue->rear = temp;
     }
 
-    queue->rear->next = temp;
-    queue->rear = temp;
     queue->nr_ele++;
+    return true;
 }

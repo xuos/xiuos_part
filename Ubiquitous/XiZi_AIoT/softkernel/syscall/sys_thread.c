@@ -60,7 +60,7 @@ int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintptr_t en
             last = name + 1;
         }
     }
-    strncpy(task->name, last, sizeof(task->name));
+    strncpy(task->name, last, sizeof(task->name) - 1);
 
     // init pcb schedule attributes
     xizi_task_manager.task_set_default_schedule_attr(task);

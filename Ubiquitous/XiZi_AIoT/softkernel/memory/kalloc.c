@@ -75,8 +75,10 @@ void* kalloc_by_ownership(TraceTag owner, uintptr_t size)
     }
 
     struct MemUsage* usage = GetSysObject(struct MemUsage, &owner);
-    assert(0 == rbt_insert(&usage->mem_block_map, (uintptr_t)new_mem, NULL));
-    // DEBUG("%p %p %p %p\n", usage, usage->mem_block_root, usage->tag, new_mem);
+    if (0 != rbt_insert(&usage->mem_block_map, (uintptr_t)new_mem, NULL)) {
+        kfree(new_mem);
+        return NULL;
+    }
     return new_mem;
 }
 
@@ -118,7 +120,10 @@ void* raw_alloc_by_ownership(TraceTag owner, uintptr_t size)
     }
 
     struct MemUsage* usage = GetSysObject(struct MemUsage, &owner);
-    assert(0 == rbt_insert(&usage->mem_block_map, (uintptr_t)new_mem, NULL));
+    if (0 != rbt_insert(&usage->mem_block_map, (uintptr_t)new_mem, NULL)) {
+        raw_free(new_mem);
+        return NULL;
+    }
     return new_mem;
 }
 

@@ -41,9 +41,13 @@ static void tracer_init_node(TracerNode* node, char* name, tracemeta_ac_type typ
     node->parent = NULL;
     if (name != NULL) {
         char* p_name = (char*)slab_alloc(&sys_tracer.node_name_allocator);
-        strcpy(p_name, name);
-        p_name[TRACER_NODE_NAME_LEN - 1] = '\0';
-        node->name = p_name;
+        if (!p_name) {
+            p_name = "BAD_NAME(NOMEM)";
+        } else {
+            strcpy(p_name, name);
+            p_name[TRACER_NODE_NAME_LEN - 1] = '\0';
+            node->name = p_name;
+        }
     }
     doubleListNodeInit(&node->children_guard);
     node->p_resource = p_resource;
@@ -58,8 +62,8 @@ void sys_tracer_init()
     sys_tracer.sys_tracer_tag.meta = &sys_tracer.root_node;
 
     // init memory allocator
-    slab_init(&sys_tracer.node_allocator, sizeof(TracerNode));
-    slab_init(&sys_tracer.node_name_allocator, sizeof(char[TRACER_NODE_NAME_LEN]));
+    slab_init(&sys_tracer.node_allocator, sizeof(TracerNode), "TracerNodeAllocator");
+    slab_init(&sys_tracer.node_name_allocator, sizeof(char[TRACER_NODE_NAME_LEN]), "TracerNodeNameAllocator");
 }
 
 static char* parse_path(char* path, char* const name)
@@ -81,7 +85,7 @@ static char* parse_path(char* path, char* const name)
     // handle current name
     int len = path - cur_start;
     if (len >= TRACER_NODE_NAME_LEN) {
-        strncpy(name, cur_start, TRACER_NODE_NAME_LEN);
+        strncpy(name, cur_start, TRACER_NODE_NAME_LEN - 1);
         name[TRACER_NODE_NAME_LEN - 1] = '\0';
     } else {
         strncpy(name, cur_start, len);
@@ -177,7 +181,7 @@ bool DeleteResource(TraceTag* target, TraceTag* owner)
     assert(target != NULL && owner != NULL);
     assert(owner->meta != NULL && owner->meta->type == TRACER_OWNER);
     if (target->meta == NULL) {
-        ERROR("Tracer: Delete a empty resource\n");
+        ERROR("Tracer: Delete a empty resource, owner: %s\n", owner->meta->name);
         return false;
     }
 

@@ -53,7 +53,10 @@ int sys_wait_session(struct Session* userland_session)
     /* handle calling */
     struct session_backend* session_backend = CLIENT_SESSION_BACKEND(client_session);
     struct Thread* server_to_call = session_backend->server;
-    enqueue(&server_to_call->sessions_to_be_handle, 0, (void*)&session_backend->server_side);
+    if (!enqueue(&server_to_call->sessions_to_be_handle, 0, (void*)&session_backend->server_side)) {
+        sys_exit(cur_task);
+        return -1;
+    }
     assert(!queue_is_empty(&server_to_call->sessions_to_be_handle));
 
     ksemaphore_wait(&xizi_task_manager.semaphore_pool, cur_task, session_backend->client_sem_to_wait);

@@ -16,7 +16,7 @@ typedef struct Queue {
 void queue_init(Queue* queue);
 QueueNode* queue_front(Queue* queue);
 bool queue_is_empty(Queue* queue);
-void dequeue(Queue* queue);
-void enqueue(Queue* queue, uintptr_t key, void* data);
+bool dequeue(Queue* queue);
+bool enqueue(Queue* queue, uintptr_t key, void* data);
 
 void module_queue_factory_init(TraceTag* _softkernel_tag);

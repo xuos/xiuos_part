@@ -25,7 +25,7 @@ void semaphore_pool_init(struct XiziSemaphorePool* sem_pool)
 {
     assert(sem_pool != NULL);
     sem_pool->next_sem_id = INVALID_SEM_ID + 1;
-    slab_init(&sem_pool->allocator, sizeof(struct ksemaphore));
+    slab_init(&sem_pool->allocator, sizeof(struct ksemaphore), "SemAllocator");
     doubleListNodeInit(&sem_pool->sem_list_guard);
     rbtree_init(&sem_pool->sem_pool_map);
     sem_pool->nr_sem = 0;
@@ -60,7 +60,11 @@ sem_id_t ksemaphore_alloc(struct XiziSemaphorePool* sem_pool, sem_val_t val)
     doubleListNodeInit(&sem->sem_list_node);
     doubleListNodeInit(&sem->wait_list_guard);
 
-    rbt_insert(&sem_pool->sem_pool_map, sem->id, sem);
+    if (0 != rbt_insert(&sem_pool->sem_pool_map, sem->id, sem)) {
+        slab_free(&sem_pool->allocator, sem);
+        return INVALID_SEM_ID;
+    }
+
     doubleListAddOnHead(&sem->sem_list_node, &sem_pool->sem_list_guard);
     sem_pool->nr_sem++;
 

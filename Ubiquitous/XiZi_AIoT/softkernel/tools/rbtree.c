@@ -14,7 +14,7 @@ static struct RbtFactory rbt_factory;
 void module_rbt_factory_init(TraceTag* _softkernel_tag)
 {
     CreateResourceTag(&rbt_factory.tag, _softkernel_tag, "GlobalRbtFactory", TRACER_SYSOBJECT, &rbt_factory);
-    slab_init(&rbt_factory.rbtnode_ele_allocator, sizeof(struct RbtNode));
+    slab_init(&rbt_factory.rbtnode_ele_allocator, sizeof(struct RbtNode), "RbtNodeAllocator");
 }
 
 void delete_case1(RbtTree* tree, RbtNode* node);

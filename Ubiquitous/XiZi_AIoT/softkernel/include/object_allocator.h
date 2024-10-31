@@ -42,15 +42,15 @@ struct slab_state {
 };
 
 struct slab_allocator {
-
     size_t element_size;
     size_t nr_elements;
     size_t slabsize;
     uint64_t bitmap_empty;
     struct slab_state *partial, *empty, *full;
+    char* name;
 };
 
-void slab_init(struct slab_allocator*, size_t);
+void slab_init(struct slab_allocator*, size_t, char* name);
 void slab_destroy(const struct slab_allocator*);
 
 void* slab_alloc(struct slab_allocator*);

@@ -47,26 +47,25 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
     int cur_userland_idx = 0;
     while (!queue_is_empty(&cur_task->sessions_in_handle)) {
         struct server_session* server_session = (struct server_session*)queue_front(&cur_task->sessions_in_handle)->data;
+        assert(server_session != NULL);
 
         // wrong session info
         if (userland_session_arr[cur_userland_idx].id != SERVER_SESSION_BACKEND(server_session)->session_id || //
             (uintptr_t)userland_session_arr[cur_userland_idx].buf != server_session->buf_addr) {
             ERROR("mismatched old session from %s, user buf: %x, server buf: %x\n", cur_task->name, userland_session_arr[cur_userland_idx].buf, server_session->buf_addr);
-            return -1;
+        } else {
+            // update session_backend
+            ksemaphore_signal(&xizi_task_manager.semaphore_pool, SERVER_SESSION_BACKEND(server_session)->client_sem_to_wait);
+
+            server_session->head = userland_session_arr[cur_userland_idx].head;
+            server_session->tail = userland_session_arr[cur_userland_idx].tail;
+            userland_session_arr[cur_userland_idx].buf = NULL;
+            userland_session_arr[cur_userland_idx].id = -1;
         }
 
-        // update session_backend
-        ksemaphore_signal(&xizi_task_manager.semaphore_pool, SERVER_SESSION_BACKEND(server_session)->client_sem_to_wait);
-
-        server_session->head = userland_session_arr[cur_userland_idx].head;
-        server_session->tail = userland_session_arr[cur_userland_idx].tail;
-        userland_session_arr[cur_userland_idx].buf = NULL;
-        userland_session_arr[cur_userland_idx].id = -1;
-
-        dequeue(&cur_task->sessions_in_handle);
+        assert(dequeue(&cur_task->sessions_in_handle));
         cur_userland_idx++;
     }
-    int nr_handled_calls = cur_userland_idx;
 
     /* poll with new sessions */
     cur_userland_idx = 0;
@@ -76,6 +75,7 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
         }
 
         struct server_session* server_session = (struct server_session*)queue_front(&cur_task->sessions_to_be_handle)->data;
+        assert(server_session != NULL);
 
         if (SERVER_SESSION_BACKEND(server_session)->client_side.closed) {
             // client had closed it, then server will close it too
@@ -89,7 +89,7 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
             continue;
         }
 
-        userland_session_arr[cur_userland_idx++] = (struct Session) {
+        userland_session_arr[cur_userland_idx] = (struct Session) {
             .buf = (void*)server_session->buf_addr,
             .capacity = server_session->capacity,
             .head = server_session->head,
@@ -97,8 +97,13 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
             .id = SERVER_SESSION_BACKEND(server_session)->session_id,
         };
 
-        enqueue(&cur_task->sessions_in_handle, 0, (void*)server_session);
-        dequeue(&cur_task->sessions_to_be_handle);
+        if (!enqueue(&cur_task->sessions_in_handle, 0, (void*)server_session)) {
+            userland_session_arr[cur_userland_idx].buf = NULL;
+            userland_session_arr[cur_userland_idx].id = 0;
+            break;
+        }
+        assert(dequeue(&cur_task->sessions_to_be_handle));
+        cur_userland_idx++;
     }
 
     // end of userland copy
@@ -108,7 +113,8 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
 
     if (queue_is_empty(&cur_task->sessions_in_handle) && queue_is_empty(&cur_task->sessions_to_be_handle)) {
         xizi_task_manager.task_yield_noschedule(cur_task, false);
-        xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
+        // @todo support blocking(now bug at 4 cores running)
+        // xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
     }
     return 0;
 }

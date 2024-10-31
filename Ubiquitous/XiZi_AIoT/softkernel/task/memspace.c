@@ -61,6 +61,7 @@ struct MemSpace* alloc_memspace(char* name)
         slab_free(&xizi_task_manager.memspace_allocator, (void*)pmemspace);
         return NULL;
     }
+    assert(pmemspace->tag.meta != NULL);
 
     rbtree_init(&pmemspace->kernspace_mem_usage.mem_block_map);
     if (!CreateResourceTag(&pmemspace->kernspace_mem_usage.tag, &pmemspace->tag, "MemUsage", TRACER_SYSOBJECT, (void*)&pmemspace->kernspace_mem_usage) || //

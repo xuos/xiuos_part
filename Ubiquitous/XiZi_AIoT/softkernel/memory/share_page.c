@@ -44,7 +44,7 @@ static struct slab_allocator* SessionAllocator()
     static bool init = false;
     static struct slab_allocator session_slab;
     if (!init) {
-        slab_init(&session_slab, sizeof(struct session_backend));
+        slab_init(&session_slab, sizeof(struct session_backend), "SessionAllocator");
     }
     return &session_slab;
 }
@@ -207,9 +207,24 @@ void unmap_task_share_pages(struct Thread* task, const uintptr_t task_vaddr, con
 static int next_session_id = 1;
 struct session_backend* create_share_pages(struct Thread* client, struct Thread* server, const int capacity)
 {
+
     /* alloc session backend */
     struct session_backend* session_backend = (struct session_backend*)slab_alloc(SessionAllocator());
     if (UNLIKELY(session_backend == NULL)) {
+        return NULL;
+    }
+    session_backend->session_id = next_session_id++;
+
+    if (0 != rbt_insert(&client->cli_sess_map, session_backend->session_id, &session_backend->client_side)) {
+        DEBUG("Rbt of %s no memory\n", client->name);
+        slab_free(SessionAllocator(), session_backend);
+        return NULL;
+    }
+
+    if (0 != rbt_insert(&server->svr_sess_map, session_backend->session_id, &session_backend->server_side)) {
+        DEBUG("Rbt of %s no memory\n", server->name);
+        rbt_delete(&client->cli_sess_map, session_backend->session_id);
+        slab_free(SessionAllocator(), session_backend);
         return NULL;
     }
 
@@ -253,7 +268,6 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
     }
 
     /* build session_backend */
-    session_backend->session_id = next_session_id++;
     session_backend->buf_kernel_addr = kern_vaddr;
     session_backend->nr_pages = nr_pages;
     session_backend->client = client;
@@ -264,7 +278,6 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
     session_backend->client_side.closed = false;
     doubleListNodeInit(&session_backend->client_side.node);
     doubleListAddOnBack(&session_backend->client_side.node, &client->cli_sess_listhead);
-    rbt_insert(&client->cli_sess_map, session_backend->session_id, &session_backend->client_side);
     // init server side session struct
     session_backend->server_side.buf_addr = server_vaddr;
     session_backend->server_side.capacity = true_capacity;
@@ -273,7 +286,6 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
     session_backend->server_side.closed = false;
     doubleListNodeInit(&session_backend->server_side.node);
     doubleListAddOnBack(&session_backend->server_side.node, &server->svr_sess_listhead);
-    rbt_insert(&server->svr_sess_map, session_backend->session_id, &session_backend->server_side);
 
     server->memspace->mem_size += true_capacity;
     client->memspace->mem_size += true_capacity;
@@ -298,6 +310,7 @@ int delete_share_pages(struct session_backend* session_backend)
     /* unmap share pages */
     // close ssesion in server's perspective
     if (session_backend->server_side.closed && session_backend->server != NULL) {
+        rbt_delete(&session_backend->server->svr_sess_map, session_backend->session_id);
         xizi_share_page_manager.unmap_task_share_pages(session_backend->server, session_backend->server_side.buf_addr, session_backend->nr_pages);
         doubleListDel(&session_backend->server_side.node);
         session_backend->server->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
@@ -306,6 +319,7 @@ int delete_share_pages(struct session_backend* session_backend)
 
     // close ssesion in client's perspective
     if (session_backend->client_side.closed && session_backend->client != NULL) {
+        rbt_delete(&session_backend->client->cli_sess_map, session_backend->session_id);
         xizi_share_page_manager.unmap_task_share_pages(session_backend->client, session_backend->client_side.buf_addr, session_backend->nr_pages);
         doubleListDel(&session_backend->client_side.node);
         session_backend->client->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
