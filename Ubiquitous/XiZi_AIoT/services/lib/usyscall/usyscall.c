@@ -128,8 +128,12 @@ uintptr_t get_tick()
 
 uintptr_t mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 {
+    sys_mmap_info info = {
+        .type = SYS_MMAP_NORMAL,
+        .is_dev = is_dev,
+    };
     uintptr_t vaddr_inner = vaddr, paddr_inner = paddr;
-    if (syscall(SYSCALL_MMAP, (intptr_t)&vaddr_inner, (intptr_t)&paddr_inner, (intptr_t)len, (intptr_t)is_dev) < 0) {
+    if (syscall(SYSCALL_MMAP, (intptr_t)&vaddr_inner, (intptr_t)&paddr_inner, (intptr_t)len, (intptr_t)&info) < 0) {
         return (uintptr_t)NULL;
     }
     return vaddr_inner;
@@ -137,7 +141,20 @@ uintptr_t mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 
 int naive_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, bool is_dev)
 {
-    return syscall(SYSCALL_MMAP, (uintptr_t)vaddr, (intptr_t)paddr, (intptr_t)len, (intptr_t)is_dev);
+    sys_mmap_info info = {
+        .type = SYS_MMAP_NORMAL,
+        .is_dev = is_dev,
+    };
+    return syscall(SYSCALL_MMAP, (uintptr_t)vaddr, (intptr_t)paddr, (intptr_t)len, (intptr_t)&info);
+}
+
+int mmap_with_attr(uintptr_t vaddr, uintptr_t paddr, int len, uintptr_t attr)
+{
+    sys_mmap_info info = {
+        .type = SYS_MMAP_CUSTOMIZE,
+        .attr = attr,
+    };
+    return syscall(SYSCALL_MMAP, (intptr_t)vaddr, (intptr_t)paddr, (intptr_t)len, (intptr_t)&info);
 }
 
 int register_irq(int irq, int opcode)

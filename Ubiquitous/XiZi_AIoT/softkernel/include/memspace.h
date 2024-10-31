@@ -52,6 +52,7 @@ struct MemSpace {
     /* mem usage info */
     struct MemUsage kernspace_mem_usage;
     struct MemUsage userspace_mem_usage;
+    struct MemUsage customized_mapping_mem_map;
 
     /* task memory resources */
     struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address

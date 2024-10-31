@@ -143,6 +143,20 @@ static bool _map_user_pages(struct MemSpace* pmemspace, uintptr_t vaddr, uintptr
     return _map_pages(pmemspace->pgdir.pd_addr, vaddr, paddr, (intptr_t)len, mem_attr);
 }
 
+bool _map_customizable_page(struct MemSpace* pmemspace, uintptr_t vaddr, uintptr_t paddr, int len, uintptr_t attr)
+{
+    if (len < 0) {
+        return false;
+    }
+
+    if (UNLIKELY(vaddr >= USER_MEM_TOP)) {
+        ERROR("mapping kernel space.\n");
+        return false;
+    }
+
+    return _map_pages(pmemspace->pgdir.pd_addr, vaddr, paddr, (intptr_t)len, attr);
+}
+
 /// assume that a user pagedir is allocated from [0, size)
 /// if new_size > old_size, allocate more space,
 /// if old_size > new_size, free extra space, to avoid unnecessary alloc/free.

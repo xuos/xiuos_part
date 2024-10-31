@@ -63,14 +63,18 @@ struct MemSpace* alloc_memspace(char* name)
     }
     assert(pmemspace->tag.meta != NULL);
 
-    rbtree_init(&pmemspace->kernspace_mem_usage.mem_block_map);
     if (!CreateResourceTag(&pmemspace->kernspace_mem_usage.tag, &pmemspace->tag, "MemUsage", TRACER_SYSOBJECT, (void*)&pmemspace->kernspace_mem_usage) || //
-        !CreateResourceTag(&pmemspace->userspace_mem_usage.tag, &pmemspace->tag, "UserMemUsage", TRACER_SYSOBJECT, (void*)&pmemspace->userspace_mem_usage)) {
+        !CreateResourceTag(&pmemspace->userspace_mem_usage.tag, &pmemspace->tag, "UserMemUsage", TRACER_SYSOBJECT, (void*)&pmemspace->userspace_mem_usage) || //
+        !CreateResourceTag(&pmemspace->customized_mapping_mem_map.tag, &pmemspace->tag, "CustomizaedMemMapping", TRACER_SYSOBJECT, (void*)&pmemspace->customized_mapping_mem_map)) {
         DEBUG("Register MemUsage %s failed\n", name);
         slab_free(&xizi_task_manager.memspace_allocator, (void*)pmemspace);
         DeleteResource(&pmemspace->tag, &xizi_task_manager.tag);
         return NULL;
     }
+
+    rbtree_init(&pmemspace->kernspace_mem_usage.mem_block_map);
+    rbtree_init(&pmemspace->userspace_mem_usage.mem_block_map);
+    rbtree_init(&pmemspace->customized_mapping_mem_map.mem_block_map);
     return pmemspace;
 }
 

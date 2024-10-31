@@ -54,8 +54,13 @@ int sys_spawn(char* img_start, char* name, char** argv)
     // alloc a new pcb
     struct Thread* new_task_cb = xizi_task_manager.new_task_cb(pmemspace);
     if (UNLIKELY(!new_task_cb)) {
-        ERROR("Unable to new task control block.\n");
-        free_memspace(pmemspace);
+        ERROR("Unable to new task control block %x.\n");
+        // error task allocation may free memspace before hand
+        // @todo use task ref map to handle this scene
+        if (NULL != pmemspace->tag.meta) {
+            free_memspace(pmemspace);
+        }
+
         return -1;
     }
     assert(!IS_DOUBLE_LIST_EMPTY(&pmemspace->thread_list_guard));

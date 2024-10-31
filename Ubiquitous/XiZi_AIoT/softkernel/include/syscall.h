@@ -78,6 +78,17 @@ typedef enum {
     SYS_TASK_YIELD_BLOCK_IPC = 0x2,
 } task_yield_reason;
 
+typedef enum {
+    SYS_MMAP_NORMAL = 0x0,
+    SYS_MMAP_CUSTOMIZE,
+} sys_mmap_type;
+
+typedef struct {
+    sys_mmap_type type;
+    uintptr_t attr;
+    bool is_dev;
+} sys_mmap_info;
+
 typedef union {
     struct {
         uintptr_t memblock_start;
@@ -112,6 +123,7 @@ int sys_wait_session(struct Session* userland_session);
 int sys_exec(char* img_start, char* name, char** argv);
 int sys_state(sys_state_option option, sys_state_info* info);
 int sys_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, int is_dev);
+int sys_mmap_v2(uintptr_t* vaddr, uintptr_t* paddr, int len, sys_mmap_info* info);
 
 int sys_register_irq(int irq_num, int irq_opcode);
 int sys_unbind_irq_all(struct Thread* task);

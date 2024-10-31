@@ -58,6 +58,17 @@ typedef enum {
     SYS_TASK_YIELD_BLOCK_IPC = 0x2,
 } task_yield_reason;
 
+typedef enum {
+    SYS_MMAP_NORMAL = 0x0,
+    SYS_MMAP_CUSTOMIZE,
+} sys_mmap_type;
+
+typedef struct sys_mmap_info {
+    sys_mmap_type type;
+    uintptr_t attr;
+    bool is_dev;
+} sys_mmap_info;
+
 typedef union {
     struct {
         uintptr_t memblock_start;
@@ -96,6 +107,7 @@ int register_irq(int irq, int opcode);
 
 uintptr_t mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev);
 int naive_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, bool is_dev);
+int customized_mmap(uintptr_t vaddr, uintptr_t paddr, int len, uintptr_t attr);
 
 int task_heap_base();
 int get_memblock_info(sys_state_info* info);
