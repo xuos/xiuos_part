@@ -124,7 +124,8 @@ int sys_register_irq(int irq_num, int irq_opcode)
         xizi_pager.new_pgdir(&pmemspace->pgdir);
         memcpy(pmemspace->pgdir.pd_addr, kern_pgdir.pd_addr, TOPLEVLE_PAGEDIR_SIZE);
 
-        kernel_irq_proxy = xizi_task_manager.new_task_cb(pmemspace);
+        struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
+        kernel_irq_proxy = tlo->new_thread(pmemspace);
         kernel_irq_proxy->state = NEVER_RUN;
     }
 

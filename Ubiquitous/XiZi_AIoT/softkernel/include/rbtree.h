@@ -23,6 +23,7 @@ typedef struct RbtNode {
 
 typedef struct RbtTree {
     RbtNode* root;
+    int nr_ele;
 } RbtTree;
 
 void rbtree_init(RbtTree* tree);
@@ -31,3 +32,8 @@ RbtNode* rbt_search(RbtTree* tree, uintptr_t key);
 int rbt_delete(RbtTree* tree, uintptr_t key);
 
 void module_rbt_factory_init(TraceTag* _softkernel_tag);
+
+static inline bool rbt_is_empty(RbtTree* tree)
+{
+    return tree->nr_ele == 0;
+}

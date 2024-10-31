@@ -310,30 +310,41 @@ int delete_share_pages(struct session_backend* session_backend)
     /* unmap share pages */
     // close ssesion in server's perspective
     if (session_backend->server_side.closed && session_backend->server != NULL) {
-        rbt_delete(&session_backend->server->svr_sess_map, session_backend->session_id);
         xizi_share_page_manager.unmap_task_share_pages(session_backend->server, session_backend->server_side.buf_addr, session_backend->nr_pages);
-        doubleListDel(&session_backend->server_side.node);
-        session_backend->server->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
-        session_backend->server = NULL;
+
+        ERROR_FREE
+        {
+            assert(0 == rbt_delete(&session_backend->server->svr_sess_map, session_backend->session_id));
+            doubleListDel(&session_backend->server_side.node);
+            session_backend->server->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
+            session_backend->server = NULL;
+        }
     }
 
     // close ssesion in client's perspective
     if (session_backend->client_side.closed && session_backend->client != NULL) {
-        rbt_delete(&session_backend->client->cli_sess_map, session_backend->session_id);
         xizi_share_page_manager.unmap_task_share_pages(session_backend->client, session_backend->client_side.buf_addr, session_backend->nr_pages);
-        doubleListDel(&session_backend->client_side.node);
-        session_backend->client->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
-        session_backend->client = NULL;
+
+        ERROR_FREE
+        {
+            assert(0 == rbt_delete(&session_backend->client->cli_sess_map, session_backend->session_id));
+            doubleListDel(&session_backend->client_side.node);
+            session_backend->client->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
+            session_backend->client = NULL;
+
+            assert(ksemaphore_free(&xizi_task_manager.semaphore_pool, session_backend->client_sem_to_wait));
+        }
     }
 
     /* free seesion backend */
     if (session_backend->server_side.closed && session_backend->client_side.closed) {
-        assert(session_backend->client == NULL && session_backend->server == NULL);
-        kfree((void*)session_backend->buf_kernel_addr);
-        slab_free(SessionAllocator(), (void*)session_backend);
+        ERROR_FREE
+        {
+            assert(session_backend->client == NULL && session_backend->server == NULL);
+            assert(kfree((void*)session_backend->buf_kernel_addr));
+            slab_free(SessionAllocator(), (void*)session_backend);
+        }
     }
-
-    ksemaphore_free(&xizi_task_manager.semaphore_pool, session_backend->client_sem_to_wait);
 
     return 0;
 }

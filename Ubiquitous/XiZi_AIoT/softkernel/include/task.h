@@ -104,7 +104,7 @@ struct Thread {
     Queue sessions_to_be_handle;
     Queue sessions_in_handle;
     struct TraceTag server_identifier;
-    bool advance_unblock;
+    bool advance_unblock; // @todo abandon
 
     /* task schedule attributes */
     struct double_list_node node;
@@ -120,6 +120,22 @@ struct SchedulerRightGroup {
     struct TraceTag mmu_driver_tag;
 };
 
+/* @todo task pool to maintain task lifetime and support fast task search */
+struct GlobalTaskPool {
+    RbtTree thd_ref_map;
+    struct double_list_node thd_listing_head;
+};
+
+struct TaskScheduler {
+};
+
+struct TaskLifecycleOperations {
+    /* new a task control block, checkout #sys_spawn for usage */
+    struct Thread* (*new_thread)(struct MemSpace* pmemspace);
+    /* free a task control block, this calls #free_user_pgdir to free all vitual spaces */
+    void (*free_pcb)(struct Thread*);
+};
+
 struct XiziTaskManager {
     TraceTag tag;
     /* thead schedule lists */
@@ -128,6 +144,10 @@ struct XiziTaskManager {
     struct double_list_node task_blocked_list_head;
     struct double_list_node task_sleep_list_head;
     struct XiziSemaphorePool semaphore_pool;
+    /* living task pool */
+    TraceTag task_pool_tag;
+    /* task lifecycle Ops */
+    TraceTag task_lifecycle_ops_tag;
 
     /* mem allocator */
     struct slab_allocator memspace_allocator;
@@ -137,10 +157,6 @@ struct XiziTaskManager {
 
     /* init task manager */
     void (*init)();
-    /* new a task control block, checkout #sys_spawn for usage */
-    struct Thread* (*new_task_cb)(struct MemSpace* pmemspace);
-    /* free a task control block, this calls #free_user_pgdir to free all vitual spaces */
-    void (*free_pcb)(struct Thread*);
     /* init a task control block, set name, remain_tick, state, cwd, priority, etc. */
     void (*task_set_default_schedule_attr)(struct Thread*);
 

@@ -43,6 +43,9 @@ Modification:
 struct CPU global_cpus[NR_CPU];
 uint32_t ready_task_priority;
 
+struct GlobalTaskPool global_task_pool;
+extern struct TaskLifecycleOperations task_lifecycle_ops;
+
 static inline void task_node_leave_list(struct Thread* task)
 {
     doubleListDel(&task->node);
@@ -65,18 +68,30 @@ static inline void task_node_add_to_ready_list_back(struct Thread* task)
 
 static void _task_manager_init()
 {
+    assert(CreateResourceTag(&xizi_task_manager.task_lifecycle_ops_tag, &xizi_task_manager.tag, //
+        "TaskLifeCycleOpTool", TRACER_SYSOBJECT, (void*)&task_lifecycle_ops));
+
     // init task list to NULL
     for (int i = 0; i < TASK_MAX_PRIORITY; i++) {
         doubleListNodeInit(&xizi_task_manager.task_list_head[i]);
     }
+
+    /* task scheduling list */
     doubleListNodeInit(&xizi_task_manager.task_blocked_list_head);
     doubleListNodeInit(&xizi_task_manager.task_running_list_head);
     doubleListNodeInit(&xizi_task_manager.task_sleep_list_head);
+
     // init task (slab) allocator
     slab_init(&xizi_task_manager.memspace_allocator, sizeof(struct MemSpace), "MemlpaceCtrlBlockAllocator");
     slab_init(&xizi_task_manager.task_allocator, sizeof(struct Thread), "TreadCtrlBlockAllocator");
     slab_init(&xizi_task_manager.task_buddy_allocator, sizeof(struct KBuddy), "DMBuddyAllocator");
+
+    /* global semaphore factory */
     semaphore_pool_init(&xizi_task_manager.semaphore_pool);
+
+    /* task pool */
+    doubleListNodeInit(&global_task_pool.thd_listing_head);
+    rbtree_init(&global_task_pool.thd_ref_map);
 
     // tid pool
     xizi_task_manager.next_pid = 0;
@@ -85,52 +100,26 @@ static void _task_manager_init()
     ready_task_priority = 0;
 }
 
-/// @brief alloc a new task without init
-static struct Thread* _alloc_task_cb()
-{
-    // alloc task and add it to used task list
-    struct Thread* task = (struct Thread*)slab_alloc(&xizi_task_manager.task_allocator);
-    if (UNLIKELY(task == NULL)) {
-        ERROR("Not enough memory\n");
-        return NULL;
-    }
-    // set tid once task is allocated
-    memset(task, 0, sizeof(*task));
-    task->tid = xizi_task_manager.next_pid++;
-    task->thread_context.user_stack_idx = -1;
-
-    return task;
-}
-
 int _task_return_sys_resources(struct Thread* ptask)
 {
     assert(ptask != NULL);
 
     /* handle sessions for condition 1, ref. delete_share_pages() */
-    struct session_backend* session_backend = NULL;
     // close all server_sessions
-    struct server_session* server_session = NULL;
     while (!IS_DOUBLE_LIST_EMPTY(&ptask->svr_sess_listhead)) {
-        server_session = CONTAINER_OF(ptask->svr_sess_listhead.next, struct server_session, node);
-        assert(server_session != NULL);
-        session_backend = SERVER_SESSION_BACKEND(server_session);
-        assert(session_backend->server == ptask);
-        // cut the connection from task to session
-        server_session->closed = true;
-        xizi_share_page_manager.delete_share_pages(session_backend);
+        // RbtNode* sess_ref_node = ptask->svr_sess_map.root;
+        struct server_session* svr_session = CONTAINER_OF(ptask->svr_sess_listhead.next, struct server_session, node);
+        server_close_session(ptask, svr_session);
     }
 
     // close all client_sessions
-    struct client_session* client_session = NULL;
     while (!IS_DOUBLE_LIST_EMPTY(&ptask->cli_sess_listhead)) {
-        client_session = CONTAINER_OF(ptask->cli_sess_listhead.next, struct client_session, node);
-        assert(client_session != NULL);
-        session_backend = CLIENT_SESSION_BACKEND(client_session);
-        assert(session_backend->client == ptask);
-        // cut the connection from task to session
-        client_session->closed = true;
-        xizi_share_page_manager.delete_share_pages(session_backend);
+        // RbtNode* sess_ref_node = ptask->cli_sess_map.root;
+        struct client_session* cli_session = CONTAINER_OF(ptask->cli_sess_listhead.next, struct client_session, node);
+        client_close_session(ptask, cli_session);
 
+        // info server that session is closed
+        struct session_backend* session_backend = CLIENT_SESSION_BACKEND(cli_session);
         struct Thread* server_to_info = session_backend->server;
         if (!enqueue(&server_to_info->sessions_to_be_handle, 0, (void*)&session_backend->server_side)) {
             // @todo fix memory leak
@@ -142,11 +131,13 @@ int _task_return_sys_resources(struct Thread* ptask)
         }
     }
 
+    /* delete server identifier */
     if (ptask->server_identifier.meta != NULL) {
+        // @todo figure out server-identifier ownership
         struct TraceTag server_identifier_owner;
         AchieveResourceTag(&server_identifier_owner, RequireRootTag(), "softkernel/server-identifier");
         assert(server_identifier_owner.meta != NULL);
-        DeleteResource(&ptask->server_identifier, &server_identifier_owner);
+        assert(DeleteResource(&ptask->server_identifier, &server_identifier_owner));
     }
 
     // delete registered irq if there is one
@@ -157,9 +148,16 @@ int _task_return_sys_resources(struct Thread* ptask)
     return 0;
 }
 
+extern void trap_return(void);
+__attribute__((optimize("O0"))) void task_prepare_enter()
+{
+    xizi_leave_kernel();
+    trap_return();
+}
+
 /// @brief this function changes task list without locking, so it must be called inside a lock critical area
 /// @param task
-static void _dealloc_task_cb(struct Thread* task)
+static void _free_thread(struct Thread* task)
 {
     if (UNLIKELY(task == NULL)) {
         ERROR("deallocating a NULL task\n");
@@ -222,69 +220,80 @@ static void _dealloc_task_cb(struct Thread* task)
 }
 
 /* alloc a new task with init */
-extern void trap_return(void);
-__attribute__((optimize("O0"))) void task_prepare_enter()
+static struct Thread* _new_thread(struct MemSpace* pmemspace)
 {
-    xizi_leave_kernel();
-    trap_return();
-}
+    assert(pmemspace != NULL);
 
-static struct Thread* _new_task_cb(struct MemSpace* pmemspace)
-{
-    // alloc task space
-    struct Thread* task = _alloc_task_cb();
-    if (!task) {
+    //  alloc task space
+    struct Thread* task = (struct Thread*)slab_alloc(&xizi_task_manager.task_allocator);
+    if (task == NULL) {
+        ERROR("Not enough memory\n");
         return NULL;
     }
 
-    /* init basic task member */
-    doubleListNodeInit(&task->cli_sess_listhead);
-    rbtree_init(&task->cli_sess_map);
-    doubleListNodeInit(&task->svr_sess_listhead);
-    rbtree_init(&task->svr_sess_map);
-    queue_init(&task->sessions_in_handle);
-    queue_init(&task->sessions_to_be_handle);
-
-    /* when creating a new task, memspace will be freed outside during memory shortage */
-    assert(pmemspace != NULL);
-    task->memspace = pmemspace;
-
-    /* init main thread of task */
-    task->thread_context.task = task;
     // alloc stack page for task
     if ((void*)(task->thread_context.kern_stack_addr = (uintptr_t)kalloc_by_ownership(pmemspace->kernspace_mem_usage.tag, USER_STACK_SIZE)) == NULL) {
         /* here inside, will no free memspace */
-        _dealloc_task_cb(task);
+        slab_free(&xizi_task_manager.task_allocator, (void*)task);
         return NULL;
     }
 
-    /* from now on, _new_task_cb() will not generate error */
-    /* init vm */
-    task->thread_context.user_stack_idx = -1;
-    doubleListNodeInit(&task->memspace_list_node);
-    doubleListAddOnBack(&task->memspace_list_node, &pmemspace->thread_list_guard);
+    ERROR_FREE
+    {
+        /* init basic task ref member */
+        task->tid = xizi_task_manager.next_pid++;
+        task->bind_irq = false;
 
-    /* set context of main thread stack */
-    /// stack bottom
-    memset((void*)task->thread_context.kern_stack_addr, 0x00, USER_STACK_SIZE);
-    char* sp = (char*)task->thread_context.kern_stack_addr + USER_STACK_SIZE - 4;
+        /* vm & memory member */
+        task->thread_context.user_stack_idx = -1;
+        task->memspace = pmemspace;
+        doubleListNodeInit(&task->memspace_list_node);
+        doubleListAddOnBack(&task->memspace_list_node, &pmemspace->thread_list_guard);
 
-    /// 1. trap frame into stack, for process to nomally return by trap_return
-    sp -= sizeof(*task->thread_context.trapframe);
-    task->thread_context.trapframe = (struct trapframe*)sp;
+        /* thread context */
+        task->thread_context.task = task;
+        memset((void*)task->thread_context.kern_stack_addr, 0x00, USER_STACK_SIZE);
+        /// stack bottom
+        char* sp = (char*)task->thread_context.kern_stack_addr + USER_STACK_SIZE - 4;
 
-    /// 2. context into stack
-    sp -= sizeof(*task->thread_context.context);
-    task->thread_context.context = (struct context*)sp;
-    arch_init_context(task->thread_context.context);
+        /// 1. trap frame into stack, for process to nomally return by trap_return
+        /// trapframe (user context)
+        sp -= sizeof(*task->thread_context.trapframe);
+        task->thread_context.trapframe = (struct trapframe*)sp;
+
+        /// 2. context into stack
+        // (kernel context)
+        sp -= sizeof(*task->thread_context.context);
+        task->thread_context.context = (struct context*)sp;
+        arch_init_context(task->thread_context.context);
+
+        /* ipc member */
+        doubleListNodeInit(&task->cli_sess_listhead);
+        doubleListNodeInit(&task->svr_sess_listhead);
+        rbtree_init(&task->cli_sess_map);
+        rbtree_init(&task->svr_sess_map);
+        queue_init(&task->sessions_in_handle);
+        queue_init(&task->sessions_to_be_handle);
+        /// server identifier
+        task->server_identifier.meta = NULL;
+    }
+
+    // [name]
+    // [schedule related]
 
     return task;
 }
+
+struct TaskLifecycleOperations task_lifecycle_ops = {
+    .new_thread = _new_thread,
+    .free_pcb = _free_thread,
+};
 
 static void _task_set_default_schedule_attr(struct Thread* task)
 {
     task->remain_tick = TASK_CLOCK_TICK;
     task->maxium_tick = TASK_CLOCK_TICK * 10;
+    task->dead = false;
     task->state = READY;
     task->priority = TASK_DEFAULT_PRIORITY;
     task_node_add_to_ready_list_head(task);
@@ -393,8 +402,6 @@ static void _set_cur_task_priority(int priority)
 
 struct XiziTaskManager xizi_task_manager = {
     .init = _task_manager_init,
-    .new_task_cb = _new_task_cb,
-    .free_pcb = _dealloc_task_cb,
     .task_set_default_schedule_attr = _task_set_default_schedule_attr,
 
     .next_runnable_task = max_priority_runnable_task,

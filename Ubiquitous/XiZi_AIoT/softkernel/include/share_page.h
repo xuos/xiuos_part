@@ -92,3 +92,23 @@ struct XiziSharePageManager {
 extern struct XiziSharePageManager xizi_share_page_manager;
 
 int module_share_page_init(struct SharePageRightGroup* right_group);
+
+static inline void client_close_session(struct Thread* thd, struct client_session* cli_sess)
+{
+    assert(cli_sess != NULL);
+    struct session_backend* sess_backend = CLIENT_SESSION_BACKEND(cli_sess);
+    assert(sess_backend->client == thd);
+    assert(cli_sess->closed == false);
+    cli_sess->closed = true;
+    xizi_share_page_manager.delete_share_pages(sess_backend);
+}
+
+static inline void server_close_session(struct Thread* thd, struct server_session* svr_sess)
+{
+    assert(svr_sess != NULL);
+    struct session_backend* sess_backend = SERVER_SESSION_BACKEND(svr_sess);
+    assert(sess_backend->server == thd);
+    assert(svr_sess->closed == false);
+    svr_sess->closed = true;
+    xizi_share_page_manager.delete_share_pages(sess_backend);
+}

@@ -255,6 +255,7 @@ static void rotate_right(RbtNode* node, RbtTree* tree)
 void rbtree_init(RbtTree* tree)
 {
     tree->root = NULL;
+    tree->nr_ele = 0;
 }
 
 RbtNode* __rbtree_insert(RbtNode* node, RbtTree* tree)
@@ -324,14 +325,20 @@ RbtNode* __rbtree_insert(RbtNode* node, RbtTree* tree)
 
 int rbt_insert(RbtTree* tree, uintptr_t key, void* data)
 {
+    if (rbt_search(tree, key) != NULL) {
+        return -2;
+    }
+
     RbtNode* node = rbtree_createnode(key, data);
     RbtNode* samenode = NULL;
     if (node == NULL)
         return -1;
     else
         samenode = __rbtree_insert(node, tree);
-    if (samenode != NULL)
-        return -2;
+
+    assert(samenode == NULL);
+
+    tree->nr_ele++;
     return 0;
 }
 
@@ -419,6 +426,7 @@ void delete_case6(RbtTree* t, RbtNode* n)
         rotate_right(n->parent, t);
     }
 }
+
 void __rbtree_remove(RbtNode* node, RbtTree* tree)
 {
     RbtNode* left = node->left;
@@ -450,5 +458,10 @@ int rbt_delete(RbtTree* tree, uintptr_t key)
         return -1;
     else
         __rbtree_remove(node, tree);
+
+    tree->nr_ele--;
+    if (rbt_is_empty(tree)) {
+        assert(tree->root == NULL);
+    }
     return 0;
 }

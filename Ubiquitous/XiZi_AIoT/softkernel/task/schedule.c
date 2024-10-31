@@ -47,7 +47,9 @@ struct Thread* max_priority_runnable_task(void)
             // found a runnable task, stop this look up
             return task;
         } else if (task->dead && task->state != RUNNING) {
-            xizi_task_manager.free_pcb(task);
+
+            struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
+            tlo->free_pcb(task);
             return NULL;
         }
     }
@@ -64,7 +66,8 @@ struct Thread* round_robin_runnable_task(uint32_t priority)
             // found a runnable task, stop this look up
             return task;
         } else if (task->dead && task->state != RUNNING) {
-            xizi_task_manager.free_pcb(task);
+            struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
+            tlo->free_pcb(task);
             return NULL;
         }
     }

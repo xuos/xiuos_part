@@ -52,7 +52,8 @@ int sys_spawn(char* img_start, char* name, char** argv)
     }
 
     // alloc a new pcb
-    struct Thread* new_task_cb = xizi_task_manager.new_task_cb(pmemspace);
+    struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
+    struct Thread* new_task_cb = tlo->new_thread(pmemspace);
     if (UNLIKELY(!new_task_cb)) {
         ERROR("Unable to new task control block %x.\n");
         // error task allocation may free memspace before hand
