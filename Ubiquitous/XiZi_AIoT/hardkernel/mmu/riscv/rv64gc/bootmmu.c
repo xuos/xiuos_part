@@ -33,6 +33,8 @@ Modification:
 #include "pagetable.h"
 #include "registers.h"
 #include "ns16550.h"
+#include <asm/csr.h>
+#include <asm/pgtable-bits.h>
 
 #include <stdint.h>
 #include <string.h>
@@ -41,11 +43,9 @@ extern uint64_t kernel_data_end[];
 extern uint64_t kernel_data_begin[];
 
 // clang-format off
-#define L2_TYPE_TAB         2
-#define L2_PTE_VALID        1
+#define L2_PTE_VALID        (1 << 0)
 
-#define L3_TYPE_TAB         2
-#define L3_PTE_VALID        1
+#define L3_PTE_VALID        (1 << 0)
 
 #define L4_TYPE_PAGE        (3 << 0)
 #define L4_PTE_DEV          ((0b00) << 2) // Device memory
@@ -58,8 +58,18 @@ extern uint64_t kernel_data_begin[];
 
 #define IDX_MASK            (0b111111111)
 #define L3_PDE_INDEX(idx)   ((idx << LEVEL3_PDE_SHIFT) & L3_IDX_MASK)
-// clang-format on
 
+#define _PAGE_KERNEL		(_PAGE_READ \
+				| _PAGE_WRITE \
+				| _PAGE_PRESENT \
+				| _PAGE_ACCESSED \
+				| _PAGE_DIRTY \
+				| _PAGE_GLOBAL)
+#define PAGE_KERNEL		(_PAGE_KERNEL)
+#define PAGE_KERNEL_READ	(_PAGE_KERNEL & ~_PAGE_WRITE)
+#define PAGE_KERNEL_EXEC	(_PAGE_KERNEL | _PAGE_EXEC)
+
+// clang-format on
 uint64_t boot_l2pgdir[NUM_LEVEL2_PDE] __attribute__((aligned(0x1000))) = { 0 };
 
 uint64_t boot_dev_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 0 };
@@ -73,38 +83,33 @@ static void build_boot_pgdir()
     static bool built = false;
     if (!built) {
         uint64_t dev_phy_mem_base = DEV_PHYMEM_BASE;
+        uint64_t kern_phy_mem_base = PHY_MEM_BASE;
+        uint64_t cur_mem_paddr;
 
         // dev mem
-        boot_l2pgdir[(dev_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
-        boot_l2pgdir[(MMIO_P2V_WO(dev_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_dev_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
+        boot_l2pgdir[(dev_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (((uint64_t)boot_dev_l3pgdir >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
+        boot_l2pgdir[(MMIO_P2V_WO(dev_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (((uint64_t)boot_dev_l3pgdir >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
 
-        uint64_t cur_mem_paddr = ALIGNDOWN((uint64_t)DEV_PHYMEM_BASE, LEVEL2_PDE_SIZE);
+        cur_mem_paddr = ALIGNDOWN(dev_phy_mem_base, LEVEL2_PDE_SIZE);
         for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
-            boot_dev_l3pgdir[i] = (uint64_t)boot_dev_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
+            boot_dev_l3pgdir[i] = (((uint64_t)boot_dev_l4pgdirs[i] >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
 
             for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-                boot_dev_l4pgdirs[i][j] = cur_mem_paddr | L4_TYPE_PAGE | L4_PTE_DEV | L4_PTE_AF | L4_PTE_XN;
-                if (cur_mem_paddr >= DEV_PHYMEM_BASE && cur_mem_paddr < DEV_PHYMEM_BASE + DEV_MEM_SIZE) {
-                    boot_dev_l4pgdirs[i][j] = cur_mem_paddr | 0x403;
-                } else {
-                    boot_dev_l4pgdirs[i][j] = cur_mem_paddr | 0x403;
-                }
-
+                boot_dev_l4pgdirs[i][j] = ((cur_mem_paddr >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | PAGE_KERNEL;
                 cur_mem_paddr += PAGE_SIZE;
             }
         }
 
         // identical mem
-        boot_l2pgdir[(PHY_MEM_BASE >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_kern_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
-        boot_l2pgdir[(P2V_WO(PHY_MEM_BASE) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (uint64_t)boot_kern_l3pgdir | L2_TYPE_TAB | L2_PTE_VALID;
+        boot_l2pgdir[(kern_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (((uint64_t)boot_kern_l3pgdir >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
+        boot_l2pgdir[(P2V_WO(kern_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (((uint64_t)boot_kern_l3pgdir >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
 
-        cur_mem_paddr = ALIGNDOWN((uint64_t)0x00000000ULL, PAGE_SIZE);
+        cur_mem_paddr = ALIGNDOWN(kern_phy_mem_base, PAGE_SIZE);
         for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
-            boot_kern_l3pgdir[i] = (uint64_t)boot_kern_l4pgdirs[i] | L3_TYPE_TAB | L3_PTE_VALID;
+            boot_kern_l3pgdir[i] = (((uint64_t)boot_kern_l4pgdirs[i] >> PAGE_SHIFT) << _PAGE_PFN_SHIFT)  | _PAGE_TABLE;
 
             for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-                boot_kern_l4pgdirs[i][j] = cur_mem_paddr | 0x713;
-
+                boot_kern_l4pgdirs[i][j] = ((cur_mem_paddr >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | PAGE_KERNEL;
                 cur_mem_paddr += PAGE_SIZE;
             }
         }
@@ -113,39 +118,43 @@ static void build_boot_pgdir()
     }
 }
 
-static void load_boot_pgdir()
+static inline void local_flush_tlb_all(void)
 {
-
-    TTBR0_W((uintptr_t)boot_l2pgdir);
-    TTBR1_W(0);
-
-#define TCR_TRUE_VALUE (0x0000000080813519ULL)
-    uint64_t tcr = 0;
-    TCR_R(tcr);
-    tcr &= (uint64_t)~0xFF;
-    tcr |= 0x19;
-    TCR_W(tcr);
-
-    CLEARTLB(0);
-    ISB();
+    __asm__ __volatile__ ("sfence.vma" : : : "memory");
 }
 
+static void load_boot_pgdir()
+{
+    unsigned long satp_val = (unsigned long)(((uintptr_t)boot_l2pgdir >> PAGE_SHIFT) | SATP_MODE);
+    unsigned long status;
+
+    status = csr_read(CSR_STATUS);
+    if( !(status & 0x100) ) {
+        _debug_uart_printascii("current is not S mode\n");
+    }
+#if 0    //to debug
+    csr_write(CSR_SATP, ((uintptr_t)boot_l2pgdir >> PAGE_SHIFT) | SATP_MODE);
+#endif
+}
 
 extern void main(void);
 static bool _bss_inited = false;
 void bootmain()
 {
     _debug_uart_init();
-#if 0
+    _debug_uart_printascii("bootmain start.\n");
+
     build_boot_pgdir();
     load_boot_pgdir();
-//    __asm__ __volatile__("add sp, sp, %0" ::"r"(KERN_OFFSET));
+//    _debug_uart_base_map();
+    _debug_uart_printascii("boot pgdir success\n");
+
+    __asm__ __volatile__("addi sp, sp, %0" ::"i"(KERN_OFFSET));
     if (!_bss_inited) {
         memset(&kernel_data_begin, 0x00, (size_t)((uint64_t)kernel_data_end - (uint64_t)kernel_data_begin));
         _bss_inited = true;
     }
 
     main();
-#endif
 }
 

@@ -5,6 +5,7 @@
  */
 
 #include <ns16550.h>
+#include "mmio_access.h"
 
 struct ns16550 g_ns16550_com_port = {0};
 struct ns16550_plat g_ns16550_plat = {0};
@@ -12,7 +13,7 @@ struct ns16550_plat g_ns16550_plat = {0};
 #define CONFIG_SYS_NS16550_UART_BASE	0x10000000
 #define CONFIG_BAUDRATE					115200
 #define CONFIG_SYS_NS16550_CLK			24000000
-
+#define CONFIG_SYS_NS16550_UART_BASE_MAP	 MMIO_P2V_WO(CONFIG_SYS_NS16550_UART_BASE)
 
 #define UART_LCRVAL UART_LCR_8N1		/* 8 data, 1 stop, no parity */
 #define UART_MCRVAL (UART_MCR_DTR | \
@@ -136,11 +137,7 @@ int ns16550_tstc(struct ns16550 *com_port)
 
 static int ns16550_serial_assign_base(struct ns16550_plat *plat, unsigned long base)
 {
-#ifdef CONFIG_SYS_NS16550_PORT_MAPPED
 	plat->base = base;
-#else
-	plat->base = (unsigned long)map_physmem(base, 0, MAP_NOCACHE);
-#endif
 	return 0;
 }
 
@@ -180,7 +177,6 @@ static void ns16550_serial_setbrg(int baudrate)
 	ns16550_setbrg(com_port, clock_divisor);
 }
 
-
 void _debug_uart_init(void)
 {
 	int baudrate = CONFIG_BAUDRATE;
@@ -190,9 +186,21 @@ void _debug_uart_init(void)
 	_debug_uart_printascii("_debug_uart_init success.\n");
 }
 
+void _debug_uart_base_map(void)
+{
+	struct ns16550_plat *plat = &g_ns16550_plat;
+	unsigned long  addr;
+
+	addr = CONFIG_SYS_NS16550_UART_BASE_MAP;
+	ns16550_serial_assign_base(plat, addr);
+	_debug_uart_printascii("_debug_uart_init_mapped success.\n");
+}
+
 void _debug_uart_putc(int ch)
 {
     struct ns16550* com_port = &g_ns16550_com_port;
+    if (ch == '\n')
+        ns16550_putc(com_port, '\r');
     ns16550_putc(com_port, ch);
 }
 

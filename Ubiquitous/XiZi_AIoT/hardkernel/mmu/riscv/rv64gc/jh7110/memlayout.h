@@ -15,7 +15,7 @@
  * @brief virtual memory and physical memory layout
  * @version 1.0
  * @author AIIT XUOS Lab
- * @date 2024-04-25
+ * @date 2024-10-31
  */
 /*************************************************
 File name: memlayout.h
@@ -33,11 +33,11 @@ Modification:
 
 #define ARCH_BIT        64
 
-/* A55 physical memory layout */
-#define PHY_MEM_BASE            (0x0000000010000000ULL)
-#define PHY_USER_FREEMEM_BASE   (0x0000000040000000ULL)
-#define PHY_USER_FREEMEM_TOP    (0x00000000e0000000ULL)
-#define PHY_MEM_STOP            (0x00000000e0000000ULL)
+/* physical memory layout */
+#define PHY_MEM_BASE            (0x0000000040200000ULL)
+#define PHY_USER_FREEMEM_BASE   (0x0000000080000000ULL)
+#define PHY_USER_FREEMEM_TOP    (0x00000000F0000000ULL)
+#define PHY_MEM_STOP            (0x00000000F0000000ULL)
 
 /* PTE-PAGE_SIZE */
 #define LEVEL4_PTE_SHIFT    12
@@ -57,24 +57,25 @@ Modification:
 #define NUM_LEVEL4_PTE      (1 << (LEVEL3_PDE_SHIFT - LEVEL4_PTE_SHIFT)) // how many PTE in a PT
 #define NUM_TOPLEVEL_PDE    NUM_LEVEL2_PDE 
 
+#define PAGE_SHIFT          LEVEL4_PTE_SHIFT
 #define PAGE_SIZE           LEVEL4_PTE_SIZE
 #define MAX_NR_FREE_PAGES   ((PHY_USER_FREEMEM_BASE - PHY_MEM_BASE) >> LEVEL4_PTE_SHIFT)
 
 /* Deivce memory layout */
-#define DEV_PHYMEM_BASE     (0x00000000F0000000ULL)
-#define DEV_VRTMEM_BASE     (0x00000040F0000000ULL)
-#define DEV_MEM_SIZE        (0x0000000010000000ULL)
+#define DEV_PHYMEM_BASE     (0x0000000010000000ULL)
+#define DEV_VRTMEM_BASE     (0x0000001010000000ULL)
+#define DEV_MEM_SIZE        (0x0000000030040000ULL)
 
 /* User memory layout */
 #define USER_STACK_SIZE     PAGE_SIZE
-#define USER_MEM_BASE       (0x0000000000000000ULL)
-#define USER_MEM_TOP        (0x0000004000000000ULL)
+#define USER_MEM_BASE       (0x0000002000000000ULL)
+#define USER_MEM_TOP        (0x0000008000000000ULL)
 #define USER_IPC_SPACE_BASE (0x0000003000000000ULL)
 #define USER_IPC_USE_ALLOCATOR_WATERMARK    (0x0000003000010000ULL)
 #define USER_IPC_SPACE_TOP  (USER_IPC_SPACE_BASE + 0x10000000ULL) 
 
 /* Kernel memory layout */
-#define KERN_MEM_BASE       (0x0000006010000000ULL) // First kernel virtual address
+#define KERN_MEM_BASE       (0x0000000000000000ULL + PHY_MEM_BASE) // First kernel virtual address
 #define KERN_OFFSET         (KERN_MEM_BASE - PHY_MEM_BASE)
 
 #define V2P(a) (((uint64_t)(a)) - KERN_OFFSET)

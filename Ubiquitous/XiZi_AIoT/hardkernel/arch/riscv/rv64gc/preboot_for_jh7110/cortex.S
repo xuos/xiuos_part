@@ -16,10 +16,12 @@ Modification:
     .section ".text","ax"
 
     .global cpu_get_current
+
   # int cpu_get_current(void)@
   # get current CPU ID
     .func cpu_get_current
 cpu_get_current:
+    li a0, 0
     ret
     .endfunc
 

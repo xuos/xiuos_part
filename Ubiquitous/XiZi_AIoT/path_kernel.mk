@@ -56,8 +56,9 @@ endif
 
 ifeq ($(BOARD), jh7110)
 KERNELPATHS += \
-	-I$(KERNEL_ROOT)/hardkernel/arch/riscv/rv64gc/preboot_for_$(BOARD)/include \
 	-I$(KERNEL_ROOT)/hardkernel/arch/riscv/rv64gc/ \
+	-I$(KERNEL_ROOT)/hardkernel/arch/riscv/rv64gc/include \
+	-I$(KERNEL_ROOT)/hardkernel/arch/riscv/rv64gc/preboot_for_$(BOARD)/include \
 	-I$(KERNEL_ROOT)/hardkernel/cache/L1/riscv/rv64gc/ \
 	-I$(KERNEL_ROOT)/hardkernel/clock/riscv/rv64gc/$(BOARD)/include \
 	-I$(KERNEL_ROOT)/hardkernel/intr/riscv/rv64gc/ \

@@ -35,7 +35,7 @@
  * @author AIIT XUOS Lab
  * @date 2024.10.10
  */ 
-
+OUTPUT_FORMAT("elf64-littleriscv", "elf64-littleriscv", "elf64-littleriscv")
 OUTPUT_ARCH(riscv)
 /* ENTRY(_start) */
 ENTRY( _boot_start )
@@ -43,17 +43,11 @@ ENTRY( _boot_start )
 BOOT_STACK_SIZE = 0x4000;
 MEMORY {
   phy_ddr3 (rwx)      : ORIGIN = 0x40200000, LENGTH = 1024M
-  vir_ddr3 (rwx)      : ORIGIN = 0x000000601040E000, LENGTH = 1024M
+  vir_ddr3 (rwx)      : ORIGIN = 0x0000000040800000, LENGTH = 1024M
 }
-
 
 SECTIONS
 {
-/* . = ((((-1))) - 0x80000000 + 1);
- _start = .;
- .head.text : AT(ADDR(.head.text) - ((((-1))) - 0x80000000 + 1)) { KEEP(*(.head.text)) }
-*/
-
   .start_sec : {
 	. = ORIGIN(phy_ddr3);
 	/* initialization start checkpoint. */
@@ -89,11 +83,12 @@ SECTIONS
 	PROVIDE(boot_end_addr = .);
   } > phy_ddr3
 
-  /* AT: 0x40200000 + 0x0041C000 */
-  .text : AT(0x4061C000) {
+  /* AT: phy_ddr3 + .start_sec size */
+  .text : AT(0x40800000) {
     . = ALIGN(0x1000);
     *(.text .text.* .gnu.linkonce.t.*)
-  }
+  } > vir_ddr3
+
   . = ALIGN(0x1000);
   .data : {
     *(.data .data.*)
@@ -112,17 +107,20 @@ SECTIONS
 		PROVIDE(_binary_default_fs_end = .);
     PROVIDE(__init_array_start = .);
     PROVIDE(__init_array_end = .);
-  }
+  } > vir_ddr3
+
+  . = ALIGN(0x1000);
+  _image_size = . - ORIGIN(phy_ddr3);
 
   . = ALIGN(0x1000);
   .bss : {
     PROVIDE(kernel_data_begin = .);
-    PROVIDE(__bss_start__ = .);
+    PROVIDE(__bss_start = .);
 		*(.bss .bss.* COMMON)
     . = ALIGN(0x1000);
-		PROVIDE(__bss_end__ = .);
+		PROVIDE(__bss_end = .);
 	  PROVIDE(kernel_data_end = .);
-  }
+  } > vir_ddr3
 
  . = ALIGN((1 << 21));
  .sdata : {
