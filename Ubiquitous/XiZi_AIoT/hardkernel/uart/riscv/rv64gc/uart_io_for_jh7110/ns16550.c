@@ -9,6 +9,7 @@
 
 struct ns16550 g_ns16550_com_port = {0};
 struct ns16550_plat g_ns16550_plat = {0};
+unsigned long g_ns16550_uart_base = {0};
 
 #define CONFIG_SYS_NS16550_UART_BASE	0x10000000
 #define CONFIG_BAUDRATE					115200
@@ -80,7 +81,7 @@ static uint32_t ns16550_getfcr(struct ns16550 *port)
 		(unsigned char *)addr - (unsigned char *)com_port)
 
 /* Divide positive dividend by positive divisor and round to closest integer. */
-#define DIV_ROUND_CLOSEST(x, divisor) \  
+#define DIV_ROUND_CLOSEST(x, divisor) \
 	(((x) + ((divisor) / 2)) / (divisor))
 
 int ns16550_calc_divisor(struct ns16550 *port, int clock, int baudrate)
@@ -134,22 +135,12 @@ int ns16550_tstc(struct ns16550 *com_port)
 	return (serial_in(&com_port->lsr) & UART_LSR_DR) != 0;
 }
 
-
-static int ns16550_serial_assign_base(struct ns16550_plat *plat, unsigned long base)
-{
-	plat->base = base;
-	return 0;
-}
-
-
 static void ns16550_plat_init(void)
 {
 	struct ns16550_plat *plat = &g_ns16550_plat;
-	unsigned long  addr;
 
-	addr = CONFIG_SYS_NS16550_UART_BASE;
-	ns16550_serial_assign_base(plat, addr);
 	/* refer jh7110 u-boot/arch/riscv/dts/jh7110.dtsi */
+	plat->base = g_ns16550_uart_base;
 	plat->reg_offset = 0;
 	plat->reg_shift = 2;
 	plat->reg_width = 4;
@@ -181,19 +172,20 @@ void _debug_uart_init(void)
 {
 	int baudrate = CONFIG_BAUDRATE;
 
+	g_ns16550_uart_base = CONFIG_SYS_NS16550_UART_BASE_MAP;
 	ns16550_serial_init();
 	ns16550_serial_setbrg(baudrate);
 	_debug_uart_printascii("_debug_uart_init success.\n");
 }
 
-void _debug_uart_base_map(void)
+void _debug_uart_phymem_init(void)
 {
-	struct ns16550_plat *plat = &g_ns16550_plat;
-	unsigned long  addr;
+	int baudrate = CONFIG_BAUDRATE;
 
-	addr = CONFIG_SYS_NS16550_UART_BASE_MAP;
-	ns16550_serial_assign_base(plat, addr);
-	_debug_uart_printascii("_debug_uart_init_mapped success.\n");
+	g_ns16550_uart_base = CONFIG_SYS_NS16550_UART_BASE;
+	ns16550_serial_init();
+	ns16550_serial_setbrg(baudrate);
+	_debug_uart_printascii("_debug_uart_phymem_init success.\n");
 }
 
 void _debug_uart_putc(int ch)

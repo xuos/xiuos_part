@@ -59,15 +59,10 @@ extern uint64_t kernel_data_begin[];
 #define IDX_MASK            (0b111111111)
 #define L3_PDE_INDEX(idx)   ((idx << LEVEL3_PDE_SHIFT) & L3_IDX_MASK)
 
-#define _PAGE_KERNEL		(_PAGE_READ \
-				| _PAGE_WRITE \
-				| _PAGE_PRESENT \
-				| _PAGE_ACCESSED \
-				| _PAGE_DIRTY \
-				| _PAGE_GLOBAL)
-#define PAGE_KERNEL		(_PAGE_KERNEL)
-#define PAGE_KERNEL_READ	(_PAGE_KERNEL & ~_PAGE_WRITE)
-#define PAGE_KERNEL_EXEC	(_PAGE_KERNEL | _PAGE_EXEC)
+#define _PAGE_KERNEL        (_PAGE_PRESENT | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC | _PAGE_ACCESSED | _PAGE_GLOBAL | _PAGE_DIRTY)
+#define PAGE_KERNEL	        (_PAGE_KERNEL)
+#define PAGE_KERNEL_READ    (_PAGE_KERNEL & ~_PAGE_WRITE)
+#define PAGE_KERNEL_EXEC    (_PAGE_KERNEL | _PAGE_EXEC)
 
 // clang-format on
 uint64_t boot_l2pgdir[NUM_LEVEL2_PDE] __attribute__((aligned(0x1000))) = { 0 };
@@ -125,15 +120,11 @@ static inline void local_flush_tlb_all(void)
 
 static void load_boot_pgdir()
 {
-    unsigned long satp_val = (unsigned long)(((uintptr_t)boot_l2pgdir >> PAGE_SHIFT) | SATP_MODE);
-    unsigned long status;
+    unsigned long satp_val = 0;
 
-    status = csr_read(CSR_STATUS);
-    if( !(status & 0x100) ) {
-        _debug_uart_printascii("current is not S mode\n");
-    }
-#if 0    //to debug
-    csr_write(CSR_SATP, ((uintptr_t)boot_l2pgdir >> PAGE_SHIFT) | SATP_MODE);
+    satp_val = (unsigned long)(((uintptr_t)boot_l2pgdir >> PAGE_SHIFT) | SATP_MODE);
+#if 1    //to debug
+    csr_write(CSR_SATP, satp_val);
 #endif
 }
 
@@ -141,12 +132,11 @@ extern void main(void);
 static bool _bss_inited = false;
 void bootmain()
 {
-    _debug_uart_init();
+    _debug_uart_phymem_init();
     _debug_uart_printascii("bootmain start.\n");
 
     build_boot_pgdir();
     load_boot_pgdir();
-//    _debug_uart_base_map();
     _debug_uart_printascii("boot pgdir success\n");
 
     __asm__ __volatile__("addi sp, sp, %0" ::"i"(KERN_OFFSET));

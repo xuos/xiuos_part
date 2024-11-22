@@ -28,6 +28,10 @@ _boot_start:
     csrw CSR_IE, zero
     csrw CSR_IP, zero
 
+    j primary_cpu_init
+
+/*
+switch_mode:
     csrr t0, sstatus
     srli t0, t0, 8
     andi t0, t0, 1
@@ -43,6 +47,7 @@ _boot_start:
 
 continue_execution:
     j primary_cpu_init
+*/
 
 primary_cpu_init:
     la t0, boot_start_addr
