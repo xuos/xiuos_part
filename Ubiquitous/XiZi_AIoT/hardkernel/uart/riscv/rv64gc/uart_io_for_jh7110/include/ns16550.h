@@ -214,6 +214,6 @@ void _debug_uart_init(void);
 void _debug_uart_putc(int ch);
 int _debug_uart_getc(void);
 void _debug_uart_printascii(const char *str);
-void _debug_uart_phymem_init(void);
+void _debug_uart_init_early(void);
 
 #endif /* __ns16550_h */

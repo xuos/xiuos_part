@@ -4,7 +4,7 @@
  * modified to use CONFIG_SYS_ISA_MEM and new defines
  */
 
-#include <ns16550.h>
+#include "ns16550.h"
 #include "mmio_access.h"
 
 struct ns16550 g_ns16550_com_port = {0};
@@ -14,7 +14,8 @@ unsigned long g_ns16550_uart_base = {0};
 #define CONFIG_SYS_NS16550_UART_BASE	0x10000000
 #define CONFIG_BAUDRATE					115200
 #define CONFIG_SYS_NS16550_CLK			24000000
-#define CONFIG_SYS_NS16550_UART_BASE_MAP	 MMIO_P2V_WO(CONFIG_SYS_NS16550_UART_BASE)
+#define CONFIG_SYS_NS16550_UART_BASE_VIRT	 MMIO_P2V_WO(CONFIG_SYS_NS16550_UART_BASE)
+
 
 #define UART_LCRVAL UART_LCR_8N1		/* 8 data, 1 stop, no parity */
 #define UART_MCRVAL (UART_MCR_DTR | \
@@ -172,20 +173,20 @@ void _debug_uart_init(void)
 {
 	int baudrate = CONFIG_BAUDRATE;
 
-	g_ns16550_uart_base = CONFIG_SYS_NS16550_UART_BASE_MAP;
+	g_ns16550_uart_base = CONFIG_SYS_NS16550_UART_BASE_VIRT;
 	ns16550_serial_init();
 	ns16550_serial_setbrg(baudrate);
 	_debug_uart_printascii("_debug_uart_init success.\n");
 }
 
-void _debug_uart_phymem_init(void)
+void _debug_uart_init_early(void)
 {
 	int baudrate = CONFIG_BAUDRATE;
 
 	g_ns16550_uart_base = CONFIG_SYS_NS16550_UART_BASE;
 	ns16550_serial_init();
 	ns16550_serial_setbrg(baudrate);
-	_debug_uart_printascii("_debug_uart_phymem_init success.\n");
+	_debug_uart_printascii("_debug_uart_init_early success.\n");
 }
 
 void _debug_uart_putc(int ch)
