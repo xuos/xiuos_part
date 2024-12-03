@@ -39,8 +39,6 @@ Modification:
 #include <stdint.h>
 #include <string.h>
 
-extern uint64_t kernel_data_end[];
-extern uint64_t kernel_data_begin[];
 
 // clang-format off
 #define L2_PTE_VALID        (1 << 0)
@@ -73,6 +71,7 @@ uint64_t boot_kern_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 
 uint64_t boot_dev_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
 uint64_t boot_kern_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
 
+
 static void build_boot_pgdir()
 {
     static bool built = false;
@@ -87,12 +86,8 @@ static void build_boot_pgdir()
 
         cur_mem_paddr = ALIGNDOWN(dev_phy_mem_base, LEVEL2_PDE_SIZE);
         for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
-            boot_dev_l3pgdir[i] = (((uint64_t)boot_dev_l4pgdirs[i] >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
-
-            for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-                boot_dev_l4pgdirs[i][j] = ((cur_mem_paddr >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | PAGE_KERNEL;
-                cur_mem_paddr += PAGE_SIZE;
-            }
+            boot_dev_l3pgdir[i] = (((uint64_t)cur_mem_paddr >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | PAGE_KERNEL;
+            cur_mem_paddr += LEVEL3_PDE_SIZE;
         }
 
         // identical mem
@@ -101,17 +96,14 @@ static void build_boot_pgdir()
 
         cur_mem_paddr = ALIGNDOWN(kern_phy_mem_base, PAGE_SIZE);
         for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
-            boot_kern_l3pgdir[i] = (((uint64_t)boot_kern_l4pgdirs[i] >> PAGE_SHIFT) << _PAGE_PFN_SHIFT)  | _PAGE_TABLE;
-
-            for (size_t j = 0; j < NUM_LEVEL4_PTE; j++) {
-                boot_kern_l4pgdirs[i][j] = ((cur_mem_paddr >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | PAGE_KERNEL;
-                cur_mem_paddr += PAGE_SIZE;
-            }
+            boot_kern_l3pgdir[i] = (((uint64_t)cur_mem_paddr >> PAGE_SHIFT) << _PAGE_PFN_SHIFT)  | PAGE_KERNEL;
+            cur_mem_paddr += LEVEL3_PDE_SIZE;
         }
 
         built = true;
     }
 }
+
 
 static inline void local_flush_tlb_all(void)
 {
@@ -123,27 +115,18 @@ static void load_boot_pgdir()
     unsigned long satp_val = 0;
 
     satp_val = (unsigned long)(((uintptr_t)boot_l2pgdir >> PAGE_SHIFT) | SATP_MODE);
-#if 1    //to debug
     csr_write(CSR_SATP, satp_val);
-#endif
 }
 
 extern void main(void);
-static bool _bss_inited = false;
-void bootmain()
+
+void bootmain(void)
 {
-    _debug_uart_phymem_init();
     _debug_uart_printascii("bootmain start.\n");
 
     build_boot_pgdir();
     load_boot_pgdir();
     _debug_uart_printascii("boot pgdir success\n");
-
-    __asm__ __volatile__("addi sp, sp, %0" ::"i"(KERN_OFFSET));
-    if (!_bss_inited) {
-        memset(&kernel_data_begin, 0x00, (size_t)((uint64_t)kernel_data_end - (uint64_t)kernel_data_begin));
-        _bss_inited = true;
-    }
 
     main();
 }

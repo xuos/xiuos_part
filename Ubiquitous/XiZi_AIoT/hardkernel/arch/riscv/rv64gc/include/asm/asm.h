@@ -14,20 +14,13 @@
 #define __ASM_STR(x)	#x
 #endif
 
-#if __riscv_xlen == 64
-#define __REG_SEL(a, b)	__ASM_STR(a)
-#elif __riscv_xlen == 32
-#define __REG_SEL(a, b)	__ASM_STR(b)
-#else
-#error "Unexpected __riscv_xlen"
-#endif
 
-#define REG_L		__REG_SEL(ld, lw)
-#define REG_S		__REG_SEL(sd, sw)
-#define REG_SC		__REG_SEL(sc.d, sc.w)
-#define REG_ASM		__REG_SEL(.dword, .word)
-#define SZREG		__REG_SEL(8, 4)
-#define LGREG		__REG_SEL(3, 2)
+#define REG_L		ld
+#define REG_S		sd
+#define REG_SC		sc.d
+#define REG_ASM		.dword
+#define SZREG		8
+#define LGREG		3
 
 
 #define RISCV_PTR		.dword

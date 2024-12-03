@@ -34,24 +34,29 @@
  * @version 1.0
  * @author AIIT XUOS Lab
  * @date 2024.10.10
- */ 
-OUTPUT_FORMAT("elf64-littleriscv", "elf64-littleriscv", "elf64-littleriscv")
+ */
+
 OUTPUT_ARCH(riscv)
+OUTPUT_FORMAT("elf64-littleriscv", "elf64-littleriscv", "elf64-littleriscv")
+
 /* ENTRY(_start) */
 ENTRY( _boot_start )
 
-BOOT_STACK_SIZE = 0x4000;
+
 MEMORY {
   phy_ddr3 (rwx)      : ORIGIN = 0x40200000, LENGTH = 1024M
   vir_ddr3 (rwx)      : ORIGIN = 0x0000000040800000, LENGTH = 1024M
 }
 
+BOOT_STACK_SIZE = 0x4000;
+
 SECTIONS
 {
-  .start_sec : {
-	. = ORIGIN(phy_ddr3);
-	/* initialization start checkpoint. */
+  . = ORIGIN(phy_ddr3);
+  _start = .;
+  _boot_start = .;
 
+  .start_sec : {
     _start_image_addr = .;
 
     boot.o(.text)
@@ -66,69 +71,74 @@ SECTIONS
     bootmmu.o(.data .data.*)
     ns16550.o(.data .data.*)
 
-	  PROVIDE(boot_start_addr = .);
+    PROVIDE(boot_start_addr = .);
 
     boot.o(.bss .bss.* COMMON)
     bootmmu.o(.bss .bss.* COMMON)
     ns16550.o(.bss .bss.* COMMON)
   
-	/* stack for booting code. */
-	. = ALIGN(0x1000);
-	PROVIDE(stacks_start = .);
-	. += BOOT_STACK_SIZE;
-	PROVIDE(stacks_end = .);
-	PROVIDE(stacks_top = .);
+    . = ALIGN(0x1000);
+    PROVIDE(stacks_start = .);
+    . += BOOT_STACK_SIZE;
+    PROVIDE(stacks_end = .);
+    PROVIDE(stacks_top = .);
 
-	/* initialization end checkpoint. */
-	PROVIDE(boot_end_addr = .);
-  } > phy_ddr3
+    PROVIDE(boot_end_addr = .);
+  }
 
-  /* AT: phy_ddr3 + .start_sec size */
-  .text : AT(0x40800000) {
+  .text : {
     . = ALIGN(0x1000);
     *(.text .text.* .gnu.linkonce.t.*)
-  } > vir_ddr3
+  }
 
   . = ALIGN(0x1000);
   .data : {
     *(.data .data.*)
 
+    __start_init_task = .;
+    init_thread_union = .;
+    init_stack = .;
+    KEEP(*(.data..init_task)) 
+    KEEP(*(.data..init_thread_info)) 
+    . = __start_init_task + ((1 << (12)) << (2)); 
+    __end_init_task = .; 
+
     . = ALIGN(0x1000);
     PROVIDE(_binary_fs_img_start = .);
     *(.rawdata_fs_img*)
-		PROVIDE(_binary_fs_img_end = .);
+    PROVIDE(_binary_fs_img_end = .);
     . = ALIGN(0x1000);
-		PROVIDE(_binary_init_start = .);
-		*(.rawdata_init*)
-		PROVIDE(_binary_init_end = .);
+    PROVIDE(_binary_init_start = .);
+    *(.rawdata_init*)
+    PROVIDE(_binary_init_end = .);
     . = ALIGN(0x1000);
-		PROVIDE(_binary_default_fs_start = .);
-		*(.rawdata_memfs*)
-		PROVIDE(_binary_default_fs_end = .);
+    PROVIDE(_binary_default_fs_start = .);
+    *(.rawdata_memfs*)
+    PROVIDE(_binary_default_fs_end = .);
     PROVIDE(__init_array_start = .);
     PROVIDE(__init_array_end = .);
-  } > vir_ddr3
+  }
 
   . = ALIGN(0x1000);
-  _image_size = . - ORIGIN(phy_ddr3);
+  _image_size = . - _start;
 
   . = ALIGN(0x1000);
   .bss : {
     PROVIDE(kernel_data_begin = .);
     PROVIDE(__bss_start = .);
-		*(.bss .bss.* COMMON)
+    *(.bss .bss.* COMMON)
     . = ALIGN(0x1000);
-		PROVIDE(__bss_end = .);
-	  PROVIDE(kernel_data_end = .);
-  } > vir_ddr3
+    PROVIDE(__bss_end = .);
+    PROVIDE(kernel_data_end = .);
+    __bss_stop = .;
+  }
 
- . = ALIGN((1 << 21));
- .sdata : {
-  __global_pointer$ = . + 0x800;
-  *(.sdata*)
- }
+  . = ALIGN((1 << 21));
+  .sdata : {
+    __global_pointer$ = . + 0x800;
+    *(.sdata*)
+  }
 
- _edata = .;
- _end = .;
-
+  _edata = .;
+  _end = .;
 }

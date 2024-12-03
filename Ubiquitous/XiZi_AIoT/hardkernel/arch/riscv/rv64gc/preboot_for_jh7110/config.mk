@@ -8,7 +8,7 @@ export KBUILD_AFLAGS :=
 export CHECKFLAGS += -D__riscv -D__riscv_xlen=64
 
 export DEVICE := 
-export CFLAGS := $(KBUILD_CFLAGS) $(KBUILD_AFLAGS) $(CHECKFLAGS) -std=c11
+export CFLAGS := $(KBUILD_CFLAGS) $(KBUILD_AFLAGS) $(CHECKFLAGS) -std=c11 -mcmodel=medany
 # .vmlinux.cmd:1:cmd_vmlinux := sh scripts/link-vmlinux.sh "riscv64-linux-gnu-ld" " -melf64lriscv" " --build-id=sha1";
 export LFLAGS := -T $(KERNEL_ROOT)/hardkernel/arch/riscv/rv64gc/preboot_for_jh7110/jh7110.lds
 export CXXFLAGS := 

@@ -14,75 +14,97 @@
 #include "core.h"
 #include "memlayout.h"
 
-#define HCR_VALUE (1 << 31)
-#define SPSR_EL2_VALUE (7 << 6) | (5 << 0)
-#define SCTLR_EL1_VALUE (0x30D00800)
 
 .section ".text", "ax"
 .globl _boot_start
-.globl primary_cpu_init
 
 
 _boot_start:
-    /* Mask all interrupts */
-    csrw CSR_IE, zero
-    csrw CSR_IP, zero
+	call _debug_uart_init_early
+	la a0, debug_string_start
+	call _debug_uart_printascii
 
-    j primary_cpu_init
+	j _start_kernel
 
-/*
-switch_mode:
-    csrr t0, sstatus
-    srli t0, t0, 8
-    andi t0, t0, 1
-    beqz t0, switch_to_s_mode
 
-    j continue_execution
-
-    switch_to_s_mode:
-    li t2, 0x100
-    csrw sstatus, t2
-
-    j continue_execution
-
-continue_execution:
-    j primary_cpu_init
-*/
-
-primary_cpu_init:
-    la t0, boot_start_addr
-    la t1, boot_end_addr
-    li t2, 0
-
-clear_bss_sec:
-    bge t0, t1, clear_bss_sec_done
-    sb t2, 0(t0)
-    addi t0, t0, 4
-    j clear_bss_sec
-
-clear_bss_sec_done:
+_start_kernel:
+	/* Mask all interrupts */
+	csrw CSR_IE, zero
+	csrw CSR_IP, zero
 
 	/* Clear BSS for flat non-ELF images */
 	la a3, __bss_start
-	la a4, __bss_end
+	la a4, __bss_stop
 	ble a4, a3, clear_bss_done
 clear_bss:
 	sd zero, (a3)
 	add a3, a3, RISCV_SZPTR
 	blt a3, a4, clear_bss
-
 clear_bss_done:
 
-    j bootmain
+	/* Initialize page tables and relocate to virtual addresses */
+	call setup_vm_early
 
-/*
-.global enable_mmu_relocate
-enable_mmu_relocate:
-    la a2, boot_l2pgdir
-    srl a2, a2, PAGE_SHIFT
-    li a1, SATP_MODE
-    or a2, a2, a1
-    sfence.vma
-    csrw CSR_SATP, a2
-    ret
-*/
+	la a0, early_pg_dir
+	call relocate_enable_mmu
+	la sp, stacks_top
+
+	call _debug_uart_init
+
+	/* Start the kernel */
+	tail bootmain
+
+
+relocate_enable_mmu:
+	/* Relocate return address */
+	la a1, kernel_map
+	ld a1, KERNEL_MAP_VIRT_ADDR(a1)
+	la a2, _start
+	sub a1, a1, a2
+	add ra, ra, a1
+
+	/* Point stvec to virtual address of intruction after satp write */
+	la a2, 1f
+	add a2, a2, a1
+	csrw CSR_TVEC, a2
+
+	/* Compute satp for kernel page tables, but don't load it yet */
+	srl a2, a0, PAGE_SHIFT
+	li a1, SATP_MODE
+	or a2, a2, a1
+
+	/*
+	 * Load trampoline page directory, which will cause us to trap to
+	 * stvec if VA != PA, or simply fall through if VA == PA.  We need a
+	 * full fence here because setup_vm() just wrote these PTEs and we need
+	 * to ensure the new translations are in use.
+	 */
+	la a0, trampoline_pg_dir
+	srl a0, a0, PAGE_SHIFT
+	or a0, a0, a1
+	sfence.vma
+	csrw CSR_SATP, a0
+
+1:
+	/* Set trap vector to spin forever to help debug */
+	la a0, .Lsecondary_park
+	csrw CSR_TVEC, a0
+
+	/*
+	 * Switch to kernel page tables.  A full fence is necessary in order to
+	 * avoid using the trampoline translations, which are only correct for
+	 * the first superpage.  Fetching the fence is guarnteed to work
+	 * because that first superpage is translated the same way.
+	 */
+	csrw CSR_SATP, a2
+	sfence.vma
+	ret
+
+.Lsecondary_park:
+	/* We lack SMP support or have too many harts, so park this hart */
+	wfi
+	j .Lsecondary_park
+
+
+debug_string_start:  .ascii "XiZi boot start\n\0"
+

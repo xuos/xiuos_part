@@ -116,3 +116,4 @@ When the process switches, the flush TLB is no longer required anymore.
 __attribute__((always_inline)) static inline uint64_t v2p(void* a) { return ((uint64_t)(a)) - KERN_MEM_BASE; }
 __attribute__((always_inline)) static inline void* p2v(uint64_t a) { return (void*)((a) + KERN_MEM_BASE); }
 #endif
+

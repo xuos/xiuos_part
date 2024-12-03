@@ -6,6 +6,10 @@
 #ifndef _ASM_RISCV_PGTABLE_BITS_H
 #define _ASM_RISCV_PGTABLE_BITS_H
 
+#include <asm/const.h>
+
+#define BIT(nr)			(UL(1) << (nr))
+
 /*
  * PTE format:
  * | XLEN-1  10 | 9             8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0
