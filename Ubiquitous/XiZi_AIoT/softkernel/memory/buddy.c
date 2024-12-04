@@ -77,8 +77,13 @@ static struct KPage* KBuddyPagesAlloc(struct KBuddy* pbuddy, int nPages)
     int i = 0, order = 0;
 
     // find order
+#if defined(__GNUC__)
+    // see: https://gcc.gnu.org/onlinedocs/gcc/Other-Builtins.html
+    order = nPages ? (sizeof(int) * 8 - __builtin_clz(nPages) - 1) + !!(__builtin_popcount(nPages) != 1) : 0;
+#else
     for (order = 0; (FREE_LIST_INDEX(order)) < nPages; order++)
         ;
+#endif
 
     // find the free page list
     for (i = order; i < MAX_BUDDY_ORDER; i++) {
