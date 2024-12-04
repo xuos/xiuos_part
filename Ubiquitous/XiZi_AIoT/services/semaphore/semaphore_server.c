@@ -41,15 +41,28 @@ int IPC_DO_SERVE_FUNC(Ipc_sem_create)(sem_t* sem, int* count)
     return SEMAPHORE_SUC;
 }
 
+
+#define CHECK_SEM_RANGE(sem) \
+    do { \
+        if (*sem < 0 || *sem >= MAX_SUPPORT_SEMAPHORES) { \
+            return SEMAPHORE_ERR; \
+        } \
+    } while (0)
+
+
+#define CHECK_SEM_RANGE_AND_VALID(sem) \
+    do { \
+        CHECK_SEM_RANGE(sem); \
+        \
+        if (!sem_pool[*sem].valid) { \
+            return SEMAPHORE_ERR; \
+        } \
+    } while (0)
+
+
 int IPC_DO_SERVE_FUNC(Ipc_sem_delete)(sem_t* sem)
 {
-    if (*sem < 0 || *sem > MAX_SUPPORT_SEMAPHORES) {
-        return SEMAPHORE_ERR;
-    }
-
-    if (!sem_pool[*sem].valid) {
-        return SEMAPHORE_ERR;
-    }
+    CHECK_SEM_RANGE_AND_VALID(sem);
 
     sem_pool[*sem].valid = false;
     return SEMAPHORE_SUC;
@@ -57,9 +70,7 @@ int IPC_DO_SERVE_FUNC(Ipc_sem_delete)(sem_t* sem)
 
 int IPC_DO_SERVE_FUNC(Ipc_sem_wait)(sem_t* sem, int* timeout)
 {
-    if (*sem < 0 || *sem > MAX_SUPPORT_SEMAPHORES) {
-        return SEMAPHORE_ERR;
-    }
+    CHECK_SEM_RANGE(sem);
 
     /// @todo support timeout
     // return if sem is freed(no valid) or sem count is sufficient
@@ -72,13 +83,7 @@ int IPC_DO_SERVE_FUNC(Ipc_sem_wait)(sem_t* sem, int* timeout)
 
 int IPC_DO_SERVE_FUNC(Ipc_sem_signal)(sem_t* sem)
 {
-    if (*sem < 0 || *sem >= MAX_SUPPORT_SEMAPHORES) {
-        return SEMAPHORE_ERR;
-    }
-
-    if (!sem_pool[*sem].valid) {
-        return SEMAPHORE_ERR;
-    }
+    CHECK_SEM_RANGE_AND_VALID(sem);
 
     sem_pool[*sem].count++;
     return SEMAPHORE_SUC;
