@@ -176,7 +176,7 @@ void _debug_uart_init(void)
 	g_ns16550_uart_base = CONFIG_SYS_NS16550_UART_BASE_VIRT;
 	ns16550_serial_init();
 	ns16550_serial_setbrg(baudrate);
-	_debug_uart_printascii("_debug_uart_init success.\n");
+//	_debug_uart_printascii("_debug_uart_init success.\n");
 }
 
 void _debug_uart_init_early(void)
@@ -186,7 +186,7 @@ void _debug_uart_init_early(void)
 	g_ns16550_uart_base = CONFIG_SYS_NS16550_UART_BASE;
 	ns16550_serial_init();
 	ns16550_serial_setbrg(baudrate);
-	_debug_uart_printascii("_debug_uart_init_early success.\n");
+//	_debug_uart_printascii("_debug_uart_init_early success.\n");
 }
 
 void _debug_uart_putc(int ch)

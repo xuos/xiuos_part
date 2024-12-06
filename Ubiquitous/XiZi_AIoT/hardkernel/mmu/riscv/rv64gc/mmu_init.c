@@ -40,7 +40,6 @@ Modification:
 #define __page_aligned_bss      __attribute__((section(".bss..page_aligned")))   __attribute__((aligned(PAGE_SIZE)))
 #define __initdata	__attribute__((section(".init.data")))
 #define __init		__attribute__((section(".init.text")))
-#define	__aligned(x)	__attribute__((aligned__(x)))
 #define __maybe_unused                  __attribute__((__unused__))
 
 
@@ -76,8 +75,6 @@ static void __init create_pmd_mapping_early(pmd_t *pmdp,
 				      uintptr_t va, phys_addr_t pa,
 				      phys_addr_t sz, pgprot_t prot)
 {
-	pte_t *ptep;
-	phys_addr_t pte_phys;
 	uintptr_t pmd_idx = pmd_index(va);
 
 	if (sz == PMD_SIZE) {
@@ -139,7 +136,7 @@ static void __init create_kernel_pgd_mapping_free_early(pgd_t *pgdp,
 	uintptr_t start_pgd_idx = pgd_index(kernel_map.virt_addr);
 
 	if (pgd_val(pgdp[pgd_idx]) == 0) {
-		next_phys = early_pmd_free[pgd_idx - start_pgd_idx];
+		next_phys = (uintptr_t)early_pmd_free[pgd_idx - start_pgd_idx];
 		pgdp[pgd_idx] = pfn_pgd(PFN_DOWN(next_phys), PAGE_TABLE);
 		nextp = get_pmd_virt_early(next_phys);
 		memset(nextp, 0, PAGE_SIZE);
@@ -173,7 +170,7 @@ static void __init create_kernel_pgd_mapping_linear_map_early(pgd_t *pgdp,
 	uintptr_t pgd_idx = pgd_index(va);
 
 	if (pgd_val(pgdp[pgd_idx]) == 0) {
-		next_phys = early_pmd_inear_map;
+		next_phys = (uintptr_t)early_pmd_inear_map;
 		pgdp[pgd_idx] = pfn_pgd(PFN_DOWN(next_phys), PAGE_TABLE);
 		nextp = get_pmd_virt_early(next_phys);
 		memset(nextp, 0, PAGE_SIZE);
@@ -211,7 +208,6 @@ static void __init create_kernel_page_table_linear_map_early(pgd_t *pgdir, bool 
 
 void __init setup_vm_early(void)
 {
-	_debug_uart_printascii("setup_vm_early start\n");
 	kernel_map.virt_addr = KERN_MEM_BASE;
 	
 	kernel_map.phys_addr = (uintptr_t)(&_start);

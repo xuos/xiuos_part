@@ -41,84 +41,7 @@ Modification:
 #include <string.h>
 
 //
-#define L2_PTE_VALID        (1 << 0)
-
-#define L3_PTE_VALID        (1 << 0)
-
-#define L4_TYPE_PAGE        (3 << 0)
-#define L4_PTE_DEV          ((0b00) << 2) // Device memory
-#define L4_PTE_NORMAL       ((0b01) << 2) // Device memory
-#define L4_PTE_AF           (1 << 10) // Data Access Permissions
-
-#define L4_PTE_PXN          (1UL << 53)   // Privileged eXecute Never
-#define L4_PTE_UXN          (1UL << 54)   // Unprivileged(user) eXecute Never
-#define L4_PTE_XN           (PTE_PXN|PTE_UXN)  // eXecute Never
-
-#define IDX_MASK            (0b111111111)
-#define L3_PDE_INDEX(idx)   ((idx << LEVEL3_PDE_SHIFT) & L3_IDX_MASK)
-
-#define _PAGE_KERNEL        (_PAGE_PRESENT | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC | _PAGE_ACCESSED | _PAGE_GLOBAL | _PAGE_DIRTY)
-#define PAGE_KERNEL	        (_PAGE_KERNEL)
-#define PAGE_KERNEL_READ    (_PAGE_KERNEL & ~_PAGE_WRITE)
-#define PAGE_KERNEL_EXEC    (_PAGE_KERNEL | _PAGE_EXEC)
-
-//
-uint64_t boot_l2pgdir[NUM_LEVEL2_PDE] __attribute__((aligned(0x1000))) = { 0 };
-
-uint64_t boot_dev_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 0 };
-uint64_t boot_kern_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 0 };
-
-uint64_t boot_dev_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
-uint64_t boot_kern_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
-
-//
-static void build_boot_pgdir()
-{
-    static bool built = false;
-    if (!built) {
-        uint64_t dev_phy_mem_base = DEV_PHYMEM_BASE;
-        uint64_t kern_phy_mem_base = PHY_MEM_BASE;
-        uint64_t cur_mem_paddr;
-
-        // dev mem
-        boot_l2pgdir[(dev_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (((uint64_t)boot_dev_l3pgdir >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
-        boot_l2pgdir[(MMIO_P2V_WO(dev_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (((uint64_t)boot_dev_l3pgdir >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
-
-        cur_mem_paddr = ALIGNDOWN(dev_phy_mem_base, LEVEL2_PDE_SIZE);
-        for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
-            boot_dev_l3pgdir[i] = (((uint64_t)cur_mem_paddr >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | PAGE_KERNEL;
-            cur_mem_paddr += LEVEL3_PDE_SIZE;
-        }
-
-        // identical mem
-        boot_l2pgdir[(kern_phy_mem_base >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (((uint64_t)boot_kern_l3pgdir >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
-        boot_l2pgdir[(P2V_WO(kern_phy_mem_base) >> LEVEL2_PDE_SHIFT) & IDX_MASK] = (((uint64_t)boot_kern_l3pgdir >> PAGE_SHIFT) << _PAGE_PFN_SHIFT) | _PAGE_TABLE;
-
-        cur_mem_paddr = ALIGNDOWN(kern_phy_mem_base, PAGE_SIZE);
-        for (size_t i = 0; i < NUM_LEVEL3_PDE; i++) {
-            boot_kern_l3pgdir[i] = (((uint64_t)cur_mem_paddr >> PAGE_SHIFT) << _PAGE_PFN_SHIFT)  | PAGE_KERNEL;
-            cur_mem_paddr += LEVEL3_PDE_SIZE;
-        }
-
-        built = true;
-    }
-}
-
-
-static inline void local_flush_tlb_all(void)
-{
-    __asm__ __volatile__ ("sfence.vma" : : : "memory");
-}
-
-static void load_boot_pgdir()
-{
-    unsigned long satp_val = 0;
-
-    satp_val = (unsigned long)(((uintptr_t)boot_l2pgdir >> PAGE_SHIFT) | SATP_MODE);
-    csr_write(CSR_SATP, satp_val);
-}
-
-//
+#if 0
 static int test_access_map_address(void)
 {
     unsigned long address = KERN_MEM_BASE + (PHY_USER_FREEMEM_BASE - PHY_MEM_BASE) - 4096;
@@ -143,6 +66,7 @@ static void test_mmu(void)
     test_access_map_address();
     test_access_unmap_address();
 }
+#endif
 
 //
 extern void main(void);
