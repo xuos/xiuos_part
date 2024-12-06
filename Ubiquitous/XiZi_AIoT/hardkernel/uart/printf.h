@@ -50,6 +50,7 @@ extern "C" {
 #define KPrintf printf_
 #define printf printf_
 int printf_(const char* format, ...);
+int printf_early(const char* format, ...);
 
 /**
  * Tiny sprintf implementation
