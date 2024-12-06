@@ -88,7 +88,7 @@ SECTIONS
 
   .text : {
     . = ALIGN(0x1000);
-    *(.text .text.* .gnu.linkonce.t.*)
+    *(.text .text.*)
   }
 
   . = ALIGN(0x1000);
@@ -138,7 +138,7 @@ SECTIONS
     __global_pointer$ = . + 0x800;
     *(.sdata*)
   }
-
+  . = ALIGN((1 << 21));
   _edata = .;
   _end = .;
 }

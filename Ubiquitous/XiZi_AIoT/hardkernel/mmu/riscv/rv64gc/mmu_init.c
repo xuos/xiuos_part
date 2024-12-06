@@ -55,6 +55,8 @@ pgd_t early_pg_dir[PTRS_PER_PGD] __initdata __attribute__((aligned(PAGE_SIZE)));
 static pmd_t trampoline_pmd[PTRS_PER_PMD] __page_aligned_bss;
 static pmd_t early_pmd[PTRS_PER_PMD] __initdata __attribute__((aligned(PAGE_SIZE)));
 static pmd_t early_uart_pmd[PTRS_PER_PMD] __initdata __attribute__((aligned(PAGE_SIZE)));
+static pmd_t early_pmd_free[((PHY_USER_FREEMEM_BASE - PHY_MEM_BASE) >> PGDIR_SHIFT) + 1][PTRS_PER_PMD] __initdata __attribute__((aligned(PAGE_SIZE)));
+static pmd_t early_pmd_inear_map[PTRS_PER_PMD] __initdata __attribute__((aligned(PAGE_SIZE)));
 
 
 static pmd_t *__init get_pmd_virt_early(phys_addr_t pa)
@@ -86,7 +88,7 @@ static void __init create_pmd_mapping_early(pmd_t *pmdp,
 	}
 }
 
-void __init create_pgd_mapping_early(pgd_t *pgdp,
+static void __init create_pgd_mapping_early(pgd_t *pgdp,
 				      uintptr_t va, phys_addr_t pa,
 				      phys_addr_t sz, pgprot_t prot)
 {
@@ -116,7 +118,6 @@ void __init create_pgd_mapping_early(pgd_t *pgdp,
 static void __init create_kernel_page_table_early(pgd_t *pgdir, bool early)
 {
 	uintptr_t va, end_va;
-	int i = 0;
 
 	end_va = kernel_map.virt_addr + kernel_map.size;
 	for (va = kernel_map.virt_addr; va < end_va; va += PMD_SIZE) {
@@ -124,7 +125,76 @@ static void __init create_kernel_page_table_early(pgd_t *pgdir, bool early)
 				   kernel_map.phys_addr + (va - kernel_map.virt_addr),
 				   PMD_SIZE,
 				   PAGE_KERNEL_EXEC);
-		i++;
+	}
+}
+
+
+static void __init create_kernel_pgd_mapping_free_early(pgd_t *pgdp,
+				      uintptr_t va, phys_addr_t pa,
+				      phys_addr_t sz, pgprot_t prot)
+{
+	pmd_t *nextp;
+	phys_addr_t next_phys;
+	uintptr_t pgd_idx = pgd_index(va);
+	uintptr_t start_pgd_idx = pgd_index(kernel_map.virt_addr);
+
+	if (pgd_val(pgdp[pgd_idx]) == 0) {
+		next_phys = early_pmd_free[pgd_idx - start_pgd_idx];
+		pgdp[pgd_idx] = pfn_pgd(PFN_DOWN(next_phys), PAGE_TABLE);
+		nextp = get_pmd_virt_early(next_phys);
+		memset(nextp, 0, PAGE_SIZE);
+	} else {
+		next_phys = PFN_PHYS(_pgd_pfn(pgdp[pgd_idx]));
+		nextp = get_pmd_virt_early(next_phys);
+	}
+
+	create_pmd_mapping_early(nextp, va, pa, sz, prot);
+}
+
+static void __init create_kernel_page_table_free_early(pgd_t *pgdir, bool early)
+{
+	uintptr_t va, end_va;
+
+	end_va = kernel_map.virt_addr + (PHY_USER_FREEMEM_BASE  - kernel_map.phys_addr);
+	for (va = kernel_map.virt_addr + kernel_map.size; va < end_va; va += PMD_SIZE) {
+		create_kernel_pgd_mapping_free_early(pgdir, va,
+				   kernel_map.phys_addr + (va - kernel_map.virt_addr),
+				   PMD_SIZE,
+				   PAGE_KERNEL_EXEC);
+	}
+}
+
+static void __init create_kernel_pgd_mapping_linear_map_early(pgd_t *pgdp,
+				      uintptr_t va, phys_addr_t pa,
+				      phys_addr_t sz, pgprot_t prot)
+{
+	pmd_t *nextp;
+	phys_addr_t next_phys;
+	uintptr_t pgd_idx = pgd_index(va);
+
+	if (pgd_val(pgdp[pgd_idx]) == 0) {
+		next_phys = early_pmd_inear_map;
+		pgdp[pgd_idx] = pfn_pgd(PFN_DOWN(next_phys), PAGE_TABLE);
+		nextp = get_pmd_virt_early(next_phys);
+		memset(nextp, 0, PAGE_SIZE);
+	} else {
+		next_phys = PFN_PHYS(_pgd_pfn(pgdp[pgd_idx]));
+		nextp = get_pmd_virt_early(next_phys);
+	}
+
+	create_pmd_mapping_early(nextp, va, pa, sz, prot);
+}
+
+static void __init create_kernel_page_table_linear_map_early(pgd_t *pgdir, bool early)
+{
+	uintptr_t va, end_va;
+
+	end_va = kernel_map.phys_addr + kernel_map.size;
+	for (va = kernel_map.phys_addr; va < end_va; va += PMD_SIZE) {
+		create_kernel_pgd_mapping_linear_map_early(pgdir, va,
+				   kernel_map.phys_addr + (va - kernel_map.phys_addr),
+				   PMD_SIZE,
+				   PAGE_KERNEL_EXEC);
 	}
 }
 
@@ -166,5 +236,11 @@ void __init setup_vm_early(void)
 	/* Setup uart PGD and PMD */
 	create_pgd_mapping_early(early_pg_dir, DEV_VRTMEM_BASE, (uintptr_t)early_uart_pmd, PGDIR_SIZE, PAGE_TABLE);
 	create_pmd_mapping_early(early_uart_pmd, DEV_VRTMEM_BASE, DEV_PHYMEM_BASE, PMD_SIZE, PAGE_KERNEL);
+
+	/* Setup kernel free PGD and PMD */
+	create_kernel_page_table_free_early(early_pg_dir, true);
+
+	/* Setup kernel linear map PGD and PMD */
+	create_kernel_page_table_linear_map_early(early_pg_dir, true);
 }
 

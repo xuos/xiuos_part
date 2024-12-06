@@ -42,6 +42,8 @@ clear_bss:
 	blt a3, a4, clear_bss
 clear_bss_done:
 
+	la sp, stacks_top
+
 	/* Initialize page tables and relocate to virtual addresses */
 	call setup_vm_early
 

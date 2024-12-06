@@ -33,14 +33,14 @@ Modification:
 #include "pagetable.h"
 #include "registers.h"
 #include "ns16550.h"
+#include "printf.h"
 #include <asm/csr.h>
 #include <asm/pgtable-bits.h>
 
 #include <stdint.h>
 #include <string.h>
 
-
-// clang-format off
+//
 #define L2_PTE_VALID        (1 << 0)
 
 #define L3_PTE_VALID        (1 << 0)
@@ -62,7 +62,7 @@ Modification:
 #define PAGE_KERNEL_READ    (_PAGE_KERNEL & ~_PAGE_WRITE)
 #define PAGE_KERNEL_EXEC    (_PAGE_KERNEL | _PAGE_EXEC)
 
-// clang-format on
+//
 uint64_t boot_l2pgdir[NUM_LEVEL2_PDE] __attribute__((aligned(0x1000))) = { 0 };
 
 uint64_t boot_dev_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 0 };
@@ -71,7 +71,7 @@ uint64_t boot_kern_l3pgdir[NUM_LEVEL3_PDE] __attribute__((aligned(0x1000))) = { 
 uint64_t boot_dev_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
 uint64_t boot_kern_l4pgdirs[NUM_LEVEL3_PDE][NUM_LEVEL4_PTE] __attribute__((aligned(0x1000))) = { 0 };
 
-
+//
 static void build_boot_pgdir()
 {
     static bool built = false;
@@ -118,16 +118,45 @@ static void load_boot_pgdir()
     csr_write(CSR_SATP, satp_val);
 }
 
+//
+static int test_access_map_address(void)
+{
+    unsigned long address = KERN_MEM_BASE + (PHY_USER_FREEMEM_BASE - PHY_MEM_BASE) - 4096;
+    printf_early("to access 0x%lx\n", address);
+    *(unsigned long *)address = 0x55;
+    if(*(unsigned long *)address == 0x55) {
+        printf_early("access 0x%lx done\n", address);
+    }
+    return 0;
+}
+
+static int test_access_unmap_address(void)
+{
+    unsigned long address = KERN_MEM_BASE + (PHY_USER_FREEMEM_BASE - PHY_MEM_BASE) + 4096;
+    *(unsigned long *)address = 0x55;
+    printf_early("access 0x%lx done\n", address);
+    return 0;
+}
+
+static void test_mmu(void)
+{
+    test_access_map_address();
+    test_access_unmap_address();
+}
+
+//
 extern void main(void);
 
 void bootmain(void)
 {
-    _debug_uart_printascii("bootmain start.\n");
-
-    build_boot_pgdir();
-    load_boot_pgdir();
-    _debug_uart_printascii("boot pgdir success\n");
+    _debug_uart_printascii("bootmain start\n");
+#if 0
+    test_mmu();
+#endif
 
     main();
+
+    _debug_uart_printascii("bootmain end\n");
+    while(1);
 }
 
