@@ -150,6 +150,8 @@ static int   _CanTestRecv(const char *bus_name, const char *driver_name, const c
                      for(i = 0; i<len;i++)
                            KPrintf("0x%02x   ", rx_buf[i]);
                            KPrintf("\n");
+
+                    return 0;
              }
             else
             {

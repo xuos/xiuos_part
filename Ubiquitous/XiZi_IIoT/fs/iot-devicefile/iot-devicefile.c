@@ -18,7 +18,9 @@ static void GetBusName(const char *path, char *bus_name)
 
 static void GetDrvName(char *bus_name, char *drv_name)
 {
-    snprintf(drv_name, strlen(bus_name) + 5, "%s_drv", bus_name);
+    //snprintf(drv_name, strlen(bus_name) + 5, "%s_drv", bus_name);
+    strcpy(drv_name, bus_name);
+    strcat(drv_name, "_drv");
 }
 
 static int DevicefileOpen(struct FileDescriptor *fdp, const char *path)

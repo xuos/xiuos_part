@@ -1,0 +1,7 @@
+menu "UVCAN"
+
+menuconfig TOOL_USING_UVCAN
+    bool "Enable UVCAN function"
+    default y
+
+endmenu

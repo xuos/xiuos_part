@@ -96,10 +96,10 @@ InterruptVectors:
   .word IsrEntry
   .word IsrEntry
   .word IsrEntry
-  .word IsrEntry
-  .word IsrEntry
-  .word IsrEntry
-  .word IsrEntry
+  .word IsrEntry              // CAN1 发送中断处理函数 CAN1_TX_IRQHandler
+  .word USB_LP_CAN1_RX0_IRQHandler   // CAN1 接收中断0处理函数
+  .word IsrEntry              // CAN1 接收中断1处理函数 CAN1_RX1_IRQHandler
+  .word IsrEntry              // CAN1 状态变化中断处理函数 CAN1_SCE_IRQHandler
   .word IsrEntry
   .word IsrEntry
   .word IsrEntry

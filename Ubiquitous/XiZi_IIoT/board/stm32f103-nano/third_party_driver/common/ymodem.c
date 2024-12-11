@@ -25,7 +25,9 @@ DMA_HandleTypeDef hdma_usart1_rx;
 
 void ymodem_uart_init(void)
 {
-	 __HAL_RCC_GPIOA_CLK_ENABLE();
+	// need UART1 IRQ --> void UartIsr1(int vector, void *param)
+	
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 	
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 	__HAL_RCC_USART1_CLK_ENABLE();
@@ -265,7 +267,8 @@ void ymodem_fun(void)
 
 	KPrintf("in ymodem func\n");
 	ymodem_uart_init();
-
+	while (1)
+	{
 	if(Get_state()==TO_START)
 	{
 		KPrintf("in ymodem wait\n");
@@ -358,6 +361,7 @@ void ymodem_fun(void)
 			}break;	
 		}
 		
+	}
 	}
 }
 

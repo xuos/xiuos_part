@@ -373,6 +373,7 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m3 \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/third_party_driver/libraries/STM32F1xx_HAL/inc \
+	-I$(BSP_ROOT)/third_party_driver/libraries/STM32F1xx_HAL/inc/Legacy \
 	-I$(BSP_ROOT)/third_party_driver/libraries/CMSIS \
 	-I$(KERNEL_ROOT)/include \
 	-I$(BSP_ROOT)/include #

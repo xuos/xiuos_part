@@ -1,438 +1,285 @@
-/*
-* Copyright (c) 2020 AIIT XUOS Lab
-* XiUOS is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*        http://license.coscl.org.cn/MulanPSL2
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-* See the Mulan PSL v2 for more details.
-*/
 
-/**
-* @file connect_uart.c
-* @brief support stm32f103_nano board uart function and register to bus framework
-* @version 1.1
-* @author AIIT XUOS Lab
-* @date 2021-11-25
-*/
 
 #include <board.h>
-#include <connect_uart.h>
+#include <connect_can.h>
 
-#ifdef BSP_USING_UART1
-static struct SerialBus serial_bus_1;
-static struct SerialDriver serial_driver_1;
-static struct SerialHardwareDevice serial_device_1;
-#endif
-#ifdef BSP_USING_UART2
-static struct SerialBus serial_bus_2;
-static struct SerialDriver serial_driver_2;
-static struct SerialHardwareDevice serial_device_2;
-#endif
+// #ifdef BSP_USING_CAN1 - TODO change to struct Stm32Can
 
-static void SerialCfgParamCheck(struct SerialCfgParam *serial_cfg_default, struct SerialCfgParam *serial_cfg_new)
-{
-    struct SerialDataCfg *data_cfg_default = &serial_cfg_default->data_cfg;
-    struct SerialDataCfg *data_cfg_new = &serial_cfg_new->data_cfg;
+static struct Stm32Can *stm32_can1;
 
-    if ((data_cfg_default->serial_baud_rate != data_cfg_new->serial_baud_rate) && (data_cfg_new->serial_baud_rate)) {
-        data_cfg_default->serial_baud_rate = data_cfg_new->serial_baud_rate;
-    }
+// #endif // BSP_USING_CAN1
 
-    if ((data_cfg_default->serial_bit_order != data_cfg_new->serial_bit_order) && (data_cfg_new->serial_bit_order)) {
-        data_cfg_default->serial_bit_order = data_cfg_new->serial_bit_order;
-    }
-
-    if ((data_cfg_default->serial_buffer_size != data_cfg_new->serial_buffer_size) && (data_cfg_new->serial_buffer_size)) {
-        data_cfg_default->serial_buffer_size = data_cfg_new->serial_buffer_size;
-    }
-
-    if ((data_cfg_default->serial_data_bits != data_cfg_new->serial_data_bits) && (data_cfg_new->serial_data_bits)) {
-        data_cfg_default->serial_data_bits = data_cfg_new->serial_data_bits;
-    }
-
-    if ((data_cfg_default->serial_invert_mode != data_cfg_new->serial_invert_mode) && (data_cfg_new->serial_invert_mode)) {
-        data_cfg_default->serial_invert_mode = data_cfg_new->serial_invert_mode;
-    }
-
-    if ((data_cfg_default->serial_parity_mode != data_cfg_new->serial_parity_mode) && (data_cfg_new->serial_parity_mode)) {
-        data_cfg_default->serial_parity_mode = data_cfg_new->serial_parity_mode;
-    }
-
-    if ((data_cfg_default->serial_stop_bits != data_cfg_new->serial_stop_bits) && (data_cfg_new->serial_stop_bits)) {
-        data_cfg_default->serial_stop_bits = data_cfg_new->serial_stop_bits;
-    }
-
-    if ((data_cfg_default->serial_timeout != data_cfg_new->serial_timeout) && (data_cfg_new->serial_timeout)) {
-        data_cfg_default->serial_timeout = data_cfg_new->serial_timeout;
-    }
-}
-
-static void UartHandler(struct SerialBus *serial_bus, struct SerialDriver *serial_drv)
-{
-    struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)serial_bus->bus.owner_haldev;
-    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data; 
-    struct Stm32UartHwCfg *serial_hw_cfg = (struct Stm32UartHwCfg *)serial_cfg->hw_cfg.private_data;
-
-    /* UART in mode Receiver -------------------------------------------------*/
-    if ((__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_RXNE) != RESET) &&
-        (__HAL_UART_GET_IT_SOURCE(&(serial_hw_cfg->uart_handle), UART_IT_RXNE) != RESET))
-    {
-        SerialSetIsr(serial_dev, SERIAL_EVENT_RX_IND);
-    }
-    else
-    {
-        if (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_ORE) != RESET)
-        {
-            __HAL_UART_CLEAR_OREFLAG(&serial_hw_cfg->uart_handle);
-        }
-        if (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_NE) != RESET)
-        {
-            __HAL_UART_CLEAR_NEFLAG(&serial_hw_cfg->uart_handle);
-        }
-        if (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_FE) != RESET)
-        {
-            __HAL_UART_CLEAR_FEFLAG(&serial_hw_cfg->uart_handle);
-        }
-        if (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_PE) != RESET)
-        {
-            __HAL_UART_CLEAR_PEFLAG(&serial_hw_cfg->uart_handle);
-        }
-    }
-}
-
-#ifdef BSP_USING_UART1
-void UartIsr1(int vector, void *param)
-{
-	/* get serial bus 1 */
-	UartHandler(&serial_bus_1, &serial_driver_1);
-}
-#endif
-
-#ifdef BSP_USING_UART2
-void UartIsr2(int vector, void *param)
-{
-	/* get serial bus 2 */
-	UartHandler(&serial_bus_2, &serial_driver_2);
-}
-#endif
-
-static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInfo *configure_info)
-{
-    NULL_PARAM_CHECK(serial_drv);
-
-    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
-    struct Stm32UartHwCfg *serial_hw_cfg = (struct Stm32UartHwCfg *)serial_cfg->hw_cfg.private_data;
-
-    if (configure_info->private_data) {
-        struct SerialCfgParam *serial_cfg_new = (struct SerialCfgParam *)configure_info->private_data;
-        SerialCfgParamCheck(serial_cfg, serial_cfg_new);
-    }
-
-	struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)serial_drv->driver.owner_bus->owner_haldev;
-	struct SerialDevParam *dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
-
-	// config serial receive sem timeout
-	dev_param->serial_timeout = serial_cfg->data_cfg.serial_timeout;
-
-    serial_hw_cfg->uart_handle.Instance          = serial_hw_cfg->uart_device;
-    serial_hw_cfg->uart_handle.Init.BaudRate     = serial_cfg->data_cfg.serial_baud_rate;
-    serial_hw_cfg->uart_handle.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
-    serial_hw_cfg->uart_handle.Init.Mode         = UART_MODE_TX_RX;
-    serial_hw_cfg->uart_handle.Init.OverSampling = UART_OVERSAMPLING_16;
-
-    switch (serial_cfg->data_cfg.serial_data_bits)
-    {
-    case DATA_BITS_8:
-        if (serial_cfg->data_cfg.serial_parity_mode == PARITY_ODD || serial_cfg->data_cfg.serial_parity_mode == PARITY_EVEN)
-            serial_hw_cfg->uart_handle.Init.WordLength = UART_WORDLENGTH_9B;
-        else
-            serial_hw_cfg->uart_handle.Init.WordLength = UART_WORDLENGTH_8B;
-        break;
-    case DATA_BITS_9:
-        serial_hw_cfg->uart_handle.Init.WordLength = UART_WORDLENGTH_9B;
-        break;
-    default:
-        serial_hw_cfg->uart_handle.Init.WordLength = UART_WORDLENGTH_8B;
-        break;
-    }
-
-    switch (serial_cfg->data_cfg.serial_stop_bits)
-    {
-    case STOP_BITS_1:
-        serial_hw_cfg->uart_handle.Init.StopBits   = UART_STOPBITS_1;
-        break;
-    case STOP_BITS_2:
-        serial_hw_cfg->uart_handle.Init.StopBits   = UART_STOPBITS_2;
-        break;
-    default:
-        serial_hw_cfg->uart_handle.Init.StopBits   = UART_STOPBITS_1;
-        break;
-    }
-
-    switch (serial_cfg->data_cfg.serial_parity_mode)
-    {
-    case PARITY_NONE:
-        serial_hw_cfg->uart_handle.Init.Parity     = UART_PARITY_NONE;
-        break;
-    case PARITY_ODD:
-        serial_hw_cfg->uart_handle.Init.Parity     = UART_PARITY_ODD;
-        break;
-    case PARITY_EVEN:
-        serial_hw_cfg->uart_handle.Init.Parity     = UART_PARITY_EVEN;
-        break;
-    default:
-        serial_hw_cfg->uart_handle.Init.Parity     = UART_PARITY_NONE;
-        break;
-    }
-
-    if (HAL_UART_Init(&serial_hw_cfg->uart_handle) != HAL_OK)
-    {
-        return ERROR;
-    }
-
-    return EOK;
-}
-
-static uint32 SerialConfigure(struct SerialDriver *serial_drv, int serial_operation_cmd)
-{
-    NULL_PARAM_CHECK(serial_drv);
-
-    struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)serial_drv->driver.owner_bus->owner_haldev;
-    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
-    struct Stm32UartHwCfg *serial_hw_cfg = (struct Stm32UartHwCfg *)serial_cfg->hw_cfg.private_data;
-    struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
-
-    if (OPER_CLR_INT == serial_operation_cmd) {
-        if (SIGN_OPER_INT_RX & serial_dev_param->serial_work_mode) {
-            /* disable rx irq */
-            NVIC_DisableIRQ(serial_hw_cfg->irq_type);
-            /* disable interrupt */
-            __HAL_UART_DISABLE_IT(&(serial_hw_cfg->uart_handle), UART_IT_RXNE);
-        }
-	} else if (OPER_SET_INT == serial_operation_cmd) {
-        /* enable rx irq */
-        HAL_NVIC_SetPriority(serial_hw_cfg->irq_type, 1, 0);
-        HAL_NVIC_EnableIRQ(serial_hw_cfg->irq_type);
-        /* enable interrupt */
-        __HAL_UART_ENABLE_IT(&(serial_hw_cfg->uart_handle), UART_IT_RXNE);
-    }
-
-    return EOK;
-}
-
-static uint32 SerialDrvConfigure(void *drv, struct BusConfigureInfo *configure_info)
+static unsigned int CanModeInit(void *drv, struct BusConfigureInfo *configure_info)
 {
     NULL_PARAM_CHECK(drv);
     NULL_PARAM_CHECK(configure_info);
-
-    x_err_t ret = EOK;
-    int serial_operation_cmd;
-    struct SerialDriver *serial_drv = (struct SerialDriver *)drv;
-
-    switch (configure_info->configure_cmd)
+    struct CanDriverConfigure *config = (struct CanDriverConfigure *)configure_info->private_data;
+    struct CanDriver *can_drv = (struct CanDriver *)drv;
+    CAN_HandleTypeDef *hcan1 = &(stm32_can1->instance);
+    // hcan1->Instance = CAN1;
+    // hcan1->Init.Prescaler = config->brp;
+    // hcan1->Init.Mode = config->mode;
+    // hcan1->Init.SyncJumpWidth = config->tsjw;
+    // hcan1->Init.TimeSeg1 = config->tbs1;
+    // hcan1->Init.TimeSeg2 = config->tbs2;
+    // hcan1->Init.TimeTriggeredMode = DISABLE;
+    // hcan1->Init.AutoBusOff = ENABLE;
+    // hcan1->Init.AutoWakeUp = ENABLE;
+    // hcan1->Init.AutoRetransmission = DISABLE;
+    // hcan1->Init.ReceiveFifoLocked = DISABLE;
+    // hcan1->Init.TransmitFifoPriority = DISABLE;
+    hcan1->Instance = CAN1;
+    hcan1->Init.Prescaler = 6;
+    hcan1->Init.Mode = CAN_MODE_NORMAL;
+    hcan1->Init.SyncJumpWidth = CAN_SJW_1TQ;
+    hcan1->Init.TimeSeg1 = CAN_BS1_6TQ;
+    hcan1->Init.TimeSeg2 = CAN_BS2_5TQ;
+    hcan1->Init.TimeTriggeredMode = DISABLE;
+    hcan1->Init.AutoBusOff = DISABLE;
+    hcan1->Init.AutoWakeUp = DISABLE;
+    hcan1->Init.AutoRetransmission = DISABLE;
+    hcan1->Init.ReceiveFifoLocked = DISABLE;
+    hcan1->Init.TransmitFifoPriority = DISABLE;
+    if (HAL_CAN_Init(hcan1) != HAL_OK)
     {
-        case OPE_INT:
-            ret = SerialInit(serial_drv, configure_info);
-            break;
-        case OPE_CFG:
-            serial_operation_cmd = *(int *)configure_info->private_data;
-            ret = SerialConfigure(serial_drv, serial_operation_cmd);
-            break;
-        default:
-            break;
+        return ERROR;
     }
 
-    return ret;
+    CAN_FilterTypeDef sFilterConfig;
+    sFilterConfig.FilterBank = 0;                                                                    /* 过滤器组0 */
+    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;                                                /* 屏蔽位模式 */
+    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;                                               /* 32位。*/
+    // sFilterConfig.FilterIdHigh = (((uint32_t)CAN_RxExtId << 3) & 0xFFFF0000) >> 16;                  /* 要过滤的ID高位 */
+    // sFilterConfig.FilterIdLow = (((uint32_t)CAN_RxExtId << 3) | CAN_ID_EXT | CAN_RTR_DATA) & 0xFFFF; /* 要过滤的ID低位 */
+    // sFilterConfig.FilterMaskIdHigh = 0xFFFF;                                                         /* 过滤器高16位每位必须匹配 */
+    // sFilterConfig.FilterMaskIdLow = 0xFFFF;                                                          /* 过滤器低16位每位必须匹配 */
+    sFilterConfig.FilterIdHigh = 0x0000;
+    sFilterConfig.FilterIdLow = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0x0000;
+    sFilterConfig.FilterMaskIdLow = 0x0000;
+    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;                                               /* 过滤器被关联到FIFO 0 */
+    sFilterConfig.FilterActivation = ENABLE;                                                         /* 使能过滤器 */
+    sFilterConfig.SlaveStartFilterBank = 14;
+    if (HAL_CAN_ConfigFilter(hcan1, &sFilterConfig) != HAL_OK)
+    {
+        /* Filter configuration Error */
+        return ERROR;
+    }
+
+    if (HAL_CAN_Start(hcan1) != HAL_OK)
+    {
+        /* Start Error */
+        return ERROR;
+    }
+
+    /*##-4- Activate CAN RX notification #######################################*/
+    if (HAL_CAN_ActivateNotification(hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
+    {
+        /* Start Error */
+        return ERROR;
+    }
 }
 
-static int SerialPutChar(struct SerialHardwareDevice *serial_dev, char c)
+static uint32 CanOpen(void *dev)
 {
-    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
-    struct Stm32UartHwCfg *serial_hw_cfg = (struct Stm32UartHwCfg *)serial_cfg->hw_cfg.private_data;
+    KPrintf("Can open\n");
+KTaskDescriptorType task = NONE;
+task = GetKTaskDescriptor();
+KPrintf("CanOpen MdelayKTask2 %x\n", task);
+KPrintf("CanOpen task->Done %x \n", task->Done);
+    return 0;
+}
 
-    UART_INSTANCE_CLEAR_FUNCTION(&(serial_hw_cfg->uart_handle), UART_FLAG_TC);
+static uint32 CanClose(void *dev)
+{
+    KPrintf("Can close\n");
+    return 0;
+}
 
-    serial_hw_cfg->uart_handle.Instance->DR = c;
-    while (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_TC) == RESET);
+static uint32 CanSendMsg(void *dev, struct BusBlockWriteParam *write_param)
+{
+    NULL_PARAM_CHECK(dev);
 
+    CAN_HandleTypeDef *hcan1 = &(stm32_can1->instance);
+    uint8_t i = 0;
+    uint32_t TxMailbox;
+    uint8_t message[8];
+    uint8_t *data = (uint8 *)write_param->buffer;
+    uint16_t timer_count = 1000;
+    CAN_TxHeaderTypeDef TxHeader; // 发送
+
+    TxHeader.ExtId = CAN_TxExtId; // 扩展标识符(29位)
+    TxHeader.IDE = CAN_ID_EXT;    // 使用扩展帧
+    TxHeader.RTR = CAN_RTR_DATA;  // 数据帧
+    TxHeader.DLC = write_param->size;
+    TxHeader.TransmitGlobalTime = DISABLE;
+
+    for (i = 0; i < TxHeader.DLC; i++)
+    {
+        message[i] = data[i];
+    }
+
+    if (HAL_CAN_AddTxMessage(hcan1, &TxHeader, message, &TxMailbox) != HAL_OK) // 发送
+    {
+        return ERROR;
+    }
+    while (HAL_CAN_GetTxMailboxesFreeLevel(hcan1) != 3 && timer_count)
+    {
+        timer_count--;
+    }
+    if (timer_count <= 0)
+    {
+        return ERROR;
+    }
     return EOK;
 }
 
-static int SerialGetChar(struct SerialHardwareDevice *serial_dev)
-{
-    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
-    struct Stm32UartHwCfg *serial_hw_cfg = (struct Stm32UartHwCfg *)serial_cfg->hw_cfg.private_data;
 
-    int ch = -1;
-    if (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_RXNE) != RESET)
+static uint32 CanRecvMsg(void *dev, struct BusBlockReadParam *databuf)
+{
+    NULL_PARAM_CHECK(dev);
+    NULL_PARAM_CHECK(databuf);
+    int size = stm32_can1->can_recv_flag;
+    int i;
+    uint8_t *buf = (uint8 *)(databuf->buffer);
+    if (size != 0)
     {
-        ch = serial_hw_cfg->uart_handle.Instance->DR & 0xff;
+        for(i=0;i<size;i++)
+        {
+            buf[i]=stm32_can1->can_Rx_Data[i];
+            //KPrintf("0x%02x   ", buf[i]);
+            stm32_can1->can_Rx_Data[i]=0;
+        }
+        //KPrintf("\n");
+
+        stm32_can1->can_recv_flag = 0;
     }
-    return ch;
+    return size;
 }
 
-static const struct SerialDataCfg data_cfg_init = 
-{
-    .serial_baud_rate = BAUD_RATE_115200,
-    .serial_data_bits = DATA_BITS_8,
-    .serial_stop_bits = STOP_BITS_1,
-    .serial_parity_mode = PARITY_NONE,
-    .serial_bit_order = BIT_ORDER_LSB,
-    .serial_invert_mode = NRZ_NORMAL,
-    .serial_buffer_size = SERIAL_RB_BUFSZ,
-    .serial_timeout = WAITING_FOREVER,
-};
+static struct CanDevDone can_dev_done =
+    {
+        .open = CanOpen,//None
+        .close = CanClose,
+        .write = CanSendMsg,
+        .read = CanRecvMsg
+    };
 
-/*manage the serial device operations*/
-static const struct SerialDrvDone drv_done =
-{
-    .init = SerialInit,
-    .configure = SerialConfigure,
-};
 
-/*manage the serial device hal operations*/
-static struct SerialHwDevDone hwdev_done =
-{
-    .put_char = SerialPutChar,
-    .get_char = SerialGetChar,
-};
+// #ifdef BSP_USING_CAN1
 
-static int BoardSerialBusInit(struct SerialBus *serial_bus, struct SerialDriver *serial_driver, const char *bus_name, const char *drv_name)
+void USB_LP_CAN1_RX0_IRQHandler(void)
 {
+  HAL_CAN_IRQHandler(&(stm32_can1->instance));
+}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *CanNum)
+{
+	uint32_t i;
+    uint8_t	RxData[8];
+
+    KPrintf("in CAN1_RX0_IRQHandler\n");
+    
+    CAN_HandleTypeDef *hcan1 = &(stm32_can1->instance);
+    CAN_RxHeaderTypeDef RxHeader;
+	HAL_CAN_GetRxMessage(hcan1, CAN_RX_FIFO0, &RxHeader, stm32_can1->can_Rx_Data);
+    stm32_can1->can_recv_flag =RxHeader.DLC;  //接收标志位
+
+    // for(i = 0; i<RxHeader.DLC;i++)
+    // {
+    //     KPrintf("0x%02x   ", stm32_can1->can_Rx_Data[i]);
+    // }
+    // KPrintf("\n%d",RxHeader.DLC);
+}
+
+// #endif // BSP_USING_CAN1
+
+
+static int BoardCanBusInit(struct Stm32Can *stm32can_bus, struct CanDriver *can_driver)
+{
+
     x_err_t ret = EOK;
-
-    /*Init the serial bus */
-    ret = SerialBusInit(serial_bus, bus_name);
-    if (EOK != ret) {
-        KPrintf("InitHwUart SerialBusInit error %d\n", ret);
+    /*Init the can bus */
+    ret = CanBusInit(&stm32can_bus->can_bus, stm32can_bus->bus_name);
+    if (EOK != ret)
+    {
+        KPrintf("Board_can_init canBusInit error %d\n", ret);
         return ERROR;
     }
-
-    /*Init the serial driver*/
-    ret = SerialDriverInit(serial_driver, drv_name);
-    if (EOK != ret) {
-        KPrintf("InitHwUart SerialDriverInit error %d\n", ret);
+    /*Init the can driver*/
+    ret = CanDriverInit(can_driver, CAN_DRIVER_NAME);
+    if (EOK != ret)
+    {
+        KPrintf("Board_can_init canDriverInit error %d\n", ret);
         return ERROR;
     }
-
-    /*Attach the serial driver to the serial bus*/
-    ret = SerialDriverAttachToBus(drv_name, bus_name);
-    if (EOK != ret) {
-        KPrintf("InitHwUart SerialDriverAttachToBus error %d\n", ret);
+    /*Attach the can driver to the can bus*/
+    ret = CanDriverAttachToBus(CAN_DRIVER_NAME, stm32can_bus->bus_name);
+    if (EOK != ret)
+    {
+        KPrintf("Board_can_init CanDriverAttachToBus error %d\n", ret);
         return ERROR;
-    } 
-
+    }
     return ret;
 }
 
-/*Attach the serial device to the serial bus*/
-static int BoardSerialDevBend(struct SerialHardwareDevice *serial_device, void *serial_param, const char *bus_name, const char *dev_name)
+static x_err_t HwCanDeviceAttach(const char *bus_name, const char *device_name, struct Stm32Can *can1)
 {
-    x_err_t ret = EOK;
-
-    ret = SerialDeviceRegister(serial_device, serial_param, dev_name);
-    if (EOK != ret) {
-        KPrintf("InitHwUart SerialDeviceInit device %s error %d\n", dev_name, ret);
+    NULL_PARAM_CHECK(bus_name);
+    NULL_PARAM_CHECK(device_name);
+    x_err_t result;
+    struct CanHardwareDevice *can_device;
+    /* attach the device to can bus*/
+    can_device = (struct CanHardwareDevice *)x_malloc(sizeof(struct CanHardwareDevice));
+    memset(can_device, 0, sizeof(struct CanHardwareDevice));
+    can_device->dev_done = &can_dev_done;
+    can_device->private_data = stm32_can1;
+    result = CanDeviceRegister(can_device, NONE, device_name);
+    if (EOK != result)
+    {
+        KPrintf("board_can_init canDeviceInit device %s error %d\n", "can1", result);
         return ERROR;
-    }  
+    }
+    result = CanDeviceAttachToBus(device_name, bus_name);
+    if (result != EOK)
+    {
+        SYS_ERR("%s attach to %s faild, %d\n", device_name, bus_name, result);
+    }
+    CHECK(result == EOK);
 
-    ret = SerialDeviceAttachToBus(dev_name, bus_name);
-    if (EOK != ret) {
-        KPrintf("InitHwUart SerialDeviceAttachToBus device %s error %d\n", dev_name, ret);
-        return ERROR;
-    }  
+    KPrintf("%s attach to %s done\n", device_name, bus_name);
 
-    return  ret;
+    return result;
 }
 
-int InitHwUart(void)
+int InitHwCan(void)
 {
     x_err_t ret = EOK;
+    struct CanDriver *can_driver;
 
-#ifdef BSP_USING_UART1
-    memset(&serial_bus_1, 0, sizeof(struct SerialBus));
-    memset(&serial_driver_1, 0, sizeof(struct SerialDriver));
-    memset(&serial_device_1, 0, sizeof(struct SerialHardwareDevice));
+    stm32_can1 = (struct Stm32Can *)x_malloc(sizeof(struct Stm32Can));
+    memset(stm32_can1, 0, sizeof(struct Stm32Can));
+    stm32_can1->bus_name = CAN_BUS_NAME_1;
+    stm32_can1->can_bus.private_data = stm32_can1;
 
-    static struct SerialCfgParam serial_cfg_1;
-    memset(&serial_cfg_1, 0, sizeof(struct SerialCfgParam));
+    can_driver = (struct CanDriver *)x_malloc(sizeof(struct CanDriver));
+    memset(can_driver, 0, sizeof(struct CanDriver));
+    can_driver->configure = CanModeInit;
+    can_driver->private_data = stm32_can1;
 
-    static struct Stm32UartHwCfg serial_hw_cfg_1;
-    memset(&serial_hw_cfg_1, 0, sizeof(struct Stm32UartHwCfg));
-
-    static struct SerialDevParam serial_dev_param_1;
-    memset(&serial_dev_param_1, 0, sizeof(struct SerialDevParam));
-    
-    serial_driver_1.drv_done = &drv_done;
-    serial_driver_1.configure = &SerialDrvConfigure;
-    serial_device_1.hwdev_done = &hwdev_done;
-
-    serial_cfg_1.data_cfg = data_cfg_init;
-
-    serial_cfg_1.hw_cfg.private_data = (void *)&serial_hw_cfg_1;
-    serial_hw_cfg_1.uart_device = USART1;
-    serial_hw_cfg_1.irq_type = USART1_IRQn;
-    serial_driver_1.private_data = (void *)&serial_cfg_1;
-
-    serial_dev_param_1.serial_work_mode = SIGN_OPER_INT_RX;
-    serial_device_1.haldev.private_data = (void *)&serial_dev_param_1;
-
-    ret = BoardSerialBusInit(&serial_bus_1, &serial_driver_1, SERIAL_BUS_NAME_1, SERIAL_DRV_NAME_1);
-    if (EOK != ret) {
-        KPrintf("InitHwUart uarths error ret %u\n", ret);
+    ret = BoardCanBusInit(stm32_can1, can_driver);
+    if (EOK != ret)
+    {
+        KPrintf(" can_bus_init %s error ret %u\n", stm32_can1->bus_name, ret);
         return ERROR;
     }
 
-    ret = BoardSerialDevBend(&serial_device_1, (void *)&serial_cfg_1, SERIAL_BUS_NAME_1, SERIAL_1_DEVICE_NAME_0);
-    if (EOK != ret) {
-        KPrintf("InitHwUart uarths error ret %u\n", ret);
-        return ERROR;
-    }    
-#endif
-
-#ifdef BSP_USING_UART2
-    memset(&serial_bus_2, 0, sizeof(struct SerialBus));
-    memset(&serial_driver_2, 0, sizeof(struct SerialDriver));
-    memset(&serial_device_2, 0, sizeof(struct SerialHardwareDevice));
-
-    static struct SerialCfgParam serial_cfg_2;
-    memset(&serial_cfg_2, 0, sizeof(struct SerialCfgParam));
-
-    static struct Stm32UartHwCfg serial_hw_cfg_2;
-    memset(&serial_hw_cfg_2, 0, sizeof(struct Stm32UartHwCfg));
-
-    static struct SerialDevParam serial_dev_param_2;
-    memset(&serial_dev_param_2, 0, sizeof(struct SerialDevParam));
-    
-    serial_driver_2.drv_done = &drv_done;
-    serial_driver_2.configure = &SerialDrvConfigure;
-    serial_device_2.hwdev_done = &hwdev_done;
-
-    serial_cfg_2.data_cfg = data_cfg_init;
-
-    serial_cfg_2.hw_cfg.private_data = (void *)&serial_hw_cfg_2;
-    serial_hw_cfg_2.uart_device = USART2;
-    serial_hw_cfg_2.irq_type = USART2_IRQn;
-    serial_driver_2.private_data = (void *)&serial_cfg_2;
-
-    serial_dev_param_2.serial_work_mode = SIGN_OPER_INT_RX;
-    serial_device_2.haldev.private_data = (void *)&serial_dev_param_2;
-
-    ret = BoardSerialBusInit(&serial_bus_2, &serial_driver_2, SERIAL_BUS_NAME_2, SERIAL_DRV_NAME_2);
-    if (EOK != ret) {
-        KPrintf("InitHwUart uarths error ret %u\n", ret);
+    ret = HwCanDeviceAttach(CAN_BUS_NAME_1, CAN_1_DEVICE_NAME_1, stm32_can1);
+    if (EOK != ret)
+    {
+        KPrintf(" HwCanDeviceAttach %s error ret %u\n", stm32_can1->bus_name, ret);
         return ERROR;
     }
 
-    ret = BoardSerialDevBend(&serial_device_2, (void *)&serial_cfg_2, SERIAL_BUS_NAME_2, SERIAL_2_DEVICE_NAME_0);
-    if (EOK != ret) {
-        KPrintf("InitHwUart uarths error ret %u\n", ret);
-        return ERROR;
-    }    
-#endif
-
-    return ret;
+    return EOK;
 }

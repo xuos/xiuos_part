@@ -20,8 +20,11 @@ extern int FrameworkInit();
 extern void ApplicationOtaTaskInit(void);
 int main(void)
 {
-	printf("Hello, world! \n");
+	int i=0;
+	KPrintf("main KPrintf1\n");
+	printf("Hello, world! %p\n",&i);
 	FrameworkInit();
+	TestcanMain();
 #ifdef APPLICATION_OTA
 	ApplicationOtaTaskInit();
 #endif
