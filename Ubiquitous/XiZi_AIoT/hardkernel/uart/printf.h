@@ -51,6 +51,7 @@ extern "C" {
 #define printf printf_
 int printf_(const char* format, ...);
 int printf_early(const char* format, ...);
+#define printk printf_
 
 /**
  * Tiny sprintf implementation
@@ -101,3 +102,4 @@ int fctprintf(void (*out)(char character, void* arg), void* arg, const char* for
 #endif
 
 #endif // _PRINTF_H_
+

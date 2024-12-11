@@ -38,6 +38,10 @@ Modification:
 
 #include "mmu.h"
 
+#include "asm/csr.h"
+#include "ptrace.h"
+
+
 extern void dabort_handler(struct trapframe* r);
 extern void iabort_handler(struct trapframe* r);
 
@@ -117,5 +121,115 @@ void syscall_arch_handler(struct trapframe* tf)
         context_switch(&cur_cpu()->task->thread_context.context, cur_cpu()->scheduler);
         panic("dabort end should never be reashed.\n");
     }
+    }
+}
+
+
+
+static void do_trap_error(struct pt_regs *regs, const char *str)
+{
+    printk("Oops: %s\n", str);
+    printk("sstatus: 0x%016lx, sbadaddr: 0x%016lx, scause: 0x%016lx\n",
+           regs->status, regs->badaddr, regs->cause);
+    panic("Fatal exception\n");
+}
+
+#define DO_ERROR_INFO(name) \
+static int name(struct pt_regs *regs, const char *str) \
+{ \
+    do_trap_error(regs, str); \
+    return 0; \
+}
+
+DO_ERROR_INFO(do_trap_unknown);
+DO_ERROR_INFO(do_trap_insn_misaligned);
+DO_ERROR_INFO(do_trap_insn_fault);
+DO_ERROR_INFO(do_trap_insn_illegal);
+DO_ERROR_INFO(do_trap_load_misaligned);
+DO_ERROR_INFO(do_trap_load_fault);
+DO_ERROR_INFO(do_trap_store_misaligned);
+DO_ERROR_INFO(do_trap_store_fault);
+DO_ERROR_INFO(do_trap_ecall_u);
+DO_ERROR_INFO(do_trap_ecall_s);
+DO_ERROR_INFO(do_trap_break);
+DO_ERROR_INFO(do_page_fault);
+
+struct fault_info {
+    int (*fn)(struct pt_regs *regs, const char *name);
+    const char *name;
+};
+
+static const struct fault_info fault_inf[] = {
+    {do_trap_insn_misaligned, "Instruction address misaligned"},
+    {do_trap_insn_fault, "Instruction access fault"},
+    {do_trap_insn_illegal, "Illegal instruction"},
+    {do_trap_break, "Breakpoint"},
+    {do_trap_load_misaligned, "Load address misaligned"},
+    {do_trap_load_fault, "Load access fault"},
+    {do_trap_store_misaligned, "Store/AMO address misaligned"},
+    {do_trap_store_fault, "Store/AMO access fault"},
+    {do_trap_ecall_u, "Environment call from U-mode"},
+    {do_trap_ecall_s, "Environment call from S-mode"},
+    {do_trap_unknown, "unknown 10"},
+    {do_trap_unknown, "unknown 11"},
+    {do_page_fault, "Instruction page fault"},
+    {do_page_fault, "Load page fault"},
+    {do_trap_unknown, "unknown 14"},
+    {do_page_fault, "Store/AMO page fault"},
+};
+
+
+/*
+void delegate_traps(void)
+{
+    unsigned long interrupts = MIP_SSIP | MIP_STIP | MIP_SEIP;
+
+    unsigned long exceptions = (1UL << CAUSE_MISALIGNED_FETCH) |
+                               (1UL << CAUSE_FETCH_PAGE_FAULT) |
+                               (1UL << CAUSE_BREAKPOINT) |
+                               (1UL << CAUSE_LOAD_PAGE_FAULT) |
+                               (1UL << CAUSE_STORE_PAGE_FAULT) |
+                               (1UL << CAUSE_USER_ECALL) |
+                               (1UL << CAUSE_LOAD_ACCESS_FAULT) |
+                               (1UL << CAUSE_STORE_ACCESS_FAULT);
+
+    csr_write(mideleg, interrupts);
+    csr_write(medeleg, exceptions);
+}
+*/
+
+
+struct fault_info * ec_to_fault_info(unsigned long scause)
+{
+    struct fault_info *inf;
+    if (scause >= (sizeof(fault_inf)/sizeof(fault_inf[0]))) {
+        printk("The cause is out of range Exception Code, scause=0x%lx\n", scause);
+        panic("Fatal exception\n");
+    }
+    inf = &fault_inf[scause];
+    return inf;
+}
+extern void do_exception_vector(void);
+void trap_init(void)
+{
+    csr_write(stvec, do_exception_vector);
+    //printk("stvec=0x%lx, do_exception_vector=0x%lx\n", csr_read(stvec), (unsigned long)do_exception_vector);
+    csr_write(sie, 0);
+}
+
+void do_exception(struct pt_regs *regs, unsigned long scause)
+{
+    const struct fault_info *inf;
+
+    printk("%s, scause: 0x%lx\n", __func__, scause);
+
+    if (scause & CAUSE_IRQ_FLAG) {
+        // TODO: 处理中断
+    }
+    else {
+        inf = ec_to_fault_info(scause);
+        if (!inf->fn(regs, inf->name)) {
+            return;
+        }
     }
 }
