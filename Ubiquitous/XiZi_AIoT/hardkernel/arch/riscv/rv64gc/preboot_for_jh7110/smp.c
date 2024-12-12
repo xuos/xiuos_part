@@ -47,6 +47,8 @@ Modification:
 *************************************************/
 #include <stdint.h>
 
+unsigned long boot_cpu_hartid;
+
 #define PSCI_CPUON 0xc4000003
 struct xizi_smccc_res {
     unsigned long a0;

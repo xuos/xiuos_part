@@ -20,9 +20,11 @@
 
 
 _boot_start:
+	mv s0, a0
 	call _debug_uart_init_early
 	la a0, debug_string_start
 	call _debug_uart_printascii
+	mv a0, s0
 
 	j _start_kernel
 
@@ -41,6 +43,9 @@ clear_bss:
 	add a3, a3, RISCV_SZPTR
 	blt a3, a4, clear_bss
 clear_bss_done:
+
+	la a2, boot_cpu_hartid
+	sd a0, (a2)
 
 	la sp, stacks_top
 
