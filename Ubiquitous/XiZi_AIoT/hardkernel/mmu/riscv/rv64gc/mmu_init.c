@@ -56,6 +56,7 @@ static pmd_t early_pmd[PTRS_PER_PMD] __initdata __attribute__((aligned(PAGE_SIZE
 static pmd_t early_uart_pmd[PTRS_PER_PMD] __initdata __attribute__((aligned(PAGE_SIZE)));
 static pmd_t early_pmd_free[((PHY_USER_FREEMEM_BASE - PHY_MEM_BASE) >> PGDIR_SHIFT) + 1][PTRS_PER_PMD] __initdata __attribute__((aligned(PAGE_SIZE)));
 static pmd_t early_pmd_inear_map[PTRS_PER_PMD] __initdata __attribute__((aligned(PAGE_SIZE)));
+static pmd_t early_plic_pmd[PTRS_PER_PMD] __initdata __attribute__((aligned(PAGE_SIZE)));
 
 
 static pmd_t *__init get_pmd_virt_early(phys_addr_t pa)
@@ -124,7 +125,6 @@ static void __init create_kernel_page_table_early(pgd_t *pgdir, bool early)
 				   PAGE_KERNEL_EXEC);
 	}
 }
-
 
 static void __init create_kernel_pgd_mapping_free_early(pgd_t *pgdp,
 				      uintptr_t va, phys_addr_t pa,
@@ -195,6 +195,17 @@ static void __init create_kernel_page_table_linear_map_early(pgd_t *pgdir, bool 
 	}
 }
 
+
+static void __init create_plic_page_table_early(pgd_t *pgdir, bool early)
+{
+	uintptr_t va;
+
+	for (va = PLIC_PHYMEM_BASE; va < PLIC_PHYMEM_BASE + PLIC_MEM_SIZE; va += PMD_SIZE) {
+		create_pgd_mapping_early(pgdir, va, (uintptr_t)early_plic_pmd, PGDIR_SIZE, PAGE_TABLE);
+		create_pmd_mapping_early(early_plic_pmd, va, va, PMD_SIZE, PAGE_KERNEL);
+	}
+}
+
 /*
  * setup_vm_early() is called from boot.S with MMU-off.
  *
@@ -238,5 +249,8 @@ void __init setup_vm_early(void)
 
 	/* Setup kernel linear map PGD and PMD */
 	create_kernel_page_table_linear_map_early(early_pg_dir, true);
+
+	/* Setup PLIC PGD and PMD */
+	create_plic_page_table_early(early_pg_dir, true);
 }
 

@@ -1,15 +1,5 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
-/*
- * Copyright (C) 2012 Regents of the University of California
- */
-
 #ifndef _ASM_RISCV_PTRACE_H
 #define _ASM_RISCV_PTRACE_H
-
-//#include <uapi/asm/ptrace.h>
-//#include <asm/csr.h>
-//#include <linux/compiler.h>
-
 
 struct pt_regs {
 	unsigned long epc;

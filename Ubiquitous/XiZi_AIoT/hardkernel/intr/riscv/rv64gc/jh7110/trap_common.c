@@ -37,6 +37,8 @@ Modification:
 #include "log.h"
 #include "multicores.h"
 
+#include "plic.h"
+
 static struct XiziTrapDriver xizi_trap_driver;
 
 void panic(char* s)
@@ -46,16 +48,24 @@ void panic(char* s)
         ;
 }
 
-extern void alltraps();
+//extern void alltraps();
+extern void trap_init(void);
 static void _sys_irq_init(int cpu_id)
 {
     // primary core init intr
-    xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)alltraps);
-
+//    xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)alltraps);
     if (cpu_id == 0) {
-        gic_init();
+        plic_init();
     }
     gicv3inithart(cpu_id);
+}
+
+static void _sys_trap_init(int cpu_id)
+{
+    if (cpu_id == 0) {
+        trap_init();
+    }
+    _sys_irq_init(cpu_id);
 }
 
 static void _cpu_irq_enable(void)
@@ -70,12 +80,12 @@ static void _cpu_irq_disable(void)
 
 static void _single_irq_enable(int irq, int cpu, int prio)
 {
-    gic_setup_ppi((uint32_t)cpu, (uint32_t)irq);
+    plic_enable_irq(cpu, irq, 1);
 }
 
 static void _single_irq_disable(int irq, int cpu)
 {
-    return;
+    plic_enable_irq(cpu, irq, 0);
 }
 
 static inline uintptr_t* _switch_hw_irqtbl(uintptr_t* new_tbl_base)
@@ -113,7 +123,7 @@ int _cur_cpu_id()
 }
 
 static struct XiziTrapDriver xizi_trap_driver = {
-    .sys_irq_init = _sys_irq_init,
+    .sys_irq_init = _sys_trap_init,
     .cur_cpu_id = _cur_cpu_id,
 
     .cpu_irq_enable = _cpu_irq_enable,

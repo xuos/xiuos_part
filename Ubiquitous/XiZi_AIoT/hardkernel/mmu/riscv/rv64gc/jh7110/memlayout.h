@@ -78,6 +78,11 @@ Modification:
 #define KERN_MEM_BASE       ((0 - 0x0000002000000000ULL) + PHY_MEM_BASE) // First kernel virtual address
 #define KERN_OFFSET         (KERN_MEM_BASE - PHY_MEM_BASE)
 
+/* PLIC (platform-level interrupt controller) memory layout */
+#define PLIC_PHYMEM_BASE    (0x0C000000ULL)
+#define PLIC_MEM_SIZE       (0x00400000ULL)
+
+
 #define V2P(a) (((uint64_t)(a)) - KERN_OFFSET)
 #define P2V(a) ((void *)(((char *)(a)) + KERN_OFFSET))
 

@@ -40,6 +40,7 @@ Modification:
 
 #include "asm/csr.h"
 #include "ptrace.h"
+#include "plic.h"
 
 
 extern void dabort_handler(struct trapframe* r);
@@ -126,6 +127,16 @@ void syscall_arch_handler(struct trapframe* tf)
 
 
 
+extern void do_exception_vector(void);
+
+void trap_init(void)
+{
+    csr_write(stvec, do_exception_vector);
+    csr_write(sie, 0);
+}
+
+
+
 static void do_trap_error(struct pt_regs *regs, const char *str)
 {
     printk("Oops: %s\n", str);
@@ -179,26 +190,6 @@ static const struct fault_info fault_inf[] = {
 };
 
 
-/*
-void delegate_traps(void)
-{
-    unsigned long interrupts = MIP_SSIP | MIP_STIP | MIP_SEIP;
-
-    unsigned long exceptions = (1UL << CAUSE_MISALIGNED_FETCH) |
-                               (1UL << CAUSE_FETCH_PAGE_FAULT) |
-                               (1UL << CAUSE_BREAKPOINT) |
-                               (1UL << CAUSE_LOAD_PAGE_FAULT) |
-                               (1UL << CAUSE_STORE_PAGE_FAULT) |
-                               (1UL << CAUSE_USER_ECALL) |
-                               (1UL << CAUSE_LOAD_ACCESS_FAULT) |
-                               (1UL << CAUSE_STORE_ACCESS_FAULT);
-
-    csr_write(mideleg, interrupts);
-    csr_write(medeleg, exceptions);
-}
-*/
-
-
 struct fault_info * ec_to_fault_info(unsigned long scause)
 {
     struct fault_info *inf;
@@ -209,12 +200,22 @@ struct fault_info * ec_to_fault_info(unsigned long scause)
     inf = &fault_inf[scause];
     return inf;
 }
-extern void do_exception_vector(void);
-void trap_init(void)
+
+void handle_irq(struct pt_regs *regs, unsigned long scause)
 {
-    csr_write(stvec, do_exception_vector);
-    //printk("stvec=0x%lx, do_exception_vector=0x%lx\n", csr_read(stvec), (unsigned long)do_exception_vector);
-    csr_write(sie, 0);
+    switch (scause & ~CAUSE_IRQ_FLAG) {
+        case IRQ_S_TIMER:
+            //handle_timer_irq();
+            break;
+        case IRQ_S_EXT:
+            plic_handle_irq(regs);
+            break;
+        case IRQ_S_SOFT:
+            // TODO
+            break;
+        default:
+            panic("unexpected interrupt cause\n");
+    }
 }
 
 void do_exception(struct pt_regs *regs, unsigned long scause)
@@ -224,7 +225,7 @@ void do_exception(struct pt_regs *regs, unsigned long scause)
     printk("%s, scause: 0x%lx\n", __func__, scause);
 
     if (scause & CAUSE_IRQ_FLAG) {
-        // TODO: 处理中断
+        handle_irq(regs, scause);
     }
     else {
         inf = ec_to_fault_info(scause);
@@ -233,3 +234,4 @@ void do_exception(struct pt_regs *regs, unsigned long scause)
         }
     }
 }
+
