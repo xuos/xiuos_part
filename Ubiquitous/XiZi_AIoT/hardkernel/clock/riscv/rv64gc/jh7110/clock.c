@@ -14,6 +14,8 @@
 #include "generic_timer.h"
 
 #include "clock_common_op.h"
+#include "clint.h"
+
 
 // armv8 generic timer driver
 #define CNTV_CTL_ENABLE (1 << 0)
@@ -45,8 +47,10 @@ static void reload_timer()
     w_cntp_tval_el0(interval_clk);
 }
 
+
 void _sys_clock_init()
 {
+    clint_timer_init();
     disable_timer();
     reload_timer();
     enable_timer();

@@ -41,6 +41,7 @@ void plic_enable_irq(int cpu, int hwirq, int enable)
 }
 
 //TODO: to debug
+//Refer to linux/drivers/irqchip/irq-sifive-plic.c
 int plic_init(void)
 {
     int i;
