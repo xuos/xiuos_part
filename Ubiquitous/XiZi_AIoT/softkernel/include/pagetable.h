@@ -88,4 +88,4 @@ void secondary_cpu_load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct Trace
 
 extern struct XiziPageManager xizi_pager;
 bool module_pager_init(struct PagerRightGroup*);
-bool _new_pgdir(struct TopLevelPageDirectory* pgdir);
+
