@@ -30,16 +30,16 @@ Modification:
 .section .rawdata_fs_img
 .globl user_apps
 user_apps:
-//    .incbin "../services/app/fs.img"
+    .incbin "../services/app/fs.img"
 
 .section .rawdata_init
 .globl initapp
 initapp:
-//    .incbin "../services/app/bin/shell"
+    .incbin "../services/app/bin/shell"
 
 .section .rawdata_memfs
 .globl memfs
 memfs:
-//    .incbin "../services/app/bin/fs_server"
+    .incbin "../services/app/bin/fs_server"
 .end
 
