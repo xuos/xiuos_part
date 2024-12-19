@@ -46,8 +46,7 @@ export CONFIG2H_EXE ?= $(HOSTTOOLS_DIR)/xsconfig.sh
 
 export CPPPATHS
 export SRC_APP_DIR := ../../APP_Framework
-# export SRC_KERNEL_DIR := hardkernel kernel_actracer services softkernel
-export SRC_KERNEL_DIR := hardkernel kernel_actracer softkernel
+export SRC_KERNEL_DIR := hardkernel kernel_actracer services softkernel
 export SRC_DIR := $(SRC_KERNEL_DIR)
 export LIBCC 
 

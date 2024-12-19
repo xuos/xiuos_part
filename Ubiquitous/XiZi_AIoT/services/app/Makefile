@@ -16,6 +16,12 @@ user_ldflags = -N -Ttext 0
 cflags = -Wall -O2 -std=c11 -mtune=cortex-a55 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
 board_specs = stub.o
 endif
+ifeq ($(BOARD), jh7110)
+toolchain ?= riscv64-unknown-elf-
+user_ldflags = -N -Ttext 0
+cflags = -Wall -O2 -std=c11 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
+board_specs = stub.o
+endif
 
 cc = ${toolchain}gcc
 ld = ${toolchain}g++
@@ -45,7 +51,11 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 ifeq ($(BOARD), imx6q-sabrelite)
 all: test_fault simple_client simple_server shell fs_server semaphore_server test_semaphore test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server test_net lwip  readme.txt | bin
 else 
+ifeq ($(BOARD), jh7110)
+all: shell fs_server | bin
+else 
 all: test_fault simple_client simple_server shell fs_server semaphore_server test_ipc_null test_thread test_semaphore test_net lwip readme.txt eth_hal | bin
+endif
 endif
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin

@@ -13,6 +13,11 @@ toolchain ?= aarch64-none-elf-
 user_ldflags = -N -Ttext 0
 cflags = -Wall -O0 -g -std=c11 -mtune=cortex-a55 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
 endif
+ifeq ($(BOARD), jh7110)
+toolchain ?= riscv64-unknown-elf-
+user_ldflags = -N -Ttext 0
+cflags = -Wall -O0 -g -std=c11 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
+endif
 
 cc = ${toolchain}gcc
 ld = ${toolchain}g++
