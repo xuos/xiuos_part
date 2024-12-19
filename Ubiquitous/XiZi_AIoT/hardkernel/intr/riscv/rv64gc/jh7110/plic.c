@@ -32,12 +32,15 @@ void plic_enable_irq(int cpu, int hwirq, int enable)
     int hart = CPU_TO_HART(cpu);
     unsigned int reg = PLIC_MENABLE(hart) + 4 * (hwirq / 32);
 
+    printk("plic_enable_irq hwirq=%d\n", hwirq);
+#if 0
     if (enable) {
         writel(readl(reg) | hwirq_mask, reg);
     }
     else {
         writel(readl(reg) & ~hwirq_mask, reg);
     }
+#endif
 }
 
 //TODO: to debug
@@ -48,7 +51,7 @@ int plic_init(void)
     int hwirq;
 
     printk("plic_init boot_cpu_hartid=%lu\n", boot_cpu_hartid);
-
+#if 0
     for (i = 0; i < MAX_CPUS; i++) {
         writel(0, PLIC_MTHRESHOLD(CPU_TO_HART(i)));
 
@@ -58,7 +61,7 @@ int plic_init(void)
         }
     }
     csr_set(CSR_IE, IE_EIE);
-
+#endif
     return 0;
 }
 

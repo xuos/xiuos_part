@@ -4,7 +4,7 @@
 #include "memlayout.h"
 #include "ptrace.h"
 
-#define PLIC_BASE    PLIC_PHYMEM_BASE
+#define PLIC_BASE    PLIC_VIRTMEM_BASE
 
 #define PLIC_PRIORITY(hwirq) (PLIC_BASE + (hwirq) * 4)
 #define PLIC_PENDING(hwirq) (PLIC_BASE + 0x1000 + ((hwirq) / 32) * 4)
