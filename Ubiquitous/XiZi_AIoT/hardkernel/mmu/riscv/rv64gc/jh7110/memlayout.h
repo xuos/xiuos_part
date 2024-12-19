@@ -35,7 +35,7 @@ Modification:
 
 /* physical memory layout */
 #define PHY_MEM_BASE            (0x0000000040200000ULL)
-#define PHY_USER_FREEMEM_BASE   (0x0000000100000000ULL)
+#define PHY_USER_FREEMEM_BASE   (0x0000000080000000ULL)
 #define PHY_USER_FREEMEM_TOP    (0x0000000200000000ULL)
 #define PHY_MEM_STOP            (0x0000000200000000ULL)
 
@@ -78,9 +78,14 @@ Modification:
 #define KERN_MEM_BASE       ((0 - 0x0000002000000000ULL) + PHY_MEM_BASE) // First kernel virtual address
 #define KERN_OFFSET         (KERN_MEM_BASE - PHY_MEM_BASE)
 
+/* Leave 2GB for kernel and BPF at the end of the address space */
+#define KERNEL_LINK_ADDR	(0 - 0x80000000ULL)
+#define KERNEL_LINK_OFFSET  (KERNEL_LINK_ADDR - PHY_MEM_BASE)
+
 /* PLIC (platform-level interrupt controller) memory layout */
 #define PLIC_PHYMEM_BASE    (0x0C000000ULL)
 #define PLIC_MEM_SIZE       (0x00400000ULL)
+#define PLIC_VIRTMEM_BASE   ((0 - 0x0000003000000000ULL) + PLIC_PHYMEM_BASE)
 
 
 #define V2P(a) (((uint64_t)(a)) - KERN_OFFSET)
@@ -88,4 +93,6 @@ Modification:
 
 #define V2P_WO(x) ((x) - KERN_OFFSET)    // same as V2P, but without casts
 #define P2V_WO(x) ((x) + KERN_OFFSET)    // same as P2V, but without casts
-// clang-format on
+
+#define V2P_LINK(a) (((uint64_t)(a)) - KERNEL_LINK_OFFSET)
+#define P2V_LINK(a) ((a) + KERNEL_LINK_OFFSET)

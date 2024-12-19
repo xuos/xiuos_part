@@ -42,17 +42,16 @@ OUTPUT_FORMAT("elf64-littleriscv", "elf64-littleriscv", "elf64-littleriscv")
 /* ENTRY(_start) */
 ENTRY( _boot_start )
 
-
 MEMORY {
+  vir_ddr3 (rwx)      : ORIGIN = (0 - 0x80000000), LENGTH = 1024M
   phy_ddr3 (rwx)      : ORIGIN = 0x40200000, LENGTH = 1024M
-  vir_ddr3 (rwx)      : ORIGIN = 0x0000000040800000, LENGTH = 1024M
 }
 
 BOOT_STACK_SIZE = 0x4000;
 
 SECTIONS
 {
-  . = ORIGIN(phy_ddr3);
+  . = ORIGIN(vir_ddr3);
   _start = .;
   _boot_start = .;
 
@@ -60,22 +59,22 @@ SECTIONS
     _start_image_addr = .;
 
     boot.o(.text)
-    bootmmu.o(.text .text.*)
     ns16550.o(.text .text.*)
+    mmu_init.o(.text .text.*)
 
     boot.o(.rodata .rodata.*)
-    bootmmu.o(.rodata .rodata.*)
     ns16550.o(.rodata .rodata.*)
+    mmu_init.o(.rodata .rodata.*)
 
     boot.o(.data .data.*)
-    bootmmu.o(.data .data.*)
     ns16550.o(.data .data.*)
+    mmu_init.o(.data .data.*)
 
     PROVIDE(boot_start_addr = .);
 
     boot.o(.bss .bss.* COMMON)
-    bootmmu.o(.bss .bss.* COMMON)
     ns16550.o(.bss .bss.* COMMON)
+    mmu_init.o(.bss .bss.* COMMON)
   
     . = ALIGN(0x1000);
     PROVIDE(stacks_start = .);
