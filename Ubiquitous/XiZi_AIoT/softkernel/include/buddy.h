@@ -36,7 +36,7 @@ Modification:
 #include <stdbool.h>
 #include <stdint.h>
 
-#define MAX_BUDDY_ORDER (14)
+#define MAX_BUDDY_ORDER (15)
 
 #define FREE_LIST_INDEX(order) \
     (1 << order)
