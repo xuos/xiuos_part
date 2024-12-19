@@ -35,21 +35,29 @@ Modification:
 #include "mmu_common.h"
 #include "trap_common.h"
 
+#include "asm/csr.h"
+#include "asm/pfn.h"
+#include "printf.h"
+
+
 // extern struct MmuCommonDone mmu_common_done;
 static struct MmuDriverRightGroup right_group;
 
 void load_pgdir(uintptr_t pgdir_paddr)
 {
+
     /* get cache driver */
     struct ICacheDone* p_icache_done = AchieveResource(&right_group.icache_driver_tag);
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
 
-    TTBR0_W((uint64_t)pgdir_paddr);
-    DSB();
-    CLEARTLB(0);
-    ISB();
+    printk("load_pgdir pgdir_paddr=%08lx\n", pgdir_paddr);
+    csr_write(CSR_SATP, PFN_DOWN(pgdir_paddr) | SATP_MODE);
+	__asm__ __volatile__ ("sfence.vma" : : : "memory");
+    printf_early("load_pgdir pgdir_paddr=%08lx ok\n", pgdir_paddr);
+
     p_icache_done->invalidateall();
     p_dcache_done->flushall();
+
 }
 
 __attribute__((always_inline)) inline static void _tlb_flush(uintptr_t va)

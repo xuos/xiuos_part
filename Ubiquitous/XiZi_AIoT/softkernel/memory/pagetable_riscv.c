@@ -38,9 +38,11 @@ Modification:
 
 static struct PagerRightGroup right_group;
 struct MmuCommonDone* _p_pgtbl_mmu_access = NULL;
+
 static bool _new_pgdir(struct TopLevelPageDirectory* pgdir)
 {
     void* new_pgdir_addr = 0;
+
     if (UNLIKELY((new_pgdir_addr = kalloc(TOPLEVLE_PAGEDIR_SIZE)) == NULL)) {
         return false;
     }
@@ -70,7 +72,7 @@ static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, intpt
             return false;
         }
 
-        *pte = paddr | attr;
+        *pte = PFN_PTE(PFN_DOWN(paddr)) | attr;
 
         if (vaddr == vaddr_last) {
             break;
@@ -170,7 +172,6 @@ static uintptr_t _resize_user_pgdir(struct MemSpace* pmemspace, uintptr_t old_si
         return cur_size;
     }
     CreateResourceTag(NULL, &pmemspace->tag, NULL, TRACER_MEM_FROM_BUDDY_AC_RESOURCE, V2P_WO(new_page));
-
     return new_size;
 }
 
@@ -246,6 +247,19 @@ bool module_pager_init(struct PagerRightGroup* _right_group)
     return _p_pgtbl_mmu_access != NULL;
 }
 
+#if 0
+static int test_access_map_address(void)
+{
+    unsigned long address = KERN_MEM_BASE + (PHY_MEM_STOP - PHY_MEM_BASE) - 4096;
+    printf_early("%s to access 0x%lx\n", __func__, address);
+    *(unsigned long *)address = 0x55;
+    if(*(unsigned long *)address == 0x55) {
+        printf_early("%s access 0x%lx done\n", __func__, address);
+    }
+    return 0;
+}
+#endif
+
 /// @brief kernel pagedir
 struct TopLevelPageDirectory kern_pgdir;
 
@@ -259,17 +273,24 @@ void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driv
     if (!_new_pgdir(&kern_pgdir)) {
         panic("cannot alloc kernel page directory");
     }
+
     uintptr_t kern_attr = 0;
     _p_pgtbl_mmu_access->MmuKernPteAttr(&kern_attr);
     uintptr_t dev_attr = 0;
     _p_pgtbl_mmu_access->MmuDevPteAttr(&dev_attr);
 
+
+    // kern mem link
+    _map_pages((uintptr_t*)kern_pgdir.pd_addr, KERNEL_LINK_ADDR, PHY_MEM_BASE, (PHY_USER_FREEMEM_BASE - PHY_MEM_BASE), kern_attr);
     // kern mem
     _map_pages((uintptr_t*)kern_pgdir.pd_addr, KERN_MEM_BASE, PHY_MEM_BASE, (PHY_MEM_STOP - PHY_MEM_BASE), kern_attr);
     // dev mem
     _map_pages((uintptr_t*)kern_pgdir.pd_addr, DEV_VRTMEM_BASE, DEV_PHYMEM_BASE, DEV_MEM_SIZE, dev_attr);
 
     _p_pgtbl_mmu_access->LoadPgdir((uintptr_t)V2P(kern_pgdir.pd_addr));
+#if 0
+    test_access_map_address();
+#endif
 }
 
 void secondary_cpu_load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driver_tag)
