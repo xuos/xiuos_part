@@ -55,6 +55,7 @@ static bool _new_pgdir(struct TopLevelPageDirectory* pgdir)
 
 static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, intptr_t len, uintptr_t attr)
 {
+    DEBUG_PRINTF("_map_pages pgdir=%08lx, vaddr=%08lx, paddr=%08lx, len=%08lx, attr==%08lx\n", pgdir, vaddr, paddr, len, attr);
     assert(len >= 0);
     vaddr = ALIGNDOWN(vaddr, LEVEL4_PTE_SIZE);
     paddr = ALIGNDOWN(paddr, LEVEL4_PTE_SIZE);
@@ -186,7 +187,7 @@ static uintptr_t _address_translate(struct TopLevelPageDirectory* pgdir, uintptr
     if (pte == NULL || *pte == 0) {
         return 0;
     }
-    return (uintptr_t)ALIGNDOWN(*pte, PAGE_SIZE);
+    return (uintptr_t)PFN_PHYS(_PTE_PFN(*pte));
 }
 
 static uintptr_t _cross_vspace_data_copy_in_page(struct TopLevelPageDirectory* pgdir, uintptr_t cross_dest, uintptr_t src, uintptr_t len)
