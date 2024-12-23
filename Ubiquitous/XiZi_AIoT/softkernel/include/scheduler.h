@@ -2,20 +2,53 @@
 #pragma once
 #include "actracer.h"
 #include "ksemaphore.h"
+#include "rbtree.h"
 
 #define TASK_MAX_PRIORITY 32
+#define UNINIT_SNODE_ID 0
+typedef uintptr_t snode_id_t;
+
+enum ThreadState {
+    NEVER_RUN = 0,
+    INIT,
+    READY,
+    RUNNING,
+    DEAD,
+    BLOCKED,
+    SLEEPING,
+    NR_STATE,
+};
+
+typedef struct ScheduleContext {
+    intptr_t remain_tick;
+    uint64_t run_time;
+} ScheduleContext;
+
+typedef struct TaskSleepContext {
+    int64_t remain_ms;
+} TaskSleepContext;
 
 struct ScheduleNode {
-    TraceTag task_ref;
-    struct double_list_node list_node;
+    struct Thread* pthd;
+    snode_id_t snode_id;
+    enum ThreadState state;
+
+    ScheduleContext sched_context;
+    TaskSleepContext sleep_context;
 };
 
 struct Scheduler {
     TraceTag tag;
-
-    struct double_list_node task_list_head[TASK_MAX_PRIORITY]; /* list of task control blocks that are allocated */
-    struct double_list_node task_running_list_head;
-    struct double_list_node task_blocked_list_head;
-    struct double_list_node task_sleep_list_head;
+    RbtTree snode_state_pool[NR_STATE];
     struct XiziSemaphorePool semaphore_pool;
 };
+
+extern struct Scheduler g_scheduler;
+
+bool init_schedule_node(struct ScheduleNode* snode, struct Thread* bind_thd);
+
+bool task_trans_sched_state(struct ScheduleNode* snode, RbtTree* from_pool, RbtTree* to_pool, enum ThreadState target_state);
+void task_block(struct Thread* thd);
+void task_dead(struct Thread* thd);
+void task_yield(struct Thread* thd);
+void task_into_ready(struct Thread* thd);

@@ -27,53 +27,37 @@ Author: AIIT XUOS Lab
 Modification:
 1. first version
 *************************************************/
+#include "task.h"
 #include "trap_common.h"
 
-#include "task.h"
+static bool kill_succ;
+
+extern int sys_exit(struct Thread* ptask);
+static bool kill_task(RbtNode* node, void* id)
+{
+    struct ScheduleNode* snode = (struct ScheduleNode*)node->data;
+    struct Thread* thd = snode->pthd;
+    tid_t target_id = *(tid_t*)id;
+
+    if (thd->tid == target_id) {
+        sys_exit(thd);
+        kill_succ = true;
+        return false;
+    }
+
+    return true;
+}
 
 extern int sys_exit(struct Thread* task);
 int sys_kill(int id)
 {
-    struct Thread* task = NULL;
-    // check if task is a running one
-    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_running_list_head, node)
-    {
-        if (task->tid == id) {
-            sys_exit(task);
-            return 0;
-        }
+    kill_succ = false;
+    for (int pool_id = 0; pool_id < NR_STATE; pool_id++) {
+        rbt_traverse(&g_scheduler.snode_state_pool[pool_id], kill_task, (void*)&id);
     }
 
-    // check if task is a blocking one
-    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_blocked_list_head, node)
-    {
-        if (task->tid == id) {
-            sys_exit(task);
-            return 0;
-        }
+    if (kill_succ) {
+        return 0;
     }
-
-    struct ksemaphore* sem = NULL;
-    DOUBLE_LIST_FOR_EACH_ENTRY(sem, &xizi_task_manager.semaphore_pool.sem_list_guard, sem_list_node)
-    {
-        task = NULL;
-        DOUBLE_LIST_FOR_EACH_ENTRY(task, &sem->wait_list_guard, node)
-        {
-            sys_exit(task);
-            return 0;
-        }
-    }
-
-    // check if task is a ready one
-    for (int prio = 0; prio < TASK_MAX_PRIORITY; prio++) {
-        DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[prio], node)
-        {
-            if (task->tid == id) {
-                sys_exit(task);
-                return 0;
-            }
-        }
-    }
-
     return -1;
 }

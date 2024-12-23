@@ -118,8 +118,8 @@ int sys_mmap_v2(uintptr_t* vaddr, uintptr_t* paddr, int len, sys_mmap_info* info
             }
 
             uintptr_t paddr_to_map = *paddr;
-            if (paddr_to_map >= PHY_MEM_BASE && paddr_to_map < PHY_MEM_STOP && cur_task->tid > 1) {
-                ERROR("mapping invalid memory: 0x%p\n", paddr_to_map);
+            if (paddr_to_map >= PHY_MEM_BASE && paddr_to_map < PHY_MEM_STOP && cur_task->tid > 2) {
+                ERROR("mapping invalid memory: 0x%p by %d\n", paddr_to_map, cur_task->tid);
                 return -1;
             }
 

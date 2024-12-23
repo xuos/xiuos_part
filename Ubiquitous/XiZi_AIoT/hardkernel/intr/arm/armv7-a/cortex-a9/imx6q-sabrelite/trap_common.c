@@ -57,7 +57,7 @@ void panic(char* s)
 /* stack for different mode*/
 static char mode_stack_pages[NR_CPU][NR_MODE_STACKS][MODE_STACK_SIZE];
 extern uint32_t _vector_jumper;
-extern uint32_t _vector_start;
+extern uint32_t* _vector_start;
 extern uint32_t _vector_end;
 
 void init_cpu_mode_stacks(int cpu_id)
@@ -75,7 +75,7 @@ static void _sys_irq_init(int cpu_id)
     /* load exception vectors */
     init_cpu_mode_stacks(cpu_id);
     if (cpu_id == 0) {
-        volatile uint32_t* vector_base = &_vector_start;
+        volatile uint32_t* vector_base = (uint32_t*)&_vector_start;
 
         // Set Interrupt handler start address
         vector_base[1] = (uint32_t)trap_undefined_instruction; // Undefined Instruction

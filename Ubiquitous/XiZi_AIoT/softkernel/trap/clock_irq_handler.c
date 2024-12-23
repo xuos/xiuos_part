@@ -62,6 +62,12 @@ void hw_current_second(uintptr_t* second)
     *second = p_clock_driver->get_second();
 }
 
+bool count_down_sleeping_task(RbtNode* node, void* data)
+{
+    /// @todo implement
+    return false;
+}
+
 uint64_t global_tick = 0;
 int xizi_clock_handler(int irq, void* tf, void* arg)
 {
@@ -73,24 +79,25 @@ int xizi_clock_handler(int irq, void* tf, void* arg)
         // handle current thread
         struct Thread* current_task = cur_cpu()->task;
         if (current_task) {
-            current_task->remain_tick--;
-            current_task->maxium_tick--;
-            if (current_task->remain_tick == 0) {
-                xizi_task_manager.task_yield_noschedule(current_task, false);
+            struct ScheduleNode* snode = &current_task->snode;
+            snode->sched_context.remain_tick--;
+            if (snode->sched_context.remain_tick == 0) {
+                task_into_ready(current_task);
             }
         }
 
         // todo: cpu 0 will handle sleeping thread
-        struct Thread* thread = NULL;
-        DOUBLE_LIST_FOR_EACH_ENTRY(thread, &xizi_task_manager.task_sleep_list_head, node)
-        {
-            assert(thread->state == SLEEPING);
-            thread->sleep_context.remain_ms--;
-            if (thread->sleep_context.remain_ms <= 0) {
-                xizi_task_manager.task_unblock(thread);
-                break;
-            }
-        }
+        rbt_traverse(&g_scheduler.snode_state_pool[SLEEPING], count_down_sleeping_task, NULL);
+
+        // DOUBLE_LIST_FOR_EACH_ENTRY(thread, &xizi_task_manager.task_sleep_list_head, node)
+        // {
+        //     assert(thread->state == SLEEPING);
+        //     thread->sleep_context.remain_ms--;
+        //     if (thread->sleep_context.remain_ms <= 0) {
+        //         xizi_task_manager.task_unblock(thread);
+        //         break;
+        //     }
+        // }
     }
     return 0;
 }

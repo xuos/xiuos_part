@@ -41,7 +41,7 @@ struct ksemaphore {
     sem_id_t id;
     sem_val_t val;
     /* list of waiting threads */
-    struct double_list_node wait_list_guard;
+    RbtTree wait_thd_tree;
     /* list to manage semaphores */
     /// @todo Use RB-Tree to manage all semaphores
     struct double_list_node sem_list_node;

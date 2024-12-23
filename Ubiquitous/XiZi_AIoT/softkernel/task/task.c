@@ -44,27 +44,8 @@ struct CPU global_cpus[NR_CPU];
 uint32_t ready_task_priority;
 
 struct GlobalTaskPool global_task_pool;
+struct Scheduler g_scheduler;
 extern struct TaskLifecycleOperations task_lifecycle_ops;
-
-static inline void task_node_leave_list(struct Thread* task)
-{
-    doubleListDel(&task->node);
-    if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[task->priority])) {
-        ready_task_priority &= ~((uint32_t)1 << task->priority);
-    }
-}
-
-static inline void task_node_add_to_ready_list_head(struct Thread* task)
-{
-    doubleListAddOnHead(&task->node, &xizi_task_manager.task_list_head[task->priority]);
-    ready_task_priority |= ((uint32_t)1 << task->priority);
-}
-
-static inline void task_node_add_to_ready_list_back(struct Thread* task)
-{
-    doubleListAddOnBack(&task->node, &xizi_task_manager.task_list_head[task->priority]);
-    ready_task_priority |= ((uint32_t)1 << task->priority);
-}
 
 static void _task_manager_init()
 {
@@ -93,8 +74,16 @@ static void _task_manager_init()
     doubleListNodeInit(&global_task_pool.thd_listing_head);
     rbtree_init(&global_task_pool.thd_ref_map);
 
+    // scheduler
+    assert(CreateResourceTag(&g_scheduler.tag, &xizi_task_manager.tag, //
+        "GlobalScheduler", TRACER_SYSOBJECT, (void*)&g_scheduler));
+    semaphore_pool_init(&g_scheduler.semaphore_pool);
+    for (int pool_id = 0; pool_id < NR_STATE; pool_id++) {
+        rbtree_init(&g_scheduler.snode_state_pool[pool_id]);
+    }
+
     // tid pool
-    xizi_task_manager.next_pid = 0;
+    xizi_task_manager.next_pid = 1;
 
     // init priority bit map
     ready_task_priority = 0;
@@ -125,8 +114,8 @@ int _task_return_sys_resources(struct Thread* ptask)
             // @todo fix memory leak
         } else {
             assert(!queue_is_empty(&server_to_info->sessions_to_be_handle));
-            if (server_to_info->state == BLOCKED) {
-                xizi_task_manager.task_unblock(session_backend->server);
+            if (server_to_info->snode.state == BLOCKED) {
+                task_into_ready(server_to_info);
             }
         }
     }
@@ -184,7 +173,7 @@ static void _free_thread(struct Thread* task)
     }
 
     // remove thread from used task list
-    task_node_leave_list(task);
+    task_dead(task);
 
     /* free memspace if needed to */
     if (task->memspace != NULL) {
@@ -196,8 +185,8 @@ static void _free_thread(struct Thread* task)
         // awake deamon in this memspace
         if (task->memspace->thread_to_notify != NULL) {
             if (task->memspace->thread_to_notify != task) {
-                if (task->memspace->thread_to_notify->state == BLOCKED) {
-                    xizi_task_manager.task_unblock(task->memspace->thread_to_notify);
+                if (task->memspace->thread_to_notify->snode.state == BLOCKED) {
+                    task_into_ready(task->memspace->thread_to_notify);
                 } else {
                     task->memspace->thread_to_notify->advance_unblock = true;
                 }
@@ -231,9 +220,18 @@ static struct Thread* _new_thread(struct MemSpace* pmemspace)
         return NULL;
     }
 
+    // [schedule related]
+    task->tid = xizi_task_manager.next_pid++;
+    if (!init_schedule_node(&task->snode, task)) {
+        ERROR("Not enough memory\n");
+        slab_free(&xizi_task_manager.task_allocator, (void*)task);
+        return NULL;
+    }
+
     // alloc stack page for task
     if ((void*)(task->thread_context.kern_stack_addr = (uintptr_t)kalloc_by_ownership(pmemspace->kernspace_mem_usage.tag, USER_STACK_SIZE)) == NULL) {
         /* here inside, will no free memspace */
+        assert(RBTTREE_DELETE_SUCC == rbt_delete(&g_scheduler.snode_state_pool[INIT], task->snode.snode_id));
         slab_free(&xizi_task_manager.task_allocator, (void*)task);
         return NULL;
     }
@@ -241,7 +239,6 @@ static struct Thread* _new_thread(struct MemSpace* pmemspace)
     ERROR_FREE
     {
         /* init basic task ref member */
-        task->tid = xizi_task_manager.next_pid++;
         task->bind_irq = false;
 
         /* vm & memory member */
@@ -279,7 +276,6 @@ static struct Thread* _new_thread(struct MemSpace* pmemspace)
     }
 
     // [name]
-    // [schedule related]
 
     return task;
 }
@@ -289,22 +285,12 @@ struct TaskLifecycleOperations task_lifecycle_ops = {
     .free_pcb = _free_thread,
 };
 
-static void _task_set_default_schedule_attr(struct Thread* task)
-{
-    task->remain_tick = TASK_CLOCK_TICK;
-    task->maxium_tick = TASK_CLOCK_TICK * 10;
-    task->dead = false;
-    task->state = READY;
-    task->priority = TASK_DEFAULT_PRIORITY;
-    task_node_add_to_ready_list_head(task);
-}
-
 static void task_state_set_running(struct Thread* task)
 {
-    assert(task != NULL && task->state == READY);
-    task->state = RUNNING;
-    task_node_leave_list(task);
-    doubleListAddOnHead(&task->node, &xizi_task_manager.task_running_list_head);
+    assert(task != NULL && task->snode.state == READY);
+    assert(task_trans_sched_state(&task->snode, //
+        &g_scheduler.snode_state_pool[READY], //
+        &g_scheduler.snode_state_pool[RUNNING], RUNNING));
 }
 
 struct Thread* next_task_emergency = NULL;
@@ -319,7 +305,7 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         next_task = NULL;
         /* find next runnable task */
         assert(cur_cpu()->task == NULL);
-        if (next_task_emergency != NULL && next_task_emergency->state == READY) {
+        if (next_task_emergency != NULL && next_task_emergency->snode.state == READY) {
             next_task = next_task_emergency;
         } else {
             next_task = xizi_task_manager.next_runnable_task();
@@ -340,76 +326,21 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         assert(next_task->memspace->pgdir.pd_addr != NULL);
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->memspace->pgdir.pd_addr));
         context_switch(&cpu->scheduler, next_task->thread_context.context);
-        assert(next_task->state != RUNNING);
+        assert(next_task->snode.state != RUNNING);
     }
-}
-
-static void _task_yield_noschedule(struct Thread* task, bool blocking)
-{
-    assert(task != NULL);
-    /// @warning only support current task yield now
-    assert(task == cur_cpu()->task && task->state == RUNNING);
-
-    // rearrage current task position
-    task_node_leave_list(task);
-    if (task->state == RUNNING) {
-        task->state = READY;
-    }
-    task->remain_tick = TASK_CLOCK_TICK;
-    cur_cpu()->task = NULL;
-    task_node_add_to_ready_list_back(task);
-}
-
-static void _task_block(struct double_list_node* head, struct Thread* task)
-{
-    assert(head != NULL);
-    assert(task != NULL);
-    assert(task->state != RUNNING);
-    task_node_leave_list(task);
-    task->state = BLOCKED;
-    doubleListAddOnHead(&task->node, head);
-}
-
-static void _task_unblock(struct Thread* task)
-{
-    assert(task != NULL);
-    assert(task->state == BLOCKED || task->state == SLEEPING);
-    task_node_leave_list(task);
-    task->state = READY;
-    task_node_add_to_ready_list_back(task);
 }
 
 /// @brief  @warning not tested function
 /// @param priority
 static void _set_cur_task_priority(int priority)
 {
-    if (priority < 0 || priority >= TASK_MAX_PRIORITY) {
-        ERROR("priority is invalid\n");
-        return;
-    }
-
-    struct Thread* current_task = cur_cpu()->task;
-    assert(current_task != NULL && current_task->state == RUNNING);
-
-    task_node_leave_list(current_task);
-
-    current_task->priority = priority;
-
-    task_node_add_to_ready_list_back(current_task);
-
     return;
 }
 
 struct XiziTaskManager xizi_task_manager = {
     .init = _task_manager_init,
-    .task_set_default_schedule_attr = _task_set_default_schedule_attr,
-
     .next_runnable_task = max_priority_runnable_task,
     .task_scheduler = _scheduler,
-
-    .task_block = _task_block,
-    .task_unblock = _task_unblock,
-    .task_yield_noschedule = _task_yield_noschedule,
     .set_cur_task_priority = _set_cur_task_priority
 };
 
