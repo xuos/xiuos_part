@@ -12,6 +12,11 @@
 #include "usyscall.h"
 #include "libmem.h"
 
+uintptr_t sys_test()
+{
+    return syscall(SYSCALL_TEST, 0, 0, 0, 0);
+}
+
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv)
 {
     /* read elf image */

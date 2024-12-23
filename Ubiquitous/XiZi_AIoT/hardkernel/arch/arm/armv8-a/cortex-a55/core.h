@@ -33,7 +33,7 @@ Modification:
 #define NO_INT 0x80 // disable IRQ.
 #define DIS_INT 0xc0 // disable both IRQ and FIQ.
 
-#define MODE_STACK_SIZE 0x1000
+#define MODE_STACK_SIZE 0x2000
 
 //! @name SPSR fields
 //@{
@@ -73,7 +73,14 @@ Modification:
 
 #include "cortex_a55.h"
 
-#define NR_CPU 4 // maximum number of CPUs
+#define NR_CPU 1 // maximum number of CPUs
+
+static inline uintptr_t arch_curr_tick()
+{
+    uint64_t x;
+    __asm__ volatile("mrs %0, cntpct_el0" : "=r"(x));
+    return x;
+}
 
 __attribute__((always_inline)) static inline uint64_t EL0_mode() // Set ARM mode to EL0
 {

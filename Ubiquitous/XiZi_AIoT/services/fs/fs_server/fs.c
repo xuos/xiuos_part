@@ -63,7 +63,7 @@ static struct FileDescriptor fd_table[MAX_SUPPORT_FD];
 struct MemFsRange MemFsRange;
 
 /// @brief Using syscall to get fs.img real location in the memory
-void MemFsInit(uintptr_t _binary_fs_img_start, uint32_t fs_img_len)
+void MemFsInit(uintptr_t _binary_fs_img_start, uintptr_t fs_img_len)
 {
     MemFsRange.memfs_start = _binary_fs_img_start;
     MemFsRange.memfs_nr_blocks = fs_img_len / BLOCK_SIZE;
@@ -251,12 +251,12 @@ struct Inode* InodeParentSeek(struct Inode* source, char* path, char* name)
 /// @brief Alloc a new Inode using type
 static struct Inode* InodeAlloc(int type)
 {
-    int inum;
+    int inum = 0;
     struct Inode* inode;
     struct SuperBlock sb;
 
     ReadSuperBlock(&sb);
-    for (inum = 1; inum < sb.ninodes; inum++) {
+    for (inum = 1; inum < (int)sb.ninodes; inum++) {
         uint8_t* block = BlockRead(BLOCK_INDEX(inum));
         inode = (struct Inode*)block + INODE_INDEX(inum);
         if (inode->type == 0) {

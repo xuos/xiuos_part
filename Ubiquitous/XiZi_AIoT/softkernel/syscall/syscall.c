@@ -39,7 +39,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
 
     switch (sys_num) {
     case SYSCALL_TEST:
-        ret = 0;
+        ret = arch_curr_tick();
         break;
     case SYSCALL_SPAWN:
         ret = sys_spawn((char*)param1, (char*)param2, (char**)param3);

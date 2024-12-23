@@ -1,4 +1,4 @@
 
-SRC_DIR := hal
+SRC_DIR :=
 
 include $(KERNEL_ROOT)/compiler.mk

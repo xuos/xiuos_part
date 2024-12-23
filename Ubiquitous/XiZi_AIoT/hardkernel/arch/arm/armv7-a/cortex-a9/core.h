@@ -76,6 +76,13 @@ Modification:
 
 #define NR_CPU 4
 
+static inline uint64_t arch_current_tick()
+{
+    uint32_t tick = 0;
+    __asm__ __volatile__("MRC p15, 0, %0, c9, c13, 0" : "=r"(tick)); // %0 应该是输出操作数
+    return (uint64_t)tick;
+}
+
 __attribute__((always_inline, optimize("O0"))) static inline uint32_t user_mode()
 {
     uint32_t val;

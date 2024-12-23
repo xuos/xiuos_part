@@ -31,3 +31,24 @@ int syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4)
 
     return ret;
 }
+
+uintptr_t syscall_ori(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4)
+{
+    uintptr_t ret = -1;
+
+    __asm__ volatile(
+        "mov x0, %1;\
+        mov x1, %2;\
+        mov x2, %3;\
+        mov x3, %4;\
+        mov x4, %5;\
+        svc #0;\
+        dsb ish;\
+        isb;\
+        mov %0, x0"
+        : "=r"(ret)
+        : "r"(sys_num), "r"(a1), "r"(a2), "r"(a3), "r"(a4)
+        : "memory", "r0", "r1", "r2", "r3", "r4");
+
+    return ret;
+}
