@@ -41,21 +41,13 @@ Modification:
 #include "share_page.h"
 #include "spinlock.h"
 
+#include "scheduler.h"
+
 #define TASK_CLOCK_TICK 50
 #define TASK_MAX_PRIORITY 32
 #define TASK_DEFAULT_PRIORITY 2
 #define TASK_NAME_MAX_LEN 16
 #define SLEEP_MONITOR_CORE 0
-
-enum ProcState {
-    INIT = 0,
-    READY,
-    RUNNING,
-    DEAD,
-    BLOCKED,
-    SLEEPING,
-    NEVER_RUN,
-};
 
 /* Thread Control Block */
 struct ThreadContext {
@@ -73,10 +65,6 @@ struct ThreadContext {
     struct context* context;
     /* user context of thread */
     struct trapframe* trapframe;
-};
-
-struct TaskSleepContext {
-    int64_t remain_ms;
 };
 
 /* Process Control Block */
@@ -107,12 +95,13 @@ struct Thread {
     bool advance_unblock; // @todo abandon
 
     /* task schedule attributes */
-    struct double_list_node node;
-    struct TaskSleepContext sleep_context;
-    enum ProcState state;
-    int priority; // priority
-    int remain_tick;
-    int maxium_tick;
+    // struct double_list_node node;
+    // struct TaskSleepContext sleep_context;
+    // enum ThreadState state;
+    // int priority; // priority
+    // int remain_tick;
+    // int maxium_tick;
+    struct ScheduleNode snode;
 };
 
 struct SchedulerRightGroup {
@@ -157,9 +146,6 @@ struct XiziTaskManager {
 
     /* init task manager */
     void (*init)();
-    /* init a task control block, set name, remain_tick, state, cwd, priority, etc. */
-    void (*task_set_default_schedule_attr)(struct Thread*);
-
     /* use by task_scheduler, find next READY task, should be in locked */
     struct Thread* (*next_runnable_task)(void);
     /* function that's runing by kernel thread context, schedule use tasks */
@@ -168,9 +154,6 @@ struct XiziTaskManager {
     /* handle task state */
     /* call to yield current use task */
     void (*task_yield_noschedule)(struct Thread* task, bool is_blocking);
-    /* block and unblock task */
-    void (*task_block)(struct double_list_node* head, struct Thread* task);
-    void (*task_unblock)(struct Thread* task);
     /* set task priority */
     void (*set_cur_task_priority)(int priority);
 };

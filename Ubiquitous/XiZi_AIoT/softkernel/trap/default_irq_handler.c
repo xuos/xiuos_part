@@ -84,7 +84,7 @@ void intr_irq_dispatch(struct trapframe* tf)
     // finish irq.
     p_intr_driver->hw_after_irq(int_info);
 
-    if (cur_cpu()->task == NULL || current_task->state != RUNNING) {
+    if (cur_cpu()->task == NULL || current_task->snode.state != RUNNING) {
         cur_cpu()->task = NULL;
         context_switch(&current_task->thread_context.context, cur_cpu()->scheduler);
     }

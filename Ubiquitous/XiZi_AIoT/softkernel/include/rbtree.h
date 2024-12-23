@@ -5,6 +5,13 @@
 
 #include "actracer.h"
 
+#define RBTTREE_INSERT_SECC 0
+#define RBTTREE_INSERT_FAILED -1
+#define RBTTREE_INSERT_EXISTED -2
+
+#define RBTTREE_DELETE_SUCC 0
+#define RBTTREE_DELETE_FAILED -1
+
 // CLRS
 // Insertion and Deletion in a Red Black Tree
 enum rbt_type {
@@ -26,10 +33,13 @@ typedef struct RbtTree {
     int nr_ele;
 } RbtTree;
 
+typedef void(rbt_traverse_fn)(RbtNode* node);
+
 void rbtree_init(RbtTree* tree);
 int rbt_insert(RbtTree* tree, uintptr_t key, void* data);
 RbtNode* rbt_search(RbtTree* tree, uintptr_t key);
 int rbt_delete(RbtTree* tree, uintptr_t key);
+void rbt_traverse(RbtTree* tree, rbt_traverse_fn fn);
 
 void module_rbt_factory_init(TraceTag* _softkernel_tag);
 

@@ -58,7 +58,7 @@ sem_id_t ksemaphore_alloc(struct XiziSemaphorePool* sem_pool, sem_val_t val)
     }
     sem->val = val;
     doubleListNodeInit(&sem->sem_list_node);
-    doubleListNodeInit(&sem->wait_list_guard);
+    rbtree_init(&sem->wait_thd_tree);
 
     if (0 != rbt_insert(&sem_pool->sem_pool_map, sem->id, sem)) {
         slab_free(&sem_pool->allocator, sem);
@@ -88,7 +88,7 @@ bool ksemaphore_consume(struct XiziSemaphorePool* sem_pool, sem_id_t sem_id, sem
 bool ksemaphore_wait(struct XiziSemaphorePool* sem_pool, struct Thread* thd, sem_id_t sem_id)
 {
     assert(thd != NULL);
-    assert(thd->state == RUNNING);
+    assert(thd->snode.state == RUNNING);
     /* find sem */
     struct ksemaphore* sem = ksemaphore_get_by_id(sem_pool, sem_id);
     // invalid sem id
@@ -105,8 +105,9 @@ bool ksemaphore_wait(struct XiziSemaphorePool* sem_pool, struct Thread* thd, sem
 
     // waiting at the sem
     sem->val--;
-    xizi_task_manager.task_yield_noschedule(thd, false);
-    xizi_task_manager.task_block(&sem->wait_list_guard, thd);
+    task_yield(thd);
+    task_block(thd);
+    assert(RBTTREE_INSERT_SECC == rbt_insert(&sem->wait_thd_tree, thd->tid, thd));
     return true;
 }
 
@@ -120,12 +121,11 @@ bool ksemaphore_signal(struct XiziSemaphorePool* sem_pool, sem_id_t sem_id)
     }
 
     if (sem->val < 0) {
-        if (!IS_DOUBLE_LIST_EMPTY(&sem->wait_list_guard)) {
-            struct Thread* thd = CONTAINER_OF(sem->wait_list_guard.next, struct Thread, node);
-            assert(thd != NULL && thd->state == BLOCKED);
-            xizi_task_manager.task_unblock(thd);
-            // DEBUG("waking %s\n", thd->name);
-        }
+        assert(!rbt_is_empty(&sem->wait_thd_tree));
+        RbtNode* root = sem->wait_thd_tree.root;
+        struct Thread* thd = (struct Thread*)root->data;
+        rbt_delete(&sem->wait_thd_tree, root->key);
+        task_into_ready(thd);
     }
 
     sem->val++;
@@ -155,11 +155,7 @@ bool ksemaphore_free(struct XiziSemaphorePool* sem_pool, sem_id_t sem_id)
     }
 
     struct Thread* thd = NULL;
-    DOUBLE_LIST_FOR_EACH_ENTRY(thd, &sem->wait_list_guard, node)
-    {
-        assert(thd != NULL);
-        xizi_task_manager.task_unblock(thd);
-    }
+    // by design: no waking any waiting threads
 
     rbt_delete(&sem_pool->sem_pool_map, sem_id);
     doubleListDel(&sem->sem_list_node);

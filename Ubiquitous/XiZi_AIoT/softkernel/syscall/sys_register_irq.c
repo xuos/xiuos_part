@@ -76,8 +76,8 @@ static void send_irq_to_user(int irq_num)
         buf->header.magic = IPC_MSG_MAGIC;
         buf->header.valid = 1;
 
-        if (irq_forward_table[irq_num].handle_task->state == BLOCKED) {
-            xizi_task_manager.task_unblock(irq_forward_table[irq_num].handle_task);
+        if (irq_forward_table[irq_num].handle_task->snode.state == BLOCKED) {
+            task_into_ready(irq_forward_table[irq_num].handle_task);
         }
 
         /* add session head */
@@ -92,7 +92,7 @@ int user_irq_handler(int irq, void* tf, void* arg)
 
         next_task_emergency = irq_forward_table[irq].handle_task;
         if (cur_cpu()->task != NULL) {
-            xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
+            task_yield(cur_cpu()->task);
         }
     }
     return 0;
@@ -126,7 +126,7 @@ int sys_register_irq(int irq_num, int irq_opcode)
 
         struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
         kernel_irq_proxy = tlo->new_thread(pmemspace);
-        kernel_irq_proxy->state = NEVER_RUN;
+        kernel_irq_proxy->snode.state = NEVER_RUN;
     }
 
     // bind irq to session

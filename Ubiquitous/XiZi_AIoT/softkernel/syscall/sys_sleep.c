@@ -36,10 +36,11 @@ Modification:
 int sys_sleep(intptr_t ms)
 {
     struct Thread* cur_task = cur_cpu()->task;
-    xizi_task_manager.task_yield_noschedule(cur_task, false);
-    xizi_task_manager.task_block(&xizi_task_manager.task_sleep_list_head, cur_task);
-    cur_task->state = SLEEPING;
-    cur_task->sleep_context.remain_ms = ms;
+    task_yield(cur_task);
+    cur_task->snode.sleep_context.remain_ms = ms;
+    task_trans_sched_state(&cur_task->snode, //
+        &g_scheduler.snode_state_pool[READY], //
+        &g_scheduler.snode_state_pool[SLEEPING], SLEEPING);
 
     return 0;
 }

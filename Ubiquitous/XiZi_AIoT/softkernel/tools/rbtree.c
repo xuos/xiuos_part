@@ -326,20 +326,20 @@ RbtNode* __rbtree_insert(RbtNode* node, RbtTree* tree)
 int rbt_insert(RbtTree* tree, uintptr_t key, void* data)
 {
     if (rbt_search(tree, key) != NULL) {
-        return -2;
+        return RBTTREE_INSERT_EXISTED;
     }
 
     RbtNode* node = rbtree_createnode(key, data);
     RbtNode* samenode = NULL;
     if (node == NULL)
-        return -1;
+        return RBTTREE_INSERT_FAILED;
     else
         samenode = __rbtree_insert(node, tree);
 
     assert(samenode == NULL);
 
     tree->nr_ele++;
-    return 0;
+    return RBTTREE_INSERT_SECC;
 }
 
 void replace_node(RbtTree* t, RbtNode* oldn, RbtNode* newn)
@@ -455,7 +455,7 @@ int rbt_delete(RbtTree* tree, uintptr_t key)
 {
     RbtNode* node = do_lookup(key, tree, NULL);
     if (node == NULL)
-        return -1;
+        return RBTTREE_DELETE_FAILED;
     else
         __rbtree_remove(node, tree);
 
@@ -463,5 +463,20 @@ int rbt_delete(RbtTree* tree, uintptr_t key)
     if (rbt_is_empty(tree)) {
         assert(tree->root == NULL);
     }
-    return 0;
+    return RBTTREE_DELETE_SUCC;
+}
+
+void rbt_traverse_inner(RbtNode* node, rbt_traverse_fn fn)
+{
+    if (node == NULL) {
+        return;
+    }
+    fn(node);
+    rbt_traverse_inner(node->left, fn);
+    rbt_traverse_inner(node->right, fn);
+}
+
+void rbt_traverse(RbtTree* tree, rbt_traverse_fn fn)
+{
+    rbt_traverse_inner(tree->root, fn);
 }
