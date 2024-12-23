@@ -17,6 +17,7 @@
  * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
  * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
  **********************************************************************************************************************/
+#define USE_AMP
 
 #include "hal_data.h"
 #include <board.h>
@@ -24,6 +25,8 @@
 #include <xizi.h>
 #include <arch_interrupt.h>
 #include <rpmsg_task.h>
+#include <channel.h>
+#include <shm.h>
 
 // FSP_CPP_HEADER
 void R_BSP_WarmStart(bsp_warm_start_event_t event);
@@ -69,7 +72,19 @@ void hal_entry(void)
 {
     /* system irq table must be inited before initialization of Hardware irq  */
 	SysInitIsrManager();
-    
+
+    /* init sharememory */
+    memset(XIUOS_SHM_TOTAL_ADDR_INFO->start,0,XIUOS_SHM_TOTAL_ADDR_INFO->len);
+    memset(XIUOS_2_LINUX_MSG_QUEUE_ADDR_INFO->start,0,XIUOS_2_LINUX_MSG_QUEUE_ADDR_INFO->len);
+    memset(XIUOS_2_XIUOS_MSG_QUEUE_ADDR_INFO->start,0,XIUOS_2_XIUOS_MSG_QUEUE_ADDR_INFO->len);
+
+    /* 初始化通道信息 */
+    channel_ops.channels_init();
+#if PROTOCOL_CHOICE == PROTOCOL_AMP
+    /* 初始化共享内存 */
+    shm_ops.shm_init();
+#endif /* PROTOCOL_CHOICE == PROTOCOL_PRIVATE */
+
     InitBoardMemory((void *)HEAP_START, (void *)HEAP_END);
     KPrintf("hal_entry: InitBoardMemory -- HEAP_START = %p, HEAP_END = %p, Size = %dKB !\n"
         ,(void *)HEAP_START,(void *)HEAP_END,(((void *)HEAP_END) - ((void *)HEAP_START)) / 1024);

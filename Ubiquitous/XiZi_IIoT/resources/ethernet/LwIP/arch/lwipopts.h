@@ -506,7 +506,9 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 #define IP_REASSEMBLY 1
 #define IP_FRAG 1
 #define IP_REASS_MAX_PBUFS 10
+#ifndef MEMP_NUM_REASSDATA
 #define MEMP_NUM_REASSDATA 10
+#endif
 #else
 #define IP_REASSEMBLY 0
 #define IP_FRAG 0

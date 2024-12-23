@@ -977,7 +977,7 @@ int AdapterLoraTest(void)
     char task_name_2[] = "adapter_lora_gateway";
     args.pthread_name = task_name_2;
     args.arg = (void *)adapter;
-    PrivTaskCreate(&lora_recv_data_task, &lora_gateway_attr, &LoraReceiveTask, (void *)&args);
+    PrivTaskCreate(&lora_gateway_task, &lora_gateway_attr, &LoraGatewayTask, (void *)&args);
 #endif
 
     PrivTaskStartup(&lora_gateway_task);
