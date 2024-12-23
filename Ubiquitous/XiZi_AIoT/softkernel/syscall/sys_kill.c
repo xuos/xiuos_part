@@ -32,6 +32,7 @@ Modification:
 
 static bool kill_succ;
 
+extern int sys_exit(struct Thread* ptask);
 static bool kill_task(RbtNode* node, void* id)
 {
     struct ScheduleNode* snode = (struct ScheduleNode*)node->data;

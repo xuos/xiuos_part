@@ -31,6 +31,7 @@ Modification:
 #include "schedule_algo.h"
 
 static struct Thread* next_runable_task;
+static uint64_t min_run_time;
 
 bool find_runable_task(RbtNode* node, void* data)
 {
@@ -38,8 +39,12 @@ bool find_runable_task(RbtNode* node, void* data)
     struct Thread* thd = snode->pthd;
 
     if (!thd->dead) {
-        next_runable_task = thd;
-        return false;
+        if (thd->snode.sched_context.run_time <= min_run_time) {
+            next_runable_task = thd;
+            min_run_time = thd->snode.sched_context.run_time;
+            thd->snode.sched_context.run_time++;
+        }
+        return true;
     } else {
         struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
         tlo->free_pcb(thd);
@@ -53,6 +58,7 @@ struct Thread* max_priority_runnable_task(void)
 {
     /// @todo better strategy
     next_runable_task = NULL;
+    min_run_time = UINT64_MAX;
     rbt_traverse(&g_scheduler.snode_state_pool[READY], find_runable_task, NULL);
     return next_runable_task;
 }
@@ -65,7 +71,10 @@ bool init_schedule_node(struct ScheduleNode* snode, struct Thread* bind_thd)
 {
     snode->pthd = bind_thd;
     snode->snode_id = bind_thd->tid;
+
     snode->sched_context.remain_tick = 0;
+    snode->sched_context.run_time = 0;
+
     snode->sleep_context.remain_ms = 0;
     snode->state = INIT;
     if (RBTTREE_INSERT_SECC != rbt_insert(&g_scheduler.snode_state_pool[INIT], //
@@ -150,6 +159,7 @@ void task_yield(struct Thread* thd)
     bool trans_res = task_trans_sched_state(snode, //
         &g_scheduler.snode_state_pool[thd_cur_state], //
         &g_scheduler.snode_state_pool[READY], READY);
+    snode->sched_context.remain_tick = TASK_CLOCK_TICK;
     assert(trans_res = true);
     return;
 }

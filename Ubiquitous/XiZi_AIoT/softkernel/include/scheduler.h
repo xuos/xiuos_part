@@ -21,6 +21,7 @@ enum ThreadState {
 
 typedef struct ScheduleContext {
     intptr_t remain_tick;
+    uint64_t run_time;
 } ScheduleContext;
 
 typedef struct TaskSleepContext {

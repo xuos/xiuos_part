@@ -288,9 +288,9 @@ struct TaskLifecycleOperations task_lifecycle_ops = {
 static void task_state_set_running(struct Thread* task)
 {
     assert(task != NULL && task->snode.state == READY);
-    task_trans_sched_state(&task->snode, //
+    assert(task_trans_sched_state(&task->snode, //
         &g_scheduler.snode_state_pool[READY], //
-        &g_scheduler.snode_state_pool[RUNNING], RUNNING);
+        &g_scheduler.snode_state_pool[RUNNING], RUNNING));
 }
 
 struct Thread* next_task_emergency = NULL;

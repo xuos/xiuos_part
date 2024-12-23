@@ -75,6 +75,7 @@ static void send_irq_to_user(int irq_num)
         buf->header.done = 0;
         buf->header.magic = IPC_MSG_MAGIC;
         buf->header.valid = 1;
+        enqueue(&irq_forward_table[irq_num].handle_task->sessions_to_be_handle, 0, (void*)&irq_forward_table[irq_num].p_kernel_session->server_side);
 
         if (irq_forward_table[irq_num].handle_task->snode.state == BLOCKED) {
             task_into_ready(irq_forward_table[irq_num].handle_task);
