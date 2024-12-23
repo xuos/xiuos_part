@@ -30,33 +30,31 @@ Modification:
 #include "log.h"
 #include "schedule_algo.h"
 
+static struct Thread* next_runable_task;
+
+bool find_runable_task(RbtNode* node, void* data)
+{
+    struct ScheduleNode* snode = (struct ScheduleNode*)node->data;
+    struct Thread* thd = snode->pthd;
+
+    if (!thd->dead) {
+        next_runable_task = thd;
+        return false;
+    } else {
+        struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
+        tlo->free_pcb(thd);
+        return false;
+    }
+
+    return true;
+}
+
 struct Thread* max_priority_runnable_task(void)
 {
-    static struct Thread* task = NULL;
-    // static int priority = 0;
-
-    // priority = __builtin_ffs(ready_task_priority) - 1;
-    // if (priority > 31 || priority < 0) {
-    //     return NULL;
-    // }
-
-    // DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[priority], node)
-    // {
-    //     assert(task != NULL);
-    //     if (task->state == READY && !task->dead) {
-    //         // found a runnable task, stop this look up
-    //         return task;
-    //     } else if (task->dead && task->state != RUNNING) {
-
-    //         struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
-    //         tlo->free_pcb(task);
-    //         return NULL;
-    //     }
-    // }
-    if (!rbt_is_empty(&g_scheduler.snode_state_pool[READY])) {
-        return ((struct ScheduleNode*)(g_scheduler.snode_state_pool[READY].root->data))->pthd;
-    }
-    return NULL;
+    /// @todo better strategy
+    next_runable_task = NULL;
+    rbt_traverse(&g_scheduler.snode_state_pool[READY], find_runable_task, NULL);
+    return next_runable_task;
 }
 
 #include "multicores.h"
@@ -79,6 +77,8 @@ bool init_schedule_node(struct ScheduleNode* snode, struct Thread* bind_thd)
 
 bool task_trans_sched_state(struct ScheduleNode* snode, RbtTree* from_pool, RbtTree* to_pool, enum ThreadState target_state)
 {
+    assert(snode != NULL);
+    // DEBUG("%d %p %d %s\n", snode->snode_id, snode->pthd, snode->pthd->tid, snode->pthd->name);
     assert(snode->snode_id != UNINIT_SNODE_ID && snode->pthd != NULL);
     if (RBTTREE_DELETE_SUCC != rbt_delete(from_pool, snode->snode_id)) {
         DEBUG("Thread %d not in from schedule pool\n", snode->pthd->tid);
@@ -98,7 +98,6 @@ void task_dead(struct Thread* thd)
 {
     assert(thd != NULL);
     struct ScheduleNode* snode = &thd->snode;
-    enum ThreadState thd_cur_state = snode->state;
 
     assert(snode->state == READY);
 
@@ -106,6 +105,7 @@ void task_dead(struct Thread* thd)
         &g_scheduler.snode_state_pool[READY], //
         &g_scheduler.snode_state_pool[DEAD], DEAD);
     assert(trans_res = true);
+    assert(RBTTREE_DELETE_SUCC == rbt_delete(&g_scheduler.snode_state_pool[DEAD], snode->snode_id));
     return;
 }
 

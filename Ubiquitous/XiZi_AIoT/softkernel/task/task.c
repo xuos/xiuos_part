@@ -83,7 +83,7 @@ static void _task_manager_init()
     }
 
     // tid pool
-    xizi_task_manager.next_pid = 0;
+    xizi_task_manager.next_pid = 1;
 
     // init priority bit map
     ready_task_priority = 0;
@@ -221,6 +221,7 @@ static struct Thread* _new_thread(struct MemSpace* pmemspace)
     }
 
     // [schedule related]
+    task->tid = xizi_task_manager.next_pid++;
     if (!init_schedule_node(&task->snode, task)) {
         ERROR("Not enough memory\n");
         slab_free(&xizi_task_manager.task_allocator, (void*)task);
@@ -238,7 +239,6 @@ static struct Thread* _new_thread(struct MemSpace* pmemspace)
     ERROR_FREE
     {
         /* init basic task ref member */
-        task->tid = xizi_task_manager.next_pid++;
         task->bind_irq = false;
 
         /* vm & memory member */

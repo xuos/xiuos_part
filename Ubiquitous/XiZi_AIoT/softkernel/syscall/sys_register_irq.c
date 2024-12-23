@@ -126,7 +126,9 @@ int sys_register_irq(int irq_num, int irq_opcode)
 
         struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
         kernel_irq_proxy = tlo->new_thread(pmemspace);
-        kernel_irq_proxy->snode.state = NEVER_RUN;
+        task_trans_sched_state(&kernel_irq_proxy->snode, //
+            &g_scheduler.snode_state_pool[INIT], //
+            &g_scheduler.snode_state_pool[NEVER_RUN], NEVER_RUN);
     }
 
     // bind irq to session

@@ -49,6 +49,8 @@ Modification:
 #define TASK_NAME_MAX_LEN 16
 #define SLEEP_MONITOR_CORE 0
 
+typedef int tid_t;
+
 /* Thread Control Block */
 struct ThreadContext {
     struct Thread* task; // process of current thread
@@ -95,12 +97,6 @@ struct Thread {
     bool advance_unblock; // @todo abandon
 
     /* task schedule attributes */
-    // struct double_list_node node;
-    // struct TaskSleepContext sleep_context;
-    // enum ThreadState state;
-    // int priority; // priority
-    // int remain_tick;
-    // int maxium_tick;
     struct ScheduleNode snode;
 };
 

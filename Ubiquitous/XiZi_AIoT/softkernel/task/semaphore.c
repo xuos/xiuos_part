@@ -154,7 +154,6 @@ bool ksemaphore_free(struct XiziSemaphorePool* sem_pool, sem_id_t sem_id)
         return false;
     }
 
-    struct Thread* thd = NULL;
     // by design: no waking any waiting threads
 
     rbt_delete(&sem_pool->sem_pool_map, sem_id);

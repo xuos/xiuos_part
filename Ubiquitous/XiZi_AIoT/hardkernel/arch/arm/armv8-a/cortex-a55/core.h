@@ -73,7 +73,7 @@ Modification:
 
 #include "cortex_a55.h"
 
-#define NR_CPU 1 // maximum number of CPUs
+#define NR_CPU 4 // maximum number of CPUs
 
 static inline uintptr_t arch_curr_tick()
 {

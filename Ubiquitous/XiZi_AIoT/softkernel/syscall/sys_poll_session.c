@@ -114,7 +114,7 @@ int sys_poll_session(struct Session* userland_session_arr, int arr_capacity)
     if (queue_is_empty(&cur_task->sessions_in_handle) && queue_is_empty(&cur_task->sessions_to_be_handle)) {
         task_yield(cur_task);
         // @todo support blocking(now bug at 4 cores running)
-        // xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
+        task_block(cur_task);
     }
     return 0;
 }

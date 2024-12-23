@@ -33,13 +33,14 @@ typedef struct RbtTree {
     int nr_ele;
 } RbtTree;
 
-typedef void(rbt_traverse_fn)(RbtNode* node);
+// return if the traverse needs to continue
+typedef bool(rbt_traverse_fn)(RbtNode* node, void* data);
 
 void rbtree_init(RbtTree* tree);
 int rbt_insert(RbtTree* tree, uintptr_t key, void* data);
 RbtNode* rbt_search(RbtTree* tree, uintptr_t key);
 int rbt_delete(RbtTree* tree, uintptr_t key);
-void rbt_traverse(RbtTree* tree, rbt_traverse_fn fn);
+void rbt_traverse(RbtTree* tree, rbt_traverse_fn fn, void* data);
 
 void module_rbt_factory_init(TraceTag* _softkernel_tag);
 

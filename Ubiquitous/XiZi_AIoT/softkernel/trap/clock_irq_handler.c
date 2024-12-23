@@ -62,9 +62,10 @@ void hw_current_second(uintptr_t* second)
     *second = p_clock_driver->get_second();
 }
 
-void count_down_sleeping_task(RbtNode* node)
+bool count_down_sleeping_task(RbtNode* node, void* data)
 {
     /// @todo implement
+    return false;
 }
 
 uint64_t global_tick = 0;
@@ -86,7 +87,7 @@ int xizi_clock_handler(int irq, void* tf, void* arg)
         }
 
         // todo: cpu 0 will handle sleeping thread
-        rbt_traverse(&g_scheduler.snode_state_pool[SLEEPING], count_down_sleeping_task);
+        rbt_traverse(&g_scheduler.snode_state_pool[SLEEPING], count_down_sleeping_task, NULL);
 
         // DOUBLE_LIST_FOR_EACH_ENTRY(thread, &xizi_task_manager.task_sleep_list_head, node)
         // {

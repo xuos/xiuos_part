@@ -466,17 +466,19 @@ int rbt_delete(RbtTree* tree, uintptr_t key)
     return RBTTREE_DELETE_SUCC;
 }
 
-void rbt_traverse_inner(RbtNode* node, rbt_traverse_fn fn)
+void rbt_traverse_inner(RbtNode* node, rbt_traverse_fn fn, void* data)
 {
     if (node == NULL) {
         return;
     }
-    fn(node);
-    rbt_traverse_inner(node->left, fn);
-    rbt_traverse_inner(node->right, fn);
+
+    if (fn(node, data)) {
+        rbt_traverse_inner(node->left, fn, data);
+        rbt_traverse_inner(node->right, fn, data);
+    }
 }
 
-void rbt_traverse(RbtTree* tree, rbt_traverse_fn fn)
+void rbt_traverse(RbtTree* tree, rbt_traverse_fn fn, void* data)
 {
-    rbt_traverse_inner(tree->root, fn);
+    rbt_traverse_inner(tree->root, fn, data);
 }

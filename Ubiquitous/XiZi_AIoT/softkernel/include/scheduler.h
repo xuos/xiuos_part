@@ -9,13 +9,13 @@
 typedef uintptr_t snode_id_t;
 
 enum ThreadState {
-    INIT = 0,
+    NEVER_RUN = 0,
+    INIT,
     READY,
     RUNNING,
     DEAD,
     BLOCKED,
     SLEEPING,
-    NEVER_RUN,
     NR_STATE,
 };
 
