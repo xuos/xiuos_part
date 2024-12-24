@@ -106,7 +106,8 @@ bool ksemaphore_wait(struct XiziSemaphorePool* sem_pool, struct Thread* thd, sem
     // waiting at the sem
     sem->val--;
     THREAD_TRANS_STATE(thd, BLOCKED);
-    assert(RBTTREE_INSERT_SECC == rbt_insert(&sem->wait_thd_tree, thd->tid, thd));
+    int rbt_insert_res = rbt_insert(&sem->wait_thd_tree, thd->tid, thd);
+    assert(RBTTREE_INSERT_SECC == rbt_insert_res || RBTTREE_INSERT_EXISTED == rbt_insert_res);
     return true;
 }
 
@@ -119,7 +120,7 @@ bool ksemaphore_signal(struct XiziSemaphorePool* sem_pool, sem_id_t sem_id)
         return false;
     }
 
-    if (sem->val < 0) {
+    if (sem->val < 0 && !rbt_is_empty(&sem->wait_thd_tree)) {
         assert(!rbt_is_empty(&sem->wait_thd_tree));
         RbtNode* root = sem->wait_thd_tree.root;
         struct Thread* thd = (struct Thread*)root->data;

@@ -122,10 +122,9 @@ void task_dead(struct Thread* thd)
     assert(thd != NULL);
     struct ScheduleNode* snode = &thd->snode;
 
-    assert(snode->state == READY);
-
+    assert(snode->state == INIT || snode->state == READY);
     bool trans_res = task_trans_sched_state(snode, //
-        &g_scheduler.snode_state_pool[READY], //
+        &g_scheduler.snode_state_pool[snode->state], //
         &g_scheduler.snode_state_pool[DEAD], DEAD);
     assert(trans_res = true);
     assert(RBTTREE_DELETE_SUCC == rbt_delete(&g_scheduler.snode_state_pool[DEAD], snode->snode_id));

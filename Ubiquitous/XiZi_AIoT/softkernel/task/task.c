@@ -185,7 +185,7 @@ static void _free_thread(struct Thread* task)
         if (task->memspace->thread_to_notify != NULL) {
             if (task->memspace->thread_to_notify != task) {
                 if (task->memspace->thread_to_notify->snode.state == BLOCKED) {
-                    THREAD_TRANS_STATE(task->memspace->thread_to_notify, READY);
+                    THREAD_TRANS_STATE(task->memspace->thread_to_notify, TRANS_WAKING);
                 } else {
                     task->memspace->thread_to_notify->advance_unblock = true;
                 }
@@ -323,7 +323,7 @@ static void central_trans_task_state()
                 if (snode->state == RUNNING || snode->state == READY) {
                     task_into_ready(thd);
                 } else {
-                    ERROR("Thread %s(%d) Error trans to READY\n", thd->name, thd->tid);
+                    ERROR("Thread %s(%d) Error trans to READY(from %d)\n", thd->name, thd->tid, snode->state);
                 }
                 break;
             }
