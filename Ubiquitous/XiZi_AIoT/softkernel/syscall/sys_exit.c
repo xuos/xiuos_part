@@ -46,6 +46,6 @@ int sys_exit(struct Thread* ptask)
         tlo->free_pcb(ptask);
     }
     // yield current task in case it wants to exit itself
-    task_yield(cur_cpu()->task);
+    THREAD_TRANS_STATE(cur_cpu()->task, READY);
     return 0;
 }

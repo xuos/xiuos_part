@@ -81,6 +81,7 @@ static void _task_manager_init()
     for (int pool_id = 0; pool_id < NR_STATE; pool_id++) {
         rbtree_init(&g_scheduler.snode_state_pool[pool_id]);
     }
+    rbtree_init(&g_scheduler.state_trans_ref_map);
 
     // tid pool
     xizi_task_manager.next_pid = 1;
@@ -114,9 +115,7 @@ int _task_return_sys_resources(struct Thread* ptask)
             // @todo fix memory leak
         } else {
             assert(!queue_is_empty(&server_to_info->sessions_to_be_handle));
-            if (server_to_info->snode.state == BLOCKED) {
-                task_into_ready(server_to_info);
-            }
+            THREAD_TRANS_STATE(server_to_info, BLOCKED);
         }
     }
 
@@ -186,7 +185,7 @@ static void _free_thread(struct Thread* task)
         if (task->memspace->thread_to_notify != NULL) {
             if (task->memspace->thread_to_notify != task) {
                 if (task->memspace->thread_to_notify->snode.state == BLOCKED) {
-                    task_into_ready(task->memspace->thread_to_notify);
+                    THREAD_TRANS_STATE(task->memspace->thread_to_notify, READY);
                 } else {
                     task->memspace->thread_to_notify->advance_unblock = true;
                 }
@@ -293,6 +292,79 @@ static void task_state_set_running(struct Thread* task)
         &g_scheduler.snode_state_pool[RUNNING], RUNNING));
 }
 
+bool rbt_in_queue(RbtNode* node, void* data)
+{
+    Queue* queue = (Queue*)data;
+    return enqueue(queue, node->key, node->data);
+}
+
+extern void show_tasks(void);
+static void central_trans_task_state()
+{
+    Queue tmp_queue;
+    queue_init(&tmp_queue);
+    rbt_traverse(&g_scheduler.state_trans_ref_map, rbt_in_queue, (void*)&tmp_queue);
+
+    while (!queue_is_empty(&tmp_queue)) {
+        struct Thread* thd = (struct Thread*)queue_front(&tmp_queue)->data;
+        struct ScheduleNode* snode = &thd->snode;
+        assert(cur_cpu()->task != NULL);
+        if (snode->state == RUNNING && cur_cpu()->task->tid != thd->tid) {
+            dequeue(&tmp_queue);
+            continue;
+        }
+
+        Queue* trans_queue = &snode->state_trans_signal_queue;
+        while (!queue_is_empty(trans_queue)) {
+            QueueNode* cur_qnode = queue_front(trans_queue);
+            enum ThreadState next_state = cur_qnode->key;
+            switch (next_state) {
+            case READY: {
+                if (snode->state == RUNNING || snode->state == READY) {
+                    task_into_ready(thd);
+                } else {
+                    ERROR("Thread %s(%d) Error trans to READY\n", thd->name, thd->tid);
+                }
+                break;
+            }
+            case BLOCKED: {
+                if (snode->sched_context.unblock_signals > 0) {
+                    snode->sched_context.unblock_signals--;
+                    task_into_ready(thd);
+                } else {
+                    task_block(thd);
+                }
+                break;
+            }
+            case SLEEPING: {
+                /// @todo support sleep
+                break;
+            }
+            case TRANS_WAKING: {
+                if (snode->state == BLOCKED) {
+                    task_into_ready(thd);
+                } else {
+                    snode->sched_context.unblock_signals++;
+                    task_into_ready(thd);
+                }
+                break;
+            }
+            case DEAD: {
+                /// @todo
+                break;
+            }
+            default:
+                break;
+            }
+
+            dequeue(trans_queue);
+        }
+
+        assert(RBTTREE_DELETE_SUCC == rbt_delete(&g_scheduler.state_trans_ref_map, thd->tid));
+        dequeue(&tmp_queue);
+    }
+}
+
 struct Thread* next_task_emergency = NULL;
 extern void context_switch(struct context**, struct context*);
 static void _scheduler(struct SchedulerRightGroup right_group)
@@ -321,12 +393,14 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         }
 
         /* run the chosen task */
+        // DEBUG_PRINTF("Thread %s(%d) to RUNNING\n", next_task->name, next_task->tid);
         task_state_set_running(next_task);
         cpu->task = next_task;
         assert(next_task->memspace->pgdir.pd_addr != NULL);
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->memspace->pgdir.pd_addr));
         context_switch(&cpu->scheduler, next_task->thread_context.context);
-        assert(next_task->snode.state != RUNNING);
+        central_trans_task_state();
+        cpu->task = NULL;
     }
 }
 

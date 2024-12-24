@@ -75,10 +75,8 @@ static void send_irq_to_user(int irq_num)
         buf->header.done = 0;
         buf->header.magic = IPC_MSG_MAGIC;
         buf->header.valid = 1;
-        enqueue(&irq_forward_table[irq_num].handle_task->sessions_to_be_handle, 0, (void*)&irq_forward_table[irq_num].p_kernel_session->server_side);
-
-        if (irq_forward_table[irq_num].handle_task->snode.state == BLOCKED) {
-            task_into_ready(irq_forward_table[irq_num].handle_task);
+        if (enqueue(&irq_forward_table[irq_num].handle_task->sessions_to_be_handle, 0, (void*)&irq_forward_table[irq_num].p_kernel_session->server_side)) {
+            THREAD_TRANS_STATE(irq_forward_table[irq_num].handle_task, TRANS_WAKING);
         }
 
         /* add session head */
@@ -93,7 +91,7 @@ int user_irq_handler(int irq, void* tf, void* arg)
 
         next_task_emergency = irq_forward_table[irq].handle_task;
         if (cur_cpu()->task != NULL) {
-            task_yield(cur_cpu()->task);
+            THREAD_TRANS_STATE(cur_cpu()->task, READY);
         }
     }
     return 0;

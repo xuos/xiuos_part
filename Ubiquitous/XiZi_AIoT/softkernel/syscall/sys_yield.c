@@ -36,6 +36,6 @@ Modification:
 int sys_yield(task_yield_reason reason)
 {
     struct Thread* cur_task = cur_cpu()->task;
-    task_yield(cur_task);
+    THREAD_TRANS_STATE(cur_task, READY);
     return 0;
 }

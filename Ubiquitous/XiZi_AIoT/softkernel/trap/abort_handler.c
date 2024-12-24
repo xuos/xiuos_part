@@ -64,7 +64,6 @@ __attribute__((optimize("O0"))) void dabort_handler(struct trapframe* r)
 
     xizi_enter_kernel();
     sys_exit(cur_task);
-    assert(cur_cpu()->task == NULL);
     context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
     panic("dabort end should never be reashed.\n");
 }
@@ -84,7 +83,6 @@ __attribute__((optimize("O0"))) void iabort_handler(struct trapframe* r)
 
     xizi_enter_kernel();
     sys_exit(cur_task);
-    assert(cur_cpu()->task == NULL);
     context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
     panic("iabort end should never be reashed.\n");
 }

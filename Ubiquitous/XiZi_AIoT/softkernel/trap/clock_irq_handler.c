@@ -82,7 +82,7 @@ int xizi_clock_handler(int irq, void* tf, void* arg)
             struct ScheduleNode* snode = &current_task->snode;
             snode->sched_context.remain_tick--;
             if (snode->sched_context.remain_tick == 0) {
-                task_into_ready(current_task);
+                THREAD_TRANS_STATE(current_task, READY);
             }
         }
 

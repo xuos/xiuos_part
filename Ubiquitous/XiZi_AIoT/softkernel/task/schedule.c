@@ -28,10 +28,12 @@ Modification:
 1. first version
 *************************************************/
 #include "log.h"
+#include "multicores.h"
 #include "schedule_algo.h"
 
 static struct Thread* next_runable_task;
 static uint64_t min_run_time;
+#define MIN_RUN_TIME_BOUND 5
 
 bool find_runable_task(RbtNode* node, void* data)
 {
@@ -43,6 +45,10 @@ bool find_runable_task(RbtNode* node, void* data)
             next_runable_task = thd;
             min_run_time = thd->snode.sched_context.run_time;
             thd->snode.sched_context.run_time++;
+        }
+
+        if (min_run_time <= MIN_RUN_TIME_BOUND) {
+            return false;
         }
         return true;
     } else {
@@ -81,13 +87,21 @@ bool init_schedule_node(struct ScheduleNode* snode, struct Thread* bind_thd)
             snode->snode_id, (void*)snode)) {
         return false;
     }
+    queue_init(&snode->state_trans_signal_queue);
     return true;
+}
+
+void enqueue_task_trans_state(struct Thread* thd, enum ThreadState state)
+{
+    /// @todo handle memory drain
+    assert(enqueue(&thd->snode.state_trans_signal_queue, state, NULL));
+    int res = rbt_insert(&g_scheduler.state_trans_ref_map, thd->tid, (void*)thd);
+    assert(RBTTREE_INSERT_SECC == res || RBTTREE_INSERT_EXISTED == res);
 }
 
 bool task_trans_sched_state(struct ScheduleNode* snode, RbtTree* from_pool, RbtTree* to_pool, enum ThreadState target_state)
 {
     assert(snode != NULL);
-    // DEBUG("%d %p %d %s\n", snode->snode_id, snode->pthd, snode->pthd->tid, snode->pthd->name);
     assert(snode->snode_id != UNINIT_SNODE_ID && snode->pthd != NULL);
     if (RBTTREE_DELETE_SUCC != rbt_delete(from_pool, snode->snode_id)) {
         DEBUG("Thread %d not in from schedule pool\n", snode->pthd->tid);
@@ -124,8 +138,6 @@ void task_block(struct Thread* thd)
     struct ScheduleNode* snode = &thd->snode;
     enum ThreadState thd_cur_state = snode->state;
 
-    assert(thd_cur_state != RUNNING);
-
     bool trans_res = task_trans_sched_state(snode, //
         &g_scheduler.snode_state_pool[thd_cur_state], //
         &g_scheduler.snode_state_pool[BLOCKED], BLOCKED);
@@ -138,23 +150,6 @@ void task_into_ready(struct Thread* thd)
     assert(thd != NULL);
     struct ScheduleNode* snode = &thd->snode;
     enum ThreadState thd_cur_state = snode->state;
-
-    bool trans_res = task_trans_sched_state(snode, //
-        &g_scheduler.snode_state_pool[thd_cur_state], //
-        &g_scheduler.snode_state_pool[READY], READY);
-    snode->sched_context.remain_tick = TASK_CLOCK_TICK;
-    assert(trans_res = true);
-    return;
-}
-
-void task_yield(struct Thread* thd)
-{
-    assert(thd != NULL);
-    struct ScheduleNode* snode = &thd->snode;
-    enum ThreadState thd_cur_state = snode->state;
-
-    assert(thd == cur_cpu()->task && thd_cur_state == RUNNING);
-    cur_cpu()->task = NULL;
 
     bool trans_res = task_trans_sched_state(snode, //
         &g_scheduler.snode_state_pool[thd_cur_state], //

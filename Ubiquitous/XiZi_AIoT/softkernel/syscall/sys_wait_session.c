@@ -60,9 +60,7 @@ int sys_wait_session(struct Session* userland_session)
     assert(!queue_is_empty(&server_to_call->sessions_to_be_handle));
 
     ksemaphore_wait(&xizi_task_manager.semaphore_pool, cur_task, session_backend->client_sem_to_wait);
-    if (server_to_call->snode.state == BLOCKED) {
-        task_into_ready(session_backend->server);
-    }
+    THREAD_TRANS_STATE(server_to_call, TRANS_WAKING);
 
     return 0;
 }

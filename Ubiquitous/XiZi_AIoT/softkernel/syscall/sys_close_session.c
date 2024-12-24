@@ -70,9 +70,7 @@ int sys_close_session(struct Thread* cur_task, struct Session* session)
             // @todo fix memory leak
         } else {
             assert(!queue_is_empty(&server_to_info->sessions_to_be_handle));
-            if (server_to_info->snode.state == BLOCKED) {
-                task_into_ready(session_backend->server);
-            }
+            THREAD_TRANS_STATE(server_to_info, TRANS_WAKING);
         }
     }
 

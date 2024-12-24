@@ -45,7 +45,7 @@ Modification:
 #define LOWLEVEL_ALLOC(size) kalloc(size)
 #define LOWLEVEL_FREE(ptr) kfree(ptr)
 
-#define ARENA_SIZE_PER_INCREASE PAGE_SIZE
+#define ARENA_SIZE_PER_INCREASE (2 * PAGE_SIZE)
 #define MAX_NR_ELEMENT_PER_SLABPAGE 64
 
 void slab_init(struct slab_allocator* const allocator, const size_t element_size, char* name)
