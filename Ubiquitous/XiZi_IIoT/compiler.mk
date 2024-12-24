@@ -30,15 +30,15 @@ CFLAGS += $(DEFINES)
 AFLAGS += $(DEFINES)
 CXXFLAGS += $(DEFINES)
 BUILD_DIR := $(KERNEL_ROOT)/build
-APP_DIR := Ubiquitous/XiZi
+APP_DIR := Ubiquitous/XiZi_IIoT
 
  
 .PHONY:COMPILER
 COMPILER:
 	@if [ "${SRC_DIR_TEMP}" != "" ];	then \
-		for dir in $(SRC_DIR_TEMP);do    \
-               $(MAKE) -C $$dir;          \
-    	done; \
+		for dir in $(SRC_DIR_TEMP); do \
+			$(MAKE) -C $$dir; \
+		done; \
 	fi
 	@/bin/echo -n $(OBJS) " " >> $(KERNEL_ROOT)/build/make.obj
 
@@ -52,7 +52,7 @@ $(eval OBJS += $(LOCALC)) \
 $(if $(strip $(LOCALC)),$(eval $(LOCALC): $(1)
 	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
 	@echo cc $$<
-	@/bin/echo -n $(dir $(LOCALC)) >>$(KERNEL_ROOT)/build/make.dep
+	@echo -n $(dir $(LOCALC)) >>$(KERNEL_ROOT)/build/make.dep
 	@($(CROSS_COMPILE)gcc -MM $$(CFLAGS) -c $$<) >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)gcc $$(CFLAGS) -c $$< -o $$@))
 endef
@@ -64,7 +64,7 @@ $(eval LOCALCPP := $(addprefix $(BUILD_DIR)/,$(COBJ))) \
 $(eval OBJS += $(LOCALCPP)) \
 $(if $(strip $(LOCALCPP)),$(eval $(LOCALCPP): $(1)
 	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
-	@echo cc $$<
+	@echo cpp $$<
 	@/bin/echo -n $(dir $(LOCALCPP)) >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)g++ -MM $$(CXXFLAGS) -c $$< >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)g++ $$(CXXFLAGS) -c $$< -o $$@))
@@ -90,7 +90,7 @@ $(eval LOCALS := $(addprefix $(BUILD_DIR)/,$(SOBJ))) \
 $(eval OBJS += $(LOCALS)) \
 $(if $(strip $(LOCALS)),$(eval $(LOCALS): $(1)
 	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
-	@echo cc $$<
+	@echo asm $$<
 	@/bin/echo -n $(dir $(LOCALC)) >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)gcc -MM $$(CFLAGS) -c $$< >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)gcc $$(AFLAGS) -c $$< -o $$@))
@@ -124,7 +124,7 @@ $(if $(SRCS),$(foreach f,$(SRCS),$(call add_S_file,$(addprefix $(CUR_DIR)/,$(f))
 SRCS := $(strip $(filter %.a,$(SRC_FILES)))
 $(if $(SRCS),$(foreach f,$(SRCS),$(call add_a_file,$(addprefix $(CUR_DIR)/,$(f)))))
 
-COMPILER:$(OBJS) 
+COMPILER:$(OBJS)
 
 
 

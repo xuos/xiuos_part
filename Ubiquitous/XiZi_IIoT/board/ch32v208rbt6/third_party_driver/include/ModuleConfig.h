@@ -13,6 +13,8 @@
 #ifndef __MODULECONFIG_H__
 #define __MODULECONFIG_H__
 
+#include <pthread.h>
+
 #include "debug.h"
 
 /*Address where configuration information is stored*/
