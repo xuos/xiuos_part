@@ -124,8 +124,8 @@ typedef x_base                          x_OffPos;
 #endif
 
 #define WAITING_FOREVER              -1                 
-// #define KPrintf printf
-void KPrintf(const char *fmt, ...);
+#define KPrintf printf
+// void KPrintf(const char *fmt, ...);
 
 
 #ifdef __cplusplus

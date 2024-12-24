@@ -658,29 +658,29 @@ int VsnPrintf(char *buf, int32 size, const char *fmt, va_list args)
 
 #endif
 
-void KPrintf(const char *fmt, ...)
-{
-#ifdef KERNEL_CONSOLE
-    if(_console != NONE) {
-        va_list args;
-        x_size_t length = 0;
-        static char logbuf[KERNEL_CONSOLEBUF_SIZE] = {0};
+// void KPrintf(const char *fmt, ...)
+// {
+// #ifdef KERNEL_CONSOLE
+//     if(_console != NONE) {
+//         va_list args;
+//         x_size_t length = 0;
+//         static char logbuf[KERNEL_CONSOLEBUF_SIZE] = {0};
 
-        va_start(args, fmt);
+//         va_start(args, fmt);
 
-        length = VsnPrintf(logbuf, sizeof(logbuf) - 1, fmt, args);
-        if (length > KERNEL_CONSOLEBUF_SIZE - 1)
-            length = KERNEL_CONSOLEBUF_SIZE - 1;
+//         length = VsnPrintf(logbuf, sizeof(logbuf) - 1, fmt, args);
+//         if (length > KERNEL_CONSOLEBUF_SIZE - 1)
+//             length = KERNEL_CONSOLEBUF_SIZE - 1;
 
-        struct BusBlockWriteParam write_param;
-        write_param.pos = 0;
-        write_param.buffer = (void *)logbuf;
-        write_param.size = length;
-        BusDevWriteData(_console, (void *)&write_param);
+//         struct BusBlockWriteParam write_param;
+//         write_param.pos = 0;
+//         write_param.buffer = (void *)logbuf;
+//         write_param.size = length;
+//         BusDevWriteData(_console, (void *)&write_param);
         
-        va_end(args);
-    }
-#endif
-}
+//         va_end(args);
+//     }
+// #endif
+// }
 
 
