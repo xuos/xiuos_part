@@ -58,7 +58,7 @@ Modification:
 .func _spinlock_lock
 _spinlock_lock:
     mv s0, a0
-    li a0, 0       # cpu_get_current
+    call cpu_get_current
     mv a1, a0
     mv a0, s0
     li a2, UNLOCKED
@@ -76,7 +76,7 @@ _spinlock_lock:
     .func _spinlock_unlock
 _spinlock_unlock:
     mv s0, a0
-    li a0, 0       # cpu_get_current
+    call cpu_get_current
     mv a1, a0
     mv a0, s0
     li a2, UNLOCKED
