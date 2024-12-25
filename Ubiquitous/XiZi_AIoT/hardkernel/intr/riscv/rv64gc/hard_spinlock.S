@@ -57,6 +57,16 @@ Modification:
     .global _spinlock_lock
 .func _spinlock_lock
 _spinlock_lock:
+    mv s0, a0
+    li a0, 0       # cpu_get_current
+    mv a1, a0
+    mv a0, s0
+    li a2, UNLOCKED
+1:
+    lr.w a3, (a0)
+    beq a3, a1, 1b
+    sc.w a4, a1, (a0)
+    bnez a4, 1b
     ret
 .endfunc 
 
@@ -65,6 +75,18 @@ _spinlock_lock:
     .global _spinlock_unlock
     .func _spinlock_unlock
 _spinlock_unlock:
+    mv s0, a0
+    li a0, 0       # cpu_get_current
+    mv a1, a0
+    mv a0, s0
+    li a2, UNLOCKED
+    lw a3, (a0)
+    bne a3, a1, 1f
+    sw a2, (a0)
+    li a0, 0
+    ret
+1:
+    li a0, -1
     ret
 .endfunc
 
