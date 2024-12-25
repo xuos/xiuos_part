@@ -82,7 +82,7 @@ static void Ec801ePowerSet(void)
 
 static int Ec801eOpen(struct Adapter *adapter)
 {
-    /*step1: open ec200a serial port*/
+    /*step1: open ec801e serial port*/
     adapter->fd = PrivOpen(ADAPTER_EC801E_DRIVER, O_RDWR);
     if (adapter->fd < 0) {
         printf("Ec801eOpen get serial %s fd error\n", ADAPTER_EC801E_DRIVER);
@@ -111,7 +111,7 @@ static int Ec801eOpen(struct Adapter *adapter)
 static int Ec801eClose(struct Adapter *adapter)
 {
     int ret = 0;
-    uint8_t ec200a_cmd[64];
+    uint8_t ec801e_cmd[64];
     
     if (!adapter->agent) {
         printf("Ec801eClose AT agent NULL\n");
@@ -124,10 +124,10 @@ static int Ec801eClose(struct Adapter *adapter)
     ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
 
     /*step2: serial write "AT+QICLOSE", close socket connect before open socket*/
-    memset(ec200a_cmd, 0, sizeof(ec200a_cmd));
-    sprintf(ec200a_cmd, EC801E_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
+    memset(ec801e_cmd, 0, sizeof(ec801e_cmd));
+    sprintf(ec801e_cmd, EC801E_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
 
-    ret = AtCmdConfigAndCheck(adapter->agent, ec200a_cmd, EC801E_OK_REPLY);
+    ret = AtCmdConfigAndCheck(adapter->agent, ec801e_cmd, EC801E_OK_REPLY);
     if (ret < 0) {
         goto out;
     }
@@ -139,11 +139,11 @@ static int Ec801eClose(struct Adapter *adapter)
     }
 
 out:
-    /*step4: power down ec200a*/
+    /*step4: power down ec801e*/
     ret = AtCmdConfigAndCheck(adapter->agent, EC801E_CLOSE, EC801E_OK_REPLY);
     PrivTaskDelay(12500); //wait at least 12s
 
-     /*step5: close ec200a serial port*/
+     /*step5: close ec801e serial port*/
     PrivClose(adapter->fd);
     
     return ret;
@@ -198,7 +198,7 @@ static int Ec801eConnect(struct Adapter *adapter, enum NetRoleType net_role, con
 {
     int ret = 0;
     int try = 0;
-    uint8_t ec200a_cmd[64];
+    uint8_t ec801e_cmd[64];
 
     AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
 
@@ -245,16 +245,16 @@ static int Ec801eConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     PrivTaskDelay(300);
 
     /*step5: serial write "AT+QICSGP", connect to China Mobile using ipv4 or ipv6*/
-    memset(ec200a_cmd, 0, sizeof(ec200a_cmd));
+    memset(ec801e_cmd, 0, sizeof(ec801e_cmd));
 
     if (IPV4 == ip_type) {
-        strcpy(ec200a_cmd, "AT+QICSGP=1,1,\"CMNET\",\"\",\"\",1\r\n");
+        strcpy(ec801e_cmd, "AT+QICSGP=1,1,\"CMNET\",\"\",\"\",1\r\n");
     } else if (IPV6 == ip_type) {
-        strcpy(ec200a_cmd, "AT+QICSGP=1,2,\"CMNET\",\"\",\"\",1\r\n");
+        strcpy(ec801e_cmd, "AT+QICSGP=1,2,\"CMNET\",\"\",\"\",1\r\n");
     }
     
     for(try = 0; try < TRY_TIMES; try++){
-        ret = AtCmdConfigAndCheck(adapter->agent, ec200a_cmd, EC801E_OK_REPLY);
+        ret = AtCmdConfigAndCheck(adapter->agent, ec801e_cmd, EC801E_OK_REPLY);
         if (ret == 0) {
             break;
         }
@@ -265,11 +265,11 @@ static int Ec801eConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     PrivTaskDelay(300);
 
     /*step6: serial write "AT+QICLOSE", close socket connect before open socket*/
-    memset(ec200a_cmd, 0, sizeof(ec200a_cmd));
+    memset(ec801e_cmd, 0, sizeof(ec801e_cmd));
     
-    sprintf(ec200a_cmd, EC801E_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
+    sprintf(ec801e_cmd, EC801E_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
     for(try = 0; try < TRY_TIMES; try++){
-        ret = AtCmdConfigAndCheck(adapter->agent, ec200a_cmd, EC801E_OK_REPLY);
+        ret = AtCmdConfigAndCheck(adapter->agent, ec801e_cmd, EC801E_OK_REPLY);
         if (ret == 0) {
             break;
         }
@@ -303,18 +303,18 @@ static int Ec801eConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     }
 
     /*step9: serial write "AT+QIOPEN", connect socket using TCP*/
-    memset(ec200a_cmd, 0, sizeof(ec200a_cmd));
-    sprintf(ec200a_cmd, EC801E_OPEN_SOCKET_CMD, adapter->socket.socket_id);
-    strcat(ec200a_cmd, ",\"TCP\",\"");
-    strcat(ec200a_cmd, ip);
-    strcat(ec200a_cmd, "\",");
-    strcat(ec200a_cmd, port);
-    strcat(ec200a_cmd, ",0,2\r\n");
+    memset(ec801e_cmd, 0, sizeof(ec801e_cmd));
+    sprintf(ec801e_cmd, EC801E_OPEN_SOCKET_CMD, adapter->socket.socket_id);
+    strcat(ec801e_cmd, ",\"TCP\",\"");
+    strcat(ec801e_cmd, ip);
+    strcat(ec801e_cmd, "\",");
+    strcat(ec801e_cmd, port);
+    strcat(ec801e_cmd, ",0,2\r\n");
 
     AtSetReplyEndChar(adapter->agent, 0x43, 0x54);
 
     for(try = 0; try < TRY_TIMES; try++){
-        ret = AtCmdConfigAndCheck(adapter->agent, ec200a_cmd, EC801E_CONNECT_REPLY);
+        ret = AtCmdConfigAndCheck(adapter->agent, ec801e_cmd, EC801E_CONNECT_REPLY);
         if (ret == 0) {
             break;
         }
@@ -357,7 +357,7 @@ static int Ec801eRecv(struct Adapter *adapter, void *buf, size_t len)
 static int Ec801eDisconnect(struct Adapter *adapter)
 {
     int ret = 0;
-    uint8_t ec200a_cmd[64];
+    uint8_t ec801e_cmd[64];
 
     AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
     
@@ -367,9 +367,9 @@ static int Ec801eDisconnect(struct Adapter *adapter)
     PrivTaskDelay(1500); //after +++ command, wait at least 1s
 
     /*step2: serial write "AT+QICLOSE", close socket connect before open socket*/
-    memset(ec200a_cmd, 0, sizeof(ec200a_cmd));
-    sprintf(ec200a_cmd, EC801E_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
-    ret = AtCmdConfigAndCheck(adapter->agent, ec200a_cmd, EC801E_OK_REPLY);
+    memset(ec801e_cmd, 0, sizeof(ec801e_cmd));
+    sprintf(ec801e_cmd, EC801E_CLOSE_SOCKET_CMD, adapter->socket.socket_id);
+    ret = AtCmdConfigAndCheck(adapter->agent, ec801e_cmd, EC801E_OK_REPLY);
     if (ret < 0) {
         goto out;
     }
@@ -518,7 +518,7 @@ out:
     return -1;
 }
 
-static const struct IpProtocolDone ec200a_done = 
+static const struct IpProtocolDone ec801e_done = 
 {
     .open = Ec801eOpen,
     .close = Ec801eClose,
@@ -551,7 +551,7 @@ AdapterProductInfoType Ec801eAttach(struct Adapter *adapter)
 
     strcpy(product_info->model_name, ADAPTER_4G_EC801E);
 
-    product_info->model_done = (void *)&ec200a_done;
+    product_info->model_done = (void *)&ec801e_done;
 
     return product_info;
 }

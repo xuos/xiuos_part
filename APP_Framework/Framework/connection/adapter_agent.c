@@ -212,9 +212,8 @@ int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
     }
 
     ret = ATOrderSend(agent, REPLY_TIME_OUT, reply, cmd);
-    if (ret < 0)
-    {
-        printf("%s %d ATOrderSend failed.\n", __func__, __LINE__);
+    if(ret < 0){
+        printf("%s %d ATOrderSend failed, cmd: %s.\n",__func__,__LINE__,cmd);
         ret = -1;
         goto __exit;
     }
