@@ -58,13 +58,15 @@ struct ATAgent
     uint32 maintain_len;
     uint32 maintain_max;
 
-#ifdef ADD_XIZI_FEATURES   
-	#ifdef ADAPTER_GM800TF
+#ifdef ADD_XIZI_FEATURES
+
+#if defined(ADAPTER_GM800TF) || defined(ADAPTER_EC801E)
     pthread_mutex_t lock;
-	#else
-	int lock;
-	#endif
 #else
+	int lock;
+#endif
+
+#else // ADD_XIZI_FEATURES
     pthread_mutex_t lock;
 #endif
 
@@ -73,7 +75,7 @@ struct ATAgent
     char reply_end_last_char;
     char reply_end_char;
     uint32 reply_char_num;
-#ifdef ADD_XIZI_FEATURES  
+#ifdef ADD_XIZI_FEATURES
 	int rsp_sem;
 #else
     sem_t rsp_sem;
