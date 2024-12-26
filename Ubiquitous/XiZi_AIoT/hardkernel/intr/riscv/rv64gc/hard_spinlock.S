@@ -64,7 +64,7 @@ _spinlock_lock:
     li a2, UNLOCKED
 1:
     lr.w a3, (a0)
-    beq a3, a1, 1b
+    bne a3, a2, 1b
     sc.w a4, a1, (a0)
     bnez a4, 1b
     ret
