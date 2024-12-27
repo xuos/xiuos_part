@@ -73,7 +73,9 @@ Modification:
 
 #include "cortex.h"
 
-#define NR_CPU 4 // maximum number of CPUs
+#define NR_CPU 1 // maximum number of CPUs
+
+#define SSTATUS_SPP (1L << 8)  // Previous mode, 1=Supervisor, 0=User
 
 __attribute__((always_inline)) static inline uint64_t EL0_mode() // Set ARM mode to EL0
 {
@@ -92,69 +94,72 @@ __attribute__((always_inline, optimize("O0"))) static inline void cpu_leave_low_
     SEV();
 }
 
-struct context {
-    uint64_t sp;
 
-    /* callee register */
-    uint64_t x18;
-    uint64_t x19;
-    uint64_t x20;
-    uint64_t x21;
-    uint64_t x22;
-    uint64_t x23;
-    uint64_t x24;
-    uint64_t x25;
-    uint64_t x26;
-    uint64_t x27;
-    uint64_t x28;
-    uint64_t x29;
-    uint64_t x30;
+struct __riscv_d_ext_state {
+    uint64_t f[32];
+    uint32_t fcsr;
+};
+/* Refer to struct thread_struct in Linux */
+/* CPU-specific state of a task */
+struct context {
+    /* Callee-saved registers */
+    unsigned long ra;
+    unsigned long sp;	/* Kernel mode stack */
+    unsigned long s[12];	/* s[0]: frame pointer */
+    struct __riscv_d_ext_state fstate;
+    unsigned long bad_cause;
 };
 
 /// @brief init task context, set return address to trap return
 /// @param  ctx
 extern void task_prepare_enter(void);
-__attribute__((__always_inline__)) static inline void arch_init_context(struct context* ctx)
+__attribute__((__always_inline__)) static inline void arch_init_context(struct context* ctx, unsigned long sp)
 {
     memset(ctx, 0, sizeof(*ctx));
-    ctx->x30 = (uintptr_t)(task_prepare_enter + 4);
+    ctx->ra = (uintptr_t)(task_prepare_enter);
+    ctx->sp = sp;
 }
 
+/* Refer to struct pt_regs in Linux */
 struct trapframe {
-    uint64_t x0;
-    uint64_t x1;
-    uint64_t x2;
-    uint64_t x3;
-    uint64_t x4;
-    uint64_t x5;
-    uint64_t x6;
-    uint64_t x7;
-    uint64_t x8;
-    uint64_t x9;
-    uint64_t x10;
-    uint64_t x11;
-    uint64_t x12;
-    uint64_t x13;
-    uint64_t x14;
-    uint64_t x15;
-    uint64_t x16;
-    uint64_t x17;
-    uint64_t x18;
-    uint64_t x19;
-    uint64_t x20;
-    uint64_t x21;
-    uint64_t x22;
-    uint64_t x23;
-    uint64_t x24;
-    uint64_t x25;
-    uint64_t x26;
-    uint64_t x27;
-    uint64_t x28;
-    uint64_t x29;
-    uint64_t x30;
-    uint64_t pc;
-    uint64_t spsr;
-    uint64_t sp;
+    unsigned long epc;
+    unsigned long ra;
+    unsigned long sp;
+    unsigned long gp;
+    unsigned long tp;
+    unsigned long t0;
+    unsigned long t1;
+    unsigned long t2;
+    unsigned long s0;
+    unsigned long s1;
+    unsigned long a0;
+    unsigned long a1;
+    unsigned long a2;
+    unsigned long a3;
+    unsigned long a4;
+    unsigned long a5;
+    unsigned long a6;
+    unsigned long a7;
+    unsigned long s2;
+    unsigned long s3;
+    unsigned long s4;
+    unsigned long s5;
+    unsigned long s6;
+    unsigned long s7;
+    unsigned long s8;
+    unsigned long s9;
+    unsigned long s10;
+    unsigned long s11;
+    unsigned long t3;
+    unsigned long t4;
+    unsigned long t5;
+    unsigned long t6;
+    /* Supervisor/Machine CSRs */
+    unsigned long status;
+    unsigned long badaddr;
+    unsigned long cause;
+    /* a0 value before the syscall */
+    unsigned long orig_a0;
 };
 
 /// @brief init task trapframe
@@ -165,8 +170,8 @@ __attribute__((__always_inline__)) static inline void arch_init_trapframe(struct
 {
     memset(tf, 0, sizeof(*tf));
     tf->sp = sp;
-    tf->spsr = EL0_mode();
-    tf->pc = pc;
+    tf->epc = pc;
+    tf->status &= ~SSTATUS_SPP; // clear SPP to 0 for user mode
 }
 
 /// @brief set pc and sp to trapframe
@@ -176,7 +181,7 @@ __attribute__((__always_inline__)) static inline void arch_init_trapframe(struct
 __attribute__((__always_inline__)) static inline void arch_trapframe_set_sp_pc(struct trapframe* tf, uintptr_t sp, uintptr_t pc)
 {
     tf->sp = sp;
-    tf->pc = pc;
+    tf->epc = pc;
 }
 
 /// @brief set params of main(int argc, char** argv) to trapframe (argc, argv)
@@ -185,8 +190,8 @@ __attribute__((__always_inline__)) static inline void arch_trapframe_set_sp_pc(s
 /// @param argv
 __attribute__((__always_inline__)) static inline void arch_set_main_params(struct trapframe* tf, int argc, uintptr_t argv)
 {
-    tf->x0 = (uint64_t)argc;
-    tf->x1 = (uint64_t)argv;
+    tf->a0 = (uint64_t)argc;
+    tf->a1 = (uint64_t)argv;
 }
 
 /// @brief retrieve params to trapframe (up to max number of 6) and pass it to syscall()
@@ -201,8 +206,8 @@ extern int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t pa
 __attribute__((__always_inline__)) static inline int arch_syscall(struct trapframe* tf, int* syscall_num)
 {
     // call syscall
-    *syscall_num = tf->x0;
-    return syscall(*syscall_num, tf->x1, tf->x2, tf->x3, tf->x4);
+    *syscall_num = tf->a0;
+    return syscall(*syscall_num, tf->a1, tf->a2, tf->a3, tf->a4);
 }
 
 /// @brief set return reg to trapframe
@@ -210,7 +215,7 @@ __attribute__((__always_inline__)) static inline int arch_syscall(struct trapfra
 /// @param ret
 __attribute__((__always_inline__)) static inline void arch_set_return(struct trapframe* tf, int ret)
 {
-    tf->x0 = (uint64_t)ret;
+    tf->a0 = (uint64_t)ret;
 }
 
 void cpu_start_secondary(uint8_t cpu_id);
