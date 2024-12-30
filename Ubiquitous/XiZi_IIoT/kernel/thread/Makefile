@@ -75,4 +75,9 @@ ifeq ($(CONFIG_USER_APPLICATION),y)
 	SRC_FILES += appstartup.c
 endif
 
+ifeq ($(CONFIG_KERNEL_CAPABILITY),y)
+	SRC_FILES += capability.c
+endif
+
+
 include $(KERNEL_ROOT)/compiler.mk

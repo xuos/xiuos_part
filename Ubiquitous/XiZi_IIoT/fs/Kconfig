@@ -3,7 +3,7 @@ menu "File system"
 menuconfig FS_VFS
     bool "Using device virtual file system"
     select KERNEL_MUTEX
-    default n
+    default y   
     help
         The device file system is a light weight virtual file system.
 

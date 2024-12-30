@@ -78,6 +78,10 @@ menu "Kernel feature"
             help
                 Enable task isolation
 
+        config KERNEL_CAPABILITY
+            bool "Enable task capability"
+            default n
+
         menu "Inter-Task communication"
             config KERNEL_SEMAPHORE
                 bool "Enable semaphore"

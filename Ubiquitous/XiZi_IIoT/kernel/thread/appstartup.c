@@ -28,6 +28,11 @@
 #ifdef APP_STARTUP_FROM_SDCARD
 #include <iot-vfs_posix.h>
 #endif
+#ifdef KERNEL_CAPABILITY
+#include <xs_capability.h>
+extern CapsOps CapsOperations;
+#endif
+
 
 extern int main(void);
 #ifdef USER_APPLICATION
@@ -76,6 +81,10 @@ void CreateMainTask(void)
 		KPrintf("main create failed ...%s %d.\n",__FUNCTION__,__LINE__);
 		return;
     }
+    #ifdef KERNEL_CAPABILITY
+        // MainTask has Root privileges
+        CapsOperations.SetTaskCap(main, XS_CAP_ROOT);
+    #endif
     
     StartupKTask(main);
 }

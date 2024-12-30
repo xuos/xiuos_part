@@ -29,6 +29,10 @@
 #include <xs_isolation.h>
 #endif
 
+#ifdef KERNEL_CAPABILITY
+#include <xs_capability.h>
+extern CapsOps CapsOperations;
+#endif
 static volatile int __exstatus;
 
 extern DoubleLinklistType KTaskZombie;
@@ -51,6 +55,9 @@ DECLARE_ID_MANAGER(k_task_id_manager, ID_NUM_MAX);
 
 void KTaskIdDelete(int32 id)
 {
+    #ifdef KERNEL_CAPABILITY
+        CapsOperations.RemoveTaskCaps(id);
+    #endif
     IdRemoveObj(&k_task_id_manager, id);
 }
 
@@ -861,6 +868,20 @@ int32 KTaskCreate(const char *name,
 
     if( task->Done->init(task, name, entry, parameter, stack_depth, priority) == EOK ) {
         HOOK(hook.task.hook_TaskCreate, (task));
+        #ifdef KERNEL_CAPABILITY
+            int32 current = GetKTaskDescriptor()->id.id;
+            KPrintf("current : %d, new : %d\n", current, id);
+            if(current >= 1000){
+                // The system has just started
+                CapsOperations.AddRootTaskCaps(id);
+            }else{
+                xs_capability *cap = (xs_capability*)x_malloc(sizeof(xs_capability));
+                xs_capability* current_cap = CapsOperations.GetTaskCaps(current);
+                CapsOperations.Copy(cap, current_cap);
+                CapsOperations.ClearCap(cap, XS_CAP_ROOT);
+                CapsOperations.AddTaskCaps(id, cap);
+            }
+        #endif
         return id;
     } else {
         KPrintf("%s %d task init failed.\n",__func__,__LINE__);
@@ -911,6 +932,9 @@ x_err_t KTaskDelete(int32 id)
     task = GetTaskWithIdnodeInfo(id);
     NULL_PARAM_CHECK(task);
 
+    #ifdef KERNEL_CAPABILITY
+        CapsOperations.RemoveTaskCaps(id);
+    #endif
     return task->Done->Delete(task);
 }
 
