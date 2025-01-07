@@ -9,7 +9,7 @@ emulator_support +=
 support := $(riscv_support) $(arm_support) $(emulator_support) 
 SRC_DIR :=
 
-export BOARD ?= 3568
+export BOARD ?= imx6q-sabrelite
 # This is the environment variable for kconfig-mconf
 export KCONFIG_CONFIG ?= .config
 
