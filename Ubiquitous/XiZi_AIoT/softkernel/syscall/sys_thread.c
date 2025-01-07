@@ -40,9 +40,9 @@ int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintptr_t en
     struct ThreadStackPointer loaded_sp = load_user_stack(pmemspace, argv);
     if (loaded_sp.stack_idx == -1) {
         ERROR("Uable to load params to memspace.\n");
-        /* memspace is freed alone with free_pcb() */
+        /* memspace is freed alone with free_thread() */
         struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
-        tlo->free_pcb(task);
+        tlo->free_thread(task);
         return -1;
     }
 

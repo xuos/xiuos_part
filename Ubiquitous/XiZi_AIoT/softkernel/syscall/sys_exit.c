@@ -40,10 +40,9 @@ int sys_exit(struct Thread* ptask)
 {
     assert(ptask != NULL);
     ptask->dead = true;
-    // free that task straightly if it's a blocked task
-    if (ptask->snode.state == BLOCKED) {
-        struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
-        tlo->free_pcb(ptask);
+    // awake the task if it's a blocked task
+    if (ptask->snode.state == BLOCKED || ptask->snode.state == SLEEPING) {
+        THREAD_TRANS_STATE(ptask, TRANS_WAKING);
     }
     // yield current task in case it wants to exit itself
     THREAD_TRANS_STATE(cur_cpu()->task, READY);

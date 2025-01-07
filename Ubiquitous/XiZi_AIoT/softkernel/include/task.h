@@ -118,7 +118,7 @@ struct TaskLifecycleOperations {
     /* new a task control block, checkout #sys_spawn for usage */
     struct Thread* (*new_thread)(struct MemSpace* pmemspace);
     /* free a task control block, this calls #free_user_pgdir to free all vitual spaces */
-    void (*free_pcb)(struct Thread*);
+    void (*free_thread)(struct Thread*);
 };
 
 struct XiziTaskManager {

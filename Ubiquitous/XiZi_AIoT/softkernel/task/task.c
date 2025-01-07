@@ -281,7 +281,7 @@ static struct Thread* _new_thread(struct MemSpace* pmemspace)
 
 struct TaskLifecycleOperations task_lifecycle_ops = {
     .new_thread = _new_thread,
-    .free_pcb = _free_thread,
+    .free_thread = _free_thread,
 };
 
 static void task_state_set_running(struct Thread* task)

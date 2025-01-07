@@ -53,7 +53,7 @@ bool find_runable_task(RbtNode* node, void* data)
         return true;
     } else {
         struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
-        tlo->free_pcb(thd);
+        tlo->free_thread(thd);
         return false;
     }
 
@@ -93,7 +93,7 @@ bool init_schedule_node(struct ScheduleNode* snode, struct Thread* bind_thd)
 
 void enqueue_task_trans_state(struct Thread* thd, enum ThreadState state)
 {
-    /// @todo handle memory drain
+    /// @todo (current bug) handle memory drain
     assert(enqueue(&thd->snode.state_trans_signal_queue, state, NULL));
     int res = rbt_insert(&g_scheduler.state_trans_ref_map, thd->tid, (void*)thd);
     assert(RBTTREE_INSERT_SECC == res || RBTTREE_INSERT_EXISTED == res);
