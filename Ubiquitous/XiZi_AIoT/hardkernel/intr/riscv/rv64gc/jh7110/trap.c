@@ -127,15 +127,24 @@ void syscall_arch_handler(struct trapframe* tf)
 
 
 
-extern void do_exception_vector(void);
+extern void handle_exception(void);
 
 void trap_init(void)
 {
-    csr_write(stvec, do_exception_vector);
+    csr_write(stvec, handle_exception);
     csr_write(sie, 0);
+    __asm__ volatile("csrw sscratch, zero" : : : "memory");
+#if 0
+    printk("trap_init test\n");
+    __asm__ volatile("ebreak");
+    printk("trap_init test ok\n");
+#endif
 }
 
-
+void trap_set_exception_vector(uint64_t new_tbl_base)
+{
+    csr_write(stvec, new_tbl_base);
+}
 
 static void do_trap_error(struct pt_regs *regs, const char *str)
 {
@@ -225,7 +234,7 @@ void do_exception(struct pt_regs *regs, unsigned long scause)
     printk("%s, scause: 0x%lx\n", __func__, scause);
 
     if (scause & CAUSE_IRQ_FLAG) {
-        handle_irq(regs, scause);
+        intr_irq_dispatch((struct trapframe *)regs);
     }
     else {
         inf = ec_to_fault_info(scause);
@@ -235,3 +244,10 @@ void do_exception(struct pt_regs *regs, unsigned long scause)
     }
 }
 
+
+#define INIT_THREAD_INFO			\
+{						\
+	.flags		= 0,			\
+	.preempt_count	= 1,	\
+}
+struct thread_info init_thread_info = INIT_THREAD_INFO;

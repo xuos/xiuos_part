@@ -41,6 +41,9 @@ Modification:
 
 static struct XiziTrapDriver xizi_trap_driver;
 
+extern void trap_init(void);
+extern void trap_set_exception_vector(uint64_t new_tbl_base);
+
 void panic(char* s)
 {
     KPrintf("panic: %s\n", s);
@@ -48,12 +51,9 @@ void panic(char* s)
         ;
 }
 
-//extern void alltraps();
-extern void trap_init(void);
 static void _sys_irq_init(int cpu_id)
 {
     // primary core init intr
-//    xizi_trap_driver.switch_hw_irqtbl((uintptr_t*)alltraps);
     if (cpu_id == 0) {
         plic_init();
     }
@@ -90,8 +90,7 @@ static void _single_irq_disable(int irq, int cpu)
 
 static inline uintptr_t* _switch_hw_irqtbl(uintptr_t* new_tbl_base)
 {
-    w_vbar_el1((uint64_t)new_tbl_base);
-
+    trap_set_exception_vector(new_tbl_base);
     return NULL;
 }
 
