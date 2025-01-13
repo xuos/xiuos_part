@@ -710,6 +710,8 @@ void* x_realloc(void* pointer, x_size_t size)
     x_size_t oldsize = 0;
     void* newmem = NONE;
     struct DynamicAllocNode* oldnode = NONE;
+    struct ByteMemory* byte_memory = &ByteManager;
+    int i;
 
     /* the given pointer is NULL */
     if (pointer == NONE)
@@ -720,17 +722,31 @@ void* x_realloc(void* pointer, x_size_t size)
         x_free(pointer);
         return NONE;
     }
-    CHECK(ByteManager.dynamic_buddy_manager.done->JudgeLegal(&ByteManager.dynamic_buddy_manager, pointer));
+    if(!byte_memory->dynamic_buddy_manager.done->JudgeLegal(&byte_memory->dynamic_buddy_manager, pointer)){
+#ifdef MEM_EXTERN_SRAM
+        for (i = 0; i < EXTSRAM_MAX_NUM; i++) {
+            if (NONE != ExtByteManager[i].dynamic_buddy_manager.done) {
+                if (ExtByteManager[i].dynamic_buddy_manager.done->JudgeLegal(&ExtByteManager[i].dynamic_buddy_manager, pointer)) {
+                    byte_memory = &ExtByteManager[i];
+                    goto check_success;
+                }
+            }
+        }
+#endif
+        CHECK(NONE);
+    }
+
+check_success:
 
     /* alignment and calculate the real size */
     newsize = ALIGN_MEN_UP(size, MEM_ALIGN_SIZE);
     newsize += SIZEOF_DYNAMICALLOCNODE_MEM;
 
     oldnode = PTR2ALLOCNODE((char*)pointer - SIZEOF_DYNAMICALLOCNODE_MEM);
-    CHECK(ByteManager.done->JudgeAllocated(oldnode));
+    CHECK(byte_memory->done->JudgeAllocated(oldnode));
 
     /* achieve the old memory size */
-    if (ByteManager.done->JudgeStaticOrDynamic(oldnode)) {
+    if (byte_memory->done->JudgeStaticOrDynamic(oldnode)) {
         oldsize = ((struct segment*)(long)(oldnode->size))->block_size;
     } else {
         oldsize = oldnode->size - SIZEOF_DYNAMICALLOCNODE_MEM;
@@ -784,6 +800,8 @@ void x_free(void* pointer)
 {
     x_base lock = 0;
     struct DynamicAllocNode* node = NONE;
+    struct ByteMemory* byte_memory = &ByteManager;
+    int i;
 
     /* parameter detection */
     if (pointer == NONE) {
@@ -793,26 +811,38 @@ void x_free(void* pointer)
     /* hold lock before release */
     lock = FREE_LIST_LOCK();
 
-    if (!ByteManager.dynamic_buddy_manager.done->JudgeLegal(&ByteManager.dynamic_buddy_manager, pointer)) {
+    if(!byte_memory->dynamic_buddy_manager.done->JudgeLegal(&byte_memory->dynamic_buddy_manager, pointer)){
+#ifdef MEM_EXTERN_SRAM
+        for (i = 0; i < EXTSRAM_MAX_NUM; i++) {
+            if (NONE != ExtByteManager[i].dynamic_buddy_manager.done) {
+                if (ExtByteManager[i].dynamic_buddy_manager.done->JudgeLegal(&ExtByteManager[i].dynamic_buddy_manager, pointer)) {
+                    byte_memory = &ExtByteManager[i];
+                    goto check_success;
+                }
+            }
+        }
+#endif
         FREE_LIST_UNLOCK(lock);
         SYS_ERR("[%s] Freeing a unallocated address.\n", __func__);
         return;
     }
 
+check_success:
+
     node = PTR2ALLOCNODE((char*)pointer - SIZEOF_DYNAMICALLOCNODE_MEM);
-    CHECK(ByteManager.done->JudgeAllocated(node));
+    CHECK(byte_memory->done->JudgeAllocated(node));
 
     /* judge release the memory block ro static_segment or dynamic buddy memory */
 #ifdef KERNEL_SMALL_MEM_ALLOC
     if (node->flag & STATIC_BLOCK_MASK) {
-        ByteManager.static_manager->done->release(pointer);
+        byte_memory->static_manager->done->release(pointer);
     } else
 #endif
     {
 #ifdef MEM_EXTERN_SRAM
         /* judge the pointer is not malloced from extern memory*/
         if (0 == (node->flag & 0xFF0000)) {
-            ByteManager.dynamic_buddy_manager.done->release(&ByteManager, pointer);
+            byte_memory->dynamic_buddy_manager.done->release(&ByteManager, pointer);
         }
 
         /* judge the pointer is malloced from extern memory*/
@@ -820,7 +850,7 @@ void x_free(void* pointer)
             ExtByteManager[((node->flag & 0xFF0000) >> 16) - 1].dynamic_buddy_manager.done->release(&ExtByteManager[((node->flag & 0xFF0000) >> 16) - 1], pointer);
         }
 #else
-        ByteManager.dynamic_buddy_manager.done->release(&ByteManager, pointer);
+        byte_memory->dynamic_buddy_manager.done->release(&ByteManager, pointer);
 #endif
     }
 
