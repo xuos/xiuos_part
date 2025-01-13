@@ -35,6 +35,8 @@ Modification:
 #define OUTPUT_LEVLE_DEBUG 1
 #define OUTPUT_LEVLE_ERROR 2
 
+#define OUTPUT_LEVEL_TEST 3
+
 #define OUTPUT_LEVLE OUTPUT_LEVLE_DEBUG
 // #define OUTPUT_LEVLE OUTPUT_LEVLE_LOG
 
@@ -56,9 +58,20 @@ Modification:
 #define DEBUG_PRINTF(f, args...)
 #endif
 
-#define DEBUG(f, args...)              \
+#if (OUTPUT_LEVLE >= OUTPUT_LEVLE_TEST)
+#define RECORD_PRINTF(f, args...) \
+    KPrintf(f, ##args)
+#else
+#define RECORD_PRINTF(f, args...)
+#endif
+
+#define DEBUG(f, args...)                   \
     DEBUG_PRINTF("DEBUG: [%s] ", __func__); \
     DEBUG_PRINTF(f, ##args)
+
+#define RECORD(f, args...)                   \
+    RECORD_PRINTF("DEBUG: [%s] ", __func__); \
+    RECORD_PRINTF(f, ##args)
 
 #define ERROR(f, args...)                           \
     KPrintf("ERROR: [%s %d] ", __func__, __LINE__); \

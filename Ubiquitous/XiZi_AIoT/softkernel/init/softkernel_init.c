@@ -31,10 +31,14 @@ Modification:
 
 #include "assert.h"
 #include "log.h"
+#include "rbtree.h"
 #include "task.h"
 
-bool softkernel_init(struct TraceTag* _hardkernel_tag, struct TraceTag* _softkernel_tag)
+bool softkernel_init(TraceTag* _hardkernel_tag, struct TraceTag* _softkernel_tag)
 {
+    module_rbt_factory_init(_softkernel_tag);
+    module_queue_factory_init(_softkernel_tag);
+
     struct TraceTag server_identifier_owner;
     CreateResourceTag(&server_identifier_owner, _softkernel_tag, "server-identifier", TRACER_OWNER, NULL);
 
@@ -48,7 +52,7 @@ bool softkernel_init(struct TraceTag* _hardkernel_tag, struct TraceTag* _softker
     AchieveResourceTag(&intr_driver_tag, _hardkernel_tag, "intr-ac-resource");
     load_kern_pgdir(&mmu_driver_tag, &intr_driver_tag); // enter kernel virtmem space
 
-    module_task_manager_init(); // init task
+    module_task_manager_init(_softkernel_tag); // init task
 
     struct SharePageRightGroup sp_rights;
     AchieveResourceTag(&sp_rights.dcache_driver_tag, _hardkernel_tag, "dcache-ac-resource");

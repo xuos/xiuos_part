@@ -352,10 +352,10 @@ int main(int argc, char* argv[])
     sys_state_info info;
     get_memblock_info(&info);
 
-    int len = info.memblock_info.memblock_end - info.memblock_info.memblock_start;
+    uintptr_t len = info.memblock_info.memblock_end - info.memblock_info.memblock_start;
     mmap(FS_IMG_ADDR, info.memblock_info.memblock_start, len, false);
 
-    MemFsInit((uintptr_t)FS_IMG_ADDR, (uint32_t)len);
+    MemFsInit((uintptr_t)FS_IMG_ADDR, (uintptr_t)len);
 
     if (register_server("MemFS") < 0) {
         printf("register server name: %s failed.\n", "MemFs");

@@ -34,7 +34,7 @@ $(eval LOCALC := $(addprefix $(BUILD_DIR)/,$(COBJ))) \
 $(eval OBJS += $(LOCALC)) \
 $(if $(strip $(LOCALC)),$(eval $(LOCALC): $(1)
 	@if [ ! -d $$(@D) ]; then mkdir -p $$(@D); fi
-	@echo cc $$< 
+	@echo cc $(subst $(KERNEL_ROOT)/,,$$<)
 	@/bin/echo -n $(dir $(LOCALC)) >>$(KERNEL_ROOT)/build/make.dep
 	@($(CROSS_COMPILE)gcc -MM $$(CFLAGS) -c $$<) >>$(KERNEL_ROOT)/build/make.dep
 	@$(CROSS_COMPILE)gcc $$(CFLAGS) -c $$< -o $$@))

@@ -38,7 +38,7 @@ extern int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintp
 int sys_spawn(char* img_start, char* name, char** argv)
 {
     // alloc a new memspace
-    struct MemSpace* pmemspace = alloc_memspace();
+    struct MemSpace* pmemspace = alloc_memspace(name);
     if (pmemspace == NULL) {
         return -1;
     }
@@ -52,10 +52,16 @@ int sys_spawn(char* img_start, char* name, char** argv)
     }
 
     // alloc a new pcb
-    struct Thread* new_task_cb = xizi_task_manager.new_task_cb(pmemspace);
+    struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
+    struct Thread* new_task_cb = tlo->new_thread(pmemspace);
     if (UNLIKELY(!new_task_cb)) {
-        ERROR("Unable to new task control block.\n");
-        free_memspace(pmemspace);
+        ERROR("Unable to new task control block %x.\n");
+        // error task allocation may free memspace before hand
+        // @todo use task ref map to handle this scene
+        if (NULL != pmemspace->tag.meta) {
+            free_memspace(pmemspace);
+        }
+
         return -1;
     }
     assert(!IS_DOUBLE_LIST_EMPTY(&pmemspace->thread_list_guard));

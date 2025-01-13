@@ -31,13 +31,11 @@ Modification:
 
 #include "list.h"
 #include "memlayout.h"
-#include "spinlock.h"
-#include "pagetable.h"
 
 #include <stdbool.h>
 #include <stdint.h>
 
-#define MAX_BUDDY_ORDER (10)
+#define MAX_BUDDY_ORDER (18)
 
 #define FREE_LIST_INDEX(order) \
     (1 << order)
@@ -71,7 +69,6 @@ struct KFreeList {
 struct KBuddy {
     uintptr_t n_pages;
     uintptr_t use_lock;
-    struct spinlock lock;
     struct KFreeList free_list[MAX_BUDDY_ORDER];
     struct KPage* first_page;
     uintptr_t mem_start;

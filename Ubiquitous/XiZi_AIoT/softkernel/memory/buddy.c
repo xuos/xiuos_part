@@ -31,6 +31,7 @@ Modification:
 #include "buddy.h"
 #include "kalloc.h"
 #include "log.h"
+#include "pagetable.h"
 
 static void _buddy_split_page(struct KPage* page, uintptr_t low_order, uintptr_t high_order, struct KFreeList* list)
 {
@@ -166,7 +167,8 @@ bool KBuddyInit(struct KBuddy* pbuddy, uintptr_t mem_start, uintptr_t mem_end)
     // total number of free pages
     pbuddy->n_pages = (pbuddy->mem_end - (uintptr_t)pbuddy->mem_start) >> LEVEL4_PTE_SHIFT;
 
-    memset(pbuddy->pages, 0, pbuddy->n_pages);
+    memset(pbuddy->pages, 0, pbuddy->n_pages * sizeof(struct KPage));
+    // memset(pbuddy->pages, 0, pbuddy->n_pages);
 
     // init each free page list from 2^0 to 2^8
     for (; i < MAX_BUDDY_ORDER; i++) {

@@ -129,7 +129,7 @@ static bool xizi_gpt_init()
         return false;
     }
     // register clock handler to intr
-    struct XiziTrapDriver* p_intr_driver = (struct XiziTrapDriver*)AchieveResource(&intr_driver_tag);
+    struct XiziTrapDriver* p_intr_driver = GetSysObject(struct XiziTrapDriver, &intr_driver_tag);
     p_intr_driver->bind_irq_handler(p_clock_driver->get_clock_int(), xizi_clock_handler);
     p_intr_driver->single_irq_enable(p_clock_driver->get_clock_int(), 0, 0);
     return true;
@@ -220,6 +220,7 @@ bool secondary_cpu_hardkernel_init(int cpu_id, struct TraceTag* _hardkernel_tag)
     p_icache_driver->enable();
     p_dcache_driver->enable();
     // clock
+    p_clock_driver->sys_clock_init();
     p_intr_driver->single_irq_enable(p_clock_driver->get_clock_int(), cpu_id, 0);
     // mmu
     secondary_cpu_load_kern_pgdir(&init_mmu_tag, &init_intr_tag);

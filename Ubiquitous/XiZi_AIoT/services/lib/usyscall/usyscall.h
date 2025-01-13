@@ -34,6 +34,9 @@
 #define SYSCALL_KILL            12  // kill the task by id
 
 #define SYSCALL_SEMAPHORE       13  // semaphore related operations
+#define SYSCALL_SLEEP           14  // sleep
+
+#define SYSCALL_WAIT_SESSION    15
 // clang-format on
 
 typedef enum {
@@ -44,6 +47,9 @@ typedef enum {
     SYS_STATE_SHOW_TASKS,
     SYS_STATE_SHOW_MEM_INFO,
     SYS_STATE_SHOW_CPU_INFO,
+    SYS_STATE_GET_CURRENT_TICK,
+    SYS_STATE_GET_CURRENT_SECOND,
+    SYS_STATE_SHOW_ACTREE,
 } sys_state_option;
 
 typedef enum {
@@ -52,12 +58,25 @@ typedef enum {
     SYS_TASK_YIELD_BLOCK_IPC = 0x2,
 } task_yield_reason;
 
+typedef enum {
+    SYS_MMAP_NORMAL = 0x0,
+    SYS_MMAP_CUSTOMIZE,
+} sys_mmap_type;
+
+typedef struct sys_mmap_info {
+    sys_mmap_type type;
+    uintptr_t attr;
+    bool is_dev;
+} sys_mmap_info;
+
 typedef union {
     struct {
         uintptr_t memblock_start;
         uintptr_t memblock_end;
     } memblock_info;
     int priority;
+    uintptr_t current_tick;
+    uintptr_t current_second;
 } sys_state_info;
 
 typedef enum {
@@ -72,20 +91,26 @@ typedef int (*ipc_fsize_fn)(struct Session* session, int fd);
 typedef int (*ipc_write_fn)(struct Session* session, int fd, char* src, int offset, int len);
 
 int syscall(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4);
+uintptr_t syscall_ori(int sys_num, intptr_t a1, intptr_t a2, intptr_t a3, intptr_t a4);
+
+uintptr_t sys_test();
 
 int spawn(struct Session* session, int fd, ipc_read_fn ipc_read, ipc_fsize_fn ipc_fsize, char* name, char** argv);
-int thread(void* entry, char* name, char** argv);
+int thread(void* entry, const char* name, char** argv);
 void exit(int status);
 int yield(task_yield_reason reason);
 int kill(int pid);
 
 int register_server(char* name);
 int session(char* path, int capacity, struct Session* user_session);
-int poll_session(struct Session* userland_session_arr, int arr_capacity);
+int poll_session(struct Session* userland_session, int arr_capacity);
+int wait_session_call(struct Session* userland_session);
 int close_session(struct Session* session);
 int register_irq(int irq, int opcode);
 
-int mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev);
+uintptr_t mmap(uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev);
+int naive_mmap(uintptr_t* vaddr, uintptr_t* paddr, int len, bool is_dev);
+int customized_mmap(uintptr_t vaddr, uintptr_t paddr, int len, uintptr_t attr);
 
 int task_heap_base();
 int get_memblock_info(sys_state_info* info);
@@ -93,8 +118,14 @@ int set_priority(sys_state_info* info);
 int show_task();
 int show_mem();
 int show_cpu();
+int show_actree();
+
+uintptr_t get_second();
+uintptr_t get_tick();
 
 int semaphore_new(int val);
 bool semaphore_free(int sem_id);
 bool semaphore_wait(int sem_id);
 bool semaphore_signal(int sem_id);
+
+int sleep(intptr_t ms);

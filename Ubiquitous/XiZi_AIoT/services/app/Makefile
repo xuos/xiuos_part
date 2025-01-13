@@ -10,10 +10,10 @@ cflags = -std=c11 -O2 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -
 board_specs = stub.o
 #cflags = -Wall -g -std=c11 
 endif
-ifeq ($(BOARD), ok1028a-c)
+ifeq ($(BOARD), 3568)
 toolchain ?= aarch64-none-elf-
 user_ldflags = -N -Ttext 0
-cflags = -Wall -g -std=c11 -mtune=cortex-a72 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie  
+cflags = -Wall -O2 -std=c11 -mtune=cortex-a55 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
 board_specs = stub.o
 endif
 
@@ -28,14 +28,34 @@ INC_DIR = 	-I$(KERNEL_ROOT)/services/shell/letter-shell \
 			-I$(KERNEL_ROOT)/services/lib/serial \
 			-I$(KERNEL_ROOT)/services/lib/usyscall \
 			-I$(KERNEL_ROOT)/services/fs/libfs \
+			-I$(KERNEL_ROOT)/services/net/libnet \
+			-I$(KERNEL_ROOT)/services/net/net_server \
+			-I$(KERNEL_ROOT)/services/net/net_server/arch \
+			-I$(KERNEL_ROOT)/services/net/net_server/include \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip/apps \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip/priv \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/lwip/prot \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/netif \
+			-I$(KERNEL_ROOT)/services/net/net_server/include/compat \
 			-I$(KERNEL_ROOT)/services/semaphore \
 			-I$(KERNEL_ROOT)/services/boards/$(BOARD) \
 			-I$(KERNEL_ROOT)/services/app 
 
 ifeq ($(BOARD), imx6q-sabrelite)
-all: init test_fault simple_client simple_server shell fs_server semaphore_server test_semaphore test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send eth_driver epit_server readme.txt | bin
+all: pingpong_client pingpong_server \
+	test_fault simple_client simple_server \
+	shell fs_server semaphore_server \
+	test_sleep test_semaphore test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send \
+	eth_driver epit_server  readme.txt | bin
 else 
-all: init test_fault simple_client simple_server shell fs_server semaphore_server test_ipc_null test_thread test_semaphore readme.txt | bin
+all: pingpong_client pingpong_server \
+	test_fault simple_client simple_server \
+	shell fs_server semaphore_server \
+	test_irq_hdlr \
+	test_sleep test_ipc_null test_thread test_semaphore readme.txt \
+	test_context_user \
+	| bin
 endif
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin
@@ -58,6 +78,22 @@ epit_server: timer.o epit.o ccm_pll.o usyscall.o arch_usyscall.o libserial.o pri
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 endif
+
+pingpong_client: pingpong_service.o pingpong_client.o libserial.o printf.o libipc.o session.o libfs.o usyscall.o arch_usyscall.o  libmem.o
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
+
+pingpong_server: pingpong_service.o pingpong_server.o libserial.o printf.o libipc.o session.o libfs.o usyscall.o arch_usyscall.o  libmem.o
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
+
+test_sleep: test_sleep.o libserial.o printf.o usyscall.o arch_usyscall.o
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
+	
+test_context_user: test_context_user.o libserial.o printf.o usyscall.o arch_usyscall.o
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
 
 test_semaphore: test_semaphore.o libserial.o printf.o usyscall.o arch_usyscall.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
@@ -87,10 +123,6 @@ shell: shell_port.o libserial.o printf.o shell_cmd_list.o shell.o shell_ext.o li
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
 	
-init: init.o libfs.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
-	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
-	@${objdump} -S $@ > $@.asm
-
 test_fault: test_fault.o libserial.o printf.o usyscall.o arch_usyscall.o 
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
 	@${objdump} -S $@ > $@.asm
@@ -109,6 +141,10 @@ fs_server: fs_server.o libfs.o fs.o libserial.o printf.o libipc.o session.o bloc
 
 test_priority: test_priority.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
 	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs}
+	@${objdump} -S $@ > $@.asm
+
+test_net: test_net.o lwip_service.o libipc.o session.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs} -llwip -L$(KERNEL_ROOT)/services/net/net_server
 	@${objdump} -S $@ > $@.asm
 
 %.o: %.c

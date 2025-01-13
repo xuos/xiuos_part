@@ -36,27 +36,6 @@ Modification:
 int sys_yield(task_yield_reason reason)
 {
     struct Thread* cur_task = cur_cpu()->task;
-    xizi_task_manager.task_yield_noschedule(cur_task, false);
-
-    // handle ipc block
-    if ((reason & SYS_TASK_YIELD_BLOCK_IPC) != 0) {
-        if (cur_task->current_ipc_handled) {
-            cur_task->current_ipc_handled = false;
-        } else {
-            xizi_task_manager.task_block(&xizi_task_manager.task_blocked_list_head, cur_task);
-        }
-    }
-
-    // wake up all possible server
-    struct client_session* client_session = NULL;
-    DOUBLE_LIST_FOR_EACH_ENTRY(client_session, &cur_task->cli_sess_listhead, node)
-    {
-        assert(client_session != NULL);
-        struct session_backend* session_backend = CLIENT_SESSION_BACKEND(client_session);
-        if (session_backend->server->state == BLOCKED) {
-            xizi_task_manager.task_unblock(session_backend->server);
-        }
-    }
-
+    THREAD_TRANS_STATE(cur_task, READY);
     return 0;
 }

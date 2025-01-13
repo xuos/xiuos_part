@@ -56,7 +56,7 @@ void software_irq_dispatch(struct trapframe* tf)
     /// @todo: Handle dead task
 
     int syscall_num = -1;
-    if (cur_task && cur_task->state != DEAD) {
+    if (cur_task && cur_task->snode.state != DEAD) {
         cur_task->thread_context.trapframe = tf;
         // call syscall
 
@@ -64,8 +64,8 @@ void software_irq_dispatch(struct trapframe* tf)
         arch_set_return(tf, ret);
     }
 
-    if ((cur_cpu()->task == NULL && cur_task != NULL) || cur_task->state != RUNNING) {
-        cur_cpu()->task = NULL;
+    assert(cur_cpu()->task == cur_task && cur_task->snode.state == RUNNING);
+    if (!queue_is_empty(&cur_task->snode.state_trans_signal_queue)) {
         context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
     }
     if (syscall_num == SYSCALL_EXIT) {

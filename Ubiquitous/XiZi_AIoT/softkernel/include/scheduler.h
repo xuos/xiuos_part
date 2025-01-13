@@ -1,36 +1,61 @@
-/*
- * Copyright (c) 2020 AIIT XUOS Lab
- * XiUOS is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- *        http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
-/**
- * @file scheduler.h
- * @brief scheduler algorithm declaration
- * @version 3.0
- * @author AIIT XUOS Lab
- * @date 2023.08.25
- */
 
-/*************************************************
-File name: scheduler.h
-Description: scheduler algorithm declaration
-Others:
-History:
-1. Date: 2023-08-28
-Author: AIIT XUOS Lab
-Modification:
-1. first version
-*************************************************/
 #pragma once
+#include "actracer.h"
+#include "ksemaphore.h"
+#include "rbtree.h"
 
-#include "task.h"
+#define TASK_MAX_PRIORITY 32
+#define UNINIT_SNODE_ID 0
+typedef uintptr_t snode_id_t;
 
-struct Thread* max_priority_runnable_task(void);
-struct Thread* round_robin_runnable_task(uint32_t priority);
-void recover_priority(void);
+enum ThreadState {
+    NEVER_RUN = 0,
+    INIT,
+    READY,
+    RUNNING,
+    DEAD,
+    BLOCKED,
+    SLEEPING,
+    NR_STATE,
+
+    // follow state is temp for kernel use
+    TRANS_WAKING,
+};
+
+typedef struct ScheduleContext {
+    intptr_t remain_tick;
+    uint64_t run_time;
+    intptr_t unblock_signals;
+} ScheduleContext;
+
+typedef struct TaskSleepContext {
+    int64_t remain_ms;
+} TaskSleepContext;
+
+struct ScheduleNode {
+    struct Thread* pthd;
+    snode_id_t snode_id;
+    enum ThreadState state;
+    Queue state_trans_signal_queue;
+
+    ScheduleContext sched_context;
+    TaskSleepContext sleep_context;
+};
+
+struct Scheduler {
+    TraceTag tag;
+    RbtTree snode_state_pool[NR_STATE];
+    RbtTree state_trans_ref_map;
+    struct XiziSemaphorePool semaphore_pool;
+};
+
+extern struct Scheduler g_scheduler;
+
+bool init_schedule_node(struct ScheduleNode* snode, struct Thread* bind_thd);
+void enqueue_task_trans_state(struct Thread* thd, enum ThreadState state);
+#define THREAD_TRANS_STATE(thd, state) enqueue_task_trans_state(thd, state);
+
+bool task_trans_sched_state(struct ScheduleNode* snode, RbtTree* from_pool, RbtTree* to_pool, enum ThreadState target_state);
+void task_block(struct Thread* thd);
+void task_dead(struct Thread* thd);
+void task_into_ready(struct Thread* thd);

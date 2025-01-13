@@ -61,7 +61,7 @@ Modification:
 // memory fs range
 struct MemFsRange {
     uintptr_t memfs_start;
-    uint32_t memfs_nr_blocks;
+    uintptr_t memfs_nr_blocks;
 };
 
 // memfs file type
@@ -89,9 +89,9 @@ struct Inode {
 };
 
 // directory entry
-#define DIR_NAME_SIZE 30
+#define DIR_NAME_SIZE 28
 struct DirectEntry {
-    uint16_t inum;
+    uint32_t inum;
     char name[DIR_NAME_SIZE];
 };
 
@@ -105,7 +105,7 @@ struct FileDescriptor {
 // range of memory fs
 extern struct MemFsRange MemFsRange;
 
-void MemFsInit(uintptr_t _binary_fs_img_start, uint32_t fs_img_len);
+void MemFsInit(uintptr_t _binary_fs_img_start, uintptr_t fs_img_len);
 void ReadSuperBlock(struct SuperBlock*);
 
 // fs Inode ops

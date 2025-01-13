@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     struct Session fs_session;
     static char id_buf[33] = { 0 };
     if (id > 1) {
-        if (connect_session(&fs_session, "MemFS", 8192) < 0) {
+        if (connect_session(&fs_session, "MemFS", 0x4000) < 0) {
             printf("connect fs_session failed\n");
         } else {
             int fd;

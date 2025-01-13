@@ -40,8 +40,9 @@ int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintptr_t en
     struct ThreadStackPointer loaded_sp = load_user_stack(pmemspace, argv);
     if (loaded_sp.stack_idx == -1) {
         ERROR("Uable to load params to memspace.\n");
-        /* memspace is freed alone with free_pcb() */
-        xizi_task_manager.free_pcb(task);
+        /* memspace is freed alone with free_thread() */
+        struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
+        tlo->free_thread(task);
         return -1;
     }
 
@@ -60,10 +61,15 @@ int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintptr_t en
             last = name + 1;
         }
     }
-    strncpy(task->name, last, sizeof(task->name));
+    strncpy(task->name, last, sizeof(task->name) - 1);
 
     // init pcb schedule attributes
-    xizi_task_manager.task_set_default_schedule_attr(task);
+    task_into_ready(task);
+
+    // thread init done by here
+    if (pmemspace->thread_to_notify == NULL) {
+        pmemspace->thread_to_notify = task;
+    }
 
     return task->tid;
 }
@@ -75,7 +81,8 @@ int sys_thread(uintptr_t entry, char* name, char** argv)
     // use current task's memspace
     struct MemSpace* pmemspace = cur_task->memspace;
 
-    struct Thread* task = xizi_task_manager.new_task_cb(pmemspace);
+    struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
+    struct Thread* task = tlo->new_thread(pmemspace);
     if (UNLIKELY(!task)) {
         ERROR("Unable to new task control block.\n");
         return -1;

@@ -77,7 +77,7 @@ _boot_start:
     mul     r3, 	r2, r1
     sub     r0, 	r0, r3
            
-    msr     CPSR_c, #ARM_MODE_SVC | I_BIT | F_BIT
+    msr     CPSR_c, #ARM_MODE_SVC | I_BIT 
     mov     sp, 	r0
     sub     r0, 	r0, r1 
     

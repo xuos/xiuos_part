@@ -48,7 +48,7 @@ uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc)
 
     uintptr_t* l3_pde_vaddr;
     if (*l2_pde_ptr != 0) {
-        uintptr_t l3_table_paddr = (*l2_pde_ptr) & ~pde_attr;
+        uintptr_t l3_table_paddr = ALIGNDOWN(*l2_pde_ptr, PAGE_SIZE);
         l3_pde_vaddr = (uintptr_t*)P2V(l3_table_paddr);
     } else {
         if (!alloc || !(l3_pde_vaddr = (uintptr_t*)kalloc(sizeof(uintptr_t) * NUM_LEVEL3_PDE))) {
@@ -63,7 +63,7 @@ uintptr_t* _page_walk(uintptr_t* pgdir, uintptr_t vaddr, bool alloc)
 
     uintptr_t* l4_pte_vaddr;
     if (*l3_pde_ptr != 0) {
-        uintptr_t l4_table_paddr = (*l3_pde_ptr) & ~pde_attr;
+        uintptr_t l4_table_paddr = ALIGNDOWN(*l3_pde_ptr, PAGE_SIZE);
         l4_pte_vaddr = (uintptr_t*)P2V(l4_table_paddr);
     } else {
         if (!alloc || !(l4_pte_vaddr = (uintptr_t*)kalloc(sizeof(uintptr_t) * NUM_LEVEL4_PTE))) {
@@ -83,8 +83,6 @@ void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
         return;
     }
 
-    uintptr_t low_bound = kern_virtmem_buddy.mem_start, high_bound = kern_virtmem_buddy.mem_end;
-    uintptr_t user_low_bound = user_phy_freemem_buddy.mem_start, user_high_bound = user_phy_freemem_buddy.mem_end;
     uintptr_t end_idx = (USER_MEM_TOP >> LEVEL2_PDE_SHIFT) & (NUM_LEVEL2_PDE - 1);
 
     for (uintptr_t l2_entry_idx = 0; l2_entry_idx < end_idx; l2_entry_idx++) {
@@ -95,23 +93,6 @@ void _free_user_pgdir(struct TopLevelPageDirectory* pgdir)
             for (uintptr_t l3_entry_idx = 0; l3_entry_idx < NUM_LEVEL3_PDE; l3_entry_idx++) {
                 uintptr_t* l4_table_paddr = (uintptr_t*)LEVEL4_PTE_ADDR(l3_table_vaddr[l3_entry_idx]);
                 if (l4_table_paddr != NULL) {
-                    uintptr_t* l4_table_vaddr = P2V(l4_table_paddr);
-                    for (uintptr_t page_entry_idx = 0; page_entry_idx < NUM_LEVEL4_PTE; page_entry_idx++) {
-                        uintptr_t vaddr = (l2_entry_idx << LEVEL2_PDE_SHIFT) | (l3_entry_idx << LEVEL3_PDE_SHIFT) | (page_entry_idx << LEVEL4_PTE_SHIFT);
-
-                        // get page paddr
-                        uintptr_t* page_paddr = (uintptr_t*)ALIGNDOWN((l4_table_vaddr)[page_entry_idx], PAGE_SIZE);
-                        if (page_paddr != NULL) {
-                            // Ensure the virtual address is not in the IPC address space
-                            assert(vaddr < USER_IPC_SPACE_BASE || vaddr >= USER_IPC_SPACE_TOP);
-
-                            if (LIKELY((uintptr_t)page_paddr >= low_bound && (uintptr_t)page_paddr < high_bound)) {
-                                kfree(P2V(page_paddr));
-                            } else if (LIKELY((uintptr_t)page_paddr >= user_low_bound && (uintptr_t)page_paddr < user_high_bound)) {
-                                raw_free((char*)page_paddr);
-                            }
-                        }
-                    }
                     kfree(P2V(l4_table_paddr));
                 }
             }

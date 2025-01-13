@@ -51,7 +51,7 @@ static bool _new_pgdir(struct TopLevelPageDirectory* pgdir)
     return true;
 }
 
-static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, int len, uintptr_t attr)
+static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, intptr_t len, uintptr_t attr)
 {
     assert(len >= 0);
     vaddr = ALIGNDOWN(vaddr, LEVEL4_PTE_SIZE);
@@ -61,12 +61,12 @@ static bool _map_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, int l
     while (true) {
         uintptr_t* pte = NULL;
         if ((pte = _page_walk(pgdir, vaddr, true)) == NULL) {
-            ERROR("pte not found for vaddr %x.\n", vaddr);
+            ERROR("pte not found for vaddr %p.\n", vaddr);
             return false;
         }
 
         if (UNLIKELY(*pte != 0)) {
-            ERROR("remapping: vaddr: %x | paddr: %x | pte: %x |\n", vaddr, paddr, *pte);
+            ERROR("remapping: vaddr: %p | paddr: %p | pte: %p |\n", vaddr, paddr, *pte);
             return false;
         }
 
@@ -93,12 +93,12 @@ static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, int len)
     while (true) {
         uintptr_t* pte = NULL;
         if ((pte = _page_walk(pgdir, vaddr, false)) == NULL) {
-            ERROR("pte not found for vaddr %x.\n", vaddr);
+            ERROR("pte not found for vaddr %p.\n", vaddr);
             return false;
         }
 
         if (*pte == 0) {
-            ERROR("unmap a unmapped page, vaddr: %x, pte: %x\n", vaddr, *pte);
+            ERROR("unmap a unmapped page, vaddr: %p, pte: %p\n", vaddr, *pte);
             return false;
         }
 
@@ -122,7 +122,7 @@ static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, int len)
 /// @param len
 /// @param is_dev
 /// @return
-static bool _map_user_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
+static bool _map_user_pages(struct MemSpace* pmemspace, uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 {
     if (len < 0) {
         return false;
@@ -140,13 +140,27 @@ static bool _map_user_pages(uintptr_t* pgdir, uintptr_t vaddr, uintptr_t paddr, 
         _p_pgtbl_mmu_access->MmuUsrDevPteAttr(&mem_attr);
     }
 
-    return _map_pages(pgdir, vaddr, paddr, len, mem_attr);
+    return _map_pages(pmemspace->pgdir.pd_addr, vaddr, paddr, (intptr_t)len, mem_attr);
+}
+
+bool _map_customizable_page(struct MemSpace* pmemspace, uintptr_t vaddr, uintptr_t paddr, int len, uintptr_t attr)
+{
+    if (len < 0) {
+        return false;
+    }
+
+    if (UNLIKELY(vaddr >= USER_MEM_TOP)) {
+        ERROR("mapping kernel space.\n");
+        return false;
+    }
+
+    return _map_pages(pmemspace->pgdir.pd_addr, vaddr, paddr, (intptr_t)len, attr);
 }
 
 /// assume that a user pagedir is allocated from [0, size)
 /// if new_size > old_size, allocate more space,
 /// if old_size > new_size, free extra space, to avoid unnecessary alloc/free.
-static uintptr_t _resize_user_pgdir(struct TopLevelPageDirectory* pgdir, uintptr_t old_size, uintptr_t new_size)
+static uintptr_t _resize_user_pgdir(struct MemSpace* pmemspace, uintptr_t old_size, uintptr_t new_size)
 {
     if (UNLIKELY(new_size > USER_MEM_TOP)) {
         ERROR("user size out of range.\n");
@@ -158,19 +172,17 @@ static uintptr_t _resize_user_pgdir(struct TopLevelPageDirectory* pgdir, uintptr
     }
 
     uintptr_t cur_size = ALIGNUP(old_size, PAGE_SIZE);
+    uintptr_t size_needed = ALIGNUP(new_size, PAGE_SIZE) - cur_size;
 
-    while (cur_size < new_size) {
-        char* new_page = kalloc(PAGE_SIZE);
-        if (new_page == NULL) {
-            ERROR("No memory\n");
-            return cur_size;
-        }
-        memset(new_page, 0, PAGE_SIZE);
-
-        if (!xizi_pager.map_pages(pgdir->pd_addr, cur_size, V2P(new_page), PAGE_SIZE, false)) {
-            return cur_size;
-        }
-        cur_size += PAGE_SIZE;
+    // char* new_page = kalloc(size_needed);
+    char* new_page = kalloc_by_ownership(pmemspace->kernspace_mem_usage.tag, size_needed);
+    if (new_page == NULL) {
+        ERROR("No memory\n");
+        return cur_size;
+    }
+    memset(new_page, 0, size_needed);
+    if (!xizi_pager.map_pages(pmemspace, cur_size, V2P(new_page), size_needed, false)) {
+        return cur_size;
     }
 
     return new_size;
@@ -269,7 +281,7 @@ void load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct TraceTag* intr_driv
     // kern mem
     _map_pages((uintptr_t*)kern_pgdir.pd_addr, KERN_MEM_BASE, PHY_MEM_BASE, (PHY_MEM_STOP - PHY_MEM_BASE), kern_attr);
     // dev mem
-    _map_pages((uintptr_t*)kern_pgdir.pd_addr, DEV_VRTMEM_BASE, DEV_PHYMEM_BASE, DEV_MEM_SZ, dev_attr);
+    _map_pages((uintptr_t*)kern_pgdir.pd_addr, DEV_VRTMEM_BASE, DEV_PHYMEM_BASE, DEV_MEM_SIZE, dev_attr);
 
     _p_pgtbl_mmu_access->LoadPgdir((uintptr_t)V2P(kern_pgdir.pd_addr));
 }

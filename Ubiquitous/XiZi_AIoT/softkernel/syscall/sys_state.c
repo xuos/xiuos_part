@@ -30,6 +30,7 @@ Modification:
 #include <stdint.h>
 #include <string.h>
 
+#include "actracer.h"
 #include "assert.h"
 #include "buddy.h"
 #include "log.h"
@@ -41,65 +42,50 @@ Modification:
 extern uint8_t _binary_fs_img_start[], _binary_fs_img_end[];
 
 #define SHOWINFO_BORDER_LINE() LOG_PRINTF("******************************************************\n");
-#define SHOWTASK_TASK_BASE_INFO(task) LOG_PRINTF(" %-6d %-16s %-4d 0x%x(%-d)\n", task->tid, task->name, task->priority, task->memspace->mem_size >> 10, task->memspace->mem_size >> 10)
+#define SHOWTASK_TASK_BASE_INFO(task) LOG_PRINTF(" %-6d %-16s %-4d 0x%x(%-d)\n", task->tid, task->name, 0, task->memspace->mem_size >> 10, task->memspace->mem_size >> 10)
+
+bool print_info(RbtNode* node, void* data)
+{
+    struct ScheduleNode* snode = (struct ScheduleNode*)node->data;
+    struct Thread* thd = snode->pthd;
+    switch (snode->state) {
+    case INIT:
+        LOG_PRINTF("%-8s", "INIT");
+        break;
+    case READY:
+        LOG_PRINTF("%-8s", "READY");
+        break;
+    case RUNNING:
+        LOG_PRINTF("%-8s", "RUNNING");
+        break;
+    case DEAD:
+        LOG_PRINTF("%-8s", "DEAD");
+        break;
+    case BLOCKED:
+        LOG_PRINTF("%-8s", "BLOCK");
+        break;
+    case SLEEPING:
+        LOG_PRINTF("%-8s", "SLEEP");
+        break;
+    default:
+        break;
+    }
+
+    SHOWTASK_TASK_BASE_INFO(thd);
+    return true;
+}
 
 void show_tasks(void)
 {
-    struct Thread* task = NULL;
     SHOWINFO_BORDER_LINE();
     for (int i = 0; i < NR_CPU; i++) {
         LOG_PRINTF("CPU %-2d: %s\n", i, (global_cpus[i].task == NULL ? "NULL" : global_cpus[i].task->name));
     }
     SHOWINFO_BORDER_LINE();
     LOG_PRINTF("%-8s %-6s %-16s %-4s %-8s\n", "STAT", "ID", "TASK", "PRI", "MEM(KB)");
-    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_running_list_head, node)
-    {
-        LOG_PRINTF("%-8s", "RUNNING");
-        SHOWTASK_TASK_BASE_INFO(task);
-    }
 
-    for (int i = 0; i < TASK_MAX_PRIORITY; i++) {
-        if (IS_DOUBLE_LIST_EMPTY(&xizi_task_manager.task_list_head[i])) {
-            continue;
-        }
-        DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_list_head[i], node)
-        {
-            switch (task->state) {
-            case INIT:
-                LOG_PRINTF("%-8s", "INIT");
-                break;
-            case READY:
-                LOG_PRINTF("%-8s", "READY");
-                break;
-            case RUNNING:
-                LOG_PRINTF("%-8s", "RUNNING");
-                break;
-            case DEAD:
-                LOG_PRINTF("%-8s", "DEAD");
-                break;
-            default:
-                break;
-            }
-
-            SHOWTASK_TASK_BASE_INFO(task);
-        }
-    }
-
-    DOUBLE_LIST_FOR_EACH_ENTRY(task, &xizi_task_manager.task_blocked_list_head, node)
-    {
-        LOG_PRINTF("%-8s", "BLOCK");
-        SHOWTASK_TASK_BASE_INFO(task);
-    }
-
-    struct ksemaphore* sem = NULL;
-    DOUBLE_LIST_FOR_EACH_ENTRY(sem, &xizi_task_manager.semaphore_pool.sem_list_guard, sem_list_node)
-    {
-        task = NULL;
-        DOUBLE_LIST_FOR_EACH_ENTRY(task, &sem->wait_list_guard, node)
-        {
-            LOG_PRINTF("%-8s", "BLOCK");
-            SHOWTASK_TASK_BASE_INFO(task);
-        }
+    for (int pool_id = INIT; pool_id < NR_STATE; pool_id++) {
+        rbt_traverse(&g_scheduler.snode_state_pool[pool_id], print_info, NULL);
     }
 
     SHOWINFO_BORDER_LINE();
@@ -143,7 +129,7 @@ void show_cpu(void)
     assert(current_task != NULL);
 
     LOG_PRINTF(" ID  COMMAND        USED_TICKS  FREE_TICKS \n");
-    LOG_PRINTF(" %d   %s   %d          %d\n", cpu_id, current_task->name, TASK_CLOCK_TICK - current_task->remain_tick, current_task->remain_tick);
+    LOG_PRINTF(" %d   %s   %d          %d\n", cpu_id, current_task->name, TASK_CLOCK_TICK - current_task->snode.sched_context.remain_tick, current_task->snode.sched_context.remain_tick);
 
     LOG_PRINTF("***********************************************************\n");
     return;
@@ -151,19 +137,43 @@ void show_cpu(void)
 
 int sys_state(sys_state_option option, sys_state_info* info)
 {
-    if (option == SYS_STATE_MEMBLOCK_INFO) {
+    switch (option) {
+    case SYS_STATE_MEMBLOCK_INFO: {
         info->memblock_info.memblock_start = (uintptr_t)V2P(_binary_fs_img_start);
         info->memblock_info.memblock_end = (uintptr_t)V2P(_binary_fs_img_end);
-    } else if (option == SYS_STATE_GET_HEAP_BASE) {
+        break;
+    }
+    case SYS_STATE_GET_HEAP_BASE:
         return cur_cpu()->task->memspace->heap_base;
-    } else if (option == SYS_STATE_SET_TASK_PRIORITY) {
+    case SYS_STATE_SET_TASK_PRIORITY:
         xizi_task_manager.set_cur_task_priority(info->priority);
-    } else if (option == SYS_STATE_SHOW_TASKS) {
+        break;
+    case SYS_STATE_SHOW_TASKS:
         show_tasks();
-    } else if (option == SYS_STATE_SHOW_MEM_INFO) {
+        break;
+    case SYS_STATE_SHOW_MEM_INFO:
         show_mem();
-    } else if (option == SYS_STATE_SHOW_CPU_INFO) {
+        break;
+    case SYS_STATE_SHOW_CPU_INFO:
         show_cpu();
+        break;
+    case SYS_STATE_GET_CURRENT_TICK: {
+        extern void hw_current_tick(uintptr_t * tick);
+        hw_current_tick(&info->current_tick);
+        break;
+    }
+    case SYS_STATE_GET_CURRENT_SECOND: {
+        extern void hw_current_second(uintptr_t * tick);
+        hw_current_second(&info->current_second);
+        break;
+    }
+    case SYS_STATE_SHOW_ACTREE: {
+        debug_list_tracetree();
+        break;
+    }
+    case SYS_STATE_TEST:
+    default:
+        break;
     }
 
     return 0;

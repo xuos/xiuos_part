@@ -9,10 +9,10 @@ user_ldflags = --start-group,-lgcc,-lc,--end-group
 cflags = -std=c11 -march=armv7-a -mtune=cortex-a9 -nostdlib -nodefaultlibs -mfloat-abi=soft -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
 #cflags = -Wall -g -std=c11 
 endif
-ifeq ($(BOARD), ok1028a-c)
+ifeq ($(BOARD), 3568)
 toolchain ?= aarch64-none-elf-
 user_ldflags = -N -Ttext 0
-cflags = -Wall -g -std=c11 -mtune=cortex-a72 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie  
+cflags = -Wall -O0 -g -std=c11 -mtune=cortex-a55 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -ggdb -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
 endif
 
 cc = ${toolchain}gcc

@@ -32,12 +32,13 @@ Modification:
 #include <stdint.h>
 
 #include "actracer.h"
+#include "ksemaphore.h"
 #include "list.h"
 #include "task.h"
 
 /// @brief userland session info copy
 struct Session {
-    int id;
+    uintptr_t id;
     int capacity;
     int head;
     int tail;
@@ -48,7 +49,7 @@ struct Session {
 #define CLIENT_SESSION_BACKEND(session) CONTAINER_OF(session, struct session_backend, client_side)
 
 struct server_session {
-    struct double_list_node node; // list_head of server task's ipc pipes
+    struct double_list_node node; // list node of server task's ipc pipes
     uintptr_t buf_addr;
     int capacity;
     int head;
@@ -57,7 +58,7 @@ struct server_session {
 };
 
 struct client_session {
-    struct double_list_node node; // list_head of client task's ipc pipes
+    struct double_list_node node; // list node of client task's ipc pipes
     uintptr_t buf_addr;
     int capacity;
     bool closed;
@@ -72,6 +73,7 @@ struct session_backend {
     struct Thread* client; // client of this pipe
     struct Thread* server; // server of this pipe
 
+    sem_id_t client_sem_to_wait;
     uintptr_t buf_kernel_addr;
 };
 
@@ -90,3 +92,23 @@ struct XiziSharePageManager {
 extern struct XiziSharePageManager xizi_share_page_manager;
 
 int module_share_page_init(struct SharePageRightGroup* right_group);
+
+static inline void client_close_session(struct Thread* thd, struct client_session* cli_sess)
+{
+    assert(cli_sess != NULL);
+    struct session_backend* sess_backend = CLIENT_SESSION_BACKEND(cli_sess);
+    assert(sess_backend->client == thd);
+    assert(cli_sess->closed == false);
+    cli_sess->closed = true;
+    xizi_share_page_manager.delete_share_pages(sess_backend);
+}
+
+static inline void server_close_session(struct Thread* thd, struct server_session* svr_sess)
+{
+    assert(svr_sess != NULL);
+    struct session_backend* sess_backend = SERVER_SESSION_BACKEND(svr_sess);
+    assert(sess_backend->server == thd);
+    assert(svr_sess->closed == false);
+    svr_sess->closed = true;
+    xizi_share_page_manager.delete_share_pages(sess_backend);
+}

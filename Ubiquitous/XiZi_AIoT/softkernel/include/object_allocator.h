@@ -29,10 +29,12 @@ Modification:
 *************************************************/
 #pragma once
 
+#include "actracer_tag.h"
 #include <stddef.h>
 #include <stdint.h>
 
 struct slab_state {
+    TraceTag owner_tag;
     struct slab_state *prev, *next;
     uint64_t bitmap;
     uintptr_t refcount;
@@ -45,9 +47,10 @@ struct slab_allocator {
     size_t slabsize;
     uint64_t bitmap_empty;
     struct slab_state *partial, *empty, *full;
+    char* name;
 };
 
-void slab_init(struct slab_allocator*, size_t);
+void slab_init(struct slab_allocator*, size_t, char* name);
 void slab_destroy(const struct slab_allocator*);
 
 void* slab_alloc(struct slab_allocator*);

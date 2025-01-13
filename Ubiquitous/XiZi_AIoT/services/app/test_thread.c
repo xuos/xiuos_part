@@ -25,15 +25,9 @@ int sub_thread_entry(int argc, char** argv)
         global_value++;
     }
 
-    /// @warning session is single threaded, so that each thread cannot share a common session.
     // sub thread connect to semaphore server
-    struct Session sem_session;
-    while (connect_session(&sem_session, sem_server_name, 4096) < 0) {
-        yield(SYS_TASK_YIELD_NO_REASON);
-    }
-
     printf("Thread signal sem.\n");
-    sem_signal(&sem_session, &sem);
+    semaphore_signal(sem);
 
     exit(0);
     return 0;
@@ -45,39 +39,8 @@ int main(int argc, char** argv)
     global_value = 0;
 
     printf("Test Create Semaphore.\n");
-    struct Session sem_session;
-    bool spawn_sem_server = false;
-    while (connect_session(&sem_session, sem_server_name, 4096) < 0) {
-        if (!spawn_sem_server) {
-            struct Session fs_session;
-            printf("Connect FS.\n");
-            if (connect_session(&fs_session, "MemFS", 8192) < 0) {
-                printf("Connect FS failed.\n");
-                exit(1);
-            }
-
-            printf("Loading semaphore server.\n");
-            int fd = -1;
-            if ((fd = open(&fs_session, sem_file_name)) < 0) {
-                printf("Open %s failed.\n", sem_file_name);
-                free_session(&fs_session);
-                exit(1);
-            }
-
-            printf("Spawn semaphore server.\n");
-            char* sem_server_params[] = { sem_server_name, sem_server_name, NULL };
-            if (spawn(&fs_session, fd, read, fsize, sem_server_name, sem_server_params) < 0) {
-                printf("Spawn %s failed.\n", sem_file_name);
-                free_session(&fs_session);
-                exit(1);
-            }
-
-            spawn_sem_server = true;
-            free_session(&fs_session);
-        }
-    }
     printf("Create new sem.\n");
-    sem_create(&sem_session, &sem, 0);
+    sem = semaphore_new(0);
 
     printf("Create new thread.\n");
     char* task_param[2] = { "add_gval", NULL };
@@ -91,12 +54,11 @@ int main(int argc, char** argv)
 
     printf("Main thread waiting for sem for %d times.\n", nr_thread);
     for (int i = 0; i < nr_thread; i++) {
-        int sem_wait_ret = sem_wait(&sem_session, &sem, 0);
+        int sem_wait_ret = semaphore_wait(sem);
     }
     printf("Main thread sem %d wait return, global val: %d.\n", sem, global_value);
 
-    sem_delete(&sem_session, &sem);
-    free_session(&sem_session);
+    semaphore_free(sem);
     exit(0);
     return 0;
 }

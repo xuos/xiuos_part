@@ -33,10 +33,11 @@ Modification:
 #include <string.h>
 
 #include "memlayout.h"
-
-#include "actracer.h"
 #include "mmu.h"
 #include "mmu_common.h"
+
+#include "actracer.h"
+#include "memspace.h"
 
 // clang-format off
 #define ALIGNUP(size, align)         (((uintptr_t)(size) + (uintptr_t)(align) - 1) & ~((uintptr_t)(align) - 1))
@@ -49,10 +50,6 @@ Modification:
 #define TOPLEVLE_PAGEDIR_SIZE   sizeof(uintptr_t) * NUM_TOPLEVEL_PDE
 // clang-format on
 
-struct TopLevelPageDirectory {
-    uintptr_t* pd_addr;
-};
-
 struct PagerRightGroup {
     struct TraceTag mmu_driver_tag;
 };
@@ -60,10 +57,10 @@ struct PagerRightGroup {
 struct XiziPageManager {
     bool (*new_pgdir)(struct TopLevelPageDirectory* pgdir);
     void (*free_user_pgdir)(struct TopLevelPageDirectory* pgdir);
-    bool (*map_pages)(uintptr_t* pd_addr, uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev);
+    bool (*map_pages)(struct MemSpace* pmemspace, uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev);
     bool (*unmap_pages)(uintptr_t* pd_addr, uintptr_t vaddr, int len);
 
-    uintptr_t (*resize_user_pgdir)(struct TopLevelPageDirectory* pgdir, uintptr_t old_size, uintptr_t new_size);
+    uintptr_t (*resize_user_pgdir)(struct MemSpace* pmemspace, uintptr_t old_size, uintptr_t new_size);
     uintptr_t (*address_translate)(struct TopLevelPageDirectory* pgdir, uintptr_t vaddr);
     uintptr_t (*cross_vspace_data_copy)(struct TopLevelPageDirectory* pgdir, uintptr_t cross_dest, uintptr_t src, uintptr_t len);
 };

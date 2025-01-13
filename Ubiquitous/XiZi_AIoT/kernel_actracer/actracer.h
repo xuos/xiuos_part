@@ -30,35 +30,12 @@ Modification:
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "list.h"
+#include "actracer_tag.h"
 #include "object_allocator.h"
 
 #define TRACER_NODE_NAME_LEN 32
 
-typedef enum {
-    TRACER_INVALID = 0,
-    TRACER_OWNER,
-    TRACER_HARDKERNEL_AC_RESOURCE,
-    TRACER_TASK_DESCRIPTOR_AC_RESOURCE,
-    TRACER_SERVER_IDENTITY_AC_RESOURCE,
-    TRACER_MEM_FROM_BUDDY_AC_RESOURCE,
-} tracemeta_ac_type;
-
-typedef struct TracerNode {
-    tracemeta_ac_type type;
-    char* name;
-    union {
-        struct double_list_node children_guard;
-        void* p_resource;
-    };
-    struct TracerNode* parent;
-    struct double_list_node list_node;
-} TracerNode;
-
-/// @brief tag for other module to reference trace meta
-typedef struct TraceTag {
-    TracerNode* meta;
-} TraceTag;
+#define GetSysObject(type, target_tag) (type*)AchieveResource(target_tag)
 
 struct SysTracer {
     TracerNode root_node;
@@ -73,3 +50,5 @@ bool AchieveResourceTag(struct TraceTag* target, struct TraceTag* owner, char* n
 void* AchieveResource(struct TraceTag* tag);
 bool CreateResourceTag(struct TraceTag* new_tag, struct TraceTag* owner, char* name, tracemeta_ac_type type, void* p_resource);
 bool DeleteResource(struct TraceTag* target, struct TraceTag* owner);
+
+void debug_list_tracetree();

@@ -32,6 +32,7 @@ Modification:
 #include "assert.h"
 #include "kalloc.h"
 #include "object_allocator.h"
+#include "pagetable.h"
 
 #define BITMAP_BITS_EMPTY_FULL ((uint64_t)0)
 #define BITMAP_FIRST_BIT ((uint64_t)1)
@@ -44,10 +45,10 @@ Modification:
 #define LOWLEVEL_ALLOC(size) kalloc(size)
 #define LOWLEVEL_FREE(ptr) kfree(ptr)
 
-#define ARENA_SIZE_PER_INCREASE PAGE_SIZE
+#define ARENA_SIZE_PER_INCREASE (2 * PAGE_SIZE)
 #define MAX_NR_ELEMENT_PER_SLABPAGE 64
 
-void slab_init(struct slab_allocator* const allocator, const size_t element_size)
+void slab_init(struct slab_allocator* const allocator, const size_t element_size, char* name)
 {
     if (allocator == NULL) {
         panic("init a NULL slab_allocator\n");
@@ -63,8 +64,11 @@ void slab_init(struct slab_allocator* const allocator, const size_t element_size
     allocator->nr_elements = allocator->nr_elements > MAX_NR_ELEMENT_PER_SLABPAGE ? MAX_NR_ELEMENT_PER_SLABPAGE : allocator->nr_elements;
 
     allocator->bitmap_empty = ~BITMAP_BITS_EMPTY_FULL >> (MAX_NR_ELEMENT_PER_SLABPAGE - allocator->nr_elements);
-
     allocator->partial = allocator->empty = allocator->full = NULL;
+
+    if (name) {
+        allocator->name = name;
+    }
 }
 
 void* slab_alloc(struct slab_allocator* const allocator)
@@ -107,7 +111,7 @@ void* slab_alloc(struct slab_allocator* const allocator)
         /* achieve slab from outer arena */
         allocator->partial = (struct slab_state*)LOWLEVEL_ALLOC(allocator->slabsize);
         if (UNLIKELY(allocator->partial == NULL)) {
-            ERROR("no enough memory\n");
+            ERROR("slab %s: no enough memory\n", allocator->name);
             return allocator->partial = NULL;
         }
         allocator->partial->prev = allocator->partial->next = NULL;

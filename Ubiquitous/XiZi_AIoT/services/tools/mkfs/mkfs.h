@@ -49,7 +49,7 @@ Modification:
 #define ROOT_INUM 1 // root inode number
 #define BLOCK_SIZE 512 // block size
 #define NR_BIT_PER_BYTE 8
-#define NR_BIT_BLOCKS 2
+#define NR_BIT_BLOCKS 8
 #define nr_blocks_total (BLOCK_SIZE * NR_BIT_PER_BYTE * NR_BIT_BLOCKS) // total number of blocks (including used blocks and free blocks)
 #define nr_inodes 200 // total number of inodes
 
@@ -83,8 +83,8 @@ struct Inode {
 };
 
 // Directory is a file containing a sequence of DirEntry structures.
-#define DIR_NAME_SIZE 30
+#define DIR_NAME_SIZE 28
 struct DirEntry {
-    ushort inum;
+    __uint32_t inum;
     char name[DIR_NAME_SIZE];
 };

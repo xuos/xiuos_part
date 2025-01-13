@@ -69,7 +69,7 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         ret = sys_state(param1, (sys_state_info*)param2);
         break;
     case SYSCALL_MMAP:
-        ret = sys_mmap(param1, param2, (int)param3, (int)param4);
+        ret = sys_mmap_v2((uintptr_t*)param1, (uintptr_t*)param2, (int)param3, (sys_mmap_info*)param4);
         break;
     case SYSCALL_REGISTER_IRQ:
         ret = sys_register_irq((int)param1, (int)param2);
@@ -79,6 +79,12 @@ int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t param3, u
         break;
     case SYSCALL_SEMAPHORE:
         ret = sys_semaphore((sys_sem_option)param1, (int)param2);
+        break;
+    case SYSCALL_SLEEP:
+        ret = sys_sleep((intptr_t)param1);
+        break;
+    case SYSCALL_WAIT_SESSION:
+        ret = sys_wait_session((struct Session*)param1);
         break;
     default:
         ERROR("Unsurport syscall(%d) right now\n", sys_num);

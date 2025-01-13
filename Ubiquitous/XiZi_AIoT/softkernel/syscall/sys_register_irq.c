@@ -75,9 +75,8 @@ static void send_irq_to_user(int irq_num)
         buf->header.done = 0;
         buf->header.magic = IPC_MSG_MAGIC;
         buf->header.valid = 1;
-
-        if (irq_forward_table[irq_num].handle_task->state == BLOCKED) {
-            xizi_task_manager.task_unblock(irq_forward_table[irq_num].handle_task);
+        if (enqueue(&irq_forward_table[irq_num].handle_task->sessions_to_be_handle, 0, (void*)&irq_forward_table[irq_num].p_kernel_session->server_side)) {
+            THREAD_TRANS_STATE(irq_forward_table[irq_num].handle_task, TRANS_WAKING);
         }
 
         /* add session head */
@@ -92,7 +91,7 @@ int user_irq_handler(int irq, void* tf, void* arg)
 
         next_task_emergency = irq_forward_table[irq].handle_task;
         if (cur_cpu()->task != NULL) {
-            xizi_task_manager.task_yield_noschedule(cur_cpu()->task, false);
+            THREAD_TRANS_STATE(cur_cpu()->task, READY);
         }
     }
     return 0;
@@ -117,15 +116,18 @@ int sys_register_irq(int irq_num, int irq_opcode)
     // init kerenl sender proxy
     if (kernel_irq_proxy == NULL) {
         /// @todo handle corner cases
-        struct MemSpace* pmemspace = alloc_memspace();
+        struct MemSpace* pmemspace = alloc_memspace("KernelIrqProxy");
         if (pmemspace == NULL) {
             return -1;
         }
         xizi_pager.new_pgdir(&pmemspace->pgdir);
         memcpy(pmemspace->pgdir.pd_addr, kern_pgdir.pd_addr, TOPLEVLE_PAGEDIR_SIZE);
 
-        kernel_irq_proxy = xizi_task_manager.new_task_cb(pmemspace);
-        kernel_irq_proxy->state = NEVER_RUN;
+        struct TaskLifecycleOperations* tlo = GetSysObject(struct TaskLifecycleOperations, &xizi_task_manager.task_lifecycle_ops_tag);
+        kernel_irq_proxy = tlo->new_thread(pmemspace);
+        task_trans_sched_state(&kernel_irq_proxy->snode, //
+            &g_scheduler.snode_state_pool[INIT], //
+            &g_scheduler.snode_state_pool[NEVER_RUN], NEVER_RUN);
     }
 
     // bind irq to session

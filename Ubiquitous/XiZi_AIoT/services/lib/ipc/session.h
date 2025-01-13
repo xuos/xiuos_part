@@ -36,7 +36,7 @@ Modification:
 #include "libserial.h"
 
 struct Session {
-    int id;
+    uintptr_t id;
     int capacity;
     int head;
     int tail;

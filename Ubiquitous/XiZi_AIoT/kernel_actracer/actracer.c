@@ -41,15 +41,16 @@ static void tracer_init_node(TracerNode* node, char* name, tracemeta_ac_type typ
     node->parent = NULL;
     if (name != NULL) {
         char* p_name = (char*)slab_alloc(&sys_tracer.node_name_allocator);
-        strcpy(p_name, name);
-        p_name[TRACER_NODE_NAME_LEN - 1] = '\0';
-        node->name = p_name;
+        if (!p_name) {
+            p_name = "BAD_NAME(NOMEM)";
+        } else {
+            strcpy(p_name, name);
+            p_name[TRACER_NODE_NAME_LEN - 1] = '\0';
+            node->name = p_name;
+        }
     }
-    if (node->type == TRACER_OWNER) {
-        doubleListNodeInit(&node->children_guard);
-    } else {
-        node->p_resource = p_resource;
-    }
+    doubleListNodeInit(&node->children_guard);
+    node->p_resource = p_resource;
     doubleListNodeInit(&node->list_node);
 }
 
@@ -61,8 +62,8 @@ void sys_tracer_init()
     sys_tracer.sys_tracer_tag.meta = &sys_tracer.root_node;
 
     // init memory allocator
-    slab_init(&sys_tracer.node_allocator, sizeof(TracerNode));
-    slab_init(&sys_tracer.node_name_allocator, sizeof(char[TRACER_NODE_NAME_LEN]));
+    slab_init(&sys_tracer.node_allocator, sizeof(TracerNode), "TracerNodeAllocator");
+    slab_init(&sys_tracer.node_name_allocator, sizeof(char[TRACER_NODE_NAME_LEN]), "TracerNodeNameAllocator");
 }
 
 static char* parse_path(char* path, char* const name)
@@ -84,7 +85,7 @@ static char* parse_path(char* path, char* const name)
     // handle current name
     int len = path - cur_start;
     if (len >= TRACER_NODE_NAME_LEN) {
-        strncpy(name, cur_start, TRACER_NODE_NAME_LEN);
+        strncpy(name, cur_start, TRACER_NODE_NAME_LEN - 1);
         name[TRACER_NODE_NAME_LEN - 1] = '\0';
     } else {
         strncpy(name, cur_start, len);
@@ -147,13 +148,14 @@ void* AchieveResource(TraceTag* tag)
 
 bool CreateResourceTag(TraceTag* new_tag, TraceTag* owner, char* name, tracemeta_ac_type type, void* p_resource)
 {
-    assert(new_tag != NULL && owner != NULL);
+    assert(owner != NULL);
     if (owner->meta == NULL) {
-        ERROR("Tracer: Empty owner\n");
+        ERROR("Tracer: Empty owner, node name: %s\n", name);
         return false;
     }
-    assert(owner->meta->type == TRACER_OWNER);
-    if (tracer_find_node_onestep(owner->meta, name) != NULL) {
+    // assert(owner->meta->type == TRACER_OWNER);
+    if (type == TRACER_SERVER_IDENTITY_AC_RESOURCE && //
+        tracer_find_node_onestep(owner->meta, name) != NULL) {
         return false;
     }
 
@@ -168,7 +170,9 @@ bool CreateResourceTag(TraceTag* new_tag, TraceTag* owner, char* name, tracemeta
     doubleListAddOnHead(&new_node->list_node, &owner->meta->children_guard);
     new_node->parent = owner->meta;
 
-    new_tag->meta = new_node;
+    if (new_tag != NULL) {
+        new_tag->meta = new_node;
+    }
     return true;
 }
 
@@ -177,7 +181,7 @@ bool DeleteResource(TraceTag* target, TraceTag* owner)
     assert(target != NULL && owner != NULL);
     assert(owner->meta != NULL && owner->meta->type == TRACER_OWNER);
     if (target->meta == NULL) {
-        ERROR("Tracer: Delete a empty resource\n");
+        ERROR("Tracer: Delete a empty resource, owner: %s\n", owner->meta->name);
         return false;
     }
 
@@ -187,12 +191,52 @@ bool DeleteResource(TraceTag* target, TraceTag* owner)
     if (target->meta->name != NULL) {
         slab_free(&sys_tracer.node_name_allocator, target->meta->name);
     }
+
     // delete all children
-    /// @attention currently donot allow multilevel resource deletion
     if (target->meta->type == TRACER_OWNER) {
-        assert(IS_DOUBLE_LIST_EMPTY(&target->meta->children_guard));
+        while (!IS_DOUBLE_LIST_EMPTY(&target->meta->children_guard)) {
+            TraceTag tmp_node = {
+                .meta = DOUBLE_LIST_ENTRY(target->meta->children_guard.next, TracerNode, list_node),
+            };
+            DeleteResource(&tmp_node, target);
+        }
     }
     slab_free(&sys_tracer.node_allocator, target->meta);
     target->meta = NULL;
     return true;
+}
+
+#define debug_print_blanks(n)           \
+    for (int __i = 0; __i < n; __i++) { \
+        DEBUG_PRINTF("  ");             \
+    }
+
+void debug_list_tracetree_inner(TracerNode* cur_node, int nr_blanks)
+{
+    debug_print_blanks(nr_blanks);
+    if (cur_node->name == NULL) {
+        DEBUG_PRINTF("[ANON %d] ", cur_node->type);
+    } else {
+        DEBUG_PRINTF("[%s %d] ", cur_node->name, cur_node->type);
+    }
+    TracerNode* tmp = NULL;
+    DOUBLE_LIST_FOR_EACH_ENTRY(tmp, &cur_node->children_guard, list_node)
+    {
+        if (tmp->name != NULL) {
+            DEBUG_PRINTF("%s ", tmp->name);
+        } else {
+            DEBUG_PRINTF("ANON ");
+        }
+    }
+    DEBUG_PRINTF("\n");
+    DOUBLE_LIST_FOR_EACH_ENTRY(tmp, &cur_node->children_guard, list_node)
+    {
+        debug_list_tracetree_inner(tmp, nr_blanks + 1);
+    }
+}
+
+void debug_list_tracetree()
+{
+    TracerNode* ref_root = RequireRootTag()->meta;
+    debug_list_tracetree_inner(ref_root, 0);
 }

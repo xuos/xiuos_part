@@ -44,7 +44,7 @@ static struct slab_allocator* SessionAllocator()
     static bool init = false;
     static struct slab_allocator session_slab;
     if (!init) {
-        slab_init(&session_slab, sizeof(struct session_backend));
+        slab_init(&session_slab, sizeof(struct session_backend), "SessionAllocator");
     }
     return &session_slab;
 }
@@ -111,7 +111,7 @@ static uintptr_t map_task_share_page(struct Thread* task, const uintptr_t paddr,
         vaddr = alloc_share_page_addr(task, nr_pages * 2);
 
         // time to use buddy
-        if (vaddr >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
+        if (vaddr + (2 * nr_pages * PAGE_SIZE) >= USER_IPC_USE_ALLOCATOR_WATERMARK) {
             task->memspace->massive_ipc_allocator = (struct KBuddy*)slab_alloc(&xizi_task_manager.task_buddy_allocator);
             if (!task->memspace->massive_ipc_allocator) {
                 ERROR("Alloc task buddy failed.\n");
@@ -133,12 +133,12 @@ static uintptr_t map_task_share_page(struct Thread* task, const uintptr_t paddr,
     }
 
     // map first area
-    if (!xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false)) {
+    if (!xizi_pager.map_pages(task->memspace, vaddr, paddr, nr_pages * PAGE_SIZE, false)) {
         return (uintptr_t)NULL;
     }
 
     // map second area
-    if (!xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr + (nr_pages * PAGE_SIZE), paddr, nr_pages * PAGE_SIZE, false)) {
+    if (!xizi_pager.map_pages(task->memspace, vaddr + (nr_pages * PAGE_SIZE), paddr, nr_pages * PAGE_SIZE, false)) {
         xizi_pager.unmap_pages(task->memspace->pgdir.pd_addr, vaddr, nr_pages * PAGE_SIZE);
         return (uintptr_t)NULL;
     }
@@ -161,9 +161,9 @@ uintptr_t task_map_pages(struct Thread* task, const uintptr_t vaddr, const uintp
 
     bool ret = false;
     if (is_dev) {
-        ret = xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, true);
+        ret = xizi_pager.map_pages(task->memspace, vaddr, paddr, nr_pages * PAGE_SIZE, true);
     } else {
-        ret = xizi_pager.map_pages(task->memspace->pgdir.pd_addr, vaddr, paddr, nr_pages * PAGE_SIZE, false);
+        ret = xizi_pager.map_pages(task->memspace, vaddr, paddr, nr_pages * PAGE_SIZE, false);
     }
 
     if (!ret) {
@@ -207,11 +207,34 @@ void unmap_task_share_pages(struct Thread* task, const uintptr_t task_vaddr, con
 static int next_session_id = 1;
 struct session_backend* create_share_pages(struct Thread* client, struct Thread* server, const int capacity)
 {
+
     /* alloc session backend */
     struct session_backend* session_backend = (struct session_backend*)slab_alloc(SessionAllocator());
     if (UNLIKELY(session_backend == NULL)) {
         return NULL;
     }
+    session_backend->session_id = next_session_id++;
+
+    if (0 != rbt_insert(&client->cli_sess_map, session_backend->session_id, &session_backend->client_side)) {
+        DEBUG("Rbt of %s no memory\n", client->name);
+        slab_free(SessionAllocator(), session_backend);
+        return NULL;
+    }
+
+    if (0 != rbt_insert(&server->svr_sess_map, session_backend->session_id, &session_backend->server_side)) {
+        DEBUG("Rbt of %s no memory\n", server->name);
+        rbt_delete(&client->cli_sess_map, session_backend->session_id);
+        slab_free(SessionAllocator(), session_backend);
+        return NULL;
+    }
+
+    sem_id_t new_sem_id = ksemaphore_alloc(&xizi_task_manager.semaphore_pool, 0);
+    if (new_sem_id == INVALID_SEM_ID) {
+        ERROR("No memory to alloc sem\n");
+        slab_free(SessionAllocator(), session_backend);
+        return NULL;
+    }
+    session_backend->client_sem_to_wait = new_sem_id;
 
     int true_capacity = ALIGNUP(capacity, PAGE_SIZE);
     int nr_pages = true_capacity / PAGE_SIZE;
@@ -220,6 +243,7 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
     if (UNLIKELY(kern_vaddr == (uintptr_t)NULL)) {
         ERROR("No memory for session\n");
         slab_free(SessionAllocator(), session_backend);
+        ksemaphore_free(&xizi_task_manager.semaphore_pool, new_sem_id);
         return NULL;
     }
 
@@ -229,6 +253,7 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
     if (UNLIKELY(client_vaddr == (uintptr_t)NULL)) {
         kfree((char*)kern_vaddr);
         slab_free(SessionAllocator(), session_backend);
+        ksemaphore_free(&xizi_task_manager.semaphore_pool, new_sem_id);
         return NULL;
     }
 
@@ -238,11 +263,11 @@ struct session_backend* create_share_pages(struct Thread* client, struct Thread*
         unmap_task_share_pages(client, client_vaddr, nr_pages);
         kfree((char*)kern_vaddr);
         slab_free(SessionAllocator(), session_backend);
+        ksemaphore_free(&xizi_task_manager.semaphore_pool, new_sem_id);
         return NULL;
     }
 
     /* build session_backend */
-    session_backend->session_id = next_session_id++;
     session_backend->buf_kernel_addr = kern_vaddr;
     session_backend->nr_pages = nr_pages;
     session_backend->client = client;
@@ -286,24 +311,39 @@ int delete_share_pages(struct session_backend* session_backend)
     // close ssesion in server's perspective
     if (session_backend->server_side.closed && session_backend->server != NULL) {
         xizi_share_page_manager.unmap_task_share_pages(session_backend->server, session_backend->server_side.buf_addr, session_backend->nr_pages);
-        doubleListDel(&session_backend->server_side.node);
-        session_backend->server->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
-        session_backend->server = NULL;
+
+        ERROR_FREE
+        {
+            assert(0 == rbt_delete(&session_backend->server->svr_sess_map, session_backend->session_id));
+            doubleListDel(&session_backend->server_side.node);
+            session_backend->server->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
+            session_backend->server = NULL;
+        }
     }
 
     // close ssesion in client's perspective
     if (session_backend->client_side.closed && session_backend->client != NULL) {
         xizi_share_page_manager.unmap_task_share_pages(session_backend->client, session_backend->client_side.buf_addr, session_backend->nr_pages);
-        doubleListDel(&session_backend->client_side.node);
-        session_backend->client->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
-        session_backend->client = NULL;
+
+        ERROR_FREE
+        {
+            assert(0 == rbt_delete(&session_backend->client->cli_sess_map, session_backend->session_id));
+            doubleListDel(&session_backend->client_side.node);
+            session_backend->client->memspace->mem_size -= session_backend->nr_pages * PAGE_SIZE;
+            session_backend->client = NULL;
+
+            assert(ksemaphore_free(&xizi_task_manager.semaphore_pool, session_backend->client_sem_to_wait));
+        }
     }
 
     /* free seesion backend */
     if (session_backend->server_side.closed && session_backend->client_side.closed) {
-        assert(session_backend->client == NULL && session_backend->server == NULL);
-        kfree((void*)session_backend->buf_kernel_addr);
-        slab_free(SessionAllocator(), (void*)session_backend);
+        ERROR_FREE
+        {
+            assert(session_backend->client == NULL && session_backend->server == NULL);
+            assert(kfree((void*)session_backend->buf_kernel_addr));
+            slab_free(SessionAllocator(), (void*)session_backend);
+        }
     }
 
     return 0;

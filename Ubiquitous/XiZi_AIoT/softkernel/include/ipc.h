@@ -54,13 +54,20 @@ typedef struct {
 struct IpcArgInfo {
     uint16_t offset;
     uint16_t len;
-};
+    union {
+        uint16_t attr;
+        struct {
+            uint16_t null_ptr : 1;
+            uint16_t reserved : 15;
+        };
+    };
+} __attribute__((packed));
 
 /* [header, ipc_arg_buffer_len[], ipc_arg_buffer[]] */
 struct IpcMsg {
     ipc_msg_header header;
     uintptr_t buf[];
-};
+} __attribute__((packed));
 enum {
     IPC_ARG_INFO_BASE_OFFSET = sizeof(ipc_msg_header),
 };

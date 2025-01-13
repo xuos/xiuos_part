@@ -92,13 +92,6 @@ When the process switches, the flush TLB is no longer required anymore.
 #define CONTEXTIDR_R(val) __asm__ volatile("mrc p15, 0, %0, c13, c0, 1" : "=r"(val))
 #define CONTEXTIDR_W(val) __asm__ volatile("mcr p15, 0, %0, c13, c0, 1" ::"r"(val))
 
-/* virtual and physical addr translate */
-#define V2P(a) ((uint32_t)((uint32_t)(a)-KERN_OFFSET))
-#define P2V(a) ((void*)((void*)(a) + KERN_OFFSET))
-
-#define V2P_WO(x) ((x)-KERN_OFFSET) // same as V2P, but without casts
-#define P2V_WO(x) ((x) + KERN_OFFSET) // same as V2P, but without casts
-
 #ifndef __ASSEMBLER__
 #include <stdint.h>
 __attribute__((always_inline)) static inline uint32_t v2p(void* a) { return ((uint32_t)(a)) - KERN_MEM_BASE; }

@@ -46,22 +46,23 @@ static inline void bitmap64_init(struct bitmap64* bitmap)
 static inline int bitmap64_alloc(struct bitmap64* bitmap)
 {
     int free_bit = -1;
-    // free bit is the first 0 bit, from [1, 64]
+    // free bit is the first 0 bit, from [0, 63]
     free_bit = __builtin_ffsl(~(uint64_t)(bitmap->map));
     // handle if bitmap is full (no using 64th bit here)
     if (free_bit == 0) {
         return -1;
     }
-    assert(free_bit < 64 && free_bit >= 1);
+    free_bit -= 1;
+    assert(free_bit < 64 && free_bit >= 0);
     // alloc and return
-    bitmap->map |= (1 << (free_bit - 1));
-    return free_bit - 1;
+    bitmap->map |= (1ULL << free_bit);
+    return free_bit;
 }
 
 static inline void bitmap64_free(struct bitmap64* bitmap, int idx)
 {
     // usages of bitmap64 must be correct
-    assert((bitmap->map & (1 << idx)) != 0);
+    assert((bitmap->map & (1ULL << idx)) != 0);
     // free bit
-    bitmap->map &= ~(uint64_t)(1 << idx);
+    bitmap->map &= ~(uint64_t)(1ULL << idx);
 }

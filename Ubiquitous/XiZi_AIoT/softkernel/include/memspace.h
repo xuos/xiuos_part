@@ -27,8 +27,17 @@ Author: AIIT XUOS Lab
 Modification:
 1. first version
 *************************************************/
+#pragma once
 
-#include "task.h"
+#include "actracer.h"
+#include "bitmap64.h"
+#include "buddy.h"
+#include "kalloc.h"
+#include "list.h"
+
+struct TopLevelPageDirectory {
+    uintptr_t* pd_addr;
+};
 
 struct ThreadStackPointer {
     int argc;
@@ -37,7 +46,30 @@ struct ThreadStackPointer {
     uintptr_t user_stack_vaddr;
 };
 
-struct MemSpace* alloc_memspace();
+struct MemSpace {
+    /* trace node */
+    TraceTag tag;
+    /* mem usage info */
+    struct MemUsage kernspace_mem_usage;
+    struct MemUsage userspace_mem_usage;
+    struct MemUsage customized_mapping_mem_map;
+
+    /* task memory resources */
+    struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address
+    uintptr_t heap_base; // mem size of proc used(allocated by kernel)
+    uintptr_t mem_size;
+    /* task communication mem resources */
+    struct KBuddy* massive_ipc_allocator;
+
+    /* thread using this memspace */
+    struct bitmap64 thread_stack_idx_bitmap;
+    struct double_list_node thread_list_guard;
+
+    // thread to notify when sub-thread exit
+    struct Thread* thread_to_notify;
+};
+
+struct MemSpace* alloc_memspace(char* name);
 void free_memspace(struct MemSpace* pmemspace);
 uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start);
 struct ThreadStackPointer load_user_stack(struct MemSpace* pmemspace, char** argv);
