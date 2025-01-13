@@ -72,10 +72,11 @@ Modification:
 #include <string.h>
 
 #include "cortex.h"
+#include "asm/csr.h"
+
 
 #define NR_CPU 1 // maximum number of CPUs
 
-#define SSTATUS_SPP (1L << 8)  // Previous mode, 1=Supervisor, 0=User
 
 __attribute__((always_inline)) static inline uint64_t EL0_mode() // Set ARM mode to EL0
 {
@@ -113,10 +114,14 @@ struct context {
 /// @brief init task context, set return address to trap return
 /// @param  ctx
 extern void task_prepare_enter(void);
-__attribute__((__always_inline__)) static inline void arch_init_context(struct context* ctx, unsigned long sp)
+__attribute__((__always_inline__)) static inline void arch_init_context(struct context* ctx)
 {
     memset(ctx, 0, sizeof(*ctx));
     ctx->ra = (uintptr_t)(task_prepare_enter);
+}
+
+__attribute__((__always_inline__)) static inline void arch_context_set_sp(struct context* ctx, unsigned long sp)
+{
     ctx->sp = sp;
 }
 
@@ -171,7 +176,7 @@ __attribute__((__always_inline__)) static inline void arch_init_trapframe(struct
     memset(tf, 0, sizeof(*tf));
     tf->sp = sp;
     tf->epc = pc;
-    tf->status &= ~SSTATUS_SPP; // clear SPP to 0 for user mode
+    tf->status = SR_PIE;
 }
 
 /// @brief set pc and sp to trapframe
@@ -217,6 +222,16 @@ __attribute__((__always_inline__)) static inline void arch_set_return(struct tra
 {
     tf->a0 = (uint64_t)ret;
 }
+
+// TODO: refer to jh7110 Linux
+struct thread_info {
+	unsigned long		flags;		/* low level flags */
+	int                     preempt_count;  /* 0=>preemptible, <0=>BUG */
+	long			kernel_sp;	/* Kernel stack pointer */
+	long			user_sp;	/* User stack pointer */
+	int			cpu;
+};
+
 
 void cpu_start_secondary(uint8_t cpu_id);
 void start_smp_cache_broadcast(int cpu_id);

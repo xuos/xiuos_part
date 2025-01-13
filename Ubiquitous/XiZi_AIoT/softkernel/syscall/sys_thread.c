@@ -53,6 +53,10 @@ int sys_new_thread(struct MemSpace* pmemspace, struct Thread* task, uintptr_t en
     arch_trapframe_set_sp_pc(task->thread_context.trapframe, loaded_sp.user_sp, (uintptr_t)entry);
     arch_set_main_params(task->thread_context.trapframe, loaded_sp.argc, loaded_sp.user_sp);
 
+#ifdef __riscv
+    arch_context_set_sp(task->thread_context.context, (uintptr_t)task->thread_context.trapframe);
+#endif
+
     // init thread name
     char* last = NULL;
     for (last = name; *name; name++) {

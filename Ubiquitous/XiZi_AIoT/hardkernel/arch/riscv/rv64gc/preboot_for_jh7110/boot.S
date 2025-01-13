@@ -44,6 +44,7 @@ clear_bss:
 	blt a3, a4, clear_bss
 clear_bss_done:
 
+	li a0, 1
 	la a2, boot_cpu_hartid
 	sd a0, (a2)
 
@@ -58,9 +59,13 @@ clear_bss_done:
 
 	call _debug_uart_init
 
+	/* Restore C environment */
+	la tp, init_thread_info
+	sw zero, TASK_TI_CPU(tp)
+	la sp, init_thread_union + THREAD_SIZE
+
 	/* Start the kernel */
 	tail bootmain
-
 
 relocate_enable_mmu:
 	/* Relocate return address */

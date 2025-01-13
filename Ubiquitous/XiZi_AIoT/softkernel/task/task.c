@@ -207,6 +207,7 @@ static void _dealloc_task_cb(struct Thread* task)
     slab_free(&xizi_task_manager.task_allocator, (void*)task);
 }
 
+#ifndef __riscv
 /* alloc a new task with init */
 extern void trap_return(void);
 __attribute__((optimize("O0"))) void task_prepare_enter()
@@ -215,6 +216,7 @@ __attribute__((optimize("O0"))) void task_prepare_enter()
     xizi_leave_kernel();
     trap_return();
 }
+#endif
 
 static struct Thread* _new_task_cb(struct MemSpace* pmemspace)
 {
@@ -251,7 +253,11 @@ static struct Thread* _new_task_cb(struct MemSpace* pmemspace)
     /* set context of main thread stack */
     /// stack bottom
     memset((void*)task->thread_context.kern_stack_addr, 0x00, USER_STACK_SIZE);
+#ifndef __riscv
     char* sp = (char*)task->thread_context.kern_stack_addr + USER_STACK_SIZE - 4;
+#else
+    char* sp = (char*)task->thread_context.kern_stack_addr + USER_STACK_SIZE;
+#endif
 
     /// 1. trap frame into stack, for process to nomally return by trap_return
     sp -= sizeof(*task->thread_context.trapframe);
@@ -260,11 +266,7 @@ static struct Thread* _new_task_cb(struct MemSpace* pmemspace)
     /// 2. context into stack
     sp -= sizeof(*task->thread_context.context);
     task->thread_context.context = (struct context*)sp;
-#ifndef __riscv
     arch_init_context(task->thread_context.context);
-#else
-    arch_init_context(task->thread_context.context, task->thread_context.kern_stack_addr);
-#endif
 
     return task;
 }
