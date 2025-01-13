@@ -140,3 +140,12 @@ distclean:
 	@rm -f .config*
 	@rm -f $(KERNEL_ROOT)/lib/musllib/libmusl.a
 	@rm -f $(KERNEL_ROOT)/board/*/.config
+
+
+# Run qemu with config discribed in README.md.
+.PHONY: qemu-default
+qemu-default:
+	qemu-system-arm -M sabrelite -m 1G -smp 4 -cpu cortex-a9 \
+    -display none -serial null -serial stdio \
+    -kernel ./build/XiZi-imx6q-sabrelite.elf
+
