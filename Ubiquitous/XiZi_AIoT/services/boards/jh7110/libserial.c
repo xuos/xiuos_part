@@ -181,7 +181,7 @@ typedef struct NS16550* NS16550_t;
 /* useful defaults for LCR */
 #define UART_LCR_8N1 0x03
 
-#define UART_ADDR (0xFE660000)
+#define UART_ADDR (0x10000000)
 
 #define UART_LCRVAL UART_LCR_8N1 /* 8 data, 1 stop, no parity */
 #define UART_MCRVAL (UART_MCR_DTR | UART_MCR_RTS) /* RTS/DTR */
