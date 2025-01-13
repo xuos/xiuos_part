@@ -62,6 +62,8 @@ x_err_t _Delete(TimerType timer)
 
     lock = CriticalAreaLock();
 
+    IdRemoveObj(&k_softtimer_id_manager, timer->id_node.id);
+
     DoubleLinkListRmNode(&(timer->sortlist));
     DoubleLinkListRmNode(&(timer->link));
 
