@@ -211,8 +211,8 @@ extern int syscall(int sys_num, uintptr_t param1, uintptr_t param2, uintptr_t pa
 __attribute__((__always_inline__)) static inline int arch_syscall(struct trapframe* tf, int* syscall_num)
 {
     // call syscall
-    *syscall_num = tf->a0;
-    return syscall(*syscall_num, tf->a1, tf->a2, tf->a3, tf->a4);
+    *syscall_num = tf->a7;
+    return syscall(*syscall_num, tf->a0, tf->a1, tf->a2, tf->a3);
 }
 
 /// @brief set return reg to trapframe

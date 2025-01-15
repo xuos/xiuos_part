@@ -78,41 +78,19 @@ void kernel_intr_handler(struct trapframe* tf)
 extern void context_switch(struct context**, struct context*);
 void syscall_arch_handler(struct trapframe* tf)
 {
+    uint64_t ec = tf->cause;
 
-    uint64_t esr = r_esr_el1();
-    uint64_t ec = (esr >> 0x1A) & 0x3F;
     switch (ec) {
-    case 0B010101:
+    case EXC_SYSCALL:
         software_irq_dispatch(tf);
         break;
-    case 0b100100:
-    case 0b100101:
-        dabort_handler(tf);
-        break;
-    case 0b100000:
-    case 0b100001:
-        iabort_handler(tf);
-        break;
+
     default: {
         ERROR("USYSCALL: unexpected\n");
-        ERROR("          esr: %016lx\n", esr);
-        ERROR("          elr = %016lx far = %016lx\n", r_elr_el1(), r_far_el1());
-        w_esr_el1(0);
+        ERROR("tf->cause: %016lx\n", tf->cause);
+
         extern void dump_tf(struct trapframe * tf);
         dump_tf(tf);
-
-        uint32_t sctlr = 0;
-        SCTLR_R(sctlr);
-        DEBUG("SCTLR: %x\n", sctlr);
-        uint32_t spsr = 0;
-//        __asm__ volatile("mrs %0, spsr_el1" : "=r"(spsr)::"memory");
-        DEBUG("SPSR: %x\n", spsr);
-        uint64_t tcr = 0;
-//        __asm__ volatile("mrs %0, tcr_el1" : "=r"(tcr)::"memory");
-        DEBUG("TCR: %x\n", tcr);
-        uint64_t mair = 0;
-//        __asm__ volatile("mrs %0, mair_el1" : "=r"(mair)::"memory");
-        DEBUG("MAIR: %x\n", mair);
 
         // kill error task
         xizi_enter_kernel();

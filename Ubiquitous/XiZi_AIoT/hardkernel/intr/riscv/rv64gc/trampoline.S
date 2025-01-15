@@ -151,7 +151,41 @@ _save_context:
 	tail do_exception
 
 handle_syscall:
-	j .
+	 /* save the initial A0 value (needed in signal handlers) */
+	REG_S a0, PT_ORIG_A0(sp)
+	/*
+	 * Advance SEPC to avoid executing the original
+	 * scall instruction on sret
+	 */
+	addi s2, s2, 0x4
+	REG_S s2, PT_EPC(sp)
+
+	/* Trace syscalls, but only if requested by the user. */
+	j handle_syscall_trace_enter
+
+	ret
+
+
+/* Slow paths for ptrace. */
+handle_syscall_trace_enter:
+	move a0, sp
+	//call do_syscall_trace_enter
+	call syscall_arch_handler
+	move t0, a0
+	REG_L a0, PT_A0(sp)
+	REG_L a1, PT_A1(sp)
+	REG_L a2, PT_A2(sp)
+	REG_L a3, PT_A3(sp)
+	REG_L a4, PT_A4(sp)
+	REG_L a5, PT_A5(sp)
+	REG_L a6, PT_A6(sp)
+	REG_L a7, PT_A7(sp)
+	//bnez t0, ret_from_syscall_rejected
+	//j check_syscall_nr
+handle_syscall_trace_exit:
+	move a0, sp
+	//call do_syscall_trace_exit
+	j ret_from_exception
 
 
 ret_from_exception:

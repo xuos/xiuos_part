@@ -153,8 +153,13 @@ int sys_state(sys_state_option option, sys_state_info* info)
 {
     switch (option) {
     case SYS_STATE_MEMBLOCK_INFO: {
+#ifndef __riscv
         info->memblock_info.memblock_start = (uintptr_t)V2P(_binary_fs_img_start);
         info->memblock_info.memblock_end = (uintptr_t)V2P(_binary_fs_img_end);
+#else
+        info->memblock_info.memblock_start = (uintptr_t)V2P_LINK(_binary_fs_img_start);
+        info->memblock_info.memblock_end = (uintptr_t)V2P_LINK(_binary_fs_img_end);
+#endif
         break;
     }
     case SYS_STATE_GET_HEAP_BASE:
