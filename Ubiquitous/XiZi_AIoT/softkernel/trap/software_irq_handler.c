@@ -52,21 +52,24 @@ void software_irq_dispatch(struct trapframe* tf)
     assert(p_intr_driver != NULL);
 
     // get current task
+    struct CPU* cpu = cur_cpu();
     struct Thread* cur_task = cur_cpu()->task;
     /// @todo: Handle dead task
-
     int syscall_num = -1;
     if (cur_task && cur_task->state != DEAD) {
         cur_task->thread_context.trapframe = tf;
         // call syscall
-
         int ret = arch_syscall(cur_task->thread_context.trapframe, &syscall_num);
         arch_set_return(tf, ret);
     }
 
     if ((cur_cpu()->task == NULL && cur_task != NULL) || cur_task->state != RUNNING) {
         cur_cpu()->task = NULL;
+#ifndef __riscv
         context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
+#else
+        context_switch(&cur_task->thread_context.context, &cpu->scheduler);
+#endif
     }
     if (syscall_num == SYSCALL_EXIT) {
         panic("Exit reaches");
