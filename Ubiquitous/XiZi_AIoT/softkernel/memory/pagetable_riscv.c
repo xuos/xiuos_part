@@ -127,6 +127,8 @@ static bool _unmap_pages(uintptr_t* pgdir, uintptr_t vaddr, int len)
 /// @return
 static bool _map_user_pages(struct MemSpace* pmemspace, uintptr_t vaddr, uintptr_t paddr, int len, bool is_dev)
 {
+    bool ret;
+
     if (len < 0) {
         return false;
     }
@@ -143,7 +145,26 @@ static bool _map_user_pages(struct MemSpace* pmemspace, uintptr_t vaddr, uintptr
         _p_pgtbl_mmu_access->MmuUsrDevPteAttr(&mem_attr);
     }
 
-    return _map_pages(pmemspace->pgdir.pd_addr, vaddr, paddr, (intptr_t)len, mem_attr);
+    ret = _map_pages(pmemspace->pgdir.pd_addr, vaddr, paddr, (intptr_t)len, mem_attr);
+    if (ret == false) {
+        ERROR("mapping _map_pages fail.\n");
+        return false;
+    }
+
+    // In order for the S-mode to access the memory of the U-mode, in the riscv architecture.
+    if (LIKELY(!is_dev)) {
+        _p_pgtbl_mmu_access->MmuKernPteAttr(&mem_attr);
+    } else {
+        _p_pgtbl_mmu_access->MmuDevPteAttr(&mem_attr);
+    }
+
+    ret = _map_pages(pmemspace->pgdir_riscv.pd_addr, vaddr, paddr, (intptr_t)len, mem_attr);
+    if (ret == false) {
+        ERROR("mapping _map_pages riscv fail.\n");
+        return false;
+    }
+
+    return true;
 }
 
 /// assume that a user pagedir is allocated from [0, size)

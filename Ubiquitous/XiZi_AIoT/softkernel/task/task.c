@@ -288,6 +288,9 @@ static void task_state_set_running(struct Thread* task)
     doubleListAddOnHead(&task->node, &xizi_task_manager.task_running_list_head);
 }
 
+#ifdef __riscv
+uintptr_t riscv_kernel_satp = 0;
+#endif
 struct Thread* next_task_emergency = NULL;
 extern void context_switch(struct context**, struct context*);
 static void _scheduler(struct SchedulerRightGroup right_group)
@@ -318,8 +321,14 @@ static void _scheduler(struct SchedulerRightGroup right_group)
         /* run the chosen task */
         task_state_set_running(next_task);
         cpu->task = next_task;
+
+#ifdef __riscv
+        riscv_kernel_satp = PFN_DOWN((uintptr_t)V2P(next_task->memspace->pgdir_riscv.pd_addr)) | SATP_MODE;
+#endif
+
         assert(next_task->memspace->pgdir.pd_addr != NULL);
         p_mmu_driver->LoadPgdir((uintptr_t)V2P(next_task->memspace->pgdir.pd_addr));
+
         context_switch(&cpu->scheduler, next_task->thread_context.context);
         assert(next_task->state != RUNNING);
     }

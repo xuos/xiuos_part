@@ -168,6 +168,12 @@ handle_syscall:
 
 /* Slow paths for ptrace. */
 handle_syscall_trace_enter:
+	csrr s0, satp
+	la a0, riscv_kernel_satp
+	ld a0, 0(a0)
+	csrw satp, a0
+	sfence.vma
+
 	move a0, sp
 	//call do_syscall_trace_enter
 	call syscall_arch_handler
@@ -185,6 +191,10 @@ handle_syscall_trace_enter:
 handle_syscall_trace_exit:
 	move a0, sp
 	//call do_syscall_trace_exit
+
+	csrw satp, s0
+	sfence.vma
+
 	j ret_from_exception
 
 
