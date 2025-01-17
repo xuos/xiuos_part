@@ -75,7 +75,7 @@ void kernel_intr_handler(struct trapframe* tf)
     panic("Intr at kernel mode should never happen by design.\n");
 }
 
-extern void context_switch(struct context**, struct context*);
+extern void context_switch(struct context*, struct context*);
 void syscall_arch_handler(struct trapframe* tf)
 {
     uint64_t ec = tf->cause;
@@ -97,7 +97,7 @@ void syscall_arch_handler(struct trapframe* tf)
         assert(cur_cpu()->task != NULL);
         ERROR("Error Task: %s\n", cur_cpu()->task->name);
         sys_exit(cur_cpu()->task);
-        context_switch(&cur_cpu()->task->thread_context.context, cur_cpu()->scheduler);
+        context_switch(&cur_cpu()->task->thread_context.context, &cur_cpu()->scheduler);
         panic("dabort end should never be reashed.\n");
     }
     }

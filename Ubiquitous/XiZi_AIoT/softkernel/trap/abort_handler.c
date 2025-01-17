@@ -48,7 +48,11 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
+#ifndef __riscv
 extern void context_switch(struct context**, struct context*);
+#else
+extern void context_switch(struct context*, struct context*);
+#endif
 __attribute__((optimize("O0"))) void dabort_handler(struct trapframe* r)
 {
 #ifndef __riscv
@@ -74,7 +78,11 @@ __attribute__((optimize("O0"))) void dabort_handler(struct trapframe* r)
     xizi_enter_kernel();
     sys_exit(cur_task);
     assert(cur_cpu()->task == NULL);
+#ifndef __riscv
     context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
+#else
+    context_switch(cur_task->thread_context.context, &cur_cpu()->scheduler);
+#endif
     panic("dabort end should never be reashed.\n");
 }
 
@@ -103,6 +111,10 @@ __attribute__((optimize("O0"))) void iabort_handler(struct trapframe* r)
     xizi_enter_kernel();
     sys_exit(cur_task);
     assert(cur_cpu()->task == NULL);
+#ifndef __riscv
     context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
+#else
+    context_switch(cur_task->thread_context.context, &cur_cpu()->scheduler);
+#endif
     panic("iabort end should never be reashed.\n");
 }

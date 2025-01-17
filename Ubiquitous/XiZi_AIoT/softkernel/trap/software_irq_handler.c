@@ -45,7 +45,11 @@ bool swi_distributer_init(struct SwiDispatcherRightGroup* _right_group)
     return p_intr_driver != NULL;
 }
 
+#ifndef __riscv
 extern void context_switch(struct context**, struct context*);
+#else
+extern void context_switch(struct context*, struct context*);
+#endif
 void software_irq_dispatch(struct trapframe* tf)
 {
     xizi_enter_kernel();
@@ -68,7 +72,7 @@ void software_irq_dispatch(struct trapframe* tf)
 #ifndef __riscv
         context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
 #else
-        context_switch(&cur_task->thread_context.context, &cpu->scheduler);
+        context_switch(cur_task->thread_context.context, &cpu->scheduler);
 #endif
     }
     if (syscall_num == SYSCALL_EXIT) {

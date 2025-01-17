@@ -292,7 +292,11 @@ static void task_state_set_running(struct Thread* task)
 uintptr_t riscv_kernel_satp = 0;
 #endif
 struct Thread* next_task_emergency = NULL;
+#ifndef __riscv
 extern void context_switch(struct context**, struct context*);
+#else
+extern void context_switch(struct context*, struct context*);
+#endif
 static void _scheduler(struct SchedulerRightGroup right_group)
 {
     struct MmuCommonDone* p_mmu_driver = AchieveResource(&right_group.mmu_driver_tag);
