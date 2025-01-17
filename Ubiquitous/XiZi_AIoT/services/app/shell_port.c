@@ -49,6 +49,7 @@ int main(void)
     shell.read = userShellRead;
 
     shellInit(&shell, shellBuffer, 512);
+    printf("shell init\n");
 
     while (connect_session(&session_fs, "MemFS", 0x10000) < 0)
         ;

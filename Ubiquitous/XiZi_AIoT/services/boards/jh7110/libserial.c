@@ -216,19 +216,19 @@ static inline int serial_in_shift(void* addr, int shift)
 
 bool init_uart_mmio()
 {
-    static int mapped = 0;
-    if (mapped == 0) {
+    static int mapped = 0xff;
+    if (mapped != 0) {
         if (-1 == mmap(UART_ADDR, UART_ADDR, 4096, true)) {
             return false;
         }
-        mapped = 1;
+        mapped = 0;
     }
     return true;
 }
 
 void putc(char ch)
 {
-    static struct NS16550* com_port = (struct NS16550*)UART_ADDR;
+    struct NS16550* com_port = (struct NS16550*)UART_ADDR;
 
     if (ch == '\n') {
         putc('\r');
@@ -241,7 +241,7 @@ void putc(char ch)
 
 char getc(void)
 {
-    static struct NS16550* com_port = (struct NS16550*)UART_ADDR;
+    struct NS16550* com_port = (struct NS16550*)UART_ADDR;
 
     while (!(serial_din(&com_port->lsr) & UART_LSR_DR))
         ;
