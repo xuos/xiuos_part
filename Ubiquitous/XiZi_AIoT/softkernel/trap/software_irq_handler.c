@@ -56,7 +56,6 @@ void software_irq_dispatch(struct trapframe* tf)
     assert(p_intr_driver != NULL);
 
     // get current task
-    struct CPU* cpu = cur_cpu();
     struct Thread* cur_task = cur_cpu()->task;
     /// @todo: Handle dead task
     int syscall_num = -1;
@@ -72,6 +71,7 @@ void software_irq_dispatch(struct trapframe* tf)
 #ifndef __riscv
         context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
 #else
+        struct CPU* cpu = cur_cpu();
         context_switch(cur_task->thread_context.context, &cpu->scheduler);
 #endif
     }
