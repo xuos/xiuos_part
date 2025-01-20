@@ -85,6 +85,7 @@ SECTIONS
     PROVIDE(boot_end_addr = .);
   }
 
+. = ALIGN(0x1000);
   .text : {
     . = ALIGN(0x1000);
     *(.text .text.*)
@@ -92,6 +93,9 @@ SECTIONS
 
   . = ALIGN(0x1000);
   .data : {
+    . = ALIGN(16);
+    *(.sdata .sdata.*)
+    . = ALIGN(16);
     *(.data .data.*)
 
     __start_init_task = .;
