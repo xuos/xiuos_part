@@ -21,7 +21,7 @@ toolchain ?= riscv64-unknown-elf-
 user_ldflags = -N -Ttext 0
 CFLAGS = -Wall -Werror -O -fno-omit-frame-pointer -ggdb -gdwarf-2 -MD -mcmodel=medany -fno-common -nostdlib -fno-builtin-strncpy -fno-builtin-strncmp -fno-builtin-strlen -fno-builtin-memset -fno-builtin-memmove -fno-builtin-memcmp -fno-builtin-log -fno-builtin-bzero -fno-builtin-strchr -fno-builtin-exit -fno-builtin-malloc -fno-builtin-putc -fno-builtin-free -fno-builtin-memcpy -Wno-main -fno-builtin-printf -fno-builtin-fprintf -fno-builtin-vprintf -I. -fno-stack-protector -fno-pie -no-pie
 cflags = $(CFLAGS) -Wno-unused -fno-strict-aliasing
-
+user_lds = -T $(KERNEL_ROOT)/services/boards/jh7110/jh7110_user.lds
 board_specs = stub.o
 endif
 
@@ -106,7 +106,7 @@ test_irq_hdlr: test_irq_handler.o libserial.o printf.o libipc.o session.o usysca
 	@${objdump} -S $@ > $@.asm
 
 shell: shell_port.o libserial.o printf.o shell_cmd_list.o shell.o shell_ext.o libfs.o libipc.o session.o usyscall.o arch_usyscall.o libmem.o
-	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs} -T $(KERNEL_ROOT)/services/boards/jh7110/jh7110_user.lds
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs} ${user_lds}
 	@${objdump} -S $@ > $@.asm
 	
 test_fault: test_fault.o libserial.o printf.o usyscall.o arch_usyscall.o 
@@ -122,7 +122,7 @@ simple_server: simple_server.o libserial.o printf.o libipc.o session.o simple_se
 	@${objdump} -S $@ > $@.asm
 
 fs_server: fs_server.o libfs.o fs.o libserial.o printf.o libipc.o session.o block_io.o usyscall.o arch_usyscall.o libmem.o
-	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs} -T $(KERNEL_ROOT)/services/boards/jh7110/jh7110_user.lds
+	@${ld} ${user_ldflags} -e main -o $@ $^ ${board_specs} ${user_lds}
 	@${objdump} -S $@ > $@.asm
 
 test_priority: test_priority.o libserial.o printf.o usyscall.o arch_usyscall.o libmem.o
