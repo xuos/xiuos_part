@@ -50,10 +50,8 @@ void load_pgdir(uintptr_t pgdir_paddr)
     struct ICacheDone* p_icache_done = AchieveResource(&right_group.icache_driver_tag);
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
 
-    printk("load_pgdir pgdir_paddr=%08lx\n", pgdir_paddr);
     csr_write(CSR_SATP, PFN_DOWN(pgdir_paddr) | SATP_MODE);
 	__asm__ __volatile__ ("sfence.vma" : : : "memory");
-    printf_early("load_pgdir pgdir_paddr=%08lx ok\n", pgdir_paddr);
 
     p_icache_done->invalidateall();
     p_dcache_done->flushall();

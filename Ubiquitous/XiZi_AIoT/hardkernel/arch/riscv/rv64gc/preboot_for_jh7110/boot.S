@@ -118,5 +118,5 @@ relocate_enable_mmu:
 	j .Lsecondary_park
 
 
-debug_string_start:  .ascii "XiZi boot start\n\0"
+debug_string_start:  .ascii "XiZi jh7110 boot start\n\0"
 
