@@ -69,47 +69,7 @@ Enable MMU, cache, write buffer, etc.
 /*
 Read and write mmu pagetable register base addr
 */
-//#define TTBR0_R(val) __asm__ volatile("mrs %0, ttbr0_el1" : "=r"(val)::"memory")
-//#define TTBR0_W(val) __asm__ volatile("msr ttbr0_el1, %0" ::"r"(val) : "memory")
-#define TTBR0_R(val) 0
-#define TTBR0_W(val) 0
 
-/*
-Read and write mmu pagetable register base addr
-*/
-//#define TTBR1_R(val) __asm__ volatile("mrs %0, ttbr1_el1" : "=r"(val)::"memory")
-//#define TTBR1_W(val) __asm__ volatile("msr ttbr1_el1, %0" ::"r"(val) : "memory")
-#define TTBR1_R(val) 0
-#define TTBR1_W(val) 0
-
-/*
-Translation Control Register（TCR）
-*/
-//#define TCR_R(val) __asm__ volatile("mrs %0, tcr_el1" : "=r"(val)::"memory")
-//#define TCR_W(val) __asm__ volatile("msr tcr_el1, %0" ::"r"(val) : "memory")
-#define TCR_R(val) 0
-#define TCR_W(val) 0
-
-//#define MAIR_R(val) __asm__ volatile("mrs %0, mair_el1" : "=r"(val)::"memory")
-//#define MAIR_W(val) __asm__ volatile("msr mair_el1, %0" ::"r"(val) : "memory")
-#define MAIR_R(val) 0
-#define MAIR_W(val) 0
-/*
-Flush TLB when loading a new page table.
-@note If nG is not set in the pte attribute, process switching need flush tlb.
-*/
-// #define CLEARTLB(val) __asm__ volatile("tlbi vmalle1" ::: "memory")
-//#define CLEARTLB(val) __asm__ volatile("tlbi vmalle1is" ::: "memory")
-#define CLEARTLB(val) 0
-
-/*
-When nG is set in the pte attribute, the process is assigned an ASID, which is stored in the lower 8 bits of the CONTEXTIDR register.
-When the process switches, the flush TLB is no longer required anymore.
-*/
-//#define CONTEXTIDR_R(val) __asm__ volatile("mrs %0, contextidr_el1" : "=r"(val))
-//#define CONTEXTIDR_W(val) __asm__ volatile("msr contextidr_el1, %0" ::"r"(val))
-#define CONTEXTIDR_R(val) 0
-#define CONTEXTIDR_W(val) 0
 
 #ifndef __ASSEMBLER__
 #include <stdint.h>

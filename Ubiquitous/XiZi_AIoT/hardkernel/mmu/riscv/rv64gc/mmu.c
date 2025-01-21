@@ -36,7 +36,6 @@ Modification:
 #include "trap_common.h"
 
 #include "asm/csr.h"
-#include "asm/pfn.h"
 #include "printf.h"
 
 
@@ -50,7 +49,7 @@ void load_pgdir(uintptr_t pgdir_paddr)
     struct ICacheDone* p_icache_done = AchieveResource(&right_group.icache_driver_tag);
     struct DCacheDone* p_dcache_done = AchieveResource(&right_group.dcache_driver_tag);
 
-    csr_write(CSR_SATP, PFN_DOWN(pgdir_paddr) | SATP_MODE);
+    csr_write(CSR_SATP, (pgdir_paddr >> PAGE_SHIFT) | SATP_MODE);
 	__asm__ __volatile__ ("sfence.vma" : : : "memory");
 
     p_icache_done->invalidateall();
@@ -60,7 +59,7 @@ void load_pgdir(uintptr_t pgdir_paddr)
 
 __attribute__((always_inline)) inline static void _tlb_flush(uintptr_t va)
 {
-//    __asm__ volatile("tlbi vae1is, %0" ::"r"(va));
+    ;
 }
 
 static void tlb_flush_range(uintptr_t vstart, int len)
@@ -74,7 +73,7 @@ static void tlb_flush_range(uintptr_t vstart, int len)
 
 static void tlb_flush_all()
 {
-    CLEARTLB(0);
+    ;
 }
 
 static struct MmuCommonDone mmu_common_done = {

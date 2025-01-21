@@ -29,16 +29,50 @@ Modification:
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-#include "asm/page.h"
-#include "pgtable.h"
 #include "memlayout.h"
-#include "ns16550.h"
-#include "asm/pgtable-bits.h"
+#include <asm/pgtable-bits.h>
+
+
+#define PTRS_PER_PGD NUM_LEVEL2_PDE
+#define PTRS_PER_PMD NUM_LEVEL3_PDE
+#define PGDIR_SHIFT     LEVEL2_PDE_SHIFT
+#define PGDIR_SIZE      (1 << PGDIR_SHIFT)
+#define PMD_SHIFT       LEVEL3_PDE_SHIFT
+#define PMD_SIZE        (1 << PMD_SHIFT)
+
+#define _PAGE_KERNEL		(_PAGE_READ \
+				| _PAGE_WRITE \
+				| _PAGE_PRESENT \
+				| _PAGE_ACCESSED \
+				| _PAGE_DIRTY \
+				| _PAGE_GLOBAL)
 
 #define PFN_PD(x, prot)	(((x) << _PAGE_PFN_SHIFT) | (prot))
 #define _PD_PFN(x)	((x) >> _PAGE_PFN_SHIFT)
 
+#define PFN_DOWN(x)	((x) >> PAGE_SHIFT)
+#define PFN_PHYS(x)	((x) << PAGE_SHIFT)
+
+#define pgd_index(a)  (((a) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1))
+#define pmd_index(a)  (((a) >> PMD_SHIFT) & (PTRS_PER_PMD - 1))
+
+
 extern char _start[];
+extern char _end[];
+
+
+struct kernel_mapping {
+	unsigned long virt_addr;
+	uintptr_t phys_addr;
+	uintptr_t size;
+	/* Offset between linear mapping virtual address and kernel load address */
+	unsigned long va_pa_offset;
+	/* Offset between kernel mapping virtual address and kernel load address */
+	unsigned long va_kernel_pa_offset;
+	unsigned long va_kernel_xip_pa_offset;
+};
+typedef uint64_t phys_addr_t;
+
 
 struct kernel_mapping kernel_map;
 
@@ -49,9 +83,7 @@ static uintptr_t trampoline_pmd[PTRS_PER_PMD] __attribute__((aligned(PAGE_SIZE))
 static uintptr_t early_pmd[PTRS_PER_PMD] __attribute__((aligned(PAGE_SIZE)));
 static uintptr_t early_uart_pmd[PTRS_PER_PMD] __attribute__((aligned(PAGE_SIZE)));
 static uintptr_t early_pmd_free[((PHY_USER_FREEMEM_BASE - PHY_MEM_BASE) >> PGDIR_SHIFT) + 1][PTRS_PER_PMD] __attribute__((aligned(PAGE_SIZE)));
-static uintptr_t early_pmd_inear_map[PTRS_PER_PMD] __attribute__((aligned(PAGE_SIZE)));
 static uintptr_t early_plic_pmd[PTRS_PER_PMD] __attribute__((aligned(PAGE_SIZE)));
-
 
 
 static uintptr_t *get_pmd_virt_early(phys_addr_t pa)
@@ -185,7 +217,7 @@ void setup_vm_early(void)
 	kernel_map.phys_addr = (uintptr_t)(&_start);
 	kernel_map.size = (uintptr_t)(&_end) - kernel_map.phys_addr;
 
-	kernel_map.va_pa_offset = PAGE_OFFSET - kernel_map.phys_addr;
+	kernel_map.va_pa_offset = KERN_OFFSET - kernel_map.phys_addr;
 	kernel_map.va_kernel_pa_offset = kernel_map.virt_addr - kernel_map.phys_addr;
 
 	/* Setup trampoline PGD and PMD */
