@@ -39,7 +39,6 @@
 OUTPUT_ARCH(riscv)
 OUTPUT_FORMAT("elf64-littleriscv", "elf64-littleriscv", "elf64-littleriscv")
 
-/* ENTRY(_start) */
 ENTRY( _boot_start )
 
 MEMORY {
@@ -85,26 +84,14 @@ SECTIONS
     PROVIDE(boot_end_addr = .);
   }
 
-. = ALIGN(0x1000);
   .text : {
     . = ALIGN(0x1000);
     *(.text .text.*)
   }
 
-  . = ALIGN(0x1000);
   .data : {
-    . = ALIGN(16);
-    *(.sdata .sdata.*)
-    . = ALIGN(16);
+    . = ALIGN(0x1000);
     *(.data .data.*)
-
-    __start_init_task = .;
-    init_thread_union = .;
-    init_stack = .;
-    KEEP(*(.data..init_task)) 
-    KEEP(*(.data..init_thread_info)) 
-    . = __start_init_task + ((1 << (12)) << (2)); 
-    __end_init_task = .; 
 
     . = ALIGN(0x1000);
     PROVIDE(_binary_fs_img_start = .);
@@ -122,11 +109,14 @@ SECTIONS
     PROVIDE(__init_array_end = .);
   }
 
-  . = ALIGN(0x1000);
-  _image_size = . - _start;
+  .sdata : {
+    . = ALIGN(0x1000);
+    __global_pointer$ = . + 0x800;
+    *(.sdata*)
+  }
 
-  . = ALIGN(0x1000);
   .bss : {
+    . = ALIGN(0x1000);
     PROVIDE(kernel_data_begin = .);
     PROVIDE(__bss_start = .);
     *(.bss .bss.* COMMON)
@@ -136,11 +126,9 @@ SECTIONS
     __bss_stop = .;
   }
 
-  . = ALIGN((1 << 21));
-  .sdata : {
-    __global_pointer$ = . + 0x800;
-    *(.sdata*)
-  }
+  . = ALIGN(0x1000);
+  _image_size = . - _start;
+
   . = ALIGN((1 << 21));
   _edata = .;
   _end = .;

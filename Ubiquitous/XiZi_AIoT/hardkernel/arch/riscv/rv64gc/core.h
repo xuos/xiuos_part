@@ -226,10 +226,10 @@ __attribute__((__always_inline__)) static inline void arch_set_return(struct tra
 // TODO: refer to jh7110 Linux
 struct thread_info {
 	unsigned long		flags;		/* low level flags */
-	int                     preempt_count;  /* 0=>preemptible, <0=>BUG */
+	long			preempt_count;  /* 0=>preemptible, <0=>BUG */
 	long			kernel_sp;	/* Kernel stack pointer */
 	long			user_sp;	/* User stack pointer */
-	int			cpu;
+	long			cpu;
 };
 
 

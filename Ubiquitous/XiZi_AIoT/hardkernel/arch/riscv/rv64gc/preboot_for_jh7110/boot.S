@@ -11,7 +11,6 @@
  */
 
 #include <asm/csr.h>
-#include "core.h"
 #include "memlayout.h"
 
 
@@ -61,8 +60,7 @@ clear_bss_done:
 
 	/* Restore C environment */
 	la tp, init_thread_info
-	sw zero, TASK_TI_CPU(tp)
-	la sp, init_thread_union + THREAD_SIZE
+	sw zero, 32(tp)
 
 	/* Start the kernel */
 	tail bootmain
@@ -70,7 +68,7 @@ clear_bss_done:
 relocate_enable_mmu:
 	/* Relocate return address */
 	la a1, kernel_map
-	ld a1, KERNEL_MAP_VIRT_ADDR(a1)
+	ld a1, 0(a1)
 	la a2, _start
 	sub a1, a1, a2
 	add ra, ra, a1
