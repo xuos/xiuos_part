@@ -203,7 +203,6 @@ void shellInit(Shell* shell, char* buffer, unsigned short size)
     shellAdd(shell);
 
     shellSetUser(shell, shellSeekCommand(shell, SHELL_DEFAULT_USER, shell->commandList.base, 0));
-
     shellWritePrompt(shell, 1);
 }
 
@@ -323,11 +322,9 @@ static void shellWritePrompt(Shell* shell, unsigned char newline)
         if (newline) {
             shellWriteString(shell, "\r\n");
         }
-#ifndef __riscv
         shellWriteString(shell, shell->info.user->data.user.name);
         shellWriteString(shell, ":");
         shellWriteString(shell, shell->info.path ? shell->info.path : "/");
-#endif
         shellWriteString(shell, "$ ");
     } else {
         shellWriteString(shell, shellText[SHELL_TEXT_PASSWORD_HINT]);

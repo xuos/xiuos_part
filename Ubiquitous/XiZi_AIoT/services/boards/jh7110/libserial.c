@@ -216,12 +216,12 @@ static inline int serial_in_shift(void* addr, int shift)
 
 bool init_uart_mmio()
 {
-    static int mapped = 0xff;
-    if (mapped != 0) {
+    static int mapped = 0;
+    if (mapped == 0) {
         if (-1 == mmap(UART_ADDR, UART_ADDR, 4096, true)) {
             return false;
         }
-        mapped = 0;
+        mapped = 1;
     }
     return true;
 }
