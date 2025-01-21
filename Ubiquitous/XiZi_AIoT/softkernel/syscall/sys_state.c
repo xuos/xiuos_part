@@ -113,7 +113,11 @@ void show_mem(void)
 {
     SHOWINFO_BORDER_LINE();
 
+#ifndef __riscv
     uint64_t total = (PHY_MEM_STOP - V2P(kernel_data_end));
+#else
+    uint64_t total = (PHY_MEM_STOP - V2P_LINK(kernel_data_end));
+#endif
     uint64_t user_dynamic_free = 0;
     uint64_t kernel_free = 0;
     for (int j = 0; j < MAX_BUDDY_ORDER; j++) {
