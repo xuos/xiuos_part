@@ -6,10 +6,11 @@
 #ifndef _ASM_RISCV_CSR_H
 #define _ASM_RISCV_CSR_H
 
-#include "autoconf.h"
 #include <asm/asm.h>
 #include <asm/const.h>
 
+
+#define CONFIG_64BIT 1
 
 /* Status register flags */
 #define SR_SIE		_AC(0x00000002, UL) /* Supervisor Interrupt Enable */
