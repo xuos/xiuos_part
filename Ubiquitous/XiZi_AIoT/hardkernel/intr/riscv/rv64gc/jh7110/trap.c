@@ -97,7 +97,7 @@ void syscall_arch_handler(struct trapframe* tf)
         assert(cur_cpu()->task != NULL);
         ERROR("Error Task: %s\n", cur_cpu()->task->name);
         sys_exit(cur_cpu()->task);
-        context_switch(&cur_cpu()->task->thread_context.context, &cur_cpu()->scheduler);
+        context_switch(cur_cpu()->task->thread_context.context, &cur_cpu()->scheduler);
         panic("dabort end should never be reashed.\n");
     }
     }
@@ -157,7 +157,7 @@ struct fault_info {
     const char *name;
 };
 
-static const struct fault_info fault_inf[] = {
+static struct fault_info fault_inf[] = {
     {do_trap_insn_misaligned, "Instruction address misaligned"},
     {do_trap_insn_fault, "Instruction access fault"},
     {do_trap_insn_illegal, "Illegal instruction"},

@@ -3,6 +3,7 @@
 
 #include "memlayout.h"
 #include "ptrace.h"
+#include <stdint.h>
 
 #define PLIC_BASE    PLIC_VIRTMEM_BASE
 
@@ -16,5 +17,8 @@
 int plic_init(void);
 void plic_enable_irq(int cpu, int hwirq, int enable);
 void plic_handle_irq(struct pt_regs *regs);
+void plic_init_hart(uint32_t cpu_id);
+uint32_t plic_read_irq_ack(void);
+void plic_write_end_of_irq(uint32_t x);
 
 #endif /* _RISCV_PLIC_H */

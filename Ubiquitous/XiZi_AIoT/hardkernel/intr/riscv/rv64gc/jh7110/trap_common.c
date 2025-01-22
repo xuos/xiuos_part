@@ -31,7 +31,6 @@ Modification:
 #include "core.h"
 #include "cortex.h"
 #include "exception_registers.h"
-#include "gicv3_common_opa.h"
 #include "trap_common.h"
 
 #include "log.h"
@@ -57,7 +56,7 @@ static void _sys_irq_init(int cpu_id)
     if (cpu_id == 0) {
         plic_init();
     }
-    gicv3inithart(cpu_id);
+    plic_init_hart(cpu_id);
 }
 
 static void _sys_trap_init(int cpu_id)
@@ -90,7 +89,7 @@ static void _single_irq_disable(int irq, int cpu)
 
 static inline uintptr_t* _switch_hw_irqtbl(uintptr_t* new_tbl_base)
 {
-    trap_set_exception_vector(new_tbl_base);
+    trap_set_exception_vector((uintptr_t)new_tbl_base);
     return NULL;
 }
 
@@ -102,7 +101,7 @@ static void _bind_irq_handler(int irq, irq_handler_t handler)
 static uint32_t _hw_before_irq()
 {
 
-    uint32_t iar = gic_read_irq_ack();
+    uint32_t iar = plic_read_irq_ack();
     return iar;
 }
 
@@ -113,7 +112,7 @@ static uint32_t _hw_cur_int_num(uint32_t int_info)
 
 static void _hw_after_irq(uint32_t int_info)
 {
-    gic_write_end_of_irq(int_info);
+    plic_write_end_of_irq(int_info);
 }
 
 int _cur_cpu_id()

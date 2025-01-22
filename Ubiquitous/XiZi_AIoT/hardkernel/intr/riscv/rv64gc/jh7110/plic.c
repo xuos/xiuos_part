@@ -65,7 +65,6 @@ int plic_init(void)
     return 0;
 }
 
-
 void plic_handle_irq(struct pt_regs *regs)
 {
     int hwirq;
@@ -74,4 +73,19 @@ void plic_handle_irq(struct pt_regs *regs)
     csr_clear(CSR_IE, IE_EIE);
     //TODO
     csr_set(CSR_IE, IE_EIE);
+}
+
+void plic_init_hart(uint32_t cpu_id)
+{
+    ;
+}
+
+uint32_t plic_read_irq_ack(void)
+{
+    return 0;
+}
+
+void plic_write_end_of_irq(uint32_t x)
+{
+    ;
 }
