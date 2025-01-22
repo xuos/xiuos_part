@@ -28,8 +28,6 @@ Modification:
 1. first version
 *************************************************/
 
-#include "memlayout.h"
-#include "core.h"
 #include "asm/csr.h"
 #include "asm/asm-offsets.h"
 

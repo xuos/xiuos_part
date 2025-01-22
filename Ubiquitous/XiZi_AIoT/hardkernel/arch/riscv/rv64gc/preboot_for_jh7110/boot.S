@@ -63,7 +63,7 @@ clear_bss_done:
 	sw zero, 32(tp)
 
 	/* Start the kernel */
-	tail bootmain
+	tail main
 
 relocate_enable_mmu:
 	/* Relocate return address */

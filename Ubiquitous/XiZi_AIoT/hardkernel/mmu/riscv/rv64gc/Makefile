@@ -1,4 +1,4 @@
-SRC_FILES := bootmmu.c mmu.c pagetable_attr.c mmu_init.c
+SRC_FILES := mmu_init.c mmu.c pagetable_attr.c
 
 include $(KERNEL_ROOT)/compiler.mk
 
