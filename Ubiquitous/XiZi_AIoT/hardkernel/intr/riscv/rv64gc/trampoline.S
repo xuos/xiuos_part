@@ -37,16 +37,18 @@ Modification:
 .align 4
     .global handle_exception
 handle_exception:
+	# Here tp is struct thread_info
 	csrrw tp, CSR_SCRATCH, tp
 	bnez tp, _save_context
 
 _restore_kernel_tpsp:
 	csrr tp, CSR_SCRATCH
-	REG_S sp, TASK_TI_KERNEL_SP(tp)
+	REG_S sp, 16(tp)
 
 _save_context:
-	REG_S sp, TASK_TI_USER_SP(tp)
-	REG_L sp, TASK_TI_KERNEL_SP(tp)
+	REG_S sp, 24(tp)
+	REG_L sp, 16(tp)
+	# Here sp is struct trapframe
 	addi sp, sp, -(PT_SIZE_ON_STACK)
 	REG_S x1,  PT_RA(sp)
 	REG_S x3,  PT_GP(sp)
@@ -87,7 +89,7 @@ _save_context:
 	 */
 	li t0, SR_SUM | SR_FS
 
-	REG_L s0, TASK_TI_USER_SP(tp)
+	REG_L s0, 24(tp)
 	csrrc s1, CSR_STATUS, t0
 	csrr s2, CSR_EPC
 	csrr s3, CSR_TVAL
@@ -208,7 +210,7 @@ ret_from_exception:
 resume_userspace:
 	/* Save unwound kernel stack pointer in thread_info */
 	addi s0, sp, PT_SIZE_ON_STACK
-	REG_S s0, TASK_TI_KERNEL_SP(tp)
+	REG_S s0, 16(tp)
 
 	/*
 	 * Save TP into the scratch register , so we can find the kernel data
