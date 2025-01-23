@@ -11,40 +11,25 @@
  */
 #include "actracer.h"
 #include "core.h"
-#include "generic_timer.h"
 
 #include "clock_common_op.h"
 #include "clint.h"
 
-
-// armv8 generic timer driver
-#define CNTV_CTL_ENABLE (1 << 0)
-#define CNTV_CTL_IMASK (1 << 1)
-#define CNTV_CTL_ISTATUS (1 << 2)
-
+//TODO:
 static void enable_timer()
 {
-    uint32_t c = r_cntp_ctl_el0();
-    c |= CNTV_CTL_ENABLE;
-    c &= ~CNTV_CTL_IMASK;
-    w_cntp_ctl_el0(c);
+    ;
 }
 
 static void disable_timer()
 {
-    uint32_t c = r_cntp_ctl_el0();
-    c |= CNTV_CTL_IMASK;
-    c &= ~CNTV_CTL_ENABLE;
-    w_cntp_ctl_el0(c);
+    ;
 }
 
 static void reload_timer()
 {
     // interval 1ms
-    static uint32_t ms = 1;
-    uint32_t interval = ms * 1000;
-    uint32_t interval_clk = interval * (r_cntfrq_el0() / 1000000);
-    w_cntp_tval_el0(interval_clk);
+    ;
 }
 
 
@@ -63,12 +48,12 @@ static uint32_t _get_clock_int()
 
 static uint64_t _get_tick()
 {
-    return r_cntvct_el0();
+    return 0;
 }
 
 static uint64_t _get_second()
 {
-    return _get_tick() / r_cntfrq_el0();
+    return 0;
 }
 
 static bool _is_timer_expired()

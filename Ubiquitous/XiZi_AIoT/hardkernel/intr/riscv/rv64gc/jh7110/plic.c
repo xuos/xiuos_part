@@ -20,20 +20,25 @@ extern unsigned long boot_cpu_hartid;
 #define CPU_TO_HART(cpu) ((2 * cpu) + 2)
 
 
+//TODO: to debug
 void plic_set_priority(int hwirq, int pro)
 {
+#if 0
     unsigned int reg = PLIC_PRIORITY(hwirq);
     writel(pro, reg);
+#endif
 }
 
+//TODO: to debug
 void plic_enable_irq(int cpu, int hwirq, int enable)
 {
+#if 0
     unsigned int hwirq_mask = 1 << (hwirq % 32);
     int hart = CPU_TO_HART(cpu);
     unsigned int reg = PLIC_MENABLE(hart) + 4 * (hwirq / 32);
 
 //    printk("plic_enable_irq hwirq=%d\n", hwirq);
-#if 0
+
     if (enable) {
         writel(readl(reg) | hwirq_mask, reg);
     }
@@ -47,11 +52,12 @@ void plic_enable_irq(int cpu, int hwirq, int enable)
 //Refer to linux/drivers/irqchip/irq-sifive-plic.c
 int plic_init(void)
 {
+#if 0
     int i;
     int hwirq;
 
 //    printk("plic_init boot_cpu_hartid=%lu\n", boot_cpu_hartid);
-#if 0
+
     for (i = 0; i < MAX_CPUS; i++) {
         writel(0, PLIC_MTHRESHOLD(CPU_TO_HART(i)));
 
@@ -67,12 +73,14 @@ int plic_init(void)
 
 void plic_handle_irq(struct pt_regs *regs)
 {
+#if 0
     int hwirq;
     int hart = CPU_TO_HART(0);
     unsigned int claim_reg = PLIC_MCLAIM(hart);
     csr_clear(CSR_IE, IE_EIE);
     //TODO
     csr_set(CSR_IE, IE_EIE);
+#endif
 }
 
 void plic_init_hart(uint32_t cpu_id)
@@ -86,6 +94,16 @@ uint32_t plic_read_irq_ack(void)
 }
 
 void plic_write_end_of_irq(uint32_t x)
+{
+    ;
+}
+
+void intr_on(void)
+{
+    ;
+}
+
+void intr_off(void)
 {
     ;
 }

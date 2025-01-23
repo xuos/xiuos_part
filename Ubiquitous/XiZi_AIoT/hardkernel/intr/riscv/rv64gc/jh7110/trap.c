@@ -28,8 +28,6 @@ Modification:
 *************************************************/
 #include <stdint.h>
 
-#include "exception_registers.h"
-
 #include "assert.h"
 #include "core.h"
 #include "multicores.h"
@@ -48,21 +46,25 @@ extern void iabort_handler(struct trapframe* r);
 
 void kernel_abort_handler(struct trapframe* tf)
 {
-    uint64_t esr = r_esr_el1();
-    switch ((esr >> 0x1A) & 0x3F) {
-    case 0b100100:
-    case 0b100101:
-        dabort_handler(tf);
-        break;
-    case 0b100000:
-    case 0b100001:
+    uint64_t ec = tf->cause;
+
+    switch (ec) {
+    case 0:
+    case 1:
+    case 2:
+    case 12:
         iabort_handler(tf);
         break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 13:
+    case 15:
+        dabort_handler(tf);
+        break;
     default: {
-        uint64_t ec = (esr >> 26) & 0x3f;
-        uint64_t iss = esr & 0x1ffffff;
-        ERROR("esr:  %016lx %016lx %016lx\n", esr, ec, iss);
-        ERROR("elr = %016lx far = %016lx\n", r_elr_el1(), r_far_el1());
+        ERROR("tf->cause: %016lx\n", tf->cause);
         ERROR("Current Task: %s.\n", cur_cpu()->task->name);
         panic("Unimplemented Error Occured.\n");
     }

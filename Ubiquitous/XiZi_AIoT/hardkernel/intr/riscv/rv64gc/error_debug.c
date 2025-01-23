@@ -41,8 +41,6 @@ Modification:
 #include <stddef.h>
 #include <stdint.h>
 
-#include "exception_registers.h"
-
 #include "assert.h"
 #include "core.h"
 #include "log.h"

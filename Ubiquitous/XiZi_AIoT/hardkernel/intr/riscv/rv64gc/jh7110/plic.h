@@ -20,5 +20,7 @@ void plic_handle_irq(struct pt_regs *regs);
 void plic_init_hart(uint32_t cpu_id);
 uint32_t plic_read_irq_ack(void);
 void plic_write_end_of_irq(uint32_t x);
+void intr_on(void);
+void intr_off(void);
 
 #endif /* _RISCV_PLIC_H */

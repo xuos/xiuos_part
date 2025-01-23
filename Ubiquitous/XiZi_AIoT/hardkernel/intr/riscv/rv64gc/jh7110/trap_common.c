@@ -30,7 +30,7 @@ Modification:
 
 #include "core.h"
 #include "cortex.h"
-#include "exception_registers.h"
+
 #include "trap_common.h"
 
 #include "log.h"
