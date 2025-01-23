@@ -78,24 +78,6 @@ Modification:
 #define NR_CPU 1 // maximum number of CPUs
 
 
-__attribute__((always_inline)) static inline uint64_t EL0_mode() // Set ARM mode to EL0
-{
-    uint64_t val = 0;
-
-    return val;
-}
-
-__attribute__((always_inline, optimize("O0"))) static inline void cpu_into_low_power()
-{
-    WFE();
-}
-
-__attribute__((always_inline, optimize("O0"))) static inline void cpu_leave_low_power()
-{
-    SEV();
-}
-
-
 struct __riscv_d_ext_state {
     uint64_t f[32];
     uint32_t fcsr;

@@ -28,7 +28,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * @file cortex_a55.h
+ * @file cortex.h
  * @brief some cortex A55 core functions
  * @version 1.0
  * @author AIIT XUOS Lab
@@ -36,7 +36,7 @@
  */
 
 /*************************************************
-File name: cortex_a55.h
+File name: cortex.h
 Description: some cortex A55 core functions
 Others:
 History:

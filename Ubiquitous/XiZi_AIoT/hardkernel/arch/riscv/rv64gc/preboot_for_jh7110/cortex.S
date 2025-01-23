@@ -1,10 +1,10 @@
 /*!
- * @file cortexA55.s
+ * @file cortex.s
  * @brief This file contains cortexA55 functions
  *
  */
 /*************************************************
-File name: cortexA55.S
+File name: cortex.S
 Description: This file contains cortexA9 functions
 Others: 
 History:
