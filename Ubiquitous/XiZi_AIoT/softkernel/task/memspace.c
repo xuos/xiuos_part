@@ -143,6 +143,10 @@ uintptr_t* load_memspace(struct MemSpace* pmemspace, char* img_start)
     }
     /* copy kernel pagetable so that interrupt and syscall wont corrupt */
     memcpy(pmemspace->pgdir.pd_addr, kern_pgdir.pd_addr, TOPLEVLE_PAGEDIR_SIZE);
+#ifdef __riscv
+    xizi_pager.new_pgdir(&pmemspace->pgdir_riscv);
+    memcpy(pmemspace->pgdir_riscv.pd_addr, kern_pgdir.pd_addr, TOPLEVLE_PAGEDIR_SIZE);
+#endif
 
     // read elf file by (header, section)
     uintptr_t load_size = 0;

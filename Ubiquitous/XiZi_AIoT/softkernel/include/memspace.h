@@ -56,6 +56,7 @@ struct MemSpace {
 
     /* task memory resources */
     struct TopLevelPageDirectory pgdir; // [phy] vm pgtbl base address
+    struct TopLevelPageDirectory pgdir_riscv; // [phy] vm pgtbl base address
     uintptr_t heap_base; // mem size of proc used(allocated by kernel)
     uintptr_t mem_size;
     /* task communication mem resources */

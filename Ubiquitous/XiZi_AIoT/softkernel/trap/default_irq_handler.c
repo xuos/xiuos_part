@@ -53,7 +53,11 @@ void default_interrupt_routine(int irq)
     ERROR("Interrupt %d has been asserted\n", irq);
 }
 
+#ifndef __riscv
 extern void context_switch(struct context**, struct context*);
+#else
+extern void context_switch(struct context*, struct context*);
+#endif
 void intr_irq_dispatch(struct trapframe* tf)
 {
     xizi_enter_kernel();
@@ -86,7 +90,11 @@ void intr_irq_dispatch(struct trapframe* tf)
 
     assert(cur_cpu()->task == current_task && current_task->snode.state == RUNNING);
     if (!queue_is_empty(&current_task->snode.state_trans_signal_queue)) {
+#ifndef __riscv
         context_switch(&current_task->thread_context.context, cur_cpu()->scheduler);
+#else
+        context_switch(current_task->thread_context.context, &cur_cpu()->scheduler);
+#endif
     }
     assert(current_task == cur_cpu()->task);
 

@@ -48,6 +48,19 @@ Modification:
 #define LEVEL3_PDE_ADDR(v)      ALIGNDOWN(v, LEVEL3_PDE_SIZE)
 
 #define TOPLEVLE_PAGEDIR_SIZE   sizeof(uintptr_t) * NUM_TOPLEVEL_PDE
+
+
+//#define PAGE_SHIFT	(12)
+#define _PAGE_PFN_SHIFT 10
+#define PFN_DOWN(x)	((x) >> PAGE_SHIFT)
+#define PFN_PGD(x)	((x) << _PAGE_PFN_SHIFT)
+#define PFN_PHYS(x)	((x) << PAGE_SHIFT)
+#define _PGD_PFN(x)	((x) >> _PAGE_PFN_SHIFT)
+#define PFN_PMD     PFN_PGD
+#define _PMD_PFN    _PGD_PFN
+#define PFN_PTE     PFN_PGD
+#define _PTE_PFN    _PGD_PFN
+
 // clang-format on
 
 struct PagerRightGroup {
@@ -75,3 +88,4 @@ void secondary_cpu_load_kern_pgdir(struct TraceTag* mmu_driver_tag, struct Trace
 
 extern struct XiziPageManager xizi_pager;
 bool module_pager_init(struct PagerRightGroup*);
+

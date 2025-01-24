@@ -48,15 +48,28 @@ Modification:
 #include "syscall.h"
 #include "task.h"
 
+#ifndef __riscv
 extern void context_switch(struct context**, struct context*);
+#else
+extern void context_switch(struct context*, struct context*);
+#endif
 __attribute__((optimize("O0"))) void dabort_handler(struct trapframe* r)
 {
+#ifndef __riscv
     if (r->pc >= DEV_VRTMEM_BASE && is_spinlock_hold_by_current_cpu(&whole_kernel_lock)) {
         assert(is_spinlock_hold_by_current_cpu(&whole_kernel_lock));
         ERROR("dabort in kernel, current task: %s\n", cur_cpu()->task == NULL ? "NULL" : cur_cpu()->task->name);
         dabort_reason(r);
         panic("data abort exception\n");
     }
+#else
+    if (r->epc >= DEV_VRTMEM_BASE && is_spinlock_hold_by_current_cpu(&whole_kernel_lock)) {
+        assert(is_spinlock_hold_by_current_cpu(&whole_kernel_lock));
+        ERROR("dabort in kernel, current task: %s\n", cur_cpu()->task == NULL ? "NULL" : cur_cpu()->task->name);
+        dabort_reason(r);
+        panic("data abort exception\n");
+    }
+#endif
 
     struct Thread* cur_task = cur_cpu()->task;
     ERROR("dabort in user space: %s\n", cur_task->name);
@@ -64,18 +77,31 @@ __attribute__((optimize("O0"))) void dabort_handler(struct trapframe* r)
 
     xizi_enter_kernel();
     sys_exit(cur_task);
+#ifndef __riscv
     context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
+#else
+    context_switch(cur_task->thread_context.context, &cur_cpu()->scheduler);
+#endif
     panic("dabort end should never be reashed.\n");
 }
 
 __attribute__((optimize("O0"))) void iabort_handler(struct trapframe* r)
 {
+#ifndef __riscv
     if (r->pc >= DEV_VRTMEM_BASE && is_spinlock_hold_by_current_cpu(&whole_kernel_lock)) {
         assert(is_spinlock_hold_by_current_cpu(&whole_kernel_lock));
         ERROR("iabort in kernel, current task: %s\n", cur_cpu()->task == NULL ? "NULL" : cur_cpu()->task->name);
         iabort_reason(r);
         panic("kernel prefetch abort exception\n");
     }
+#else
+    if (r->epc >= DEV_VRTMEM_BASE && is_spinlock_hold_by_current_cpu(&whole_kernel_lock)) {
+        assert(is_spinlock_hold_by_current_cpu(&whole_kernel_lock));
+        ERROR("iabort in kernel, current task: %s\n", cur_cpu()->task == NULL ? "NULL" : cur_cpu()->task->name);
+        iabort_reason(r);
+        panic("kernel prefetch abort exception\n");
+    }
+#endif
 
     struct Thread* cur_task = cur_cpu()->task;
     ERROR("iabort in user space: %s\n", cur_task->name);
@@ -83,6 +109,10 @@ __attribute__((optimize("O0"))) void iabort_handler(struct trapframe* r)
 
     xizi_enter_kernel();
     sys_exit(cur_task);
+#ifndef __riscv
     context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
+#else
+    context_switch(cur_task->thread_context.context, &cur_cpu()->scheduler);
+#endif
     panic("iabort end should never be reashed.\n");
 }

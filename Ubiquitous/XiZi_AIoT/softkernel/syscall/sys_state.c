@@ -99,7 +99,11 @@ void show_mem(void)
 {
     SHOWINFO_BORDER_LINE();
 
+#ifndef __riscv
     uint64_t total = (PHY_MEM_STOP - V2P(kernel_data_end));
+#else
+    uint64_t total = (PHY_MEM_STOP - V2P_LINK(kernel_data_end));
+#endif
     uint64_t user_dynamic_free = 0;
     uint64_t kernel_free = 0;
     for (int j = 0; j < MAX_BUDDY_ORDER; j++) {
@@ -139,8 +143,13 @@ int sys_state(sys_state_option option, sys_state_info* info)
 {
     switch (option) {
     case SYS_STATE_MEMBLOCK_INFO: {
+#ifndef __riscv
         info->memblock_info.memblock_start = (uintptr_t)V2P(_binary_fs_img_start);
         info->memblock_info.memblock_end = (uintptr_t)V2P(_binary_fs_img_end);
+#else
+        info->memblock_info.memblock_start = (uintptr_t)V2P_LINK(_binary_fs_img_start);
+        info->memblock_info.memblock_end = (uintptr_t)V2P_LINK(_binary_fs_img_end);
+#endif
         break;
     }
     case SYS_STATE_GET_HEAP_BASE:
