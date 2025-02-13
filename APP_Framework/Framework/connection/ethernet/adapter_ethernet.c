@@ -1,14 +1,14 @@
 /*
-* Copyright (c) 2020 AIIT XUOS Lab
-* XiUOS is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*        http://license.coscl.org.cn/MulanPSL2
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-* See the Mulan PSL v2 for more details.
-*/
+ * Copyright (c) 2020 AIIT XUOS Lab
+ * XiUOS is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *        http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 
 /**
  * @file adapter_ethernet.c
@@ -23,9 +23,11 @@
 #ifdef ADAPTER_HFA21_ETHERNET
 extern AdapterProductInfoType Hfa21EthernetAttach(struct Adapter *adapter);
 #endif
+#ifdef ADAPTER_WCHNET_ETHERNET
+extern AdapterProductInfoType wchnetEthernetAttach(struct Adapter *adapter);
+#endif
 
-static int AdapterEthernetRegister(struct Adapter *adapter)
-{
+static int AdapterEthernetRegister(struct Adapter *adapter) {
     int ret = 0;
 
     strncpy(adapter->name, ADAPTER_ETHERNET_NAME, NAME_NUM_MAX);
@@ -42,8 +44,7 @@ static int AdapterEthernetRegister(struct Adapter *adapter)
     return ret;
 }
 
-int AdapterEthernetInit(void)
-{
+int AdapterEthernetInit(void) {
     int ret = 0;
 
     struct Adapter *adapter = PrivMalloc(sizeof(struct Adapter));
@@ -75,16 +76,27 @@ int AdapterEthernetInit(void)
     adapter->done = product_info->model_done;
 
 #endif
+#ifdef ADAPTER_WCHNET_ETHERNET
+    AdapterProductInfoType product_info = wchnetEthernetAttach(adapter);
+    if (!product_info) {
+        printf("AdapterEthernetInit wchnet attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
+#endif
 
     return ret;
 }
 
 /******************ethernet TEST*********************/
-int AdapterEthernetTest(void)
-{
+int AdapterEthernetTest(void) {
     int baud_rate = BAUD_RATE_57600;
 
-    struct Adapter *adapter =  AdapterDeviceFindByName(ADAPTER_ETHERNET_NAME);
+    struct Adapter *adapter = AdapterDeviceFindByName(ADAPTER_ETHERNET_NAME);
 
 #ifdef ADAPTER_HFA21_ETHERNET
 
@@ -96,30 +108,67 @@ int AdapterEthernetTest(void)
     AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
 
     AdapterDeviceSetUp(adapter);
-    
+
     const char *ip = "192.168.131.26";
     const char *port = "9999";
-    enum NetRoleType net_role = CLIENT;//SERVER
+    enum NetRoleType net_role = CLIENT;  // SERVER
     enum IpType ip_type = IPV4;
     AdapterDeviceConnect(adapter, net_role, ip, port, ip_type);
 
     printf("ready to test data transfer\n");
     PrivTaskDelay(2000);
     len = strlen(ethernet_msg);
-    for (i = 0;i < 10; i ++) {
+    for (i = 0; i < 10; i++) {
         printf("AdapterEthernetTest send %s\n", ethernet_msg);
         AdapterDeviceSend(adapter, ethernet_msg, len);
         PrivTaskDelay(4000);
     }
-    
+
     while (1) {
         AdapterDeviceRecv(adapter, ethernet_recv_msg, 128);
         printf("AdapterEthernetTest recv %s\n", ethernet_recv_msg);
         memset(ethernet_recv_msg, 0, 128);
     }
-    
+
 #endif
-    
+#ifdef ADAPTER_WCHNET_ETHERNET
+    AdapterDeviceSetUp(adapter);
+    // AdapterDeviceSetAddr(adapter, "192.168.1.10", "255.255.255.0", "192.168.1.1");
+    // AdapterDeviceSetDhcp(adapter, 1);
+    // AdapterDeviceConnect(adapter, CLIENT, "115.238.53.59", "10208", IPV4);
+    AdapterDeviceConnect(adapter, CLIENT, "192.168.1.100", "1000", IPV4);
+    AdapterDeviceSend(adapter, "Hello World!", sizeof("Hello World!"));
+    // /* 测试DHCP连接路由器后，连接因特网 */
+    // AdapterDeviceSend(adapter,
+    //                   "GET /v3/weather/weatherInfo?city=%E9%95%BF%E6%B2%99&key=13cb58f5884f9749287abbead9c658f2 "
+    //                   "HTTP/1.1\r\nHost: restapi.amap.com\r\n\r\n",
+    //                   sizeof("GET
+    //                   /v3/weather/weatherInfo?city=%E9%95%BF%E6%B2%99&key=13cb58f5884f9749287abbead9c658f2 "
+    //                          "HTTP/1.1\r\nHost: restapi.amap.com\r\n\r\n"));
+    char receiveBuffer[128] = {};
+    PrivTaskDelay(20000);
+    ssize_t readLength = AdapterDeviceRecv(adapter, receiveBuffer, sizeof(receiveBuffer));
+    // printf("receiveBuffer:%s\n", receiveBuffer);
+    printf("[socketid-%d]receiveBuffer:", adapter->socket.socket_id);
+    for (int i = 0; i < readLength; i++) {
+        printf("%c", receiveBuffer[i]);
+    }
+    printf("\n");
+    AdapterDeviceDisconnect(adapter, NULL);
+    // AdapterDeviceConnect(adapter, CLIENT, "115.238.53.59", "10208", IPV4);
+    AdapterDeviceConnect(adapter, CLIENT, "192.168.1.100", "1000", IPV4);
+    AdapterDeviceSend(adapter, "Hello World!", sizeof("Hello World!"));
+    PrivTaskDelay(20000);
+    readLength = AdapterDeviceRecv(adapter, receiveBuffer, sizeof(receiveBuffer));
+	printf("[socketid-%d]receiveBuffer:", adapter->socket.socket_id);
+    for (int i = 0; i < readLength; i++) {
+        printf("%c", receiveBuffer[i]);
+    }
+    printf("\n");
+    AdapterDeviceSetDown(adapter);
+    AdapterDeviceClose(adapter);
+#endif
+
     return 0;
 }
 PRIV_SHELL_CMD_FUNCTION(AdapterEthernetTest, a ethernet test sample, PRIV_SHELL_CMD_MAIN_ATTR);

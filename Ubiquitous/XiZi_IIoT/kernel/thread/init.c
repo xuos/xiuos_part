@@ -177,6 +177,8 @@ void EnvInitKTask(void *parameter)
 	}	
 #else
 	CreateMainTask();
+    extern long ShowTask(void);
+    extern void ShowMemory(void);
 #endif
 #endif
 }
