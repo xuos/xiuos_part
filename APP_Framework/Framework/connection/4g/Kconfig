@@ -13,3 +13,11 @@ config ADAPTER_EC200A
 if ADAPTER_EC200A
     source "$APP_DIR/Framework/connection/4g/ec200a/Kconfig"
 endif
+
+config ADAPTER_GM800TF
+		bool "Using 4G adapter device GM800TF"
+        default n
+
+if ADAPTER_GM800TF
+    source "$APP_DIR/Framework/connection/4g/gm800tf/Kconfig"
+endif

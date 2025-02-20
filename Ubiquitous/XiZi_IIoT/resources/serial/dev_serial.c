@@ -27,22 +27,22 @@
  */
 
 /**
-* @file dev_serial.c
-* @brief register serial dev function using bus driver framework
-* @version 1.0 
-* @author AIIT XUOS Lab
-* @date 2021-04-24
-*/
+ * @file dev_serial.c
+ * @brief register serial dev function using bus driver framework
+ * @version 1.0
+ * @author AIIT XUOS Lab
+ * @date 2021-04-24
+ */
 
 /*************************************************
 File name: dev_serial.c
 Description: support serial dev INT and DMA configure、transfer data
 Others: take RT-Thread v4.0.2/components/driver/serial/serial.c for references
                 https://github.com/RT-Thread/rt-thread/tree/v4.0.2
-History: 
+History:
 1. Date: 2021-04-24
 Author: AIIT XUOS Lab
-Modification: 
+Modification:
 1. support serial dev register, configure, write and read
 2. add bus driver framework support, include INT and DMA mode
 *************************************************/
@@ -55,39 +55,60 @@ static DoubleLinklistType serialdev_linklist;
 
 static int SerialWorkModeCheck(struct SerialDevParam *serial_dev_param)
 {
-    if (SIGN_OPER_INT_TX & serial_dev_param->serial_set_mode) {
-        if (SIGN_OPER_INT_TX & serial_dev_param->serial_work_mode) {
+    if (SIGN_OPER_INT_TX & serial_dev_param->serial_set_mode)
+    {
+        if (SIGN_OPER_INT_TX & serial_dev_param->serial_work_mode)
+        {
             return EOK;
-        } else {
-            KPrintf("SerialWorkModeCheck set mode 0x%x work mode error 0x%x\n", 
-                serial_dev_param->serial_set_mode, serial_dev_param->serial_work_mode);
+        }
+        else
+        {
+            KPrintf("SerialWorkModeCheck set mode 0x%x work mode error 0x%x\n",
+                    serial_dev_param->serial_set_mode, serial_dev_param->serial_work_mode);
             return ERROR;
         }
-    } else if (SIGN_OPER_INT_RX & serial_dev_param->serial_set_mode) {
-        if (SIGN_OPER_INT_RX & serial_dev_param->serial_work_mode) {
+    }
+    else if (SIGN_OPER_INT_RX & serial_dev_param->serial_set_mode)
+    {
+        if (SIGN_OPER_INT_RX & serial_dev_param->serial_work_mode)
+        {
             return EOK;
-        } else {
-            KPrintf("SerialWorkModeCheck set mode 0x%x work mode error 0x%x\n", 
-                serial_dev_param->serial_set_mode, serial_dev_param->serial_work_mode);
+        }
+        else
+        {
+            KPrintf("SerialWorkModeCheck set mode 0x%x work mode error 0x%x\n",
+                    serial_dev_param->serial_set_mode, serial_dev_param->serial_work_mode);
             return ERROR;
         }
-    } else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_set_mode) {
-        if (SIGN_OPER_DMA_TX & serial_dev_param->serial_work_mode) {
+    }
+    else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_set_mode)
+    {
+        if (SIGN_OPER_DMA_TX & serial_dev_param->serial_work_mode)
+        {
             return EOK;
-        } else {
-            KPrintf("SerialWorkModeCheck set mode 0x%x work mode error 0x%x\n", 
-                serial_dev_param->serial_set_mode, serial_dev_param->serial_work_mode);
+        }
+        else
+        {
+            KPrintf("SerialWorkModeCheck set mode 0x%x work mode error 0x%x\n",
+                    serial_dev_param->serial_set_mode, serial_dev_param->serial_work_mode);
             return ERROR;
         }
-    } else if (SIGN_OPER_DMA_RX & serial_dev_param->serial_set_mode) {
-        if (SIGN_OPER_DMA_RX & serial_dev_param->serial_work_mode) {
+    }
+    else if (SIGN_OPER_DMA_RX & serial_dev_param->serial_set_mode)
+    {
+        if (SIGN_OPER_DMA_RX & serial_dev_param->serial_work_mode)
+        {
             return EOK;
-        } else {
-            KPrintf("SerialWorkModeCheck set mode 0x%x work mode error 0x%x\n", 
-                serial_dev_param->serial_set_mode, serial_dev_param->serial_work_mode);
+        }
+        else
+        {
+            KPrintf("SerialWorkModeCheck set mode 0x%x work mode error 0x%x\n",
+                    serial_dev_param->serial_set_mode, serial_dev_param->serial_work_mode);
             return ERROR;
         }
-    } else {
+    }
+    else
+    {
         serial_dev_param->serial_set_mode = serial_dev_param->serial_work_mode;
         return EOK;
     }
@@ -105,14 +126,15 @@ static inline int SerialDevIntWrite(struct SerialHardwareDevice *serial_dev, str
 
     while (write_length)
     {
-        if (EOK != hwdev_done->put_char(serial_dev, *(char *)write_data)) {
+        if (EOK != hwdev_done->put_char(serial_dev, *(char *)write_data))
+        {
             KSemaphoreObtain(serial_dev->serial_fifo.serial_tx->serial_txfifo_sem, WAITING_FOREVER);
             continue;
         }
 
         KPrintf("SerialDevIntWrite data %d write_length %u\n", *(char *)write_data, write_length);
         len_result++;
-        write_data++; 
+        write_data++;
         write_length--;
     }
 
@@ -135,35 +157,41 @@ static inline int SerialDevIntRead(struct SerialHardwareDevice *serial_dev, stru
         x_base lock;
 
         lock = CriticalAreaLock();
-     
-        if (serial_dev->serial_fifo.serial_rx->serial_recv_num == serial_dev->serial_fifo.serial_rx->serial_send_num) {
-            if (RET_FALSE == serial_dev->serial_fifo.serial_rx->serial_rx_full) {
+
+        if (serial_dev->serial_fifo.serial_rx->serial_recv_num == serial_dev->serial_fifo.serial_rx->serial_send_num)
+        {
+            if (RET_FALSE == serial_dev->serial_fifo.serial_rx->serial_rx_full)
+            {
                 CriticalAreaUnLock(lock);
-                if (0 == serial_isr_cnt) {
+                if (0 == serial_isr_cnt)
+                {
                     KSemaphoreSetValue(serial_dev->haldev.dev_sem, 0);
                 }
                 break;
             }
         }
-        
+
         get_char = serial_dev->serial_fifo.serial_rx->serial_rx_buffer[serial_dev->serial_fifo.serial_rx->serial_recv_num];
         serial_dev->serial_fifo.serial_rx->serial_recv_num += 1;
-        if (serial_dev->serial_fifo.serial_rx->serial_recv_num >= serial_cfg->data_cfg.serial_buffer_size) {
+        if (serial_dev->serial_fifo.serial_rx->serial_recv_num >= serial_cfg->data_cfg.serial_buffer_size)
+        {
             serial_dev->serial_fifo.serial_rx->serial_recv_num = 0;
         }
 
-        if (RET_TRUE == serial_dev->serial_fifo.serial_rx->serial_rx_full) {
+        if (RET_TRUE == serial_dev->serial_fifo.serial_rx->serial_rx_full)
+        {
             serial_dev->serial_fifo.serial_rx->serial_rx_full = RET_FALSE;
         }
-        
-        if (serial_isr_cnt > 0) {
+
+        if (serial_isr_cnt > 0)
+        {
             serial_isr_cnt--;
         }
 
         CriticalAreaUnLock(lock);
 
         *read_data = get_char;
-        read_data++; 
+        read_data++;
         read_length--;
         read_param->read_length++;
     }
@@ -184,19 +212,23 @@ static inline int SerialDevDMAWrite(struct SerialHardwareDevice *serial_dev, str
     const uint8 *write_data = (const uint8 *)write_param->buffer;
     x_size_t write_length = write_param->size;
 
-    ret = ((DataQueueDoneType*)serial_dev->serial_fifo.serial_tx->serial_dma_queue.done)->PushDataqueue((DataQueueType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.property, write_param->buffer, write_param->size, WAITING_FOREVER);
-    if (EOK != ret) {
+    ret = ((DataQueueDoneType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.done)->PushDataqueue((DataQueueType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.property, write_param->buffer, write_param->size, WAITING_FOREVER);
+    if (EOK != ret)
+    {
         KUpdateExstatus(ret);
         return ERROR;
     }
 
     lock = CriticalAreaLock();
-    if (RET_FALSE == serial_dev->serial_fifo.serial_tx->serial_dma_enable) {
+    if (RET_FALSE == serial_dev->serial_fifo.serial_tx->serial_dma_enable)
+    {
         serial_dev->serial_fifo.serial_tx->serial_dma_enable = RET_TRUE;
         CriticalAreaUnLock(lock);
 
         hwdev_done->dmatransfer(serial_dev, (uint8 *)write_data, write_length, SERIAL_DMA_TX);
-    } else {
+    }
+    else
+    {
         CriticalAreaUnLock(lock);
     }
 
@@ -208,18 +240,27 @@ static x_size_t SerialGetRxFifoLength(struct SerialHardwareDevice *serial_dev)
     NULL_PARAM_CHECK(serial_dev);
 
     x_size_t length;
-    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;  
+    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
 
-    if (serial_dev->serial_fifo.serial_rx->serial_recv_num == serial_dev->serial_fifo.serial_rx->serial_send_num) {
-        if (serial_dev->serial_fifo.serial_rx->serial_rx_full) {
+    if (serial_dev->serial_fifo.serial_rx->serial_recv_num == serial_dev->serial_fifo.serial_rx->serial_send_num)
+    {
+        if (serial_dev->serial_fifo.serial_rx->serial_rx_full)
+        {
             length = serial_cfg->data_cfg.serial_buffer_size;
-        } else {
+        }
+        else
+        {
             length = 0;
         }
-    } else {
-        if (serial_dev->serial_fifo.serial_rx->serial_recv_num > serial_dev->serial_fifo.serial_rx->serial_send_num) {
+    }
+    else
+    {
+        if (serial_dev->serial_fifo.serial_rx->serial_recv_num > serial_dev->serial_fifo.serial_rx->serial_send_num)
+        {
             length = serial_cfg->data_cfg.serial_buffer_size - serial_dev->serial_fifo.serial_rx->serial_recv_num + serial_dev->serial_fifo.serial_rx->serial_send_num;
-        } else {
+        }
+        else
+        {
             length = serial_dev->serial_fifo.serial_rx->serial_send_num - serial_dev->serial_fifo.serial_rx->serial_recv_num;
         }
     }
@@ -231,13 +272,15 @@ static void SerialDmaRxSetRecvLength(struct SerialHardwareDevice *serial_dev, x_
 
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
 
-    if ((serial_dev->serial_fifo.serial_rx->serial_rx_full) && (length)) {
+    if ((serial_dev->serial_fifo.serial_rx->serial_rx_full) && (length))
+    {
         serial_dev->serial_fifo.serial_rx->serial_rx_full = RET_FALSE;
     }
 
     serial_dev->serial_fifo.serial_rx->serial_recv_num += length;
 
-    if (serial_dev->serial_fifo.serial_rx->serial_recv_num >= serial_cfg->data_cfg.serial_buffer_size) {
+    if (serial_dev->serial_fifo.serial_rx->serial_recv_num >= serial_cfg->data_cfg.serial_buffer_size)
+    {
         serial_dev->serial_fifo.serial_rx->serial_recv_num %= serial_cfg->data_cfg.serial_buffer_size;
     }
 }
@@ -245,28 +288,36 @@ static void SerialDmaRxSetRecvLength(struct SerialHardwareDevice *serial_dev, x_
 static void SerialDmaRxSetSendLength(struct SerialHardwareDevice *serial_dev, x_size_t length)
 {
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
-    
-    if (serial_dev->serial_fifo.serial_rx->serial_recv_num > serial_dev->serial_fifo.serial_rx->serial_send_num) {
+
+    if (serial_dev->serial_fifo.serial_rx->serial_recv_num > serial_dev->serial_fifo.serial_rx->serial_send_num)
+    {
         serial_dev->serial_fifo.serial_rx->serial_send_num += length;
-        if (serial_dev->serial_fifo.serial_rx->serial_recv_num <= serial_dev->serial_fifo.serial_rx->serial_send_num) {
-            if (serial_dev->serial_fifo.serial_rx->serial_send_num >= serial_cfg->data_cfg.serial_buffer_size) {
+        if (serial_dev->serial_fifo.serial_rx->serial_recv_num <= serial_dev->serial_fifo.serial_rx->serial_send_num)
+        {
+            if (serial_dev->serial_fifo.serial_rx->serial_send_num >= serial_cfg->data_cfg.serial_buffer_size)
+            {
                 serial_dev->serial_fifo.serial_rx->serial_send_num %= serial_cfg->data_cfg.serial_buffer_size;
             }
-        
+
             serial_dev->serial_fifo.serial_rx->serial_rx_full = RET_TRUE;
         }
-    } else {
+    }
+    else
+    {
         serial_dev->serial_fifo.serial_rx->serial_send_num += length;
-        if (serial_dev->serial_fifo.serial_rx->serial_send_num >= serial_cfg->data_cfg.serial_buffer_size) {
+        if (serial_dev->serial_fifo.serial_rx->serial_send_num >= serial_cfg->data_cfg.serial_buffer_size)
+        {
             serial_dev->serial_fifo.serial_rx->serial_send_num %= serial_cfg->data_cfg.serial_buffer_size;
 
-            if (serial_dev->serial_fifo.serial_rx->serial_send_num >= serial_dev->serial_fifo.serial_rx->serial_recv_num) {
+            if (serial_dev->serial_fifo.serial_rx->serial_send_num >= serial_dev->serial_fifo.serial_rx->serial_recv_num)
+            {
                 serial_dev->serial_fifo.serial_rx->serial_rx_full = RET_TRUE;
             }
         }
     }
-    
-    if (RET_TRUE == serial_dev->serial_fifo.serial_rx->serial_rx_full) {
+
+    if (RET_TRUE == serial_dev->serial_fifo.serial_rx->serial_rx_full)
+    {
         serial_dev->serial_fifo.serial_rx->serial_recv_num = serial_dev->serial_fifo.serial_rx->serial_send_num;
     }
 }
@@ -280,37 +331,46 @@ static inline int SerialDevDMARead(struct SerialHardwareDevice *serial_dev, stru
     x_base lock;
 
     struct SerialHwDevDone *hwdev_done = serial_dev->hwdev_done;
-    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;    
+    struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
     uint8 *read_data = (uint8 *)read_param->buffer;
     x_size_t read_length = read_param->size;
     x_size_t read_dma_length;
     x_size_t read_dma_size = SerialGetRxFifoLength(serial_dev);
-    
+
     lock = CriticalAreaLock();
-    if (serial_cfg->data_cfg.serial_buffer_size) {
-        if(read_length < (int)read_dma_size)
+    if (serial_cfg->data_cfg.serial_buffer_size)
+    {
+        if (read_length < (int)read_dma_size)
             read_dma_length = read_length;
         else
             read_dma_length = read_dma_size;
 
-        if (serial_dev->serial_fifo.serial_rx->serial_recv_num + read_dma_length < serial_cfg->data_cfg.serial_buffer_size) {
-            memcpy(read_data, 
-                serial_dev->serial_fifo.serial_rx->serial_rx_buffer + serial_dev->serial_fifo.serial_rx->serial_recv_num, read_dma_length);
-        } else {
+        if (serial_dev->serial_fifo.serial_rx->serial_recv_num + read_dma_length < serial_cfg->data_cfg.serial_buffer_size)
+        {
+            memcpy(read_data,
+                   serial_dev->serial_fifo.serial_rx->serial_rx_buffer + serial_dev->serial_fifo.serial_rx->serial_recv_num, read_dma_length);
+        }
+        else
+        {
             memcpy(read_data, serial_dev->serial_fifo.serial_rx->serial_rx_buffer + serial_dev->serial_fifo.serial_rx->serial_recv_num,
-                serial_cfg->data_cfg.serial_buffer_size - serial_dev->serial_fifo.serial_rx->serial_recv_num);
-            memcpy(read_data + serial_cfg->data_cfg.serial_buffer_size - serial_dev->serial_fifo.serial_rx->serial_recv_num, 
-                serial_dev->serial_fifo.serial_rx->serial_rx_buffer, read_dma_length + serial_dev->serial_fifo.serial_rx->serial_recv_num - serial_cfg->data_cfg.serial_buffer_size);
+                   serial_cfg->data_cfg.serial_buffer_size - serial_dev->serial_fifo.serial_rx->serial_recv_num);
+            memcpy(read_data + serial_cfg->data_cfg.serial_buffer_size - serial_dev->serial_fifo.serial_rx->serial_recv_num,
+                   serial_dev->serial_fifo.serial_rx->serial_rx_buffer, read_dma_length + serial_dev->serial_fifo.serial_rx->serial_recv_num - serial_cfg->data_cfg.serial_buffer_size);
         }
         SerialDmaRxSetRecvLength(serial_dev, read_dma_length);
         read_param->read_length = read_dma_length;
         CriticalAreaUnLock(lock);
         return EOK;
-    } else {
-        if (RET_FALSE == serial_dev->serial_fifo.serial_rx->serial_dma_enable) {
+    }
+    else
+    {
+        if (RET_FALSE == serial_dev->serial_fifo.serial_rx->serial_dma_enable)
+        {
             serial_dev->serial_fifo.serial_rx->serial_dma_enable = RET_TRUE;
             hwdev_done->dmatransfer(serial_dev, read_data, read_length, SERIAL_DMA_RX);
-        } else {
+        }
+        else
+        {
             ret = ERROR;
             KUpdateExstatus(ret);
         }
@@ -332,7 +392,8 @@ static inline int SerialDevPollingWrite(struct SerialHardwareDevice *serial_dev,
     x_size_t len_result = 0;
     while (write_length)
     {
-        if ((*write_data == '\n') && (SIGN_OPER_STREAM == serial_stream_mode)) {
+        if ((*write_data == '\n') && (SIGN_OPER_STREAM == serial_stream_mode))
+        {
             hwdev_done->put_char(serial_dev, '\r');
         }
 
@@ -359,15 +420,17 @@ static inline int SerialDevPollingRead(struct SerialHardwareDevice *serial_dev, 
     while (read_length)
     {
         get_char = hwdev_done->get_char(serial_dev);
-        if (-ERROR == get_char) {
+        if (-ERROR == get_char)
+        {
             break;
         }
 
         *read_data = get_char;
-        read_data++; 
+        read_data++;
         read_length--;
 
-        if ('\n' == get_char) {
+        if ('\n' == get_char)
+        {
             break;
         }
     }
@@ -386,22 +449,27 @@ static uint32 SerialDevOpen(void *dev)
     struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
 
-    if (EOK != SerialWorkModeCheck(serial_dev_param)) {
+    if (EOK != SerialWorkModeCheck(serial_dev_param))
+    {
         KPrintf("SerialDevOpen error!\n");
         return ERROR;
     }
- 
-    if (NONE == serial_dev->serial_fifo.serial_rx) { 
-        if (SIGN_OPER_INT_RX & serial_dev_param->serial_set_mode) {
+
+    if (NONE == serial_dev->serial_fifo.serial_rx)
+    {
+        if (SIGN_OPER_INT_RX & serial_dev_param->serial_set_mode)
+        {
             serial_dev->serial_fifo.serial_rx = (struct SerialRx *)x_malloc(sizeof(struct SerialRx));
-            if (NONE == serial_dev->serial_fifo.serial_rx) {   
+            if (NONE == serial_dev->serial_fifo.serial_rx)
+            {
                 KPrintf("SerialDevOpen x_malloc serial_rx error\n");
                 x_free(serial_dev->serial_fifo.serial_rx);
                 return ERROR;
             }
 
             serial_dev->serial_fifo.serial_rx->serial_rx_buffer = (uint8 *)x_malloc(serial_cfg->data_cfg.serial_buffer_size);
-            if (NONE == serial_dev->serial_fifo.serial_rx->serial_rx_buffer) {   
+            if (NONE == serial_dev->serial_fifo.serial_rx->serial_rx_buffer)
+            {
                 KPrintf("SerialDevOpen x_malloc serial_rx_buffer error\n");
                 x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
                 x_free(serial_dev->serial_fifo.serial_rx);
@@ -413,31 +481,38 @@ static uint32 SerialDevOpen(void *dev)
             serial_dev->serial_fifo.serial_rx->serial_recv_num = 0;
             serial_dev->serial_fifo.serial_rx->serial_rx_full = RET_FALSE;
             serial_dev_param->serial_work_mode |= SIGN_OPER_INT_RX;
-            
+
             serial_operation_cmd = OPER_SET_INT;
             serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
         }
-#ifdef SERIAL_USING_DMA        
-        else if (SIGN_OPER_DMA_RX & serial_dev_param->serial_set_mode) {
-            if (0 == serial_cfg->data_cfg.serial_buffer_size) {
+#ifdef SERIAL_USING_DMA
+        else if (SIGN_OPER_DMA_RX & serial_dev_param->serial_set_mode)
+        {
+            if (0 == serial_cfg->data_cfg.serial_buffer_size)
+            {
                 serial_dev->serial_fifo.serial_rx = (struct SerialRx *)x_malloc(sizeof(struct SerialRx));
-                if (NONE == serial_dev->serial_fifo.serial_rx) {   
+                if (NONE == serial_dev->serial_fifo.serial_rx)
+                {
                     KPrintf("SerialDevOpen DMA buffer 0 x_malloc serial_rx error\n");
                     x_free(serial_dev->serial_fifo.serial_rx);
                     return ERROR;
                 }
                 serial_dev->serial_fifo.serial_rx->serial_dma_enable = RET_FALSE;
                 serial_dev_param->serial_work_mode |= SIGN_OPER_DMA_RX;
-            } else {
+            }
+            else
+            {
                 serial_dev->serial_fifo.serial_rx = (struct SerialRx *)x_malloc(sizeof(struct SerialRx));
-                if (NONE == serial_dev->serial_fifo.serial_rx) {   
+                if (NONE == serial_dev->serial_fifo.serial_rx)
+                {
                     KPrintf("SerialDevOpen DMA x_malloc serial_rx error\n");
                     x_free(serial_dev->serial_fifo.serial_rx);
                     return ERROR;
                 }
 
                 serial_dev->serial_fifo.serial_rx->serial_rx_buffer = (uint8 *)x_malloc(serial_cfg->data_cfg.serial_buffer_size);
-                if (NONE == serial_dev->serial_fifo.serial_rx->serial_rx_buffer) {   
+                if (NONE == serial_dev->serial_fifo.serial_rx->serial_rx_buffer)
+                {
                     KPrintf("SerialDevOpen DMA x_malloc serial_rx_buffer error\n");
                     x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
                     x_free(serial_dev->serial_fifo.serial_rx);
@@ -454,25 +529,33 @@ static uint32 SerialDevOpen(void *dev)
                 serial_drv->drv_done->configure(serial_drv, serial_dma_operation);
             }
         }
-#endif 
-        else {
+#endif
+        else
+        {
             serial_dev->serial_fifo.serial_rx = NONE;
         }
-    } else {
-        if (SIGN_OPER_INT_RX & serial_dev_param->serial_set_mode) {
+    }
+    else
+    {
+        if (SIGN_OPER_INT_RX & serial_dev_param->serial_set_mode)
+        {
             serial_dev_param->serial_work_mode |= SIGN_OPER_INT_RX;
         }
 #ifdef SERIAL_USING_DMA
-        else if (SIGN_OPER_DMA_RX & serial_dev_param->serial_set_mode) {
+        else if (SIGN_OPER_DMA_RX & serial_dev_param->serial_set_mode)
+        {
             serial_dev_param->serial_work_mode |= SIGN_OPER_DMA_RX;
         }
-#endif 
+#endif
     }
 
-    if (NONE == serial_dev->serial_fifo.serial_tx) {
-        if (SIGN_OPER_INT_TX & serial_dev_param->serial_set_mode) {
+    if (NONE == serial_dev->serial_fifo.serial_tx)
+    {
+        if (SIGN_OPER_INT_TX & serial_dev_param->serial_set_mode)
+        {
             serial_dev->serial_fifo.serial_tx = (struct SerialTx *)x_malloc(sizeof(struct SerialTx));
-            if (NONE == serial_dev->serial_fifo.serial_tx) {   
+            if (NONE == serial_dev->serial_fifo.serial_tx)
+            {
                 KPrintf("SerialDevOpen x_malloc serial_tx error\n");
                 x_free(serial_dev->serial_fifo.serial_tx);
                 return ERROR;
@@ -485,9 +568,11 @@ static uint32 SerialDevOpen(void *dev)
             serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
         }
 #ifdef SERIAL_USING_DMA
-        else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_set_mode) {
+        else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_set_mode)
+        {
             serial_dev->serial_fifo.serial_tx = (struct SerialTx *)x_malloc(sizeof(struct SerialTx));
-            if (NONE == serial_dev->serial_fifo.serial_tx) {   
+            if (NONE == serial_dev->serial_fifo.serial_tx)
+            {
                 KPrintf("SerialDevOpen DMA x_malloc serial_tx error\n");
                 x_free(serial_dev->serial_fifo.serial_tx);
                 return ERROR;
@@ -496,43 +581,52 @@ static uint32 SerialDevOpen(void *dev)
             serial_dev->serial_fifo.serial_tx->serial_dma_enable = RET_FALSE;
             serial_dev->serial_fifo.serial_tx->serial_dma_queue.done = g_queue_done[DATA_QUEUE];
             serial_dev->serial_fifo.serial_tx->serial_dma_queue.property = x_malloc(sizeof(DataQueueType));
-            ((DataQueueDoneType*)serial_dev->serial_fifo.serial_tx->serial_dma_queue.done)->InitDataqueue((DataQueueType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.property, 8);
-        
+            ((DataQueueDoneType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.done)->InitDataqueue((DataQueueType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.property, 8);
+
             serial_dev_param->serial_work_mode |= SIGN_OPER_DMA_TX;
             serial_operation_cmd = OPER_CONFIG;
-            serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);        
+            serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
         }
-#endif 
-        else {
+#endif
+        else
+        {
             serial_dev->serial_fifo.serial_tx = NONE;
         }
-    } else {
-        if (SIGN_OPER_INT_TX & serial_dev_param->serial_set_mode) {
+    }
+    else
+    {
+        if (SIGN_OPER_INT_TX & serial_dev_param->serial_set_mode)
+        {
             serial_dev_param->serial_work_mode |= SIGN_OPER_INT_TX;
         }
 #ifdef SERIAL_USING_DMA
-        else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_set_mode) {
+        else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_set_mode)
+        {
             serial_dev_param->serial_work_mode |= SIGN_OPER_DMA_TX;
         }
-#endif 
+#endif
     }
 
     serial_dev->haldev.dev_sem = KSemaphoreCreate(0);
-	if (serial_dev->haldev.dev_sem < 0) {
-		KPrintf("SerialDevOpen create sem failed .\n");
+    if (serial_dev->haldev.dev_sem < 0)
+    {
+        KPrintf("SerialDevOpen create sem failed .\n");
 
-        if (serial_dev->serial_fifo.serial_rx->serial_rx_buffer) {
+        if (serial_dev->serial_fifo.serial_rx->serial_rx_buffer)
+        {
             x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
         }
-        if (serial_dev->serial_fifo.serial_rx) {
+        if (serial_dev->serial_fifo.serial_rx)
+        {
             x_free(serial_dev->serial_fifo.serial_rx);
         }
-        if (serial_dev->serial_fifo.serial_tx) {
+        if (serial_dev->serial_fifo.serial_tx)
+        {
             x_free(serial_dev->serial_fifo.serial_tx);
         }
-    
-		return ERROR;
-	}
+
+        return ERROR;
+    }
 
     return EOK;
 }
@@ -548,21 +642,26 @@ static uint32 SerialDevClose(void *dev)
     struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
 
-    if (SIGN_OPER_INT_RX & serial_dev_param->serial_work_mode) {
+    if (SIGN_OPER_INT_RX & serial_dev_param->serial_work_mode)
+    {
         NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
         NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx);
         x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
         x_free(serial_dev->serial_fifo.serial_rx);
+        serial_dev->serial_fifo.serial_rx = NONE; // set none to make next open to call x_malloc again
 
         serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
     }
 #ifdef SERIAL_USING_DMA
-    else if (SIGN_OPER_DMA_RX & serial_dev_param->serial_work_mode) {
-        if(0 == serial_cfg->data_cfg.serial_buffer_size)
+    else if (SIGN_OPER_DMA_RX & serial_dev_param->serial_work_mode)
+    {
+        if (0 == serial_cfg->data_cfg.serial_buffer_size)
         {
             NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx);
             x_free(serial_dev->serial_fifo.serial_rx);
-        } else {
+        }
+        else
+        {
             NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
             NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_rx);
             x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
@@ -571,22 +670,24 @@ static uint32 SerialDevClose(void *dev)
 
         serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
     }
-#endif 
-    
-    if (SIGN_OPER_INT_TX & serial_dev_param->serial_work_mode) {
-        NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_tx);
-        x_free(serial_dev->serial_fifo.serial_tx);
+#endif
 
-        serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);    
-    }
-#ifdef SERIAL_USING_DMA
-    else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_work_mode) {
+    if (SIGN_OPER_INT_TX & serial_dev_param->serial_work_mode)
+    {
         NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_tx);
         x_free(serial_dev->serial_fifo.serial_tx);
 
         serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
     }
-#endif 
+#ifdef SERIAL_USING_DMA
+    else if (SIGN_OPER_DMA_TX & serial_dev_param->serial_work_mode)
+    {
+        NULL_PARAM_CHECK(serial_dev->serial_fifo.serial_tx);
+        x_free(serial_dev->serial_fifo.serial_tx);
+
+        serial_drv->drv_done->configure(serial_drv, serial_operation_cmd);
+    }
+#endif
 
     KSemaphoreDelete(serial_dev->haldev.dev_sem);
     return EOK;
@@ -602,25 +703,31 @@ static uint32 SerialDevWrite(void *dev, struct BusBlockWriteParam *write_param)
     struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)dev;
     struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
 
-    if (serial_dev_param->serial_work_mode & SIGN_OPER_INT_TX) {
+    if (serial_dev_param->serial_work_mode & SIGN_OPER_INT_TX)
+    {
         ret = SerialDevIntWrite(serial_dev, write_param);
-        if (ret < 0) {
+        if (ret < 0)
+        {
             KPrintf("SerialDevIntWrite error %d\n", ret);
             return ERROR;
         }
     }
 #ifdef SERIAL_USING_DMA
-    else if (serial_dev_param->serial_work_mode & SIGN_OPER_DMA_TX) {
+    else if (serial_dev_param->serial_work_mode & SIGN_OPER_DMA_TX)
+    {
         ret = SerialDevDMAWrite(serial_dev, write_param);
-        if (ret < 0) {
+        if (ret < 0)
+        {
             KPrintf("SerialDevDMAWrite error %d\n", ret);
             return ERROR;
         }
     }
-#endif        
-    else {
+#endif
+    else
+    {
         ret = SerialDevPollingWrite(serial_dev, write_param, serial_dev_param->serial_stream_mode);
-        if (ret < 0) {
+        if (ret < 0)
+        {
             KPrintf("SerialDevPollingWrite error %d\n", ret);
             return ERROR;
         }
@@ -639,31 +746,40 @@ static uint32 SerialDevRead(void *dev, struct BusBlockReadParam *read_param)
     struct SerialHardwareDevice *serial_dev = (struct SerialHardwareDevice *)dev;
     struct SerialDevParam *serial_dev_param = (struct SerialDevParam *)serial_dev->haldev.private_data;
 
-    if (EOK == KSemaphoreObtain(serial_dev->haldev.dev_sem, serial_dev_param->serial_timeout)) {
-        if (serial_dev_param->serial_work_mode & SIGN_OPER_INT_RX) {
+    if (EOK == KSemaphoreObtain(serial_dev->haldev.dev_sem, serial_dev_param->serial_timeout))
+    {
+        if (serial_dev_param->serial_work_mode & SIGN_OPER_INT_RX)
+        {
             ret = SerialDevIntRead(serial_dev, read_param);
-            if (EOK != ret) {
+            if (EOK != ret)
+            {
                 KPrintf("SerialDevIntRead error %d\n", ret);
                 return ERROR;
             }
         }
-    #ifdef SERIAL_USING_DMA
-        else if (serial_dev_param->serial_work_mode & SIGN_OPER_DMA_RX) {
+#ifdef SERIAL_USING_DMA
+        else if (serial_dev_param->serial_work_mode & SIGN_OPER_DMA_RX)
+        {
             ret = SerialDevDMARead(serial_dev, read_param);
-            if (EOK != ret) {
+            if (EOK != ret)
+            {
                 KPrintf("SerialDevDMARead error %d\n", ret);
                 return ERROR;
             }
         }
-    #endif        
-        else {
+#endif
+        else
+        {
             ret = SerialDevPollingRead(serial_dev, read_param);
-            if (EOK != ret) {
+            if (EOK != ret)
+            {
                 KPrintf("SerialDevPollingRead error %d\n", ret);
                 return ERROR;
             }
         }
-    } else {
+    }
+    else
+    {
         return ERROR;
     }
     return EOK;
@@ -673,125 +789,142 @@ void SerialSetIsr(struct SerialHardwareDevice *serial_dev, int event)
 {
     switch (event & 0xff)
     {
-        case SERIAL_EVENT_RX_IND:
+    case SERIAL_EVENT_RX_IND:
+    {
+        int get_char;
+        x_base lock;
+
+        struct SerialHwDevDone *hwdev_done = serial_dev->hwdev_done;
+        struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
+
+        while (1)
         {
-            int get_char;
-            x_base lock;
-
-            struct SerialHwDevDone *hwdev_done = serial_dev->hwdev_done;
-            struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
-
-            while (1)
+            get_char = hwdev_done->get_char(serial_dev);
+            if (-ERROR == get_char)
             {
-                get_char = hwdev_done->get_char(serial_dev);
-                if (-ERROR == get_char) {
-                    break;
-                }
-
-                lock = CriticalAreaLock();
-
-                serial_dev->serial_fifo.serial_rx->serial_rx_buffer[serial_dev->serial_fifo.serial_rx->serial_send_num] = (uint8)get_char;
-                serial_dev->serial_fifo.serial_rx->serial_send_num += 1;
-                if (serial_dev->serial_fifo.serial_rx->serial_send_num >= serial_cfg->data_cfg.serial_buffer_size) {
-                    serial_dev->serial_fifo.serial_rx->serial_send_num = 0;
-                }
-             
-                if (serial_dev->serial_fifo.serial_rx->serial_send_num == serial_dev->serial_fifo.serial_rx->serial_recv_num) {
-                    serial_dev->serial_fifo.serial_rx->serial_recv_num += 1;
-                    serial_dev->serial_fifo.serial_rx->serial_rx_full = RET_TRUE;
-                    if (serial_dev->serial_fifo.serial_rx->serial_recv_num >= serial_cfg->data_cfg.serial_buffer_size) {
-                        serial_dev->serial_fifo.serial_rx->serial_recv_num = 0;
-                    }
-                }
-                CriticalAreaUnLock(lock);
+                break;
             }
 
-            x_size_t serial_rx_length;
-                
             lock = CriticalAreaLock();
-            if (serial_dev->serial_fifo.serial_rx->serial_recv_num > serial_dev->serial_fifo.serial_rx->serial_send_num) {
-               serial_rx_length = serial_cfg->data_cfg.serial_buffer_size - serial_dev->serial_fifo.serial_rx->serial_recv_num + serial_dev->serial_fifo.serial_rx->serial_send_num;
-            } else {
-                serial_rx_length = serial_dev->serial_fifo.serial_rx->serial_send_num - serial_dev->serial_fifo.serial_rx->serial_recv_num;
+
+            serial_dev->serial_fifo.serial_rx->serial_rx_buffer[serial_dev->serial_fifo.serial_rx->serial_send_num] = (uint8)get_char;
+            serial_dev->serial_fifo.serial_rx->serial_send_num += 1;
+            if (serial_dev->serial_fifo.serial_rx->serial_send_num >= serial_cfg->data_cfg.serial_buffer_size)
+            {
+                serial_dev->serial_fifo.serial_rx->serial_send_num = 0;
+            }
+
+            if (serial_dev->serial_fifo.serial_rx->serial_send_num == serial_dev->serial_fifo.serial_rx->serial_recv_num)
+            {
+                serial_dev->serial_fifo.serial_rx->serial_recv_num += 1;
+                serial_dev->serial_fifo.serial_rx->serial_rx_full = RET_TRUE;
+                if (serial_dev->serial_fifo.serial_rx->serial_recv_num >= serial_cfg->data_cfg.serial_buffer_size)
+                {
+                    serial_dev->serial_fifo.serial_rx->serial_recv_num = 0;
+                }
             }
             CriticalAreaUnLock(lock);
-
-            if (serial_rx_length) {
-                if (serial_dev->haldev.dev_recv_callback) {
-                    serial_dev->haldev.dev_recv_callback((void *)serial_dev, serial_rx_length);
-                }
-
-                lock = CriticalAreaLock();
-                serial_isr_cnt += 1;
-                CriticalAreaUnLock(lock);
-                
-                KSemaphoreAbandon(serial_dev->haldev.dev_sem);
-            }
-            break;
         }
-        case SERIAL_event_id_tX_DONE:
+
+        x_size_t serial_rx_length;
+
+        lock = CriticalAreaLock();
+        if (serial_dev->serial_fifo.serial_rx->serial_recv_num > serial_dev->serial_fifo.serial_rx->serial_send_num)
         {
-            KSemaphoreAbandon(serial_dev->serial_fifo.serial_tx->serial_txfifo_sem);
-            break;
+            serial_rx_length = serial_cfg->data_cfg.serial_buffer_size - serial_dev->serial_fifo.serial_rx->serial_recv_num + serial_dev->serial_fifo.serial_rx->serial_send_num;
         }
+        else
+        {
+            serial_rx_length = serial_dev->serial_fifo.serial_rx->serial_send_num - serial_dev->serial_fifo.serial_rx->serial_recv_num;
+        }
+        CriticalAreaUnLock(lock);
+
+        if (serial_rx_length)
+        {
+            if (serial_dev->haldev.dev_recv_callback)
+            {
+                serial_dev->haldev.dev_recv_callback((void *)serial_dev, serial_rx_length);
+            }
+
+            lock = CriticalAreaLock();
+            serial_isr_cnt += 1;
+            CriticalAreaUnLock(lock);
+
+            KSemaphoreAbandon(serial_dev->haldev.dev_sem);
+        }
+        break;
+    }
+    case SERIAL_event_id_tX_DONE:
+    {
+        KSemaphoreAbandon(serial_dev->serial_fifo.serial_tx->serial_txfifo_sem);
+        break;
+    }
 #ifdef SERIAL_USING_DMA
-        case SERIAL_event_id_tX_DMADONE:
+    case SERIAL_event_id_tX_DMADONE:
+    {
+        const void *data_ptr;
+        x_size_t DataSize;
+        const void *last_data_ptr;
+
+        struct SerialHwDevDone *hwdev_done = serial_dev->hwdev_done;
+
+        ((DataQueueDoneType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.done)->PopDataqueue((DataQueueType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.property, &last_data_ptr, &DataSize, 0);
+        if (EOK == ((DataQueueDoneType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.done)->DataqueuePeak((DataQueueType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.property, &data_ptr, &DataSize))
         {
-            const void *data_ptr;
-            x_size_t DataSize;
-            const void *last_data_ptr;
-
-            struct SerialHwDevDone *hwdev_done = serial_dev->hwdev_done;
-
-            ((DataQueueDoneType*)serial_dev->serial_fifo.serial_tx->serial_dma_queue.done)->PopDataqueue((DataQueueType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.property, &last_data_ptr, &DataSize, 0);
-            if (EOK == ((DataQueueDoneType*)serial_dev->serial_fifo.serial_tx->serial_dma_queue.done)->DataqueuePeak((DataQueueType *)serial_dev->serial_fifo.serial_tx->serial_dma_queue.property, &data_ptr, &DataSize)) {
-                serial_dev->serial_fifo.serial_tx->serial_dma_enable = RET_TRUE;
-                hwdev_done->dmatransfer(serial_dev, (uint8 *)data_ptr, DataSize, SERIAL_DMA_TX);
-            } else {
-                serial_dev->serial_fifo.serial_tx->serial_dma_enable = RET_FALSE;
-            }
-            break;
+            serial_dev->serial_fifo.serial_tx->serial_dma_enable = RET_TRUE;
+            hwdev_done->dmatransfer(serial_dev, (uint8 *)data_ptr, DataSize, SERIAL_DMA_TX);
         }
-        case SERIAL_EVENT_RX_DMADONE:
+        else
         {
-            int length;
-            x_base lock;
-
-            struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
-          
-            length = (event & (~0xff)) >> 8;
-
-            if (serial_cfg->data_cfg.serial_buffer_size) {
-                lock = CriticalAreaLock();
-            
-                SerialDmaRxSetSendLength(serial_dev, length);
-         
-                length = SerialGetRxFifoLength(serial_dev);
-           
-                CriticalAreaUnLock(lock);
-                if (serial_dev->haldev.dev_recv_callback) {
-                    serial_dev->haldev.dev_recv_callback((void *)serial_dev, length);
-                }
-                KSemaphoreAbandon(serial_dev->haldev.dev_sem);
-            } else {
-                serial_dev->serial_fifo.serial_rx->serial_dma_enable = RET_FALSE;
-                if (serial_dev->haldev.dev_recv_callback) {
-                    serial_dev->haldev.dev_recv_callback((void *)serial_dev, length);
-                }
-                KSemaphoreAbandon(serial_dev->haldev.dev_sem);
-            }
-            break;
+            serial_dev->serial_fifo.serial_tx->serial_dma_enable = RET_FALSE;
         }
-#endif 
+        break;
+    }
+    case SERIAL_EVENT_RX_DMADONE:
+    {
+        int length;
+        x_base lock;
+
+        struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
+
+        length = (event & (~0xff)) >> 8;
+
+        if (serial_cfg->data_cfg.serial_buffer_size)
+        {
+            lock = CriticalAreaLock();
+
+            SerialDmaRxSetSendLength(serial_dev, length);
+
+            length = SerialGetRxFifoLength(serial_dev);
+
+            CriticalAreaUnLock(lock);
+            if (serial_dev->haldev.dev_recv_callback)
+            {
+                serial_dev->haldev.dev_recv_callback((void *)serial_dev, length);
+            }
+            KSemaphoreAbandon(serial_dev->haldev.dev_sem);
+        }
+        else
+        {
+            serial_dev->serial_fifo.serial_rx->serial_dma_enable = RET_FALSE;
+            if (serial_dev->haldev.dev_recv_callback)
+            {
+                serial_dev->haldev.dev_recv_callback((void *)serial_dev, length);
+            }
+            KSemaphoreAbandon(serial_dev->haldev.dev_sem);
+        }
+        break;
+    }
+#endif
     }
 }
 
 const struct SerialDevDone dev_done =
-{
-    .open = SerialDevOpen,
-    .close = SerialDevClose,
-    .write = SerialDevWrite,
-    .read = SerialDevRead,
+    {
+        .open = SerialDevOpen,
+        .close = SerialDevClose,
+        .write = SerialDevWrite,
+        .read = SerialDevRead,
 };
 
 /*Create the serial device linklist*/
@@ -803,15 +936,17 @@ static void SerialDeviceLinkInit()
 HardwareDevType SerialDeviceFind(const char *dev_name, enum DevType dev_type)
 {
     NULL_PARAM_CHECK(dev_name);
-    
+
     struct HardwareDev *device = NONE;
 
     DoubleLinklistType *node = NONE;
     DoubleLinklistType *head = &serialdev_linklist;
 
-    for (node = head->node_next; node != head; node = node->node_next) {
+    for (node = head->node_next; node != head; node = node->node_next)
+    {
         device = SYS_DOUBLE_LINKLIST_ENTRY(node, struct HardwareDev, dev_link);
-        if ((!strcmp(device->dev_name, dev_name)) && (dev_type == device->dev_type)) {
+        if ((!strcmp(device->dev_name, dev_name)) && (dev_type == device->dev_type))
+        {
             return device;
         }
     }
@@ -825,29 +960,36 @@ int SerialDeviceRegister(struct SerialHardwareDevice *serial_device, void *seria
     NULL_PARAM_CHECK(serial_device);
     NULL_PARAM_CHECK(device_name);
 
-    x_err_t ret = EOK;    
+    x_err_t ret = EOK;
     static x_bool dev_link_flag = RET_FALSE;
 
-    if (!dev_link_flag) {
+    if (!dev_link_flag)
+    {
         SerialDeviceLinkInit();
         dev_link_flag = RET_TRUE;
     }
 
-    if (DEV_INSTALL != serial_device->haldev.dev_state) {
+    if (DEV_INSTALL != serial_device->haldev.dev_state)
+    {
         strncpy(serial_device->haldev.dev_name, device_name, NAME_NUM_MAX);
         serial_device->haldev.dev_type = TYPE_SERIAL_DEV;
         serial_device->haldev.dev_state = DEV_INSTALL;
 
-        if (serial_device->ext_serial_mode) {
+        if (serial_device->ext_serial_mode)
+        {
             serial_device->haldev.dev_done = (struct HalDevDone *)serial_device->dev_done;
-        } else {
+        }
+        else
+        {
             serial_device->haldev.dev_done = (struct HalDevDone *)&dev_done;
             serial_device->private_data = serial_param;
         }
 
         DoubleLinkListInsertNodeAfter(&serialdev_linklist, &(serial_device->haldev.dev_link));
-    } else {
-        KPrintf("SerialDeviceRegister device has been register state%u\n", serial_device->haldev.dev_state);        
+    }
+    else
+    {
+        KPrintf("SerialDeviceRegister device has been register state%u\n", serial_device->haldev.dev_state);
     }
 
     return ret;
@@ -857,28 +999,33 @@ int SerialDeviceAttachToBus(const char *dev_name, const char *bus_name)
 {
     NULL_PARAM_CHECK(dev_name);
     NULL_PARAM_CHECK(bus_name);
-    
+
     x_err_t ret = EOK;
 
     struct Bus *bus;
     struct HardwareDev *device;
 
     bus = BusFind(bus_name);
-    if (NONE == bus) {
+    if (NONE == bus)
+    {
         KPrintf("SerialDeviceAttachToBus find serial bus error!name %s\n", bus_name);
         return ERROR;
     }
-    
-    if (TYPE_SERIAL_BUS == bus->bus_type) {
+
+    if (TYPE_SERIAL_BUS == bus->bus_type)
+    {
         device = SerialDeviceFind(dev_name, TYPE_SERIAL_DEV);
-        if (NONE == device) {
+        if (NONE == device)
+        {
             KPrintf("SerialDeviceAttachToBus find serial device error!name %s\n", dev_name);
             return ERROR;
         }
 
-        if (TYPE_SERIAL_DEV == device->dev_type) {
+        if (TYPE_SERIAL_DEV == device->dev_type)
+        {
             ret = DeviceRegisterToBus(bus, device);
-            if (EOK != ret) {
+            if (EOK != ret)
+            {
                 KPrintf("SerialDeviceAttachToBus DeviceRegisterToBus error %u\n", ret);
                 return ERROR;
             }

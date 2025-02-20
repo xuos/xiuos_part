@@ -59,7 +59,11 @@ struct ATAgent
     uint32 maintain_max;
 
 #ifdef ADD_XIZI_FEATURES   
-    int lock;
+	#ifdef ADAPTER_GM800TF
+    pthread_mutex_t lock;
+	#else
+	int lock;
+	#endif
 #else
     pthread_mutex_t lock;
 #endif
