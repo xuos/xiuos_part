@@ -103,21 +103,21 @@ static void UartHandler(struct SerialBus *serial_bus, struct SerialDriver *seria
     }
 }
 
-#ifdef BSP_USING_UART1
 void UartIsr1(int vector, void *param)
 {
+#ifdef BSP_USING_UART1
 	/* get serial bus 1 */
 	UartHandler(&serial_bus_1, &serial_driver_1);
-}
 #endif
+}
 
-#ifdef BSP_USING_UART2
 void UartIsr2(int vector, void *param)
 {
+#ifdef BSP_USING_UART2
 	/* get serial bus 2 */
 	UartHandler(&serial_bus_2, &serial_driver_2);
-}
 #endif
+}
 
 static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInfo *configure_info)
 {
