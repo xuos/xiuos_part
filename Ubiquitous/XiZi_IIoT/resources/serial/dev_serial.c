@@ -356,21 +356,12 @@ static inline int SerialDevPollingRead(struct SerialHardwareDevice *serial_dev, 
 
     uint8 get_char;
 
-    while (read_length)
-    {
-        get_char = hwdev_done->get_char(serial_dev);
-        if (-ERROR == get_char) {
-            break;
-        }
+    get_char = hwdev_done->get_char(serial_dev);
 
-        *read_data = get_char;
-        read_data++; 
-        read_length--;
-
-        if ('\n' == get_char) {
-            break;
-        }
-    }
+    *read_data = get_char;
+    read_data++; 
+    read_length--;
+    read_param->read_length++;
 
     return EOK;
 }
@@ -647,6 +638,7 @@ static uint32 SerialDevRead(void *dev, struct BusBlockReadParam *read_param)
                 return ERROR;
             }
         }
+
     #ifdef SERIAL_USING_DMA
         else if (serial_dev_param->serial_work_mode & SIGN_OPER_DMA_RX) {
             ret = SerialDevDMARead(serial_dev, read_param);
