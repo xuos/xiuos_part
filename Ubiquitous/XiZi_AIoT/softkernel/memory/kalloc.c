@@ -36,13 +36,18 @@ Modification:
 #include "actracer.h"
 #include "buddy.h"
 
+
 struct KBuddy kern_virtmem_buddy;
 struct KBuddy user_phy_freemem_buddy;
 
 extern uintptr_t kernel_data_end[];
 bool module_phymem_init()
 {
+#ifndef __riscv
     uintptr_t kern_freemem_start = V2P(kernel_data_end);
+#else
+    uintptr_t kern_freemem_start = V2P_LINK(kernel_data_end);
+#endif
     uintptr_t kern_freemem_end = PHY_USER_FREEMEM_BASE;
     uintptr_t user_freemem_start = PHY_USER_FREEMEM_BASE;
     uintptr_t user_freemem_end = PHY_MEM_STOP;
@@ -58,7 +63,11 @@ char* kalloc(uintptr_t size)
     if (mem_alloc == NULL) {
         return NULL;
     }
+#ifndef __riscv
     assert((uintptr_t)mem_alloc >= V2P(&kernel_data_end) && (uintptr_t)mem_alloc < PHY_USER_FREEMEM_BASE);
+#else
+    assert((uintptr_t)mem_alloc >= V2P_LINK(&kernel_data_end) && (uintptr_t)mem_alloc < PHY_USER_FREEMEM_BASE);
+#endif
     mem_alloc = P2V(mem_alloc);
     if ((uintptr_t)mem_alloc < KERN_MEM_BASE) {
         DEBUG("Error Alloc: %x by size: %d (Caused by double free)\n", mem_alloc, size);
