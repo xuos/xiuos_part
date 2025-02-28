@@ -9,30 +9,44 @@
 * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 * See the Mulan PSL v2 for more details.
 */
-
+ 
 /**
-* @file board.h
-* @brief define stm32f103-nano init configure and start-up function
+* @file connect_can.h
+* @brief define aiit-arm32-board can function and struct
 * @version 1.0 
 * @author AIIT XUOS Lab
-* @date 2021-11-25
+* @date 2025-02-22
 */
 
-#ifndef __BOARD_H__
-#define __BOARD_H__
+#ifndef CONNECT_CAN_H
+#define CONNECT_CAN_H
 
-#include <stm32f1xx.h>
-#include <connect_uart.h>
-#ifdef BSP_USING_CAN
-#include <connect_can.h>
-#endif // BSP_USING_CAN
+#include <device.h>
+#include "stm32f1xx_hal_can.h"
+#include "stm32f103xb.h"
+#include "stm32f1xx_hal_def.h"
 
-extern void *__bss_end;
-extern void *_heap_end;
 
-#define HEAP_START  ((void *)&__bss_end)
-#define HEAP_END    ((void *)&_heap_end)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void SystemClock_Config(void);
+struct Stm32Can
+{
+    CAN_HandleTypeDef instance;
+    char *bus_name;
+    struct CanBus can_bus;
+    uint8 can_recv_flag;
+    uint8_t	can_Rx_Data[8];
+};
+
+#define CAN_RxExtId 0x1800D8D0
+#define CAN_TxExtId 0x1800D0D8
+
+int InitHwCan(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

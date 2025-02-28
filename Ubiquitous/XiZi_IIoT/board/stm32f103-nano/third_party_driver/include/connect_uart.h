@@ -37,10 +37,19 @@ struct Stm32UartHwCfg
     USART_TypeDef *uart_device;
     IRQn_Type irq_type;
 };
+#ifdef BSP_USING_UART1
 
 #define KERNEL_CONSOLE_BUS_NAME       SERIAL_BUS_NAME_1
 #define KERNEL_CONSOLE_DRV_NAME       SERIAL_DRV_NAME_1
 #define KERNEL_CONSOLE_DEVICE_NAME    SERIAL_1_DEVICE_NAME_0
+
+#elif BSP_USING_UART2
+
+#define KERNEL_CONSOLE_BUS_NAME       SERIAL_BUS_NAME_2
+#define KERNEL_CONSOLE_DRV_NAME       SERIAL_DRV_NAME_2
+#define KERNEL_CONSOLE_DEVICE_NAME    SERIAL_2_DEVICE_NAME_0
+
+#endif
 
 int InitHwUart(void);
 
