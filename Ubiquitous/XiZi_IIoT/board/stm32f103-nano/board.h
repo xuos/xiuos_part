@@ -23,6 +23,9 @@
 
 #include <stm32f1xx.h>
 #include <connect_uart.h>
+#ifdef BSP_USING_CAN
+#include <connect_can.h>
+#endif // BSP_USING_CAN
 
 extern void *__bss_end;
 extern void *_heap_end;

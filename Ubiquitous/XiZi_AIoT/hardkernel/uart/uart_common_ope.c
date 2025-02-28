@@ -896,3 +896,26 @@ int fctprintf(void (*out)(char character, void* arg), void* arg, const char* for
     va_end(va);
     return ret;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+__attribute__((weak)) void _debug_uart_putc(int ch) {}
+
+static inline void _out_char_early(char character, void* buffer, size_t idx, size_t maxlen)
+{
+    (void)buffer;
+    (void)idx;
+    (void)maxlen;
+    if (character) {
+        _debug_uart_putc(character);
+    }
+}
+
+int printf_early(const char* format, ...)
+{
+    va_list va;
+    va_start(va, format);
+    char buffer[1];
+    const int ret = _vsnprintf(_out_char_early, buffer, (size_t)-1, format, va);
+    va_end(va);
+    return ret;
+}

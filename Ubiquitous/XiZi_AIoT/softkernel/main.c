@@ -96,10 +96,17 @@ int main(void)
         }
 
         /* start first task */
+#ifndef __riscv
         char* init_task_param[2] = { "/app/shell", 0 };
         sys_spawn((char*)_binary_init_start, "shell", init_task_param);
         char* fs_server_task_param[2] = { "/app/fs_server", 0 };
         sys_spawn((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
+#else
+        char* fs_server_task_param[2] = { "/app/fs_server", 0 };
+        sys_spawn((char*)_binary_default_fs_start, "memfs", fs_server_task_param);
+        char* init_task_param[2] = { "/app/shell", 0 };
+        sys_spawn((char*)_binary_init_start, "shell", init_task_param);
+#endif
     }
     /* start scheduler */
     struct SchedulerRightGroup scheduler_rights;

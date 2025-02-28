@@ -295,6 +295,18 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/ch32v208rbt6)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch32v208rbt6/Core \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch32v208rbt6/Debug \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch32v208rbt6/User \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch32v208rbt6 \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/Peripheral/inc \
+	-I$(BSP_ROOT)/include \
+	-I$(KERNEL_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rv32m1-vega)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/risc-v/rv32m1-vega \
@@ -462,6 +474,7 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m3 \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/third_party_driver/libraries/STM32F1xx_HAL/inc \
+	-I$(BSP_ROOT)/third_party_driver/libraries/STM32F1xx_HAL/inc/Legacy \
 	-I$(BSP_ROOT)/third_party_driver/libraries/CMSIS \
 	-I$(KERNEL_ROOT)/include \
 	-I$(BSP_ROOT)/include #

@@ -28,6 +28,14 @@ extern AdapterProductInfoType Ec200tAttach(struct Adapter *adapter);
 extern AdapterProductInfoType Ec200aAttach(struct Adapter *adapter);
 #endif
 
+#ifdef ADAPTER_GM800TF
+extern AdapterProductInfoType Gm800tfAttach(struct Adapter *adapter);
+#endif
+
+#ifdef ADAPTER_EC801E
+extern AdapterProductInfoType Ec801eAttach(struct Adapter *adapter);
+#endif
+
 static int Adapter4GRegister(struct Adapter *adapter)
 {
     int ret = 0;
@@ -66,6 +74,20 @@ int Adapter4GInit(void)
         return -1;
     }
 
+#ifdef ADAPTER_EC801E
+    AdapterProductInfoType product_info = Ec801eAttach(adapter);
+    if (!product_info) {
+        printf("Adapter4GInit ec801e attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
+
+#endif
+
 #ifdef ADAPTER_EC200T
     AdapterProductInfoType product_info = Ec200tAttach(adapter);
     if (!product_info) {
@@ -84,6 +106,20 @@ int Adapter4GInit(void)
     AdapterProductInfoType product_info = Ec200aAttach(adapter);
     if (!product_info) {
         printf("Adapter4GInit ec200a attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
+
+#endif
+
+#ifdef ADAPTER_GM800TF
+    AdapterProductInfoType product_info = Gm800tfAttach(adapter);
+    if (!product_info) {
+        printf("Adapter4GInit gm800tf attach error\n");
         PrivFree(adapter);
         return -1;
     }
@@ -164,6 +200,106 @@ int Adapter4GTest(void)
     }
 #endif
 
+#ifdef ADAPTER_GM800TF
+	uint8 server_addr[64] = "115.238.53.59";
+    uint8 server_port[64] = "10208";
+
+    adapter->socket.socket_id = 0;
+    AdapterDeviceOpen(adapter);
+    AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+    AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
+	// AdapterDeviceDisconnect(adapter, NULL);
+    // AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
+	AdapterDeviceNetstat(adapter);
+	
+	// char sendData[15] = "Hello World!";
+	char sendData = 'a';
+	char receiveData = 0;
+	int failCount = 0;
+	for (int i = 0; i < 1024; i++) { // send 1kB data
+		AdapterDeviceSend(adapter, &sendData, 1);
+		sendData = sendData + 1 > 'z' ? 'a' : sendData + 1;
+	}
+	// AdapterDeviceSend(adapter, sendData, 13);
+    // while (1) {
+	// 	// if (sendData > 'z') {
+	// 	// 	break;
+	// 	// }
+    //     AdapterDeviceSend(adapter, &sendData, 1);
+	// 	sendData = sendData + 1 > 'z' ? 'a' : sendData + 1;
+    //     // int ret = AdapterDeviceRecv(adapter, &receiveData, 1);
+	// 	// printf("receiveData: %d\n", receiveData);
+	// 	// if (ret >= 0 && receiveData == sendData) {
+	// 	// 	sendData = sendData + 1 > 'z' ? 'a' : sendData + 1;
+	// 	// 	failCount = 0;
+	// 	// } else {
+	// 	// 	failCount++;
+	// 	// 	if (failCount >= 10) {
+	// 	// 		AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
+	// 	// 		failCount = 0;
+	// 	// 	}
+	// 	// }
+    //     // printf("4G recv msg %c\n", receiveData);
+	// 	// receiveData = 0;
+    // }
+	// PrivTaskDelay(10000);
+	AdapterDeviceClose(adapter);
+#endif
     return 0;    
 }
 PRIV_SHELL_CMD_FUNCTION(Adapter4GTest, a EC200T or EC200A adapter sample, PRIV_SHELL_CMD_FUNC_ATTR);
+
+#ifdef ADAPTER_GM800TF
+// unsigned char data[1024 * 40];
+void *uploadDataTask(void *param) {
+    int baud_rate = BAUD_RATE_115200;
+    struct Adapter* adapter = AdapterDeviceFindByName(ADAPTER_4G_NAME);
+	int reconnectLimit = 3; // try reconnect to server up to 3 times
+
+	uint8 server_addr[64] = "115.238.53.59";
+    uint8 server_port[64] = "10208";
+
+    adapter->socket.socket_id = 0;
+    AdapterDeviceOpen(adapter);
+    AdapterDeviceControl(adapter, OPE_INT, &baud_rate);
+
+	/* try to connect to server */
+	do {
+        AdapterDeviceConnect(adapter, CLIENT, server_addr, server_port, IPV4);
+        AdapterDeviceNetstat(adapter);
+		if (adapter->network_info.is_connected && adapter->network_info.signal_strength < 99) {
+			break;
+		}
+    } while (--reconnectLimit > 0);
+	if (reconnectLimit <= 0) {
+		printf("4G connect to server failed\n");
+		AdapterDeviceClose(adapter);
+		return NULL;
+	}
+	
+	/* send data to server */
+	char sendData[15] = "Hello World!";
+	AdapterDeviceSend(adapter, &sendData, 13);
+	// char sendData = 'a';
+	// char receiveData = 0;
+	// int failCount = 0;
+	// for (int i = 0; i < 1024; i++) { // send 1kB data
+	// 	AdapterDeviceSend(adapter, &sendData, 1);
+	// 	sendData = sendData + 1 > 'z' ? 'a' : sendData + 1;
+	// }
+
+	AdapterDeviceClose(adapter);
+}
+
+void startUploadDataTask(void) {
+	pthread_attr_t attr;
+    attr.schedparam.sched_priority = 20;
+    attr.stacksize = 8096;
+
+    // char task_name[] = "upload_data_task";
+
+	pthread_t thread;
+    PrivTaskCreate(&thread, &attr, uploadDataTask, NULL);
+	PrivTaskStartup(&thread);
+}
+#endif

@@ -3,3 +3,7 @@
 *libmusl.a
 *liblwip.a
 .DS_Store
+
+.cache/
+compile_commands.json
+.clangd

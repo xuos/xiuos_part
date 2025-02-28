@@ -129,6 +129,18 @@ struct NetworkInfo {
     enum CarrierType carrier_type;
     int signal_strength;
     char ip_address[16];
+#ifdef ADAPTER_GM800TF
+	unsigned char workMode;         // 工作模式，1为NET，2为MQTT,NOR
+	unsigned short port;            // 目的端口号
+	unsigned char is_connected;     // SOCKET连接状态，0为失败，1为成功
+	unsigned char mqttSwitch;       // MQTT开关
+	char     mqttServerIp[16];      // MQTT目的IP地址
+	unsigned short mqttServerPort;  // MQTT目的端口号
+	char     mqttClientId[64];      // MQTT客户端ID
+	char     mqttUsername[64];      // MQTT用户名
+	char     mqttPassword[64];      // MQTT密码
+	unsigned char mqttIsConnected;  // MQTT连接状态，0为失败，1为成功
+#endif
 };
 
 struct AdapterData

@@ -37,7 +37,11 @@ struct CPU {
     int cpuid;
 
     struct Thread* task;
+#ifndef __riscv
     struct context* scheduler;
+#else
+    struct context scheduler;
+#endif
 };
 
 extern struct CPU global_cpus[NR_CPU];

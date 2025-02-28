@@ -45,7 +45,11 @@ bool swi_distributer_init(struct SwiDispatcherRightGroup* _right_group)
     return p_intr_driver != NULL;
 }
 
+#ifndef __riscv
 extern void context_switch(struct context**, struct context*);
+#else
+extern void context_switch(struct context*, struct context*);
+#endif
 void software_irq_dispatch(struct trapframe* tf)
 {
     xizi_enter_kernel();
@@ -54,19 +58,22 @@ void software_irq_dispatch(struct trapframe* tf)
     // get current task
     struct Thread* cur_task = cur_cpu()->task;
     /// @todo: Handle dead task
-
     int syscall_num = -1;
     if (cur_task && cur_task->snode.state != DEAD) {
         cur_task->thread_context.trapframe = tf;
         // call syscall
-
         int ret = arch_syscall(cur_task->thread_context.trapframe, &syscall_num);
         arch_set_return(tf, ret);
     }
 
     assert(cur_cpu()->task == cur_task && cur_task->snode.state == RUNNING);
     if (!queue_is_empty(&cur_task->snode.state_trans_signal_queue)) {
+#ifndef __riscv
         context_switch(&cur_task->thread_context.context, cur_cpu()->scheduler);
+#else
+        struct CPU* cpu = cur_cpu();
+        context_switch(cur_task->thread_context.context, &cpu->scheduler);
+#endif
     }
     if (syscall_num == SYSCALL_EXIT) {
         panic("Exit reaches");

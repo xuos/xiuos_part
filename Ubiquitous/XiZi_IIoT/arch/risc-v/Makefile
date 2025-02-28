@@ -2,6 +2,10 @@ ifeq ($(CONFIG_BOARD_CH32V307VCT6), )
 SRC_DIR :=  shared
 endif
 
+ifeq ($(CONFIG_BOARD_CH32V208RBT6), )
+SRC_DIR := shared
+endif
+
 ifeq ($(CONFIG_BOARD_FE310_EVB),y)
 SRC_DIR +=fe310
 endif
@@ -36,6 +40,10 @@ endif
 ifeq ($(CONFIG_BOARD_CH32V307VCT6), y)
 SRC_DIR +=ch32v307vct6
 endif 
+
+ifeq ($(CONFIG_BOARD_CH32V208RBT6), y)
+SRC_DIR := ch32v208rbt6
+endif
 
 ifeq ($(CONFIG_BOARD_RV32M1_VEGA),y)
 SRC_DIR +=rv32m1-vega

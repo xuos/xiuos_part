@@ -16,6 +16,13 @@ user_ldflags = -N -Ttext 0
 cflags = -Wall -O2 -std=c11 -mtune=cortex-a55 -nostdlib -nodefaultlibs -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -Wno-unused -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie
 board_specs = stub.o
 endif
+ifeq ($(BOARD), jh7110)
+toolchain ?= riscv64-unknown-elf-
+user_ldflags = -N -Ttext 0 -T $(KERNEL_ROOT)/services/boards/jh7110/jh7110_user.lds
+CFLAGS = -Wall -Werror -O -fno-omit-frame-pointer -ggdb -gdwarf-2 -MD -mcmodel=medany -fno-common -nostdlib -fno-builtin-strncpy -fno-builtin-strncmp -fno-builtin-strlen -fno-builtin-memset -fno-builtin-memmove -fno-builtin-memcmp -fno-builtin-log -fno-builtin-bzero -fno-builtin-strchr -fno-builtin-exit -fno-builtin-malloc -fno-builtin-putc -fno-builtin-free -fno-builtin-memcpy -Wno-main -fno-builtin-printf -fno-builtin-fprintf -fno-builtin-vprintf -I. -fno-stack-protector -fno-pie -no-pie
+cflags = $(CFLAGS) -Wno-unused -fno-strict-aliasing
+board_specs = stub.o
+endif
 
 cc = ${toolchain}gcc
 ld = ${toolchain}g++
@@ -49,6 +56,10 @@ all: pingpong_client pingpong_server \
 	test_sleep test_semaphore test_ipc_null test_thread test_irq_hdlr test_irq_block test_irq_send \
 	eth_driver epit_server  readme.txt | bin
 else 
+ifeq ($(BOARD), jh7110)
+all: shell fs_server \
+	| bin
+else 
 all: pingpong_client pingpong_server \
 	test_fault simple_client simple_server \
 	shell fs_server semaphore_server \
@@ -56,6 +67,7 @@ all: pingpong_client pingpong_server \
 	test_sleep test_ipc_null test_thread test_semaphore readme.txt \
 	test_context_user \
 	| bin
+endif
 endif
 	../tools/mkfs/mkfs ./fs.img $^
 	@mv $(filter-out readme.txt, $^) bin

@@ -9,6 +9,10 @@ endif
 ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     SRC_FILES := adapter_4g.c
 
+    ifeq ($(CONFIG_ADAPTER_EC801E),y)
+        SRC_DIR += ec801e
+    endif
+
     ifeq ($(CONFIG_ADAPTER_EC200T),y)
         SRC_DIR += ec200t
     endif
@@ -16,6 +20,10 @@ ifeq ($(CONFIG_ADD_XIZI_FEATURES),y)
     ifeq ($(CONFIG_ADAPTER_EC200A),y)
         SRC_DIR += ec200a
     endif
+
+	ifeq ($(CONFIG_ADAPTER_GM800TF),y)
+		SRC_DIR += gm800tf
+	endif
 
     include $(KERNEL_ROOT)/compiler.mk
 endif

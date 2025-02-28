@@ -177,6 +177,8 @@ void EnvInitKTask(void *parameter)
 	}	
 #else
 	CreateMainTask();
+    extern long ShowTask(void);
+    extern void ShowMemory(void);
 #endif
 #endif
 }
@@ -225,7 +227,8 @@ int XiUOSStartup(void)
  
 #ifdef TOOL_SHELL
     extern int userShellInit(void);
-	userShellInit();
+    KPrintf("%s %d\n", __func__, __LINE__);
+    userShellInit();
 #endif
 
 #ifdef USER_APPLICATION
@@ -237,7 +240,8 @@ extern int InitUserspace(void);
 		CreateMainTask();
 	}	
 #else
-	CreateMainTask();
+KPrintf("%s %d\n", __func__, __LINE__);
+    CreateMainTask();
 #endif
 #endif
 
@@ -251,7 +255,10 @@ extern int InitUserspace(void);
     StartWatchdog();
 #endif
 
-	StartupOsAssign();
+    KPrintf("%s %d\n", __func__, __LINE__);
+    extern long ShowTask(void);
+    ShowTask();
+    StartupOsAssign();
     return 0;
 }
 

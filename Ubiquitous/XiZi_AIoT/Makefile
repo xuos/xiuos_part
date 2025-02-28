@@ -3,7 +3,7 @@ MAKEFLAGS += --no-print-directory
 .PHONY:all clean distclean show_info menuconfig
 .PHONY:COMPILE_APP COMPILE_KERNEL
 
-riscv_support := 
+riscv_support := jh7110 
 arm_support += imx6q-sabrelite zynq7000-zc702 3568
 emulator_support += 
 support := $(riscv_support) $(arm_support) $(emulator_support) 
@@ -36,6 +36,9 @@ include $(KERNEL_ROOT)/hardkernel/arch/arm/armv7-a/cortex-a9/preboot_for_$(BOARD
 endif
 ifneq ($(findstring $(BOARD), 3568), )
 include $(KERNEL_ROOT)/hardkernel/arch/arm/armv8-a/cortex-a55/preboot_for_$(BOARD)/config.mk
+endif
+ifneq ($(findstring $(BOARD), jh7110), )
+include $(KERNEL_ROOT)/hardkernel/arch/riscv/rv64gc/preboot_for_$(BOARD)/config.mk
 endif
 export BSP_BUILD_DIR := $(KERNEL_ROOT)
 export HOSTTOOLS_DIR ?= $(KERNEL_ROOT)/services/tools/hosttools
