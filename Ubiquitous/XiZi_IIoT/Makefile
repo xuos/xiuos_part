@@ -85,6 +85,7 @@ endif
 
 endif
 
+.NOTPARALLEL: all
 
 all: $(PART)
 

@@ -1,11 +1,14 @@
+# newer risc-v toolchain requires `zicsr` extension for csr-related ops
+export MARCH := rv32imac_zicsr
+# export MARCH := rv32imacxw_zicsr
 
-export CFLAGS :=  -march=rv32imac -mabi=ilp32 -msmall-data-limit=8 -msave-restore -Os -g
-export AFLAGS :=  -march=rv32imac -mabi=ilp32 -x assembler-with-cpp -ggdb
-export LFLAGS :=  -march=rv32imac -mabi=ilp32 -nostartfiles -Wl,--gc-sections,-Map=XiZi-ch32v208vct6.map,-cref,-u,_start -T $(BSP_ROOT)/link.ld
+export CFLAGS :=  -march=$(MARCH) -mabi=ilp32 -msmall-data-limit=8 -msave-restore -Os -g
+export AFLAGS :=  -march=$(MARCH) -mabi=ilp32 -x assembler-with-cpp -ggdb
+export LFLAGS :=  -march=$(MARCH) -mabi=ilp32 -nostartfiles -Wl,--gc-sections,-Map=XiZi-ch32v208vct6.map,-cref,-u,_start -T $(BSP_ROOT)/link.ld
 
-# export CFLAGS :=  -march=rv32imacxw -mabi=ilp32 -msmall-data-limit=8 -msave-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -g -std=gnu99
-# export AFLAGS :=  -march=rv32imac -mabi=ilp32 -x assembler-with-cpp -ggdb
-# export LFLAGS :=  -march=rv32imacxw -mabi=ilp32 -msmall-data-limit=8 -msave-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -g -T $(BSP_ROOT)/link.ld -nostartfiles -Xlinker --gc-sections -Wl,-Map,"XiZi-ch32v307vct6.map" --specs=nano.specs --specs=nosys.specs
+# export CFLAGS :=  -march=$(MARCH) -mabi=ilp32 -msmall-data-limit=8 -msave-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -g -std=gnu99
+# export AFLAGS :=  -march=$(MARCH) -mabi=ilp32 -x assembler-with-cpp -ggdb
+# export LFLAGS :=  -march=$(MARCH) -mabi=ilp32 -msmall-data-limit=8 -msave-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -g -T $(BSP_ROOT)/link.ld -nostartfiles -Xlinker --gc-sections -Wl,-Map,"XiZi-ch32v307vct6.map" --specs=nano.specs --specs=nosys.specs
 
 export APPLFLAGS :=  -nostartfiles -Wl,--gc-sections,-Map=XiZi-app.map,-cref,-u, -T $(BSP_ROOT)/link_userspace.lds
 

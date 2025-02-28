@@ -32,6 +32,10 @@ extern AdapterProductInfoType Ec200aAttach(struct Adapter *adapter);
 extern AdapterProductInfoType Gm800tfAttach(struct Adapter *adapter);
 #endif
 
+#ifdef ADAPTER_EC801E
+extern AdapterProductInfoType Ec801eAttach(struct Adapter *adapter);
+#endif
+
 static int Adapter4GRegister(struct Adapter *adapter)
 {
     int ret = 0;
@@ -69,6 +73,20 @@ int Adapter4GInit(void)
         PrivFree(adapter);
         return -1;
     }
+
+#ifdef ADAPTER_EC801E
+    AdapterProductInfoType product_info = Ec801eAttach(adapter);
+    if (!product_info) {
+        printf("Adapter4GInit ec801e attach error\n");
+        PrivFree(adapter);
+        return -1;
+    }
+
+    adapter->product_info_flag = 1;
+    adapter->info = product_info;
+    adapter->done = product_info->model_done;
+
+#endif
 
 #ifdef ADAPTER_EC200T
     AdapterProductInfoType product_info = Ec200tAttach(adapter);

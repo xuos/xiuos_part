@@ -1,6 +1,6 @@
 OBJS := $(shell cat make.obj)
 
-$(TARGET): $(OBJS) 
+$(TARGET): $(OBJS)
 	@echo ------------------------------------------------
 	@echo link $(TARGET)
 	@$(CROSS_COMPILE)g++ -o $@ $($(LINK_FLAGS)) $(OBJS) $(LINK_LWIP) $(LINK_MUSLLIB) $(LINK_MONGOOSE) $(LINK_WCH_NET) $(LIBCC) $(LINK_WCH_BLE)
