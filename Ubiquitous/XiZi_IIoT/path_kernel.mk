@@ -526,6 +526,17 @@ KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif 
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/imx8mp)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
+	-I$(BSP_ROOT)/ \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/rpmsg_lite/lib/include \
+	-I$(BSP_ROOT)/rpmsg_lite/lib/include/platform/imx8mp_m7 \
+	-I$(KERNEL_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xishutong-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4/hc32f4a0 \
