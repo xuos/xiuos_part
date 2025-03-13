@@ -14,6 +14,10 @@ SRC_FILES += svc_handle.c mpu.c
 endif
 endif
 
+ifeq ($(CONFIG_BOARD_STM32L476_EVB),y)
+SRC_FILES := stm32l476/interrupt.c stm32l476/system_init.c stm32l476/coreclock.c boot.S interrupt_vector.S svc_entry.S
+endif
+
 ifeq ($(CONFIG_BOARD_EDU_ARM32_EVB),y)
 SRC_DIR += hc32f4a0
 endif
