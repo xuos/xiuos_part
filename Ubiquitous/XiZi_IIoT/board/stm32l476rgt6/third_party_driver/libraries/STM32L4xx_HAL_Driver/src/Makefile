@@ -22,5 +22,7 @@ SRC_FILES := \
 	stm32l4xx_hal_spi_ex.c \
 	stm32l4xx_hal_pcd.c \
 	stm32l4xx_hal_pcd_ex.c \
-	stm32l4xx_ll_usb.c
+	stm32l4xx_hal_can.c \
+	stm32l4xx_ll_usb.c \
+	stm32l4xx_hal_wwdg.c
 include $(KERNEL_ROOT)/compiler.mk

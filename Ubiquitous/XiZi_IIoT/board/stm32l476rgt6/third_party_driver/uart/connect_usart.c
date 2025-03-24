@@ -20,7 +20,6 @@ Modification:
 #include <board.h>
 #include <connect_usart.h>
 
-#define BSP_USING_UART1
 #if defined(BSP_USING_UART1)
 UART_HandleTypeDef huart1;
 #endif
@@ -416,8 +415,6 @@ static int SerialGetChar(struct SerialHardwareDevice *serial_dev)
     if (serial_hw_cfg->uart_device->Instance->ISR & UART_FLAG_RXNE) {
         ch = serial_hw_cfg->uart_device->Instance->RDR & 0xff;
     }
-    // uint8_t data = serial_hw_cfg->uart_device->Instance->RDR;
-    // HAL_UART_Receive(serial_hw_cfg->uart_device, &ch, 1, 100);
     return ch;
 }
 
@@ -741,3 +738,37 @@ int HwUsartInit(void)
 
     return ret;
 }
+
+
+#ifdef TEST_RS485
+static struct Bus *bus;
+static struct HardwareDev *dev;
+static struct Driver *drv;
+
+void RS485Test(void)
+{
+    x_err_t ret = EOK;
+
+    bus = BusFind(SERIAL_BUS_NAME_4);
+    dev = BusFindDevice(bus, SERIAL_4_DEVICE_NAME_0);
+    drv = BusFindDriver(bus, SERIAL_DRV_NAME_4);
+
+    struct BusConfigureInfo configure_info;
+    configure_info.configure_cmd = OPE_INT;
+    struct SerialCfgParam serial_cfg;
+    memset(&serial_cfg, 0, sizeof(struct SerialCfgParam));
+    configure_info.private_data = &serial_cfg;
+    ret = BusDrvConfigure(drv, &configure_info);
+
+    struct BusBlockWriteParam write_param;
+    memset(&write_param, 0, sizeof(struct BusBlockWriteParam));
+
+    uint8 write_data[] = "Message from stm32L476 by RS485(UART5)";
+
+    write_param.buffer = (void *)write_data;
+    write_param.size = sizeof(write_data);
+    BusDevWriteData(dev, &write_param);
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                    RS485Test, RS485Test, open uart device and use rs485 write_read parameters);
+#endif

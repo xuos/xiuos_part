@@ -26,6 +26,8 @@
 #include "connect_usart.h"
 #include "connect_spi.h"
 #include "connect_usb.h"
+#include "connect_wdt.h"
+#include "connect_can.h"
 
 void Error_Handler(void)
 {
@@ -47,8 +49,10 @@ void SystemClock_Config(void)
     __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
     /** Initializes the CPU, AHB and APB busses clocks 
     */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE|RCC_OSCILLATORTYPE_MSI;
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_LSE
+                                |RCC_OSCILLATORTYPE_MSI;
     RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+    RCC_OscInitStruct.LSIState = RCC_LSI_ON;
     RCC_OscInitStruct.MSIState = RCC_MSI_ON;
     RCC_OscInitStruct.MSICalibrationValue = 0;
     RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
@@ -69,7 +73,7 @@ void SystemClock_Config(void)
                                 |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV16;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
     if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
@@ -80,10 +84,10 @@ void SystemClock_Config(void)
                                 |RCC_PERIPHCLK_USART3|RCC_PERIPHCLK_UART4
                                 |RCC_PERIPHCLK_UART5|RCC_PERIPHCLK_USB;
     PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
-    PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-    PeriphClkInit.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
-    PeriphClkInit.Uart4ClockSelection = RCC_UART4CLKSOURCE_PCLK1;
-    PeriphClkInit.Uart5ClockSelection = RCC_UART5CLKSOURCE_PCLK1;
+    PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_SYSCLK;
+    PeriphClkInit.Usart3ClockSelection = RCC_USART3CLKSOURCE_SYSCLK;
+    PeriphClkInit.Uart4ClockSelection = RCC_UART4CLKSOURCE_SYSCLK;
+    PeriphClkInit.Uart5ClockSelection = RCC_UART5CLKSOURCE_SYSCLK;
     PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLLSAI1;
     PeriphClkInit.PLLSAI1.PLLSAI1Source = RCC_PLLSOURCE_MSI;
     PeriphClkInit.PLLSAI1.PLLSAI1M = 1;
@@ -139,6 +143,14 @@ void InitBoardHardware()
 
 #ifdef BSP_USING_USB
     HwUsbDeviceInit();
+#endif
+
+#ifdef BSP_USING_WDT
+    HwWdtInit();
+#endif
+
+#ifdef BSP_USING_CAN
+    HwCanInit();
 #endif
     /* disable interrupt */
     __set_PRIMASK(1);

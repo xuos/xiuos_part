@@ -12,4 +12,12 @@ ifeq ($(CONFIG_BSP_USING_USB),y)
   SRC_DIR += usb
 endif
 
+ifeq ($(CONFIG_BSP_USING_WDT),y)
+  SRC_DIR += watchdog
+endif
+
+ifeq ($(CONFIG_BSP_USING_CAN),y)
+  SRC_DIR += can
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
