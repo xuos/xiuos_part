@@ -11,7 +11,7 @@ MEMORY
 OUTPUT_ARCH(arm)
 
 ENTRY(Reset_Handler)
-_system_stack_size = 0x200;
+_system_stack_size = 0x10000;
 
 SECTIONS
 {
@@ -42,9 +42,6 @@ SECTIONS
         __isrtbl_end = .;
         . = ALIGN(4);
 
-        PROVIDE(g_service_table_start = ABSOLUTE(.));
-        KEEP(*(.g_service_table))
-        PROVIDE(g_service_table_end = ABSOLUTE(.));
 
         PROVIDE(_etext =  ABSOLUTE(.));
 
@@ -78,11 +75,12 @@ SECTIONS
         __data_end__ = . ;
     } >sram
 
-    __bss_start__ = .;
+    
     .bss :
     {
         . = ALIGN(4);
         /* This is used by the startup in order to initialize the .bss secion */
+        __bss_start__ = .;
         _sbss = .;
 
         *(.bss)
@@ -92,16 +90,16 @@ SECTIONS
         . = ALIGN(4);
         /* This is used by the startup in order to initialize the .bss secion */
         _ebss = . ;
+        __bss_end__ = .;
     } > sram
-    __bss_end__ = .;
+    .stack : 
+    {
+        . = ALIGN(8);
+        /* cpu stack */
+        . = . + _system_stack_size;
+        __StackTop = .;
+    } > sram
 
     _end = .;
-
-   .stack ORIGIN(sram) + LENGTH(sram) - _system_stack_size :
-    {
-    PROVIDE( _heap_end = . );
-    . = _system_stack_size;
-    PROVIDE( __StackTop = . );
-    } >sram 
 
 }

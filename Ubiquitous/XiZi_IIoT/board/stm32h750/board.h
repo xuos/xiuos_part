@@ -24,11 +24,10 @@
 
 
 void InitBoardHardware();
-extern void *__bss_end__;
-extern void *_heap_end;
 
-#define HEAP_START  ((void *)&__bss_end__)
-#define HEAP_END    ((void *)&_heap_end)
+
+#define HEAP_START  0x24030000
+#define HEAP_END    0x24060000
 
 
 

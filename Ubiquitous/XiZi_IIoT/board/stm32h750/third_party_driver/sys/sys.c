@@ -31,7 +31,12 @@ RCC_PeriphCLKInitTypeDef rcc_periph_clk_init_struct = {0};
 
 
 
-
+void sys_cache_enable(void)
+{
+    SCB_EnableICache();                 /* Ê¹ÄÜI-Cache */
+    SCB_EnableDCache();                 /* Ê¹ÄÜD-Cache */
+    SCB->CACR |= SCB_CACR_FORCEWT_Msk;  /* Ê¹ÄÜD-CacheÇ¿ÖÆÍ¸Ð´ */
+}
 
 
 /**

@@ -22,6 +22,7 @@
 #include <connect_uart.h>
 #include <usart.h>
 #include <stm32h7xx_hal_cortex.h>
+#include <stm32h7xx_hal_uart.h>
 static struct SerialBus serial_bus_1;
 static struct SerialDriver serial_driver_1;
 static struct SerialHardwareDevice serial_device_1;
@@ -75,31 +76,19 @@ static void UartHandler(struct SerialBus *serial_bus, struct SerialDriver *seria
     {
         SerialSetIsr(serial_dev, SERIAL_EVENT_RX_IND);
     }
-    else
-    {
-        if (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_ORE) != RESET)
-        {
-            __HAL_UART_CLEAR_OREFLAG(&serial_hw_cfg->uart_handle);
-        }
-        if (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_NE) != RESET)
-        {
-            __HAL_UART_CLEAR_NEFLAG(&serial_hw_cfg->uart_handle);
-        }
-        if (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_FE) != RESET)
-        {
-            __HAL_UART_CLEAR_FEFLAG(&serial_hw_cfg->uart_handle);
-        }
-        if (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_PE) != RESET)
-        {
-            __HAL_UART_CLEAR_PEFLAG(&serial_hw_cfg->uart_handle);
-        }
-    }
+    HAL_UART_IRQHandler(&(serial_hw_cfg->uart_handle));
 }
 
 void UartIsr1(int vector, void *param)
 {
 	/* get serial bus 1 */
-	UartHandler(&serial_bus_1, &serial_driver_1);
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+
+    UartHandler(&serial_bus_1, &serial_driver_1);
+
+    ENABLE_INTERRUPT(lock);
+	
 
 }
 DECLARE_HW_IRQ(USART1_IRQn, UartIsr1, NONE);
@@ -240,11 +229,12 @@ static int SerialPutChar(struct SerialHardwareDevice *serial_dev, char c)
 {
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
     struct Stm32UartHwCfg *serial_hw_cfg = (struct Stm32UartHwCfg *)serial_cfg->hw_cfg.private_data;
+    /* Polling mode. */
+    HAL_UART_Transmit(&(serial_hw_cfg->uart_handle), (uint8_t *)&c, 1, 100);
+    // UART_INSTANCE_CLEAR_FUNCTION(&(serial_hw_cfg->uart_handle), UART_FLAG_TC);
 
-    UART_INSTANCE_CLEAR_FUNCTION(&(serial_hw_cfg->uart_handle), UART_FLAG_TC);
-
-    serial_hw_cfg->uart_handle.Instance->RDR = c;
-    while (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_TC) == RESET);
+    // serial_hw_cfg->uart_handle.Instance->TDR = c;
+    // while (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_TC) == RESET);
 
     return EOK;
 }

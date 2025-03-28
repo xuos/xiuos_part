@@ -33,11 +33,11 @@
 
 void InitBoardHardware()
 {
-
+  sys_cache_enable();
     HAL_Init();
     sys_stm32_clock_init(192, 5, 2, 4);
  
-    delay_init(480); 
+    //delay_init(480); 
   InitHwUart();
 
 	InitBoardMemory((void*)HEAP_START, (void*)HEAP_END);
