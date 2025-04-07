@@ -254,7 +254,7 @@ extern "C" {
 #define RB_SOFTWARE_RESET       0x01                     // WA/WZ, global software reset, high action, auto clear
 #define RB_WDOG_RST_EN          0x02                     // RWA, enable watch-dog reset if watch-dog timer overflow: 0=as timer only, 1=enable reset if timer overflow
 #define RB_WDOG_INT_EN          0x04                     // RWA, watch-dog interrupt enable or INT_ID_WDOG interrupt source selection: 0=software interrupt, 1=from watch-dog timer overflow
-#define RB_WDOG_INT_FLAG        0x10                     // RW1, watch-dog timer overflow interrupt flag, cleared by RW1 or reload watch-dog count
+#define RB_WDOG_INT_FLAG        0x08                     // RW1, watch-dog timer overflow interrupt flag, cleared by RW1 or reload watch-dog count
 #define R8_GLOB_RESET_KEEP      (*((PUINT8V)0x40001007)) // RW, value keeper during global reset
 
 /* System: clock configuration register */

@@ -45,6 +45,10 @@ ifeq ($(CONFIG_BOARD_CH32V208RBT6), y)
 SRC_DIR := ch32v208rbt6
 endif
 
+ifeq ($(CONFIG_BOARD_CH569W), y)
+SRC_DIR := ch569w
+endif
+
 ifeq ($(CONFIG_BOARD_RV32M1_VEGA),y)
 SRC_DIR +=rv32m1-vega
 endif
