@@ -98,16 +98,14 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
     // config serial receive sem timeout
     dev_param->serial_timeout = serial_cfg->data_cfg.serial_timeout;
 
-
-#if 1
+    // config serial reg
     struct uart_registers *uxreg = (struct uart_registers *)serial_cfg->hw_cfg.serial_register_base;
-
     union _uart_fcr fcr;
     union _uart_lcr lcr;
     uint32_t x;
     uint32_t t = FREQ_SYS;
 
-//    x = 10 * sys_hclk_get() / 8 / serial_cfg->data_cfg.serial_baud_rate;
+    // x = 10 * sys_hclk_get() / 8 / serial_cfg->data_cfg.serial_baud_rate;
     x = 10 * t / 8 / serial_cfg->data_cfg.serial_baud_rate;
     x = (x + 5) / 10;
     uxreg->DL = x;
@@ -165,8 +163,6 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
 
     /* TXD pin output enable */
     uxreg->IER.txd_en = 1;
-
-#endif
 
     return EOK;
 }
@@ -236,15 +232,12 @@ static int SerialPutChar(struct SerialHardwareDevice *serial_dev, char ch) {
 static int SerialGetChar(struct SerialHardwareDevice *serial_dev) {
     int ch = -1;
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
+    volatile struct uart_registers *uxreg = (struct uart_registers *)serial_cfg->hw_cfg.serial_register_base;
 
-    if ( (UART1_GetLinSTA() & RB_LSR_DATA_RDY) == RB_LSR_DATA_RDY) {
-        ch = UART1_RecvByte();
+    if (1 == uxreg->LSR.data_rdy) {
+        /* UART_II_RECV_RDY is cleared by reading RBR */
+        ch = (uxreg->RFC > 0) ? uxreg->RBR : -1;
     }
-#if 0
-    if (RESET != USART_GetFlagStatus((USART_TypeDef *)serial_cfg->hw_cfg.serial_register_base, USART_FLAG_RXNE)) {
-        ch = USART_ReceiveData((USART_TypeDef *)serial_cfg->hw_cfg.serial_register_base) & 0xff;
-    }
-#endif
 
     return ch;
 }
@@ -326,9 +319,7 @@ struct SerialHardwareDevice serial_device_1;
 
 void UART1_IRQHandler(void) __attribute__((interrupt()));
 void UART1_IRQHandler(void) {
-#if 1
     GET_INT_SP();
-    //isr_sp_enter();
     x_base level;
     level = DisableLocalInterrupt();
     isrManager.done->incCounter();
@@ -338,8 +329,6 @@ void UART1_IRQHandler(void) {
     isrManager.done->decCounter();
     EnableLocalInterrupt(level);
     FREE_INT_SP();
-    //isr_sp_leave();
-#endif
 }
 #endif
 
@@ -386,18 +375,11 @@ int InitHwUart(void) {
         return ERROR;
     }
 
-
     /* Configure the serial port */
 	GPIOA_SetBits(GPIO_Pin_8);
 	GPIOA_ModeCfg(GPIO_Pin_7, GPIO_ModeIN_PU_NSMT);			// RXD-pull-up input
 	GPIOA_ModeCfg(GPIO_Pin_8, GPIO_Slowascent_PP_8mA);		// TXD-push-pull output
-//	UART1_DefInit();
-/*
-    //Interrupt method
-	UART1_ByteTrigCfg( UART_1BYTE_TRIG );
-	UART1_INTCfg( ENABLE, RB_IER_RECV_RDY|RB_IER_LINE_STAT );
-	PFIC_EnableIRQ( UART1_IRQn );
-*/
+	UART1_DefInit();
 #endif
 
     return ret;

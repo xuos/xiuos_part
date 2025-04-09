@@ -26,12 +26,12 @@ extern x_ubase interrupt_new_task;
 
 void sw_setpend(void)
 {
-    PFIC_SetPendingIRQ(SWI_IRQn);
+    SysTick->CNTFG |= (1 << 0);
 }
 
 void sw_clearpend(void)
 {
-    PFIC_ClearPendingIRQ(SWI_IRQn);
+    SysTick->CNTFG &= ~(1 << 0);
 }
 
 x_base DisableLocalInterrupt()
