@@ -21,13 +21,13 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
-
+extern int __StackTop;
 
 void InitBoardHardware();
 
 
-#define HEAP_START  0x24030000
-#define HEAP_END    0x24060000
+#define HEAP_START   (void *)(&__StackTop)
+#define HEAP_END    0x24080000
 
 
 

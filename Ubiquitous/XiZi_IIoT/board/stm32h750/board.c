@@ -38,9 +38,10 @@ void InitBoardHardware()
     sys_stm32_clock_init(192, 5, 2, 4);
  
     //delay_init(480); 
+    InitBoardMemory((void*)HEAP_START, (void*)HEAP_END);
   InitHwUart();
 
-	InitBoardMemory((void*)HEAP_START, (void*)HEAP_END);
+	
 	InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
 
   

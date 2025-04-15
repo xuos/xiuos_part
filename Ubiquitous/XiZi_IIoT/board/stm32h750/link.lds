@@ -11,7 +11,7 @@ MEMORY
 OUTPUT_ARCH(arm)
 
 ENTRY(Reset_Handler)
-_system_stack_size = 0x10000;
+_system_stack_size = 0x1000;
 
 SECTIONS
 {
@@ -49,19 +49,18 @@ SECTIONS
     } > flash = 0
 
     /* .ARM.exidx is sorted, so has to go in its own output section.  */
-    __exidx_start = .;
+     __exidx_start = .;
     .ARM.exidx :
     {
+        PROVIDE(__exidx_start = ABSOLUTE(.));
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-
-        /* This is used by the startup in order to initialize the .data secion */
         _sidata = .;
+        PROVIDE(__exidx_end = ABSOLUTE(.));
     } > flash
-    __exidx_end = .;
 
     /* .data section which is used for initialized data */
 
-    .data : AT (_sidata)
+    .data : AT (__exidx_end )
     {
         . = ALIGN(4);
         /* This is used by the startup in order to initialize the .data secion */

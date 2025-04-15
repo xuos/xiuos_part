@@ -1,7 +1,7 @@
 SRC_DIR := libraries 
 
 ifeq ($(CONFIG_BSP_USING_UART),y)
-  SRC_DIR += usart sys 
+  SRC_DIR += usart sys delay
 endif
 
 include $(KERNEL_ROOT)/compiler.mk

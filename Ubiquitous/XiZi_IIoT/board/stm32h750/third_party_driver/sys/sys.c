@@ -1,22 +1,3 @@
-/**
- ****************************************************************************************************
- * @file        sys.c
- * @author      ����ԭ���Ŷ�(ALIENTEK)
- * @version     V1.0
- * @date        2023-06-12
- * @brief       ϵͳ��ʼ������
- * @license     Copyright (c) 2020-2032, �������������ӿƼ����޹�˾
- ****************************************************************************************************
- * @attention
- * 
- * ʵ��ƽ̨:����ԭ�� ������ H750������
- * ������Ƶ:www.yuanzige.com
- * ������̳:www.openedv.com
- * ��˾��ַ:www.alientek.com
- * ������?:openedv.taobao.com
- * 
- ****************************************************************************************************
- */
 
 #include "sys.h"
 #include "stm32h7xx_hal_rcc.h"
@@ -26,51 +7,36 @@
 #include "stm32h7xx_hal_pwr.h"
 #include "stm32h7xx_hal_flash_ex.h"
 #include "stm32h7xx_hal_gpio.h"
-/* �������ø�����ʱ�� */
+
 RCC_PeriphCLKInitTypeDef rcc_periph_clk_init_struct = {0};
 
 
 
 void sys_cache_enable(void)
 {
-    SCB_EnableICache();                 /* Ê¹ÄÜI-Cache */
-    SCB_EnableDCache();                 /* Ê¹ÄÜD-Cache */
-    SCB->CACR |= SCB_CACR_FORCEWT_Msk;  /* Ê¹ÄÜD-CacheÇ¿ÖÆÍ¸Ð´ */
+    SCB_EnableICache();                 
+    SCB_EnableDCache();                
+    SCB->CACR |= SCB_CACR_FORCEWT_Msk;  
 }
 
 
-/**
- * @brief   ?????��??
- * @param   plln: PLL1??��????��?????����??��??4~512??
- * @param   pllm: PLL1???�衤????��?????����??��??1~63??
- * @param   pllp: PLL1??P?????����????��?????����??��??2~128?��????????
- * @param   pllq: PLL1??Q?????����????��?????����??��??1~128??
- * @note    ?��?????��????????25MHz?��??????????plln=192 pllm=5 pllp=2 pllq=4
- * @retval  ?????��??
- * @arg     0: ????
- * @arg     1: ?���?
- */
+
 uint8_t sys_stm32_clock_init(uint32_t plln, uint32_t pllm, uint32_t pllp, uint32_t pllq)
 {
     RCC_OscInitTypeDef rcc_osc_init_struct = {0};
     RCC_ClkInitTypeDef rcc_clk_init_struct = {0};
     
-    /* ����ΪLDO Supply��ʽΪ�ں��򹩵� */
+    
     HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
     
-    /* ����ΪVOS0��1.26V~1.40V�� */
+    
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
     while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY));
     __HAL_RCC_SYSCFG_CLK_ENABLE();
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
     while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY));
     
-    /* ����PLL1��ʹ��HSI48
-     * PLL1ʱ��Դ��HSE��hse_ck��
-     * PLL1 P�����pll1_p_ck = hse_ck / pllm * plln / pllp
-     * PLL1 Q�����pll1_q_ck = hse_ck / pllm * plln / pllq
-     * PLL1 R�����pll1_r_ck = hse_ck / pllm * plln / 2
-     */
+    
     rcc_osc_init_struct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI48;
     rcc_osc_init_struct.HSEState = RCC_HSE_ON;
     rcc_osc_init_struct.HSI48State = RCC_HSI48_ON;
@@ -88,16 +54,7 @@ uint8_t sys_stm32_clock_init(uint32_t plln, uint32_t pllm, uint32_t pllp, uint32
     {
         return 1;
     }
-    
-    /* ����CPU��AHB���ߺ�APB����ʱ��
-     * ʱ��Դ��PLL1P�����pll1_p_ck��
-     * ϵͳʱ�ӣ�sys_ck = pll1_p_ck
-     * AHB����ʱ�ӣ�rcc_ahb_ck��rcc_hclk[4:1]�� = sys_ck / 2
-     * APB1����ʱ�ӣ�rcc_pclk1 = rcc_ahb_ck / 2
-     * APB2����ʱ�ӣ�rcc_pclk2 = rcc_ahb_ck / 2
-     * APB3����ʱ�ӣ�rcc_pclk3 = rcc_ahb_ck / 2
-     * APB4����ʱ�ӣ�rcc_pclk4 = rcc_ahb_ck / 2
-     */
+ 
     rcc_clk_init_struct.ClockType = RCC_CLOCKTYPE_SYSCLK |
                                     RCC_CLOCKTYPE_HCLK |
                                     RCC_CLOCKTYPE_D1PCLK1 |
@@ -113,12 +70,7 @@ uint8_t sys_stm32_clock_init(uint32_t plln, uint32_t pllm, uint32_t pllp, uint32
     rcc_clk_init_struct.APB4CLKDivider = RCC_APB4_DIV2;
     HAL_RCC_ClockConfig(&rcc_clk_init_struct, FLASH_LATENCY_4);
     
-    /* ����PLL2
-     * ʱ��Դ��HSE��hse_ck��
-     * P�����pll2_p_ck = hse_ck / 5 * 192 / 12
-     * Q�����pll2_q_ck = hse_ck / 5 * 192 / 2
-     * R�����pll2_r_ck = hse_ck / 5 * 192 / 2
-     */
+  
     rcc_periph_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_PLL2_DIVP |
                                                       RCC_PERIPHCLK_PLL2_DIVQ |
                                                       RCC_PERIPHCLK_PLL2_DIVR;
@@ -132,21 +84,16 @@ uint8_t sys_stm32_clock_init(uint32_t plln, uint32_t pllm, uint32_t pllp, uint32
     rcc_periph_clk_init_struct.PLL2.PLL2FRACN = 0;
     HAL_RCCEx_PeriphCLKConfig(&rcc_periph_clk_init_struct);
     
-    /* ʹ��QSPI�ڴ�ӳ��ģʽ */
     sys_qspi_enable_memmapmode();
     
-    /* ʹ��I/O������Ԫ */
+  
     HAL_SYSCFG_CompensationCodeSelect(SYSCFG_CELL_CODE);
     HAL_EnableCompensationCell();
     
     return 0;
 }
 
-/**
- * @brief   ʹ��QSPI�ڴ�ӳ��ģʽ
- * @param   ��
- * @retval  ��
- */
+
 void sys_qspi_enable_memmapmode(void)
 {
     QSPI_HandleTypeDef qspi_handle = {0};
@@ -155,7 +102,7 @@ void sys_qspi_enable_memmapmode(void)
     QSPI_MemoryMappedTypeDef qspi_memory_mapped_struct = {0};
     MPU_Region_InitTypeDef mpu_region_init_struct = {0};
     
-    /* ��ʼ��QSPI */
+ 
     qspi_handle.Instance = QUADSPI;
     qspi_handle.Init.ClockPrescaler = 2 - 1;
     qspi_handle.Init.FifoThreshold = 32;
@@ -167,8 +114,7 @@ void sys_qspi_enable_memmapmode(void)
     qspi_handle.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
     HAL_QSPI_DeInit(&qspi_handle);
     HAL_QSPI_Init(&qspi_handle);
-    
-    /* дʹ��Flash��06h�� */
+   
     qspi_command_struct.InstructionMode = QSPI_INSTRUCTION_1_LINE;
     qspi_command_struct.Instruction = 0x06;
     qspi_command_struct.AddressMode = QSPI_ADDRESS_NONE;
@@ -180,7 +126,6 @@ void sys_qspi_enable_memmapmode(void)
     qspi_command_struct.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
     HAL_QSPI_Command(&qspi_handle, &qspi_command_struct, HAL_QSPI_TIMEOUT_DEFAULT_VALUE);
     
-    /* ��ѯ�ȴ�Flashдʹ�ܣ�05h�� */
     qspi_command_struct.InstructionMode = QSPI_INSTRUCTION_1_LINE;
     qspi_command_struct.Instruction = 0x05;
     qspi_command_struct.AddressMode = QSPI_ADDRESS_NONE;
@@ -198,7 +143,7 @@ void sys_qspi_enable_memmapmode(void)
     qspi_autopolling_struct.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
     HAL_QSPI_AutoPolling(&qspi_handle, &qspi_command_struct, &qspi_autopolling_struct, HAL_QSPI_TIMEOUT_DEFAULT_VALUE);
     
-    /* ����MPU����QSPI�ڴ�ӳ������ */
+ 
     mpu_region_init_struct.Enable = MPU_REGION_ENABLE;
     mpu_region_init_struct.Number = MPU_REGION_NUMBER0;
     mpu_region_init_struct.BaseAddress = QSPI_BASE;
@@ -214,7 +159,7 @@ void sys_qspi_enable_memmapmode(void)
     HAL_MPU_ConfigRegion(&mpu_region_init_struct);
     HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
     
-    /* Flash�����ݿڿ��ٶ���EBh���ڴ�ӳ��ģʽ */
+ 
     qspi_command_struct.InstructionMode = QSPI_INSTRUCTION_1_LINE;
     qspi_command_struct.Instruction = 0xEB;
     qspi_command_struct.AddressMode = QSPI_ADDRESS_4_LINES;
@@ -229,36 +174,24 @@ void sys_qspi_enable_memmapmode(void)
     HAL_QSPI_MemoryMapped(&qspi_handle, &qspi_command_struct, &qspi_memory_mapped_struct);
 }
 
-/**
- * @brief   HAL��QSPI��ʼ��MSP����
- * @param   ��
- * @retval  ��
- */
+
 void HAL_QSPI_MspInit(QSPI_HandleTypeDef *hqspi)
 {
     GPIO_InitTypeDef gpio_init_struct;
     
     if (hqspi->Instance == QUADSPI)
     {
-        /* ����ʱ�� */
+       
         rcc_periph_clk_init_struct.PeriphClockSelection |= RCC_PERIPHCLK_QSPI;
         rcc_periph_clk_init_struct.QspiClockSelection = RCC_QSPICLKSOURCE_D1HCLK;
         HAL_RCCEx_PeriphCLKConfig(&rcc_periph_clk_init_struct);
         
-        /* ʹ��ʱ�� */
+       
         __HAL_RCC_QSPI_CLK_ENABLE();
         __HAL_RCC_GPIOB_CLK_ENABLE();
         __HAL_RCC_GPIOF_CLK_ENABLE();
         
-        /* ��ʼ��GPIO
-         * QSPI Signal          MCU Pin
-         * QUADSPI_BK1_IO0 <--> PF8
-         * QUADSPI_BK1_IO1 <--> PF9
-         * QUADSPI_BK1_IO2 <--> PF7
-         * QUADSPI_BK1_IO3 <--> PF6
-         * QUADSPI_BK1_NCS <--> PB6
-         * QUADSPI_CLK     <--> PB2
-         */
+      
         gpio_init_struct.Pin = GPIO_PIN_6;
         gpio_init_struct.Mode = GPIO_MODE_AF_PP;
         gpio_init_struct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -280,27 +213,14 @@ void HAL_QSPI_MspInit(QSPI_HandleTypeDef *hqspi)
     }
 }
 
-/**
- * @brief   HAL��QSPI����ʼ��MSP����
- * @param   ��
- * @retval  ��
- */
+
 void HAL_QSPI_MspDeInit(QSPI_HandleTypeDef* hqspi)
 {
     if (hqspi->Instance == QUADSPI)
     {
-        /* ʹ��ʱ�� */
         __HAL_RCC_QSPI_CLK_DISABLE();
         
-        /* ����ʼ��GPIO
-         * QSPI Signal          MCU Pin
-         * QUADSPI_BK1_IO0 <--> PF8
-         * QUADSPI_BK1_IO1 <--> PF9
-         * QUADSPI_BK1_IO2 <--> PF7
-         * QUADSPI_BK1_IO3 <--> PF6
-         * QUADSPI_BK1_NCS <--> PB6
-         * QUADSPI_CLK     <--> PB2
-         */
+      
         HAL_GPIO_DeInit(GPIOB, GPIO_PIN_2 | GPIO_PIN_6);
         HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9);
     }

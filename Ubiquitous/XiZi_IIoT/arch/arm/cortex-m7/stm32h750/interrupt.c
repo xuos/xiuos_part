@@ -22,6 +22,7 @@
 #include <xs_isr.h>
 #include <arch_interrupt.h>
 #include <stm32h7xx_hal_cortex.h>
+#include "stm32h7xx_hal.h"
 
 x_base __attribute__((naked)) DisableLocalInterrupt()
 {
@@ -87,7 +88,6 @@ void NMI_Handler(int irqn, void *arg)
 
 void SysTick_Handler(int irqn, void *arg)
 {
-    while (1)
-  {
-  }
+    TickAndTaskTimesliceUpdate();
+   
 }

@@ -94,7 +94,6 @@ void UartIsr1(int vector, void *param)
 DECLARE_HW_IRQ(USART1_IRQn, UartIsr1, NONE);
 
 
-
 static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInfo *configure_info)
 {
     NULL_PARAM_CHECK(serial_drv);
@@ -117,58 +116,15 @@ static uint32 SerialInit(struct SerialDriver *serial_drv, struct BusConfigureInf
 	// config serial receive sem timeout
 	dev_param->serial_timeout = serial_cfg->data_cfg.serial_timeout;
 
-    serial_hw_cfg->uart_handle.Instance          = serial_hw_cfg->uart_device;
-    serial_hw_cfg->uart_handle.Init.BaudRate     = serial_cfg->data_cfg.serial_baud_rate;
+    serial_hw_cfg->uart_handle.Instance          = USART_UX;
+    serial_hw_cfg->uart_handle.Init.BaudRate     = 115200;
     serial_hw_cfg->uart_handle.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
     serial_hw_cfg->uart_handle.Init.Mode         = UART_MODE_TX_RX;
     serial_hw_cfg->uart_handle.Init.OverSampling = UART_OVERSAMPLING_16;
-
-    switch (serial_cfg->data_cfg.serial_data_bits)
-    {
-    case DATA_BITS_8:
-        if (serial_cfg->data_cfg.serial_parity_mode == PARITY_ODD || serial_cfg->data_cfg.serial_parity_mode == PARITY_EVEN)
-            serial_hw_cfg->uart_handle.Init.WordLength = UART_WORDLENGTH_9B;
-        else
-            serial_hw_cfg->uart_handle.Init.WordLength = UART_WORDLENGTH_8B;
-        break;
-    case DATA_BITS_9:
-        serial_hw_cfg->uart_handle.Init.WordLength = UART_WORDLENGTH_9B;
-        break;
-    default:
-        serial_hw_cfg->uart_handle.Init.WordLength = UART_WORDLENGTH_8B;
-        break;
-    }
-
-    switch (serial_cfg->data_cfg.serial_stop_bits)
-    {
-    case STOP_BITS_1:
-        serial_hw_cfg->uart_handle.Init.StopBits   = UART_STOPBITS_1;
-        break;
-    case STOP_BITS_2:
-        serial_hw_cfg->uart_handle.Init.StopBits   = UART_STOPBITS_2;
-        break;
-    default:
-        serial_hw_cfg->uart_handle.Init.StopBits   = UART_STOPBITS_1;
-        break;
-    }
-
-    switch (serial_cfg->data_cfg.serial_parity_mode)
-    {
-    case PARITY_NONE:
-        serial_hw_cfg->uart_handle.Init.Parity     = UART_PARITY_NONE;
-        break;
-    case PARITY_ODD:
-        serial_hw_cfg->uart_handle.Init.Parity     = UART_PARITY_ODD;
-        break;
-    case PARITY_EVEN:
-        serial_hw_cfg->uart_handle.Init.Parity     = UART_PARITY_EVEN;
-        break;
-    default:
-        serial_hw_cfg->uart_handle.Init.Parity     = UART_PARITY_NONE;
-        break;
-    }
-    usart_init(115200);
-    
+    serial_hw_cfg->uart_handle.Init.WordLength = UART_WORDLENGTH_8B;
+    serial_hw_cfg->uart_handle.Init.Parity     = UART_PARITY_NONE;
+    serial_hw_cfg->uart_handle.Init.StopBits   = UART_STOPBITS_1;
+    usart_init(115200);    
 
     return EOK;
 }
@@ -229,12 +185,11 @@ static int SerialPutChar(struct SerialHardwareDevice *serial_dev, char c)
 {
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_dev->private_data;
     struct Stm32UartHwCfg *serial_hw_cfg = (struct Stm32UartHwCfg *)serial_cfg->hw_cfg.private_data;
-    /* Polling mode. */
-    HAL_UART_Transmit(&(serial_hw_cfg->uart_handle), (uint8_t *)&c, 1, 100);
-    // UART_INSTANCE_CLEAR_FUNCTION(&(serial_hw_cfg->uart_handle), UART_FLAG_TC);
+   
 
-    // serial_hw_cfg->uart_handle.Instance->TDR = c;
-    // while (__HAL_UART_GET_FLAG(&(serial_hw_cfg->uart_handle), UART_FLAG_TC) == RESET);
+    while ((serial_hw_cfg->uart_handle.Instance->ISR & 0X40) == 0);    
+
+    serial_hw_cfg->uart_handle.Instance->TDR = (uint8_t)c;           
 
     return EOK;
 }
