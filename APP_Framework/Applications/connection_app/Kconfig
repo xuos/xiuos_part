@@ -8,6 +8,20 @@ menu "connection app"
 		menuconfig SOCKET_DEMO
 		bool "Config test socket demo"
 		default n
+
+		choice
+            prompt "Select Ammeter Device Type"
+            default DEVICE_ADL400
+
+            config DEVICE_ADL400
+                bool "CH32V208_ADL400"
+
+            config DEVICE_DTZ178
+                bool "CH32V208_DTZ178"
+
+            config DEVICE_DTSD342
+                bool "CH32V208_DTSD342"
+        endchoice
 	endif
 
 endmenu
