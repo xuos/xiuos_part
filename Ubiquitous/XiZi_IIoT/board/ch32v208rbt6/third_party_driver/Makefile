@@ -22,4 +22,8 @@ endif
 ifeq ($(CONFIG_BSP_USING_LTE),y)
   SRC_DIR += lte
 endif
+ifeq ($(CONFIG_TOOL_USING_OTA),y)
+  SRC_DIR += ota
+  SRC_DIR += common
+endif
 include $(KERNEL_ROOT)/compiler.mk

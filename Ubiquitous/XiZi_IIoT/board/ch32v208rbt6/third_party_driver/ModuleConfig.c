@@ -102,6 +102,7 @@ void CFG_READ(u32 StartAddr, u8 *Buffer, u32 Length) {
     }
 }
 
+#ifdef BSP_USING_BLE
 /**
  * @brief  尝试使用配置通过4G连接到服务器，并且蓝牙响应连接状态报文。
  * @param  requestId 蓝牙请求报文ID
@@ -531,6 +532,7 @@ void startParseBleRequestTask(uint8_t *request) {
     PrivTaskCreate(&parseBleRequestThread, &parseBleRequestTaskAttr, parseBleRequest, &parseBleRequestTaskArgs);
     PrivTaskStartup(&parseBleRequestThread);
 }
+#endif /* BSP_USING_BLE */
 
 /**
  * @brief  命令行显示配置信息

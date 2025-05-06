@@ -268,7 +268,11 @@ handle_reset:
 	csrw mtvec, t0
 
     jal  SystemInit
+#ifdef __BOOTLOADER /* BOOT */
+	la t0, ota_entry
+#else /* APP */
 	la t0, entry
+#endif /* BOOT */
 	csrw mepc, t0
 	mret
 
