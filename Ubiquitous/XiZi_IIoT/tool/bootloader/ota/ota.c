@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <transform.h>
-#include "shell.h"
 #include "boot_for_ota.h"
 #include "ymodem.h"
 #include "ota.h"
