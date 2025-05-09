@@ -200,6 +200,8 @@ static int Ec801eConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     int try = 0;
     uint8_t ec801e_cmd[64];
 
+    ADAPTER_DEBUG("%s enter\n", __func__);
+
     AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
 
     /*step1: serial write "+++", quit transparent mode*/

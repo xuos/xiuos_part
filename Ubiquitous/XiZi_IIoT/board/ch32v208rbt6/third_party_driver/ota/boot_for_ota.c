@@ -109,7 +109,7 @@ void mcuboot_reset(void)
 
 void mcuboot_jump(void)
 {
-    KPrintf("boot jumpApp\n");
+    KPrintf("boot jumpApp\n\n");
     jumpApp();
     /*
     uint32_t addr = XIUOS_FLAH_ADDRESS;

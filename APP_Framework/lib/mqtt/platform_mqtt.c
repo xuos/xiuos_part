@@ -46,6 +46,8 @@ int AdapterNetActive(void)
 {
     int ret = 0;
     uint32_t baud_rate = BAUD_RATE_115200;
+
+    KPrintf("%s enter\n", __func__);
     adapter =  AdapterDeviceFindByName(ADAPTER_4G_NAME);
     adapter->socket.socket_id = 0;
     
@@ -66,12 +68,14 @@ int AdapterNetActive(void)
     {
         goto out;
     }
+    KPrintf("%s success\n", __func__);
 
 out:
     if (ret < 0) 
     {
         AdapterDeviceClose(adapter);
     }
+    KPrintf("%s fail\n", __func__);
 
     return ret;
 }
@@ -112,6 +116,7 @@ bool MQTT_Connect(void)
 {
     uint8_t TryConnect_time = 10;  //尝试登录次数
 
+    KPrintf("%s enter\n", __func__);
     memset(&Platform_mqtt,0,sizeof(Platform_mqtt));
 #ifdef XIUOS_PLATFORM
     sprintf(Platform_mqtt.ClientID,"%s",CLIENTID);   //客户端ID存入缓冲区

@@ -104,6 +104,7 @@ static const uint32_t crc32tab[] = {
     0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
+__attribute__((aligned(8))) ota_info_t g_ota_info;
 
 /*******************************************************************************
 * 函 数 名: calculate_crc32
@@ -197,19 +198,19 @@ static status_t UpdateOTAFlag(ota_info_t *ptr)
 static void InitialVersion(void)
 {
     int32_t size;
-    ota_info_t ota_info;
+    ota_info_t *p_ota_info = &g_ota_info;
 
-    memset(&ota_info, 0, sizeof(ota_info_t));
+    memset(p_ota_info, 0, sizeof(ota_info_t));
     size = mcuboot.download_by_serial(XIUOS_FLAH_ADDRESS);
     if(size > 0)
     {
-        ota_info.os.size = size;
-        ota_info.os.crc32 = calculate_crc32(XIUOS_FLAH_ADDRESS, size);
+        p_ota_info->os.size = size;
+        p_ota_info->os.crc32 = calculate_crc32(XIUOS_FLAH_ADDRESS, size);
 
-        strncpy(ota_info.os.version,"001.000.000",sizeof(ota_info.os.version));
-        strncpy(ota_info.os.description, "The initial firmware.", sizeof(ota_info.os.description));
+        strncpy(p_ota_info->os.version,"001.000.000",sizeof(p_ota_info->os.version));
+        strncpy(p_ota_info->os.description, "The initial firmware.", sizeof(p_ota_info->os.description));
 
-        UpdateOTAFlag(&ota_info);
+        UpdateOTAFlag(p_ota_info);
     }
 }
 
@@ -458,21 +459,26 @@ static void Update(void)
 *******************************************************************************/
 static void BootLoaderJumpApp(void)
 {
-    ota_info_t ota_info;
+    ota_info_t *p_ota_info = &g_ota_info;
 
     mcuboot.flash_init();
-    memset(&ota_info, 0, sizeof(ota_info_t));
-    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
+    memset(p_ota_info, 0, sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)p_ota_info, sizeof(ota_info_t));
 
-    if(ota_info.lastjumpflag == JUMP_FAILED_FLAG)
+    if(p_ota_info->lastjumpflag == JUMP_FAILED_FLAG)
     {
         mcuboot.print_string("\r\n------Jump to app partition failed,start version rollback!------\r\n");
-        BackupVersion();   
+#ifdef BOARD_CH32V208RBT6
+        p_ota_info->lastjumpflag = JUMP_SUCCESS_FLAG;
+        UpdateOTAFlag(p_ota_info);
+#else
+        BackupVersion();
+#endif
     }
     else
     {
-        ota_info.lastjumpflag = JUMP_FAILED_FLAG;
-        UpdateOTAFlag(&ota_info);
+        p_ota_info->lastjumpflag = JUMP_FAILED_FLAG;
+        UpdateOTAFlag(p_ota_info);
     }
     mcuboot.flash_deinit();
     mcuboot.op_jump();
@@ -882,18 +888,19 @@ static void mqttCloudInteraction(void* parameter)
     int datalen;
     int ret = 0;
     int freecnt = 0;
-    ota_info_t ota_info;
+    ota_info_t *p_ota_info = &g_ota_info;
     uint32_t heart_time = 0;
     uint32_t flashdestination = DOWN_FLAH_ADDRESS;
     uint8_t topicdatabuff[2][64];
     char *ptr1, *ptr2;
     uint16_t payloadLen;
 
+    KPrintf("%s enter\n", __func__);
     mcuboot.flash_init();
-    memset(&ota_info, 0, sizeof(ota_info_t));
-    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
-    ota_info.status = OTA_STATUS_DOWNLOADING;
-    UpdateOTAFlag(&ota_info);
+    memset(p_ota_info, 0, sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)p_ota_info, sizeof(ota_info_t));
+    p_ota_info->status = OTA_STATUS_DOWNLOADING;
+    UpdateOTAFlag(p_ota_info);
     memset(topicdatabuff,0,sizeof(topicdatabuff)); 
     sprintf(topicdatabuff[0],"ota/%s/update",CLIENTID); 
     sprintf(topicdatabuff[1],"ota/%s/files",CLIENTID);   
@@ -959,20 +966,20 @@ reconnect:
                     {
                         KPrintf("File size is larger than partition size,the partition size is %dk.\n",APP_FLASH_SIZE/1024);
                         ret = -1;
-                        ota_info.status = OTA_STATUS_ERROR;
-                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
-                        strncpy(ota_info.error_message, "File size is larger than partition size!",sizeof(ota_info.error_message));
-                        UpdateOTAFlag(&ota_info);
+                        p_ota_info->status = OTA_STATUS_ERROR;
+                        memset(p_ota_info->error_message,0,sizeof(p_ota_info->error_message));
+                        strncpy(p_ota_info->error_message, "File size is larger than partition size!",sizeof(p_ota_info->error_message));
+                        UpdateOTAFlag(p_ota_info);
                         break;
                     }
                     if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,platform_ota.size) != kStatus_Success)
                     {
                         KPrintf("Failed to erase download partition!\n");
                         ret = -1;
-                        ota_info.status = OTA_STATUS_ERROR;
-                        memset(ota_info.error_message,0,sizeof(ota_info.error_message));
-                        strncpy(ota_info.error_message, "Failed to erase download partition!",sizeof(ota_info.error_message));
-                        UpdateOTAFlag(&ota_info);
+                        p_ota_info->status = OTA_STATUS_ERROR;
+                        memset(p_ota_info->error_message,0,sizeof(p_ota_info->error_message));
+                        strncpy(p_ota_info->error_message, "Failed to erase download partition!",sizeof(p_ota_info->error_message));
+                        UpdateOTAFlag(p_ota_info);
                         break;
                     }
                     platform_ota.counter = (platform_ota.size%FRAME_LEN != 0)? (platform_ota.size/FRAME_LEN + 1):(platform_ota.size/FRAME_LEN);
@@ -984,10 +991,10 @@ reconnect:
                 {
                     KPrintf("Failed to get ota information!\n");
                     ret = -1;
-                    ota_info.status = OTA_STATUS_ERROR;
-                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
-                    strncpy(ota_info.error_message, "Failed to get ota information!",sizeof(ota_info.error_message));
-                    UpdateOTAFlag(&ota_info);
+                    p_ota_info->status = OTA_STATUS_ERROR;
+                    memset(p_ota_info->error_message,0,sizeof(p_ota_info->error_message));
+                    strncpy(p_ota_info->error_message, "Failed to get ota information!",sizeof(p_ota_info->error_message));
+                    UpdateOTAFlag(p_ota_info);
                     break;
                 }
             }
@@ -1001,10 +1008,10 @@ reconnect:
                 {
                     KPrintf("current frame[%d] flash failed.\n",platform_ota.num-1);
                     ret = -1;
-                    ota_info.status = OTA_STATUS_ERROR;
-                    memset(ota_info.error_message,0,sizeof(ota_info.error_message));
-                    sprintf(ota_info.error_message,"current frame[%d] flash failed.",platform_ota.num-1);  
-                    UpdateOTAFlag(&ota_info);
+                    p_ota_info->status = OTA_STATUS_ERROR;
+                    memset(p_ota_info->error_message,0,sizeof(p_ota_info->error_message));
+                    sprintf(p_ota_info->error_message,"current frame[%d] flash failed.",platform_ota.num-1);  
+                    UpdateOTAFlag(p_ota_info);
                     break;
                 }
                 else
@@ -1084,21 +1091,21 @@ reconnect:
     // 新版本固件接收完毕,写入描述信息
     if(0 == ret)
     {
-        ota_info.down.size = platform_ota.size;
-        ota_info.down.crc32 = calculate_crc32(DOWN_FLAH_ADDRESS, platform_ota.size);
+        p_ota_info->down.size = platform_ota.size;
+        p_ota_info->down.crc32 = calculate_crc32(DOWN_FLAH_ADDRESS, platform_ota.size);
 
-        memset(ota_info.down.version,0,sizeof(ota_info.down.version)); 
-        strncpy(ota_info.down.version, platform_ota.version, sizeof(ota_info.down.version));
+        memset(p_ota_info->down.version,0,sizeof(p_ota_info->down.version)); 
+        strncpy(p_ota_info->down.version, platform_ota.version, sizeof(p_ota_info->down.version));
 
-        memset(ota_info.down.description,0,sizeof(ota_info.down.description)); 
-        strncpy(ota_info.down.description, "MQTT OTA bin.",sizeof(ota_info.down.description));
+        memset(p_ota_info->down.description,0,sizeof(p_ota_info->down.description)); 
+        strncpy(p_ota_info->down.description, "MQTT OTA bin.",sizeof(p_ota_info->down.description));
 
-        ota_info.status = OTA_STATUS_READY;
+        p_ota_info->status = OTA_STATUS_READY;
     
-        memset(ota_info.error_message,0,sizeof(ota_info.error_message)); 
-        strncpy(ota_info.error_message, "No error message!",sizeof(ota_info.error_message));
+        memset(p_ota_info->error_message,0,sizeof(p_ota_info->error_message)); 
+        strncpy(p_ota_info->error_message, "No error message!",sizeof(p_ota_info->error_message));
 
-        UpdateOTAFlag(&ota_info);
+        UpdateOTAFlag(p_ota_info);
         KPrintf("firmware file transfer successful,start reboot!\n");
     }
     else
