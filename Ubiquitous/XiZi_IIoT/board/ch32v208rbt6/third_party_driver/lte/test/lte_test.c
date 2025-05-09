@@ -21,7 +21,6 @@
 #include "ch32v20x_usart.h"
 #include "connect_uart.h"
 #include "debug.h"
-#include "shell.h"
 #include "string.h"
 
 #define TRANSPARENT_TRANSMISSION_MODE 0

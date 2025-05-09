@@ -90,7 +90,7 @@ void mcuboot_bord_init(void)
     void readRomConfiguration(void);
     readRomConfiguration();  // 读取配置信息到外部变量CFG中
 
-    KPrintf("boot board initialization......\n");
+    KPrintf("mcuboot board initialization......\n");
 
     /*
     BOARD_ConfigMPU();

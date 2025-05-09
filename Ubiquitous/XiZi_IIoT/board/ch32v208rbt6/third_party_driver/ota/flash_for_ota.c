@@ -77,17 +77,17 @@ void FLASH_DeInit(void)
 *******************************************************************************/
 status_t Flash_Erase(uint32_t start_addr, uint32_t imageSize)
 {
-    uint16_t i;
+    uint32_t page_count;
     uint32_t pageNum = (imageSize%FLASH_PAGE_FAST_SIZE != 0)? (imageSize/FLASH_PAGE_FAST_SIZE + 1):(imageSize/FLASH_PAGE_FAST_SIZE);
     
     KPrintf("Flash_Erase start_addr=0x%x imageSize=0x%x\n", start_addr, imageSize);
-    KPrintf("Flash_Erase pageNum=%d\n", pageNum);
     FLASH_Unlock_Fast();
-    for(i = 0; i < pageNum; i++)
+    for(page_count = 0; page_count < pageNum; page_count++)
     {
-        FLASH_ErasePage_Fast(start_addr + (i * FLASH_PAGE_FAST_SIZE));
+        FLASH_ErasePage_Fast(start_addr + (page_count * FLASH_PAGE_FAST_SIZE));
     }
     FLASH_Lock_Fast();
+    KPrintf("Flash_Erase start_addr=0x%x success\n", start_addr);
 
     return (status_t)kStatus_Success;
 }
@@ -103,15 +103,17 @@ status_t Flash_Erase(uint32_t start_addr, uint32_t imageSize)
 *******************************************************************************/
 status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWrite)
 {
-    uint8_t page_count;
+    uint32_t page_count;
     uint32_t pageNum = (NumByteToWrite%FLASH_PAGE_FAST_SIZE != 0)? (NumByteToWrite/FLASH_PAGE_FAST_SIZE + 1):(NumByteToWrite/FLASH_PAGE_FAST_SIZE);
 
+    KPrintf("Flash_Write start_addr=0x%x imageSize=0x%x\n", WriteAddr, NumByteToWrite);
     FLASH_Unlock_Fast();
     for(page_count = 0; page_count < pageNum; page_count++)
     {
         FLASH_ProgramPage_Fast(WriteAddr + (page_count * FLASH_PAGE_FAST_SIZE), (uint32_t *)&pBuffer[page_count * FLASH_PAGE_FAST_SIZE]);
     }
     FLASH_Lock_Fast();
+    KPrintf("Flash_Write start_addr=0x%x success\n", WriteAddr);
 
     return (status_t)kStatus_Success;
 
