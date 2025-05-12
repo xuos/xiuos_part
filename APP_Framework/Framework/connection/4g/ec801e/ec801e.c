@@ -200,14 +200,25 @@ static int Ec801eConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     int try = 0;
     uint8_t ec801e_cmd[64];
 
-    ADAPTER_DEBUG("%s enter\n", __func__);
+    printf("%s enter\n", __func__);
 
     AtSetReplyEndChar(adapter->agent, 0x4F, 0x4B);
 
     /*step1: serial write "+++", quit transparent mode*/
     PrivTaskDelay(1500); //before +++ command, wait at least 1s
-    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, "+++");
+    ATOrderSend(adapter->agent, REPLY_TIME_OUT, NULL, EC801E_AT_MODE_CMD);
     PrivTaskDelay(1500); //after +++ command, wait at least 1s
+
+    for(try = 0; try < TRY_TIMES; try++){
+        ret = AtCmdConfigAndCheck(adapter->agent, EC801E_ATI_CMD, EC801E_OK_REPLY);
+        if (ret == 0) {
+            break;
+        }
+    }
+    if (ret < 0) {
+        goto out;
+    }
+    PrivTaskDelay(300);
 
     /*step2: serial write "AT+CPIN?", check SIM status*/
     for(try = 0; try < TRY_TIMES; try++){

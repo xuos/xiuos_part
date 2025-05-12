@@ -74,8 +74,8 @@ out:
     if (ret < 0) 
     {
         AdapterDeviceClose(adapter);
+        KPrintf("%s fail\n", __func__);
     }
-    KPrintf("%s fail\n", __func__);
 
     return ret;
 }

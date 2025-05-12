@@ -22,7 +22,7 @@
 #define __BOOT_FOR_OTA_H__
 
 #define IMAGE_IAP_START_ADD    0x08000000
-#define IMAGE_IAP_SIZE         (112 * 1024)
+#define IMAGE_IAP_SIZE         (64 * 1024)
 #define IMAGE_A_START_ADD      (IMAGE_IAP_START_ADD + IMAGE_IAP_SIZE)
 
 void mcuboot_bord_init(void);

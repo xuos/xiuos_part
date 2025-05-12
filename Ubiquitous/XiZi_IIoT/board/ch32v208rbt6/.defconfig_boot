@@ -22,6 +22,7 @@ CONFIG_BSP_USING_LTE=y
 CONFIG_LTE_BUS_NAME="lte"
 CONFIG_LTE_DRV_NAME="lte_drv"
 CONFIG_LTE_DEVICE_NAME_1="lte_dev1"
+# CONFIG_LTE_TEST is not set
 
 #
 # Hardware feature
@@ -101,6 +102,8 @@ CONFIG_KERNEL_CONSOLEBUF_SIZE=128
 # Command shell
 #
 # CONFIG_TOOL_SHELL is not set
+# CONFIG_SHELL_ENTER_CR_AND_LF is not set
+# CONFIG_SHELL_ENTER_CRLF is not set
 
 #
 # Kernel data structure Manage
@@ -166,6 +169,8 @@ CONFIG_FS_VFS_DEVFS=y
 CONFIG_TOOL_USING_OTA=y
 CONFIG_MCUBOOT_BOOTLOADER=y
 # CONFIG_MCUBOOT_APPLICATION is not set
+# CONFIG_OTA_BY_PLATFORM is not set
+# CONFIG_OTA_BY_TCPSERVER is not set
 
 #
 # Flash area address and size configuration.
