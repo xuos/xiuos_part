@@ -102,27 +102,14 @@ void mcuboot_bord_init(void)
 
 void mcuboot_reset(void)
 {
-    /*
-    __set_FAULTMASK(1);
-    NVIC_SystemReset();*/
+    KPrintf("%s NVIC_SystemReset\n\n", __func__);
+    NVIC_SystemReset();
 }
 
 void mcuboot_jump(void)
 {
-    KPrintf("boot jumpApp\n\n");
+    KPrintf("%s jumpApp\n\n", __func__);
     jumpApp();
-    /*
-    uint32_t addr = XIUOS_FLAH_ADDRESS;
-
-    SCB->VTOR = addr;
-    asm volatile("LDR R0, %0" : : "m"(addr));
-    asm volatile("LDR   R0, [R0]");
-    asm volatile("MOV   SP, R0");
-    
-    addr += 4;
-    asm volatile("LDR R0, %0" : : "m"(addr));
-    asm volatile("LDR   R0, [R0]");
-    asm volatile("BX  R0");*/
 }
 
 void mcuboot_delay(uint32_t ms)

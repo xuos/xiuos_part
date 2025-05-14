@@ -16,7 +16,7 @@ menu "OTA function"
                     bool "Config as application."
         endchoice
 
-        if MCUBOOT_APPLICATION
+        #if MCUBOOT_APPLICATION
             choice 
                 prompt "The way of OTA firmware upgrade."
                 default OTA_BY_PLATFORM
@@ -29,9 +29,11 @@ menu "OTA function"
                     bool "Through the public network TCP server."
                     select SUPPORT_CONNECTION_FRAMEWORK
                     select CONNECTION_ADAPTER_4G
-            endchoice
-        endif
 
+                config OTA_BY_NONE
+                    bool "Not download firmware."
+            endchoice
+        #endif
 
         menu "Flash area address and size configuration."
             config CHIP_FLAH_BASE

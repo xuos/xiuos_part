@@ -21,6 +21,7 @@
 #include "ymodem.h"
 #include "string.h"
 #include "flash_for_ota.h"
+#include "boot_for_ota.h"
 
 uint8_t tab_1024[1024] ={0};
 uint8_t FileName[FILE_NAME_LENGTH];
@@ -49,6 +50,6 @@ int32_t Ymodem_Receive(uint8_t *buf, const uint32_t addr)
 *******************************************************************************/
 int32_t SerialDownload(const uint32_t addr)
 {
-    int32_t Size = 0;
+    int32_t Size = IMAGE_IAP_SIZE;
     return Size;
 }

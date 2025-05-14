@@ -72,12 +72,14 @@ void readRomConfiguration(void) {
     extern pmodule_cfg CFG;                  // 指向配置信息的指针
 
     /* 从EEPROM中读取网络配置信息 */
-    KPrintf("%s PAGE_WRITE_START_ADDR=%08x\n", __func__, PAGE_WRITE_START_ADDR);
+    KPrintf("%s PAGE_READ_START_ADDR=%08x\n", __func__, PAGE_WRITE_START_ADDR);
     CFG_READ(PAGE_WRITE_START_ADDR, Configbuf, MODULE_CFG_LEN);
 
     /* 如果存储在EEPROM中的网络配置信息无效，或者WCHNET还没有被主机配置过，通过默认配置信息初始化WCHNET */
     if ((CFG->cfgFlag[0] != checkcode1) || (CFG->cfgFlag[1] != checkcode2)) {
+        KPrintf("%s PAGE_ERASE_START_ADDR=%08x\n", __func__, PAGE_WRITE_START_ADDR);
         CFG_ERASE(PAGE_WRITE_START_ADDR, FLASH_PAGE_SIZE);
+        KPrintf("%s PAGE_WRITE_START_ADDR=%08x\n", __func__, PAGE_WRITE_START_ADDR);
         CFG_WRITE(PAGE_WRITE_START_ADDR, (u8 *)&defaultConfiguration, MODULE_CFG_LEN);
         KPrintf("%s NVIC_SystemReset\n\n", __func__);
         NVIC_SystemReset(); // 复位ch32v208

@@ -75,11 +75,12 @@ void FLASH_DeInit(void)
             imageSize:要擦除的字节数
 * 返 回 值: 如果函数执行成功,状态值为 kStatus_Success,否则状态值为其他错误码 
 *******************************************************************************/
+#ifdef MCUBOOT_BOOTLOADER
 status_t Flash_Erase(uint32_t start_addr, uint32_t imageSize)
 {
     uint32_t page_count;
     uint32_t pageNum = (imageSize%FLASH_PAGE_FAST_SIZE != 0)? (imageSize/FLASH_PAGE_FAST_SIZE + 1):(imageSize/FLASH_PAGE_FAST_SIZE);
-    
+
     KPrintf("Flash_Erase start_addr=%08x imageSize=0x%x\n", start_addr, imageSize);
     FLASH_Unlock_Fast();
     for(page_count = 0; page_count < pageNum; page_count++)
@@ -91,7 +92,25 @@ status_t Flash_Erase(uint32_t start_addr, uint32_t imageSize)
 
     return (status_t)kStatus_Success;
 }
+#else
+status_t Flash_Erase(uint32_t start_addr, uint32_t imageSize)
+{
+/*
+    uint32_t page_count;
+    uint32_t pageNum = (imageSize%FLASH_BLOCK_SIZE != 0)? (imageSize/FLASH_BLOCK_SIZE + 1):(imageSize/FLASH_BLOCK_SIZE);
 
+    KPrintf("Flash_Erase start_addr=%08x pageNum=0x%x\n", start_addr, imageSize);
+    FLASH_Unlock();
+    for(page_count = 0; page_count < pageNum; page_count++)
+    {
+        FLASH_ErasePage(start_addr + (page_count * FLASH_BLOCK_SIZE));
+    }
+    FLASH_Lock();
+    KPrintf("Flash_Erase start_addr=%08x success\n", start_addr);
+*/
+    return (status_t)kStatus_Success;
+}
+#endif
 /*******************************************************************************
 * 函 数 名: Flash_Write
 * 功能描述: 写入W25QXX在指定地址开始写入指定长度的数据 
@@ -101,12 +120,13 @@ status_t Flash_Erase(uint32_t start_addr, uint32_t imageSize)
 * 返 回 值: 如果函数执行成功,状态值为 kStatus_Success,否则状态值为其他错误码 
 * 注    释: 该函数带擦除操作
 *******************************************************************************/
+#ifdef MCUBOOT_BOOTLOADER
 status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWrite)
 {
     uint32_t page_count;
     uint32_t pageNum = (NumByteToWrite%FLASH_PAGE_FAST_SIZE != 0)? (NumByteToWrite/FLASH_PAGE_FAST_SIZE + 1):(NumByteToWrite/FLASH_PAGE_FAST_SIZE);
 
-    KPrintf("Flash_Write start_addr=%08x pBuffer=%p imageSize=0x%x\n", WriteAddr, pBuffer, NumByteToWrite);
+    KPrintf("Flash_Write start_addr=%08x pBuffer=%p NumByteToWrite=0x%x\n", WriteAddr, pBuffer, NumByteToWrite);
     FLASH_Unlock_Fast();
     for(page_count = 0; page_count < pageNum; page_count++)
     {
@@ -116,9 +136,24 @@ status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWri
     KPrintf("Flash_Write start_addr=%08x success\n", WriteAddr);
 
     return (status_t)kStatus_Success;
-
 }
+#else
+status_t Flash_Write(uint32_t WriteAddr, uint8_t *pBuffer, uint32_t NumByteToWrite)
+{
+    uint32_t addr;
+    uint32_t *p_buff = (uint32_t *)pBuffer;
 
+    KPrintf("Flash_Write start_addr=%08x pBuffer=%p NumByteToWrite=0x%x\n", WriteAddr, pBuffer, NumByteToWrite);
+    FLASH_Unlock();
+    for (addr = WriteAddr; addr < WriteAddr + NumByteToWrite; addr += 4, p_buff++) {
+        FLASH_ProgramWord(addr, *p_buff);
+    }
+    FLASH_Lock();
+    KPrintf("Flash_Write start_addr=%08x success\n", WriteAddr);
+
+    return (status_t)kStatus_Success;
+}
+#endif
 /*******************************************************************************
 * 函 数 名: Flash_Read
 * 功能描述: 读Flash内容
