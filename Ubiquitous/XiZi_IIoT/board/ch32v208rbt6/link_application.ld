@@ -26,8 +26,7 @@ MEMORY
    FLASH-144K + RAM-48K
    FLASH-160K + RAM-32K
 */
-	/*FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 448K*/
-	FLASH (rx) : ORIGIN = 0x00030000, LENGTH = 284K
+	FLASH (rx) : ORIGIN = 0x00008000, LENGTH = 288K
 	RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
@@ -44,19 +43,19 @@ SECTIONS
 		_einit = .;
 	} >FLASH AT>FLASH
 
-  .vector :
-  {
-      *(.vector);
-	  . = ALIGN(64);
-  } >FLASH AT>FLASH
-  
-     .highcode : 
-    {
-        . = ALIGN(4);
-        *(.highcode);
-        *(.highcode.*);
-		. = ALIGN(4); 
-    } >FLASH AT>FLASH
+	.vector :
+	{
+		*(.vector);
+		. = ALIGN(64);
+	} >FLASH AT>FLASH
+
+	.highcode :
+	{
+		. = ALIGN(4);
+		*(.highcode);
+		*(.highcode.*);
+		. = ALIGN(4);
+	} >FLASH AT>FLASH
     
 	.text :
 	{

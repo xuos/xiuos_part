@@ -26,15 +26,14 @@ MEMORY
    FLASH-144K + RAM-48K
    FLASH-160K + RAM-32K
 */
-	/*FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 64K*/
-	FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 192K
+	FLASH_FAST (rx) : ORIGIN = 0x00000000, LENGTH = 32K
+	FLASH (rx) : ORIGIN = 0x00048000, LENGTH = 156K
 	RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
 
 SECTIONS
 {
-
 	.init :
 	{
 		_sinit = .;
@@ -42,22 +41,34 @@ SECTIONS
 		KEEP(*(SORT_NONE(.init)))
 		. = ALIGN(4);
 		_einit = .;
-	} >FLASH AT>FLASH
+	} >FLASH_FAST AT>FLASH_FAST
 
-  .vector :
-  {
-      *(.vector);
-	  . = ALIGN(64);
-  } >FLASH AT>FLASH
-  
-     .highcode : 
-    {
-        . = ALIGN(4);
-        *(.highcode);
-        *(.highcode.*);
+	.vector :
+	{
+		*(.vector);
+		. = ALIGN(64);
+	} >FLASH_FAST AT>FLASH_FAST
+
+	.highcode :
+	{
+		. = ALIGN(4);
+		*(.highcode);
+		*(.highcode.*);
 		. = ALIGN(4); 
-    } >FLASH AT>FLASH
-    
+	} >FLASH_FAST AT>FLASH_FAST
+
+	.text.fast :
+	{
+		. = ALIGN(4);
+		*(.text.fast)
+		*arch/risc-v/ch32v208rbt6*.o(.text)
+		*board/ch32v208rbt6/third_party_driver/Peripheral/src/ch32v20x_flash.o(.text)
+		*board/ch32v208rbt6/third_party_driver/Peripheral/src/ch32v20x_usart.o(.text)
+		*board/ch32v208rbt6/third_party_driver/lte/connect_lte.o(.text)
+		*kernel/thread*.o(.text)
+		. = ALIGN(4);
+	} >FLASH_FAST AT>FLASH_FAST
+
 	.text :
 	{
 		. = ALIGN(4);

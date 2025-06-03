@@ -188,6 +188,19 @@ static status_t UpdateOTAFlag(ota_info_t *ptr)
     return status;
 }
 
+/*******************************************************************************
+* 函 数 名: GetOTAFlagStatus
+* 功能描述: 获取OTA Flag区域的Status信息
+* 形    参: 
+* 返 回 值: 
+*******************************************************************************/
+static uint32_t GetOTAFlagStatus(void)
+{
+    ota_info_t ota_info;
+    memset(&ota_info, 0, sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
+    return ota_info.status;
+}
 
 /*******************************************************************************
 * 函 数 名: InitialVersion
@@ -899,11 +912,26 @@ static void mqttCloudInteraction(void* parameter)
     mcuboot.flash_init();
     memset(p_ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)p_ota_info, sizeof(ota_info_t));
+#ifdef MCUBOOT_BOOTLOADER
+    p_ota_info->status = OTA_STATUS_BOOT_DOWNLOAD;
+#else
     p_ota_info->status = OTA_STATUS_DOWNLOADING;
+#endif
     UpdateOTAFlag(p_ota_info);
     memset(topicdatabuff,0,sizeof(topicdatabuff)); 
     sprintf(topicdatabuff[0],"ota/%s/update",CLIENTID); 
     sprintf(topicdatabuff[1],"ota/%s/files",CLIENTID);   
+
+#if 1    //debug
+    if((AdapterNetActive() == 0) )
+    {
+        KPrintf("mqttCloudInteraction write OTA flag and reboot\n");
+        p_ota_info->status = OTA_STATUS_BOOT_DOWNLOAD;
+        UpdateOTAFlag(p_ota_info);
+        MdelayKTask(2000);
+        mcuboot.op_reset();
+    }
+#endif
 
 reconnect:
     if((AdapterNetActive() == 0) && MQTT_Connect() && MQTT_SubscribeTopic(topicdatabuff[0]) && MQTT_SubscribeTopic(topicdatabuff[1]))
@@ -1408,6 +1436,11 @@ void ota_entry(void)
     uint32_t ret;
     uint32_t timeout = 1000;
 
+    if(XIUOS_FLAH_ADDRESS == DOWN_FLAH_ADDRESS) {
+        DISABLE_INTERRUPT();
+        SysInitIsrManager();
+    }
+
     mcuboot.board_init();
 
     mcuboot.print_string("Please press 'space' key into menu in 5s !!!\r\n");
@@ -1453,6 +1486,24 @@ void ota_entry(void)
         //10s内不按下空格键默然进行升级,升级完成后跳转
         else
         {
+            if(XIUOS_FLAH_ADDRESS == DOWN_FLAH_ADDRESS)
+            {
+                if(OTA_STATUS_BOOT_DOWNLOAD == GetOTAFlagStatus())
+                {
+#ifdef BSP_USING_LTE
+                    mcuboot.print_string("ota_entry to InitHwLte\r\n");
+                    extern int InitHwLte(void);
+                    InitHwLte();
+#endif
+                    mcuboot.print_string("ota_entry to XiUOSStartup\r\n");
+                    extern int XiUOSStartup(void);
+                    XiUOSStartup();
+                }
+                else
+                {
+                    BootLoaderJumpApp();
+                }
+            }
             Update();
             BootLoaderJumpApp();
         } 

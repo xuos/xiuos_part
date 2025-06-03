@@ -65,13 +65,6 @@ static uint32_t _SysTick_Config(uint32_t ticks) {
 
 void mcuboot_bord_init(void)
 {
-    DISABLE_INTERRUPT();
-	/* system irq table must be inited before initialization of Hardware irq  */
-	SysInitIsrManager();
-
-//    InitBoardHardware();
-//    XiUOSStartup();
-
     Delay_Init();
     USART_Printf_Init(115200);
     /* System Tick Configuration */
@@ -90,14 +83,7 @@ void mcuboot_bord_init(void)
     void readRomConfiguration(void);
     readRomConfiguration();  // 读取配置信息到外部变量CFG中
 
-    KPrintf("mcuboot board initialization......\n");
-
-    /*
-    BOARD_ConfigMPU();
-    BOARD_InitPins();
-    BOARD_BootClockRUN();
-    UartConfig();
-    SysTick_Config(SystemCoreClock / TICK_PER_SECOND);*/
+    KPrintf("mcuboot board init done.\n");
 }
 
 void mcuboot_reset(void)

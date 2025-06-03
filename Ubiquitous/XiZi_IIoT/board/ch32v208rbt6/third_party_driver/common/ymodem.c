@@ -50,6 +50,6 @@ int32_t Ymodem_Receive(uint8_t *buf, const uint32_t addr)
 *******************************************************************************/
 int32_t SerialDownload(const uint32_t addr)
 {
-    int32_t Size = IMAGE_IAP_SIZE;
+    int32_t Size = 1; //TODO: 208 does not support serial download
     return Size;
 }
