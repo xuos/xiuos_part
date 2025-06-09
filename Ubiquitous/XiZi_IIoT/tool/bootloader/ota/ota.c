@@ -450,6 +450,12 @@ static void Update(void)
     /*进行新版本的升级*/
     else 
     {
+        if(XIUOS_FLAH_ADDRESS == DOWN_FLAH_ADDRESS)
+        {
+            mcuboot.flash_deinit();
+            return;
+        }
+
         if(UpdateNewApplication() == true) /*如果实际发生了flash搬移,操作完成后再重启一次*/
         {
             mcuboot.flash_deinit();
@@ -912,26 +918,13 @@ static void mqttCloudInteraction(void* parameter)
     mcuboot.flash_init();
     memset(p_ota_info, 0, sizeof(ota_info_t));
     mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)p_ota_info, sizeof(ota_info_t));
-#ifdef MCUBOOT_BOOTLOADER
-    p_ota_info->status = OTA_STATUS_BOOT_DOWNLOAD;
-#else
+#ifndef MCUBOOT_BOOTLOADER
     p_ota_info->status = OTA_STATUS_DOWNLOADING;
 #endif
     UpdateOTAFlag(p_ota_info);
     memset(topicdatabuff,0,sizeof(topicdatabuff)); 
     sprintf(topicdatabuff[0],"ota/%s/update",CLIENTID); 
     sprintf(topicdatabuff[1],"ota/%s/files",CLIENTID);   
-
-#if 1    //debug
-    if((AdapterNetActive() == 0) )
-    {
-        KPrintf("mqttCloudInteraction write OTA flag and reboot\n");
-        p_ota_info->status = OTA_STATUS_BOOT_DOWNLOAD;
-        UpdateOTAFlag(p_ota_info);
-        MdelayKTask(2000);
-        mcuboot.op_reset();
-    }
-#endif
 
 reconnect:
     if((AdapterNetActive() == 0) && MQTT_Connect() && MQTT_SubscribeTopic(topicdatabuff[0]) && MQTT_SubscribeTopic(topicdatabuff[1]))
@@ -988,6 +981,19 @@ reconnect:
                 if(sscanf(ptr2,"{\"fileSize\":%d,\"version\":\"%11s\",\"fileId\":%d,\"md5\"",&platform_ota.size,platform_ota.version,&platform_ota.streamId)==3)
                 {
                     KPrintf("OTA firmware information:file size is %d,file id is %d,file version is %s!\r\n",platform_ota.size,platform_ota.streamId,platform_ota.version);
+#ifndef MCUBOOT_BOOTLOADER
+                    if(XIUOS_FLAH_ADDRESS == DOWN_FLAH_ADDRESS)
+                    {
+                        KPrintf("mqttCloudInteraction write OTA flag and reboot\n");
+                        p_ota_info->status = OTA_STATUS_BOOT_DOWNLOAD;
+                        UpdateOTAFlag(p_ota_info);
+                        MQTT_Disconnect();
+                        mcuboot.flash_deinit();
+                        MdelayKTask(2000);
+                        mcuboot.op_reset();
+                    }
+#endif
+
                     KPrintf("------Start the firmware file transfer!------\r\n");
                     KPrintf("---------------------------------------------\r\n");
                     if(platform_ota.size > APP_FLASH_SIZE)
@@ -1501,6 +1507,7 @@ void ota_entry(void)
                 }
                 else
                 {
+                    Update();
                     BootLoaderJumpApp();
                 }
             }

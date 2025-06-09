@@ -444,6 +444,27 @@ static uint32 SerialDevOpen(void *dev)
         return ERROR;
     }
 
+    serial_dev->haldev.dev_sem = KSemaphoreCreate(0);
+    if (serial_dev->haldev.dev_sem < 0)
+    {
+        KPrintf("SerialDevOpen create sem failed .\n");
+
+        if (serial_dev->serial_fifo.serial_rx->serial_rx_buffer)
+        {
+            x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
+        }
+        if (serial_dev->serial_fifo.serial_rx)
+        {
+            x_free(serial_dev->serial_fifo.serial_rx);
+        }
+        if (serial_dev->serial_fifo.serial_tx)
+        {
+            x_free(serial_dev->serial_fifo.serial_tx);
+        }
+
+        return ERROR;
+    }
+
     if (NONE == serial_dev->serial_fifo.serial_rx)
     {
         if (SIGN_OPER_INT_RX & serial_dev_param->serial_set_mode)
@@ -594,27 +615,6 @@ static uint32 SerialDevOpen(void *dev)
             serial_dev_param->serial_work_mode |= SIGN_OPER_DMA_TX;
         }
 #endif
-    }
-
-    serial_dev->haldev.dev_sem = KSemaphoreCreate(0);
-    if (serial_dev->haldev.dev_sem < 0)
-    {
-        KPrintf("SerialDevOpen create sem failed .\n");
-
-        if (serial_dev->serial_fifo.serial_rx->serial_rx_buffer)
-        {
-            x_free(serial_dev->serial_fifo.serial_rx->serial_rx_buffer);
-        }
-        if (serial_dev->serial_fifo.serial_rx)
-        {
-            x_free(serial_dev->serial_fifo.serial_rx);
-        }
-        if (serial_dev->serial_fifo.serial_tx)
-        {
-            x_free(serial_dev->serial_fifo.serial_tx);
-        }
-
-        return ERROR;
     }
 
     return EOK;
