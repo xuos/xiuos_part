@@ -66,6 +66,7 @@ SECTIONS
 		*board/ch32v208rbt6/third_party_driver/Peripheral/src/ch32v20x_usart.o(.text)
 		*board/ch32v208rbt6/third_party_driver/lte/connect_lte.o(.text)
 		*kernel/thread*.o(.text)
+		*resources/serial*.o(.text)
 		. = ALIGN(4);
 	} >FLASH_FAST AT>FLASH_FAST
 

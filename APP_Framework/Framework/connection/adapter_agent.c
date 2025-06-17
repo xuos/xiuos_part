@@ -589,7 +589,6 @@ static void *ATAgentReceiveProcess(void *param)
                     memset(reply->reply_buffer, 0, reply->reply_max_len);
                     memcpy(reply->reply_buffer, agent->maintain_buffer, agent->maintain_len);
                     reply->reply_len = agent->maintain_len;
-                    printf("%s reply->reply_buffer=%s\n", __func__, reply->reply_buffer);
                 }
                 else
                 {

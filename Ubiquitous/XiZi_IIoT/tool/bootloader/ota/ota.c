@@ -970,6 +970,7 @@ reconnect:
         }
         else if(MqttRxbuf[0] == 0x30)
         {
+            KPrintf("recv datalen %d  \n", datalen);
             freecnt = 0;
             payloadLen = MQTT_DealPublishData(MqttRxbuf, datalen);
 
@@ -989,7 +990,6 @@ reconnect:
                         UpdateOTAFlag(p_ota_info);
                         MQTT_Disconnect();
                         mcuboot.flash_deinit();
-                        MdelayKTask(2000);
                         mcuboot.op_reset();
                     }
 #endif
