@@ -487,12 +487,15 @@ static void BootLoaderJumpApp(void)
     if(p_ota_info->lastjumpflag == JUMP_FAILED_FLAG)
     {
         mcuboot.print_string("\r\n------Jump to app partition failed,start version rollback!------\r\n");
-#ifdef BOARD_CH32V208RBT6
-        p_ota_info->lastjumpflag = JUMP_SUCCESS_FLAG;
-        UpdateOTAFlag(p_ota_info);
-#else
-        BackupVersion();
-#endif
+        if(XIUOS_FLAH_ADDRESS == DOWN_FLAH_ADDRESS)
+        {
+            p_ota_info->status = OTA_STATUS_BOOT_DOWNLOAD;
+            UpdateOTAFlag(p_ota_info);
+        }
+        else
+        {
+            BackupVersion();
+        }
     }
     else
     {
@@ -985,6 +988,11 @@ reconnect:
 #ifndef MCUBOOT_BOOTLOADER
                     if(XIUOS_FLAH_ADDRESS == DOWN_FLAH_ADDRESS)
                     {
+                        if (strcmp(platform_ota.version, p_ota_info->os.version) == 0) {
+                            KPrintf("current version is the latest version and does not upgrade\n");
+                            MdelayKTask(2000);
+                            continue;
+                        }
                         KPrintf("mqttCloudInteraction write OTA flag and reboot\n");
                         p_ota_info->status = OTA_STATUS_BOOT_DOWNLOAD;
                         UpdateOTAFlag(p_ota_info);
@@ -1133,6 +1141,11 @@ reconnect:
 
         memset(p_ota_info->down.description,0,sizeof(p_ota_info->down.description)); 
         strncpy(p_ota_info->down.description, "MQTT OTA bin.",sizeof(p_ota_info->down.description));
+
+        if(XIUOS_FLAH_ADDRESS == DOWN_FLAH_ADDRESS)
+        {
+            memcpy(&p_ota_info->os, &p_ota_info->down,sizeof(p_ota_info->os));
+        }
 
         p_ota_info->status = OTA_STATUS_READY;
     
@@ -1419,13 +1432,13 @@ int OtaTask(void)
 *******************************************************************************/
 void app_clear_jumpflag(void)
 {
-    ota_info_t ota_info;
+    ota_info_t *p_ota_info = &g_ota_info;
     mcuboot.flash_init();
     //跳转成功设置lastjumpflag为JUMP_SUCCESS_FLAG
-    memset(&ota_info, 0, sizeof(ota_info_t));
-    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)&ota_info, sizeof(ota_info_t));
-    ota_info.lastjumpflag = JUMP_SUCCESS_FLAG;
-    UpdateOTAFlag(&ota_info);
+    memset(p_ota_info, 0, sizeof(ota_info_t));
+    mcuboot.op_flash_read(FLAG_FLAH_ADDRESS, (void*)p_ota_info, sizeof(ota_info_t));
+    p_ota_info->lastjumpflag = JUMP_SUCCESS_FLAG;
+    UpdateOTAFlag(p_ota_info);
     mcuboot.flash_deinit();
 }
 
@@ -1511,8 +1524,11 @@ void ota_entry(void)
                     BootLoaderJumpApp();
                 }
             }
-            Update();
-            BootLoaderJumpApp();
+            else
+            {
+                Update();
+                BootLoaderJumpApp();
+            }
         } 
     }
 }

@@ -250,4 +250,9 @@ void InitBoardHardware() {
             (x_ubase)MEMORY_END_ADDRESS, SRAM_SIZE, __stack_size);
     KPrintf("board init done.\n");
     KPrintf("start kernel...\n");
+
+#ifdef TOOL_USING_OTA
+    extern void app_clear_jumpflag(void);
+    app_clear_jumpflag();  // set lastjumpflag to JUMP_SUCCESS_FLAG
+#endif
 }
