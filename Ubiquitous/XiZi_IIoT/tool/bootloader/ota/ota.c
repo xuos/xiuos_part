@@ -993,9 +993,6 @@ reconnect:
                         mcuboot.op_reset();
                     }
 #endif
-
-                    KPrintf("------Start the firmware file transfer!------\r\n");
-                    KPrintf("---------------------------------------------\r\n");
                     if(platform_ota.size > APP_FLASH_SIZE)
                     {
                         KPrintf("File size is larger than partition size,the partition size is %dk.\n",APP_FLASH_SIZE/1024);
@@ -1006,6 +1003,7 @@ reconnect:
                         UpdateOTAFlag(p_ota_info);
                         break;
                     }
+                    KPrintf("Start erase download partition\n");
                     if(mcuboot.op_flash_erase(DOWN_FLAH_ADDRESS,platform_ota.size) != kStatus_Success)
                     {
                         KPrintf("Failed to erase download partition!\n");
@@ -1016,6 +1014,8 @@ reconnect:
                         UpdateOTAFlag(p_ota_info);
                         break;
                     }
+                    KPrintf("------Start the firmware file transfer!------\r\n");
+                    KPrintf("---------------------------------------------\r\n");
                     platform_ota.counter = (platform_ota.size%FRAME_LEN != 0)? (platform_ota.size/FRAME_LEN + 1):(platform_ota.size/FRAME_LEN);
                     platform_ota.num = 1;                                          //下载次数,初始值为1
                     platform_ota.downlen = FRAME_LEN;                              //记录本次下载量

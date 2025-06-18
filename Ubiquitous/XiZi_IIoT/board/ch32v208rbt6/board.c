@@ -215,7 +215,8 @@ void InitBoardHardware() {
 #ifdef BSP_USING_UART
     InitHwUart();
     InstallConsole("uart1", SERIAL_DRV_NAME_1, SERIAL_1_DEVICE_NAME_0);
-    KPrintf("console init completed.\n");
+    KPrintf("\nconsole init completed.\n");
+    KPrintf("compiled on: %s at %s\n", __DATE__, __TIME__);
 #endif
 
     readRomConfiguration();  // 读取配置信息到外部变量CFG中

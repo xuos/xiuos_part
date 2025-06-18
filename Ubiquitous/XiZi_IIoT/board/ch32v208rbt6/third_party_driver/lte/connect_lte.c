@@ -315,12 +315,19 @@ int InitHwLte(void) {
     USART_Cmd(USART2, ENABLE);
 
     /* Enable module pin */
+    GPIO_InitStructure_Lte.GPIO_Pin = GPIO_Pin_7;
+    GPIO_InitStructure_Lte.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure_Lte.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(GPIOA, &GPIO_InitStructure_Lte);
+    GPIO_SetBits(GPIOA, GPIO_Pin_7);
+    Delay_Ms(500);    // >= 300ms
+    GPIO_ResetBits(GPIOA, GPIO_Pin_7);
     GPIO_InitStructure_Lte.GPIO_Pin = GPIO_Pin_6;
     GPIO_InitStructure_Lte.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure_Lte.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOA, &GPIO_InitStructure_Lte);
     GPIO_SetBits(GPIOA, GPIO_Pin_6);
-    Delay_Ms(2000);
+    Delay_Ms(1000);    // >= 500ms
     GPIO_ResetBits(GPIOA, GPIO_Pin_6);
 
     return ret;

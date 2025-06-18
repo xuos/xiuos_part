@@ -232,7 +232,7 @@ int AtCmdConfigAndCheck(ATAgentType agent, char *cmd, char *check)
 #endif
     if (!strstr(result, check))
     {
-        printf("%s %d check[%s] reply[%s] failed.\n", __func__, __LINE__, check, result);
+        printf("%s %d cmd[%s] check[%s] reply[%s] failed.\n", __func__, __LINE__, cmd, check, result);
         ret = -1;
         goto __exit;
     }
