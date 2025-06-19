@@ -46,8 +46,6 @@ int AdapterNetActive(void)
 {
     int ret = 0;
     uint32_t baud_rate = BAUD_RATE_115200;
-
-    KPrintf("%s enter\n", __func__);
     adapter =  AdapterDeviceFindByName(ADAPTER_4G_NAME);
     adapter->socket.socket_id = 0;
     
@@ -68,13 +66,11 @@ int AdapterNetActive(void)
     {
         goto out;
     }
-    KPrintf("%s success\n", __func__);
 
 out:
     if (ret < 0) 
     {
         AdapterDeviceClose(adapter);
-        KPrintf("%s fail\n", __func__);
     }
 
     return ret;
@@ -115,8 +111,6 @@ int MQTT_Recv(uint8_t* buf, int buflen)
 bool MQTT_Connect(void)
 {
     uint8_t TryConnect_time = 10;  //尝试登录次数
-
-    KPrintf("%s enter\n", __func__);
 
     memset(&Platform_mqtt,0,sizeof(Platform_mqtt));
 #ifdef XIUOS_PLATFORM
@@ -184,7 +178,8 @@ bool MQTT_Connect(void)
         MQTT_Send(Platform_mqtt.Pack_buff,Platform_mqtt.Fixed_len + Platform_mqtt.Variable_len + Platform_mqtt.Payload_len);
         MdelayKTask(50);
         MQTT_Recv(mqtt_rxbuf, 4);
-        if(mqtt_rxbuf[0] == parket_connetAck[0] && mqtt_rxbuf[1] == parket_connetAck[1] && mqtt_rxbuf[2] == parket_connetAck[2] && mqtt_rxbuf[3] == parket_connetAck[3]) //连接成功
+        if(mqtt_rxbuf[0] == parket_connetAck[0] && mqtt_rxbuf[1] == parket_connetAck[1] 
+                && mqtt_rxbuf[2] == parket_connetAck[2] && mqtt_rxbuf[3] == parket_connetAck[3]) //连接成功
         {
             return true;
         }
@@ -215,8 +210,6 @@ void MQTT_Disconnect(void)
 bool MQTT_SubscribeTopic(uint8_t *topic_name)
 {
     uint8_t TrySub_time = 10; //尝试订阅次数
-
-    KPrintf("%s topic_name=%s\n", __func__, topic_name);
 
     Platform_mqtt.Fixed_len = 1;   //SUBSCRIBE报文,固定报头长度暂定为1
     Platform_mqtt.Variable_len = 2;//SUBSCRIBE报文,可变报头长度=2,2为字节报文标识符

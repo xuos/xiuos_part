@@ -407,7 +407,7 @@ int AdapterDeviceConnect(struct Adapter *adapter, enum NetRoleType net_role, con
     
         if (NULL == ip_done->connect)
             return -1;
-        printf("AdapterDeviceConnect to connect ip=%s port=%s\n", ip, port);
+    
         return ip_done->connect(adapter, net_role, ip, port, ip_type);
     } else {
         printf("AdapterDeviceConnect net_protocol %d not support\n", adapter->net_protocol);

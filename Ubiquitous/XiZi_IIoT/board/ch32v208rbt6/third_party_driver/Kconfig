@@ -111,6 +111,6 @@ menuconfig BSP_USING_LTE
             default "lte_dev1"
         config LTE_TEST
             bool "Enable lte test"
-            default y
+            default n
     endif	
 	
