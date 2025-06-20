@@ -23,12 +23,6 @@
 #include "flash_for_ota.h"
 #include "ch32v20x_flash.h"
 
-#if 0
-uint8_t NorFlash_BUFFER[4096];         //4K buffer cache
-uint8_t buffer[FLASH_PAGE_SIZE];       //256 bytes buffer cache
-#endif
-
-
 
 /*******************************************************************************
 * 函 数 名: FLASH_Init
@@ -38,18 +32,7 @@ uint8_t buffer[FLASH_PAGE_SIZE];       //256 bytes buffer cache
 *******************************************************************************/
 void FLASH_Init(void)
 {
-    #if 0
-    /* Update LUT Table for Status, Write Enable, Erase and Program */
-    ROM_FLEXSPI_NorFlash_UpdateLut(0, NOR_CMD_LUT_SEQ_IDX_READSTATUS, (const uint32_t *)FlashLookupTable.ReadStatus_Seq, 10U);
-    /* Use 30MHz Flexspi clock for safe operation */
-    flexspi_clock_config(0, kFLEXSPISerialClk_30MHz, kFLEXSPIClk_DDR);
-    extern flexspi_nor_config_t Qspiflash_config;
-    flexspi_config_mcr1(0, &Qspiflash_config.memConfig);
-    flexspi_configure_dll(0, &Qspiflash_config.memConfig);
-    ROM_FLEXSPI_NorFlash_ClearCache(0);
-    #endif
 }
-
 
 /*******************************************************************************
 * 函 数 名: FLASH_DeInit
@@ -59,13 +42,6 @@ void FLASH_Init(void)
 *******************************************************************************/
 void FLASH_DeInit(void)
 {
-    #if 0
-    lookuptable_t clearlut;
-    memset(&clearlut, 0, sizeof(lookuptable_t));
-    ROM_FLEXSPI_NorFlash_UpdateLut(0, NOR_CMD_LUT_SEQ_IDX_READSTATUS, (const uint32_t *)FlashLookupTable.ReadStatus_Seq, 10U);
-    /* Use 30MHz Flexspi clock for safe operation */
-    flexspi_clock_config(0, kFLEXSPISerialClk_30MHz, kFLEXSPIClk_DDR);
-    #endif
 }
 
 /*******************************************************************************
@@ -132,7 +108,6 @@ status_t Flash_Read(uint32_t addr, uint8_t *buf, uint32_t len)
     return 0;
 }
 
-
 /*******************************************************************************
 * 函 数 名: Flash_Copy
 * 功能描述: 实现flash数据在分区之间的拷贝
@@ -143,61 +118,6 @@ status_t Flash_Read(uint32_t addr, uint8_t *buf, uint32_t len)
 *******************************************************************************/
 status_t Flash_Copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
 {   
-    #if 0
-    uint32_t PageNum, Remain, i;
-    status_t status;
-
-    if((srcAddr == dstAddr) || imageSize > APP_FLASH_SIZE)
-    {
-        return (status_t)kStatus_Fail;
-    }
-
-    status = Flash_Erase(dstAddr,imageSize);
-    if(status != kStatus_Success)
-    {
-        KPrintf("Erase flash 0x%08x failure !\r\n",dstAddr);
-        return status;
-    }
-
-    PageNum = imageSize/FLASH_PAGE_SIZE;
-    Remain = imageSize%FLASH_PAGE_SIZE;
-
-    for(i=0;i<PageNum;i++)
-    {
-        memset(buffer, 0, sizeof(buffer));
-        status = Flash_Read(srcAddr + i*FLASH_PAGE_SIZE, buffer, sizeof(buffer));
-        if(status != kStatus_Success)
-        {
-            KPrintf("Read flash 0x%08x failure !\r\n", srcAddr + i*FLASH_PAGE_SIZE);
-            return status;
-        }
-        status = Flash_Write(dstAddr+ i*FLASH_PAGE_SIZE, buffer, FLASH_PAGE_SIZE);
-        if(status != kStatus_Success)
-        {
-            KPrintf("Write flash 0x%08x failure !\r\n", dstAddr + i*FLASH_PAGE_SIZE);
-            return status;
-        }
-    }
-
-    if(Remain)
-    {
-        memset(buffer, 0, sizeof(buffer));
-        status = Flash_Read(srcAddr + i*FLASH_PAGE_SIZE, buffer, Remain);
-        if(status != kStatus_Success)
-        {
-            KPrintf("Read flash 0x%08x failure !\r\n", srcAddr + i*FLASH_PAGE_SIZE);
-            return status;
-        }
-        status = Flash_Write(dstAddr+ i*FLASH_PAGE_SIZE, buffer, Remain);
-        if(status != kStatus_Success)
-        {
-            KPrintf("Write flash 0x%08x failure !\r\n", dstAddr + i*FLASH_PAGE_SIZE);
-            return status;
-        }
-    }
-
-    return (status_t)kStatus_Success; 
-    #endif
     return 0;
 }
 
@@ -209,47 +129,7 @@ status_t Flash_Copy(uint32_t srcAddr,uint32_t dstAddr, uint32_t imageSize)
             DataLength:要写入的字节数
 * 返 回 值: 如果函数执行成功,状态值为 kStatus_Success,否则状态值为其他错误码  
 *******************************************************************************/
-uint8_t packetNum = 0;
-uint32_t dataLen = 0;
-uint32_t WriteAddr;
-uint8_t dataBuff[5*1024];
 status_t NOR_FLASH_Write(uint32_t* FlashAddress, uint8_t* Data ,uint16_t DataLength,uint8_t doneFlag)
 {
-    #if 0
-    status_t status;
-    if(!doneFlag)
-    {  
-        memcpy(&dataBuff[dataLen],Data,DataLength);
-        dataLen += DataLength;
-        packetNum ++;
-        if(1 == packetNum)
-        {
-            WriteAddr = *FlashAddress;
-        }
-
-        if(dataLen>=SECTOR_SIZE)
-        {
-            status = Flash_Write(WriteAddr,dataBuff,dataLen);
-            if(status != kStatus_Success)
-            {
-                return status;
-            } 
-            packetNum = 0;
-            dataLen = 0; 
-        }
-        *FlashAddress += DataLength;
-    }
-    else
-    {
-        status = Flash_Write(WriteAddr,dataBuff,dataLen);
-        if(status != kStatus_Success)
-        {
-            return status;
-        }
-        packetNum = 0;
-        dataLen = 0; 
-    }
-   return (status_t)kStatus_Success;;
-   #endif
    return 0;
 }

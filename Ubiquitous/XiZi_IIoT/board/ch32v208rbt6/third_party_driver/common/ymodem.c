@@ -23,11 +23,6 @@
 #include "flash_for_ota.h"
 #include "boot_for_ota.h"
 
-uint8_t tab_1024[1024] ={0};
-uint8_t FileName[FILE_NAME_LENGTH];
-
-
-
 /*******************************************************************************
 * 函 数 名: Ymodem_Receive
 * 功能描述: 使用ymodem协议接收文件

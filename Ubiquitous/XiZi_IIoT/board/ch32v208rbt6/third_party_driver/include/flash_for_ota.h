@@ -25,7 +25,6 @@
 #include "common.h"
 
 #define FLASH_PAGE_FAST_SIZE        256
-#define FLASH_BLOCK_SIZE       4096
 
 typedef int32_t status_t;
 
