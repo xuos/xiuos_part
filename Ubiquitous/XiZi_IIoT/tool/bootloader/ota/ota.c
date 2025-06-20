@@ -486,14 +486,15 @@ static void BootLoaderJumpApp(void)
 
     if(p_ota_info->lastjumpflag == JUMP_FAILED_FLAG)
     {
-        mcuboot.print_string("\r\n------Jump to app partition failed,start version rollback!------\r\n");
         if(XIUOS_FLAH_ADDRESS == DOWN_FLAH_ADDRESS)
         {
+            mcuboot.print_string("\r\n------Jump to app partition failed, retry download!------\r\n");
             p_ota_info->status = OTA_STATUS_BOOT_DOWNLOAD;
             UpdateOTAFlag(p_ota_info);
         }
         else
         {
+            mcuboot.print_string("\r\n------Jump to app partition failed,start version rollback!------\r\n");
             BackupVersion();
         }
     }
@@ -1514,6 +1515,8 @@ void ota_entry(void)
                     extern int InitHwLte(void);
                     InitHwLte();
 #endif
+                    app_clear_jumpflag();
+
                     mcuboot.print_string("ota_entry to XiUOSStartup\r\n");
                     extern int XiUOSStartup(void);
                     XiUOSStartup();

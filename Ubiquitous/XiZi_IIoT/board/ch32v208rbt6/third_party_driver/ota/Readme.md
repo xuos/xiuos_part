@@ -1,5 +1,15 @@
 # 编译
-路径 Ubiquitous/XiZi_IIoT 下，执行 make BOARD=ch32v208rbt6 menuconfig，打开config 选项：
+生成支持OTA升级的固件，需要分别编译boot和app。其中，boot是升级需要的固件，app是正常系统固件。
+
+编译boot之前，需要在路径 Ubiquitous/XiZi_IIoT 下，执行：
+
+    cp board/ch32v208rbt6/.defconfig_boot board/ch32v208rbt6/.defconfig
+
+编译app之前，需要在路径 Ubiquitous/XiZi_IIoT 下，执行：
+
+    cp board/ch32v208rbt6/.defconfig_app board/ch32v208rbt6/.defconfig
+
+可以执行 make BOARD=ch32v208rbt6 menuconfig，查看config 选项。
 
      .config - XiZi_IIoT Project Configuration
      > Tool feature > OTA function > Enable support OTA function > Compile bootloader bin or application bin.
@@ -82,5 +92,4 @@ CH32V208的FLASH大小是480KB，其中零等待运行区域大小是128KB。FLA
 |0x08008000 ~ 0x08050000 | Application | 288KB |
 |0x08050000 ~ 0x08077000 | Boot_SLOW | 156KB |
 |0x08077000 ~ 0x08078000 | OTA_FLAG | 4KB |
-
 

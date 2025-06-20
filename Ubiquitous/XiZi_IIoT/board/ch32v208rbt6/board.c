@@ -78,7 +78,7 @@ void readRomConfiguration(void) {
     if ((CFG->cfgFlag[0] != checkcode1) || (CFG->cfgFlag[1] != checkcode2)) {
         CFG_ERASE(PAGE_WRITE_START_ADDR, FLASH_PAGE_SIZE);
         CFG_WRITE(PAGE_WRITE_START_ADDR, (u8 *)&defaultConfiguration, MODULE_CFG_LEN);
-        KPrintf("%s NVIC_SystemReset\n", __func__);
+        KPrintf("%s NVIC_SystemReset\r\n\r\n", __func__);
         NVIC_SystemReset(); // 复位ch32v208
     }
 
