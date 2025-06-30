@@ -307,6 +307,17 @@ KERNELPATHS += \
 	-I$(KERNEL_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/ch569w)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch569w \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch569w/RVMSIS \
+	-I$(KERNEL_ROOT)/arch/risc-v/ch569w/User \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/Peripheral/inc \
+	-I$(BSP_ROOT)/include \
+	-I$(KERNEL_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rv32m1-vega)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/risc-v/rv32m1-vega \
