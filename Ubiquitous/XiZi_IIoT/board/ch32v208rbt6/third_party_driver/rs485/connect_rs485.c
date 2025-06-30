@@ -99,7 +99,10 @@ static uint32 Rs485Init(struct SerialDriver *rs485_drv, struct BusConfigureInfo 
 
     switch (rs485_cfg->data_cfg.serial_data_bits) {
         case DATA_BITS_8:
-            USART_InitStructure_Rs485.USART_WordLength = USART_WordLength_8b;
+            if (rs485_cfg->data_cfg.serial_parity_mode == PARITY_ODD || rs485_cfg->data_cfg.serial_parity_mode == PARITY_EVEN)
+                USART_InitStructure_Rs485.USART_WordLength = USART_WordLength_9b;
+            else
+                USART_InitStructure_Rs485.USART_WordLength = USART_WordLength_8b;
             break;
         case DATA_BITS_9:
             USART_InitStructure_Rs485.USART_WordLength = USART_WordLength_9b;
