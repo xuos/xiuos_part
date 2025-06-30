@@ -256,8 +256,10 @@ KPrintf("%s %d\n", __func__, __LINE__);
 #endif
 
     KPrintf("%s %d\n", __func__, __LINE__);
+#ifdef TOOL_SHELL
     extern long ShowTask(void);
     ShowTask();
+#endif
     StartupOsAssign();
     return 0;
 }

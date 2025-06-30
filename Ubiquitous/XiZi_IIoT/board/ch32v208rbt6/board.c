@@ -78,6 +78,7 @@ void readRomConfiguration(void) {
     if ((CFG->cfgFlag[0] != checkcode1) || (CFG->cfgFlag[1] != checkcode2)) {
         CFG_ERASE(PAGE_WRITE_START_ADDR, FLASH_PAGE_SIZE);
         CFG_WRITE(PAGE_WRITE_START_ADDR, (u8 *)&defaultConfiguration, MODULE_CFG_LEN);
+        KPrintf("%s NVIC_SystemReset\r\n\r\n", __func__);
         NVIC_SystemReset(); // 复位ch32v208
     }
 
@@ -211,7 +212,8 @@ void InitBoardHardware() {
 #ifdef BSP_USING_UART
     InitHwUart();
     InstallConsole("uart1", SERIAL_DRV_NAME_1, SERIAL_1_DEVICE_NAME_0);
-    KPrintf("console init completed.\n");
+    KPrintf("\nconsole init completed.\n");
+    KPrintf("compiled on: %s at %s\n", __DATE__, __TIME__);
 #endif
 
     readRomConfiguration();  // 读取配置信息到外部变量CFG中
@@ -245,4 +247,9 @@ void InitBoardHardware() {
             (x_ubase)MEMORY_END_ADDRESS, SRAM_SIZE, __stack_size);
     KPrintf("board init done.\n");
     KPrintf("start kernel...\n");
+
+#ifdef TOOL_USING_OTA
+    extern void app_clear_jumpflag(void);
+    app_clear_jumpflag();  // set lastjumpflag to JUMP_SUCCESS_FLAG
+#endif
 }

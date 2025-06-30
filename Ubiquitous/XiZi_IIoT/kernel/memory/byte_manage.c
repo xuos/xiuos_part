@@ -660,8 +660,10 @@ void *x_malloc(x_size_t size)
             KPrintf("dynamic_buddy_end:%d\n", ByteManager.dynamic_buddy_manager.dynamic_buddy_end);
             KPrintf("dynamic_buddy_start:%d\n", ByteManager.dynamic_buddy_manager.dynamic_buddy_start);
             KPrintf("active_memory:%d\n", ByteManager.dynamic_buddy_manager.active_memory);
+#ifdef TOOL_SHELL
             extern int ShowTask();
             ShowTask();
+#endif
             return NONE;
         }
 #endif

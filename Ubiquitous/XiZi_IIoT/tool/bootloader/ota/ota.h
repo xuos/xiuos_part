@@ -34,6 +34,7 @@ typedef enum {
     OTA_STATUS_DOWNLOADED,   //固件下载完成
     OTA_STATUS_UPDATING,     //正在进行OTA升级
     OTA_STATUS_BACKUP,       //正在版本回退
+    OTA_STATUS_BOOT_DOWNLOAD,//boot阶段下载固件
     OTA_STATUS_ERROR,        //出现错误,升级失败
 } ota_status_t;
 

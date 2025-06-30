@@ -178,7 +178,8 @@ bool MQTT_Connect(void)
         MQTT_Send(Platform_mqtt.Pack_buff,Platform_mqtt.Fixed_len + Platform_mqtt.Variable_len + Platform_mqtt.Payload_len);
         MdelayKTask(50);
         MQTT_Recv(mqtt_rxbuf, 4);
-        if(mqtt_rxbuf[0] == parket_connetAck[0] && mqtt_rxbuf[1] == parket_connetAck[1]) //连接成功
+        if(mqtt_rxbuf[0] == parket_connetAck[0] && mqtt_rxbuf[1] == parket_connetAck[1] 
+                && mqtt_rxbuf[2] == parket_connetAck[2] && mqtt_rxbuf[3] == parket_connetAck[3]) //连接成功
         {
             return true;
         }

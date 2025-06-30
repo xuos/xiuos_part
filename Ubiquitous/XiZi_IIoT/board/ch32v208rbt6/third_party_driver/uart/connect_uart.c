@@ -221,7 +221,7 @@ static int SerialGetChar(struct SerialHardwareDevice *serial_dev) {
     if (RESET != USART_GetFlagStatus((USART_TypeDef *)serial_cfg->hw_cfg.serial_register_base, USART_FLAG_RXNE)) {
         ch = USART_ReceiveData((USART_TypeDef *)serial_cfg->hw_cfg.serial_register_base) & 0xff;
     }
-#ifdef BSP_USING_LTE
+#ifdef LTE_TEST
 #define TRANSPARENT_TRANSMISSION_MODE 0  // 数据透传模式
 #define COMMAND_LINE_MODE 1              // 命令行模式
                                          /* lte模式下，实现DBG串口和MAIN串口的数据转发 */

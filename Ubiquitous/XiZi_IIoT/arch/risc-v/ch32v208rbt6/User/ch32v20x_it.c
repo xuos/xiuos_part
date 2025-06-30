@@ -54,10 +54,12 @@ void HardFault_Handler(void)
     KPrintf("mepc  :%08x\r\n", __get_MEPC());
     KPrintf("mcause:%08x\r\n", __get_MCAUSE());
     KPrintf("mtval :%08x\r\n", __get_MTVAL());
+#ifdef TOOL_SHELL
 	extern void ShowTask(void);
 	extern void ShowMemory(void);
 	ShowTask();
 	ShowMemory();
+#endif
     while (1)
         ;
 
