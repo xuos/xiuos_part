@@ -11,7 +11,7 @@ export APPLFLAGS :=  -nostartfiles -Wl,--gc-sections,-Map=XiZi-app.map,-cref,-u,
 
 export CXXFLAGS :=  -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common # -std=gnu99
 
-export CROSS_COMPILE ?=/opt/riscv64-toolchain/bin/riscv64-unknown-elf-
+export CROSS_COMPILE ?=/opt/riscv-embedded-gcc/bin/riscv-none-embed-
 
 export DEFINES := -DHAVE_CCONFIG_H -DHAVE_SIGINFO
 
