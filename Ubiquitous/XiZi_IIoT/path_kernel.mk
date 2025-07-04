@@ -284,6 +284,18 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32l476rgt6)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/libraries/STM32L4xx_HAL_Driver/inc \
+	-I$(BSP_ROOT)/third_party_driver/usb/usb_device/include \
+	-I$(KERNEL_ROOT)/include \
+	-I$(BSP_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/gapuino)
 KERNELPATHS += \
 	-I$(BSP_ROOT)/third_party_driver \
