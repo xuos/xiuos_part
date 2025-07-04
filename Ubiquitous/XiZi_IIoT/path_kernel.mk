@@ -465,6 +465,18 @@ KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rt1062xb)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/include/periph \
+	-I$(BSP_ROOT)/third_party_driver/CMSIS \
+	-I$(BSP_ROOT)/include \
+	-I$(KERNEL_ROOT)/include \
+	-I$(KERNEL_ROOT)/resources/include
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/imxrt1176-sbc)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
