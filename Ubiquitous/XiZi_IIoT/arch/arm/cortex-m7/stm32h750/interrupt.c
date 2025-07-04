@@ -20,7 +20,9 @@
 
 #include <xs_base.h>
 #include <xs_isr.h>
+#include <arch_interrupt.h>
 #include <stm32h7xx_hal_cortex.h>
+#include "stm32h7xx_hal.h"
 
 x_base __attribute__((naked)) DisableLocalInterrupt()
 {
@@ -37,13 +39,13 @@ void __attribute__((naked)) EnableLocalInterrupt(x_base level)
 
 int32 ArchEnableHwIrq(uint32 irq_num)
 {
-    EnableIRQ(irq_num);
+  HAL_NVIC_EnableIRQ((IRQn_Type)irq_num);
     return EOK;
 }
 
 int32 ArchDisableHwIrq(uint32 irq_num)
 {
-    DisableIRQ(irq_num);
+  HAL_NVIC_DisableIRQ((IRQn_Type)irq_num);
     return EOK;
 }
 
@@ -82,4 +84,10 @@ void NMI_Handler(int irqn, void *arg)
     while (1)
   {
   }
+}
+
+void SysTick_Handler(int irqn, void *arg)
+{
+    TickAndTaskTimesliceUpdate();
+   
 }

@@ -122,6 +122,24 @@ KERNELPATHS += \
 
 endif 
 
+
+
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32h750)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/libraries/STM32H7xx_HAL/inc \
+	-I$(BSP_ROOT)/third_party_driver/libraries/STM32H7xx_HAL/inc/Legacy \
+	-I$(BSP_ROOT)/third_party_driver/libraries/CMSIS \
+	-I$(KERNEL_ROOT)/include \
+	-I$(KERNEL_ROOT)/resources/include \
+	-I$(KERNEL_ROOT)/tool/shell/letter-shell \
+	-I$(KERNEL_ROOT)/fs/shared/include \
+	-I$(KERNEL_ROOT)/arch/cortex-m7/stm32h750 \
+	-I$(BSP_ROOT)/include 
+endif 
+
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xiwangtong-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
