@@ -20,7 +20,7 @@
 
 #include <xs_base.h>
 #include <xs_isr.h>
-#include "fsl_common.h"
+#include <stm32h7xx_hal_cortex.h>
 
 x_base __attribute__((naked)) DisableLocalInterrupt()
 {

@@ -122,6 +122,24 @@ KERNELPATHS += \
 
 endif 
 
+
+
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32h750)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/libraries/STM32H7xx_HAL/inc \
+	-I$(BSP_ROOT)/third_party_driver/libraries/STM32H7xx_HAL/inc/Legacy \
+	-I$(BSP_ROOT)/third_party_driver/libraries/CMSIS \
+	-I$(KERNEL_ROOT)/include \
+	-I$(KERNEL_ROOT)/resources/include \
+	-I$(KERNEL_ROOT)/tool/shell/letter-shell \
+	-I$(KERNEL_ROOT)/fs/shared/include \
+	-I$(KERNEL_ROOT)/arch/cortex-m7/stm32h750 \
+	-I$(BSP_ROOT)/include 
+endif 
+
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/xiwangtong-arm32)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
@@ -262,6 +280,18 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include \
 	-I$(BSP_ROOT)/third_party_driver/include \
 	-I$(BSP_ROOT)/third_party_driver/usb/STM32_USB_OTG_Driver/inc \
+	-I$(KERNEL_ROOT)/include \
+	-I$(BSP_ROOT)/include #
+endif
+
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32l476rgt6)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/libraries/STM32L4xx_HAL_Driver/inc \
+	-I$(BSP_ROOT)/third_party_driver/usb/usb_device/include \
 	-I$(KERNEL_ROOT)/include \
 	-I$(BSP_ROOT)/include #
 endif
@@ -445,6 +475,18 @@ KERNELPATHS += \
 
 KERNELPATHS += -I$(KERNEL_ROOT)/resources/include/netdev
 endif
+endif
+
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/rt1062xb)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m7 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/include/periph \
+	-I$(BSP_ROOT)/third_party_driver/CMSIS \
+	-I$(BSP_ROOT)/include \
+	-I$(KERNEL_ROOT)/include \
+	-I$(KERNEL_ROOT)/resources/include
 endif
 
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/imxrt1176-sbc)
