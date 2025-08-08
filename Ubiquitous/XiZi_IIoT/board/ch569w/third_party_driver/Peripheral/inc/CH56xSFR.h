@@ -1341,6 +1341,7 @@ extern "C" {
 #ifndef TABLE_IRQN
 typedef enum IRQn
 {
+    PWMX_OFFn = 0,
     Reset_IRQn = 1,
     NMI_IRQn = 2,      /*!< Non Maskable Interrupt   */
     EXC_IRQn = 3,      /*!< Exceptions Interrupt      */
@@ -1367,6 +1368,7 @@ typedef enum IRQn
     ETH_IRQn = 34,
     PMT_IRQn = 35,
     ECDC_IRQn = 36,
+    END_OF_IRQn
 } IRQn_Type;
 #endif
 
