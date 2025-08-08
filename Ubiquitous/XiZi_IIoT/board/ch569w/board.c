@@ -29,11 +29,10 @@
 
 void InitBoardHardware()
 {
-
 	SystemInit(FREQ_SYS);
 	Delay_Init(FREQ_SYS);
 
-    SysTick_Config(FREQ_SYS / TICK_PER_SECOND);
+    SysTick_Config(FREQ_SYS / 8 / TICK_PER_SECOND);
     PFIC_EnableIRQ(SWI_IRQn);
 
     /* initialize memory system */
