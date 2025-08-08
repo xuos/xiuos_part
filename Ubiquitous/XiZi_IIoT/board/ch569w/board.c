@@ -44,6 +44,11 @@ void InitBoardHardware()
     KPrintf("\nconsole init completed.\n");
 #endif
 
+#ifdef BSP_USING_SPI
+    int InitHwSpi(void);
+    InitHwSpi();
+#endif
+
     KPrintf("memory address range: [0x%08x - 0x%08x] ssize: %x\n", (x_ubase)MEMORY_START_ADDRESS,
             (x_ubase)MEMORY_END_ADDRESS, MEMORY_STACK_SIZE);
 
