@@ -461,4 +461,4 @@ int SpiFlashTest(int argc, char *argv[])
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
-                 test_spi, SpiFlashTest, test spi);
+                 SpiFlashTest, SpiFlashTest, test spi);
