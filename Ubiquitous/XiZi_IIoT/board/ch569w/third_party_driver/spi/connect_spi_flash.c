@@ -423,8 +423,9 @@ int InitHwSpi(void) {
 
 int SpiFlashTest(int argc, char *argv[])
 {
-	UINT8 buf[1024];
-	UINT8 i;
+    UINT8 buf[1024];
+    UINT8 i;
+    int read_only = 0;
 
 	KPrintf("SpiFlashTest Start\n");
 
@@ -434,8 +435,21 @@ int SpiFlashTest(int argc, char *argv[])
         buf[i] = i;
     }
 
-    EraseExternal4KFlash_SPI(0);
-    BlukWriteExternalFlash_SPI(0,255,buf);
+    if (argc == 3) {
+        KPrintf("SpiFlashTest argv[2]=%s\n", argv[2]);
+        if (argv[2][0] == 'r') {
+            read_only = 1;
+        }
+        else {
+            buf[0] = argv[2][0] - '0';
+        }
+    }
+
+    if (read_only == 0) {
+        EraseExternal4KFlash_SPI(0);
+        BlukWriteExternalFlash_SPI(0,255,buf);
+    }
+
     BlukReadExternalFlash_SPI( 0,255,buf );
 
     for(i=0; i!=255; i++){
