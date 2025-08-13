@@ -17,3 +17,7 @@ export MCU =  CH569W
 ifeq ($(CONFIG_BSP_USING_SERDES), y)
 export LINK_BOARD += $(KERNEL_ROOT)/board/ch569w/third_party_driver/serdes/libSERDES.a
 endif
+
+ifeq ($(CONFIG_BSP_USING_USBD), y)
+export LINK_BOARD += $(KERNEL_ROOT)/board/ch569w/third_party_driver/usb/usbd/simulate_cdc/USB30/libCH56x_USB30_device_lib.a
+endif

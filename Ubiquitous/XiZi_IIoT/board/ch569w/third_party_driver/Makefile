@@ -10,8 +10,12 @@ ifeq ($(CONFIG_BSP_USING_SPI),y)
   SRC_DIR += spi
 endif
 
-ifeq ($(CONFIG_BSP_USING_SPI),y)
+ifeq ($(CONFIG_BSP_USING_SERDES),y)
   SRC_DIR += serdes
+endif
+
+ifeq ($(CONFIG_BSP_USING_USB),y)
+  SRC_DIR += usb
 endif
 
 ifeq ($(CONFIG_BSP_USING_WDT),y)
