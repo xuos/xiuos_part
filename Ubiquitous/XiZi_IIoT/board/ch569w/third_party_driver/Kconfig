@@ -13,6 +13,13 @@ menuconfig BSP_USING_SPI
         source "$BSP_DIR/third_party_driver/spi/Kconfig"
     endif
 
+menuconfig BSP_USING_SERDES
+    bool "Using serdes device"
+    default y
+    if BSP_USING_SERDES
+        source "$BSP_DIR/third_party_driver/serdes/Kconfig"
+    endif
+
 menuconfig BSP_USING_WDT
     bool "Using watchdog timer device"
-    default y
+    default n

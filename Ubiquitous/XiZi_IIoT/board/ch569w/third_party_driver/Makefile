@@ -10,6 +10,10 @@ ifeq ($(CONFIG_BSP_USING_SPI),y)
   SRC_DIR += spi
 endif
 
+ifeq ($(CONFIG_BSP_USING_SPI),y)
+  SRC_DIR += serdes
+endif
+
 ifeq ($(CONFIG_BSP_USING_WDT),y)
   SRC_DIR += wdt
 endif

@@ -14,5 +14,6 @@ export DEFINES := -DDEBUG=1
 export ARCH = risc-v
 export MCU =  CH569W
 
-
-
+ifeq ($(CONFIG_BSP_USING_SERDES), y)
+export LINK_BOARD += $(KERNEL_ROOT)/board/ch569w/third_party_driver/serdes/libSERDES.a
+endif
