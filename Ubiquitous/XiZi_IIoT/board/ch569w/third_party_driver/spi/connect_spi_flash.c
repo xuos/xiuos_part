@@ -417,7 +417,6 @@ UINT16 SPIFlash_ReadID(void)
  */
 int InitHwSpi(void) {
 	SPI_MASTER_INIT ( );                                                       /* SPI0 master mode initialization */
-    KPrintf("START SPI FLASH\n");
     return 0;
 }
 
