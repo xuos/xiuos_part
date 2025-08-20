@@ -55,8 +55,9 @@ make BOARD=ch32v208rbt6
 >
 > 如果`make BOARD=ch32v208rbt6 menuconfig`显示【无法找到`kconfig-mconf`】，需要先安装`ncurses-devel`和`kconfig-mconf`，如下：
 >
-> ```bash
-> sudo apt install libncurses5-dev kconfig-frontends
+```bash
+sudo apt install libncurses5-dev kconfig-frontends
+```
 
 ## 方式2
 
