@@ -68,7 +68,7 @@ git clone https://github.com/texane/stlink.git
 ```
 aiit-arm32-board下载连接示意图如下：
 <div align= "center"> 
-<img src ="./img/aiit.jpg" />
+<img src="./img/aiit.jpg" />
   </div>
 
 代码根目录下执行st-flash工具烧录
