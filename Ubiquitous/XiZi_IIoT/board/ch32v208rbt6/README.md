@@ -117,7 +117,7 @@ make BOARD=ch32v208rbt6
 
 2. 打开MounRiver Studio，点击`download`图标右边的向下箭头，点击`configuration`，如下所示：
 
-![image-20240509163525255](./imgs/image-20240509163525255.png)
+![image-20240509163525255](imgs/image-20240509163525255.png)
 
 3. 显示窗口后，点击任意`query`按钮即可进行固件更新，如下：
 
