@@ -24,12 +24,12 @@ XiUOS板级当前支持使用CH438、GPIO、I2C、LCD、USB、RTC、SDIO、SPI�
 
 编译步骤：
 >	1.ARM下编译需要安装arm-none-eabi编译工具, 安装到Ubuntu的默认路径/usr/bin/arm-none-eabi-，使用如下命令行下载
-```
+```bash
 sudo apt-get install gcc-arm-none-eabi
 ```
 >2.在代码根目录下执行以下命令，生成配置文件
 
-```
+```bash
 cd ./Ubiquitous/XiZi
 make BOARD=aiit-arm32-board distclean
 make BOARD=aiit-arm32-board menuconfig
@@ -39,15 +39,15 @@ make BOARD=aiit-arm32-board menuconfig
 ![img](./img/menu.png)
 
 >4.继续执行以下命令，进行编译
-```
+```bash
 make BOARD=aiit-arm32-board
 ```
 >5.如果编译正确无误，会产生XiZi-aiit-arm32-board.elf、XiZi-aiit-arm32-board.bin文件。其中XiZi-aiit-arm32-board.bin需要烧写到设备中进行运行。
-```
+```bash
 sudo write build/XiZi-aiit-arm32-board.bin 0x8000000
 ```
 >6.最后可以执行以下命令，清除配置文件和编译生成的文件
-```
+```bash
 make BOARD=aiit-arm32-board distclean
 ```
 
@@ -63,7 +63,7 @@ st-link 图片如下：
 
 
 执行以下命令下载st-link工具驱动
-```
+```bash
 git clone https://github.com/texane/stlink.git
 ```
 aiit-arm32-board下载连接示意图如下：
@@ -72,7 +72,7 @@ aiit-arm32-board下载连接示意图如下：
   </div>
 
 代码根目录下执行st-flash工具烧录
-```
+```bash
 sudo st-flash write build/XiZi-aiit-arm32-board.bin 0x8000000
 ```
 ### 3.1 运行结果
