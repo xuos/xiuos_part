@@ -1,13 +1,13 @@
 # 1. 简介
 
-| 硬件      | 描述                                      |
-| --------- | ----------------------------------------- |
-| 芯片型号  | CH569W                                    |
-| CPU       | 单核RISC-V3A                              |
-| 主频      | 120MHz                                    |
-| 片内SRAM  | 32/64/96KB 可配置的 128 位宽 SRAM（RAMX） |
-| 片内FLASH | 448KB 用户应用程序存储区 CodeFlash        |
-| 外设      | UART等                                    |
+| 硬件      | 描述                                              |
+| --------- | ------------------------------------------------- |
+| 芯片型号  | CH569W                                            |
+| CPU       | 单核RISC-V3A                                      |
+| 主频      | 120MHz                                            |
+| 片内SRAM  | 32/64/96KB 可配置的 128 位宽 SRAM（RAMX）         |
+| 片内FLASH | 448KB 用户应用程序存储区 CodeFlash                |
+| 外设      | 串口、SPI FLASH、SerDes网络、USBD CDC、Watchdog等 |
 
 # 2. 克隆代码
 
@@ -45,18 +45,15 @@ make BOARD=ch569w menuconfig
 make BOARD=ch569w
 ```
 
-创建之后，在命令行移动到`XiZi-IIOT`目录下，键入`./script`运行该脚本。
+创建之后，在命令行移动到`XiZi-IIOT`目录下，键入`./script.sh`运行该脚本。
 
-经过Kconfig配置、编译后，即可在`Ubiquitous/XiZi_IIoT/build`目录中生成`XiZi-ch569w.bin`文件，将该文件拷贝至Windows侧待下一步进行烧录。
+经过Kconfig配置、编译后，即可在`Ubiquitous/XiZi_IIoT/build`目录中生成`XiZi-ch569w.bin`文件，将该文件拷贝至Windows本地电脑，用于下一步烧录。
 
-> [!CAUTION]
->
-> 如果`make BOARD=ch569w menuconfig`显示【无法找到`kconfig-mconf`】，需要先安装`ncurses-devel`和`kconfig-mconf`，如下：
->
-> ```bash
-> sudo apt install libncurses5-dev kconfig-frontends
+如果`make BOARD=ch569w menuconfig`显示【无法找到`kconfig-mconf`】，需要先安装`ncurses-devel`和`kconfig-mconf`，如下：
 
-
+```bash
+sudo apt install libncurses5-dev kconfig-frontends
+```
 
 # 5. 烧录
 

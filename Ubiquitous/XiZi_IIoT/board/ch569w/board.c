@@ -29,11 +29,10 @@
 
 void InitBoardHardware()
 {
-
 	SystemInit(FREQ_SYS);
 	Delay_Init(FREQ_SYS);
 
-    SysTick_Config(FREQ_SYS / TICK_PER_SECOND);
+    SysTick_Config(FREQ_SYS / 8 / TICK_PER_SECOND);
     PFIC_EnableIRQ(SWI_IRQn);
 
     /* initialize memory system */
@@ -43,6 +42,11 @@ void InitBoardHardware()
     InitHwUart();
     InstallConsole("uart1", SERIAL_DRV_NAME_1, SERIAL_1_DEVICE_NAME_0);
     KPrintf("\nconsole init completed.\n");
+#endif
+
+#ifdef BSP_USING_SPI
+    int InitHwSpi(void);
+    InitHwSpi();
 #endif
 
     KPrintf("memory address range: [0x%08x - 0x%08x] ssize: %x\n", (x_ubase)MEMORY_START_ADDRESS,
