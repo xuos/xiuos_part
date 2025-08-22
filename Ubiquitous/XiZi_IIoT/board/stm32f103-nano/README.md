@@ -75,9 +75,7 @@ git clone https://gitlink.org.cn/xuos/xiuos.git
 
 使用VScode打开代码，具体操作步骤为：在源码文件夹下打开系统终端，输入`code .`即可打开VScode开发环境，如下图所示：
 
-<div align= "center"> 
-<img src = img/vscode.jpg  width =1000>
-  </div>
+![vscode](img/vscode.jpg)
 
 ### 裁减配置工具的下载
 

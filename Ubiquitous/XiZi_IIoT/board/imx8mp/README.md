@@ -89,9 +89,7 @@ git clone https://gitlink.org.cn/xuos/xiuos.git
 
 使用VScode打开代码，具体操作步骤为：在源码文件夹下打开系统终端，输入`code .`即可打开VScode开发环境，如下图所示：
 
-<div align= "center">
-<img src="img/vscode.jpg"  width =1000>
-  </div>
+![vscode](img/vscode.jpg)
 
 
 ### 裁减配置工具的下载
@@ -143,15 +141,12 @@ make BOARD=imx8mp menuconfig
 
 2.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出（本例旨在演示简单的输出例程，所以没有需要配置的选项，双击快捷键ESC退出配置）
 
-<div align= "center">
-<img src="img/menuconfig.png"  width =1000>
-  </div>
+![menuconfig](img/menuconfig.png)
 
 退出时选择`yes`保存上面所配置的内容，如下图所示：
 
-<div align= "center">
-<img src="img/menuconfig1.png"  width =1000>
-  </div>
+![menuconfig1](img/menuconfig1.png)
+
 3.继续执行以下命令，进行编译
 
 ```
@@ -180,9 +175,8 @@ bootaux 0x80000000
 
 运行起来后将会在UART4串口上看到如下信息：
 
-<div align= "center">
-<img src="img/terminal.png"  width =1000>
-  </div>
+![terminal](img/terminal.png)
+
 ### 4.3 运行rpmsg例程
 
 目前支持在M核上运行rpmsg例程，与A核上的Linux应用程序通过RPMsg通信。具体方式如下：
@@ -193,18 +187,12 @@ bootaux 0x80000000
 
 3. 在Linux端可观察到：
 
-   <div align= "center">
-   <img src="img/linux.png"  width =1000>
-     </div>
+![linux](img/linux.png)
 
 4. 在XiUOS上可观察到：
 
-   <div align= "center">
-   <img src="img/xiuos.png"  width =1000>
-     </div>
+![xiuos](img/xiuos.png)
 
 * 通信流程图
 
-<div align= "center">
-<img src="img/rpmsg.png"  width =1000>
-  </div>
+![rpmsg](img/rpmsg.png)

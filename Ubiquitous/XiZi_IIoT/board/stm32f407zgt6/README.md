@@ -35,7 +35,7 @@ make BOARD=stm32f407zgt6 menuconfig
 ```
 >3.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出
 
-![img](./img/menu.png )
+![menu](./img/menu.png )
 
 >4.继续执行以下命令，进行编译
 ```
@@ -60,14 +60,12 @@ git clone https://github.com/texane/stlink.git
 ```
 
 开发板接口如下：
-<div align= "center"> 
-<img src = ./img/interface.jpg   width =50%>
-  </div>
+
+![interface](img/interface.jpg)
 
   实际连接图为：
-  <div align= "center"> 
-<img src = ./img/total.jpg   width =50%>
-  </div>
+
+![total](img/total.jpg)
 
 在代码根目录下执行st-flash工具烧录
 ```
@@ -76,6 +74,5 @@ sudo st-flash write build/XiZi-stm32f407zgt6.bin 0x8000000
 ### 3.1 运行结果
 
 如果编译 & 烧写无误，将会在串口终端上看到信息打印输出，(终端串口引脚为PB6、PB7)。
-  <div align= "center"> 
-<img src = ./img/shell.png   >
-  </div>
+
+![shell](img/shell.png)
