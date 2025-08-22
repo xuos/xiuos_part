@@ -411,4 +411,6 @@ __attribute__((weak)) void HwCpuReset(void)
 {
     SCB_AIRCR = SCB_RESET_VALUE;
 }
+#ifdef SHELL_EXPORT_CMD
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_PARAM_NUM(0), Reboot, HwCpuReset, reset machine );
+#endif
