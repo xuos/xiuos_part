@@ -203,7 +203,7 @@ saveenv
 ### 5、运行M33
 **将SD插入卡槽，按下开发板 reset 按键**
 
-![run-result](img/run-result.jpeg)
+![run-result](img/run-result.png)
 
 ## 四、核间通信测试
 > XiUOS 将收到的数据打印后返回到Linux
