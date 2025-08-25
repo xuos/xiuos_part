@@ -44,7 +44,7 @@ $ sudo apt install gcc make libncurses5-dev openssl libssl-dev bison flex libelf
 ### 4、VSCode 插件安装
 **推荐安装下图所示插件：**
 
-![VSCode插件推荐](img/vscode-plugins.png "VSCode插件推荐")
+![vscode-plugins](img/vscode-plugins.png)
 
 ### 5、XiUOS操作系统源码下载
 XiUOS [https://www.gitlink.org.cn/xuos/xiuos](https://www.gitlink.org.cn/xuos/xiuos)
@@ -75,7 +75,7 @@ git clone https://gitlink.org.cn/xuos/xiuos.git
 
 使用VScode打开代码，具体操作步骤为：在源码文件夹下打开系统终端，输入`code .`即可打开VScode开发环境，如下图所示：
 
-![VSCode介绍](img/vscode.jpg "VSCode介绍")
+![vscode](img/vscode.jpg)
 
 ### 6、裁减配置工具的下载
 
@@ -108,7 +108,7 @@ sudo ./LibgenUpdateInstall_v1.2023.11.run
 ```
 **运行后输入ARM工具链根目录、回车，再输入 y 以确认**
 
-![更新编译工具链](img/libgen-update.png "更新编译工具链")
+![libgen-update](img/libgen-update.png)
 
 **至此，编译环境已经安装完毕**
 
@@ -141,7 +141,7 @@ make BOARD=rzg2ul-m33
 ```
 等待编译完成：生成`XiZi-rzg2ul-m33.elf`等文件
 
-![编译结果](img/compile-result.png "编译结果")
+![compile-result](img/compile-result.png)
 
 ### 4、编译输出处理
 `RZ/G2UL`的`M33`端没有`FLASH`，需要借助 `boot-loader` 加载到内存中直接运行。
@@ -152,7 +152,7 @@ make BOARD=rzg2ul-m33
 ```
 生成的文件：安全/非安全的中断向量表和代码数据段共四个文件
 
-![运行文件提取](img/postbuild-result.png "运行文件提取")
+![postbuild-result](img/postbuild-result.png)
 
 ## 三、运行执行
 
@@ -172,7 +172,7 @@ static const unsigned int r9a07g043_crit_mod_clks[] __initconst = {
 
 ### 2、将生成的文件拷贝到上一步生成的SD卡里
 
-![复制到内存卡](img/copy-bin-to-sd.png "复制到内存卡")
+![copy-bin-to-sd](img/copy-bin-to-sd.png)
 
 > 在上一步中，SD被划分为两个逻辑分区，一个作为根文件系统（RZ_ext），一个用于存放系统镜像（RZ_FAT包含Linux镜像、设备数已经刚放进去的M33端程序）
 
@@ -180,7 +180,7 @@ static const unsigned int r9a07g043_crit_mod_clks[] __initconst = {
 
 `SCIF2_TX/RX`作为M33核心的输出串口；`RZ_SCIF0_TX/RX`作为Linux的输出串口，`GND`共地；
 
-![硬件连接](img/connection-state.jpg "硬件连接")
+![connection-state](img/connection-state.jpg)
 
 ### 4、修改 boot 参数以自动加载
 ```c
@@ -203,7 +203,7 @@ saveenv
 ### 5、运行M33
 **将SD插入卡槽，按下开发板 reset 按键**
 
-![启动M33](img/run-result.jpeg "启动M33")
+![run-result](img/run-result.png)
 
 ## 四、核间通信测试
 > XiUOS 将收到的数据打印后返回到Linux
@@ -213,7 +213,7 @@ saveenv
 ```c
 CreateRPMsgTask // 该命令会创建一个通信节点，在探测到Linux的第一条信息时该通信节点被激活
 ```
-![通信节点创造](img/rpmsg_create.png "通信节点创造")
+![rpmsg_create](img/rpmsg_create.png)
 
 ### 2、在Linux端启动核间通信测试例程
 
@@ -221,8 +221,8 @@ CreateRPMsgTask // 该命令会创建一个通信节点，在探测到Linux的�
 rpmsg_sample_client
 ```
 
-![测试启动](img/rpmsg_test_begin.png "测试启动")
+![rpmsg_test_begin](img/rpmsg_test_begin.png)
 
 ### 3、测试结果
 
-![测试结果](img/rpmsg_test_result.png "测试结果")
+![rpmsg_test_result](img/rpmsg_test_result.png)
