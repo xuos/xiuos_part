@@ -23,30 +23,30 @@ XiUOS板级当前支持使用GPIO和UART。
 
 编译步骤：
 >	1.ARM下编译需要安装arm-none-eabi编译工具, 安装到Ubuntu的默认路径/usr/bin/arm-none-eabi-，使用如下命令行下载
-```
+```bash
 sudo apt-get install gcc-arm-none-eabi
 ```
 >2.在代码根目录下执行以下命令，生成配置文件
 
-```
+```bash
 cd ./Ubiquitous/XiZi
 make BOARD=stm32f407zgt6 distclean
 make BOARD=stm32f407zgt6 menuconfig
 ```
 >3.在menuconfig界面配置需要关闭和开启的功能，按回车键进入下级菜单，按Y键选中需要开启的功能，按N键选中需要关闭的功能，配置结束后保存并退出
 
-![menu](./img/menu.png )
+![menu](img/menu.png)
 
 >4.继续执行以下命令，进行编译
-```
+```bash
 make BOARD=stm32f407zgt6
 ```
 >5.如果编译正确无误，会产生XiZi-stm32f407zgt6.elf、XiZi-stm32f407zgt6.bin文件。其中XiZi-stm32f407zgt6.bin需要烧写到设备中进行运行。
-```
+```bash
 sudo write build/XiZi-stm32f407zgt6.bin 0x8000000
 ```
 >6.最后可以执行以下命令，清除配置文件和编译生成的文件
-```
+```bash
 make BOARD=stm32f407zgt6 distclean
 ```
 
@@ -55,7 +55,7 @@ make BOARD=stm32f407zgt6 distclean
 将 BOARD=stm32f407zgt6开发板SWD经 st-link 转接到USB接口，然后使用st-flash工具进行烧写bin文件。
 
 执行以下命令下载st-link工具
-```
+```bash
 git clone https://github.com/texane/stlink.git
 ```
 
@@ -68,7 +68,7 @@ git clone https://github.com/texane/stlink.git
 ![total](img/total.jpg)
 
 在代码根目录下执行st-flash工具烧录
-```
+```bash
 sudo st-flash write build/XiZi-stm32f407zgt6.bin 0x8000000
 ```
 ### 3.1 运行结果
