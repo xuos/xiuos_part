@@ -199,7 +199,7 @@ flag_status crm_interrupt_flag_get(uint32_t flag)
 error_status crm_hext_stable_wait(void)
 {
   uint32_t stable_cnt = 0;
-  error_status status = ERROR;
+  error_status status = AT_ERROR;
 
   while((crm_flag_get(CRM_HEXT_STABLE_FLAG) != SET) && (stable_cnt < HEXT_STARTUP_TIMEOUT))
   {
@@ -208,7 +208,7 @@ error_status crm_hext_stable_wait(void)
 
   if(crm_flag_get(CRM_HEXT_STABLE_FLAG) != SET)
   {
-    status = ERROR;
+    status = AT_ERROR;
   }
   else
   {
@@ -1032,7 +1032,7 @@ error_status crm_pll_parameter_calculate(crm_pll_clock_source_type pll_rcs, uint
     }
   }
   /* the pll parameters that is the closest approach to target_sclk_freq */
-  return ERROR;
+  return AT_ERROR;
 }
 
 /**

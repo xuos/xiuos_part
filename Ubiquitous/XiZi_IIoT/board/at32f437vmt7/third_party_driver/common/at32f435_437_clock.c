@@ -61,7 +61,7 @@ void system_clock_config(void)
   crm_clock_source_enable(CRM_CLOCK_SOURCE_HEXT, TRUE);
 
   /* wait till hext is ready */
-  while(crm_hext_stable_wait() == ERROR)
+  while(crm_hext_stable_wait() == AT_ERROR)
   {
   }
 

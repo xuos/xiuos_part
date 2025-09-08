@@ -96,7 +96,7 @@ void can_baudrate_default_para_init(can_baudrate_type* can_baudrate_struct)
   */
 error_status can_baudrate_set(can_type* can_x, can_baudrate_type* can_baudrate_struct)
 {
-  error_status status_index = ERROR;
+  error_status status_index = AT_ERROR;
   uint32_t wait_ack_index = 0x00000000;
   /* exit from doze mode */
   can_x->mctrl_bit.dzen = FALSE;
@@ -131,7 +131,7 @@ error_status can_baudrate_set(can_type* can_x, can_baudrate_type* can_baudrate_s
     /* check acknowledged */
     if(can_x->msts_bit.fzc)
     {
-      status_index = ERROR;
+      status_index = AT_ERROR;
     }
     else
     {
@@ -140,7 +140,7 @@ error_status can_baudrate_set(can_type* can_x, can_baudrate_type* can_baudrate_s
   }
   else
   {
-    status_index = ERROR;
+    status_index = AT_ERROR;
   }
 
   /* return the status of baudrate set */
@@ -191,7 +191,7 @@ void can_default_para_init(can_base_type* can_base_struct)
   */
 error_status can_base_init(can_type* can_x, can_base_type* can_base_struct)
 {
-  error_status init_status_index = ERROR;
+  error_status init_status_index = AT_ERROR;
   uint32_t wait_ack_index = 0x00000000;
   /* exit from doze mode */
   can_x->mctrl_bit.dzen = FALSE;
@@ -243,7 +243,7 @@ error_status can_base_init(can_type* can_x, can_base_type* can_base_struct)
     /* check acknowledged */
     if(can_x->msts_bit.fzc)
     {
-      init_status_index = ERROR;
+      init_status_index = AT_ERROR;
     }
     else
     {
@@ -252,7 +252,7 @@ error_status can_base_init(can_type* can_x, can_base_type* can_base_struct)
   }
   else
   {
-    init_status_index = ERROR;
+    init_status_index = AT_ERROR;
   }
 
   /* return the status of initialization */
@@ -722,7 +722,7 @@ uint8_t can_receive_message_pending_get(can_type* can_x, can_rx_fifo_num_type fi
   */
 error_status can_operating_mode_set(can_type* can_x, can_operating_mode_type can_operating_mode)
 {
-  error_status status = ERROR;
+  error_status status = AT_ERROR;
   uint32_t time_out_index = FZC_TIMEOUT;
 
   if (can_operating_mode == CAN_OPERATINGMODE_FREEZE)
@@ -737,7 +737,7 @@ error_status can_operating_mode_set(can_type* can_x, can_operating_mode_type can
     }
     if((can_x->msts_bit.dzc) || (!can_x->msts_bit.fzc))
     {
-      status = ERROR;
+      status = AT_ERROR;
     }
     else
     {
@@ -756,7 +756,7 @@ error_status can_operating_mode_set(can_type* can_x, can_operating_mode_type can
     }
     if((!can_x->msts_bit.dzc) || (can_x->msts_bit.fzc))
     {
-      status = ERROR;
+      status = AT_ERROR;
     }
     else
     {
@@ -775,7 +775,7 @@ error_status can_operating_mode_set(can_type* can_x, can_operating_mode_type can
     }
     if((can_x->msts_bit.dzc) || (can_x->msts_bit.fzc))
     {
-      status = ERROR;
+      status = AT_ERROR;
     }
     else
     {
@@ -784,7 +784,7 @@ error_status can_operating_mode_set(can_type* can_x, can_operating_mode_type can
   }
   else
   {
-    status = ERROR;
+    status = AT_ERROR;
   }
   return status;
 }

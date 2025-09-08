@@ -103,7 +103,7 @@ error_status ertc_wait_update(void)
   {
     if(timeout == 0)
     {
-      return ERROR;
+      return AT_ERROR;
     }
 
     timeout--;
@@ -138,7 +138,7 @@ error_status ertc_wait_flag(uint32_t flag, flag_status status)
       /* enable write protection */
       ertc_write_protect_enable();
 
-      return ERROR;
+      return AT_ERROR;
     }
 
     timeout--;
@@ -168,7 +168,7 @@ error_status ertc_init_mode_enter(void)
         /* enable write protection */
         ertc_write_protect_enable();
 
-        return ERROR;
+        return AT_ERROR;
       }
 
       timeout--;
@@ -203,7 +203,7 @@ error_status ertc_reset(void)
   /* enter init mode */
   if(ertc_init_mode_enter() != SUCCESS)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   /* reset register */
@@ -245,7 +245,7 @@ error_status ertc_divider_set(uint16_t div_a, uint16_t div_b)
   /* enter init mode */
   if(ertc_init_mode_enter() != SUCCESS)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   /* config the ertc divider */
@@ -277,7 +277,7 @@ error_status ertc_hour_mode_set(ertc_hour_mode_set_type mode)
   /* enter init mode */
   if(ertc_init_mode_enter() != SUCCESS)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   /* write register */
@@ -317,7 +317,7 @@ error_status ertc_date_set(uint8_t year, uint8_t month, uint8_t date, uint8_t we
   /* enter init mode */
   if(ertc_init_mode_enter() != SUCCESS)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   /* set the ertc_date register */
@@ -366,7 +366,7 @@ error_status ertc_time_set(uint8_t hour, uint8_t min, uint8_t sec, ertc_am_pm_ty
   /* enter init mode */
   if(ertc_init_mode_enter() != SUCCESS)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   ERTC->time = reg.time;
@@ -626,7 +626,7 @@ error_status ertc_alarm_enable(ertc_alarm_type alarm_x, confirm_state new_state)
     {
       if(ertc_wait_flag(ERTC_ALAWF_FLAG, RESET) != SUCCESS)
       {
-        return ERROR;
+        return AT_ERROR;
       }
     }
   }
@@ -638,7 +638,7 @@ error_status ertc_alarm_enable(ertc_alarm_type alarm_x, confirm_state new_state)
     {
       if(ertc_wait_flag(ERTC_ALBWF_FLAG, RESET) != SUCCESS)
       {
-        return ERROR;
+        return AT_ERROR;
       }
     }
   }
@@ -768,7 +768,7 @@ error_status ertc_wakeup_enable(confirm_state new_state)
   {
     if(ertc_wait_flag(ERTC_WATWF_FLAG, RESET) != SUCCESS)
     {
-      return ERROR;
+      return AT_ERROR;
     }
   }
 
@@ -801,7 +801,7 @@ error_status ertc_smooth_calibration_config(ertc_smooth_cal_period_type period, 
 
   if(ertc_wait_flag(ERTC_CALUPDF_FLAG, SET) != SUCCESS)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   reg.scal = 0;
@@ -846,9 +846,9 @@ error_status ertc_coarse_calibration_set(ertc_cal_direction_type dir, uint32_t v
   ertc_write_protect_disable();
 
   /* enter init mode */
-  if(ertc_init_mode_enter() == ERROR)
+  if(ertc_init_mode_enter() == AT_ERROR)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   ERTC->ccal_bit.caldir = dir;
@@ -875,9 +875,9 @@ error_status ertc_coarse_calibration_enable(confirm_state new_state)
   ertc_write_protect_disable();
 
   /* enter init mode */
-  if(ertc_init_mode_enter() == ERROR)
+  if(ertc_init_mode_enter() == AT_ERROR)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   ERTC->ctrl_bit.ccalen = new_state;
@@ -946,7 +946,7 @@ error_status ertc_time_adjust(ertc_time_adjust_type add1s, uint32_t decsbs)
 
   if(ertc_wait_flag(ERTC_TADJF_FLAG, SET) != SUCCESS)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   /* check if the reference clock detection is disabled */
@@ -957,14 +957,14 @@ error_status ertc_time_adjust(ertc_time_adjust_type add1s, uint32_t decsbs)
 
     ERTC->tadj = reg.tadj;
 
-    if(ertc_wait_update() == ERROR)
+    if(ertc_wait_update() == AT_ERROR)
     {
-      return ERROR;
+      return AT_ERROR;
     }
   }
   else
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   /* enable write protection */
@@ -1028,7 +1028,7 @@ error_status ertc_refer_clock_detect_enable(confirm_state new_state)
   /* enter init mode */
   if(ertc_init_mode_enter() != SUCCESS)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   /* write register */

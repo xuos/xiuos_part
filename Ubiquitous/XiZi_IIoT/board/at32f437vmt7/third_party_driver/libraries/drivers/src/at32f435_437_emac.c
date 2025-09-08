@@ -246,7 +246,7 @@ error_status emac_phy_register_write(uint8_t address, uint8_t reg, uint16_t data
 
   if(timeout == PHY_TIMEOUT)
   {
-    return ERROR;
+    return AT_ERROR;
   }
   return SUCCESS;
 }
@@ -275,7 +275,7 @@ error_status emac_phy_register_read(uint8_t address, uint8_t reg, uint16_t *data
 
   if(timeout == PHY_TIMEOUT)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   *data = EMAC->miidt_bit.md;

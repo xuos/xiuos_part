@@ -1046,9 +1046,9 @@ error_status flash_slib_disable(uint32_t pwd)
     if(FLASH->slib_misc_sts_bit.slib_pwd_ok)
       return SUCCESS;
     else
-      return ERROR;
+      return AT_ERROR;
   }
-  return ERROR;
+  return AT_ERROR;
 }
 
 /**
