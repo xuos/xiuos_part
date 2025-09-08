@@ -1,6 +1,6 @@
 choice
     prompt "Config the value of high speed external crystal (hext)"
-    default HEXT_VALUE_8MHZ
+    default HEXT_VALUE_24MHZ
 
     config HEXT_VALUE_8MHZ
         bool "8MHZ"

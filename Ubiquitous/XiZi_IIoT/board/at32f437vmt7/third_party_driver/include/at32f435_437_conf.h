@@ -26,6 +26,8 @@
 #ifndef __AT32F435_437_CONF_H
 #define __AT32F435_437_CONF_H
 
+#include "xsconfig.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
