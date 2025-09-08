@@ -81,7 +81,11 @@ void system_clock_config(void)
 
   if pll clock source selects hext with other frequency values, or configure pll to other
   frequency values, please use the at32 new clock  configuration tool for configuration.  */
+  #ifdef HEXT_VALUE_24MHZ
+  crm_pll_config(CRM_PLL_SOURCE_HEXT, 96, 2, CRM_PLL_FR_4); // PLL = (HEXT * PLL_NS) / (PLL_MS * PLL_FR)
+  #else
   crm_pll_config(CRM_PLL_SOURCE_HEXT, 144, 1, CRM_PLL_FR_4);
+  #endif
 
   /* enable pll */
   crm_clock_source_enable(CRM_CLOCK_SOURCE_PLL, TRUE);

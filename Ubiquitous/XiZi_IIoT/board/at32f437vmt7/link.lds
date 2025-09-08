@@ -21,12 +21,8 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-/* Highest address of the user mode stack */
-_estack = 0x20060000;    /* end of RAM */
-
-/* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size = 0x200;      /* required amount of heap  */
-_Min_Stack_Size = 0x400; /* required amount of stack */
+/* Define stack size */
+__SYSTEM_STACKSIZE__ = 0x400;
 
 /* Specify the memory areas */
 MEMORY
@@ -34,6 +30,9 @@ MEMORY
 FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 4032K
 RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 384K
 }
+
+/* End address of RAM */
+__ram_end__ = ORIGIN(RAM) + LENGTH(RAM);
 
 /* Define output sections */
 SECTIONS
@@ -58,6 +57,18 @@ SECTIONS
 
     KEEP (*(.init))
     KEEP (*(.fini))
+
+    . = ALIGN(4);
+    _shell_command_start = .;
+    KEEP (*(shellCommand))
+    _shell_command_end = .;
+
+    . = ALIGN(4);
+    __isrtbl_idx_start = .;
+    KEEP(*(.isrtbl.idx))
+    __isrtbl_start = .;
+    KEEP(*(.isrtbl))
+    __isrtbl_end = .;
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
@@ -132,14 +143,14 @@ SECTIONS
   } >RAM
 
   /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack :
+  .stack :
   {
     . = ALIGN(8);
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
-    . = . + _Min_Heap_Size;
-    . = . + _Min_Stack_Size;
+    PROVIDE(__stack_start__ = ABSOLUTE(.));
+    . = . + __SYSTEM_STACKSIZE__;
     . = ALIGN(8);
+    __stack_tp = .;
+    PROVIDE(__stack_end__ = ABSOLUTE(.));
   } >RAM
 
   /* Remove information from the standard libraries */

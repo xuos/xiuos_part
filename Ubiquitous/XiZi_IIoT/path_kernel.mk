@@ -296,6 +296,19 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/at32f437vmt7)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
+	-I$(BSP_ROOT)/third_party_driver \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/libraries/cmsis/cm4/core_support \
+	-I$(BSP_ROOT)/third_party_driver/libraries/cmsis/cm4/device_support \
+	-I$(BSP_ROOT)/third_party_driver/libraries/drivers/inc \
+	-I$(KERNEL_ROOT)/include \
+	-I$(BSP_ROOT)/include #
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/gapuino)
 KERNELPATHS += \
 	-I$(BSP_ROOT)/third_party_driver \

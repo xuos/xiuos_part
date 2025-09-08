@@ -38,6 +38,10 @@ extern "C" {
   *      can define the hext value in your toolchain compiler preprocessor.
   *
   */
+#ifdef HEXT_VALUE_24MHZ
+#define HEXT_VALUE                       ((uint32_t)24000000)
+#endif
+
 #if !defined  HEXT_VALUE
 #define HEXT_VALUE                       ((uint32_t)8000000) /*!< value of the high speed external crystal in hz */
 #endif

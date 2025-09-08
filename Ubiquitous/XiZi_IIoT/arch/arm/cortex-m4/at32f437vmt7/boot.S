@@ -83,7 +83,7 @@ LoopFillZerobss:
 /* Call static constructors */
   bl __libc_init_array
 /* Call the application's entry point.*/
-  bl  main
+  bl  entry
   bx  lr
 .size  Reset_Handler, .-Reset_Handler
 
@@ -112,7 +112,7 @@ Infinite_Loop:
 
 
 g_pfnVectors:
-  .word  _estack
+  .word  __stack_end__
   .word  Reset_Handler
   .word  NMI_Handler
   .word  HardFault_Handler
