@@ -31,6 +31,11 @@ static void UsartClockInit(void)
     crm_periph_clock_enable(CRM_USART1_PERIPH_CLOCK, TRUE);
     crm_periph_clock_enable(CRM_GPIOA_PERIPH_CLOCK, TRUE);
 #endif
+
+#ifdef BSP_USING_UART2
+    crm_periph_clock_enable(CRM_USART2_PERIPH_CLOCK, TRUE);
+    crm_periph_clock_enable(CRM_GPIOD_PERIPH_CLOCK, TRUE);
+#endif
 }
 
 static void UsartGpioInit(void)
@@ -39,16 +44,23 @@ static void UsartGpioInit(void)
 
     gpio_default_para_init(&gpio_init_struct);
 
-#ifdef BSP_USING_UART1
-    /* configure the usart1 tx, rx pin */
     gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER;
     gpio_init_struct.gpio_out_type  = GPIO_OUTPUT_PUSH_PULL;
     gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
-    gpio_init_struct.gpio_pins = GPIO_PINS_9 | GPIO_PINS_10;
     gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+
+#ifdef BSP_USING_UART1
+    gpio_init_struct.gpio_pins = GPIO_PINS_9 | GPIO_PINS_10;
     gpio_init(GPIOA, &gpio_init_struct);
     gpio_pin_mux_config(GPIOA, GPIO_PINS_SOURCE9, GPIO_MUX_7);
     gpio_pin_mux_config(GPIOA, GPIO_PINS_SOURCE10, GPIO_MUX_7);
+#endif
+
+#ifdef BSP_USING_UART2
+    gpio_init_struct.gpio_pins = GPIO_PINS_5 | GPIO_PINS_6;
+    gpio_init(GPIOD, &gpio_init_struct);
+    gpio_pin_mux_config(GPIOD, GPIO_PINS_SOURCE5, GPIO_MUX_7);
+    gpio_pin_mux_config(GPIOD, GPIO_PINS_SOURCE6, GPIO_MUX_7);
 #endif
 }
 
@@ -78,6 +90,20 @@ void USART1_IRQHandler(int irq_num, void *arg)
 DECLARE_HW_IRQ(USART1_IRQn, USART1_IRQHandler, NONE);
 #endif
 
+#ifdef BSP_USING_UART2
+struct SerialBus serial_bus_2;
+struct SerialDriver serial_driver_2;
+struct SerialHardwareDevice serial_device_2;
+
+void USART2_IRQHandler(int irq_num, void *arg)
+{
+    x_base lock = 0;
+    lock = DISABLE_INTERRUPT();
+    UartIsr(&serial_bus_2, &serial_driver_2, &serial_device_2);
+    ENABLE_INTERRUPT(lock);
+}
+DECLARE_HW_IRQ(USART2_IRQn, USART2_IRQHandler, NONE);
+#endif
 
 static void SerialCfgParamCheck(struct SerialCfgParam *serial_cfg_default, struct SerialCfgParam *serial_cfg_new)
 {
@@ -396,14 +422,14 @@ static int HwUsart1Init(void)
     ret = BoardSerialBusInit(&serial_bus_1, &serial_driver_1, SERIAL_BUS_NAME_1, SERIAL_DRV_NAME_1);
     if (EOK != ret)
     {
-        KPrintf("HwUartInit uart1 error ret %u\n", ret);
+        KPrintf("HwUartInit uart1 BoardSerialBusInit error ret %u\n", ret);
         return ERROR;
     }
 
     ret = BoardSerialDevBend(&serial_device_1, (void *)&serial_cfg_1, SERIAL_BUS_NAME_1, SERIAL_1_DEVICE_NAME_0);
     if (EOK != ret)
     {
-        KPrintf("HwUartInit uart1 error ret %u\n", ret);
+        KPrintf("HwUartInit uart1 BoardSerialDevBend error ret %u\n", ret);
         return ERROR;
     }
 
@@ -411,6 +437,53 @@ static int HwUsart1Init(void)
 }
 #endif
 
+
+#ifdef BSP_USING_UART2
+static int HwUsart2Init(void)
+{
+    x_err_t ret = EOK;
+
+    static struct SerialCfgParam serial_cfg_2;
+    memset(&serial_cfg_2, 0, sizeof(struct SerialCfgParam));
+
+    static struct SerialDevParam serial_dev_param_2;
+    memset(&serial_dev_param_2, 0, sizeof(struct SerialDevParam));
+
+    static struct UsartHwCfg serial_hw_cfg_2;
+    memset(&serial_hw_cfg_2, 0, sizeof(struct UsartHwCfg));
+
+    serial_driver_2.drv_done = &drv_done;
+    serial_driver_2.configure = SerialDrvConfigure;
+    serial_device_2.hwdev_done = &hwdev_done;
+
+    serial_cfg_2.data_cfg = data_cfg_init;
+
+    serial_hw_cfg_2.uart_device = USART2;
+    serial_hw_cfg_2.irq = USART2_IRQn;
+
+    serial_cfg_2.hw_cfg.private_data = (void *)&serial_hw_cfg_2;
+    serial_driver_2.private_data = (void *)&serial_cfg_2;
+
+    serial_dev_param_2.serial_work_mode = SIGN_OPER_INT_RX;
+    serial_device_2.haldev.private_data = (void *)&serial_dev_param_2;
+
+    ret = BoardSerialBusInit(&serial_bus_2, &serial_driver_2, SERIAL_BUS_NAME_2, SERIAL_DRV_NAME_2);
+    if (EOK != ret)
+    {
+        KPrintf("HwUartInit uart2 BoardSerialBusInit error ret %u\n", ret);
+        return ERROR;
+    }
+
+    ret = BoardSerialDevBend(&serial_device_2, (void *)&serial_cfg_2, SERIAL_BUS_NAME_2, SERIAL_2_DEVICE_NAME_0);
+    if (EOK != ret)
+    {
+        KPrintf("HwUartInit uart2 BoardSerialDevBend error ret %u\n", ret);
+        return ERROR;
+    }
+
+    return ret;
+}
+#endif
 
 int HwUsartInit(void)
 {
@@ -428,5 +501,62 @@ int HwUsartInit(void)
     }
 #endif
 
+#ifdef BSP_USING_UART2
+    ret = HwUsart2Init();
+    if (EOK != ret)
+    {
+        KPrintf("HwUartInit uart2 error ret %u\n", ret);
+        return ERROR;
+    }
+#endif
+
     return ret;
 }
+
+
+#if defined(BSP_USING_RS485) || defined(BSP_USING_RS232)
+static struct Bus *bus;
+static struct HardwareDev *dev;
+static struct Driver *drv;
+
+void Rs485Rs232Test(void)
+{
+    x_err_t ret = EOK;
+
+    bus = BusFind(SERIAL_BUS_NAME_2);
+    dev = BusFindDevice(bus, SERIAL_2_DEVICE_NAME_0);
+    drv = BusFindDriver(bus, SERIAL_DRV_NAME_2);
+
+    struct BusConfigureInfo configure_info;
+    configure_info.configure_cmd = OPE_INT;
+    struct SerialCfgParam serial_cfg;
+    memset(&serial_cfg, 0, sizeof(struct SerialCfgParam));
+    configure_info.private_data = &serial_cfg;
+    ret = BusDrvConfigure(drv, &configure_info);
+
+    struct BusBlockWriteParam write_param;
+    memset(&write_param, 0, sizeof(struct BusBlockWriteParam));
+
+    uint8 write_data[] = "Message from board by RS485/RS232";
+
+    write_param.buffer = (void *)write_data;
+    write_param.size = sizeof(write_data);
+    BusDevWriteData(dev, &write_param);
+
+#if 1
+    nvic_irq_disable(USART2_IRQn);
+    char recv_data = 0;
+    while(1)
+    {
+        while(usart_flag_get(USART2, USART_RDBF_FLAG) == RESET);
+        recv_data = usart_data_receive(USART2);
+        KPrintf("recv_data:0x%02x\n", recv_data);
+    }
+#endif
+
+    return;
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                    Rs485Rs232Test, Rs485Rs232Test, rs485 or rs232 write read test);
+#endif

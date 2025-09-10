@@ -69,7 +69,7 @@ void InitBoardHardware(void)
 
 #ifdef BSP_USING_UART
   HwUsartInit();
-  InstallConsole(SERIAL_BUS_NAME_1, SERIAL_DRV_NAME_1, SERIAL_1_DEVICE_NAME_0);
+  InstallConsole(CONSOLE_BUS_NAME, CONSOLE_DRV_NAME, CONSOLE_DEVICE_NAME_0);
   KPrintf("\nAT32F437 board console\n");
 #endif
 
