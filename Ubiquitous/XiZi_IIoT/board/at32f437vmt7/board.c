@@ -69,9 +69,11 @@ void InitBoardHardware(void)
 
 #ifdef BSP_USING_UART
   HwUsartInit();
-  InstallConsole(CONSOLE_BUS_NAME, CONSOLE_DRV_NAME, CONSOLE_DEVICE_NAME_0);
-  KPrintf("\nAT32F437 board console\n");
 #endif
 
+#ifdef KERNEL_CONSOLE
+  InstallConsole(KERNEL_CONSOLE_BUS_NAME, KERNEL_CONSOLE_DRV_NAME, KERNEL_CONSOLE_DEVICE_NAME);
+  KPrintf("\nAT32F437 board console\n");
+#endif
   KPrintf("RAM start=%08x end=%08x\n", MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
 }

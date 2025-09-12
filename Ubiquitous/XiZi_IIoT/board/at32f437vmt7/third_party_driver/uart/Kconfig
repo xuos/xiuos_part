@@ -32,15 +32,16 @@ menuconfig BSP_USING_CONSOLE
     bool "Enable Console"
     default y
     select BSP_USING_UART1
+    select KERNEL_CONSOLE
     if BSP_USING_CONSOLE
-        config CONSOLE_BUS_NAME
+        config KERNEL_CONSOLE_BUS_NAME
             string "Console bus name"
             default "usart1"
-        config CONSOLE_DRV_NAME
+        config KERNEL_CONSOLE_DRV_NAME
             string "Console bus driver name"
             default "usart1_drv"
-        config CONSOLE_DEVICE_NAME_0
-            string "Console bus device 0 name"
+        config KERNEL_CONSOLE_DEVICE_NAME
+            string "Console bus device name"
             default "usart1_dev1"
     endif
 

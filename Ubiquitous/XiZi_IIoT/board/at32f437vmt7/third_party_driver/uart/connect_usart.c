@@ -523,6 +523,8 @@ void Rs485Rs232Test(void)
 {
     x_err_t ret = EOK;
 
+    KPrintf("Rs485 or Rs232 test start\n");
+
     bus = BusFind(SERIAL_BUS_NAME_2);
     dev = BusFindDevice(bus, SERIAL_2_DEVICE_NAME_0);
     drv = BusFindDriver(bus, SERIAL_DRV_NAME_2);
