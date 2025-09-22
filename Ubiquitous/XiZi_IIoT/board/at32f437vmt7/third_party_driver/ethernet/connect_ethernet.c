@@ -37,6 +37,7 @@
 /* Private variables ---------------------------------------------------------*/
 #define MAC_ADDR_LENGTH                  (6)
 static uint8_t mac_address[MAC_ADDR_LENGTH] = {0, 0, 0x44, 0x45, 0x56, 1};
+// Local IP see xiuos/Ubiquitous/XiZi_IIoT/resources/ethernet/LwIP/arch/sys_arch.c
 
 /**
   * @brief  main function.

@@ -520,8 +520,6 @@ void Rs485Rs232Test(void)
 {
     x_err_t ret = EOK;
 
-    KPrintf("Rs485 or Rs232 test start\n");
-
     bus = BusFind(SERIAL_BUS_NAME_2);
     dev = BusFindDevice(bus, SERIAL_2_DEVICE_NAME_0);
     drv = BusFindDriver(bus, SERIAL_DRV_NAME_2);
@@ -536,8 +534,9 @@ void Rs485Rs232Test(void)
     struct BusBlockWriteParam write_param;
     memset(&write_param, 0, sizeof(struct BusBlockWriteParam));
 
-    uint8 write_data[] = "Message from board by RS485/RS232";
+    uint8 write_data[] = "Hello";
 
+    KPrintf("Rs485 or Rs232 send: %s\n", write_data);
     write_param.buffer = (void *)write_data;
     write_param.size = sizeof(write_data);
     BusDevWriteData(dev, &write_param);
