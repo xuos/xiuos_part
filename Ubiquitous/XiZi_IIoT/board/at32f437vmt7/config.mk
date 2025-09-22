@@ -9,5 +9,9 @@ export APPLFLAGS := -mcpu=cortex-m4 -mthumb -ffunction-sections -fdata-sections 
 
 export DEFINES := -DAT32F437VMT7 -DAT_START_F437_V1
 
+ifeq ($(CONFIG_RESOURCES_LWIP), y)
+export LINK_LWIP := $(KERNEL_ROOT)/resources/ethernet/LwIP/liblwip.a
+endif
+
 export ARCH = arm
 export MCU = cortex-m4

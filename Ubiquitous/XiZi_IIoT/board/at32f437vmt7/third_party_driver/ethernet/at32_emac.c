@@ -23,9 +23,10 @@
   */
 
 /* includes ------------------------------------------------------------------*/
-#include "at32f435_437_board.h"
+#include "board.h"
 #include "lwip/dhcp.h"
 #include "at32_emac.h"
+#include "lwip/sys.h"
 
 /** @addtogroup AT32F437_periph_examples
   * @{
@@ -55,7 +56,6 @@ error_status emac_system_init(void)
 
   emac_pins_configuration();
   status = emac_layer2_configuration();
-  emac_tmr_init();
 
   return status;
 }
@@ -67,9 +67,8 @@ error_status emac_system_init(void)
   */
 void emac_nvic_configuration(void)
 {
-  /*
-   nvic_irq_enable(EMAC_IRQn, 1, 0);
-  */
+  sys_sem_new(get_eth_recv_sem(), 0);
+  nvic_irq_enable(EMAC_IRQn, 1, 0);
 }
 
 /**
@@ -87,7 +86,6 @@ void emac_pins_configuration(void)
   crm_periph_clock_enable(CRM_GPIOC_PERIPH_CLOCK, TRUE);
   crm_periph_clock_enable(CRM_GPIOD_PERIPH_CLOCK, TRUE);
   crm_periph_clock_enable(CRM_GPIOE_PERIPH_CLOCK, TRUE);
-  crm_periph_clock_enable(CRM_GPIOG_PERIPH_CLOCK, TRUE);
 
   /* pa2 -> mdio */
   gpio_pin_mux_config(GPIOA, GPIO_PINS_SOURCE2, GPIO_MUX_11);
@@ -103,70 +101,17 @@ void emac_pins_configuration(void)
   gpio_init_struct.gpio_pins = GPIO_PINS_1;
   gpio_init(GPIOC, &gpio_init_struct);
 
-  #ifdef MII_MODE
-  /*
-    pb12 -> tx_d0
-    pb13 -> tx_d1
-    pc2  -> tx_d2
-    pb8  -> tx_d3
-    pb11 -> tx_en
-    pc3  -> tx_clk
-  */
-  gpio_pin_mux_config(GPIOB, GPIO_PINS_SOURCE8, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOB, GPIO_PINS_SOURCE11, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOB, GPIO_PINS_SOURCE12, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOB, GPIO_PINS_SOURCE13, GPIO_MUX_11);
-  gpio_init_struct.gpio_pins = GPIO_PINS_8 | GPIO_PINS_11 | GPIO_PINS_12 | GPIO_PINS_13;
-  gpio_init(GPIOB, &gpio_init_struct);
-
-  gpio_pin_mux_config(GPIOC, GPIO_PINS_SOURCE2, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOC, GPIO_PINS_SOURCE3, GPIO_MUX_11);
-  gpio_init_struct.gpio_pins = GPIO_PINS_2 | GPIO_PINS_3;
-  gpio_init(GPIOC, &gpio_init_struct);
-
-  /*
-    pd8  -> rx_dv
-    pd9  -> rx_d0
-    pd10 -> rx_d1
-    pd11 -> rx_d2
-    pd12 -> rx_d3
-  */
-  gpio_pin_mux_config(GPIOD, GPIO_PINS_SOURCE8, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOD, GPIO_PINS_SOURCE9, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOD, GPIO_PINS_SOURCE10, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOD, GPIO_PINS_SOURCE11, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOD, GPIO_PINS_SOURCE12, GPIO_MUX_11);
-  gpio_init_struct.gpio_pins = GPIO_PINS_8 | GPIO_PINS_9 | GPIO_PINS_10 | GPIO_PINS_11 | GPIO_PINS_12;
-  gpio_init(GPIOD, &gpio_init_struct);
-
-  /*
-    pa1  -> rx_clk
-    pa0  -> crs
-    pa3  -> col
-    pb10 -> rx_er
-  */
-  gpio_pin_mux_config(GPIOA, GPIO_PINS_SOURCE0, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOA, GPIO_PINS_SOURCE1, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOA, GPIO_PINS_SOURCE3, GPIO_MUX_11);
-  gpio_init_struct.gpio_pins = GPIO_PINS_0 | GPIO_PINS_1 | GPIO_PINS_3;
-  gpio_init(GPIOA, &gpio_init_struct);
-
-  gpio_pin_mux_config(GPIOB, GPIO_PINS_SOURCE10, GPIO_MUX_11);
-  gpio_init_struct.gpio_pins = GPIO_PINS_10;
-  gpio_init(GPIOB, &gpio_init_struct);
-  #endif  /* MII_MODE */
-
   #ifdef RMII_MODE
   /*
     pb12 -> tx_d0
     pb13 -> tx_d1
     pb11 -> tx_en
   */
-  gpio_pin_mux_config(GPIOG, GPIO_PINS_SOURCE11, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOG, GPIO_PINS_SOURCE13, GPIO_MUX_11);
-  gpio_pin_mux_config(GPIOG, GPIO_PINS_SOURCE14, GPIO_MUX_11);
-  gpio_init_struct.gpio_pins = GPIO_PINS_11 | GPIO_PINS_13 | GPIO_PINS_14;
-  gpio_init(GPIOG, &gpio_init_struct);
+  gpio_pin_mux_config(GPIOB, GPIO_PINS_SOURCE11, GPIO_MUX_11);
+  gpio_pin_mux_config(GPIOB, GPIO_PINS_SOURCE12, GPIO_MUX_11);
+  gpio_pin_mux_config(GPIOB, GPIO_PINS_SOURCE13, GPIO_MUX_11);
+  gpio_init_struct.gpio_pins = GPIO_PINS_11 | GPIO_PINS_12 | GPIO_PINS_13;
+  gpio_init(GPIOB, &gpio_init_struct);
 
   /*
     pd8  -> rx_dv
@@ -188,13 +133,6 @@ void emac_pins_configuration(void)
   gpio_pin_mux_config(GPIOA, GPIO_PINS_SOURCE1, GPIO_MUX_11);
   gpio_init_struct.gpio_pins = GPIO_PINS_1;
   gpio_init(GPIOA, &gpio_init_struct);
-
-  #if !CRYSTAL_ON_PHY
-  gpio_pin_mux_config(GPIOA, GPIO_PINS_SOURCE8, GPIO_MUX_0);
-  gpio_init_struct.gpio_pins = GPIO_PINS_8;
-  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
-  gpio_init(GPIOA, &gpio_init_struct);
-  #endif
 }
 
 /**
@@ -206,9 +144,7 @@ error_status emac_layer2_configuration(void)
 {
   emac_dma_config_type dma_control_para;
   crm_periph_clock_enable(CRM_SCFG_PERIPH_CLOCK, TRUE);
-  #ifdef MII_MODE
-  scfg_emac_interface_set(SCFG_EMAC_SELECT_MII);
-  #elif defined RMII_MODE
+  #ifdef RMII_MODE
   scfg_emac_interface_set(SCFG_EMAC_SELECT_RMII);
   #endif
   crm_clock_out1_set(CRM_CLKOUT1_PLL);
@@ -233,9 +169,9 @@ error_status emac_layer2_configuration(void)
   mac_control_para.ipv4_checksum_offload = FALSE;
 #endif
 
-  if(emac_phy_init(&mac_control_para) == ERROR)
+  if(emac_phy_init(&mac_control_para) == AT_ERROR)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   emac_dma_para_init(&dma_control_para);
@@ -267,26 +203,18 @@ void static reset_phy(void)
 {
   gpio_init_type gpio_init_struct = {0};
   crm_periph_clock_enable(CRM_GPIOE_PERIPH_CLOCK, TRUE);
-  crm_periph_clock_enable(CRM_GPIOG_PERIPH_CLOCK, TRUE);
   
   gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER;
   gpio_init_struct.gpio_mode = GPIO_MODE_OUTPUT;
   gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
-  gpio_init_struct.gpio_pins = GPIO_PINS_15;
+  gpio_init_struct.gpio_pins = GPIO_PINS_10;
   gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
   gpio_init(GPIOE, &gpio_init_struct);
 
-  gpio_init_struct.gpio_pins = GPIO_PINS_15;
-  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
-  gpio_init(GPIOG, &gpio_init_struct);
-  
-  /* exit power down mode */
-  gpio_bits_reset(GPIOG, GPIO_PINS_15);
-  
   /*reset phy */
-  gpio_bits_reset(GPIOE, GPIO_PINS_15);
+  gpio_bits_reset(GPIOE, GPIO_PINS_10);
   delay_ms(2);
-  gpio_bits_set(GPIOE, GPIO_PINS_15);
+  gpio_bits_set(GPIOE, GPIO_PINS_10);
   delay_ms(2);
 }
 
@@ -301,9 +229,9 @@ error_status emac_phy_register_reset(void)
   uint32_t timeout = 0;
   uint32_t i = 0;
 
-  if(emac_phy_register_write(PHY_ADDRESS, PHY_CONTROL_REG, PHY_RESET_BIT) == ERROR)
+  if(emac_phy_register_write(PHY_ADDRESS, PHY_CONTROL_REG, PHY_RESET_BIT) == AT_ERROR)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   for(i = 0; i < 0x000FFFFF; i++);
@@ -311,16 +239,16 @@ error_status emac_phy_register_reset(void)
   do
   {
     timeout++;
-    if(emac_phy_register_read(PHY_ADDRESS, PHY_CONTROL_REG, &data) == ERROR)
+    if(emac_phy_register_read(PHY_ADDRESS, PHY_CONTROL_REG, &data) == AT_ERROR)
     {
-      return ERROR;
+      return AT_ERROR;
     }
   } while((data & PHY_RESET_BIT) && (timeout < PHY_TIMEOUT));
 
   for(i = 0; i < 0x00FFFFF; i++);
   if(timeout == PHY_TIMEOUT)
   {
-    return ERROR;
+    return AT_ERROR;
   }
   return SUCCESS;
 }
@@ -350,44 +278,44 @@ error_status emac_speed_config(emac_auto_negotiation_type nego, emac_duplex_type
     do
     {
       timeout++;
-      if(emac_phy_register_read(PHY_ADDRESS, PHY_STATUS_REG, &data) == ERROR)
+      if(emac_phy_register_read(PHY_ADDRESS, PHY_STATUS_REG, &data) == AT_ERROR)
       {
-        return ERROR;
+        return AT_ERROR;
       }
     } while(!(data & PHY_LINKED_STATUS_BIT) && (timeout < PHY_TIMEOUT));
 
     if(timeout == PHY_TIMEOUT)
     {
-      return ERROR;
+      return AT_ERROR;
     }
 
     timeout = 0;
 
-    if(emac_phy_register_write(PHY_ADDRESS, PHY_CONTROL_REG, PHY_AUTO_NEGOTIATION_BIT) == ERROR)
+    if(emac_phy_register_write(PHY_ADDRESS, PHY_CONTROL_REG, PHY_AUTO_NEGOTIATION_BIT) == AT_ERROR)
     {
-      return ERROR;
+      return AT_ERROR;
     }
 
 
     do
     {
       timeout++;
-      if(emac_phy_register_read(PHY_ADDRESS, PHY_STATUS_REG, &data) == ERROR)
+      if(emac_phy_register_read(PHY_ADDRESS, PHY_STATUS_REG, &data) == AT_ERROR)
       {
-        return ERROR;
+        return AT_ERROR;
       }
     } while(!(data & PHY_NEGO_COMPLETE_BIT) && (timeout < PHY_TIMEOUT));
 
     if(timeout == PHY_TIMEOUT)
     {
-      return ERROR;
+      return AT_ERROR;
     }
 
-    if(emac_phy_register_read(PHY_ADDRESS, PHY_SPECIFIED_CS_REG, &data) == ERROR)
+    if(emac_phy_register_read(PHY_ADDRESS, PHY_SPECIFIED_CS_REG, &data) == AT_ERROR)
     {
-      return ERROR;
+      return AT_ERROR;
     }
-    #ifdef DM9162
+    #ifdef YT8512
     if(data & PHY_FULL_DUPLEX_100MBPS_BIT)
     {
       emac_fast_speed_set(EMAC_SPEED_100MBPS);
@@ -409,29 +337,14 @@ error_status emac_speed_config(emac_auto_negotiation_type nego, emac_duplex_type
       emac_duplex_mode_set(EMAC_HALF_DUPLEX);
     }
     #else
-    if(data & PHY_DUPLEX_MODE)
-    {
-      emac_duplex_mode_set(EMAC_FULL_DUPLEX);
-    }
-    else
-    {
-      emac_duplex_mode_set(EMAC_HALF_DUPLEX);
-    }
-    if(data & PHY_SPEED_MODE)
-    {
-      emac_fast_speed_set(EMAC_SPEED_10MBPS);
-    }
-    else
-    {
-      emac_fast_speed_set(EMAC_SPEED_100MBPS);
-    }
+    // TODO
     #endif
   }
   else
   {
-    if(emac_phy_register_write(PHY_ADDRESS, PHY_CONTROL_REG, (uint16_t)((mode << 8) | (speed << 13))) == ERROR)
+    if(emac_phy_register_write(PHY_ADDRESS, PHY_CONTROL_REG, (uint16_t)((mode << 8) | (speed << 13))) == AT_ERROR)
     {
-      return ERROR;
+      return AT_ERROR;
     }
     if(speed == EMAC_SPEED_100MBPS)
     {
@@ -462,9 +375,9 @@ error_status emac_speed_config(emac_auto_negotiation_type nego, emac_duplex_type
 error_status emac_phy_init(emac_control_config_type *control_para)
 {
   emac_clock_range_set();
-  if(emac_phy_register_reset() == ERROR)
+  if(emac_phy_register_reset() == AT_ERROR)
   {
-    return ERROR;
+    return AT_ERROR;
   }
 
   emac_control_config(control_para);
@@ -479,9 +392,9 @@ error_status emac_phy_init(emac_control_config_type *control_para)
 uint16_t link_update(void)
 {
   uint16_t link_data, link_state;
-  if(emac_phy_register_read(PHY_ADDRESS, PHY_STATUS_REG, &link_data) == ERROR)
+  if(emac_phy_register_read(PHY_ADDRESS, PHY_STATUS_REG, &link_data) == AT_ERROR)
   {
-    return ERROR;
+    return AT_ERROR;
   }
   
   link_state = (link_data & PHY_LINKED_STATUS_BIT)>>2;
@@ -500,17 +413,7 @@ void ethernetif_set_link(void const *argument)
   
   /* read phy_bsr*/
   regvalue = link_update();
-  
-  if(regvalue > 0)
-  {
-    at32_led_on(LED4);
-    at32_led_off(LED2);
-  }
-  else
-  {
-    at32_led_on(LED2);
-    at32_led_off(LED4);
-  }
+
   /* check whether the netif link down and the phy link is up */
   if(!netif_is_link_up(netif) && (regvalue))
   {

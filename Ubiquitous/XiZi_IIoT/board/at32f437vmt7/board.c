@@ -24,7 +24,12 @@
 #include "at32f435_437_clock.h"
 #include "at32f435_437_conf.h"
 #include "board.h"
+#ifdef BSP_USING_UART
 #include "connect_usart.h"
+#endif
+#ifdef BSP_USING_ETH
+#include "connect_ethernet.h"
+#endif
 
 
 /** @addtogroup AT32F435_437_board
@@ -32,6 +37,13 @@
   */
 
 #define MS_TICK                          (system_core_clock / 1000U)
+
+/* delay macros */
+#define STEP_DELAY_MS                    50
+
+/* delay variable */
+static __IO uint32_t fac_us;
+static __IO uint32_t fac_ms;
 
 /**
   * @brief  config systick and enable interrupt.
@@ -53,6 +65,88 @@ static uint32_t systick_interrupt_config(uint32_t ticks)
   return (0UL);
 }
 
+
+/**
+  * @brief  initialize delay function
+  * @param  none
+  * @retval none
+  */
+void delay_init()
+{
+  /* configure systick */
+  systick_clock_source_config(SYSTICK_CLOCK_SOURCE_AHBCLK_NODIV);
+  fac_us = system_core_clock / (1000000U);
+  fac_ms = fac_us * (1000U);
+}
+
+/**
+  * @brief  inserts a delay time.
+  * @param  nus: specifies the delay time length, in microsecond.
+  * @retval none
+  */
+void delay_us(uint32_t nus)
+{
+  uint32_t temp = 0;
+  SysTick->LOAD = (uint32_t)(nus * fac_us);
+  SysTick->VAL = 0x00;
+  SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk ;
+  do
+  {
+    temp = SysTick->CTRL;
+  }while((temp & 0x01) && !(temp & (1 << 16)));
+
+  SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+  SysTick->VAL = 0x00;
+}
+
+/**
+  * @brief  inserts a delay time.
+  * @param  nms: specifies the delay time length, in milliseconds.
+  * @retval none
+  */
+void delay_ms(uint16_t nms)
+{
+  uint32_t temp = 0;
+  while(nms)
+  {
+    if(nms > STEP_DELAY_MS)
+    {
+      SysTick->LOAD = (uint32_t)(STEP_DELAY_MS * fac_ms);
+      nms -= STEP_DELAY_MS;
+    }
+    else
+    {
+      SysTick->LOAD = (uint32_t)(nms * fac_ms);
+      nms = 0;
+    }
+    SysTick->VAL = 0x00;
+    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+    do
+    {
+      temp = SysTick->CTRL;
+    }while((temp & 0x01) && !(temp & (1 << 16)));
+
+    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+    SysTick->VAL = 0x00;
+  }
+}
+
+/**
+  * @brief  inserts a delay time.
+  * @param  sec: specifies the delay time, in seconds.
+  * @retval none
+  */
+void delay_sec(uint16_t sec)
+{
+  uint16_t index;
+  for(index = 0; index < sec; index++)
+  {
+    delay_ms(500);
+    delay_ms(500);
+  }
+}
+
+
 /**
   * @brief  This function will initial your board.
   * @param  none
@@ -65,6 +159,8 @@ void InitBoardHardware(void)
   systick_clock_source_config(SYSTICK_CLOCK_SOURCE_AHBCLK_NODIV);
   systick_interrupt_config(MS_TICK);
 
+  delay_init();
+
   InitBoardMemory((void *)MEMORY_START_ADDRESS, (void *)MEMORY_END_ADDRESS);
 
 #ifdef BSP_USING_UART
@@ -76,4 +172,8 @@ void InitBoardHardware(void)
   KPrintf("\nAT32F437 board console\n");
 #endif
   KPrintf("RAM start=%08x end=%08x\n", MEMORY_START_ADDRESS, MEMORY_END_ADDRESS);
+
+#ifdef BSP_USING_ETH
+  HwEthInit();
+#endif
 }

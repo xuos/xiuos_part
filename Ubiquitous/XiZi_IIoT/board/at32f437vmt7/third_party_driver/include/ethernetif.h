@@ -6,7 +6,7 @@
 #include "lwip/netif.h"
 
 err_t ethernetif_init(struct netif *netif);
-err_t ethernetif_input(struct netif *netif);
+void ethernetif_input(void *netif);
 struct netif *ethernetif_register(void);
 int ethernetif_poll(void);
 void lwip_set_mac_address(unsigned char* macadd);

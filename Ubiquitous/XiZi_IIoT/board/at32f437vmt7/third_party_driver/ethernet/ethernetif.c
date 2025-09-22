@@ -80,8 +80,6 @@ struct ethernetif
   int unused;
 };
 
-/* Forward declarations. */
-err_t  ethernetif_input(struct netif *netif);
 
 #define EMAC_RXBUFNB        6
 #define EMAC_TXBUFNB        6
@@ -180,7 +178,6 @@ low_level_init(struct netif *netif)
 
   /* Enable MAC and DMA transmission and reception */
   emac_start();
-
 }
 
 /**
@@ -294,7 +291,7 @@ low_level_input(struct netif *netif)
      variable. */
   len = rx_frame.length;
   buffer = (uint8_t *)rx_frame.buffer;
-  
+
   /* We allocate a pbuf chain of pbufs from the pool. */
   if(len > 0)
   {
@@ -362,7 +359,7 @@ low_level_input(struct netif *netif)
  * @param netif the lwip network interface structure for this ethernetif
  */
 err_t
-ethernetif_input(struct netif *netif)
+ethernetif_input_at32(struct netif *netif)
 {
   err_t err;
   struct pbuf *p;
@@ -382,6 +379,18 @@ ethernetif_input(struct netif *netif)
   }
 
   return err;
+}
+
+void
+ethernetif_input(void *netif_arg)
+{
+  struct netif* netif = (struct netif*)netif_arg;
+
+  while (1)
+  {
+    sys_arch_sem_wait(get_eth_recv_sem(), WAITING_FOREVER);
+    ethernetif_input_at32(netif);
+  }
 }
 
 /**
@@ -454,7 +463,7 @@ error_status emac_rxpkt_chainmode(void)
   if((dma_rx_desc_to_get->status & EMAC_DMARXDESC_OWN) != (u32)RESET)
   {    
     /* return error: own bit set */
-    return ERROR;
+    return AT_ERROR;
   }
   if((dma_rx_desc_to_get->status & EMAC_DMARXDESC_LS) != (u32)RESET)
   {
@@ -485,7 +494,7 @@ error_status emac_rxpkt_chainmode(void)
     dma_rx_desc_to_get = (emac_dma_desc_type*) (dma_rx_desc_to_get->buf2nextdescaddr);
   }
 
-  return ERROR;
+  return AT_ERROR;
 }
 
 /*******************************************************************************
@@ -504,12 +513,12 @@ error_status emac_txpkt_chainmode(uint32_t FrameLength)
   if((dma_tx_desc_to_set->status & EMAC_DMATXDESC_OWN) != (u32)RESET)
   {
     /* Return ERROR: OWN bit set */
-    return ERROR;
+    return AT_ERROR;
   }
   
   if(FrameLength == 0)
   {
-    return ERROR;
+    return AT_ERROR;
   }
   
   if(FrameLength > EMAC_MAX_PACKET_LENGTH)

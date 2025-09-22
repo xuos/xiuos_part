@@ -9,3 +9,10 @@ menuconfig BSP_USING_UART
     if BSP_USING_UART
         source "$BSP_DIR/third_party_driver/uart/Kconfig"
     endif
+
+menuconfig BSP_USING_ETH
+    bool "Using ethernet device"
+    default y
+    if BSP_USING_ETH
+        source "$BSP_DIR/third_party_driver/ethernet/Kconfig"
+    endif

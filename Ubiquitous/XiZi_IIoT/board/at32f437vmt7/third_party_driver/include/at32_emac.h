@@ -48,15 +48,14 @@
 //#define MII_MODE
 #define RMII_MODE
 
-#define DM9162
-//#define DP83848
+#define YT8512
 
 #define LINK_DETECTION                   (1)            /*!< link status detection, 0: no detection, 1: detect with polling */
 
 #define TCP_CLIENT_TEST_DATA             "tcp client experiment!\n"
 
-#if defined (DM9162)
-  #define PHY_ADDRESS                      (0x03)       /*!< relative to at32 board */
+#if defined (YT8512)
+  #define PHY_ADDRESS                      (0x00)       /*!< relative to at32 board */
   #define PHY_CONTROL_REG                  (0x00)       /*!< basic mode control register */
   #define PHY_STATUS_REG                   (0x01)       /*!< basic mode status register */
   #define PHY_SPECIFIED_CS_REG             (0x11)       /*!< specified configuration and status register */
@@ -72,21 +71,8 @@
   #define PHY_HALF_DUPLEX_100MBPS_BIT      (0x4000)     /*!< half duplex 100 mbps */
   #define PHY_FULL_DUPLEX_10MBPS_BIT       (0x2000)     /*!< full duplex 10 mbps */
   #define PHY_HALF_DUPLEX_10MBPS_BIT       (0x1000)     /*!< half duplex 10 mbps */
-#elif defined (DP83848)
-  #define PHY_ADDRESS                      (0x01)       /*!< relative to at32 board */
-  #define PHY_CONTROL_REG                  (0x00)       /*!< basic mode control register */
-  #define PHY_STATUS_REG                   (0x01)       /*!< basic mode status register */
-  #define PHY_SPECIFIED_CS_REG             (0x10)       /*!< phy status register */
-  /* phy control register */
-  #define PHY_AUTO_NEGOTIATION_BIT         (0x1000)     /*!< enable auto negotiation */
-  #define PHY_LOOPBACK_BIT                 (0x4000)     /*!< enable loopback */
-  #define PHY_RESET_BIT                    (0x8000)     /*!< reset phy */
-  /* phy status register */
-  #define PHY_LINKED_STATUS_BIT            (0x0004)     /*!< link status */
-  #define PHY_NEGO_COMPLETE_BIT            (0x0020)     /*!< auto negotiation complete */
-
-  #define PHY_DUPLEX_MODE                  (0x0004)     /*!< full duplex mode */
-  #define PHY_SPEED_MODE                   (0x0002)     /*!< 10 mbps */
+#else
+  // TODO
 #endif
 
 error_status emac_system_init(void);

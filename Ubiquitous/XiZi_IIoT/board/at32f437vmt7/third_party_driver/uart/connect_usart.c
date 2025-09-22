@@ -69,7 +69,6 @@ static void UartIsr(struct SerialBus *serial, struct SerialDriver *serial_drv, s
     struct SerialCfgParam *serial_cfg = (struct SerialCfgParam *)serial_drv->private_data;
     struct UsartHwCfg *serial_hw_cfg = (struct UsartHwCfg *)serial_cfg->hw_cfg.private_data;
 
-    //if(usart_flag_get(serial_hw_cfg->uart_device, USART_IDLEF_FLAG) != RESET) {
     if(usart_interrupt_flag_get(serial_hw_cfg->uart_device, USART_RDBF_FLAG) != RESET) {
         SerialSetIsr(serial_dev, SERIAL_EVENT_RX_IND);
     }
@@ -80,14 +79,13 @@ struct SerialBus serial_bus_1;
 struct SerialDriver serial_driver_1;
 struct SerialHardwareDevice serial_device_1;
 
-void USART1_IRQHandler(int irq_num, void *arg)
+void USART1_IRQHandler(void)
 {
     x_base lock = 0;
     lock = DISABLE_INTERRUPT();
     UartIsr(&serial_bus_1, &serial_driver_1, &serial_device_1);
     ENABLE_INTERRUPT(lock);
 }
-DECLARE_HW_IRQ(USART1_IRQn, USART1_IRQHandler, NONE);
 #endif
 
 #ifdef BSP_USING_UART2
@@ -95,14 +93,13 @@ struct SerialBus serial_bus_2;
 struct SerialDriver serial_driver_2;
 struct SerialHardwareDevice serial_device_2;
 
-void USART2_IRQHandler(int irq_num, void *arg)
+void USART2_IRQHandler(void)
 {
     x_base lock = 0;
     lock = DISABLE_INTERRUPT();
     UartIsr(&serial_bus_2, &serial_driver_2, &serial_device_2);
     ENABLE_INTERRUPT(lock);
 }
-DECLARE_HW_IRQ(USART2_IRQn, USART2_IRQHandler, NONE);
 #endif
 
 static void SerialCfgParamCheck(struct SerialCfgParam *serial_cfg_default, struct SerialCfgParam *serial_cfg_new)

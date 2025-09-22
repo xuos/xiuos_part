@@ -32,6 +32,11 @@ extern unsigned int __ram_end__;
 #define MEMORY_END_ADDRESS      (&__ram_end__)
 
 /******************** functions ********************/
+void delay_init(void);
+void delay_us(uint32_t nus);
+void delay_ms(uint16_t nms);
+void delay_sec(uint16_t sec);
+
 void InitBoardHardware(void);
 
 #endif
