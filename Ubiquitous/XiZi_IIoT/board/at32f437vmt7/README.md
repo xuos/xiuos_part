@@ -47,7 +47,7 @@ make BOARD=at32f437vmt7
 
 >6.最后可以执行以下命令，清除配置文件和编译生成的文件
 ```bash
-make BOARD=aiit-arm32-board distclean
+make BOARD=at32f437vmt7 distclean
 ```
 
 
@@ -115,9 +115,9 @@ RS485信号通过XJ13487EESA转换后接的是UART2，RS232信号通过TPT3232E�
 
 NS301R-CN的RS485接口连接到USB转RS485/232转换器的485接口（测RS232时连接232接口），转换器连接电脑。NS301R-CN发送数据，电脑端接收数据。
 
-电脑上，打开串口工具XCOM V2.2.exe，选择USB转RS485/232转换器对应的串口，选择波特率115200，打开串口。
+在电脑上，打开XCOM V2.2.exe工具，选择USB转RS485/232转换器对应的串口，选择波特率115200，然后打开串口。
 
-连接NS301R-CN的shell输入命令：Rs485Rs232Test
+在连接NS301R-CN的shell窗口，输入命令：Rs485Rs232Test
 
 串口打印：
 
@@ -137,13 +137,11 @@ NS301R-CN的RS485接口连接到USB转RS485/232转换器的485接口（测RS232�
 
 NS301R-CN开发板的以太网接口连接到网络，测试tcp发送数据。NS301R-CN是tcp client端，电脑是tcp server端。
 
-在文件Ubiquitous/XiZi_IIoT/resources/ethernet/LwIP/arch/sys_arch.c中，配置NS301R-CN的IP地址信息。
+配置设备本地IP（文件resources/ethernet/LwIP/arch/sys_arch.c），配置服务端IP（文件resources/ethernet/cmd_lwip/lwip_tcp_demo.c），重新编译烧录。
 
-在文件Ubiquitous/XiZi_IIoT/resources/ethernet/cmd_lwip/lwip_tcp_demo.c中，配置服务端（电脑）的IP地址信息。
+在电脑上，用python编写tcp server端程序，用于确认连接成功，以及打印接收到的数据。
 
-电脑上用python编写tcp server端程序，用于确认连接成功，以及打印接收到的数据。
-
-电脑上运行tcp server端程序，然后，NS301R-CN上执行shell命令：TCPSend。
+在电脑上，cmd运行tcp server端程序；然后，NS301R-CN对应的shell上，执行命令：TCPSend。
 
 tcp client端打印：
 
