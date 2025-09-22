@@ -130,6 +130,8 @@ NS301R-CN的RS485接口连接到USB转RS485/232转换器的485接口（测RS232�
 <div align= "center"> 
 <img src="./img/rs485receive.png" />
   </div>
+然后，XCOM发送ABC，串口显示接收数据。
+
 
 
 

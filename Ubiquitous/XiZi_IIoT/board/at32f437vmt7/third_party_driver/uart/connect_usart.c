@@ -557,7 +557,7 @@ void Rs485Rs232Test(void)
     readParam.buffer = (void *)buffer;
     readParam.size = 256;
     readParam.read_length = 0;
-    KPrintf("Rs485 or Rs232 resv: ");
+    KPrintf("Rs485 or Rs232 recv: ");
     while (1) {
         int res = BusDevReadData(dev, &readParam);
         int i = 0;
