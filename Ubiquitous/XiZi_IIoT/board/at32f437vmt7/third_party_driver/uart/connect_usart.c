@@ -512,45 +512,68 @@ int HwUsartInit(void)
 
 
 #if defined(BSP_USING_RS485) || defined(BSP_USING_RS232)
-static struct Bus *bus;
-static struct HardwareDev *dev;
-static struct Driver *drv;
-
 void Rs485Rs232Test(void)
 {
+    struct Bus *bus;
+    struct HardwareDev *dev;
+    struct Driver *drv;
     x_err_t ret = EOK;
+    uint8 write_data[] = "Hello";
 
     bus = BusFind(SERIAL_BUS_NAME_2);
     dev = BusFindDevice(bus, SERIAL_2_DEVICE_NAME_0);
     drv = BusFindDriver(bus, SERIAL_DRV_NAME_2);
 
+    /*step 1: init bus_driver, change struct SerialCfgParam if necessary*/
     struct BusConfigureInfo configure_info;
-    configure_info.configure_cmd = OPE_INT;
     struct SerialCfgParam serial_cfg;
     memset(&serial_cfg, 0, sizeof(struct SerialCfgParam));
+    configure_info.configure_cmd = OPE_INT;
     configure_info.private_data = &serial_cfg;
     ret = BusDrvConfigure(drv, &configure_info);
 
-    struct BusBlockWriteParam write_param;
-    memset(&write_param, 0, sizeof(struct BusBlockWriteParam));
+    /*step 2: match serial bus_driver with bus_device*/
+    ret = bus->match(drv, dev);
+    if (EOK != ret) {
+        KPrintf("BusMatch failed error code %d\n", ret);
+    }
 
-    uint8 write_data[] = "Hello";
+    /*step 3: open bus_device, configure struct SerialDevParam if necessary*/
+    ret = BusDevOpen(dev);
+    if (EOK != ret) {
+        KPrintf("BusDevOpen failed error code %d\n", ret);
+    }
+
 
     KPrintf("Rs485 or Rs232 send: %s\n", write_data);
+    struct BusBlockWriteParam write_param;
+    memset(&write_param, 0, sizeof(struct BusBlockWriteParam));
     write_param.buffer = (void *)write_data;
     write_param.size = sizeof(write_data);
     BusDevWriteData(dev, &write_param);
 
-#if 1
-    nvic_irq_disable(USART2_IRQn);
-    char recv_data = 0;
-    while(1)
-    {
-        while(usart_flag_get(USART2, USART_RDBF_FLAG) == RESET);
-        recv_data = usart_data_receive(USART2);
-        KPrintf("recv_data:0x%02x\n", recv_data);
+    struct BusBlockReadParam readParam;
+    char buffer[256];
+    readParam.buffer = (void *)buffer;
+    readParam.size = 256;
+    readParam.read_length = 0;
+    KPrintf("Rs485 or Rs232 resv: ");
+    while (1) {
+        int res = BusDevReadData(dev, &readParam);
+        int i = 0;
+        for (i = 0; i < readParam.read_length; i++) {
+            KPrintf("0x%02X ", buffer[i]);
+            if ('#' == buffer[i]) {
+                break;
+            }
+        }
+        if (i != readParam.read_length) {
+            break;
+        }
     }
-#endif
+    KPrintf("\n");
+
+    BusDevClose(dev);
 
     return;
 }
