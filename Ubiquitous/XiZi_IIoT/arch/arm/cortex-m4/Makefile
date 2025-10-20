@@ -34,4 +34,9 @@ ifeq ($(CONFIG_BOARD_GD32F415RG), y)
 SRC_DIR += gd32f415
 endif
 
+ifeq ($(CONFIG_BOARD_AT32F437VMT7), y)
+SRC_DIR += at32f437vmt7
+SRC_FILES += svc_entry.S
+endif
+
 include $(KERNEL_ROOT)/compiler.mk
