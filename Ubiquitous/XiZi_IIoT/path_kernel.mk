@@ -284,6 +284,17 @@ KERNELPATHS += \
 	-I$(BSP_ROOT)/include #
 endif
 
+ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32g474)
+KERNELPATHS += \
+	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
+	-I$(BSP_ROOT) \
+	-I$(BSP_ROOT)/include \
+	-I$(BSP_ROOT)/third_party_driver/include \
+	-I$(BSP_ROOT)/third_party_driver/stm32cube_g4/STM32G4xx_HAL_Driver/Inc \
+	-I$(BSP_ROOT)/third_party_driver/usb/inc \
+	-I$(KERNEL_ROOT)/include 
+endif
+
 ifeq ($(BSP_ROOT),$(KERNEL_ROOT)/board/stm32l476rgt6)
 KERNELPATHS += \
 	-I$(KERNEL_ROOT)/arch/arm/cortex-m4 \
