@@ -68,13 +68,17 @@ char *GetAbsolutePath(const char *path)
 
     NULL_PARAM_CHECK(path);
 
-    if (path[0] == '/') {
+    if (path[0] == '/')
+    {
+
         len = strlen(path) + 1;
         tmp = (char *)malloc(len);
         if (tmp == NULL)
             return NULL;
         strcpy(tmp, path);
-    } else {
+    }
+    else
+    {
         len = strlen(working_dir) + strlen(path) + 2;
         tmp = (char *)malloc(len);
         if (tmp == NULL)
@@ -85,7 +89,8 @@ char *GetAbsolutePath(const char *path)
     }
 
     abspath = (char *)malloc(len);
-    if (abspath == NULL) {
+    if (abspath == NULL)
+    {
         free(tmp);
         return NULL;
     }
@@ -96,44 +101,58 @@ char *GetAbsolutePath(const char *path)
             *curr = '\0';
 
     curr = tmp;
-    while (curr < tmp + len) {
-        if (*curr == '\0') {
+    while (curr < tmp + len)
+    {
+        if (*curr == '\0')
+        {
             curr++;
             continue;
         }
-        if (*curr == '.') {
-            if (strlen(curr) == 1) {
-                *curr = '\0';
-                curr++;
-            } else if (strlen(curr) == 2 && *(curr + 1) == '.') {
-                prev = curr - 1;
-                while (prev >= tmp && *prev == '\0')
+
+        size_t token_len = strlen(curr);
+
+        if (token_len == 1 && curr[0] == '.')
+        {
+            *curr = '\0';
+            curr += 1;
+        }
+        else if (token_len == 2 && curr[0] == '.' && curr[1] == '.')
+        {
+            prev = curr - 1;
+            while (prev >= tmp && *prev == '\0')
+                prev--;
+            if (prev >= tmp)
+            {
+                while (prev > tmp && *(prev - 1) != '\0')
                     prev--;
-                if (prev >= tmp) {
-                    while (prev > tmp && *(prev - 1) != '\0')
-                        prev--;
-                    memset(prev, 0, strlen(prev));
-                }
-                *curr = *(curr + 1) = '\0';
-                curr += 2;
+                memset(prev, 0, strlen(prev));
             }
-        } else {
-            curr += strlen(curr);
+            *curr = *(curr + 1) = '\0';
+            curr += 2;
+        }
+        else
+        {
+            curr += token_len;
         }
     }
 
     curr = tmp;
-    while (curr < tmp + len) {
-        if (*curr == '\0') {
+    while (curr < tmp + len)
+    {
+        if (*curr == '\0')
+        {
             curr++;
-        } else {
+        }
+        else
+        {
             strcat(abspath, "/");
             strcat(abspath, curr);
             curr += strlen(curr);
         }
     }
 
-    if (abspath[0] == '\0') {
+    if (abspath[0] == '\0')
+    {
         abspath[0] = '/';
         abspath[1] = '\0';
     }
