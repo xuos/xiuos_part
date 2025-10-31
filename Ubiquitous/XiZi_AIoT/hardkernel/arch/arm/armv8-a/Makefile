@@ -1,7 +1,0 @@
-# The following three platforms support compatiable instructions.
-ifneq ($(findstring $(BOARD), 3568), )
-SRC_DIR := cortex-a55
-endif
-
-
-include $(KERNEL_ROOT)/compiler.mk
